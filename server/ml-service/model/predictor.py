@@ -23,19 +23,23 @@ class AdvancedOutfitPredictor:
         Собирает полный комплект с учетом профиля пользователя
         """
         logger.info("Building ML-powered outfit with user preferences...")
+        logger.info(f"Input data - Weather: {weather_data}, User profile: {user_profile}, Items count: {len(all_items)}")
         
         # Группируем предметы по категориям
         items_by_category = self._group_by_category(all_items)
+        logger.info(f"Items by category: { {k: len(v) for k, v in items_by_category.items()} }")
         
         # Определяем необходимые категории на основе погоды
         temp = weather_data.get('temperature', 20)
         weather = weather_data.get('weather', 'Ясно')
         required_categories = self._get_required_categories(temp, weather)
+        logger.info(f"Required categories: {required_categories}")
         
         # Проверяем, нужны ли аксессуары
         should_add_accessories = self._should_add_accessories(
             temp, weather, user_profile
         )
+        logger.info(f"Should add accessories: {should_add_accessories}")
         
         outfit_items = []
         category_confidences = {}
@@ -54,7 +58,10 @@ class AdvancedOutfitPredictor:
             )
             
             if not filtered_items:
+                logger.debug(f"No filtered items for {category}, using all items in category")
                 filtered_items = items_in_category  # Fallback
+            
+            logger.debug(f"Items in category {category}: {len(items_in_category)}, filtered: {len(filtered_items)}")
             
             # Получаем рекомендации для этой категории
             category_recommendations = self.recommend_items(
@@ -77,6 +84,15 @@ class AdvancedOutfitPredictor:
                 
                 logger.debug(f"Selected for {category}: {best_item['name']} "
                            f"(confidence: {best_item['ml_score']:.2%})")
+            else:
+                # Use fallback recommendations if ML recommendations are empty
+                fallback_recommendations = self._fallback_recommendations(
+                    weather_data, filtered_items, 1
+                )
+                if fallback_recommendations:
+                    outfit_items.append(fallback_recommendations[0])
+                    category_confidences[category] = fallback_recommendations[0]['ml_score']
+                    logger.debug(f"Fallback selected for {category}: {fallback_recommendations[0]['name']}")
         
         # Аксессуары (опционально)
         if should_add_accessories and 'accessories' in items_by_category:
@@ -292,6 +308,9 @@ class AdvancedOutfitPredictor:
                 avg_conf = sum(item['ml_score'] for item in recommendations) / len(recommendations)
                 logger.info(f"Generated {len(recommendations)} ML-powered recommendations")
                 logger.info(f"Average confidence: {avg_conf:.2%}")
+            else:
+                max_prob = max(probabilities) if probabilities.size > 0 else 0
+                logger.info(f"No recommendations above threshold. Max probability: {max_prob:.2%}, threshold: {min_confidence:.2%}")
             
             return recommendations
             
@@ -362,6 +381,7 @@ class AdvancedOutfitPredictor:
             if category not in grouped:
                 grouped[category] = []
             grouped[category].append(item)
+        logger.debug(f"Grouped items by category: { {k: len(v) for k, v in grouped.items()} }")
         return grouped
     
     def _get_required_categories(self, temperature: float, weather: str) -> List[str]:
@@ -383,17 +403,43 @@ class AdvancedOutfitPredictor:
             min_temp = item.get('min_temp', 0)
             max_temp = item.get('max_temp', 30)
             
+            # Calculate temperature suitability score
             if min_temp <= temp <= max_temp:
-                score = 0.8
+                # Perfect temperature range
+                score = 0.9
             elif min_temp - 5 <= temp <= max_temp + 5:
-                score = 0.5
+                # Close to suitable range
+                score = 0.7
+            elif min_temp - 10 <= temp <= max_temp + 10:
+                # Somewhat suitable
+                score = 0.4
             else:
-                score = 0.2
+                # Not suitable
+                score = 0.1
+            
+            # Adjust score based on weather conditions
+            weather = weather_data.get('weather', '').lower()
+            if 'дождь' in weather or 'rain' in weather:
+                # Prefer waterproof items in rain
+                if 'waterproof' in item.get('name', '').lower() or 'rain' in item.get('name', '').lower():
+                    score += 0.1
+            elif temp < 5:
+                # Prefer warmer items in cold weather
+                if item.get('warmth_level', 0) > 6:
+                    score += 0.1
+            elif temp > 25:
+                # Prefer lighter items in hot weather
+                if item.get('warmth_level', 10) < 4:
+                    score += 0.1
+            
+            # Ensure score is within bounds
+            score = max(0.1, min(0.95, score))
             
             item_copy = item.copy()
             item_copy['ml_score'] = score * random.uniform(0.95, 1.05)
-            item_copy['is_recommended'] = score >= 0.5
+            item_copy['is_recommended'] = score >= 0.3
             scored_items.append(item_copy)
         
         scored_items.sort(key=lambda x: x['ml_score'], reverse=True)
+        logger.info(f"Fallback recommendations generated: {len(scored_items)} items, top score: {scored_items[0]['ml_score'] if scored_items else 0:.2%}")
         return scored_items[:top_n]

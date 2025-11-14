@@ -3,28 +3,12 @@ import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
 import '../screens/profile_screen.dart';
-import '../services/onboarding_service.dart';
 
-class OnboardingDialog extends StatefulWidget {
-  const OnboardingDialog({Key? key}) : super(key: key);
+class DemoOnboardingDialog extends StatefulWidget {
+  const DemoOnboardingDialog({Key? key}) : super(key: key);
 
   @override
-  State<OnboardingDialog> createState() => _OnboardingDialogState();
-
-  static Future<void> showIfNeeded(BuildContext context) async {
-    final shouldShow = await OnboardingService.shouldShowOnboarding();
-
-    if (shouldShow) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (context.mounted) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const OnboardingDialog(),
-        );
-      }
-    }
-  }
+  State<DemoOnboardingDialog> createState() => _DemoOnboardingDialogState();
 
   static Future<void> showEveryTime(BuildContext context) async {
     await Future.delayed(const Duration(milliseconds: 800));
@@ -32,13 +16,13 @@ class OnboardingDialog extends StatefulWidget {
       await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const OnboardingDialog(),
+        builder: (context) => const DemoOnboardingDialog(),
       );
     }
   }
 }
 
-class _OnboardingDialogState extends State<OnboardingDialog>
+class _DemoOnboardingDialogState extends State<DemoOnboardingDialog>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -129,8 +113,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
     }
   }
 
-  void _finish() async {
-    await OnboardingService.markOnboardingShown();
+  void _finish() {
     if (mounted) {
       Navigator.pop(context);
       Navigator.push(
@@ -140,15 +123,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
     }
   }
 
-  void _skip() async {
-    await OnboardingService.markOnboardingShown();
-    if (mounted) {
-      Navigator.pop(context);
-    }
-  }
-
-  // For demo mode - don't mark as shown so it appears every time
-  void _close() async {
+  void _skip() {
     if (mounted) {
       Navigator.pop(context);
     }

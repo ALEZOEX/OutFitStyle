@@ -9,7 +9,7 @@ import '../widgets/top_outfit_card.dart';
 import '../widgets/alternative_outfits.dart';
 import '../utils/city_translator.dart';
 import 'profile_screen.dart';
-import '../widgets/onboarding_dialog.dart';
+import '../widgets/demo_onboarding_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -47,9 +47,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
     _loadData();
     
-    // Показываем онбординг после загрузки
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      OnboardingDialog.showIfNeeded(context);
+    // Показываем онбординг на каждом запуске
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await DemoOnboardingDialog.showEveryTime(context);
     });
   }
 
@@ -125,11 +125,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: SafeArea(
         child: Stack(
           children: [
-            // Animated background
+            // Animated background with theme transition
             AnimatedBuilder(
               animation: _animationController,
               builder: (context, child) {
-                return Container(
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -145,6 +146,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             ],
                     ),
                   ),
+                  child: themeProvider.isAnimating
+                      ? Container(
+                          color: isDark
+                              ? Colors.black.withOpacity(0.1)
+                              : Colors.white.withOpacity(0.1),
+                        )
+                      : null,
                 );
               },
             ),

@@ -192,16 +192,21 @@ def recommend():
         logger.info(f"🎯 Recommendation request: user={user_id}, temp={weather_data.get('temperature')}°C")
         
         user_profile = load_user_profile(user_id)
+        logger.info(f"Loaded user profile: {user_profile}")
         available_items = load_clothing_items(weather_data, user_profile)
+        logger.info(f"Loaded {len(available_items)} clothing items")
         
         if not available_items:
             return jsonify({'error': 'No suitable clothing items found'}), 404
+        
+        # Lower the minimum confidence to ensure we get some recommendations
+        adjusted_min_confidence = min(0.3, min_confidence)
         
         outfit = predictor.build_outfit(
             weather_data, 
             user_profile, 
             available_items,
-            min_confidence=min_confidence
+            min_confidence=adjusted_min_confidence
         )
         
         recommendation_id = save_recommendation_to_db(
