@@ -20,12 +20,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late String _language;
 
   @override
-  voidinitState() {
+  void initState() {
     super.initState();
     _notificationsEnabled = widget.settings.notificationsEnabled;
     _autoSaveOutfits = widget.settings.autoSaveOutfits;
-    _temperatureUnit = widget.settings.temperatureUnit;
-    _language = widget.settings.language;
+    _temperatureUnit = widget.settings.temperatureUnit.isNotEmpty ? widget.settings.temperatureUnit : 'celsius';
+    _language = widget.settings.language.isNotEmpty ? widget.settings.language : 'ru';
   }
 
   Future<void> _saveSettings() async {

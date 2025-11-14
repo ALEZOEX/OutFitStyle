@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'config/app_config.dart';
 import 'screens/home_screen.dart';
+import 'providers/theme_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +24,12 @@ void main() {
     ),
   );
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -51,6 +58,25 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFF007bff),
+        scaffoldBackgroundColor: const Color(0xFF1a1a2e),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF007bff),
+          secondary: Color(0xFF6c757d),
+          error: Color(0xFFdc3545),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF007bff),
+            foregroundColor: Colors.white,
+            elevation: 2,
+          ),
+        ),
+      ),
+      themeMode: Provider.of<ThemeProvider>(context).themeMode,
       home: const HomeScreen(),
     );
   }
