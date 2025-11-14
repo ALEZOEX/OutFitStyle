@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _backgroundAnimation;
 
   @override
   void initState() {
@@ -40,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+    _backgroundAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _loadData();
     
@@ -117,43 +121,70 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final isDark = themeProvider.isDarkMode;
     
     return Scaffold(
-      backgroundColor: isDark 
-          ? AppTheme.backgroundDark 
-          : const Color(0xFFF0F2F5),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: _isLoading
-? _buildLoadingState(isDark)
-           : _error != null
-                ? _buildErrorWidget(isDark)
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 600),
-child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: Column(
-                            children: [
-                              _buildHeader(isDark, themeProvider),
-                              const SizedBox(height: 20),
-                              _buildSearchPanel(isDark),
-                              const SizedBox(height: 20),
-                              if (_recommendation != null) ...[
-                                _buildWeatherCard(isDark),
-const SizedBox(height: 20),
-                                _buildOutfitGrid(isDark),
-                                const SizedBox(height: 20),
-                                _buildRatingPanel(isDark),
-                              ],
+        child: Stack(
+          children: [
+            // Animated background
+            AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: isDark 
+                          ? [
+                              Color.lerp(AppTheme.backgroundDark, Colors.black, themeProvider.isAnimating ? 0.3 : 0.0)!,
+                              Color.lerp(AppTheme.cardDark, Colors.grey[900]!, themeProvider.isAnimating ? 0.3 : 0.0)!,
+                            ]
+                          : [
+                              Color.lerp(const Color(0xFFF0F2F5), Colors.white, themeProvider.isAnimating ? 0.3 : 0.0)!,
+                              Color.lerp(const Color(0xFFE4E6E9), Colors.grey[300]!, themeProvider.isAnimating ? 0.3 : 0.0)!,
                             ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            
+            // Content
+            _isLoading
+                ? _buildLoadingState(isDark)
+                : _error != null
+                    ? _buildErrorWidget(isDark)
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 600),
+                            child: FadeTransition(
+                              opacity: _fadeAnimation,
+                              child: Column(
+                                children: [
+                                  _buildHeader(isDark, themeProvider),
+                                  const SizedBox(height: 20),
+                                  _buildSearchPanel(isDark),
+                                  const SizedBox(height: 20),
+                                  if (_recommendation != null) ...[
+                                    _buildWeatherCard(isDark),
+                                    const SizedBox(height: 20),
+                                    _buildOutfitGrid(isDark),
+                                    const SizedBox(height: 20),
+                                    _buildRatingPanel(isDark),
+                                  ],
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+          ],
+        ),
       ),
     );
- }
+  }
 
   // ==================== HEADER ====================
   Widget _buildHeader(bool isDark, ThemeProvider themeProvider) {

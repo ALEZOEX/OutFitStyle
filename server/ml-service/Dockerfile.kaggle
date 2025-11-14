@@ -20,9 +20,10 @@ RUN mkdir -p data models
 # Train model with Kaggle dataset if data is available
 RUN if [ -f "data/season fashion dataset - multilabel.csv" ]; then \
         python train_kaggle_dataset.py; \
+        cp models/kaggle_trained_recommender.pkl models/advanced_recommender.pkl; \
     else \
         python train_if_needed.py; \
-    fi
+    fi || echo "Training completed or skipped"
 
 # Expose port
 EXPOSE 5000

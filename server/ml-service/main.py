@@ -254,12 +254,22 @@ def train_model():
 
 if __name__ == '__main__':
     try:
-        model_path = 'models/advanced_recommender.pkl'
-        if os.path.exists(model_path):
-            recommender.load(model_path)
-            predictor = AdvancedOutfitPredictor(recommender)
-            logger.info("✅ Loaded trained ML model")
-        else:
+        # Try to load the Kaggle-trained model first, fallback to default
+        model_paths = [
+            'models/kaggle_trained_recommender.pkl',
+            'models/advanced_recommender.pkl'
+        ]
+        
+        model_loaded = False
+        for model_path in model_paths:
+            if os.path.exists(model_path):
+                recommender.load(model_path)
+                predictor = AdvancedOutfitPredictor(recommender)
+                logger.info(f"✅ Loaded trained ML model from {model_path}")
+                model_loaded = True
+                break
+        
+        if not model_loaded:
             logger.warning("⚠️ No trained model found")
     except Exception as e:
         logger.error(f"Failed to load model: {e}")

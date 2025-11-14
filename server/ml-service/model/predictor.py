@@ -160,12 +160,14 @@ class AdvancedOutfitPredictor:
     ) -> bool:
         """Определяет, нужны ли аксессуары"""
         
+        weather_lower = weather.lower()
+        
         # Холодная погода - обязательно
         if temperature < 0:
             return True
         
         # Дождь/снег - обязательно
-        if weather.lower() in ['дождь', 'снег', 'морось', 'гроза']:
+        if any(cond in weather_lower for cond in ['дождь', 'снег', 'морось', 'гроза', 'rain', 'snow', 'drizzle', 'thunderstorm']):
             return True
         
         # Прохладно - 70% вероятность
@@ -189,7 +191,8 @@ class AdvancedOutfitPredictor:
         """Выбирает подходящие аксессуары"""
         
         temp = weather_data.get('temperature', 20)
-        weather = weather_data.get('weather', 'Ясно').lower()
+        weather = weather_data.get('weather', 'Ясно')
+        weather_lower = weather.lower()
         
         # Получаем рекомендации для аксессуаров
         recommendations = self.recommend_items(
@@ -219,16 +222,16 @@ class AdvancedOutfitPredictor:
                         selected.append(rec)
         
         # Дождь - зонт
-        elif weather in ['дождь', 'морось']:
+        elif any(cond in weather_lower for cond in ['дождь', 'морось', 'rain', 'drizzle']):
             for rec in recommendations:
-                if 'зонт' in rec['name'].lower():
+                if 'зонт' in rec['name'].lower() or 'umbrella' in rec['name'].lower():
                     selected.append(rec)
                     break
         
         # Солнечно - очки
-        elif 'ясно' in weather and temp > 20:
+        elif any(cond in weather_lower for cond in ['ясно', 'clear']) and temp > 20:
             for rec in recommendations:
-                if 'очки' in rec['name'].lower():
+                if 'очки' in rec['name'].lower() or 'sunglasses' in rec['name'].lower():
                     selected.append(rec)
                     break
         

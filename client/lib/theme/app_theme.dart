@@ -14,6 +14,12 @@ class AppTheme {
   static const Color cardDark = Color(0xFF1E293B);
   static const Color textPrimary = Color(0xFFF1F5F9);
   static const Color textSecondary = Color(0xFFCBD5E1);
+  
+  // Light theme colors
+  static const Color backgroundLight = Color(0xFFF0F2F5);
+  static const Color cardLight = Color(0xFFFFFFFF);
+  static const Color textPrimaryLight = Color(0xFF1E293B);
+  static const Color textSecondaryLight = Color(0xFF64748B);
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(

@@ -37,6 +37,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
+    // Update system UI based on theme
+    SystemChrome.setSystemUIOverlayStyle(
+      themeProvider.isDarkMode
+          ? const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light,
+              systemNavigationBarColor: Color(0xFF0F172A),
+              systemNavigationBarIconBrightness: Brightness.light,
+            )
+          : const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.dark,
+              systemNavigationBarColor: Color(0xFFF0F2F5),
+              systemNavigationBarIconBrightness: Brightness.dark,
+            ),
+    );
+    
     return MaterialApp(
       title: 'OutfitStyle',
       debugShowCheckedModeBanner: false,
@@ -76,7 +95,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      themeMode: Provider.of<ThemeProvider>(context).themeMode,
+      themeMode: themeProvider.themeMode,
       home: const HomeScreen(),
     );
   }

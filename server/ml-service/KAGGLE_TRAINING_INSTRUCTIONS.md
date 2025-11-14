@@ -2,6 +2,10 @@
 
 This guide explains how to train the OutfitStyle ML model using the Kaggle Fashion by Season Multi-label dataset.
 
+## Important Fix
+
+The previous version of this script had an issue where it only generated positive examples (items that were recommended), which caused a training error. This has been fixed by generating both positive and negative examples using the same evaluation logic as the original dataset preparation.
+
 ## Prerequisites
 
 1. Download the Kaggle dataset from: https://www.kaggle.com/datasets/mottie/fashion-by-season-multi-label
@@ -30,17 +34,41 @@ This guide explains how to train the OutfitStyle ML model using the Kaggle Fashi
 
 1. Build the Docker image:
    ```bash
-   docker build -t outfitstyle-ml-kaggle .
+   docker build -f Dockerfile.kaggle -t outfitstyle-ml-kaggle .
    ```
 
-2. Run the training (you can override the CMD to run training instead of the service):
+2. Run the training with Docker:
+   
+   On Unix/Linux/macOS:
    ```bash
-   docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models outfitstyle-ml-kaggle python train_kaggle_dataset.py
+   docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models outfitstyle-ml-kaggle
+   ```
+   
+   On Windows PowerShell:
+   ```powershell
+   docker run --rm -v ${pwd}/data:/app/data -v ${pwd}/models:/app/models outfitstyle-ml-kaggle
+   ```
+   
+   On Windows Command Prompt:
+   ```cmd
+   docker run --rm -v %cd%/data:/app/data -v %cd%/models:/app/models outfitstyle-ml-kaggle
    ```
 
 ## Using the Trained Model
 
-After training, the model will be saved as `models/kaggle_trained_recommender.pkl`. You can configure the service to use this model by modifying the model loading path in the main application.
+After training, the model will be saved as both `models/kaggle_trained_recommender.pkl` and `models/advanced_recommender.pkl`. The application automatically looks for `advanced_recommender.pkl`, so your trained model will be used immediately.
+
+If you want to manually switch between models, you can:
+
+1. Use the provided script:
+   ```bash
+   python use_kaggle_model.py
+   ```
+
+2. Or manually copy the file:
+   ```bash
+   cp models/kaggle_trained_recommender.pkl models/advanced_recommender.pkl
+   ```
 
 ## Dataset Transformation
 
@@ -51,50 +79,51 @@ The Kaggle dataset contains clothing recommendations based on weather conditions
 3. Creating season information based on temperature
 4. Converting the multi-label format to individual training samples
 5. Adding default values for missing features
+6. Generating negative examples for proper model training (e.g., winter coats in hot weather)
 
 ## Docker Configuration
 
-If you want to make the Docker image use the Kaggle-trained model by default, you can modify the Dockerfile to run the Kaggle training script instead:
+The Dockerfile.kaggle will automatically detect if the Kaggle dataset is present and train the model accordingly. It will fall back to the default training if the Kaggle dataset is not present.
 
-```dockerfile
-# Replace this line in the Dockerfile:
-RUN python train_if_needed.py
+To build and run with Docker:
 
-# With:
-RUN python train_kaggle_dataset.py
+```bash
+docker build -f Dockerfile.kaggle -t outfitstyle-ml-kaggle .
 ```
 
-Or create a new Dockerfile specifically for Kaggle training:
-
-```dockerfile
-FROM python:3.9-slim
-
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . .
-
-# Create directories
-RUN mkdir -p data models
-
-# Train model with Kaggle dataset if data is available
-RUN python train_kaggle_dataset.py
-
-# Expose port
-EXPOSE 5000
-
-# Run the application
-CMD ["python", "main.py"]
+On Unix/Linux/macOS:
+```bash
+docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models outfitstyle-ml-kaggle
 ```
+
+On Windows PowerShell:
+```powershell
+docker run --rm -v ${pwd}/data:/app/data -v ${pwd}/models:/app/models outfitstyle-ml-kaggle
+```
+
+On Windows Command Prompt:
+```cmd
+docker run --rm -v %cd%/data:/app/data -v %cd%/models:/app/models outfitstyle-ml-kaggle
+```
+
+## How the Training Works
+
+The Kaggle dataset only contains positive examples (clothing combinations that were actually worn). To properly train a machine learning model, we need both positive and negative examples. The script automatically generates negative examples by:
+
+1. Taking the existing clothing database
+2. Randomly selecting items that would not be appropriate for the given weather conditions
+3. Using the same evaluation logic as the original dataset preparation to ensure proper labeling
+
+This approach ensures a balanced dataset that can effectively train the recommendation model.
+
+## Improvements Made
+
+We've also made several improvements to the accessory selection logic:
+
+1. Fixed the umbrella recommendation issue by making weather condition matching more robust
+2. Added support for both Russian and English weather condition names
+3. Improved the model loading to automatically use your trained model
+4. Made the accessory selection logic more flexible for different weather conditions
 
 ## Comparing Models
 

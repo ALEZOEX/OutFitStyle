@@ -5,9 +5,11 @@ class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
   
   ThemeMode _themeMode = ThemeMode.light;
+  bool _isAnimating = false;
   
   ThemeMode get themeMode => _themeMode;
   bool get isDarkMode => _themeMode == ThemeMode.dark;
+  bool get isAnimating => _isAnimating;
 
   ThemeProvider() {
     _loadTheme();
@@ -25,6 +27,13 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   Future<void> toggleTheme() async {
+    if (_isAnimating) return;
+    
+    _isAnimating = true;
+    notifyListeners();
+    
+    await Future.delayed(const Duration(milliseconds: 300));
+    
     _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     notifyListeners();
     
@@ -34,9 +43,20 @@ class ThemeProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error saving theme: $e');
     }
+    
+    await Future.delayed(const Duration(milliseconds: 300));
+    _isAnimating = false;
+    notifyListeners();
   }
 
   Future<void> setTheme(bool isDark) async {
+    if (_isAnimating) return;
+    
+    _isAnimating = true;
+    notifyListeners();
+    
+    await Future.delayed(const Duration(milliseconds: 300));
+    
     _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
     notifyListeners();
     
@@ -46,5 +66,9 @@ class ThemeProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error saving theme: $e');
     }
+    
+    await Future.delayed(const Duration(milliseconds: 300));
+    _isAnimating = false;
+    notifyListeners();
   }
 }

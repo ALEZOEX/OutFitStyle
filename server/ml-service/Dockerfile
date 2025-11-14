@@ -20,6 +20,11 @@ RUN mkdir -p data models
 # Train model if needed (this will only run if no model exists)
 RUN python train_if_needed.py
 
+# If we have a Kaggle-trained model, use it instead
+RUN if [ -f "models/kaggle_trained_recommender.pkl" ]; then \
+        cp models/kaggle_trained_recommender.pkl models/advanced_recommender.pkl; \
+    fi
+
 # Expose port
 EXPOSE 5000
 
