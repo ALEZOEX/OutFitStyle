@@ -1,0 +1,37 @@
+name: outfitstyle_client
+description: AI-powered weather outfit recommendations
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # HTTP
+  http: ^1.1.0
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # UI
+  google_fonts: ^6.1.0
+  
+  # Utils
+  intl: ^0.18.1
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  # Uncomment when you add actual assets
+  # assets:
+  #   - assets/animations/
+  #   - assets/icons/

@@ -1,0 +1,125 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+
+class AppConfig {
+  // ============================================
+  // 🔧 НАСТРОЙКИ ДЛЯ РАЗРАБОТКИ
+  // ============================================
+
+  // Твой IP адрес из ipconfig (Ethernet адаптер)
+  static const String _localNetworkIp = '192.168.1.63';
+
+  // Используешь ли реальное Android/iOS устройство?
+  // true  = реальное устройство (телефон/планшет)
+  // false = эмулятор/симулятор
+  static const bool _useRealDevice = false;
+
+  // ============================================
+  // 🌐 URL НАСТРОЙКИ
+  // ============================================
+
+  // Development API
+  static const String _devApiUrl = 'http://localhost:8080';
+
+  // Production API (когда будет сервер в интернете)
+  static const String _prodApiUrl = 'https://api.outfitstyle.com';
+
+  // ============================================
+  // 🎯 АВТОМАТИЧЕСКИЙ ВЫБОР URL
+  // ============================================
+
+  static String get apiBaseUrl {
+    // Если релизная сборка - используем production
+    if (!kDebugMode) {
+      return _prodApiUrl;
+    }
+
+    // Режим разработки - выбираем по платформе
+    if (kIsWeb) {
+      // Web (Chrome, Edge, Firefox и т.д.)
+      return _devApiUrl;
+    } else if (Platform.isAndroid) {
+      // Android
+      if (_useRealDevice) {
+        // Реальное Android устройство
+        return 'http://$_localNetworkIp:8080';
+      } else {
+        // Android эмулятор
+        return 'http://10.0.2.2:8080';
+      }
+    } else if (Platform.isIOS) {
+      // iOS
+      if (_useRealDevice) {
+        // Реальное iOS устройство
+        return 'http://$_localNetworkIp:8080';
+      } else {
+        // iOS симулятор
+        return _devApiUrl;
+      }
+    } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      // Desktop приложения
+      return _devApiUrl;
+    } else {
+      // Fallback на всякий случай
+      return _devApiUrl;
+    }
+  }
+
+  // ============================================
+  // ⚙️ ДРУГИЕ НАСТРОЙКИ
+  // ============================================
+
+  // Таймаут для HTTP запросов (в секундах)
+  static const int requestTimeout = 30;
+
+  // Включить логирование в консоль?
+  static const bool enableLogging = true;
+
+  // Версия приложения
+  static const String appVersion = '1.0.0';
+  static const String appName = 'OutfitStyle';
+
+  // ============================================
+  // 📊 ИНФОРМАЦИЯ О КОНФИГУРАЦИИ
+  // ============================================
+
+  // Получить всю информацию о текущей конфигурации
+  static Map<String, dynamic> get info => {
+        'platform': _platformName,
+        'apiUrl': apiBaseUrl,
+        'isDebug': kDebugMode,
+        'isRealDevice': _useRealDevice,
+        'version': appVersion,
+      };
+
+  // Название текущей платформы
+  static String get _platformName {
+    if (kIsWeb) return 'Web';
+    if (Platform.isAndroid) return 'Android';
+    if (Platform.isIOS) return 'iOS';
+    if (Platform.isWindows) return 'Windows';
+    if (Platform.isMacOS) return 'macOS';
+    if (Platform.isLinux) return 'Linux';
+    return 'Unknown';
+  }
+
+  // ============================================
+  // 🖨️ ПЕЧАТЬ КОНФИГУРАЦИИ (для отладки)
+  // ============================================
+
+  static void printConfig() {
+    if (!enableLogging) return;
+
+    print('');
+    print('╔═══════════════════════════════════════════╗');
+    print('║     📱 OutfitStyle Configuration         ║');
+    print('╚═══════════════════════════════════════════╝');
+    print('');
+    print('🔹 Platform:      $_platformName');
+    print('🔹 API URL:       $apiBaseUrl');
+    print('🔹 Debug Mode:    $kDebugMode');
+    print('🔹 Real Device:   $_useRealDevice');
+    print('🔹 App Version:   $appVersion');
+    print('');
+  }
+}

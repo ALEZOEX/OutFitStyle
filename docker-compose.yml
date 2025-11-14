@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: outfitstyle-db
+    environment:
+      POSTGRES_USER: Admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: outfitstyle
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U Admin -d outfitstyle"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ml-service:
+    build:
+      context: ./server/ml-service
+    container_name: outfitstyle-ml
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=Admin
+      - DB_PASSWORD=password
+      - DB_NAME=outfitstyle
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./server/ml-service/models:/app/models
+      - ./server/ml-service/data:/app/data
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./server/api
+    container_name: outfitstyle-api
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=Admin
+      - DB_PASSWORD=password
+      - DB_NAME=outfitstyle
+      - WEATHER_API_KEY=8e9f1a366923ec63437f21570c89fa17
+      - WEATHER_API_URL=https://api.openweathermap.org/data/2.5/weather
+      - WEATHER_API_TIMEOUT=10
+      - DEBUG=true
+      - LOG_LEVEL=info
+      - ML_SERVICE_URL=http://ml-service:5000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

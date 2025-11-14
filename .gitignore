@@ -1,0 +1,97 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with go test -c
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories
+vendor/
+Godeps/
+
+# IDE
+.vscode/
+.idea/
+
+# Flutter/Dart/Pub
+.build/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+flutter_*.png
+pubspec.lock
+
+# Flutter build artifacts
+/build/
+/ephemorial/
+
+# Android related
+/android/local.properties
+/android/app/build/
+/android/app/local.properties
+/android/key.properties
+
+# iOS related
+/ios/Flutter/App.framework
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/app.flx
+/ios/Flutter/app.zip
+/ios/Flutter/flutter_assets/
+/ios/Flutter/flutter_export_environment.sh
+/ios/Pods/
+/ios/.symlinks/
+/ios/build/
+/ios/Runner/GeneratedPluginRegistrant.*
+
+# Web related
+/web/assets/
+/web/main.dart.js
+/web/main.dart.js.map
+
+# MacOS
+**/*.xcworkspace
+**/*.xcodeproj
+**/*.xcsettings
+
+# Environment files
+.env
+
+# Docker
+.dockerignore
+
+# Logs
+*.log
+
+# ML Models
+server/ml-service/models/*.pkl
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+~*
+
+# IDE specific files
+*.swp
+*.swo
