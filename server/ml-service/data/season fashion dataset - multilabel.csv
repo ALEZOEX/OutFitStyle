@@ -1,0 +1,1001 @@
+Jenis Kelamin,Kondisi Cuaca,Suhu,Kelembapan,Lokasi,Aktivitas,Durasi,Atasan,Bawahan,Pakaian Luar,Alas Kaki
+Perempuan,Mendung,24,96,Indoor,Berjalan,1,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,22,78,Outdoor,Santai,15,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,9,84,Outdoor,Kondangan,18,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Mendung,15,100,Indoor,Bekerja,23,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,29,71,Indoor,Kondangan,16,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Hujan,24,77,Outdoor,Santai,15,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,15,93,Outdoor,Kondangan,15,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Cerah,34,79,Outdoor,Berjalan,13,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,25,100,Outdoor,Berjalan,17,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,21,67,Indoor,Kondangan,21,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Berawan,35,68,Indoor,Santai,14,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,32,65,Indoor,Bekerja,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,20,72,Indoor,Santai,5,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,13,82,Outdoor,Bekerja,14,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,15,69,Outdoor,Olahraga,13,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Gerimis,38,97,Outdoor,Santai,3,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,26,67,Outdoor,Olahraga,24,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,24,82,Indoor,Olahraga,12,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,40,62,Outdoor,Bekerja,10,Kemeja,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Mendung,8,67,Outdoor,Kondangan,24,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Cerah,17,85,Indoor,Berjalan,2,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,38,60,Indoor,Kondangan,3,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Mendung,35,71,Indoor,Bekerja,24,Kemeja,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,19,65,Indoor,Santai,2,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Hujan,38,76,Outdoor,Berjalan,17,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Laki-laki,Berawan,34,96,Indoor,Kondangan,19,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Gerimis,23,66,Indoor,Bekerja,24,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,34,60,Outdoor,Santai,24,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,31,93,Indoor,Bekerja,1,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,8,91,Indoor,Santai,8,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,32,94,Outdoor,Olahraga,13,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,19,86,Outdoor,Berjalan,9,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,39,93,Outdoor,Olahraga,5,Kaos,Legging,Jaket,Sneakers
+Laki-laki,Gerimis,30,92,Indoor,Berjalan,8,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,24,72,Outdoor,Santai,9,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Cerah,19,86,Outdoor,Olahraga,4,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Berawan,22,87,Outdoor,Bekerja,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,14,65,Indoor,Santai,16,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Hujan,39,68,Indoor,Olahraga,15,Kaos,Legging,Jaket,Sneakers
+Perempuan,Mendung,31,88,Outdoor,Berjalan,7,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,12,60,Indoor,Berjalan,20,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,15,95,Indoor,Santai,6,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,31,100,Outdoor,Santai,4,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,28,69,Indoor,Berjalan,2,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,26,81,Indoor,Kondangan,2,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Cerah,18,80,Indoor,Bekerja,3,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,14,70,Indoor,Santai,7,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Cerah,14,71,Outdoor,Santai,22,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,32,76,Outdoor,Kondangan,8,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Berawan,16,66,Outdoor,Kondangan,8,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Hujan,19,83,Indoor,Santai,2,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,30,97,Outdoor,Bekerja,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,19,70,Outdoor,Santai,17,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,9,93,Outdoor,Santai,20,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Cerah,15,83,Outdoor,Berjalan,7,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,13,61,Outdoor,Berjalan,15,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,23,95,Outdoor,Santai,5,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Hujan,30,93,Indoor,Berjalan,22,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,21,100,Outdoor,Santai,12,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,8,98,Outdoor,Olahraga,14,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Gerimis,26,66,Outdoor,Olahraga,6,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,27,85,Outdoor,Santai,16,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,12,100,Indoor,Santai,22,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Mendung,22,75,Outdoor,Bekerja,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,23,61,Indoor,Bekerja,24,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,9,66,Indoor,Bekerja,24,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,18,90,Indoor,Berjalan,4,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,24,64,Outdoor,Berjalan,16,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,39,61,Indoor,Berjalan,24,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,26,78,Outdoor,Santai,6,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,9,100,Indoor,Santai,11,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Gerimis,30,66,Indoor,Olahraga,16,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,13,79,Outdoor,Kondangan,7,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Mendung,14,70,Indoor,Berjalan,4,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,17,83,Indoor,Bekerja,6,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,34,82,Indoor,Berjalan,20,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,31,88,Indoor,Santai,13,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,30,90,Outdoor,Bekerja,8,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Hujan,18,62,Outdoor,Bekerja,13,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,25,66,Outdoor,Olahraga,3,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,35,95,Outdoor,Kondangan,14,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Berawan,40,88,Outdoor,Berjalan,9,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,31,70,Outdoor,Kondangan,2,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Gerimis,36,97,Indoor,Santai,8,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,28,93,Outdoor,Santai,15,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,12,92,Outdoor,Berjalan,15,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,26,100,Indoor,Kondangan,12,Blouse,Rok,Jaket,Sepatu Bot
+Perempuan,Gerimis,32,62,Indoor,Olahraga,5,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,27,78,Outdoor,Berjalan,15,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,24,67,Indoor,Santai,14,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,16,62,Outdoor,Bekerja,23,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,28,75,Outdoor,Berjalan,13,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,21,65,Outdoor,Santai,6,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Hujan,20,90,Outdoor,Berjalan,24,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,37,81,Indoor,Berjalan,4,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,25,91,Indoor,Kondangan,10,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Mendung,9,72,Outdoor,Santai,24,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,15,68,Indoor,Bekerja,11,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,12,69,Outdoor,Olahraga,19,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Cerah,13,61,Outdoor,Olahraga,5,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Cerah,29,72,Outdoor,Bekerja,4,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,39,62,Outdoor,Berjalan,21,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,16,70,Outdoor,Berjalan,2,Kaos,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,28,70,Indoor,Bekerja,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,34,100,Outdoor,Kondangan,8,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Mendung,13,70,Indoor,Kondangan,14,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Cerah,21,75,Outdoor,Olahraga,23,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,16,62,Outdoor,Kondangan,5,Blouse,Rok,Jaket,Sepatu Bot
+Perempuan,Mendung,26,91,Outdoor,Bekerja,7,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,35,98,Indoor,Santai,4,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,38,84,Outdoor,Berjalan,10,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,26,68,Outdoor,Santai,11,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,29,83,Indoor,Kondangan,1,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Cerah,21,91,Outdoor,Santai,22,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,9,76,Outdoor,Santai,13,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,39,60,Outdoor,Bekerja,12,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,8,66,Outdoor,Kondangan,10,Jas,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,28,94,Indoor,Bekerja,14,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,20,62,Outdoor,Santai,20,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,16,100,Outdoor,Santai,3,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,24,91,Indoor,Kondangan,12,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Mendung,28,85,Outdoor,Kondangan,18,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Berawan,21,64,Outdoor,Santai,6,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,17,94,Indoor,Berjalan,23,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,8,92,Indoor,Santai,1,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,29,64,Outdoor,Berjalan,14,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,27,90,Indoor,Berjalan,18,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,31,99,Indoor,Bekerja,14,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,28,65,Outdoor,Berjalan,7,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,8,88,Indoor,Santai,6,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,18,61,Outdoor,Bekerja,5,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,23,77,Indoor,Berjalan,7,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,13,81,Indoor,Kondangan,24,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Hujan,12,77,Outdoor,Olahraga,14,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Mendung,23,85,Outdoor,Bekerja,13,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,39,76,Outdoor,Bekerja,17,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,20,66,Outdoor,Kondangan,22,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Cerah,37,83,Outdoor,Berjalan,7,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,27,79,Outdoor,Olahraga,15,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,14,64,Indoor,Kondangan,12,Blouse,Rok,Jaket,Sepatu Bot
+Perempuan,Cerah,11,66,Outdoor,Bekerja,9,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,37,82,Outdoor,Bekerja,17,Kemeja,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Cerah,23,80,Outdoor,Berjalan,9,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,30,64,Outdoor,Bekerja,2,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,28,81,Indoor,Santai,9,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Cerah,26,60,Outdoor,Berjalan,23,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,19,95,Indoor,Santai,14,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Gerimis,23,68,Indoor,Bekerja,13,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,24,95,Indoor,Berjalan,7,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,35,95,Outdoor,Bekerja,5,Kemeja,Rok,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,38,81,Indoor,Santai,12,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,11,65,Outdoor,Berjalan,11,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,32,63,Outdoor,Berjalan,3,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,16,99,Outdoor,Kondangan,8,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Cerah,39,84,Indoor,Bekerja,17,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,14,97,Outdoor,Santai,12,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,10,99,Indoor,Bekerja,3,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,33,75,Outdoor,Kondangan,23,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,29,68,Outdoor,Bekerja,17,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,38,67,Indoor,Olahraga,11,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,34,68,Indoor,Santai,12,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Cerah,9,89,Outdoor,Berjalan,6,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,40,91,Outdoor,Bekerja,4,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,20,94,Indoor,Bekerja,16,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,27,76,Indoor,Santai,5,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,20,80,Outdoor,Olahraga,1,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,27,72,Outdoor,Berjalan,16,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,30,69,Indoor,Santai,23,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,8,87,Indoor,Olahraga,18,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Berawan,16,84,Indoor,Olahraga,23,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Cerah,24,87,Indoor,Berjalan,4,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,15,60,Indoor,Santai,5,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Hujan,20,85,Outdoor,Berjalan,15,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,29,68,Outdoor,Santai,7,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,9,78,Outdoor,Santai,5,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Mendung,9,61,Indoor,Olahraga,24,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Gerimis,10,68,Indoor,Bekerja,8,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,9,69,Indoor,Olahraga,22,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Gerimis,8,68,Outdoor,Kondangan,18,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Hujan,25,87,Outdoor,Santai,7,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,33,71,Indoor,Bekerja,9,Kemeja,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Hujan,39,79,Indoor,Kondangan,16,Blouse,Rok,Jaket,Sepatu Bot
+Laki-laki,Hujan,27,90,Indoor,Kondangan,10,Jas,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,39,66,Outdoor,Bekerja,20,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,12,84,Indoor,Santai,5,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Hujan,16,96,Outdoor,Olahraga,23,Kaos,Legging,Jaket,Sneakers
+Laki-laki,Cerah,13,73,Outdoor,Berjalan,21,Kaos,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,30,87,Outdoor,Bekerja,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,24,82,Indoor,Santai,10,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,34,82,Indoor,Olahraga,11,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Gerimis,31,73,Indoor,Bekerja,1,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,22,70,Indoor,Bekerja,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,21,78,Outdoor,Santai,14,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,23,60,Outdoor,Olahraga,14,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,29,80,Outdoor,Santai,5,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,17,68,Indoor,Olahraga,2,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Hujan,14,74,Outdoor,Bekerja,21,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,8,67,Indoor,Kondangan,20,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Berawan,19,94,Indoor,Olahraga,13,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Gerimis,8,100,Indoor,Olahraga,5,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Cerah,29,64,Outdoor,Kondangan,7,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Gerimis,38,71,Indoor,Berjalan,17,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,21,77,Indoor,Olahraga,17,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,10,75,Indoor,Bekerja,21,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,23,80,Outdoor,Berjalan,22,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,18,62,Indoor,Santai,24,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,28,60,Outdoor,Berjalan,8,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,27,76,Indoor,Kondangan,3,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Gerimis,37,84,Outdoor,Olahraga,9,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,22,75,Indoor,Bekerja,11,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,35,79,Indoor,Bekerja,22,Kemeja,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Hujan,15,84,Indoor,Santai,16,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,25,100,Indoor,Berjalan,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,23,89,Outdoor,Kondangan,7,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Hujan,29,93,Indoor,Olahraga,16,Kaos,Legging,Jaket,Sneakers
+Perempuan,Hujan,29,100,Outdoor,Kondangan,22,Blouse,Rok,Jaket,Sepatu Bot
+Laki-laki,Gerimis,22,71,Outdoor,Santai,2,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,21,81,Outdoor,Bekerja,9,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,20,89,Indoor,Olahraga,20,Kaos,Celana Olahraga,Jaket,Sneakers
+Laki-laki,Mendung,24,67,Indoor,Berjalan,5,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,34,85,Indoor,Santai,5,Kaos,Rok,Jaket,Sepatu Bot
+Laki-laki,Hujan,15,67,Outdoor,Berjalan,15,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Cerah,14,89,Outdoor,Santai,21,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Berawan,10,89,Outdoor,Bekerja,15,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,29,71,Indoor,Santai,19,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,9,76,Outdoor,Santai,3,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Mendung,22,76,Outdoor,Bekerja,13,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,18,87,Outdoor,Berjalan,12,Blouse,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,34,62,Outdoor,Santai,20,Kaos,Rok,Jaket,Sepatu Bot
+Perempuan,Berawan,36,87,Indoor,Santai,13,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,17,87,Outdoor,Kondangan,14,Jas,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Cerah,32,74,Outdoor,Santai,9,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Hujan,22,71,Outdoor,Bekerja,8,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,30,87,Indoor,Santai,7,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,31,63,Indoor,Santai,3,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Cerah,10,95,Indoor,Santai,2,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,12,84,Indoor,Bekerja,19,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,34,76,Indoor,Olahraga,10,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,16,97,Outdoor,Kondangan,17,Blouse,Rok,Jaket,Sepatu Bot
+Laki-laki,Gerimis,40,82,Indoor,Kondangan,19,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Hujan,25,78,Indoor,Bekerja,4,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Cerah,12,67,Outdoor,Berjalan,2,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,26,61,Outdoor,Berjalan,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,33,75,Indoor,Bekerja,3,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,32,63,Indoor,Bekerja,12,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,30,88,Indoor,Kondangan,7,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Mendung,13,83,Indoor,Kondangan,13,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Gerimis,38,81,Indoor,Santai,5,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,9,62,Outdoor,Bekerja,9,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,15,85,Outdoor,Kondangan,14,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Mendung,21,63,Indoor,Kondangan,22,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Cerah,12,61,Indoor,Bekerja,11,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,32,97,Indoor,Kondangan,19,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Gerimis,40,93,Outdoor,Santai,2,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,33,85,Indoor,Olahraga,20,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,8,95,Outdoor,Berjalan,13,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,16,78,Indoor,Kondangan,8,Blouse,Rok,Jaket,Sepatu Bot
+Laki-laki,Mendung,11,78,Outdoor,Bekerja,19,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,39,80,Indoor,Santai,17,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,16,64,Indoor,Bekerja,5,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,17,85,Indoor,Bekerja,18,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,40,87,Indoor,Kondangan,15,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Berawan,22,96,Outdoor,Kondangan,23,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Gerimis,30,76,Indoor,Kondangan,18,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Berawan,18,97,Indoor,Santai,6,Blouse,Celana Panjang,Hoodie,Sandal
+Perempuan,Cerah,21,68,Indoor,Kondangan,15,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Cerah,12,75,Outdoor,Berjalan,19,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,20,76,Indoor,Santai,10,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,24,72,Outdoor,Olahraga,24,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,23,79,Outdoor,Olahraga,23,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,20,77,Outdoor,Berjalan,1,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,12,61,Indoor,Bekerja,8,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,27,63,Indoor,Olahraga,14,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,19,99,Outdoor,Kondangan,13,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Berawan,19,99,Indoor,Olahraga,16,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Berawan,17,66,Outdoor,Santai,1,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Cerah,33,96,Outdoor,Berjalan,18,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,10,95,Outdoor,Bekerja,20,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,22,86,Indoor,Berjalan,21,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,33,63,Indoor,Kondangan,7,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Cerah,8,85,Outdoor,Berjalan,22,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,20,84,Outdoor,Bekerja,14,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,25,97,Outdoor,Olahraga,7,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,11,88,Indoor,Bekerja,12,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,30,86,Outdoor,Santai,22,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,40,91,Indoor,Kondangan,14,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Gerimis,33,72,Outdoor,Berjalan,23,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,27,98,Outdoor,Berjalan,2,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,22,89,Outdoor,Bekerja,11,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,32,89,Indoor,Bekerja,3,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,13,84,Indoor,Berjalan,19,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,32,70,Indoor,Olahraga,19,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,16,79,Indoor,Santai,8,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,15,62,Indoor,Santai,8,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Hujan,30,81,Indoor,Berjalan,7,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,36,71,Outdoor,Olahraga,23,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,8,89,Outdoor,Berjalan,21,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,35,72,Indoor,Berjalan,7,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,14,88,Outdoor,Berjalan,22,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,17,62,Indoor,Santai,4,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Gerimis,16,68,Outdoor,Berjalan,23,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,26,61,Indoor,Olahraga,7,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,40,78,Outdoor,Olahraga,16,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,14,79,Outdoor,Olahraga,4,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Cerah,27,90,Indoor,Kondangan,5,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Cerah,22,93,Indoor,Berjalan,6,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,29,74,Indoor,Bekerja,11,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Cerah,32,69,Indoor,Santai,4,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,25,71,Outdoor,Olahraga,7,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,12,99,Outdoor,Olahraga,21,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Berawan,27,99,Outdoor,Berjalan,16,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,26,75,Indoor,Bekerja,15,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,13,68,Outdoor,Berjalan,3,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,31,69,Indoor,Bekerja,21,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,38,79,Outdoor,Berjalan,20,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Mendung,31,77,Outdoor,Santai,10,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,15,69,Outdoor,Olahraga,13,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Mendung,36,67,Outdoor,Olahraga,2,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,28,71,Outdoor,Kondangan,20,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,19,79,Indoor,Olahraga,11,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Gerimis,31,75,Outdoor,Berjalan,16,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,36,64,Outdoor,Santai,14,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,11,69,Outdoor,Olahraga,5,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Berawan,17,70,Indoor,Bekerja,9,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,31,67,Outdoor,Olahraga,8,Kaos,Legging,Jaket,Sneakers
+Laki-laki,Cerah,35,93,Indoor,Olahraga,1,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,32,84,Indoor,Bekerja,4,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Hujan,11,96,Outdoor,Berjalan,12,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,34,79,Outdoor,Bekerja,12,Kemeja,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,22,83,Outdoor,Bekerja,22,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,32,76,Outdoor,Berjalan,6,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,24,86,Indoor,Bekerja,19,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,25,70,Indoor,Bekerja,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,23,87,Outdoor,Santai,7,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Hujan,8,63,Indoor,Olahraga,4,Kaos,Legging,Jaket,Sneakers
+Perempuan,Cerah,21,69,Indoor,Berjalan,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,21,83,Indoor,Bekerja,8,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,28,90,Outdoor,Berjalan,2,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,8,78,Indoor,Bekerja,10,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,29,83,Outdoor,Berjalan,13,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,15,65,Indoor,Bekerja,4,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,10,69,Indoor,Berjalan,9,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,8,67,Outdoor,Kondangan,8,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Berawan,16,66,Indoor,Bekerja,16,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,39,81,Indoor,Olahraga,15,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,39,69,Indoor,Kondangan,10,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Cerah,25,72,Indoor,Bekerja,18,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,25,81,Outdoor,Berjalan,7,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,8,89,Indoor,Kondangan,8,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Cerah,9,66,Indoor,Bekerja,24,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,34,60,Indoor,Santai,24,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,18,69,Outdoor,Kondangan,21,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Cerah,36,78,Indoor,Santai,23,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,34,87,Outdoor,Kondangan,8,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,24,75,Outdoor,Kondangan,10,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Hujan,10,93,Outdoor,Berjalan,17,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Hujan,15,84,Indoor,Santai,24,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,29,89,Indoor,Berjalan,13,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,36,78,Outdoor,Olahraga,8,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,32,89,Indoor,Kondangan,13,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Gerimis,27,68,Outdoor,Berjalan,19,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,26,92,Indoor,Kondangan,1,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Cerah,35,72,Indoor,Berjalan,24,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,20,60,Indoor,Olahraga,23,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,19,100,Outdoor,Santai,20,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Mendung,40,65,Outdoor,Bekerja,17,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,21,76,Indoor,Berjalan,8,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,13,78,Outdoor,Bekerja,6,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,32,77,Indoor,Berjalan,20,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,37,93,Outdoor,Bekerja,17,Kemeja,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Mendung,33,85,Outdoor,Olahraga,10,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,13,81,Outdoor,Santai,15,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,17,99,Indoor,Bekerja,16,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,19,65,Indoor,Olahraga,17,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Hujan,10,83,Outdoor,Berjalan,12,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,26,74,Outdoor,Kondangan,21,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Gerimis,27,89,Indoor,Berjalan,12,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,14,65,Outdoor,Berjalan,17,Kaos,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,39,60,Outdoor,Kondangan,13,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,9,80,Indoor,Olahraga,11,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Hujan,28,77,Outdoor,Berjalan,6,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,15,75,Indoor,Bekerja,17,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,34,80,Outdoor,Bekerja,8,Kemeja,Rok,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,9,77,Outdoor,Olahraga,16,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Cerah,20,65,Outdoor,Kondangan,14,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Berawan,13,93,Outdoor,Berjalan,22,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,39,73,Outdoor,Bekerja,16,Kemeja,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,9,64,Indoor,Santai,6,Blouse,Celana Panjang,Hoodie,Sandal
+Perempuan,Berawan,16,95,Indoor,Bekerja,15,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,35,87,Indoor,Bekerja,18,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,38,80,Indoor,Kondangan,15,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Mendung,21,65,Indoor,Santai,15,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,38,88,Outdoor,Santai,18,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Hujan,30,89,Indoor,Santai,24,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,40,84,Indoor,Bekerja,1,Kemeja,Rok,Jaket,Sepatu Bot
+Laki-laki,Berawan,27,100,Indoor,Olahraga,3,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,16,82,Indoor,Berjalan,12,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,35,81,Indoor,Kondangan,15,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Cerah,20,76,Outdoor,Santai,2,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,10,88,Outdoor,Kondangan,7,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Hujan,27,81,Outdoor,Santai,19,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,13,69,Outdoor,Santai,6,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Mendung,27,79,Outdoor,Santai,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,19,94,Outdoor,Olahraga,16,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Berawan,12,79,Indoor,Santai,11,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Hujan,27,67,Outdoor,Bekerja,1,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,10,63,Indoor,Berjalan,9,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,37,85,Indoor,Berjalan,1,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Mendung,38,75,Indoor,Kondangan,16,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Gerimis,38,72,Outdoor,Berjalan,21,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,16,65,Outdoor,Berjalan,6,Blouse,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,37,99,Outdoor,Bekerja,23,Kemeja,Celana Pendek,Jaket,Sepatu Bot
+Laki-laki,Cerah,17,76,Indoor,Bekerja,24,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,11,97,Indoor,Kondangan,11,Jas,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,35,64,Indoor,Bekerja,14,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,22,86,Outdoor,Olahraga,5,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,39,98,Outdoor,Santai,4,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,35,99,Outdoor,Santai,3,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,9,76,Outdoor,Kondangan,3,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Gerimis,33,78,Outdoor,Olahraga,14,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,17,71,Indoor,Bekerja,16,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,27,72,Indoor,Olahraga,21,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,40,62,Outdoor,Olahraga,14,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,17,88,Indoor,Olahraga,17,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Hujan,32,60,Indoor,Olahraga,19,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Berawan,28,74,Indoor,Berjalan,16,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,25,88,Indoor,Olahraga,17,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,38,73,Outdoor,Berjalan,7,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,8,85,Outdoor,Santai,4,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Cerah,26,82,Indoor,Santai,2,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,17,92,Outdoor,Berjalan,6,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,22,91,Outdoor,Berjalan,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,10,100,Outdoor,Bekerja,6,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,8,77,Outdoor,Bekerja,1,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,29,97,Outdoor,Berjalan,24,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,30,67,Outdoor,Kondangan,7,Jas,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,30,83,Outdoor,Bekerja,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,12,66,Outdoor,Berjalan,19,Kaos,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,23,87,Outdoor,Bekerja,12,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,30,75,Indoor,Bekerja,2,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,16,64,Outdoor,Santai,5,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,16,67,Outdoor,Berjalan,7,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,11,68,Outdoor,Kondangan,2,Jas,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,24,66,Indoor,Berjalan,23,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,36,64,Outdoor,Bekerja,5,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,31,64,Indoor,Berjalan,20,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,26,94,Indoor,Bekerja,20,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,26,73,Outdoor,Berjalan,22,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,20,90,Outdoor,Bekerja,13,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,37,92,Outdoor,Berjalan,3,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,8,77,Indoor,Berjalan,16,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,8,78,Outdoor,Santai,19,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Cerah,19,89,Indoor,Berjalan,18,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,40,86,Outdoor,Santai,7,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,37,95,Outdoor,Bekerja,2,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,15,69,Indoor,Olahraga,6,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Hujan,34,81,Outdoor,Berjalan,18,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Hujan,22,64,Outdoor,Berjalan,15,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,39,91,Indoor,Santai,5,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,26,99,Indoor,Santai,15,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Hujan,14,77,Indoor,Santai,14,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Hujan,18,85,Indoor,Olahraga,3,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Berawan,24,63,Outdoor,Santai,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,22,99,Indoor,Kondangan,18,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Berawan,13,92,Indoor,Olahraga,9,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Mendung,35,79,Indoor,Santai,15,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,16,73,Indoor,Kondangan,7,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Cerah,32,75,Outdoor,Berjalan,2,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,8,88,Indoor,Kondangan,4,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Cerah,34,99,Outdoor,Santai,9,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,39,64,Outdoor,Bekerja,8,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,38,77,Outdoor,Olahraga,9,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,17,87,Indoor,Bekerja,14,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,30,77,Outdoor,Bekerja,21,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,24,89,Outdoor,Santai,11,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,24,89,Outdoor,Kondangan,15,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Hujan,17,99,Outdoor,Kondangan,10,Jas,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,14,92,Outdoor,Kondangan,4,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Mendung,40,61,Outdoor,Berjalan,10,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,33,84,Outdoor,Olahraga,16,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,23,61,Outdoor,Olahraga,24,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,28,72,Outdoor,Bekerja,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,34,69,Outdoor,Kondangan,15,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Cerah,14,79,Outdoor,Olahraga,19,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Hujan,10,89,Indoor,Olahraga,21,Kaos,Legging,Jaket,Sneakers
+Perempuan,Cerah,16,90,Indoor,Kondangan,6,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Cerah,10,68,Indoor,Olahraga,17,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Berawan,17,88,Indoor,Santai,12,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Gerimis,22,80,Indoor,Bekerja,4,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,12,73,Indoor,Berjalan,19,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,14,76,Indoor,Bekerja,21,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,16,73,Indoor,Santai,21,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Mendung,19,97,Outdoor,Berjalan,8,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,20,77,Indoor,Berjalan,7,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,23,84,Outdoor,Kondangan,12,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Cerah,11,75,Outdoor,Bekerja,19,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Gerimis,14,83,Indoor,Olahraga,6,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Gerimis,10,91,Indoor,Kondangan,21,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Mendung,27,64,Indoor,Bekerja,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,12,85,Indoor,Bekerja,5,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,28,72,Outdoor,Kondangan,18,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Hujan,28,76,Indoor,Olahraga,8,Kaos,Celana Olahraga,Jaket,Sneakers
+Laki-laki,Mendung,23,76,Indoor,Olahraga,2,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,32,83,Outdoor,Olahraga,4,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,25,95,Indoor,Santai,20,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,29,89,Outdoor,Santai,7,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,33,79,Indoor,Olahraga,16,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,38,90,Indoor,Olahraga,5,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,17,82,Indoor,Berjalan,18,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Gerimis,33,72,Indoor,Kondangan,9,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Cerah,20,65,Indoor,Berjalan,10,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,38,91,Outdoor,Santai,3,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Gerimis,15,73,Outdoor,Berjalan,13,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,18,90,Outdoor,Bekerja,2,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,39,89,Outdoor,Santai,3,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,21,92,Outdoor,Bekerja,11,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,22,86,Indoor,Berjalan,13,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,25,98,Indoor,Berjalan,9,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,25,76,Indoor,Santai,22,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,40,73,Indoor,Bekerja,24,Kemeja,Rok,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,26,75,Outdoor,Kondangan,8,Jas,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,39,67,Indoor,Olahraga,6,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,11,93,Outdoor,Berjalan,12,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,30,81,Indoor,Berjalan,19,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,32,83,Indoor,Bekerja,7,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,22,76,Outdoor,Olahraga,8,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,35,86,Outdoor,Santai,17,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,22,95,Outdoor,Olahraga,5,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,39,68,Indoor,Santai,4,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,39,81,Outdoor,Kondangan,15,Jas,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Berawan,22,73,Outdoor,Kondangan,6,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Gerimis,9,90,Outdoor,Berjalan,20,Blouse,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,33,67,Indoor,Bekerja,4,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,11,99,Indoor,Bekerja,1,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,11,76,Outdoor,Berjalan,7,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,12,95,Indoor,Berjalan,5,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,19,60,Outdoor,Santai,2,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,33,91,Indoor,Kondangan,15,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Gerimis,22,99,Outdoor,Olahraga,9,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,10,77,Indoor,Kondangan,9,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Hujan,29,94,Outdoor,Olahraga,16,Kaos,Legging,Jaket,Sneakers
+Perempuan,Mendung,17,80,Outdoor,Berjalan,14,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,10,78,Indoor,Berjalan,13,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,21,93,Outdoor,Santai,17,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,28,78,Indoor,Berjalan,20,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,24,96,Outdoor,Olahraga,9,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,20,94,Indoor,Bekerja,19,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,24,97,Indoor,Bekerja,4,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,22,95,Indoor,Santai,20,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,38,70,Outdoor,Berjalan,16,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,15,65,Outdoor,Olahraga,19,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Hujan,12,96,Outdoor,Bekerja,23,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,40,73,Outdoor,Kondangan,9,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,38,91,Outdoor,Berjalan,14,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,12,61,Indoor,Berjalan,23,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,21,91,Indoor,Bekerja,19,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,12,98,Indoor,Bekerja,9,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,19,60,Outdoor,Olahraga,6,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Hujan,14,69,Indoor,Santai,16,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Hujan,32,84,Outdoor,Olahraga,16,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Berawan,35,75,Outdoor,Bekerja,17,Kemeja,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,21,63,Indoor,Bekerja,6,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Hujan,13,71,Outdoor,Olahraga,15,Kaos,Celana Olahraga,Jaket,Sneakers
+Laki-laki,Cerah,39,80,Outdoor,Santai,11,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,24,62,Outdoor,Olahraga,1,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,15,68,Outdoor,Olahraga,7,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Gerimis,11,94,Indoor,Bekerja,14,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,40,92,Indoor,Santai,3,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,40,74,Indoor,Olahraga,16,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,25,91,Outdoor,Olahraga,9,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,21,79,Outdoor,Berjalan,23,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Hujan,35,96,Indoor,Santai,17,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Laki-laki,Cerah,36,68,Outdoor,Bekerja,17,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,40,94,Indoor,Berjalan,23,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,27,84,Outdoor,Berjalan,4,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,22,94,Indoor,Santai,19,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,20,62,Indoor,Kondangan,1,Blouse,Rok,Jaket,Sepatu Bot
+Laki-laki,Hujan,38,71,Outdoor,Santai,18,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Gerimis,18,61,Outdoor,Kondangan,14,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Hujan,38,87,Outdoor,Olahraga,11,Kaos,Celana Olahraga,Jaket,Sneakers
+Laki-laki,Gerimis,13,65,Outdoor,Bekerja,6,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,22,68,Indoor,Olahraga,2,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,15,79,Outdoor,Berjalan,22,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,36,90,Outdoor,Bekerja,13,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,28,98,Outdoor,Berjalan,20,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,21,91,Indoor,Bekerja,16,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,16,78,Indoor,Bekerja,4,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Gerimis,38,77,Outdoor,Bekerja,6,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,34,99,Indoor,Olahraga,24,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,9,62,Outdoor,Kondangan,10,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Gerimis,21,67,Indoor,Santai,3,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,25,76,Outdoor,Berjalan,1,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,26,90,Outdoor,Berjalan,2,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,23,68,Indoor,Bekerja,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,17,75,Indoor,Bekerja,18,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,36,94,Indoor,Bekerja,4,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,22,88,Indoor,Olahraga,21,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,14,68,Outdoor,Bekerja,21,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,17,82,Indoor,Bekerja,23,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,29,91,Outdoor,Bekerja,5,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,22,73,Indoor,Santai,24,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,36,95,Indoor,Olahraga,11,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,13,74,Outdoor,Olahraga,6,Kaos,Celana Olahraga,Jaket,Sneakers
+Laki-laki,Hujan,16,83,Outdoor,Santai,18,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,31,67,Outdoor,Berjalan,21,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,11,62,Outdoor,Olahraga,5,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Hujan,23,87,Outdoor,Olahraga,12,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Hujan,24,62,Outdoor,Kondangan,4,Blouse,Rok,Jaket,Sepatu Bot
+Laki-laki,Mendung,20,65,Indoor,Berjalan,2,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,25,99,Indoor,Olahraga,14,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,20,98,Outdoor,Bekerja,22,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,40,65,Indoor,Santai,20,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,32,65,Indoor,Santai,13,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Cerah,21,91,Indoor,Olahraga,5,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,20,83,Outdoor,Olahraga,8,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,15,98,Indoor,Olahraga,1,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Mendung,10,85,Outdoor,Santai,15,Blouse,Celana Panjang,Hoodie,Sandal
+Laki-laki,Gerimis,22,78,Indoor,Santai,16,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,14,77,Outdoor,Berjalan,3,Blouse,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,39,61,Indoor,Bekerja,12,Kemeja,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Berawan,8,93,Indoor,Berjalan,1,Blouse,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,40,86,Indoor,Kondangan,11,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Gerimis,23,63,Outdoor,Kondangan,19,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Cerah,15,76,Indoor,Santai,3,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,26,68,Indoor,Santai,13,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,38,63,Outdoor,Bekerja,24,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,13,85,Indoor,Kondangan,10,Jas,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,32,71,Indoor,Berjalan,3,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,38,92,Outdoor,Olahraga,7,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,8,62,Indoor,Berjalan,2,Blouse,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,10,74,Indoor,Santai,13,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,36,87,Outdoor,Kondangan,13,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Mendung,32,64,Indoor,Olahraga,1,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,17,66,Indoor,Bekerja,20,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,10,73,Indoor,Berjalan,21,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Gerimis,32,80,Outdoor,Bekerja,17,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,29,78,Outdoor,Berjalan,6,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,15,79,Outdoor,Berjalan,22,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,27,96,Indoor,Kondangan,23,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Berawan,32,81,Indoor,Bekerja,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,26,100,Outdoor,Bekerja,11,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,15,65,Indoor,Bekerja,4,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,16,77,Outdoor,Kondangan,9,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Hujan,32,77,Indoor,Bekerja,18,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,17,82,Outdoor,Olahraga,8,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Hujan,26,95,Outdoor,Kondangan,18,Blouse,Rok,Jaket,Sepatu Bot
+Perempuan,Gerimis,21,90,Outdoor,Olahraga,24,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,30,95,Indoor,Kondangan,10,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Gerimis,10,74,Outdoor,Kondangan,4,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Hujan,21,93,Outdoor,Santai,10,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,35,68,Outdoor,Berjalan,3,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,10,62,Indoor,Santai,9,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Cerah,20,85,Indoor,Berjalan,2,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,17,64,Outdoor,Kondangan,20,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Berawan,39,83,Outdoor,Kondangan,19,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Gerimis,13,63,Outdoor,Santai,18,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Gerimis,38,85,Outdoor,Santai,18,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,8,99,Indoor,Berjalan,19,Kaos,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,17,73,Indoor,Bekerja,5,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,24,72,Outdoor,Olahraga,21,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,9,97,Outdoor,Berjalan,16,Kaos,Celana Panjang,Hoodie,Sneakers
+Perempuan,Cerah,9,77,Outdoor,Santai,18,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Mendung,37,100,Indoor,Berjalan,18,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,23,79,Outdoor,Olahraga,1,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,8,99,Indoor,Santai,6,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Cerah,30,91,Indoor,Berjalan,11,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,12,87,Outdoor,Berjalan,11,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,22,92,Outdoor,Santai,12,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Cerah,14,94,Outdoor,Olahraga,8,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Mendung,38,62,Outdoor,Santai,10,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,38,80,Outdoor,Berjalan,3,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,8,87,Outdoor,Bekerja,17,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,15,91,Indoor,Santai,11,Blouse,Celana Panjang,Hoodie,Sandal
+Laki-laki,Gerimis,22,74,Indoor,Olahraga,1,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,35,78,Outdoor,Olahraga,13,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,34,64,Outdoor,Santai,14,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,39,76,Outdoor,Olahraga,10,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,37,84,Outdoor,Olahraga,16,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,34,84,Indoor,Olahraga,19,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,18,79,Indoor,Berjalan,3,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Gerimis,39,60,Outdoor,Berjalan,14,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,30,79,Outdoor,Santai,19,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,37,67,Outdoor,Olahraga,23,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,19,71,Indoor,Olahraga,5,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Cerah,24,83,Indoor,Bekerja,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,17,94,Indoor,Bekerja,15,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,16,64,Indoor,Berjalan,15,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,15,96,Indoor,Bekerja,15,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,18,66,Outdoor,Santai,17,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,14,84,Indoor,Bekerja,19,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,34,65,Indoor,Berjalan,12,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,15,67,Indoor,Olahraga,21,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Mendung,24,93,Indoor,Santai,9,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,30,88,Indoor,Kondangan,21,Jas,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,32,96,Outdoor,Olahraga,9,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,16,60,Outdoor,Berjalan,18,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,32,92,Outdoor,Santai,6,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,18,99,Outdoor,Kondangan,8,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Berawan,33,89,Outdoor,Berjalan,2,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,32,98,Indoor,Santai,18,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,27,93,Indoor,Kondangan,17,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Gerimis,32,60,Indoor,Berjalan,15,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,30,99,Outdoor,Bekerja,14,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,20,70,Outdoor,Bekerja,13,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,27,80,Outdoor,Olahraga,7,Kaos,Celana Olahraga,Jaket,Sneakers
+Laki-laki,Cerah,31,72,Indoor,Santai,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,34,79,Indoor,Santai,19,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,14,77,Indoor,Olahraga,23,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Mendung,29,99,Indoor,Berjalan,19,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,33,78,Indoor,Berjalan,24,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Laki-laki,Gerimis,34,82,Outdoor,Olahraga,13,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,10,64,Indoor,Berjalan,16,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,39,74,Outdoor,Bekerja,14,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,15,98,Outdoor,Olahraga,11,Kaos,Legging,Jaket,Sneakers
+Perempuan,Hujan,35,68,Outdoor,Olahraga,1,Kaos,Legging,Jaket,Sneakers
+Perempuan,Hujan,10,65,Outdoor,Berjalan,17,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,29,78,Indoor,Santai,6,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,34,78,Indoor,Santai,22,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,32,67,Outdoor,Bekerja,20,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,39,88,Indoor,Kondangan,2,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Hujan,21,93,Outdoor,Berjalan,11,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,32,65,Outdoor,Bekerja,11,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,30,60,Indoor,Berjalan,13,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,29,79,Indoor,Olahraga,16,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,14,97,Outdoor,Kondangan,14,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Berawan,17,69,Indoor,Kondangan,3,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Hujan,13,91,Indoor,Olahraga,16,Kaos,Celana Olahraga,Jaket,Sneakers
+Laki-laki,Hujan,16,96,Indoor,Berjalan,18,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,14,79,Indoor,Berjalan,12,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,22,76,Outdoor,Berjalan,8,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,29,60,Indoor,Bekerja,14,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,9,89,Outdoor,Berjalan,16,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,31,61,Outdoor,Santai,1,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,23,94,Outdoor,Berjalan,23,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,19,79,Indoor,Berjalan,7,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,30,100,Indoor,Santai,12,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,23,96,Indoor,Kondangan,11,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,17,72,Outdoor,Olahraga,19,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Mendung,17,93,Indoor,Kondangan,16,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Cerah,22,60,Outdoor,Berjalan,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,9,93,Indoor,Kondangan,9,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Berawan,12,69,Indoor,Bekerja,12,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,31,92,Indoor,Bekerja,17,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,27,75,Outdoor,Olahraga,21,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,24,91,Indoor,Bekerja,1,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,38,100,Outdoor,Olahraga,14,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,24,67,Indoor,Kondangan,23,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Mendung,31,76,Outdoor,Berjalan,2,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,40,60,Outdoor,Olahraga,2,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,12,89,Outdoor,Kondangan,24,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Hujan,22,98,Indoor,Olahraga,24,Kaos,Celana Olahraga,Jaket,Sneakers
+Laki-laki,Hujan,29,93,Outdoor,Berjalan,9,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,28,90,Outdoor,Santai,3,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,13,99,Indoor,Santai,11,Blouse,Celana Panjang,Hoodie,Sandal
+Perempuan,Gerimis,36,81,Outdoor,Santai,21,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,35,70,Outdoor,Bekerja,8,Kemeja,Celana Pendek,Jaket,Sepatu Bot
+Laki-laki,Mendung,28,80,Indoor,Olahraga,17,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,39,80,Indoor,Berjalan,1,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,14,95,Outdoor,Olahraga,17,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Cerah,40,67,Outdoor,Olahraga,12,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,12,80,Outdoor,Santai,16,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,27,71,Outdoor,Santai,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,8,80,Outdoor,Kondangan,18,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Berawan,19,71,Indoor,Bekerja,12,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,31,93,Outdoor,Santai,14,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,15,73,Indoor,Santai,2,Blouse,Celana Panjang,Hoodie,Sandal
+Perempuan,Berawan,21,88,Outdoor,Bekerja,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,24,100,Outdoor,Santai,19,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,28,67,Outdoor,Kondangan,10,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,21,74,Outdoor,Santai,14,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,25,100,Indoor,Kondangan,21,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Hujan,20,71,Indoor,Santai,24,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,35,62,Indoor,Berjalan,20,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,11,62,Outdoor,Santai,6,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Gerimis,15,78,Indoor,Kondangan,24,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Gerimis,17,96,Outdoor,Bekerja,15,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,23,92,Indoor,Berjalan,15,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,15,68,Indoor,Olahraga,1,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Mendung,30,69,Indoor,Bekerja,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,25,80,Outdoor,Berjalan,13,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,31,94,Indoor,Kondangan,1,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Berawan,16,86,Outdoor,Berjalan,12,Blouse,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,13,77,Indoor,Bekerja,6,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,12,78,Outdoor,Olahraga,10,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Hujan,30,68,Outdoor,Bekerja,18,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,16,81,Indoor,Bekerja,7,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,22,93,Outdoor,Kondangan,9,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Mendung,9,84,Indoor,Santai,21,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Cerah,38,70,Indoor,Olahraga,11,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,16,67,Outdoor,Santai,10,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Berawan,13,68,Indoor,Berjalan,24,Blouse,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,14,90,Outdoor,Bekerja,23,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,32,73,Outdoor,Berjalan,7,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,40,71,Indoor,Kondangan,24,Jas,Celana Pendek,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Hujan,31,61,Indoor,Berjalan,4,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,28,62,Indoor,Kondangan,13,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Cerah,10,93,Outdoor,Olahraga,5,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Cerah,39,96,Outdoor,Bekerja,17,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,35,82,Indoor,Berjalan,20,Kaos,Rok,Jaket,Sepatu Bot
+Laki-laki,Gerimis,38,99,Indoor,Olahraga,15,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,8,73,Indoor,Olahraga,6,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Cerah,29,85,Indoor,Olahraga,10,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,27,72,Outdoor,Kondangan,6,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Mendung,15,85,Indoor,Bekerja,6,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,19,79,Outdoor,Berjalan,14,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,18,66,Outdoor,Berjalan,22,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,26,84,Indoor,Olahraga,21,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,14,61,Outdoor,Kondangan,10,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Berawan,21,62,Indoor,Santai,13,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,23,65,Indoor,Bekerja,18,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,9,83,Outdoor,Santai,4,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,25,81,Outdoor,Olahraga,5,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,26,82,Indoor,Kondangan,1,Blouse,Rok,Jaket,Sepatu Bot
+Laki-laki,Cerah,37,65,Indoor,Bekerja,14,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,29,61,Outdoor,Olahraga,5,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,14,77,Outdoor,Santai,5,Blouse,Celana Panjang,Hoodie,Sandal
+Perempuan,Cerah,8,62,Indoor,Kondangan,16,Blouse,Rok,Hoodie,Sepatu Hak
+Laki-laki,Gerimis,14,74,Indoor,Santai,2,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Hujan,24,95,Indoor,Berjalan,23,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,8,66,Indoor,Berjalan,6,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Gerimis,34,74,Outdoor,Olahraga,13,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,23,81,Indoor,Olahraga,10,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,22,93,Indoor,Kondangan,7,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Hujan,15,79,Outdoor,Santai,5,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Cerah,25,91,Outdoor,Berjalan,1,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,22,74,Indoor,Berjalan,23,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,26,96,Indoor,Kondangan,13,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Berawan,34,100,Outdoor,Olahraga,17,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,29,96,Outdoor,Kondangan,24,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Berawan,29,63,Indoor,Bekerja,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,31,86,Outdoor,Kondangan,4,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Hujan,27,76,Indoor,Berjalan,12,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,22,78,Outdoor,Santai,23,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Hujan,29,98,Indoor,Berjalan,7,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,30,68,Indoor,Kondangan,6,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,25,90,Outdoor,Berjalan,2,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,26,73,Outdoor,Santai,20,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,22,78,Outdoor,Olahraga,23,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,24,83,Outdoor,Santai,14,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Mendung,33,97,Indoor,Santai,13,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,12,61,Outdoor,Santai,19,Kemeja,Celana Panjang,Hoodie,Sandal
+Laki-laki,Gerimis,29,97,Outdoor,Bekerja,3,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,32,89,Indoor,Bekerja,3,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,11,66,Outdoor,Santai,24,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Mendung,24,77,Indoor,Kondangan,14,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Berawan,13,67,Outdoor,Olahraga,15,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Mendung,16,89,Indoor,Berjalan,3,Blouse,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,34,97,Outdoor,Bekerja,2,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,32,66,Indoor,Bekerja,23,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,40,95,Outdoor,Berjalan,17,Kaos,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,11,88,Indoor,Bekerja,9,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Gerimis,14,96,Indoor,Bekerja,23,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,36,95,Indoor,Berjalan,8,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,27,95,Outdoor,Bekerja,18,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,27,65,Indoor,Kondangan,18,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Hujan,11,78,Indoor,Olahraga,15,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Mendung,23,65,Outdoor,Santai,18,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Gerimis,27,91,Indoor,Santai,15,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,35,64,Indoor,Santai,13,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Cerah,38,79,Outdoor,Santai,7,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,30,96,Indoor,Kondangan,17,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Hujan,35,94,Indoor,Kondangan,15,Jas,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Gerimis,31,81,Indoor,Berjalan,21,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,18,81,Outdoor,Olahraga,11,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Mendung,18,84,Indoor,Kondangan,22,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Hujan,14,99,Indoor,Santai,14,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,27,83,Outdoor,Bekerja,16,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,16,100,Outdoor,Olahraga,3,Kaos,Legging,Jaket,Sneakers
+Perempuan,Cerah,38,78,Indoor,Olahraga,21,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,8,89,Outdoor,Bekerja,18,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,10,80,Outdoor,Santai,22,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,17,88,Outdoor,Olahraga,14,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Cerah,17,76,Indoor,Berjalan,15,Kaos,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,34,97,Outdoor,Santai,6,Kaos,Rok,Tanpa Pakaian Luar,Sandal
+Perempuan,Cerah,10,78,Outdoor,Berjalan,10,Blouse,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,12,74,Indoor,Olahraga,7,Kaos,Legging,Jaket,Sneakers
+Laki-laki,Cerah,15,67,Indoor,Santai,20,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Hujan,12,81,Indoor,Berjalan,11,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,17,92,Indoor,Bekerja,23,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Cerah,9,83,Indoor,Santai,11,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Mendung,17,83,Outdoor,Santai,10,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Mendung,32,84,Indoor,Bekerja,23,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Gerimis,18,64,Indoor,Olahraga,24,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Cerah,9,79,Outdoor,Berjalan,4,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Hujan,34,97,Indoor,Berjalan,11,Kaos,Rok,Jaket,Sepatu Bot
+Perempuan,Gerimis,24,79,Indoor,Bekerja,16,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,34,61,Outdoor,Olahraga,10,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,28,90,Outdoor,Santai,19,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,19,100,Indoor,Olahraga,4,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Mendung,11,93,Outdoor,Berjalan,16,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,22,92,Indoor,Olahraga,2,Kaos,Celana Olahraga,Jaket,Sneakers
+Perempuan,Mendung,29,84,Indoor,Olahraga,18,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,38,65,Outdoor,Olahraga,24,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,25,94,Outdoor,Kondangan,23,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Laki-laki,Gerimis,27,78,Outdoor,Berjalan,24,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,33,81,Outdoor,Santai,15,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,10,88,Indoor,Bekerja,12,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,31,87,Indoor,Kondangan,19,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Gerimis,15,95,Indoor,Olahraga,11,Kaos,Legging,Hoodie,Sneakers
+Laki-laki,Berawan,23,75,Outdoor,Santai,2,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,25,84,Outdoor,Bekerja,21,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,35,63,Indoor,Santai,12,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Berawan,15,96,Outdoor,Santai,24,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Gerimis,35,87,Outdoor,Berjalan,12,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,12,94,Outdoor,Kondangan,18,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Cerah,34,71,Outdoor,Kondangan,22,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Berawan,14,66,Outdoor,Santai,11,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Berawan,14,91,Indoor,Kondangan,7,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Cerah,18,70,Indoor,Olahraga,18,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Berawan,34,65,Outdoor,Kondangan,4,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Perempuan,Hujan,19,82,Outdoor,Bekerja,14,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Mendung,33,75,Indoor,Bekerja,7,Kemeja,Rok,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,22,76,Indoor,Olahraga,13,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,22,81,Indoor,Santai,18,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,25,82,Outdoor,Kondangan,24,Blouse,Rok,Jaket,Sepatu Bot
+Perempuan,Mendung,39,64,Outdoor,Olahraga,5,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,9,100,Indoor,Berjalan,7,Blouse,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,19,68,Outdoor,Santai,8,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Berawan,15,66,Outdoor,Berjalan,9,Blouse,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,16,69,Indoor,Bekerja,10,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Hujan,24,79,Indoor,Bekerja,16,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,26,100,Indoor,Bekerja,15,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,9,67,Indoor,Berjalan,10,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,17,78,Indoor,Bekerja,9,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,36,92,Outdoor,Olahraga,12,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,15,96,Outdoor,Santai,3,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Berawan,34,78,Outdoor,Santai,19,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Perempuan,Gerimis,14,71,Indoor,Kondangan,10,Blouse,Rok,Hoodie,Sepatu Hak
+Perempuan,Mendung,27,71,Outdoor,Berjalan,13,Blouse,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,19,68,Outdoor,Kondangan,16,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Cerah,15,68,Outdoor,Santai,3,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Gerimis,18,77,Outdoor,Berjalan,4,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Mendung,26,76,Indoor,Kondangan,11,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Gerimis,30,69,Indoor,Santai,6,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Hujan,13,98,Indoor,Bekerja,7,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Berawan,24,90,Indoor,Berjalan,11,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,35,67,Outdoor,Kondangan,6,Jas,Celana Pendek,Jaket,Sepatu Bot
+Perempuan,Hujan,31,63,Outdoor,Santai,16,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,25,70,Indoor,Santai,17,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Hujan,29,83,Indoor,Bekerja,11,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Berawan,35,86,Outdoor,Bekerja,14,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,13,95,Indoor,Santai,13,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Cerah,30,85,Outdoor,Kondangan,5,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Cerah,15,61,Outdoor,Santai,1,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Berawan,10,88,Outdoor,Olahraga,12,Kaos,Legging,Hoodie,Sneakers
+Perempuan,Hujan,16,68,Indoor,Kondangan,17,Blouse,Rok,Jaket,Sepatu Bot
+Laki-laki,Hujan,14,69,Outdoor,Berjalan,20,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,32,79,Indoor,Olahraga,3,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Mendung,39,76,Indoor,Bekerja,23,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Mendung,33,68,Outdoor,Bekerja,15,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,27,83,Outdoor,Olahraga,12,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,23,87,Outdoor,Santai,9,Kaos,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Hujan,19,82,Outdoor,Bekerja,15,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Cerah,39,70,Outdoor,Santai,8,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,36,94,Indoor,Olahraga,23,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,26,88,Indoor,Kondangan,24,Jas,Celana Panjang,Tanpa Pakaian Luar,Sepatu Pantofel
+Perempuan,Gerimis,30,86,Indoor,Bekerja,12,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,31,66,Indoor,Kondangan,18,Blouse,Rok,Jaket,Sepatu Bot
+Perempuan,Berawan,26,88,Indoor,Bekerja,22,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,29,97,Outdoor,Berjalan,20,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Berawan,14,89,Indoor,Santai,18,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Mendung,12,68,Indoor,Bekerja,1,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Mendung,15,99,Indoor,Kondangan,3,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Mendung,22,73,Indoor,Bekerja,2,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Hujan,10,87,Indoor,Bekerja,23,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,40,81,Outdoor,Kondangan,12,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Cerah,18,73,Indoor,Kondangan,17,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Laki-laki,Gerimis,9,82,Indoor,Santai,12,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Gerimis,12,78,Outdoor,Santai,14,Kaos,Celana Panjang,Hoodie,Sandal
+Perempuan,Cerah,27,73,Indoor,Olahraga,23,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,24,61,Indoor,Kondangan,6,Jas,Celana Panjang,Jaket,Sepatu Bot
+Perempuan,Gerimis,24,87,Indoor,Olahraga,12,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,19,93,Outdoor,Berjalan,16,Kemeja,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,27,84,Outdoor,Bekerja,19,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Gerimis,32,94,Indoor,Berjalan,16,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,35,90,Outdoor,Kondangan,7,Blouse,Rok,Tanpa Pakaian Luar,Sepatu Hak
+Laki-laki,Mendung,18,95,Outdoor,Olahraga,23,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Mendung,17,78,Indoor,Olahraga,6,Kaos,Celana Olahraga,Hoodie,Sneakers
+Laki-laki,Berawan,11,77,Outdoor,Berjalan,7,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Berawan,38,80,Outdoor,Santai,9,Kaos,Celana Pendek,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,8,90,Indoor,Kondangan,14,Jas,Celana Panjang,Hoodie,Sepatu Pantofel
+Perempuan,Berawan,14,90,Indoor,Santai,4,Blouse,Celana Panjang,Hoodie,Sandal
+Laki-laki,Mendung,28,85,Indoor,Berjalan,18,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Hujan,35,85,Indoor,Berjalan,7,Kaos,Celana Pendek,Jaket,Sepatu Bot
+Laki-laki,Cerah,26,95,Indoor,Berjalan,17,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,23,94,Indoor,Santai,17,Kemeja,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Laki-laki,Berawan,17,85,Indoor,Olahraga,2,Kaos,Celana Olahraga,Hoodie,Sneakers
+Perempuan,Gerimis,8,86,Indoor,Bekerja,8,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,10,68,Indoor,Santai,13,Kaos,Celana Panjang,Hoodie,Sandal
+Laki-laki,Cerah,28,99,Indoor,Santai,22,Kaos,Celana Panjang,Tanpa Pakaian Luar,Sandal
+Perempuan,Mendung,17,64,Outdoor,Bekerja,5,Kemeja,Celana Panjang,Hoodie,Sneakers
+Perempuan,Berawan,8,78,Indoor,Berjalan,2,Kaos,Celana Panjang,Hoodie,Sneakers
+Laki-laki,Cerah,40,79,Outdoor,Bekerja,15,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,39,61,Indoor,Olahraga,10,Kaos,Celana Olahraga,Tanpa Pakaian Luar,Sneakers
+Perempuan,Cerah,34,62,Outdoor,Olahraga,18,Kaos,Legging,Tanpa Pakaian Luar,Sneakers
+Perempuan,Berawan,33,92,Indoor,Bekerja,6,Kemeja,Celana Pendek,Tanpa Pakaian Luar,Sneakers
+Laki-laki,Cerah,16,60,Indoor,Santai,10,Kemeja,Celana Panjang,Hoodie,Sandal
+Perempuan,Cerah,13,95,Indoor,Santai,11,Blouse,Celana Panjang,Hoodie,Sandal
+Laki-laki,Hujan,8,80,Indoor,Santai,15,Kemeja,Celana Panjang,Jaket,Sepatu Bot
+Laki-laki,Gerimis,12,62,Outdoor,Santai,3,Kaos,Celana Panjang,Hoodie,Sandal

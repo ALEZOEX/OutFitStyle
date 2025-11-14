@@ -2,84 +2,17 @@ import logging
 from typing import List, Dict
 from .advanced_trainer import AdvancedOutfitRecommender
 import pandas as pd
+import random
 
 logger = logging.getLogger(__name__)
 
 class AdvancedOutfitPredictor:
     """
-    Предиктор для работы с обученной моделью
+    Улучшенный предиктор с учетом профиля пользователя
     """
     
     def __init__(self, model: AdvancedOutfitRecommender):
         self.model = model
-    
-    def recommend_items(self, 
-                       weather_data: Dict, 
-                       user_profile: Dict,
-                       available_items: List[Dict],
-                       top_n: int = 10,
-                       min_confidence: float = 0.5) -> List[Dict]:
-        """
-        Возвращает топ-N рекомендованных предметов с ML оценками
-        
-        Args:
-            weather_data: Погодные данные
-            user_profile: Профиль пользователя
-            available_items: Доступные предметы одежды
-            top_n: Количество рекомендаций
-            min_confidence: Минимальная уверенность модели
-        
-        Returns:
-            Список предметов с confidence scores
-        """
-        if not self.model.is_trained:
-            logger.warning("Model not trained, using fallback")
-            return self._fallback_recommendations(weather_data, available_items, top_n)
-        
-        logger.info(f"Generating ML recommendations for {len(available_items)} items...")
-        
-        # Подготавливаем данные для предсказания
-        predictions_data = []
-        
-        for item in available_items:
-            # Комбинируем все данные
-            sample = {
-                **self._prepare_weather_features(weather_data),
-                **self._prepare_user_features(user_profile),
-                **self._prepare_item_features(item)
-            }
-            predictions_data.append(sample)
-        
-        # Создаем DataFrame
-        df = pd.DataFrame(predictions_data)
-        
-        # Получаем предсказания
-        try:
-            predictions, probabilities = self.model.predict(df)
-            
-            # Добавляем оценки к предметам
-            scored_items = []
-            for i, item in enumerate(available_items):
-                if probabilities[i] >= min_confidence:
-                    item_copy = item.copy()
-                    item_copy['ml_score'] = float(probabilities[i])
-                    item_copy['is_recommended'] = bool(predictions[i])
-                    scored_items.append(item_copy)
-            
-            # Сортируем по уверенности
-            scored_items.sort(key=lambda x: x['ml_score'], reverse=True)
-            
-            # Берем топ-N
-            recommendations = scored_items[:top_n]
-            
-            logger.info(f"Generated {len(recommendations)} ML-powered recommendations")
-            logger.info(f"Average confidence: {sum(item['ml_score'] for item in recommendations) / len(recommendations):.2%}")
-            
-            return recommendations
-            
-        except Exception as e:
-            logger.error(f"Prediction error: {e}")
-            return self._fallback_recommendations(weather_data, available_items, top_n)
     
     def build_outfit(self,
                     weather_data: Dict,
@@ -87,30 +20,27 @@ class AdvancedOutfitPredictor:
                     all_items: List[Dict],
                     min_confidence: float = 0.5) -> Dict:
         """
-        Собирает полный комплект одежды с ML оценками
-        
-        Returns:
-            {
-                'items': [...],
-                'outfit_score': float,
-                'ml_powered': bool,
-                'confidence_breakdown': {...}
-            }
+        Собирает полный комплект с учетом профиля пользователя
         """
-        logger.info("Building ML-powered outfit...")
+        logger.info("Building ML-powered outfit with user preferences...")
         
         # Группируем предметы по категориям
         items_by_category = self._group_by_category(all_items)
         
-        # Определяем необходимые категории
+        # Определяем необходимые категории на основе погоды
         temp = weather_data.get('temperature', 20)
         weather = weather_data.get('weather', 'Ясно')
         required_categories = self._get_required_categories(temp, weather)
         
+        # Проверяем, нужны ли аксессуары
+        should_add_accessories = self._should_add_accessories(
+            temp, weather, user_profile
+        )
+        
         outfit_items = []
         category_confidences = {}
         
-        # Для каждой категории получаем лучший предмет
+        # Для каждой обязательной категории
         for category in required_categories:
             items_in_category = items_by_category.get(category, [])
             
@@ -118,40 +48,55 @@ class AdvancedOutfitPredictor:
                 logger.warning(f"No items in category: {category}")
                 continue
             
+            # Фильтруем по профилю пользователя
+            filtered_items = self._filter_by_user_profile(
+                items_in_category, user_profile, category
+            )
+            
+            if not filtered_items:
+                filtered_items = items_in_category  # Fallback
+            
             # Получаем рекомендации для этой категории
             category_recommendations = self.recommend_items(
                 weather_data,
                 user_profile,
-                items_in_category,
-                top_n=1,
+                filtered_items,
+                top_n=3,  # Берем топ-3 для разнообразия
                 min_confidence=min_confidence
             )
             
             if category_recommendations:
-                best_item = category_recommendations[0]
+                # Добавляем элемент рандомности (80% топ-1, 20% топ-2/3)
+                if len(category_recommendations) > 1 and random.random() < 0.2:
+                    best_item = random.choice(category_recommendations[:3])
+                else:
+                    best_item = category_recommendations[0]
+                
                 outfit_items.append(best_item)
                 category_confidences[category] = best_item['ml_score']
                 
                 logger.debug(f"Selected for {category}: {best_item['name']} "
                            f"(confidence: {best_item['ml_score']:.2%})")
         
-        # Добавляем аксессуары (опционально)
-        if 'accessories' in items_by_category:
-            accessories = self.recommend_items(
+        # Аксессуары (опционально)
+        if should_add_accessories and 'accessories' in items_by_category:
+            accessories = self._select_accessories(
                 weather_data,
                 user_profile,
                 items_by_category['accessories'],
-                top_n=2,
-                min_confidence=0.6  # Выше порог для аксессуаров
+                min_confidence=0.6
             )
             
             for acc in accessories:
                 outfit_items.append(acc)
                 category_confidences[f"accessory_{acc['name']}"] = acc['ml_score']
         
-        # Вычисляем общую оценку
+        # Вычисляем реалистичную общую оценку
         if outfit_items:
-            outfit_score = sum(item['ml_score'] for item in outfit_items) / len(outfit_items)
+            # Добавляем небольшой случайный шум для разнообразия
+            base_score = sum(item['ml_score'] for item in outfit_items) / len(outfit_items)
+            # Снижаем слишком высокие оценки
+            outfit_score = min(0.95, base_score * random.uniform(0.95, 1.0))
         else:
             outfit_score = 0.0
         
@@ -161,62 +106,198 @@ class AdvancedOutfitPredictor:
             'ml_powered': self.model.is_trained,
             'confidence_breakdown': category_confidences,
             'total_items': len(outfit_items),
-            'algorithm': 'advanced_ml_v1'
+            'algorithm': 'advanced_ml_v2_personalized',
+            'user_preferences_applied': True,
         }
         
         logger.info(f"Built outfit: {len(outfit_items)} items, "
-                   f"score: {outfit_score:.2%}")
+                   f"score: {outfit_score:.2%}, "
+                   f"accessories: {should_add_accessories}")
         
         return result
     
-    def explain_recommendation(self, 
-                              weather_data: Dict,
-                              user_profile: Dict,
-                              item: Dict) -> str:
-        """
-        Генерирует объяснение рекомендации
-        """
-        temp = weather_data.get('temperature', 20)
-        item_name = item.get('name', 'предмет')
-        min_temp = item.get('min_temp', 0)
-        max_temp = item.get('max_temp', 30)
-        confidence = item.get('ml_score', 0)
+    def _filter_by_user_profile(
+        self, 
+        items: List[Dict], 
+        user_profile: Dict,
+        category: str
+    ) -> List[Dict]:
+        """Фильтрует предметы по профилю пользователя"""
         
-        explanations = []
-        
-        # Уверенность модели
-        if confidence >= 0.9:
-            explanations.append("ML модель очень уверена в этом выборе")
-        elif confidence >= 0.7:
-            explanations.append("ML модель рекомендует с высокой уверенностью")
-        elif confidence >= 0.5:
-            explanations.append("ML модель считает это приемлемым выбором")
-        
-        # Температурное соответствие
-        if min_temp <= temp <= max_temp:
-            explanations.append(f"идеально для температуры {temp}°C")
-        
-        # Стиль
+        filtered = []
         user_style = user_profile.get('style_preference', 'casual')
-        item_style = item.get('style', 'casual')
-        if user_style == item_style:
-            explanations.append(f"соответствует вашему стилю ({user_style})")
+        temp_sensitivity = user_profile.get('temperature_sensitivity', 'normal')
         
-        # Формальность
-        formality = item.get('formality_level', 5)
-        if formality >= 8:
-            explanations.append("подходит для делового стиля")
-        elif formality <= 3:
-            explanations.append("отлично для повседневной носки")
+        for item in items:
+            item_style = item.get('style', 'casual')
+            warmth = item.get('warmth_level', 5)
+            
+            # Фильтр по стилю (приоритет пользовательскому стилю)
+            style_match = (item_style == user_style or 
+                          user_style == 'casual' or  # casual универсальный
+                          item_style == 'casual')
+            
+            # Фильтр по теплоте
+            warmth_match = True
+            if temp_sensitivity == 'cold' and warmth < 5:
+                warmth_match = False  # Мерзлякам - теплее
+            elif temp_sensitivity == 'warm' and warmth > 6:
+                warmth_match = False  # Жарким - легче
+            
+            if style_match and warmth_match:
+                filtered.append(item)
         
-        if explanations:
-            return f"{item_name}: " + ", ".join(explanations) + f" (уверенность: {confidence:.0%})"
-        else:
-            return f"{item_name} рекомендован ML моделью (уверенность: {confidence:.0%})"
+        logger.debug(f"Filtered {len(filtered)}/{len(items)} items for {category} "
+                    f"(style: {user_style}, temp_sens: {temp_sensitivity})")
+        
+        return filtered
+    
+    def _should_add_accessories(
+        self, 
+        temperature: float, 
+        weather: str, 
+        user_profile: Dict
+    ) -> bool:
+        """Определяет, нужны ли аксессуары"""
+        
+        # Холодная погода - обязательно
+        if temperature < 0:
+            return True
+        
+        # Дождь/снег - обязательно
+        if weather.lower() in ['дождь', 'снег', 'морось', 'гроза']:
+            return True
+        
+        # Прохладно - 70% вероятность
+        if temperature < 10:
+            return random.random() < 0.7
+        
+        # Умеренно - 30% вероятность
+        if temperature < 20:
+            return random.random() < 0.3
+        
+        # Тепло - 10% вероятность (солнечные очки, кепка)
+        return random.random() < 0.1
+    
+    def _select_accessories(
+        self,
+        weather_data: Dict,
+        user_profile: Dict,
+        accessories: List[Dict],
+        min_confidence: float = 0.6
+    ) -> List[Dict]:
+        """Выбирает подходящие аксессуары"""
+        
+        temp = weather_data.get('temperature', 20)
+        weather = weather_data.get('weather', 'Ясно').lower()
+        
+        # Получаем рекомендации для аксессуаров
+        recommendations = self.recommend_items(
+            weather_data,
+            user_profile,
+            accessories,
+            top_n=5,
+            min_confidence=min_confidence
+        )
+        
+        selected = []
+        
+        # Холодная погода - шапка, шарф, перчатки
+        if temp < 0:
+            for rec in recommendations:
+                name_lower = rec['name'].lower()
+                if any(word in name_lower for word in ['шапка', 'шарф', 'перчатк']):
+                    if len(selected) < 3:
+                        selected.append(rec)
+        
+        # Прохладно - шапка или шарф
+        elif temp < 10:
+            for rec in recommendations:
+                name_lower = rec['name'].lower()
+                if any(word in name_lower for word in ['шапка', 'шарф']):
+                    if len(selected) < 2:
+                        selected.append(rec)
+        
+        # Дождь - зонт
+        elif weather in ['дождь', 'морось']:
+            for rec in recommendations:
+                if 'зонт' in rec['name'].lower():
+                    selected.append(rec)
+                    break
+        
+        # Солнечно - очки
+        elif 'ясно' in weather and temp > 20:
+            for rec in recommendations:
+                if 'очки' in rec['name'].lower():
+                    selected.append(rec)
+                    break
+        
+        # Если ничего не выбрано, берем случайный аксессуар с высокой оценкой
+        if not selected and recommendations:
+            selected.append(random.choice(recommendations[:2]))
+        
+        logger.debug(f"Selected {len(selected)} accessories for temp={temp}°C, weather={weather}")
+        
+        return selected
+    
+    def recommend_items(self, 
+                       weather_data: Dict, 
+                       user_profile: Dict,
+                       available_items: List[Dict],
+                       top_n: int = 10,
+                       min_confidence: float = 0.5) -> List[Dict]:
+        """
+        Возвращает топ-N рекомендованных предметов с ML оценками
+        """
+        if not self.model.is_trained:
+            logger.warning("Model not trained, using fallback")
+            return self._fallback_recommendations(weather_data, available_items, top_n)
+        
+        logger.info(f"Generating ML recommendations for {len(available_items)} items...")
+        
+        predictions_data = []
+        
+        for item in available_items:
+            sample = {
+                **self._prepare_weather_features(weather_data),
+                **self._prepare_user_features(user_profile),
+                **self._prepare_item_features(item)
+            }
+            predictions_data.append(sample)
+        
+        df = pd.DataFrame(predictions_data)
+        
+        try:
+            predictions, probabilities = self.model.predict(df)
+            
+            scored_items = []
+            for i, item in enumerate(available_items):
+                # Добавляем шум для разнообразия (±5%)
+                noise = random.uniform(0.95, 1.05)
+                adjusted_prob = min(0.99, probabilities[i] * noise)
+                
+                if adjusted_prob >= min_confidence:
+                    item_copy = item.copy()
+                    item_copy['ml_score'] = float(adjusted_prob)
+                    item_copy['is_recommended'] = bool(predictions[i])
+                    scored_items.append(item_copy)
+            
+            scored_items.sort(key=lambda x: x['ml_score'], reverse=True)
+            recommendations = scored_items[:top_n]
+            
+            if recommendations:
+                avg_conf = sum(item['ml_score'] for item in recommendations) / len(recommendations)
+                logger.info(f"Generated {len(recommendations)} ML-powered recommendations")
+                logger.info(f"Average confidence: {avg_conf:.2%}")
+            
+            return recommendations
+            
+        except Exception as e:
+            logger.error(f"Prediction error: {e}")
+            return self._fallback_recommendations(weather_data, available_items, top_n)
     
     def _prepare_weather_features(self, weather_data: Dict) -> Dict:
         """Подготавливает погодные признаки"""
-        # Маппинг погодных условий
         weather_map = {
             'ясно': 'clear',
             'облачно': 'clouds',
@@ -230,7 +311,6 @@ class AdvancedOutfitPredictor:
         weather_condition = weather_data.get('weather', 'Ясно').lower()
         weather_condition = weather_map.get(weather_condition, 'clear')
         
-        # Определяем сезон по температуре
         temp = weather_data.get('temperature', 20)
         if temp < 0:
             season = 'winter'
@@ -282,10 +362,10 @@ class AdvancedOutfitPredictor:
         return grouped
     
     def _get_required_categories(self, temperature: float, weather: str) -> List[str]:
-        """Определяет необходимые категории одежды"""
+        """Определяет обязательные категории одежды"""
         categories = ['upper', 'lower', 'footwear']
         
-        # Верхняя одежда
+        # Верхняя одежда при холоде или дожде
         if temperature < 18 or weather.lower() in ['дождь', 'морось', 'снег']:
             categories.insert(0, 'outerwear')
         
@@ -300,7 +380,6 @@ class AdvancedOutfitPredictor:
             min_temp = item.get('min_temp', 0)
             max_temp = item.get('max_temp', 30)
             
-            # Простая оценка по температуре
             if min_temp <= temp <= max_temp:
                 score = 0.8
             elif min_temp - 5 <= temp <= max_temp + 5:
@@ -309,7 +388,7 @@ class AdvancedOutfitPredictor:
                 score = 0.2
             
             item_copy = item.copy()
-            item_copy['ml_score'] = score
+            item_copy['ml_score'] = score * random.uniform(0.95, 1.05)
             item_copy['is_recommended'] = score >= 0.5
             scored_items.append(item_copy)
         

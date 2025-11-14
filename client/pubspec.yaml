@@ -12,6 +12,7 @@ dependencies:
   
   # HTTP
   http: ^1.1.0
+  url_launcher: ^6.2.2
   
   # State Management
   provider: ^6.1.1

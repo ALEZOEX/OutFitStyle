@@ -9,6 +9,7 @@ import '../widgets/top_outfit_card.dart';
 import '../widgets/alternative_outfits.dart';
 import '../utils/city_translator.dart';
 import 'profile_screen.dart';
+import '../widgets/onboarding_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -41,6 +42,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
     _loadData();
+    
+    // Показываем онбординг после загрузки
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      OnboardingDialog.showIfNeeded(context);
+    });
   }
 
   @override

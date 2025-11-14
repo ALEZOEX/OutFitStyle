@@ -65,5 +65,17 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  marketplace-service:
+    build:
+      context: ./server/marketplace-service
+    container_name: outfitstyle-marketplace
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - WB_AFFILIATE_ID=${WB_AFFILIATE_ID:-YOUR_WB_ID}
+      - OZON_AFFILIATE_ID=${OZON_AFFILIATE_ID:-YOUR_OZON_ID}
+    restart: unless-stopped
+
 volumes:
   postgres_data:

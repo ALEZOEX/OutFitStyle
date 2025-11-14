@@ -5,6 +5,8 @@ import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
 import 'settings_screen.dart';
 import 'edit_profile_screen.dart';
+import '../services/onboarding_service.dart';
+import '../widgets/onboarding_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -249,6 +251,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Icons.bookmark_border,
                         isDark,
                         () => _showComingSoon(),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      _buildActionCard(
+                        'Пройти обучение снова',
+                        Icons.school,
+                        isDark,
+                        () async {
+                          await OnboardingService.resetOnboarding();
+                          if (mounted) {
+                            OnboardingDialog.showIfNeeded(context);
+                          }
+                        },
                       ),
 
                       const SizedBox(height: 24),

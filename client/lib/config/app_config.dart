@@ -24,6 +24,31 @@ class AppConfig {
   // Production API (когда будет сервер в интернете)
   static const String _prodApiUrl = 'https://api.outfitstyle.com';
 
+  // Marketplace Service URL
+  static String get marketplaceServiceUrl {
+    if (!kDebugMode) {
+      return 'https://marketplace.outfitstyle.com';
+    }
+
+    if (kIsWeb) {
+      return 'http://localhost:5001';
+    } else if (Platform.isAndroid) {
+      if (_useRealDevice) {
+        return 'http://$_localNetworkIp:5001';
+      } else {
+        return 'http://10.0.2.2:5001';
+      }
+    } else if (Platform.isIOS) {
+      if (_useRealDevice) {
+        return 'http://$_localNetworkIp:5001';
+      } else {
+        return 'http://localhost:5001';
+      }
+    } else {
+      return 'http://localhost:5001';
+    }
+  }
+
   // ============================================
   // 🎯 АВТОМАТИЧЕСКИЙ ВЫБОР URL
   // ============================================
