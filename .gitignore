@@ -30,7 +30,10 @@ pubspec.lock
 
 # Flutter build artifacts
 /build/
-/ephemorial/
+/ephemeral/
+
+# Platform specific build files
+**/CMakeLists.txt
 
 # Android related
 /android/local.properties
@@ -70,8 +73,9 @@ pubspec.lock
 # Logs
 *.log
 
-# ML Models
+# ML Models and dependencies
 server/ml-service/models/*.pkl
+server/ml-service/requirements.txt
 
 # OS generated files
 .DS_Store
