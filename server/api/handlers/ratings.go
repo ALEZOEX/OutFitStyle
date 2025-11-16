@@ -49,8 +49,18 @@ func (h *RatingHandler) RateRecommendation(w http.ResponseWriter, r *http.Reques
 	log.Printf("✅ Rating saved: user=%d, rec=%d, rating=%d",
 		req.UserID, req.RecommendationID, req.OverallRating)
 
+	// Проверяем достижения
+	h.checkRatingAchievements(req.UserID)
+
 	utils.JSONResponse(w, map[string]interface{}{
 		"status":  "success",
 		"message": "Оценка сохранена",
 	}, http.StatusOK)
+}
+
+// checkRatingAchievements проверяет достижения, связанные с оценками
+func (h *RatingHandler) checkRatingAchievements(userID int) {
+	// TODO: Реализовать проверку достижений "Критик моды" и "Эксперт стиля"
+	// Пока просто логируем
+	log.Printf("Проверка достижений оценок для пользователя %d", userID)
 }

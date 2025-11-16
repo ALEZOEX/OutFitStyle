@@ -1,0 +1,65 @@
+[
+  {
+    "accuracy": 0.8320765334833989,
+    "precision": 0.7693098720292505,
+    "recall": 0.7326441784548422,
+    "f1_score": 0.7505294838925426,
+    "auc": 0.8580875975485871,
+    "cv_mean": 0.8323813215730647,
+    "cv_std": 0.0016970580134257035,
+    "top_features": [
+      {
+        "name": "temp_suitability",
+        "importance": 0.6467199783202081
+      },
+      {
+        "name": "category",
+        "importance": 0.11836040650336535
+      },
+      {
+        "name": "season",
+        "importance": 0.05699543637969338
+      },
+      {
+        "name": "wind_speed",
+        "importance": 0.0411651254202394
+      },
+      {
+        "name": "temp_distance",
+        "importance": 0.0245022045470292
+      },
+      {
+        "name": "temperature",
+        "importance": 0.022790144830546435
+      },
+      {
+        "name": "humidity",
+        "importance": 0.01696291928399296
+      },
+      {
+        "name": "feels_like",
+        "importance": 0.0102455988130712
+      },
+      {
+        "name": "temp_category",
+        "importance": 0.008553531729057397
+      },
+      {
+        "name": "warmth_level",
+        "importance": 0.006584427900998323
+      }
+    ],
+    "confusion_matrix": [
+      [
+        15446,
+        2019
+      ],
+      [
+        2457,
+        6733
+      ]
+    ],
+    "version": 1,
+    "timestamp": "2025-11-16T16:50:25.722074"
+  }
+]

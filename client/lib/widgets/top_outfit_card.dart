@@ -1,7 +1,7 @@
 import'package:flutter/material.dart';
 import '../models/outfit.dart';
 import '../theme/app_theme.dart';
-import 'buy_button.dart';
+// ... existing code ...
 import '../models/recommendation.dart';
 
 class TopOutfitCard extends StatefulWidget {
@@ -24,7 +24,7 @@ class _TopOutfitCardState extends State<TopOutfitCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _rotateAnimation;
+
 
   @override
   void initState() {
@@ -36,9 +36,6 @@ class _TopOutfitCardState extends State<TopOutfitCard>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
-    _rotateAnimation = Tween<double>(begin: 0.0, end: 0.02).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-);
  }
 
   @override
@@ -67,7 +64,7 @@ class _TopOutfitCardState extends State<TopOutfitCard>
                     end: Alignment.bottomRight,
                     colors: [
                       AppTheme.cardDark,
-                      AppTheme.cardDark.withOpacity(0.6),
+                      Color.fromRGBO(15, 23, 42, 0.6),
                       AppTheme.primary.withOpacity(0.1),
                     ],
                   )
@@ -77,20 +74,20 @@ class _TopOutfitCardState extends State<TopOutfitCard>
                     colors: [
                       Colors.white,
                       const Color(0xFFF8F9FA),
-                      const Color(0xFF007bff).withOpacity(0.05),
+                      Color.fromRGBO(0, 123, 255, 0.05),
                     ],
                   ),
             boxShadow: [
               BoxShadow(
                 color: widget.isDark
-                    ?AppTheme.primary.withOpacity(0.3)
-                    : const Color(0xFF007bff).withOpacity(0.2),
+                    ?Color.fromRGBO(99, 102, 241, 0.3)
+                    : Color.fromRGBO(0, 123, 255, 0.2),
                 blurRadius: 30,
                 offset: const Offset(0, 12),
                 spreadRadius: -5,
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(widget.isDark ? 0.3 : 0.08),
+                color: Color.fromRGBO(0, 0, 0, widget.isDark ? 0.3 : 0.08),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -110,8 +107,8 @@ class _TopOutfitCardState extends State<TopOutfitCard>
                     gradient: RadialGradient(
                       colors: [
                         widget.isDark
-                            ? AppTheme.primary.withOpacity(0.1)
-                            : const Color(0xFF007bff).withOpacity(0.1),
+                            ? Color.fromRGBO(99, 102, 241, 0.1)
+                            : Color.fromRGBO(0, 123, 255, 0.1),
                         Colors.transparent,
                       ],
                     ),
@@ -190,8 +187,8 @@ class _TopOutfitCardState extends State<TopOutfitCard>
         boxShadow: [
           BoxShadow(
             color: widget.isDark
-                ? AppTheme.primary.withOpacity(0.3)
-                : const Color(0xFF007bff).withOpacity(0.3),
+                ? Color.fromRGBO(99, 102, 241, 0.3)
+                : Color.fromRGBO(0, 123, 255, 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -314,8 +311,8 @@ color: widget.isDark
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: widget.isDark
-              ? AppTheme.primary.withOpacity(0.3)
-              : const Color(0xFF007bff).withOpacity(0.2),
+              ? Color.fromRGBO(99, 102, 241, 0.3)
+              : Color.fromRGBO(0, 123, 255, 0.2),
           width: 1.5,
         ),
       ),
@@ -325,7 +322,7 @@ color: widget.isDark
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
              color: widget.isDark
-                  ? AppTheme.primary.withOpacity(0.2)
+                  ? Color.fromRGBO(99, 102, 241, 0.2)
                   : const Color(0xFF007bff).withOpacity(0.15),
               borderRadius: BorderRadius.circular(8),
             ),
@@ -585,7 +582,7 @@ crossAxisAlignment: CrossAxisAlignment.start,
                       ]
                     : [
                         const Color(0xFF007bff).withOpacity(0.4),
-                        const Color(0xFF007bff).withOpacity(0.1),
+                        Color.fromRGBO(0, 123, 255, 0.1),
                       ],
               ),
               borderRadius: BorderRadius.circular(2),
@@ -599,11 +596,11 @@ crossAxisAlignment: CrossAxisAlignment.start,
                 gradient: LinearGradient(
                   colors: widget.isDark
                       ? [
-                          AppTheme.primary.withOpacity(0.3),
+                          Color.fromRGBO(99, 102, 241, 0.3),
                           Colors.transparent,
                         ]
                       : [
-                          const Color(0xFF007bff).withOpacity(0.2),
+                          Color.fromRGBO(0, 123, 255, 0.2),
                           Colors.transparent,
                         ],
 ),
@@ -706,7 +703,7 @@ fontSize: 13,
           BoxShadow(
             color: widget.isDark
                 ? AppTheme.primary.withOpacity(0.4)
-                : const Color(0xFF007bff).withOpacity(0.3),
+                : Color.fromRGBO(0, 123, 255, 0.3),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),

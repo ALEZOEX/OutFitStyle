@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 import '../models/recommendation.dart';
+import '../models/favorite.dart';
+import '../models/achievement.dart'; // Добавляем импорт модели достижений
 
 class ApiService {
   // Берем URL из конфигурации
@@ -35,13 +37,28 @@ class ApiService {
 
       if (AppConfig.enableLogging) {
         print('📡 Response status: ${response.statusCode}');
+        // Логируем тело ошибки
+        if (response.statusCode != 200) {
+          print('❌ Response body: ${response.body}');
+        }
       }
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return Recommendation.fromJson(data);
       } else {
-        throw Exception('HTTP ${response.statusCode}');
+        // Формируем более понятную ошибку
+        String errorMessage = 'HTTP ${response.statusCode}';
+        try {
+          final errorBody = json.decode(response.body);
+          if (errorBody['error'] != null) {
+            errorMessage = errorBody['error'];
+          }
+        } catch (_) {
+          // Если тело не JSON, возвращаем как есть
+          errorMessage = response.body.isNotEmpty ? response.body : errorMessage;
+        }
+        throw Exception(errorMessage);
       }
     } catch (e) {
       if (AppConfig.enableLogging) {
@@ -99,6 +116,99 @@ class ApiService {
 
       if (response.statusCode != 200) {
         throw Exception('Failed to submit rating');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Новые методы для работы с избранными комплектами
+  Future<void> addFavorite(int userId, int recommendationId) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/favorites');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'user_id': userId,
+          'recommendation_id': recommendationId,
+        }),
+      ).timeout(Duration(seconds: AppConfig.requestTimeout));
+
+      if (response.statusCode != 201) {
+        throw Exception('Failed to add favorite');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<FavoriteOutfit>> getFavorites({required int userId}) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/favorites?user_id=$userId');
+      final response = await http.get(url).timeout(
+        Duration(seconds: AppConfig.requestTimeout),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((json) => FavoriteOutfit.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load favorites');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteFavorite(int favoriteId) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/favorites?id=$favoriteId');
+      final response = await http.delete(url).timeout(
+        Duration(seconds: AppConfig.requestTimeout),
+      );
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to delete favorite');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Метод для получения истории рекомендаций
+  Future<List<Recommendation>> getRecommendationHistory({required int userId}) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/recommendations/history?user_id=$userId');
+      final response = await http.get(url).timeout(
+        Duration(seconds: AppConfig.requestTimeout),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> historyData = data['history'] ?? [];
+        return historyData.map((json) => Recommendation.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load history');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Метод для получения достижений пользователя
+  Future<List<Achievement>> getAchievements({required int userId}) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/achievements?user_id=$userId');
+      final response = await http.get(url).timeout(
+        Duration(seconds: AppConfig.requestTimeout),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((json) => Achievement.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load achievements');
       }
     } catch (e) {
       rethrow;

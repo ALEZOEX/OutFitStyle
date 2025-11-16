@@ -132,19 +132,5 @@ class AppConfig {
   // 🖨️ ПЕЧАТЬ КОНФИГУРАЦИИ (для отладки)
   // ============================================
 
-  static void printConfig() {
-    if (!enableLogging) return;
 
-    print('');
-    print('╔═══════════════════════════════════════════╗');
-    print('║     📱 OutfitStyle Configuration         ║');
-    print('╚═══════════════════════════════════════════╝');
-    print('');
-    print('🔹 Platform:      $_platformName');
-    print('🔹 API URL:       $apiBaseUrl');
-    print('🔹 Debug Mode:    $kDebugMode');
-    print('🔹 Real Device:   $_useRealDevice');
-    print('🔹 App Version:   $appVersion');
-    print('');
-  }
 }

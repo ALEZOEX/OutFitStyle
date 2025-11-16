@@ -255,7 +255,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         color: isDark ? AppTheme.cardDark : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: isDark
-            ? Border.all(color: AppTheme.primary.withOpacity(0.3))
+            ? Border.all(color: AppTheme.withOpacity(AppTheme.primary, 0.3))
             : Border.all(color: Colors.grey[300]!),
       ),
       child: Row(

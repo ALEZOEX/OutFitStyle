@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user_settings.dart';
 import '../providers/theme_provider.dart';
-import '../theme/app_theme.dart';
-import 'settings_screen.dart';
-import 'edit_profile_screen.dart';
 import '../services/onboarding_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/onboarding_dialog.dart';
+import 'edit_profile_screen.dart';
+import 'settings_screen.dart';
+
+// Временно импортируем заглушки для экранов, которые еще не созданы
+// import 'history_screen.dart';
+// import 'favorites_screen.dart';
+// import 'achievements_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -36,12 +41,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = themeProvider.isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
+      backgroundColor:
+          isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
       body: FutureBuilder<UserSettings>(
         future: _settingsFuture,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError || !snapshot.hasData) {
+            return Center(
+              child: Text('Не удалось загрузить профиль: ${snapshot.error}'),
+            );
           }
 
           final settings = snapshot.data!;
@@ -52,7 +63,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SliverAppBar(
                 expandedHeight: 280,
                 pinned: true,
-                backgroundColor: isDark ? AppTheme.cardDark : const Color(0xFF007bff),
+                backgroundColor:
+                    isDark ? AppTheme.cardDark : const Color(0xFF007bff),
+                foregroundColor: Colors.white,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
                     decoration: BoxDecoration(
@@ -68,8 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 40),
-                          
+                          const SizedBox(height: 30), // Уменьшен отступ
                           // Avatar
                           Stack(
                             children: [
@@ -78,7 +90,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 height: 100,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 3),
+                                  border:
+                                      Border.all(color: Colors.white, width: 3),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.2),
@@ -90,12 +103,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: CircleAvatar(
                                   radius: 48,
                                   backgroundColor: Colors.white,
-                                  backgroundImage: settings.avatarUrl != null
-                                      ? NetworkImage(settings.avatarUrl!)
-                                      : null,
-                                  child: settings.avatarUrl == null
+                                  backgroundImage:
+                                      (settings.avatarUrl != null &&
+                                              settings.avatarUrl!.isNotEmpty)
+                                          ? NetworkImage(settings.avatarUrl!)
+                                          : null,
+                                  child: (settings.avatarUrl == null ||
+                                          settings.avatarUrl!.isEmpty)
                                       ? Text(
-                                          settings.name[0].toUpperCase(),
+                                          settings.name.isNotEmpty
+                                              ? settings.name[0].toUpperCase()
+                                              : '?',
                                           style: const TextStyle(
                                             fontSize: 40,
                                             fontWeight: FontWeight.bold,
@@ -123,9 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
-                          
                           const SizedBox(height: 16),
-                          
                           // Name
                           Text(
                             settings.name,
@@ -135,9 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: Colors.white,
                             ),
                           ),
-                          
                           const SizedBox(height: 4),
-                          
                           // Email
                           Text(
                             settings.email,
@@ -154,107 +168,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
 
               // Content
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
                       // Stats cards
                       Row(
                         children: [
                           Expanded(
                             child: _buildStatCard(
-                              '47',
-                              'Рекомендаций',
-                              Icons.checkroom,
-                              isDark,
-                            ),
+                                '47', 'Рекомендаций', Icons.checkroom, isDark),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildStatCard(
-                              '12',
-                              'Сохранено',
-                              Icons.bookmark,
-                              isDark,
-                            ),
+                                '12', 'Сохранено', Icons.bookmark, isDark),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildStatCard(
-                              '4.8',
-                              'Средний рейтинг',
-                              Icons.star,
-                              isDark,
-                            ),
+                                '4.8', 'Средний рейтинг', Icons.star, isDark),
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 24),
 
                       // Preferences section
                       _buildSectionTitle('Мои предпочтения', isDark),
                       const SizedBox(height: 12),
                       _buildPreferenceCard(
-                        'Стиль',
-                        _getStyleName(settings.stylePreference),
-                        Icons.style,
-                        isDark,
-                        () => _navigateToEditProfile(settings),
-                      ),
+                          'Стиль',
+                          _getStyleName(settings.stylePreference),
+                          Icons.style,
+                          isDark,
+                          () => _navigateToEditProfile(settings)),
                       const SizedBox(height: 8),
                       _buildPreferenceCard(
-                        'Чувствительность к температуре',
-                        _getSensitivityName(settings.temperatureSensitivity),
-                        Icons.thermostat,
-                        isDark,
-                        () => _navigateToEditProfile(settings),
-                      ),
+                          'Чувствительность к температуре',
+                          _getSensitivityName(settings.temperatureSensitivity),
+                          Icons.thermostat,
+                          isDark,
+                          () => _navigateToEditProfile(settings)),
                       const SizedBox(height: 8),
                       _buildPreferenceCard(
-                        'Возрастная группа',
-                        settings.ageRange,
-                        Icons.calendar_today,
-                        isDark,
-                        () => _navigateToEditProfile(settings),
-                      ),
-
+                          'Возрастная группа',
+                          settings.ageRange,
+                          Icons.calendar_today,
+                          isDark,
+                          () => _navigateToEditProfile(settings)),
                       const SizedBox(height: 24),
 
                       // Actions section
-                      _buildSectionTitle('Настройки', isDark),
+                      _buildSectionTitle('Разделы', isDark),
                       const SizedBox(height: 12),
-                      _buildActionCard(
-                        'Редактировать профиль',
-                        Icons.edit,
-                        isDark,
-                        () => _navigateToEditProfile(settings),
-                      ),
+                      _buildActionCard('Редактировать профиль', Icons.edit,
+                          isDark, () => _navigateToEditProfile(settings)),
                       const SizedBox(height: 8),
-                      _buildActionCard(
-                        'Настройки приложения',
-                        Icons.settings,
-                        isDark,
-                        () => _navigateToSettings(settings),
-                      ),
+                      _buildActionCard('Настройки приложения', Icons.settings,
+                          isDark, () => _navigateToSettings(settings)),
                       const SizedBox(height: 8),
-                      _buildActionCard(
-                        'История рекомендаций',
-                        Icons.history,
-                        isDark,
-                        () => _showComingSoon(),
-                      ),
+                      _buildActionCard('История рекомендаций', Icons.history,
+                          isDark, _showComingSoon),
                       const SizedBox(height: 8),
-                      _buildActionCard(
-                        'Сохраненные комплекты',
-                        Icons.bookmark_border,
-                        isDark,
-                        () => _showComingSoon(),
-                      ),
-
+                      _buildActionCard('Сохраненные комплекты',
+                          Icons.bookmark_border, isDark, _showComingSoon),
                       const SizedBox(height: 8),
-
+                      _buildActionCard('Достижения', Icons.emoji_events, isDark,
+                          _showComingSoon),
+                      const SizedBox(height: 8),
                       _buildActionCard(
                         'Пройти обучение снова',
                         Icons.school,
@@ -266,7 +248,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           }
                         },
                       ),
-
                       const SizedBox(height: 24),
 
                       // Danger zone
@@ -279,18 +260,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _showDeleteAccountDialog,
                         isDestructive: true,
                       ),
-
                       const SizedBox(height: 32),
 
                       // Version
                       Text(
                         'OutfitStyle v1.0.0',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? AppTheme.textSecondary : Colors.grey[600],
-                        ),
+                            fontSize: 12,
+                            color: isDark
+                                ? AppTheme.textSecondary
+                                : Colors.grey[600]),
                       ),
-
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -303,7 +283,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatCard(String value, String label, IconData icon, bool isDark) {
+  Widget _buildStatCard(
+      String value, String label, IconData icon, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -316,35 +297,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2))
               ],
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: isDark ? AppTheme.primary : const Color(0xFF007bff),
-            size: 24,
-          ),
+          Icon(icon,
+              color: isDark ? AppTheme.primary : const Color(0xFF007bff),
+              size: 24),
           const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isDark ? AppTheme.textPrimary : Colors.black87,
-            ),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: isDark ? AppTheme.textPrimary : Colors.black87),
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
-              color: isDark ? AppTheme.textSecondary : Colors.grey[600],
-            ),
+                fontSize: 11,
+                color: isDark ? AppTheme.textSecondary : Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ],
@@ -358,21 +334,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: isDark ? AppTheme.textPrimary : Colors.black87,
-        ),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isDark ? AppTheme.textPrimary : Colors.black87),
       ),
     );
   }
 
-  Widget _buildPreferenceCard(
-    String title,
-    String value,
-    IconData icon,
-    bool isDark,
-    VoidCallback onTap,
-  ) {
+  Widget _buildPreferenceCard(String title, String value, IconData icon,
+      bool isDark, VoidCallback onTap) {
     return _buildActionCard(
       title,
       icon,
@@ -381,22 +351,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       trailing: Text(
         value,
         style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: isDark ? AppTheme.primary : const Color(0xFF007bff),
-        ),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppTheme.primary : const Color(0xFF007bff)),
       ),
     );
   }
 
   Widget _buildActionCard(
-    String title,
-    IconData icon,
-    bool isDark,
-    VoidCallback onTap, {
-    Widget? trailing,
-    bool isDestructive = false,
-  }) {
+      String title, IconData icon, bool isDark, VoidCallback onTap,
+      {Widget? trailing, bool isDestructive = false}) {
+    final color = isDestructive
+        ? AppTheme.danger
+        : (isDark ? AppTheme.primary : const Color(0xFF007bff));
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -407,21 +374,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           decoration: BoxDecoration(
             color: isDark ? AppTheme.cardDark : Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: isDark
-                ? Border.all(
-                    color: isDestructive
-                        ? AppTheme.danger.withOpacity(0.3)
-                        : AppTheme.primary.withOpacity(0.3),
-                  )
-                : null,
+            border: isDark ? Border.all(color: color.withOpacity(0.3)) : null,
             boxShadow: isDark
                 ? null
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2))
                   ],
           ),
           child: Row(
@@ -429,20 +389,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDestructive
-                      ? AppTheme.danger.withOpacity(0.1)
-                      : (isDark
-                          ? AppTheme.primary.withOpacity(0.1)
-                          : const Color(0xFF007bff).withOpacity(0.1)),
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  color: isDestructive
-                      ? AppTheme.danger
-                      : (isDark ? AppTheme.primary : const Color(0xFF007bff)),
-                  size: 20,
-                ),
+                child: Icon(icon, color: color, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -458,10 +408,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               trailing ??
-                  Icon(
-                    Icons.chevron_right,
-                    color: isDark ? AppTheme.textSecondary : Colors.grey[400],
-                  ),
+                  Icon(Icons.chevron_right,
+                      color:
+                          isDark ? AppTheme.textSecondary : Colors.grey[400]),
             ],
           ),
         ),
@@ -471,20 +420,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _getStyleName(String style) {
     switch (style) {
-      case 'casual': return 'Повседневный';
-      case 'business': return 'Деловой';
-      case 'sporty': return 'Спортивный';
-      case 'elegant': return 'Элегантный';
-      default: return style;
+      case 'casual':
+        return 'Повседневный';
+      case 'business':
+        return 'Деловой';
+      case 'sporty':
+        return 'Спортивный';
+      case 'elegant':
+        return 'Элегантный';
+      default:
+        return style;
     }
   }
 
   String _getSensitivityName(String sensitivity) {
     switch (sensitivity) {
-      case 'cold': return 'Мерзну';
-      case 'normal': return 'Нормально';
-      case 'warm': return 'Жарко';
-      default: return sensitivity;
+      case 'cold':
+        return 'Мерзну';
+      case 'normal':
+        return 'Нормально';
+      case 'warm':
+        return 'Жарко';
+      default:
+        return sensitivity;
     }
   }
 
@@ -492,10 +450,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfileScreen(settings: settings),
-      ),
+          builder: (context) => EditProfileScreen(settings: settings)),
     );
-    
     if (result == true) {
       _refreshSettings();
     }
@@ -505,10 +461,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SettingsScreen(settings: settings),
-      ),
+          builder: (context) => SettingsScreen(settings: settings)),
     );
-    
     if (result == true) {
       _refreshSettings();
     }
@@ -519,9 +473,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       SnackBar(
         content: const Row(
           children: [
-            Icon(Icons.info, color: Colors.white),
+            Icon(Icons.info_outline, color: Colors.white),
             SizedBox(width: 12),
-            Text('Скоро появится!'),
+            Text('Этот раздел скоро появится!'),
           ],
         ),
         backgroundColor: const Color(0xFF007bff),
@@ -537,8 +491,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Удалить аккаунт?'),
         content: const Text(
-          'Это действие необратимо. Все ваши данные, сохраненные комплекты и история будут удалены навсегда.',
-        ),
+            'Это действие необратимо. Все ваши данные будут удалены навсегда.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -549,9 +502,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pop(context);
               await _deleteAccount();
             },
-            style: TextButton.styleFrom(
-              foregroundColor: AppTheme.danger,
-            ),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
             child: const Text('Удалить'),
           ),
         ],
@@ -560,9 +511,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    // TODO: Вызвать API для удаления аккаунта
     await UserSettings.clear();
-    
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -575,12 +524,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           backgroundColor: AppTheme.danger,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
-      
-      // Возврат на главный экран
-      Navigator.pop(context);
     }
   }
 }

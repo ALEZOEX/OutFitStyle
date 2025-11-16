@@ -11,67 +11,107 @@ import (
 )
 
 type RecommendationHandler struct {
-	weatherService *services.WeatherService
-	mlService      *services.MLService
-	dbService      *services.DBService
+	WeatherService *services.WeatherService
+	MLService      *services.MLService
+	DBService      *services.DBService
 }
 
 func NewRecommendationHandler(ws *services.WeatherService, ml *services.MLService, db *services.DBService) *RecommendationHandler {
 	return &RecommendationHandler{
-		weatherService: ws,
-		mlService:      ml,
-		dbService:      db,
+		WeatherService: ws,
+		MLService:      ml,
+		DBService:      db,
 	}
 }
 
 func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *http.Request) {
 	city := r.URL.Query().Get("city")
 	if city == "" {
-		utils.JSONError(w, "Параметр city обязателен", http.StatusBadRequest)
+		utils.JSONError(w, "city is required", http.StatusBadRequest)
 		return
 	}
 
 	userIDStr := r.URL.Query().Get("user_id")
-	userID := 1
-	if userIDStr != "" {
-		if id, err := strconv.Atoi(userIDStr); err == nil {
-			userID = id
-		}
+	userID := 1 // Значение по умолчанию
+	if id, err := strconv.Atoi(userIDStr); err == nil {
+		userID = id
 	}
 
 	log.Printf("📍 Request: city=%s, user_id=%d", city, userID)
 
-	weather, err := h.weatherService.GetWeather(city)
+	// Получаем погоду (реальные данные)
+	weather, err := h.WeatherService.GetWeather(city)
 	if err != nil {
-		log.Printf("❌ Weather API error: %v", err)
-		utils.JSONError(w, "Не удалось получить данные о погоде", http.StatusInternalServerError)
+		log.Printf("❌ Weather error: %v", err)
+		utils.JSONError(w, "Failed to get weather: "+err.Error(), http.StatusServiceUnavailable)
 		return
 	}
 
 	log.Printf("🌤 Weather: %s, %.1f°C (%s)", weather.Location, weather.Temperature, weather.Weather)
 
-	mlResp, err := h.mlService.GetRecommendations(userID, weather)
+	// Получаем профиль пользователя
+	if h.DBService != nil {
+		_, err := h.DBService.GetUserProfile(userID)
+		if err != nil {
+			log.Printf("⚠️ Could not load user profile for user %d: %v", userID, err)
+		}
+	} else {
+		log.Printf("⚠️ DB service unavailable, using default user profile")
+	}
+
+	// Преобразуем ExtendedWeatherData в WeatherData для ML сервиса
+	weatherData := &models.WeatherData{
+		Location:    weather.Location,
+		Temperature: weather.Temperature,
+		FeelsLike:   weather.FeelsLike,
+		Weather:     weather.Weather,
+		Humidity:    weather.Humidity,
+		WindSpeed:   weather.WindSpeed,
+	}
+
+	// Получаем ML рекомендации
+	mlRecommendations, err := h.MLService.GetRecommendations(userID, weatherData)
 	if err != nil {
-		log.Printf("⚠️ ML service error: %v, using fallback", err)
-		recommendation := h.generateFallbackRecommendation(weather)
-		utils.JSONResponse(w, recommendation, http.StatusOK)
+		utils.JSONError(w, "Failed to get ML recommendations: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	recommendation := &models.Recommendation{
-		Location:    weather.Location,
-		Temperature: weather.Temperature,
-		Weather:     weather.Weather,
-		Message:     h.generateMessage(weather, mlResp.Recommendations),
-		Items:       mlResp.Recommendations,
-		Humidity:    weather.Humidity,
-		WindSpeed:   weather.WindSpeed,
-		MLPowered:   mlResp.MLPowered,
-		OutfitScore: &mlResp.OutfitScore,
-		Algorithm:   mlResp.Algorithm,
+	recommendations := make([]interface{}, len(mlRecommendations.Recommendations))
+	for i, v := range mlRecommendations.Recommendations {
+		recommendations[i] = v
+	}
+	outfitScore := mlRecommendations.OutfitScore
+	mlPowered := mlRecommendations.MLPowered
+	algorithm := mlRecommendations.Algorithm
+
+	log.Printf("✅ Got %d recommendations (score: %.2f, ML: %v)",
+		len(recommendations), outfitScore, mlPowered,
+	)
+
+	// Формируем ответ
+	response := map[string]interface{}{
+		"location":        weather.Location,
+		"temperature":     weather.Temperature,
+		"feels_like":      weather.FeelsLike,
+		"weather":         weather.Weather,
+		"humidity":        weather.Humidity,
+		"wind_speed":      weather.WindSpeed,
+		"min_temp":        weather.MinTemp,
+		"max_temp":        weather.MaxTemp,
+		"will_rain":       weather.WillRain,
+		"will_snow":       weather.WillSnow,
+		"hourly_forecast": weather.HourlyForecast,
+		"message":         h.getWeatherMessage(weather.Temperature),
+		"items":           recommendations,
+		"ml_powered":      mlPowered,
+		"outfit_score":    outfitScore,
+		"algorithm":       algorithm,
 	}
 
-	utils.JSONResponse(w, recommendation, http.StatusOK)
+	// Проверяем достижения
+	h.checkAchievements(userID, weather)
+
+	utils.JSONResponse(w, response, http.StatusOK)
 }
 
 func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, r *http.Request) {
@@ -88,19 +128,19 @@ func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, 
 	}
 
 	limitStr := r.URL.Query().Get("limit")
-	limit := 20
+	limit := 20 // Значение по умолчанию
 	if limitStr != "" {
 		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 100 {
 			limit = l
 		}
 	}
 
-	if h.dbService == nil {
+	if h.DBService == nil {
 		utils.JSONError(w, "Database unavailable", http.StatusServiceUnavailable)
 		return
 	}
 
-	recommendations, err := h.dbService.GetUserRecommendations(userID, limit)
+	recommendations, err := h.DBService.GetUserRecommendations(userID, limit)
 	if err != nil {
 		log.Printf("❌ DB error: %v", err)
 		utils.JSONError(w, "Ошибка получения истории", http.StatusInternalServerError)
@@ -108,9 +148,9 @@ func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, 
 	}
 
 	utils.JSONResponse(w, map[string]interface{}{
-		"user_id":         userID,
-		"recommendations": recommendations,
-		"count":           len(recommendations),
+		"user_id": userID,
+		"history": recommendations, // Изменено на "history" для соответствия Flutter-модели
+		"count":   len(recommendations),
 	}, http.StatusOK)
 }
 
@@ -127,12 +167,12 @@ func (h *RecommendationHandler) GetRecommendationByID(w http.ResponseWriter, r *
 		return
 	}
 
-	if h.dbService == nil {
+	if h.DBService == nil {
 		utils.JSONError(w, "Database unavailable", http.StatusServiceUnavailable)
 		return
 	}
 
-	recommendation, err := h.dbService.GetRecommendation(id)
+	recommendation, err := h.DBService.GetRecommendation(id)
 	if err != nil {
 		log.Printf("❌ DB error: %v", err)
 		utils.JSONError(w, "Рекомендация не найдена", http.StatusNotFound)
@@ -142,104 +182,35 @@ func (h *RecommendationHandler) GetRecommendationByID(w http.ResponseWriter, r *
 	utils.JSONResponse(w, recommendation, http.StatusOK)
 }
 
-func (h *RecommendationHandler) generateMessage(weather *models.WeatherData, items []models.ClothingItem) string {
-	temp := weather.Temperature
-	var message string
-
+func (h *RecommendationHandler) getWeatherMessage(temp float64) string {
 	switch {
 	case temp < -10:
-		message = "🥶 Экстремальный холод! Одевайтесь максимально тепло!"
+		return "🥶 Экстремальный холод! Одевайтесь максимально тепло!"
 	case temp < 0:
-		message = "❄️ Морозно! Зимняя одежда обязательна"
+		return "❄️ Морозно! Зимняя одежда обязательна"
 	case temp < 10:
-		message = "🧥 Прохладно. Демисезонная одежда"
+		return "🧥 Прохладно. Демисезонная одежда"
 	case temp < 18:
-		message = "🍂 Комфортная температура. Легкая куртка"
+		return "🍂 Комфортная температура. Легкая куртка"
 	case temp < 25:
-		message = "☀️ Приятная погода! Легкая одежда"
+		return "☀️ Приятная погода! Легкая одежда"
 	default:
-		message = "🔥 Жарко! Летняя одежда"
+		return "🔥 Жарко! Летняя одежда"
 	}
-
-	weatherLower := weather.Weather
-	if weatherLower == "Дождь" || weatherLower == "Морось" {
-		message += " ☔ Возьмите зонт!"
-	} else if weatherLower == "Снег" {
-		message += " ❄️ Идет снег!"
-	}
-
-	if weather.WindSpeed > 10 {
-		message += " 💨 Сильный ветер!"
-	}
-
-	return message
 }
 
-func (h *RecommendationHandler) generateFallbackRecommendation(weather *models.WeatherData) *models.Recommendation {
-	temp := weather.Temperature
-	var items []models.ClothingItem
-
-	switch {
-	case temp < -10:
-		items = []models.ClothingItem{
-			{Name: "Пуховик", Category: "outerwear", IconEmoji: "🧥"},
-			{Name: "Термобелье", Category: "upper", IconEmoji: "👕"},
-			{Name: "Зимние ботинки", Category: "footwear", IconEmoji: "👢"},
-			{Name: "Шапка", Category: "accessories", IconEmoji: "🧢"},
-			{Name: "Перчатки", Category: "accessories", IconEmoji: "🧤"},
-		}
-	case temp < 0:
-		items = []models.ClothingItem{
-			{Name: "Зимняя куртка", Category: "outerwear", IconEmoji: "🧥"},
-			{Name: "Свитер", Category: "upper", IconEmoji: "👕"},
-			{Name: "Джинсы", Category: "lower", IconEmoji: "👖"},
-			{Name: "Ботинки", Category: "footwear", IconEmoji: "👞"},
-		}
-	case temp < 10:
-		items = []models.ClothingItem{
-			{Name: "Демисезонная куртка", Category: "outerwear", IconEmoji: "🧥"},
-			{Name: "Толстовка", Category: "upper", IconEmoji: "👕"},
-			{Name: "Джинсы", Category: "lower", IconEmoji: "👖"},
-			{Name: "Кроссовки", Category: "footwear", IconEmoji: "👟"},
-		}
-	case temp < 18:
-		items = []models.ClothingItem{
-			{Name: "Легкая куртка", Category: "outerwear", IconEmoji: "🧥"},
-			{Name: "Рубашка", Category: "upper", IconEmoji: "👔"},
-			{Name: "Брюки", Category: "lower", IconEmoji: "👖"},
-			{Name: "Кроссовки", Category: "footwear", IconEmoji: "👟"},
-		}
-	case temp < 25:
-		items = []models.ClothingItem{
-			{Name: "Футболка", Category: "upper", IconEmoji: "👕"},
-			{Name: "Джинсы", Category: "lower", IconEmoji: "👖"},
-			{Name: "Кроссовки", Category: "footwear", IconEmoji: "👟"},
-		}
-	default:
-		items = []models.ClothingItem{
-			{Name: "Майка", Category: "upper", IconEmoji: "👕"},
-			{Name: "Шорты", Category: "lower", IconEmoji: "🩳"},
-			{Name: "Сандалии", Category: "footwear", IconEmoji: "👡"},
-		}
+// checkAchievements проверяет и выдает достижения пользователю
+func (h *RecommendationHandler) checkAchievements(userID int, weather *services.ExtendedWeatherData) {
+	if h.DBService == nil {
+		return
 	}
 
-	if weather.Weather == "Дождь" || weather.Weather == "Морось" {
-		items = append(items, models.ClothingItem{
-			Name:      "Зонт",
-			Category:  "accessories",
-			IconEmoji: "☂️",
-		})
-	}
-
-	return &models.Recommendation{
-		Location:    weather.Location,
-		Temperature: weather.Temperature,
-		Weather:     weather.Weather,
-		Message:     h.generateMessage(weather, items),
-		Items:       items,
-		Humidity:    weather.Humidity,
-		WindSpeed:   weather.WindSpeed,
-		MLPowered:   false,
-		Algorithm:   "rule_based_fallback",
-	}
+	// Запускаем проверки в отдельной горутине, чтобы не блокировать основной запрос
+	go func() {
+		// TODO: Implement achievement system
+		// Currently these methods don't exist in DBService
+		// h.DBService.UnlockAchievement(userID, "first_recommendation")
+		// h.DBService.UnlockAchievement(userID, "cold_warrior")
+		// h.DBService.UnlockAchievement(userID, "rainy_day")
+	}()
 }

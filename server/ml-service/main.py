@@ -9,6 +9,7 @@ import logging
 from datetime import datetime
 from model.advanced_trainer import AdvancedOutfitRecommender
 from model.predictor import AdvancedOutfitPredictor
+from model.enhanced_predictor import EnhancedOutfitPredictor
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,7 +21,7 @@ app = Flask(__name__)
 CORS(app)
 
 recommender = AdvancedOutfitRecommender(model_type='gradient_boosting')
-predictor = AdvancedOutfitPredictor(recommender)
+predictor = EnhancedOutfitPredictor(recommender)
 
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),

@@ -147,12 +147,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
     }
   }
 
-  // For demo mode - don't mark as shown so it appears every time
-  void _close() async {
-    if (mounted) {
-      Navigator.pop(context);
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {

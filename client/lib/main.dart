@@ -1,14 +1,12 @@
-import 'package:flutter/material.dart';
+import'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'config/app_config.dart';
-import 'screens/home_screen.dart';
+import 'screens/navigation_screen.dart'; // Changed from home_screen.dart
 import 'providers/theme_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  AppConfig.printConfig();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -18,7 +16,7 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark, // Темные иконки
+      statusBarIconBrightness: Brightness.dark, // Dark icons
       systemNavigationBarColor: Colors.white,
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
@@ -32,13 +30,15 @@ void main() {
   );
 }
 
+class printConfig {}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    
+
     // Update system UI based on theme
     SystemChrome.setSystemUIOverlayStyle(
       themeProvider.isDarkMode
@@ -55,13 +55,13 @@ class MyApp extends StatelessWidget {
               systemNavigationBarIconBrightness: Brightness.dark,
             ),
     );
-    
+
     return MaterialApp(
       title: 'OutfitStyle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.light, // Светлая тема
+        brightness: Brightness.light,
         primaryColor: const Color(0xFF007bff),
         scaffoldBackgroundColor: const Color(0xFFF0F2F5),
         colorScheme: const ColorScheme.light(
@@ -78,13 +78,13 @@ class MyApp extends StatelessWidget {
         ),
       ),
       darkTheme: ThemeData(
-        useMaterial3: true,
+       useMaterial3: true,
         brightness: Brightness.dark,
         primaryColor: const Color(0xFF007bff),
         scaffoldBackgroundColor: const Color(0xFF1a1a2e),
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF007bff),
-          secondary: Color(0xFF6c757d),
+         secondary: Color(0xFF6c757d),
           error: Color(0xFFdc3545),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
@@ -96,7 +96,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       themeMode: themeProvider.themeMode,
-      home: const HomeScreen(),
+      home: const NavigationScreen(),
     );
   }
 }

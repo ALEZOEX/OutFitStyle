@@ -57,7 +57,7 @@ class AdvancedOutfitPredictor:
                     for item_score in item_scores[:5]
                 ]
             
-            outfit_score = np.mean([item.get('ml_score', 0) for item in outfit_items]) if outfit_items else 0
+            outfit_scorenp.mean([item.get('ml_score', 0) for item in outfit_items]) if outfit_items else 0
             
             return {
                 'items': outfit_items,

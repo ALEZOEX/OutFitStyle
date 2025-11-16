@@ -19,6 +19,7 @@ dependencies:
   
   # UI
   google_fonts: ^6.1.0
+  shimmer: ^3.0.0
   
   # Utils
   intl: ^0.18.1

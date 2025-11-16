@@ -198,58 +198,42 @@ class AdvancedOutfitPredictor:
         return random.random() < 0.1
     
     def _select_accessories(
-        self,
-        weather_data: Dict,
-        user_profile: Dict,
+        self, 
+        weather_data: Dict, 
+        user_profile: Dict, 
         accessories: List[Dict],
-        min_confidence: float = 0.6
+        min_confidence: float
     ) -> List[Dict]:
         """Выбирает подходящие аксессуары"""
         
         temp = weather_data.get('temperature', 20)
         weather = weather_data.get('weather', 'Ясно')
-        weather_lower = weather.lower()
+        recommendations = []
         
-        # Получаем рекомендации для аксессуаров
-        recommendations = self.recommend_items(
-            weather_data,
-            user_profile,
-            accessories,
-            top_n=5,
-            min_confidence=min_confidence
-        )
+        # Сначала получаем рекомендации для аксессуаров
+        try:
+            recommendations = self.recommend_items(
+                weather_data, user_profile, accessories, 
+                top_n=len(accessories), min_confidence=min_confidence
+            )
+        except Exception as e:
+            logger.warning(f"Failed to get ML recommendations for accessories: {e}")
+            # Используем фолбэк
+            recommendations = self._fallback_recommendations(
+                weather_data, accessories, len(accessories)
+            )
         
         selected = []
         
-        # Холодная погода - шапка, шарф, перчатки
-        if temp < 0:
-            for rec in recommendations:
-                name_lower = rec['name'].lower()
-                if any(word in name_lower for word in ['шапка', 'шарф', 'перчатк']):
-                    if len(selected) < 3:
-                        selected.append(rec)
-        
-        # Прохладно - шапка или шарф
-        elif temp < 10:
-            for rec in recommendations:
-                name_lower = rec['name'].lower()
-                if any(word in name_lower for word in ['шапка', 'шарф']):
-                    if len(selected) < 2:
-                        selected.append(rec)
-        
-        # Дождь - зонт
-        elif any(cond in weather_lower for cond in ['дождь', 'морось', 'rain', 'drizzle']):
-            for rec in recommendations:
-                if 'зонт' in rec['name'].lower() or 'umbrella' in rec['name'].lower():
-                    selected.append(rec)
-                    break
-        
-        # Солнечно - очки
-        elif any(cond in weather_lower for cond in ['ясно', 'clear']) and temp > 20:
-            for rec in recommendations:
-                if 'очки' in rec['name'].lower() or 'sunglasses' in rec['name'].lower():
-                    selected.append(rec)
-                    break
+        # Выбираем подходящие аксессуары
+        for rec in recommendations:
+            name_lower = rec['name'].lower()
+            
+            # Зонт при дожде или прогнозе дождя
+            if ('umbrella' in name_lower or 'зонт' in name_lower) and \
+               (temp < 20 and ('дождь' in weather.lower() or 'rain' in weather.lower())):
+                selected.append(rec)
+                break
         
         # Если ничего не выбрано, берем случайный аксессуар с высокой оценкой
         if not selected and recommendations:
@@ -268,9 +252,9 @@ class AdvancedOutfitPredictor:
         """
         Возвращает топ-N рекомендованных предметов с ML оценками
         """
-        if not self.model.is_trained:
-            logger.warning("Model not trained, using fallback")
-            return self._fallback_recommendations(weather_data, available_items, top_n)
+        if not self.model or not self.model.is_trained:
+            # Если модель не обучена, возвращаем ошибку
+            raise ValueError("ML model is not trained. Please train the model first.")
         
         logger.info(f"Generating ML recommendations for {len(available_items)} items...")
         
@@ -311,12 +295,13 @@ class AdvancedOutfitPredictor:
             else:
                 max_prob = max(probabilities) if probabilities.size > 0 else 0
                 logger.info(f"No recommendations above threshold. Max probability: {max_prob:.2%}, threshold: {min_confidence:.2%}")
+                # Если ничего не найдено, возвращаем пустой список, а не ошибку
             
             return recommendations
             
         except Exception as e:
             logger.error(f"Prediction error: {e}")
-            return self._fallback_recommendations(weather_data, available_items, top_n)
+            raise
     
     def _prepare_weather_features(self, weather_data: Dict) -> Dict:
         """Подготавливает погодные признаки"""
