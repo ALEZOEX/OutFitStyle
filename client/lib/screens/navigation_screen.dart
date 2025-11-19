@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
-import '../theme/app_theme.dart';
 import 'home_screen.dart';
-import 'favorites_screen.dart';
+import 'wardrobe_screen.dart';
+import 'planning_screen.dart';
+import 'shopping_screen.dart';
 import 'profile_screen.dart';
-import 'history_screen.dart'; // Добавляем импорт экрана истории
 
 class NavigationScreen extends StatefulWidget {
-  const NavigationScreen({Key? key}) : super(key: key);
+  const NavigationScreen({super.key});
 
   @override
   State<NavigationScreen> createState() => _NavigationScreenState();
@@ -20,13 +20,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const HistoryScreen(), // Добавляем экран истории
-    const FavoritesScreen(),
+    const WardrobeScreen(),
+    const PlanningScreen(),
+    const ShoppingScreen(),
     const ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
 
     return Scaffold(
@@ -49,8 +51,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
           );
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: isDark ? AppTheme.cardDark : Colors.white,
-        selectedItemColor: isDark ? AppTheme.primary : const Color(0xFF007bff),
+        backgroundColor: theme.cardColor,
+        selectedItemColor: theme.primaryColor,
         unselectedItemColor: isDark ? Colors.grey[600] : Colors.grey[500],
         elevation: 10,
         items: const [
@@ -60,14 +62,19 @@ class _NavigationScreenState extends State<NavigationScreen> {
             label: 'Главная',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            activeIcon: Icon(Icons.history),
-            label: 'История',
+            icon: Icon(Icons.checkroom_outlined),
+            activeIcon: Icon(Icons.checkroom),
+            label: 'Гардероб',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark_border_outlined),
-            activeIcon: Icon(Icons.bookmark),
-            label: 'Избранное',
+            icon: Icon(Icons.calendar_today_outlined),
+            activeIcon: Icon(Icons.calendar_today),
+            label: 'ПЛАН',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag_outlined),
+            activeIcon: Icon(Icons.shopping_bag),
+            label: 'ШОПИНГ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

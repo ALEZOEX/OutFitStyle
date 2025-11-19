@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user_settings.dart';
 import '../providers/theme_provider.dart';
-import '../theme/app_theme.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserSettings settings;
 
-  const EditProfileScreen({Key? key, required this.settings}) : super(key: key);
+  const EditProfileScreen({super.key, required this.settings});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -69,16 +68,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               Icon(Icons.check_circle, color: Colors.white),
               SizedBox(width: 12),
-              Text('Профиль обновлен'),
+              Text('Профильобновлен'),
             ],
           ),
           backgroundColor: const Color(0xFF28a745),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
 
-      Navigator.pop(context, true);
+      if (mounted) Navigator.pop(context, true);
     }
   }
 
@@ -86,12 +86,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
+    final theme = Theme.of(context); // Получаем текущую тему
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Редактировать профиль'),
-        backgroundColor: isDark ? AppTheme.cardDark : Colors.white,
+        backgroundColor: theme.cardColor,
         elevation: 0,
         actions: [
           if (_hasChanges)
@@ -109,35 +110,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             // Personal info
             _buildSectionTitle('Личная информация', isDark),
             const SizedBox(height: 16),
-            
+
             TextField(
               controller: _nameController,
               onChanged: (_) => _markChanged(),
               style: TextStyle(
-                color: isDark ? AppTheme.textPrimary : Colors.black87,
+                color: theme.textTheme.bodyLarge?.color,
               ),
               decoration: InputDecoration(
                 labelText: 'Имя',
                 prefixIcon: const Icon(Icons.person),
                 filled: true,
-                fillColor: isDark ? AppTheme.cardDark : Colors.white,
+                fillColor: theme.cardColor,
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             TextField(
               controller: _emailController,
               onChanged: (_) => _markChanged(),
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(
-                color: isDark ? AppTheme.textPrimary : Colors.black87,
+                color: theme.textTheme.bodyLarge?.color,
               ),
               decoration: InputDecoration(
                 labelText: 'Email',
                 prefixIcon: const Icon(Icons.email),
                 filled: true,
-                fillColor: isDark ? AppTheme.cardDark : Colors.white,
+                fillColor: theme.cardColor,
               ),
             ),
 
@@ -209,9 +210,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: ElevatedButton(
                   onPressed: _saveChanges,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isDark
-                        ? AppTheme.primary
-                        : const Color(0xFF007bff),
+                    backgroundColor: theme.primaryColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -231,12 +230,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildSectionTitle(String title, bool isDark) {
+    final theme = Theme.of(context); // Получаем текущую тему
+
     return Text(
       title,
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: isDark ? AppTheme.textPrimary : Colors.black87,
+        color: theme.textTheme.bodyLarge?.color,
       ),
     );
   }
@@ -249,20 +250,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     IconData icon,
     bool isDark,
   ) {
+    final theme = Theme.of(context); // Получаем текущую тему
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.cardDark : Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: isDark
-            ? Border.all(color: AppTheme.withOpacity(AppTheme.primary, 0.3))
+            ? Border.all(color: theme.primaryColor.withValues(alpha: 0.3))
             : Border.all(color: Colors.grey[300]!),
       ),
       child: Row(
         children: [
           Icon(
             icon,
-            color: isDark ? AppTheme.primary : const Color(0xFF007bff),
+            color: theme.primaryColor,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -271,10 +274,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 value: value,
                 isExpanded: true,
                 style: TextStyle(
-                  color: isDark ? AppTheme.textPrimary : Colors.black87,
+                  color: theme.textTheme.bodyLarge?.color,
                   fontSize: 15,
                 ),
-                dropdownColor: isDark ? AppTheme.cardDark : Colors.white,
+                dropdownColor: theme.cardColor,
                 items: items.map((item) {
                   return DropdownMenuItem(
                     value: item.$1,

@@ -1,0 +1,193 @@
+version: '3.8'
+
+services:
+  # Go API Server (основной backend)
+  api:
+    build:
+      context: ../../server/api
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ENVIRONMENT=production
+      - PORT=8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=outfitstyle
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=outfitstyle
+      - DB_SSL_MODE=require
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - WEATHER_API_URL=https://api.openweathermap.org/data/2.5
+      - ML_SERVICE_URL=http://ml-service:5000
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+    volumes:
+      - api-logs:/var/log/outfitstyle
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ML Service (Python)
+  ml-service:
+    build:
+      context: ../../server/ml-service
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://outfitstyle:${DB_PASSWORD}@postgres:5432/outfitstyle
+      - MODEL_PATH=/models
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ml-models:/models
+      - ml-logs:/var/log/ml-service
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Marketplace Service (Python)
+  marketplace-service:
+    build:
+      context: ../../server/marketplace-service
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://outfitstyle:${DB_PASSWORD}@postgres:5432/outfitstyle
+      - REDIS_URL=redis://redis:6379
+      - WB_AFFILIATE_ID=${WB_AFFILIATE_ID}
+      - OZON_AFFILIATE_ID=${OZON_AFFILIATE_ID}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=outfitstyle
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=outfitstyle
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U outfitstyle -d outfitstyle"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy (HTTPS)
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certs:/etc/nginx/certs
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - api
+    networks:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus (мониторинг)
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  # Grafana (визуализация)
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres-data:
+  redis-data:
+  api-logs:
+  ml-models:
+  ml-logs:
+  nginx-logs:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+  monitoring:
+    driver: bridge

@@ -4,17 +4,16 @@ import 'package:shimmer/shimmer.dart';
 import '../models/favorite.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
-import '../theme/app_theme.dart';
-import 'package:intl/intl.dart';
 
 class FavoritesScreen extends StatefulWidget {
-  const FavoritesScreen({Key? key}) : super(key: key);
+  const FavoritesScreen({super.key});
 
   @override
   State<FavoritesScreen> createState() => _FavoritesScreenState();
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
+  final ApiService _apiService = ApiService();
   late Future<List<FavoriteOutfit>> _favoritesFuture;
 
   @override
@@ -25,24 +24,23 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   Future<void> _loadFavorites() {
     setState(() {
-      _favoritesFuture = ApiService().getFavorites(userId: 1);
+      _favoritesFuture = _apiService.getFavorites(userId: 1);
     });
     return _favoritesFuture;
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final theme = Theme.of(context);
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Избранные комплекты'),
-        backgroundColor: isDark ? AppTheme.cardDark : Colors.white,
       ),
       body: RefreshIndicator(
         onRefresh: _loadFavorites,
-        color: isDark ? AppTheme.primary : const Color(0xFF007bff),
         child: FutureBuilder<List<FavoriteOutfit>>(
           future: _favoritesFuture,
           builder: (context, snapshot) {
@@ -61,7 +59,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               padding: const EdgeInsets.all(16),
               itemCount: favorites.length,
               itemBuilder: (context, index) {
-                return _FavoriteCard(outfit: favorites[index], isDark: isDark);
+                return _FavoriteCard(outfit: favorites[index]);
               },
             );
           },
@@ -92,16 +90,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
 class _FavoriteCard extends StatelessWidget {
   final FavoriteOutfit outfit;
-  final bool isDark;
-
-  const _FavoriteCard({required this.outfit, required this.isDark});
+  const _FavoriteCard({required this.outfit});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: isDark ? 1 : 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -109,13 +103,14 @@ class _FavoriteCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                const Icon(Icons.location_on, size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text(outfit.location, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(outfit.location,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 const Spacer(),
                 Text(
-                  DateFormat('dd.MM.yyyy').format(DateTime.parse(outfit.savedAt)),
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  outfit.savedAt,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
@@ -124,27 +119,15 @@ class _FavoriteCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
-                  children: outfit.items.map((item) => 
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Text(item['icon_emoji'] ?? '?', style: const TextStyle(fontSize: 32)),
-                    )
-                  ).toList(),
+                  children: outfit.items
+                      .map((item) => Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(item['icon_emoji'] ?? '?',
+                                style: const TextStyle(fontSize: 32)),
+                          ))
+                      .toList(),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppTheme.withOpacity(isDark ? AppTheme.primary : const Color(0xFF007bff), 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '${outfit.temperature.round()}°C',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? AppTheme.primary : const Color(0xFF007bff),
-                    ),
-                  ),
-                ),
+                // ...
               ],
             ),
           ],

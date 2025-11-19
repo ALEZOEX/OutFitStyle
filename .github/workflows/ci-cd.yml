@@ -1,0 +1,38 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.21
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+
+    - name: Build and test Go service
+      run: |
+        cd server/api
+        go build -v ./...
+        go test -v ./...
+
+    - name: Test Python services
+      run: |
+        cd server/ml-service
+        pip install -r requirements.txt
+        python -m pytest tests/
+        
+        cd ../marketplace-service
+        pip install -r requirements.txt

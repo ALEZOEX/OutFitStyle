@@ -242,7 +242,30 @@ def train_model():
         
         conn = get_db_connection()
         query = """
-        SELECT ...
+        SELECT 
+            r.temperature,
+            r.weather,
+            r.humidity,
+            r.wind_speed,
+            up.gender,
+            up.age_range,
+            up.style_preference,
+            up.temperature_sensitivity,
+            ci.category,
+            ci.style,
+            ci.warmth_level,
+            ci.formality_level,
+            ri.ml_score,
+            CASE WHEN rat.overall_rating >= 4 THEN 1 ELSE 0 END as is_liked
+        FROM recommendations r
+        JOIN user_profiles up ON r.user_id = up.user_id
+        JOIN recommendation_items ri ON r.id = ri.recommendation_id
+        JOIN clothing_items ci ON ri.clothing_item_id = ci.id
+        LEFT JOIN ratings rat ON r.id = rat.recommendation_id AND ci.id = rat.clothing_item_id
+        WHERE r.created_at >= NOW() - INTERVAL '30 days'
+            AND ri.ml_score IS NOT NULL
+        ORDER BY r.created_at DESC
+        LIMIT 10000
         """
         df = pd.read_sql(query, conn)
         conn.close()

@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-import '../models/recommendation.dart';
+import '../models/history.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
-import '../theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({Key? key}) : super(key: key);
+  const HistoryScreen({super.key});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  late Future<List<Recommendation>> _historyFuture;
+  late Future<List<HistoryItem>> _historyFuture;
 
   @override
   void initState() {
@@ -24,8 +23,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _loadHistory() {
+    final apiService = Provider.of<ApiService>(context, listen: false);
     setState(() {
-      _historyFuture = ApiService().getRecommendationHistory(userId: 1);
+      _historyFuture = apiService.getRecommendationHistory(userId: 1);
     });
     return _historyFuture;
   }
@@ -33,17 +33,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final theme = Theme.of(context); // Получаем текущую тему
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('История рекомендаций'),
-        backgroundColor: isDark ? AppTheme.cardDark : Colors.white,
+        backgroundColor: theme.cardColor,
       ),
       body: RefreshIndicator(
         onRefresh: _loadHistory,
-        color: isDark ? AppTheme.primary : const Color(0xFF007bff),
-        child: FutureBuilder<List<Recommendation>>(
+        color: theme.primaryColor,
+        child: FutureBuilder<List<HistoryItem>>(
           future: _historyFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -61,7 +62,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               padding: const EdgeInsets.all(16),
               itemCount: history.length,
               itemBuilder: (context, index) {
-                return _HistoryCard(recommendation: history[index], isDark: isDark);
+                return _HistoryCard(
+                    recommendation: history[index], isDark: isDark);
               },
             );
           },
@@ -91,13 +93,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
 }
 
 class _HistoryCard extends StatelessWidget {
-  final Recommendation recommendation;
+  final HistoryItem recommendation;
   final bool isDark;
 
   const _HistoryCard({required this.recommendation, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Получаем текущую тему
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: isDark ? 1 : 4,
@@ -109,13 +113,17 @@ class _HistoryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                Icon(Icons.location_on,
+                    size: 16, color: theme.textTheme.bodyMedium?.color),
                 const SizedBox(width: 4),
-                Text(recommendation.location, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(recommendation.location,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 const Spacer(),
                 Text(
-                  DateFormat('dd.MM.yyyy HH:mm').format(DateTime.now()),
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  DateFormat('dd.MM.yyyy HH:mm')
+                      .format(recommendation.createdAt),
+                  style: TextStyle(
+                      fontSize: 12, color: theme.textTheme.bodyMedium?.color),
                 ),
               ],
             ),
@@ -124,24 +132,26 @@ class _HistoryCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
-                  children: recommendation.items.map((item) => 
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Text(item.iconEmoji, style: const TextStyle(fontSize: 32)),
-                    )
-                  ).toList(),
+                  children: recommendation.items
+                      .map((item) => Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(item['icon_emoji'] ?? '👕',
+                                style: const TextStyle(fontSize: 32)),
+                          ))
+                      .toList(),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.withOpacity(isDark ? AppTheme.primary : const Color(0xFF007bff), 0.1),
+                    color: theme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '${recommendation.temperature.round()}°C',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isDark ? AppTheme.primary : const Color(0xFF007bff),
+                      color: theme.primaryColor,
                     ),
                   ),
                 ),

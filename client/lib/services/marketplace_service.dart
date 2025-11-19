@@ -56,7 +56,8 @@ class MarketplaceService {
       }
       return [];
     } catch (e) {
-      print('Error getting marketplace links: $e');
+      //print('Error getting marketplace links: $e');
+      // In production, use a proper logging framework instead
       return [];
     }
   }
@@ -79,7 +80,7 @@ class MarketplaceService {
         final data = json.decode(response.body);
         final outfitLinks = data['outfit_links'] as List;
 
-        final Map<String, List<MarketplaceLink>> result = {};
+        Map<String, List<MarketplaceLink>> result = {};
 
         for (var item in outfitLinks) {
           final itemName = item['item_name'];
@@ -93,7 +94,8 @@ class MarketplaceService {
       }
       return {};
     } catch (e) {
-      print('Error getting outfit links: $e');
+      //print('Error getting outfit links: $e');
+      // In production, use a proper logging framework instead
       return {};
     }
   }
@@ -116,7 +118,8 @@ class MarketplaceService {
         }),
       );
     } catch (e) {
-      print('Error tracking click: $e');
+      //print('Error tracking click: $e');
+      // In production, use a proper logging framework instead
     }
   }
 }

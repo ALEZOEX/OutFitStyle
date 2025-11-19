@@ -65,7 +65,7 @@ pubspec.lock
 **/*.xcsettings
 
 # Environment files
-.env
+server/go-server/.env
 
 # Docker
 .dockerignore

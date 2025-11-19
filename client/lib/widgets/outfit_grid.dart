@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import'package:flutter/material.dart';
 import '../models/recommendation.dart';
 import '../theme/app_theme.dart';
 
@@ -11,7 +11,7 @@ class OutfitGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -35,7 +35,7 @@ class OutfitGrid extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  gradient: AppTheme.primaryGradient,
+                 gradient: AppTheme.primaryGradient,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Row(
@@ -70,7 +70,7 @@ class OutfitGrid extends StatelessWidget {
             mainAxisSpacing: 16,
             childAspectRatio: 0.85,
           ),
-          itemCount: items.length,
+         itemCount: items.length,
           itemBuilder: (context, index) {
             return _OutfitItemCard(item: items[index]);
           },
@@ -85,7 +85,7 @@ class _OutfitItemCard extends StatefulWidget {
 
   const _OutfitItemCard({required this.item});
 
-  @override
+ @override
   State<_OutfitItemCard> createState() => _OutfitItemCardState();
 }
 
@@ -95,7 +95,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
   late Animation<double> _scaleAnimation;
 
   @override
-  void initState() {
+void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
@@ -116,7 +116,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
     switch (category.toLowerCase()) {
       case 'outerwear':
         return AppTheme.primary;
-      case 'upper':
+case 'upper':
         return AppTheme.secondary;
       case 'lower':
         return AppTheme.success;
@@ -127,7 +127,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
       default:
         return AppTheme.primary;
     }
-  }
+ }
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +136,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
     final confidence = hasMLScore ? widget.item.mlScore! : 0.0;
 
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
+      onTapDown:(_) => _controller.forward(),
       onTapUp: (_) => _controller.reverse(),
       onTapCancel: () => _controller.reverse(),
       onTap: () => _showItemDetails(context),
@@ -147,7 +147,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
             gradient: AppTheme.cardGradient,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: AppTheme.withOpacity(categoryColor, 0.3),
+              color: categoryColor.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -166,7 +166,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
                         Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Confidence ring
+                           // Confidence ring
                             SizedBox(
                               width: 90,
                               height: 90,
@@ -174,23 +174,22 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
                                 value: confidence,
                                 strokeWidth: 3,
                                 backgroundColor:
-                                    AppTheme.withOpacity(categoryColor, 0.1),
+                                    categoryColor.withValues(alpha: 0.1),
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                     categoryColor),
-                              ),
+),
                             ),
                             // Icon
                             Container(
                               width: 75,
                               height: 75,
                               decoration: BoxDecoration(
-                                color:
-                                    AppTheme.withOpacity(categoryColor, 0.15),
+                                color: categoryColor.withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
                                 child: Text(
-                                  widget.item.iconEmoji,
+                                 widget.item.iconEmoji,
                                   style: const TextStyle(fontSize: 40),
                                 ),
                               ),
@@ -202,7 +201,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            color: AppTheme.withOpacity(categoryColor, 0.15),
+                            color: categoryColor.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Center(
@@ -218,7 +217,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
                       // Name
                       Text(
                         widget.item.name,
-                        textAlign: TextAlign.center,
+                       textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -230,14 +229,14 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
 
                       const SizedBox(height: 8),
 
-                      // Category badge
+                      // Categorybadge
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.withOpacity(categoryColor, 0.2),
+                          color: categoryColor.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -254,7 +253,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
                       if (hasMLScore) ...[
                         const SizedBox(height: 8),
                         Text(
-                          '${(confidence * 100).toInt()}% match',
+                         '${(confidence * 100).toInt()}% match',
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppTheme.textSecondary,
@@ -267,7 +266,7 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
                 ),
 
                 // ML Badge (top-left)
-                if (hasMLScore && confidence >= 0.8)
+               if (hasMLScore && confidence >= 0.8)
                   Positioned(
                     top: 8,
                     left: 8,
@@ -320,18 +319,18 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
         ),
         padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+mainAxisSize: MainAxisSize.min,
           children: [
             // Handle
             Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppTheme.withOpacity(AppTheme.textSecondary, 0.3),
+                color: AppTheme.textSecondary.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 24),
+const SizedBox(height: 24),
 
             // Icon
             Text(
@@ -355,8 +354,8 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
                 vertical: 8,
               ),
               decoration: BoxDecoration(
-                color: AppTheme.withOpacity(
-                    _getCategoryColor(widget.item.category), 0.2),
+                color: _getCategoryColor(widget.item.category)
+                    .withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
@@ -368,14 +367,14 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
               ),
             ),
 
-            if (widget.item.mlScore != null) ...[
+if (widget.item.mlScore != null) ...[
               const SizedBox(height: 24),
 
               // ML Confidence
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.withOpacity(AppTheme.primary, 0.1),
+                  color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -410,10 +409,10 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
-                        value: widget.item.mlScore,
+                       value: widget.item.mlScore,
                         minHeight: 8,
                         backgroundColor:
-                            AppTheme.withOpacity(AppTheme.backgroundDark, 0.5),
+                            AppTheme.cardDark.withValues(alpha: 0.5),
                         valueColor: const AlwaysStoppedAnimation<Color>(
                             AppTheme.primary),
                       ),

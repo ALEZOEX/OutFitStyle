@@ -27,12 +27,12 @@ class WeatherCard extends StatelessWidget {
         gradient: AppTheme.cardGradient,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: AppTheme.withOpacity(AppTheme.primary, 0.3),
+          color: AppTheme.primary.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.withOpacity(AppTheme.primary, 0.1),
+            color: AppTheme.primary.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -101,7 +101,7 @@ class WeatherCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.withOpacity(AppTheme.backgroundDark, 0.5),
+                color: AppTheme.backgroundDark.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -127,7 +127,7 @@ class WeatherCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.withOpacity(AppTheme.primary, 0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(

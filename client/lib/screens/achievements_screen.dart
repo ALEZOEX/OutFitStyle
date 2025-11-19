@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
+import'package:flutter/material.dart';
 import '../models/achievement.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import 'package:provider/provider.dart';
 
 class AchievementsScreen extends StatefulWidget {
-  const AchievementsScreen({Key? key}) : super(key: key);
+  const AchievementsScreen({super.key});
 
   @override
-  State<AchievementsScreen> createState() => _AchievementsScreenState();
+  State<AchievementsScreen> createState() =>_AchievementsScreenState();
 }
 
 class _AchievementsScreenState extends State<AchievementsScreen> {
@@ -19,17 +20,18 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
     _loadAchievements();
   }
 
-  Future<void> _loadAchievements() {
+  Future<void> _loadAchievements() async {
+   final apiService = Provider.of<ApiService>(context, listen: false);
     setState(() {
-      _achievementsFuture = ApiService().getAchievements(userId: 1);
+      _achievementsFuture = apiService.getAchievements(userId: 1);
     });
-    return _achievementsFuture;
+    await _achievementsFuture;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar:AppBar(
         title: const Text('Достижения'),
       ),
       body: RefreshIndicator(
@@ -45,7 +47,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             }
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text('Нет достижений'));
-            }
+           }
 
             final achievements = snapshot.data!;
             return GridView.builder(
@@ -54,7 +56,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: 0.9,
+               childAspectRatio: 0.9,
               ),
               itemCount: achievements.length,
               itemBuilder: (context, index) {
@@ -71,10 +73,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 class _AchievementCard extends StatelessWidget {
   final Achievement achievement;
 
-  const _AchievementCard({required this.achievement});
+const _AchievementCard({required this.achievement});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(16),
@@ -87,11 +91,11 @@ class _AchievementCard extends StatelessWidget {
                 end: Alignment.bottomRight,
               )
             : null,
-        color: achievement.isUnlocked ? null : Theme.of(context).cardColor,
+        color:achievement.isUnlocked ? null : theme.cardColor,
         boxShadow: [
           if (achievement.isUnlocked)
             BoxShadow(
-              color: AppTheme.withOpacity(const Color(0xFFFFD700), 0.4),
+              color: const Color(0xFFFFD700).withValues(alpha: 0.4),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -124,7 +128,7 @@ class _AchievementCard extends StatelessWidget {
               fontSize: 11,
               color: achievement.isUnlocked ? Colors.black54 : Colors.grey[600],
             ),
-            textAlign: TextAlign.center,
+textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -137,7 +141,8 @@ class _AchievementCard extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: achievement.progress,
                     backgroundColor: Colors.grey[300],
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(AppTheme.primary),
                   ),
                 ),
                 const SizedBox(height: 4),

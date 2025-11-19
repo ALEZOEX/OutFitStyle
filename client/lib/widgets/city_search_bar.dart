@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../providers/theme_provider.dart';
 
 class CitySearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -13,12 +15,14 @@ class CitySearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+
     return Container(
       decoration: BoxDecoration(
-        gradient: AppTheme.cardGradient,
+        gradient: isDark ? AppTheme.cardGradientDark : AppTheme.cardGradient,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.withOpacity(AppTheme.primary, 0.3),
+          color: AppTheme.primary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -27,16 +31,18 @@ class CitySearchBar extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
-              style: const TextStyle(color: AppTheme.textPrimary),
-              decoration: const InputDecoration(
+              style: TextStyle(
+                  color: isDark ? Colors.white : AppTheme.textPrimary),
+              decoration: InputDecoration(
                 hintText: 'Введите город...',
-                hintStyle: TextStyle(color: AppTheme.textSecondary),
-                prefixIcon: Icon(
+                hintStyle: TextStyle(
+                    color: isDark ? Colors.grey[400] : AppTheme.textSecondary),
+                prefixIcon: const Icon(
                   Icons.location_city,
                   color: AppTheme.primary,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 16,
                 ),

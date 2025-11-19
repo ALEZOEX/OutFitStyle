@@ -1,16 +1,40 @@
-# client
+# OutfitStyle Web Client
 
-A new Flutter project.
+This is the web version of the OutfitStyle client built with Flutter.
 
-## Getting Started
+## Running with Docker
 
-This project is a starting point for a Flutter application.
+To run the web client using Docker:
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+# Build and run the Docker container
+docker-compose up --build
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# Or run just the web client
+docker-compose up web-client
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The web application will be available at http://localhost
+
+## Building for Production
+
+To build the Docker image for production:
+
+```bash
+docker build -t outfitstyle-web .
+```
+
+## Development
+
+For development, you can run the Flutter web app locally:
+
+```bash
+# Get dependencies
+flutter pub get
+
+# Run in Chrome
+flutter run -d chrome
+
+# Build for web
+flutter build web
+```

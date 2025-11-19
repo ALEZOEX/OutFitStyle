@@ -3,16 +3,16 @@ import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
 import '../screens/profile_screen.dart';
-import '../services/onboarding_service.dart';
 
 class OnboardingDialog extends StatefulWidget {
-  const OnboardingDialog({Key? key}) : super(key: key);
+  const OnboardingDialog({super.key});
 
   @override
   State<OnboardingDialog> createState() => _OnboardingDialogState();
 
   static Future<void> showIfNeeded(BuildContext context) async {
-    final shouldShow = await OnboardingService.shouldShowOnboarding();
+    // Проверяем, нужно ли показывать онбординг (например, по флагу в SharedPreferences)
+    const shouldShow = true; // Заглушка, заменить на реальную логику
 
     if (shouldShow) {
       await Future.delayed(const Duration(milliseconds: 800));
@@ -23,17 +23,6 @@ class OnboardingDialog extends StatefulWidget {
           builder: (context) => const OnboardingDialog(),
         );
       }
-    }
-  }
-
-  static Future<void> showEveryTime(BuildContext context) async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (context.mounted) {
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const OnboardingDialog(),
-      );
     }
   }
 }
@@ -129,8 +118,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
     }
   }
 
-  void _finish() async {
-    await OnboardingService.markOnboardingShown();
+  void _finish() {
     if (mounted) {
       Navigator.pop(context);
       Navigator.push(
@@ -140,14 +128,11 @@ class _OnboardingDialogState extends State<OnboardingDialog>
     }
   }
 
-  void _skip() async {
-    await OnboardingService.markOnboardingShown();
+  void _skip() {
     if (mounted) {
       Navigator.pop(context);
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +153,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 10),
                 ),
@@ -200,7 +185,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
                             decoration: BoxDecoration(
                               color: index == _currentStep
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.4),
+                                  : Colors.white.withValues(alpha: 0.4),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           );
@@ -221,7 +206,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
                               width: 100,
                               height: 100,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -249,7 +234,8 @@ class _OnboardingDialogState extends State<OnboardingDialog>
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? AppTheme.textPrimary : Colors.black87,
+                            color:
+                                isDark ? AppTheme.textPrimary : Colors.black87,
                           ),
                           textAlign: TextAlign.center,
                         ),

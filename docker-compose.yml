@@ -19,6 +19,13 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: outfitstyle-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
   ml-service:
     build:
       context: ./server/ml-service
@@ -39,28 +46,30 @@ services:
       - ./server/ml-service/data:/app/data
     restart: unless-stopped
 
-  api:
+  server:
     build:
-      context: ./server/api
-    container_name: outfitstyle-api
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: outfitstyle-server
     ports:
       - "8080:8080"
     environment:
-      - PORT=8080
+      - SERVER_PORT=8080
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=Admin
       - DB_PASSWORD=password
       - DB_NAME=outfitstyle
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - WEATHER_API_KEY=8e9f1a366923ec63437f21570c89fa17
-      - WEATHER_API_URL=https://api.openweathermap.org/data/2.5/weather
-      - WEATHER_API_TIMEOUT=10
-      - DEBUG=true
-      - LOG_LEVEL=info
       - ML_SERVICE_URL=http://ml-service:5000
+      - JWT_SECRET=your-jwt-secret-key
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
       ml-service:
         condition: service_started
     restart: unless-stopped
@@ -75,6 +84,16 @@ services:
       - PORT=5001
       - WB_AFFILIATE_ID=${WB_AFFILIATE_ID:-YOUR_WB_ID}
       - OZON_AFFILIATE_ID=${OZON_AFFILIATE_ID:-YOUR_OZON_ID}
+    restart: unless-stopped
+
+  web-client:
+    build:
+      context: ./client
+    container_name: outfitstyle-web-client
+    ports:
+      - "80:80"
+    depends_on:
+      - server
     restart: unless-stopped
 
 volumes:

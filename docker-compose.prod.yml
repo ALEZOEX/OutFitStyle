@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: outfitstyle-db
+    environment:
+      POSTGRES_USER: outfitstyle
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: outfitstyle
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U outfitstyle -d outfitstyle"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: outfitstyle-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  ml-service:
+    build:
+      context: ./server/ml-service
+      dockerfile: Dockerfile.prod
+    container_name: outfitstyle-ml
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=outfitstyle
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=outfitstyle
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ml_models:/app/models
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.prod
+    container_name: outfitstyle-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=outfitstyle
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=outfitstyle
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - ML_SERVICE_URL=http://ml-service:5000
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      ml-service:
+        condition: service_started
+    restart: unless-stopped
+
+  marketplace-service:
+    build:
+      context: ./server/marketplace-service
+      dockerfile: Dockerfile.prod
+    container_name: outfitstyle-marketplace
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - WB_AFFILIATE_ID=${WB_AFFILIATE_ID}
+      - OZON_AFFILIATE_ID=${OZON_AFFILIATE_ID}
+    restart: unless-stopped
+
+  web-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    container_name: outfitstyle-web-client
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  ml_models:

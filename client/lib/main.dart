@@ -1,7 +1,6 @@
-import'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'config/app_config.dart';
 import 'screens/navigation_screen.dart'; // Changed from home_screen.dart
 import 'providers/theme_provider.dart';
 
@@ -30,13 +29,13 @@ void main() {
   );
 }
 
-class printConfig {}
+class PrintConfig {}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     // Update system UI based on theme
@@ -78,13 +77,13 @@ Widget build(BuildContext context) {
         ),
       ),
       darkTheme: ThemeData(
-       useMaterial3: true,
+        useMaterial3: true,
         brightness: Brightness.dark,
         primaryColor: const Color(0xFF007bff),
         scaffoldBackgroundColor: const Color(0xFF1a1a2e),
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF007bff),
-         secondary: Color(0xFF6c757d),
+          secondary: Color(0xFF6c757d),
           error: Color(0xFFdc3545),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(

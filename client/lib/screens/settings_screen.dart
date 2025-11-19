@@ -1,35 +1,37 @@
-import'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user_settings.dart';
 import '../providers/theme_provider.dart';
-import '../theme/app_theme.dart';
 
 class SettingsScreen extends StatefulWidget {
   final UserSettings settings;
 
-  const SettingsScreen({Key? key, required this.settings}) : super(key: key);
+  const SettingsScreen({super.key, required this.settings});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late bool _notificationsEnabled;
-  late bool _autoSaveOutfits;
-  late String _temperatureUnit;
-  late String _language;
+  late bool notificationsEnabled;
+  late bool autoSaveOutfits;
+  late String temperatureUnit;
+  late String language;
 
   @override
   void initState() {
     super.initState();
-    _notificationsEnabled = widget.settings.notificationsEnabled;
-    _autoSaveOutfits = widget.settings.autoSaveOutfits;
-    _temperatureUnit = widget.settings.temperatureUnit.isNotEmpty ? widget.settings.temperatureUnit : 'celsius';
-    _language = widget.settings.language.isNotEmpty ? widget.settings.language : 'ru';
+    notificationsEnabled = widget.settings.notificationsEnabled;
+    autoSaveOutfits = widget.settings.autoSaveOutfits;
+    temperatureUnit = widget.settings.temperatureUnit.isNotEmpty
+        ? widget.settings.temperatureUnit
+        : 'celsius';
+    language =
+        widget.settings.language.isNotEmpty ? widget.settings.language : 'ru';
   }
 
-  Future<void> _saveSettings() async {
-    final updated =UserSettings(
+  Future<void> saveSettings() async {
+    final updated = UserSettings(
       userId: widget.settings.userId,
       name: widget.settings.name,
       email: widget.settings.email,
@@ -38,10 +40,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       stylePreference: widget.settings.stylePreference,
       ageRange: widget.settings.ageRange,
       preferredCategories: widget.settings.preferredCategories,
-      notificationsEnabled: _notificationsEnabled,
-      autoSaveOutfits: _autoSaveOutfits,
-      temperatureUnit: _temperatureUnit,
-      language: _language,
+      notificationsEnabled: notificationsEnabled,
+      autoSaveOutfits: autoSaveOutfits,
+      temperatureUnit: temperatureUnit,
+      language: language,
     );
 
     await updated.save();
@@ -58,11 +60,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           backgroundColor: const Color(0xFF28a745),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
 
-      Navigator.pop(context, true);
+      if (mounted) Navigator.pop(context, true);
     }
   }
 
@@ -70,25 +73,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
+    final theme = Theme.of(context); // Получаем текущую тему
 
-return Scaffold(
-      backgroundColor: isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Настройки'),
-        backgroundColor: isDark ? AppTheme.cardDark : Colors.white,
+        backgroundColor: theme.cardColor,
         elevation: 0,
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           // Appearance
-          _buildSectionTitle('Внешний вид', isDark),
+          buildSectionTitle('Внешний вид', isDark),
           const SizedBox(height: 12),
-          
-          _buildSwitchTile(
+
+          buildSwitchTile(
             'Темная тема',
             isDark,
-           Icons.dark_mode,
+            Icons.dark_mode,
             isDark,
             (value) => themeProvider.toggleTheme(),
           ),
@@ -96,17 +100,17 @@ return Scaffold(
           const SizedBox(height: 24),
 
           // Units
-          _buildSectionTitle('Единицы измерения', isDark),
+          buildSectionTitle('Единицы измерения', isDark),
           const SizedBox(height: 12),
-          
-          _buildRadioGroup(
-'Температура',
-            _temperatureUnit,
+
+          buildRadioGroup(
+            'Температура',
+            temperatureUnit,
             [
               ('celsius', '°C (Цельсий)'),
               ('fahrenheit', '°F (Фаренгейт)'),
             ],
-            (value) => setState(() => _temperatureUnit = value!),
+            (value) => setState(() => temperatureUnit = value!),
             Icons.thermostat,
             isDark,
           ),
@@ -114,40 +118,40 @@ return Scaffold(
           const SizedBox(height: 24),
 
           // App behavior
-          _buildSectionTitle('Поведение приложения', isDark),
+          buildSectionTitle('Поведение приложения', isDark),
           const SizedBox(height: 12),
-_buildSwitchTile(
+          buildSwitchTile(
             'Уведомления',
-            _notificationsEnabled,
+            notificationsEnabled,
             Icons.notifications,
             isDark,
-            (value) => setState(() => _notificationsEnabled = value),
+            (value) => setState(() => notificationsEnabled = value),
           ),
-          
+
           const SizedBox(height: 8),
-          
-          _buildSwitchTile(
+
+          buildSwitchTile(
             'Автосохранение комплектов',
-            _autoSaveOutfits,
+            autoSaveOutfits,
             Icons.auto_awesome,
             isDark,
-            (value) => setState(() => _autoSaveOutfits = value),
+            (value) => setState(() => autoSaveOutfits = value),
           ),
 
           const SizedBox(height: 24),
 
           // Language
-          _buildSectionTitle('Язык', isDark),
-const SizedBox(height: 12),
-          
-          _buildRadioGroup(
+          buildSectionTitle('Язык', isDark),
+          const SizedBox(height: 12),
+
+          buildRadioGroup(
             'Язык интерфейса',
-            _language,
+            language,
             [
               ('ru', 'Русский'),
               ('en', 'English'),
             ],
-            (value) => setState(() => _language = value!),
+            (value) => setState(() => language = value!),
             Icons.language,
             isDark,
           ),
@@ -158,11 +162,9 @@ const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _saveSettings,
+              onPressed: saveSettings,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDark
-                    ? AppTheme.primary
-                   : const Color(0xFF007bff),
+                backgroundColor: theme.primaryColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -180,38 +182,41 @@ const SizedBox(height: 12),
     );
   }
 
-  Widget _buildSectionTitle(String title, bool isDark) {
+  Widget buildSectionTitle(String title, bool isDark) {
+    final theme = Theme.of(context); // Получаем текущую тему
+
     return Text(
       title,
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: isDark ? AppTheme.textPrimary : Colors.black87,
+        color: theme.textTheme.bodyLarge?.color,
       ),
     );
   }
 
-  Widget _buildSwitchTile(
+  Widget buildSwitchTile(
     String title,
     bool value,
     IconData icon,
     bool isDark,
     void Function(bool) onChanged,
   ) {
+    final theme = Theme.of(context); // Получаем текущую тему
+
     return Container(
-     padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.cardDark : Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: isDark
-            ? Border.all(color: AppTheme.primary.withOpacity(0.3))
-            : null,
+        border:
+            isDark ? Border.all(color: theme.primaryColor.withAlpha(76)) : null,
       ),
-     child: Row(
+      child: Row(
         children: [
           Icon(
             icon,
-            color: isDark ? AppTheme.primary : const Color(0xFF007bff),
+            color: theme.primaryColor,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -219,21 +224,21 @@ const SizedBox(height: 12),
               title,
               style: TextStyle(
                 fontSize: 15,
-                color: isDark ? AppTheme.textPrimary : Colors.black87,
+                color: theme.textTheme.bodyLarge?.color,
               ),
             ),
           ),
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: isDark ? AppTheme.primary : const Color(0xFF007bff),
+            activeThumbColor: theme.primaryColor,
           ),
         ],
       ),
-);
+    );
   }
 
-  Widget _buildRadioGroup(
+  Widget buildRadioGroup(
     String title,
     String groupValue,
     List<(String, String)> options,
@@ -241,14 +246,15 @@ const SizedBox(height: 12),
     IconData icon,
     bool isDark,
   ) {
+    final theme = Theme.of(context); // Получаем текущую тему
+
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration:BoxDecoration(
-        color: isDark ? AppTheme.cardDark : Colors.white,
+      decoration: BoxDecoration(
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: isDark
-            ? Border.all(color: AppTheme.primary.withOpacity(0.3))
-            : null,
+        border:
+            isDark ? Border.all(color: theme.primaryColor.withAlpha(76)) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +263,7 @@ const SizedBox(height: 12),
             children: [
               Icon(
                 icon,
-                color: isDark ? AppTheme.primary : const Color(0xFF007bff),
+                color: theme.primaryColor,
               ),
               const SizedBox(width: 12),
               Text(
@@ -265,7 +271,7 @@ const SizedBox(height: 12),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? AppTheme.textPrimary : Colors.black87,
+                  color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
             ],
@@ -273,20 +279,20 @@ const SizedBox(height: 12),
           const SizedBox(height: 12),
           ...options.map((option) {
             return RadioListTile<String>(
-title: Text(
+              title: Text(
                 option.$2,
                 style: TextStyle(
-                  color: isDark ? AppTheme.textPrimary : Colors.black87,
+                  color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
               value: option.$1,
               groupValue: groupValue,
               onChanged: onChanged,
-              activeColor: isDark ? AppTheme.primary :const Color(0xFF007bff),
+              activeColor: theme.primaryColor,
               contentPadding: EdgeInsets.zero,
               dense: true,
             );
-          }).toList(),
+          }),
         ],
       ),
     );

@@ -2,6 +2,37 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 
 class AppConfig {
+  // API ключ для сервиса погоды
+  static const String weatherApiKey = 'your_weather_api_key';
+
+  // Базовый URL для сервиса погоды
+  static const String weatherBaseUrl = 'api.openweathermap.org';
+
+  // Shopping API URL
+  static String get shoppingApiUrl {
+    if (!kDebugMode) {
+      return 'https://shopping.outfitstyle.com';
+    }
+
+    if (kIsWeb) {
+      return 'http://localhost:5002';
+    } else if (Platform.isAndroid) {
+      if (_useRealDevice) {
+        return 'http://$_localNetworkIp:5002';
+      } else {
+        return 'http://10.0.2.2:5002';
+      }
+    } else if (Platform.isIOS) {
+      if (_useRealDevice) {
+        return 'http://$_localNetworkIp:5002';
+      } else {
+        return 'http://localhost:5002';
+      }
+    } else {
+      return 'http://localhost:5002';
+    }
+  }
+
   // ============================================
   // 🔧 НАСТРОЙКИ ДЛЯ РАЗРАБОТКИ
   // ============================================

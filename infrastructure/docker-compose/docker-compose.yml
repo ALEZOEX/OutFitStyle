@@ -1,0 +1,74 @@
+version: '3.8'
+services:
+  # Go API server
+  api:
+    build:
+      context: ../../server
+      dockerfile: deployments/docker/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - ENVIRONMENT=development
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - WEATHER_API_URL=${WEATHER_API_URL}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=outfitstyle
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=outfitstyle
+      - DB_SSL_MODE=disable
+      - ML_SERVICE_URL=http://ml-service:5000
+    depends_on:
+      - postgres
+      - ml-service
+    volumes:
+      - ../../server:/app
+    restart: unless-stopped
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=outfitstyle
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=outfitstyle
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../server/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # ML Service (Python Flask)
+  ml-service:
+    build:
+      context: ../../server/ml-service
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://outfitstyle:${DB_PASSWORD}@postgres:5432/outfitstyle
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+    volumes:
+      - ../../server/ml-service:/app
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Flutter client (development only)
+  client:
+    image: cirrusci/flutter:3.13.0
+    working_dir: /app
+    command: flutter run -d web-server --web-port=8081 --web-hostname=0.0.0.0
+    ports:
+      - "8081:8081"
+    volumes:
+      - ../../client:/app
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

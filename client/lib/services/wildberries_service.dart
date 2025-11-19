@@ -1,4 +1,4 @@
-import 'dart:convert';
+import'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WildberriesProduct {
@@ -40,7 +40,7 @@ class WildberriesProduct {
 }
 
 class WildberriesService {
-  static const String _baseUrl = 'https://search.wb.ru';
+  static const String _baseUrl= 'https://search.wb.ru';
   
   // Search for products on Wildberries
   Future<List<WildberriesProduct>> searchProducts({
@@ -48,7 +48,7 @@ class WildberriesService {
     int limit = 20,
   }) async {
     try {
-      // This is a simplified example - in reality, you would need to use
+      // This is a simplified example - in reality, you would need touse
       // the actual Wildberries API or scrape the data
       final url = Uri.parse(
           '$_baseUrl/exactmatch/ru/common/v4/search?appType=1&couponsGeo=12,3,18,15,21&dest=-1029256,-102269,-1278703,-1255563&emp=0&lang=ru&limit=$limit&listType=1&locale=ru&pricemarginCoeff=1.0&query=$query&reg=0&regions=68,64,83,4,38,80,33,70,82,86,75,30,69,22,66,31,40,1,48&resultset=catalog&sort=popular&spp=0&suppressSpellcheck=false');
@@ -59,17 +59,18 @@ class WildberriesService {
         final data = json.decode(response.body);
         final products = data['data']['products'] as List;
         return products
-            .map((product) => WildberriesProduct.fromJson(product))
+            .map((product)=> WildberriesProduct.fromJson(product))
             .toList();
       }
       return [];
     } catch (e) {
-      print('Error searching Wildberries products: $e');
+      //print('Error searching Wildberries products: $e');
+      // In production, use a proper logging framework instead
       return [];
     }
   }
 
-  // Get product details by ID
+ // Get product details by ID
   Future<WildberriesProduct?> getProductDetails(int productId) async {
     try {
       // This is a simplified example - in reality, you would need to use
@@ -80,12 +81,13 @@ class WildberriesService {
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final productData = data['data']['products'][0];
+       final productData = data['data']['products'][0];
         return WildberriesProduct.fromJson(productData);
       }
       return null;
     } catch (e) {
-      print('Error getting Wildberries product details: $e');
+      //print('Error getting Wildberries product details: $e');
+      // In production, use a proper logging framework instead
       return null;
     }
   }

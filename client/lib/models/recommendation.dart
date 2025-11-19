@@ -62,6 +62,7 @@ class Recommendation {
   final String weather;
   final String message;
   final List<ClothingItem> items;
+  final int id;
   final int humidity;
   final double windSpeed;
   final bool mlPowered;
@@ -74,6 +75,7 @@ class Recommendation {
     required this.weather,
     required this.message,
     required this.items,
+    required this.id,
     required this.humidity,
     required this.windSpeed,
     required this.mlPowered,
@@ -91,6 +93,7 @@ class Recommendation {
               ?.map((item) => ClothingItem.fromJson(item))
               .toList() ??
           [],
+      id: json['id'] ?? 0,
       humidity: json['humidity'] ?? 0,
       windSpeed: (json['wind_speed'] ?? 0).toDouble(),
       mlPowered: json['ml_powered'] ?? false,

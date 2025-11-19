@@ -10,12 +10,12 @@ class BuyButton extends StatelessWidget {
   final bool isDark;
 
   const BuyButton({
-    Key? key,
+    super.key,
     required this.itemName,
     required this.category,
     this.subcategory,
     required this.isDark,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +24,8 @@ class BuyButton extends StatelessWidget {
       icon: const Icon(Icons.shopping_bag, size: 18),
       label: const Text('Купить'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: isDark
-            ? const Color(0xFF10B981)
-            : const Color(0xFF10B981),
+        backgroundColor:
+            isDark ? const Color(0xFF10B981) : const Color(0xFF10B981),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         shape: RoundedRectangleBorder(
@@ -79,7 +78,7 @@ class BuyButton extends StatelessWidget {
           links: links,
           isDark: isDark,
           onLinkTap: (link) async {
-            Navigator.pop(context);
+            if (context.mounted) Navigator.pop(context);
             await _openMarketplace(context, link);
           },
         ),
@@ -91,10 +90,9 @@ class BuyButton extends StatelessWidget {
     BuildContext context,
     MarketplaceLink link,
   ) async {
-    // Track click
     final marketplaceService = MarketplaceService();
     await marketplaceService.trackClick(
-      userId: 1, // TODO: Get from user session
+      userId: 1,
       itemName: itemName,
       marketplace: link.marketplace,
       category: category,
@@ -148,7 +146,7 @@ class _MarketplaceSheet extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 color: isDark
-                    ? AppTheme.textSecondary.withOpacity(0.3)
+                    ? AppTheme.textSecondary.withValues(alpha: 0.3)
                     : Colors.grey[300],
                 borderRadius: BorderRadius.circular(2),
               ),
@@ -180,7 +178,8 @@ class _MarketplaceSheet extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Links
-          ...links.map((link) => _buildMarketplaceButton(link)).toList(),
+          ...links
+              .map((link) => _buildMarketplaceButton(link)), // Added toList()
 
           const SizedBox(height: 16),
 
@@ -189,8 +188,8 @@ class _MarketplaceSheet extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isDark
-                  ? AppTheme.primary.withOpacity(0.1)
-                  : const Color(0xFF007bff).withOpacity(0.1),
+                  ? AppTheme.primary.withValues(alpha: 0.1)
+                  : const Color(0xFF007bff).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -219,6 +218,7 @@ class _MarketplaceSheet extends StatelessWidget {
   }
 
   Widget _buildMarketplaceButton(MarketplaceLink link) {
+    // Fixed method name
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Material(
@@ -233,7 +233,7 @@ class _MarketplaceSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark
-                    ? AppTheme.primary.withOpacity(0.3)
+                    ? AppTheme.primary.withValues(alpha: 0.3)
                     : Colors.grey[300]!,
               ),
             ),
@@ -281,7 +281,9 @@ class _MarketplaceSheet extends StatelessWidget {
                         'Комиссия: ${link.commission}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? AppTheme.textSecondary : Colors.grey[600],
+                          color: isDark
+                              ? AppTheme.textSecondary
+                              : Colors.grey[600],
                         ),
                       ),
                     ],

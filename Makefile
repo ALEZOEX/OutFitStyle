@@ -1,30 +1,39 @@
-.PHONY: help server client db clean all
+# Makefile for OutfitStyle project
+
+.PHONY: help build run stop logs test clean
 
 help:
-	@echo "OutfitStyle - Команды для разработки"
-	@echo ""
-	@echo "  make server      - Запустить Go API (localhost:8080)"
-	@echo "  make client      - Запустить Flutter"
-	@echo "  make db          - Запустить PostgreSQL"
-	@echo "  make all         - Запустить всё через Docker"
-	@echo "  make clean       - Остановить и очистить Docker"
+	@echo "OutfitStyle Project Commands:"
+	@echo "  build    - Build all services"
+	@echo "  run      - Run all services"
+	@echo "  stop     - Stop all services"
+	@echo "  logs     - View service logs"
+	@echo "  test     - Run tests"
+	@echo "  clean    - Clean build artifacts"
 
-server:
-	@echo "🚀 Запуск Go API..."
-	cd server/api && go run main.go
+build:
+	@echo "Building all services..."
+	cd infrastructure/docker-compose && docker-compose build
 
-client:
-	@echo "📱 Запустить Flutter..."
-	cd client && flutter run
+run:
+	@echo "Starting all services..."
+	cd infrastructure/docker-compose && docker-compose up -d
 
-db:
-	@echo "🗄️ Запуск PostgreSQL..."
-	docker-compose up -d postgres
+stop:
+	@echo "Stopping all services..."
+	cd infrastructure/docker-compose && docker-compose down
 
-all:
-	@echo "🐳 Запуск всех сервисов..."
-	docker-compose up --build
+logs:
+	@echo "Viewing service logs..."
+	cd infrastructure/docker-compose && docker-compose logs -f
+
+test:
+	@echo "Running tests..."
+	cd server/api && go test -v ./...
+	cd server/ml-service && python -m pytest tests/
+	cd server/marketplace-service && python -m pytest tests/
 
 clean:
-	@echo "🧹 Очистка..."
-	docker-compose down -v
+	@echo "Cleaning build artifacts..."
+	cd server/api && rm -f server
+	cd infrastructure/docker-compose && docker-compose down -v
