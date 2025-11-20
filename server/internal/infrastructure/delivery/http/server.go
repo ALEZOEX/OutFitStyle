@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 	"time"
-	
+
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
@@ -25,7 +25,7 @@ func NewServer(addr string, router *mux.Router, logger *zap.Logger) *Server {
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
-	
+
 	return &Server{
 		server: srv,
 		logger: logger,
@@ -35,12 +35,12 @@ func NewServer(addr string, router *mux.Router, logger *zap.Logger) *Server {
 // Start starts the HTTP server
 func (s *Server) Start() error {
 	s.logger.Info("🚀 Starting server on " + s.server.Addr)
-	
+
 	// Start server
 	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}
-	
+
 	return nil
 }
 

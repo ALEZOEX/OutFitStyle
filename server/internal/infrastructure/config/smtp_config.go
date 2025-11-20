@@ -51,6 +51,24 @@ func (c *SMTPConfig) Validate() error {
 	return nil
 }
 
+// getEnv reads an environment variable or returns a default value
+func getEnv(key, defaultVal string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return defaultVal
+}
+
+// getEnvAsInt reads an environment variable as an integer or returns a default value
+func getEnvAsInt(key string, defaultVal int) int {
+	if v := os.Getenv(key); v != "" {
+		if i, err := strconv.Atoi(v); err == nil {
+			return i
+		}
+	}
+	return defaultVal
+}
+
 // getEnvAsBool reads an environment variable as a boolean or returns a default value
 func getEnvAsBool(key string, defaultValue bool) bool {
 	if value, exists := os.LookupEnv(key); exists {

@@ -2,11 +2,11 @@ package services
 
 import (
 	"context"
-	
+
 	"go.uber.org/zap"
-	
-	"outfitstyle/server/internal/core/domain"
+
 	"outfitstyle/server/internal/core/application/repositories"
+	"outfitstyle/server/internal/core/domain"
 )
 
 // UserService handles user-related business logic

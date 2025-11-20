@@ -6,14 +6,32 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"net/mail"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/gorilla/mux"
 
-	"outfitstyle/server/internal/api"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	resp "outfitstyle/server/internal/pkg/http"
+)
+
+const accessTokenTTLSeconds = 3600
+
+var (
+	errInvalidRequestBody         = errors.New("invalid request body")
+	errInvalidCredentials         = errors.New("invalid credentials")
+	errCodeRequired               = errors.New("code is required")
+	errInvalidOrExpiredCode       = errors.New("invalid or expired code")
+	errAuthHeaderRequired         = errors.New("authorization header required")
+	errInvalidAuthHeaderFormat    = errors.New("invalid authorization header format")
+	errInvalidRefreshToken        = errors.New("invalid refresh token")
+	errInvalidEmailFormat         = errors.New("invalid email format")
+	errFailedToProcessReset       = errors.New("failed to process password reset")
+	errTokenRequired              = errors.New("token is required")
+	errInvalidOrExpiredResetToken = errors.New("invalid or expired reset token")
 )
 
 // AuthHandler handles authentication-related HTTP requests
@@ -26,17 +44,44 @@ func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 	return &AuthHandler{authService: authService}
 }
 
-// Register handles user registration
+// DTO для запросов
+type loginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type verifyCodeRequest struct {
+	Code string `json:"code"`
+}
+
+type emailRequest struct {
+	Email string `json:"email"`
+}
+
+type resetPasswordRequest struct {
+	Token       string `json:"token"`
+	NewPassword string `json:"newPassword"`
+}
+
+func decodeJSON(w http.ResponseWriter, r *http.Request, dst interface{}) bool {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(dst); err != nil {
+		log.Printf("decodeJSON error: %v", err)
+		resp.Error(w, http.StatusBadRequest, errInvalidRequestBody)
+		return false
+	}
+	return true
+}
+
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var userInput domain.UserRegistration
-	if err := json.NewDecoder(r.Body).Decode(&userInput); err != nil {
-		api.JSONError(w, http.StatusBadRequest, "Invalid request body")
+	if !decodeJSON(w, r, &userInput) {
 		return
 	}
 
-	// Validate input
 	if err := validateRegistrationInput(userInput); err != nil {
-		api.JSONError(w, http.StatusBadRequest, err.Error())
+		resp.Error(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -45,8 +90,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.authService.RegisterUser(ctx, userInput)
 	if err != nil {
-		// In a real implementation, you would check the specific error type
-		api.JSONError(w, http.StatusInternalServerError, "Failed to register user")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to register user"))
 		log.Printf("Registration error: %v", err)
 		return
 	}
@@ -60,62 +104,56 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		},
 		"message": "Verification code sent to your email. Please check your inbox.",
 	}
-
-	api.JSONResponse(w, http.StatusCreated, response)
+	resp.Success(w, response)
 }
 
-// Login handles user login
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var loginInput struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+	defer r.Body.Close()
+	var input loginRequest
+	if !decodeJSON(w, r, &input) {
+		return
 	}
-
-	if err := json.NewDecoder(r.Body).Decode(&loginInput); err != nil {
-		api.JSONError(w, http.StatusBadRequest, "Invalid request body")
+	if err := validateLoginInput(input); err != nil {
+		resp.Error(w, http.StatusBadRequest, err)
 		return
 	}
 
-	// Validate input
-	if err := validateLoginInput(loginInput); err != nil {
-		api.JSONError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	_, err := h.authService.LoginUser(ctx, loginInput.Email, loginInput.Password)
+	// Метод LoginUser теперь возвращает (string, error) - код подтверждения
+	_, err := h.authService.LoginUser(ctx, input.Email, input.Password)
 	if err != nil {
-		// Don't reveal which part failed for security
-		api.JSONError(w, http.StatusUnauthorized, "Invalid credentials")
+		log.Printf("Login error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errInvalidCredentials)
 		return
 	}
 
 	response := map[string]interface{}{
 		"message": "Verification code sent to your email. Please check your inbox.",
 	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, response)
 }
 
-// VerifyCode handles verification code submission
 func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
-	var verifyInput struct {
-		Code string `json:"code"`
+	defer r.Body.Close()
+	var input verifyCodeRequest
+	if !decodeJSON(w, r, &input) {
+		return
 	}
-
-	if err := json.NewDecoder(r.Body).Decode(&verifyInput); err != nil {
-		api.JSONError(w, http.StatusBadRequest, "Invalid request body")
+	input.Code = strings.TrimSpace(input.Code)
+	if input.Code == "" {
+		resp.Error(w, http.StatusBadRequest, errCodeRequired)
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	user, accessToken, err := h.authService.VerifyCode(ctx, verifyInput.Code)
+	user, accessToken, err := h.authService.VerifyCode(ctx, input.Code)
 	if err != nil {
-		api.JSONError(w, http.StatusUnauthorized, "Invalid or expired code")
+		log.Printf("VerifyCode error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errInvalidOrExpiredCode)
 		return
 	}
 
@@ -127,148 +165,124 @@ func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 			"isVerified": user.IsVerified,
 		},
 		"accessToken": accessToken,
-		"expiresIn":   3600, // 1 hour
+		"expiresIn":   accessTokenTTLSeconds,
 	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, response)
 }
 
-// RefreshToken handles token refresh
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
-	authHeader := r.Header.Get("Authorization")
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
 	if authHeader == "" {
-		api.JSONError(w, http.StatusUnauthorized, "Authorization header required")
+		resp.Error(w, http.StatusUnauthorized, errAuthHeaderRequired)
 		return
 	}
-
-	if !strings.HasPrefix(authHeader, "Bearer ") {
-		api.JSONError(w, http.StatusUnauthorized, "Invalid authorization header format")
+	const prefix = "Bearer "
+	if !strings.HasPrefix(authHeader, prefix) || len(authHeader) <= len(prefix) {
+		resp.Error(w, http.StatusUnauthorized, errInvalidAuthHeaderFormat)
 		return
 	}
+	refreshToken := strings.TrimSpace(authHeader[len(prefix):])
 
-	refreshToken := authHeader[7:] // Remove "Bearer " prefix
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
 	accessToken, err := h.authService.RefreshToken(ctx, refreshToken)
 	if err != nil {
-		api.JSONError(w, http.StatusUnauthorized, "Invalid refresh token")
+		log.Printf("RefreshToken error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errInvalidRefreshToken)
 		return
 	}
 
 	response := map[string]interface{}{
 		"accessToken": accessToken,
-		"expiresIn":   3600, // 1 hour
+		"expiresIn":   accessTokenTTLSeconds,
 	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, response)
 }
 
-// Logout handles user logout
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	authHeader := r.Header.Get("Authorization")
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
 	if authHeader == "" {
-		api.JSONError(w, http.StatusUnauthorized, "Authorization header required")
+		resp.Error(w, http.StatusUnauthorized, errAuthHeaderRequired)
 		return
 	}
-
-	if !strings.HasPrefix(authHeader, "Bearer ") {
-		api.JSONError(w, http.StatusUnauthorized, "Invalid authorization header format")
+	const prefix = "Bearer "
+	if !strings.HasPrefix(authHeader, prefix) || len(authHeader) <= len(prefix) {
+		resp.Error(w, http.StatusUnauthorized, errInvalidAuthHeaderFormat)
 		return
 	}
-
-	refreshToken := authHeader[7:] // Remove "Bearer " prefix
-
+	refreshToken := strings.TrimSpace(authHeader[len(prefix):])
 	h.authService.RevokeToken(refreshToken)
 
 	response := map[string]interface{}{
 		"message": "Successfully logged out",
 	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, response)
 }
 
-// ForgotPassword handles password reset request
 func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
-	var emailInput struct {
-		Email string `json:"email"`
+	defer r.Body.Close()
+	var input emailRequest
+	if !decodeJSON(w, r, &input) {
+		return
 	}
-
-	if err := json.NewDecoder(r.Body).Decode(&emailInput); err != nil {
-		api.JSONError(w, http.StatusBadRequest, "Invalid request body")
+	if !isValidEmail(input.Email) {
+		resp.Error(w, http.StatusBadRequest, errInvalidEmailFormat)
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	err := h.authService.ForgotPassword(ctx, emailInput.Email)
-	if err != nil {
-		api.JSONError(w, http.StatusInternalServerError, "Failed to process password reset")
-		log.Printf("Password reset error: %v", err)
+	if err := h.authService.ForgotPassword(ctx, input.Email); err != nil {
+		log.Printf("Password reset request error: %v", err)
+		resp.Error(w, http.StatusInternalServerError, errFailedToProcessReset)
 		return
 	}
-
-	response := map[string]interface{}{
-		"message": "If this email is registered, you will receive a password reset link.",
-	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, map[string]interface{}{"message": "Password reset instructions sent to your email"})
 }
 
-// ResetPassword handles password reset
 func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
-	var resetInput struct {
-		Token       string `json:"token"`
-		NewPassword string `json:"newPassword"`
+	defer r.Body.Close()
+	var input resetPasswordRequest
+	if !decodeJSON(w, r, &input) {
+		return
 	}
-
-	if err := json.NewDecoder(r.Body).Decode(&resetInput); err != nil {
-		api.JSONError(w, http.StatusBadRequest, "Invalid request body")
+	input.Token = strings.TrimSpace(input.Token)
+	if input.Token == "" {
+		resp.Error(w, http.StatusBadRequest, errTokenRequired)
+		return
+	}
+	if err := validatePasswordStrength(input.NewPassword); err != nil {
+		resp.Error(w, http.StatusBadRequest, err)
 		return
 	}
 
-	// Validate password strength
-	if err := validatePasswordStrength(resetInput.NewPassword); err != nil {
-		api.JSONError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	err := h.authService.ResetPassword(ctx, resetInput.Token, resetInput.NewPassword)
-	if err != nil {
-		api.JSONError(w, http.StatusUnauthorized, "Invalid or expired reset token")
+	if err := h.authService.ResetPassword(ctx, input.Token, input.NewPassword); err != nil {
+		log.Printf("ResetPassword error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errInvalidOrExpiredResetToken)
 		return
 	}
-
-	response := map[string]interface{}{
-		"message": "Password successfully reset. Please login with your new password.",
-	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, map[string]interface{}{"message": "Password successfully reset. Please login with your new password."})
 }
 
-// RegisterRoutes registers authentication routes
 func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	auth := r.PathPrefix("/api/auth").Subrouter()
-
-	// Public routes
-	auth.HandleFunc("/register", h.Register).Methods("POST")
-	auth.HandleFunc("/login", h.Login).Methods("POST")
-	auth.HandleFunc("/verify", h.VerifyCode).Methods("POST")
-	auth.HandleFunc("/forgot-password", h.ForgotPassword).Methods("POST")
-	auth.HandleFunc("/reset-password", h.ResetPassword).Methods("POST")
-
-	// Protected routes
-	auth.HandleFunc("/refresh", h.RefreshToken).Methods("POST")
-	auth.HandleFunc("/logout", h.Logout).Methods("POST")
+	auth.HandleFunc("/register", h.Register).Methods(http.MethodPost)
+	auth.HandleFunc("/login", h.Login).Methods(http.MethodPost)
+	auth.HandleFunc("/verify", h.VerifyCode).Methods(http.MethodPost)
+	auth.HandleFunc("/forgot-password", h.ForgotPassword).Methods(http.MethodPost)
+	auth.HandleFunc("/reset-password", h.ResetPassword).Methods(http.MethodPost)
+	auth.HandleFunc("/refresh", h.RefreshToken).Methods(http.MethodPost)
+	auth.HandleFunc("/logout", h.Logout).Methods(http.MethodPost)
 }
 
-// validateRegistrationInput validates registration input
 func validateRegistrationInput(input domain.UserRegistration) error {
+	input.Email = strings.TrimSpace(input.Email)
+	input.Username = strings.TrimSpace(input.Username)
 	if input.Email == "" {
 		return errors.New("email is required")
 	}
@@ -287,11 +301,8 @@ func validateRegistrationInput(input domain.UserRegistration) error {
 	return nil
 }
 
-// validateLoginInput validates login input
-func validateLoginInput(input struct {
-	Email    string
-	Password string
-}) error {
+func validateLoginInput(input loginRequest) error {
+	input.Email = strings.TrimSpace(input.Email)
 	if input.Email == "" {
 		return errors.New("email is required")
 	}
@@ -304,43 +315,32 @@ func validateLoginInput(input struct {
 	return nil
 }
 
-// validatePasswordStrength checks password strength
 func validatePasswordStrength(password string) error {
 	if len(password) < 8 {
 		return errors.New("password must be at least 8 characters")
 	}
-	if !containsDigit(password) {
+	var hasDigit, hasSpecial bool
+	for _, r := range password {
+		if unicode.IsDigit(r) {
+			hasDigit = true
+		}
+		if unicode.IsPunct(r) || unicode.IsSymbol(r) {
+			hasSpecial = true
+		}
+	}
+	if !hasDigit {
 		return errors.New("password must contain at least one number")
 	}
-	if !containsSpecialChar(password) {
+	if !hasSpecial {
 		return errors.New("password must contain at least one special character")
 	}
 	return nil
 }
 
-// isValidEmail validates email format
 func isValidEmail(email string) bool {
-	// Simple email validation - in a real application, use a proper email validation library
-	return strings.Contains(email, "@") && strings.Contains(email, ".")
-}
-
-// containsDigit checks if string contains a digit
-func containsDigit(s string) bool {
-	for _, c := range s {
-		if c >= '0' && c <= '9' {
-			return true
-		}
+	if email == "" {
+		return false
 	}
-	return false
-}
-
-// containsSpecialChar checks if string contains special character
-func containsSpecialChar(s string) bool {
-	specialChars := "!@#$%^&*()_+-=[]{}|;:,.<>?/`~"
-	for _, c := range s {
-		if strings.ContainsRune(specialChars, c) {
-			return true
-		}
-	}
-	return false
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }

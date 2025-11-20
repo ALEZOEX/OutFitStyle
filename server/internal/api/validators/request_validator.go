@@ -1,7 +1,6 @@
 package validators
 
 import (
-	"errors"
 	"net/url"
 	"strconv"
 )
@@ -29,16 +28,13 @@ func (ve ValidationErrors) Error() string {
 // RecommendationRequestValidator validates recommendation request parameters
 type RecommendationRequestValidator struct{}
 
-// NewRecommendationRequestValidator creates a new recommendation request validator
 func NewRecommendationRequestValidator() *RecommendationRequestValidator {
 	return &RecommendationRequestValidator{}
 }
 
-// ValidateGetRecommendations validates the parameters for getting recommendations
 func (v *RecommendationRequestValidator) ValidateGetRecommendations(query url.Values) error {
 	var errs ValidationErrors
-	
-	// Validate city parameter
+
 	city := query.Get("city")
 	if city == "" {
 		errs = append(errs, ValidationError{
@@ -46,8 +42,7 @@ func (v *RecommendationRequestValidator) ValidateGetRecommendations(query url.Va
 			Message: "city parameter is required",
 		})
 	}
-	
-	// Validate user_id parameter if provided
+
 	userIDStr := query.Get("user_id")
 	if userIDStr != "" {
 		if _, err := strconv.Atoi(userIDStr); err != nil {
@@ -57,35 +52,30 @@ func (v *RecommendationRequestValidator) ValidateGetRecommendations(query url.Va
 			})
 		}
 	}
-	
+
 	if len(errs) > 0 {
 		return errs
 	}
-	
+
 	return nil
 }
 
-// ValidateGetRecommendationHistory validates the parameters for getting recommendation history
 func (v *RecommendationRequestValidator) ValidateGetRecommendationHistory(query url.Values) error {
 	var errs ValidationErrors
-	
-	// Validate user_id parameter
+
 	userIDStr := query.Get("user_id")
 	if userIDStr == "" {
 		errs = append(errs, ValidationError{
 			Field:   "user_id",
 			Message: "user_id parameter is required",
 		})
-	} else {
-		if _, err := strconv.Atoi(userIDStr); err != nil {
-			errs = append(errs, ValidationError{
-				Field:   "user_id",
-				Message: "user_id must be a valid integer",
-			})
-		}
+	} else if _, err := strconv.Atoi(userIDStr); err != nil {
+		errs = append(errs, ValidationError{
+			Field:   "user_id",
+			Message: "user_id must be a valid integer",
+		})
 	}
-	
-	// Validate limit parameter if provided
+
 	limitStr := query.Get("limit")
 	if limitStr != "" {
 		if limit, err := strconv.Atoi(limitStr); err != nil || limit <= 0 {
@@ -95,10 +85,10 @@ func (v *RecommendationRequestValidator) ValidateGetRecommendationHistory(query 
 			})
 		}
 	}
-	
+
 	if len(errs) > 0 {
 		return errs
 	}
-	
+
 	return nil
 }

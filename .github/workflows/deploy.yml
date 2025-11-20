@@ -1,0 +1,26 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to production server
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: |
+          echo "Pulling latest Docker images..."
+          docker-compose -f docker-compose.prod.yml pull
+          echo "Starting services..."
+          docker-compose -f docker-compose.prod.yml up -d
+          echo "Deployment completed!"

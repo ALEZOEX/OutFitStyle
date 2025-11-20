@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"outfitstyle/server/internal/core/domain"
 )
 
 // TokenService handles JWT token generation and validation
 type TokenService struct {
-	jwtSecret           []byte
-	accessTokenExpiry   time.Duration
-	refreshTokenExpiry  time.Duration
+	jwtSecret          []byte
+	accessTokenExpiry  time.Duration
+	refreshTokenExpiry time.Duration
 }
 
 // NewTokenService creates a new token service
@@ -28,7 +29,7 @@ func NewTokenService(
 }
 
 // GenerateAccessToken generates a new access token for a user
-func (s *TokenService) GenerateAccessToken(user *User) (string, error) {
+func (s *TokenService) GenerateAccessToken(user *domain.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":  user.ID,
 		"email":    user.Email,
@@ -41,7 +42,7 @@ func (s *TokenService) GenerateAccessToken(user *User) (string, error) {
 }
 
 // GenerateRefreshToken generates a new refresh token for a user
-func (s *TokenService) GenerateRefreshToken(user *User) (string, error) {
+func (s *TokenService) GenerateRefreshToken(user *domain.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": user.ID,
 		"exp":     time.Now().Add(s.refreshTokenExpiry).Unix(),

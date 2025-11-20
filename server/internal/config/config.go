@@ -36,12 +36,14 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Host     string `env:"DB_HOST" default:"localhost"`
-	Port     string `env:"DB_PORT" default:"5432"`
-	User     string `env:"DB_USER" default:"outfitstyle"`
-	Password string `env:"DB_PASSWORD"`
-	Name     string `env:"DB_NAME" default:"outfitstyle"`
-	SSLMode  string `env:"DB_SSL_MODE" default:"require"`
+	Host         string `env:"DB_HOST" default:"localhost"`
+	Port         string `env:"DB_PORT" default:"5432"`
+	User         string `env:"DB_USER" default:"outfitstyle"`
+	Password     string `env:"DB_PASSWORD"`
+	Name         string `env:"DB_NAME" default:"outfitstyle"`
+	SSLMode      string `env:"DB_SSL_MODE" default:"require"`
+	MaxOpenConns int    `env:"DB_MAX_OPEN_CONNS" default:"25"`
+	MaxIdleConns int    `env:"DB_MAX_IDLE_CONNS" default:"5"`
 }
 
 type WeatherAPIConfig struct {
@@ -71,6 +73,7 @@ type SecurityConfig struct {
 	MaxLoginAttempts       int    `env:"MAX_LOGIN_ATTEMPTS" default:"5"`
 	BlockDuration          int    `env:"BLOCK_DURATION" default:"30"` // minutes
 	CORSAllowedOrigins     string `env:"CORS_ALLOWED_ORIGINS" default:"*"`
+	RateLimit              int    `env:"RATE_LIMIT" default:"100"` // requests per minute
 }
 
 type LoggingConfig struct {
@@ -110,6 +113,86 @@ func Load() (*AppConfig, error) {
 
 func (c *AppConfig) Validate() error {
 	return validateConfig(c)
+}
+
+// Load configuration functions
+func loadServerConfig() ServerConfig {
+	return ServerConfig{
+		Port:            getEnv("PORT", "8080"),
+		Host:            getEnv("HOST", "0.0.0.0"),
+		Environment:     getEnv("ENVIRONMENT", "development"),
+		Debug:           getEnvBool("DEBUG", false),
+		ReadTimeout:     getEnvDuration("READ_TIMEOUT", 15*time.Second),
+		WriteTimeout:    getEnvDuration("WRITE_TIMEOUT", 30*time.Second),
+		ShutdownTimeout: getEnvDuration("SHUTDOWN_TIMEOUT", 30*time.Second),
+		EnablePprof:     getEnvBool("ENABLE_PPROF", false),
+	}
+}
+
+func loadDatabaseConfig() DatabaseConfig {
+	return DatabaseConfig{
+		Host:         getEnv("DB_HOST", "localhost"),
+		Port:         getEnv("DB_PORT", "5432"),
+		User:         getEnv("DB_USER", "outfitstyle"),
+		Password:     getEnv("DB_PASSWORD", ""),
+		Name:         getEnv("DB_NAME", "outfitstyle"),
+		SSLMode:      getEnv("DB_SSL_MODE", "require"),
+		MaxOpenConns: getEnvInt("DB_MAX_OPEN_CONNS", 25, 1, 100),
+		MaxIdleConns: getEnvInt("DB_MAX_IDLE_CONNS", 5, 1, 50),
+	}
+}
+
+func loadWeatherAPIConfig() WeatherAPIConfig {
+	return WeatherAPIConfig{
+		Key:     getEnv("WEATHER_API_KEY", ""),
+		BaseURL: getEnv("WEATHER_API_URL", "https://api.openweathermap.org/data/2.5"),
+		Timeout: getEnvInt("WEATHER_API_TIMEOUT", 10, 1, 300),
+	}
+}
+
+func loadMLServiceConfig() MLServiceConfig {
+	return MLServiceConfig{
+		BaseURL: getEnv("ML_SERVICE_URL", "http://localhost:5000"),
+		Timeout: getEnvInt("ML_SERVICE_TIMEOUT", 30, 1, 300),
+	}
+}
+
+func loadEmailConfig() EmailConfig {
+	return EmailConfig{
+		SMTPHost:     getEnv("SMTP_HOST", ""),
+		SMTPPort:     getEnvInt("SMTP_PORT", 587, 1, 65535),
+		SMTPUsername: getEnv("SMTP_USERNAME", ""),
+		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
+		FromEmail:    getEnv("SMTP_FROM_EMAIL", ""),
+	}
+}
+
+func loadSecurityConfig() SecurityConfig {
+	return SecurityConfig{
+		JWTSecret:              getEnv("JWT_SECRET", ""),
+		TokenExpiryHours:       getEnvInt("TOKEN_EXPIRY_HOURS", 24, 1, 168),
+		RefreshTokenExpiryDays: getEnvInt("REFRESH_TOKEN_EXPIRY_DAYS", 7, 1, 365),
+		VerificationCodeExpiry: getEnvInt("VERIFICATION_CODE_EXPIRY", 10, 1, 1440),
+		MaxLoginAttempts:       getEnvInt("MAX_LOGIN_ATTEMPTS", 5, 1, 100),
+		BlockDuration:          getEnvInt("BLOCK_DURATION", 30, 1, 1440),
+		CORSAllowedOrigins:     getEnv("CORS_ALLOWED_ORIGINS", "*"),
+		RateLimit:              getEnvInt("RATE_LIMIT", 100, 1, 10000),
+	}
+}
+
+func loadLoggingConfig() LoggingConfig {
+	return LoggingConfig{
+		Level:  getEnv("LOG_LEVEL", "info"),
+		Format: getEnv("LOG_FORMAT", "json"),
+	}
+}
+
+func loadCacheConfig() CacheConfig {
+	return CacheConfig{
+		Enabled:    getEnvBool("CACHE_ENABLED", true),
+		RedisURL:   getEnv("REDIS_URL", "redis://localhost:6379"),
+		Expiration: getEnvInt("CACHE_EXPIRATION", 300, 1, 3600),
+	}
 }
 
 func validateConfig(cfg *AppConfig) error {
@@ -189,31 +272,6 @@ func getEnvInt(key string, defaultValue, min, max int) int {
 	return defaultValue
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-// Load configuration functions
-func loadServerConfig() ServerConfig {
-	return ServerConfig{
-		Port:            getEnv("PORT", "8080"),
-		Host:            getEnv("HOST", "0.0.0.0"),
-		Environment:     getEnv("ENVIRONMENT", "development"),
-		Debug:           getEnvBool("DEBUG", false),
-		ReadTimeout:     getEnvDuration("READ_TIMEOUT", 15*time.Second),
-		WriteTimeout:    getEnvDuration("WRITE_TIMEOUT", 30*time.Second),
-		ShutdownTimeout: getEnvDuration("SHUTDOWN_TIMEOUT", 30*time.Second),
-		EnablePprof:     getEnvBool("ENABLE_PPROF", false),
-	}
-}
-
-// Implement similar load functions for other config types...
-
 func getEnvDuration(key string, defaultValue time.Duration) time.Duration {
 	if value := os.Getenv(key); value != "" {
 		if d, err := time.ParseDuration(value); err == nil {
@@ -221,4 +279,13 @@ func getEnvDuration(key string, defaultValue time.Duration) time.Duration {
 		}
 	}
 	return defaultValue
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

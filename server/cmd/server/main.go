@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
+	stdhttp "net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,13 +12,13 @@ import (
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
+	"outfitstyle/server/internal/api/handlers"
+	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/config"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/infrastructure/external"
 	"outfitstyle/server/internal/infrastructure/persistence/postgres"
 	"outfitstyle/server/internal/pkg/health"
-	"outfitstyle/server/internal/pkg/http"
-	"outfitstyle/server/internal/pkg/http/middleware"
 )
 
 func main() {
@@ -43,7 +43,7 @@ func main() {
 	// Initialize database
 	db, err := postgres.NewDB(cfg.Database.DatabaseURL(), logger)
 	if err != nil {
-		logger.Fatal("Database connection failed", zap.Error(err))
+		logger.Fatal("Databaseconnection failed", zap.Error(err))
 	}
 	defer db.Close()
 
@@ -64,14 +64,18 @@ func main() {
 	userRepo := postgres.NewUserRepository(db, logger)
 	recommendationRepo := postgres.NewRecommendationRepository(db, logger)
 
-	// Initialize email service (with fallback)
+	// Initialize email service
 	var emailService services.EmailService
 	if cfg.Email.SMTPHost != "" {
-		emailService, err = services.NewEmailService(cfg.Email, logger)
-		if err != nil {
-			logger.Warn("Email service initialization failed, using fallback", zap.Error(err))
-			emailService = services.NewNoopEmailService()
-		}
+		emailSvc := services.NewEmailService(
+			cfg.Email.SMTPHost,
+			cfg.Email.SMTPPort,
+			cfg.Email.SMTPUsername,
+			cfg.Email.SMTPPassword,
+			"noreply@outfitstyle.com",
+			logger,
+		)
+		emailService = emailSvc
 	} else {
 		emailService = services.NewNoopEmailService()
 	}
@@ -81,12 +85,11 @@ func main() {
 		cfg.Security.JWTSecret,
 		time.Duration(cfg.Security.TokenExpiryHours)*time.Hour,
 		time.Duration(cfg.Security.RefreshTokenExpiryDays)*24*time.Hour,
-		logger,
 	)
 
 	// Initialize auth service
 	authConfig := services.AuthConfig{
-		TokenExpiry:            time.Duration(cfg.Security.TokenExpiryHours) * time.Hour,
+		TokenExpiryHours:       cfg.Security.TokenExpiryHours,
 		VerificationCodeExpiry: time.Duration(cfg.Security.VerificationCodeExpiry) * time.Minute,
 		MaxLoginAttempts:       cfg.Security.MaxLoginAttempts,
 		BlockDuration:          time.Duration(cfg.Security.BlockDuration) * time.Minute,
@@ -96,7 +99,6 @@ func main() {
 		emailService,
 		tokenService,
 		authConfig,
-		logger,
 	)
 
 	// Initialize application services
@@ -111,34 +113,35 @@ func main() {
 	userService := services.NewUserService(userRepo, logger)
 
 	// Initialize handlers
-	recommendationHandler := http.NewRecommendationHandler(recommendationService, logger)
-	authHandler := http.NewAuthHandler(authService, logger)
-	userHandler := http.NewUserHandler(userService, authHandler, logger)
+	recommendationHandler := handlers.NewRecommendationHandler(recommendationService, weatherService, logger)
+	authHandler := handlers.NewAuthHandler(authService)
+	userHandler := handlers.NewUserHandler(userService, logger)
 
 	// Setup router
 	router := setupRouter(cfg, recommendationHandler, authHandler, userHandler, logger)
 
 	// Setup health checks
-	health.RegisterChecks(map[string]health.Checker{
+	checks := map[string]health.Checker{
 		"database": db,
 		"weather":  weatherService,
 		"ml":       mlService,
-	})
+	}
+	health.RegisterChecks(checks)
 
 	// Setup server
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
-	srv := &http.Server{
+	srv := &stdhttp.Server{
 		Addr:         addr,
 		Handler:      router,
-		ReadTimeout:  cfg.Server.ReadTimeout,
-		WriteTimeout: cfg.Server.WriteTimeout,
+		ReadTimeout:  time.Duration(cfg.Server.ReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(cfg.Server.WriteTimeout) * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
 
 	// Start server in a goroutine
 	go func() {
 		logger.Info("Starting server", zap.String("address", addr))
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.ListenAndServe(); err != nil && err != stdhttp.ErrServerClosed {
 			logger.Fatal("Server failed to start", zap.Error(err))
 		}
 	}()
@@ -149,7 +152,7 @@ func main() {
 	<-shutdown
 	logger.Info("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.Server.ShutdownTimeout)*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
@@ -158,8 +161,6 @@ func main() {
 
 	logger.Info("Server stopped successfully")
 }
-
-// Helper functions
 
 func setupLogger() (*zap.Logger, error) {
 	var cfg zap.Config
@@ -178,53 +179,46 @@ func setupLogger() (*zap.Logger, error) {
 
 func setupRouter(
 	cfg *config.AppConfig,
-	recommendationHandler *http.RecommendationHandler,
-	authHandler *http.AuthHandler,
-	userHandler *http.UserHandler,
+	recommendationHandler *handlers.RecommendationHandler,
+	authHandler *handlers.AuthHandler,
+	userHandler *handlers.UserHandler,
 	logger *zap.Logger,
 ) *mux.Router {
 	router := mux.NewRouter()
 
-	// Middleware
+	// Enablemiddleware
 	router.Use(
 		middleware.CORSMiddleware(cfg.Security.GetAllowedOrigins()),
 		middleware.LoggerMiddleware(logger),
-		middleware.RecoveryMiddleware(logger),
 		middleware.RateLimitMiddleware(cfg.Security.RateLimit, time.Minute),
 	)
 
 	// Health check endpoint
-	router.HandleFunc("/health", health.Handler).Methods(http.MethodGet)
+	router.HandleFunc("/health", health.Handler).Methods(stdhttp.MethodGet)
 
 	// API routes
 	api := router.PathPrefix("/api/v1").Subrouter()
 
 	// Public routes (authentication)
 	auth := api.PathPrefix("/auth").Subrouter()
-	auth.HandleFunc("/register", authHandler.Register).Methods(http.MethodPost)
-	auth.HandleFunc("/login", authHandler.Login).Methods(http.MethodPost)
-	auth.HandleFunc("/verify", authHandler.Verify).Methods(http.MethodPost)
-	auth.HandleFunc("/refresh", authHandler.Refresh).Methods(http.MethodPost)
+	auth.HandleFunc("/register", authHandler.Register).Methods(stdhttp.MethodPost)
+	auth.HandleFunc("/login", authHandler.Login).Methods(stdhttp.MethodPost)
+	auth.HandleFunc("/verify", authHandler.VerifyCode).Methods(stdhttp.MethodPost)
+	auth.HandleFunc("/refresh", authHandler.RefreshToken).Methods(stdhttp.MethodPost)
 
 	// Protected routes
 	protected := api.PathPrefix("").Subrouter()
-	protected.Use(middleware.AuthMiddleware(authHandler.AuthService))
 
-	// Recommendations
 	recommendations := protected.PathPrefix("/recommendations").Subrouter()
-	recommendations.HandleFunc("", recommendationHandler.GetRecommendations).Methods(http.MethodGet)
-	recommendations.HandleFunc("/{id}", recommendationHandler.GetRecommendation).Methods(http.MethodGet)
+	recommendations.HandleFunc("", recommendationHandler.GetRecommendations).Methods(stdhttp.MethodGet)
+	recommendations.HandleFunc("/{id}", recommendationHandler.GetRecommendationByID).Methods(stdhttp.MethodGet)
 
-	// Users
 	users := protected.PathPrefix("/users").Subrouter()
-	users.HandleFunc("/me", userHandler.GetCurrentUser).Methods(http.MethodGet)
-	users.HandleFunc("/me/profile", userHandler.UpdateProfile).Methods(http.MethodPut)
-	users.HandleFunc("/me/preferences", userHandler.UpdatePreferences).Methods(http.MethodPut)
-	users.HandleFunc("/me/wardrobe", userHandler.GetUserWardrobe).Methods(http.MethodGet)
-	users.HandleFunc("/me/wardrobe", userHandler.AddWardrobeItem).Methods(http.MethodPost)
-	users.HandleFunc("/me/plans", userHandler.GetUserPlans).Methods(http.MethodGet)
-	users.HandleFunc("/me/plans", userHandler.CreatePlan).Methods(http.MethodPost)
-	users.HandleFunc("/me/plans/{id}", userHandler.DeletePlan).Methods(http.MethodDelete)
+	users.HandleFunc("/{id}/profile", userHandler.GetUserProfile).Methods(stdhttp.MethodGet)
+	users.HandleFunc("/{id}/profile", userHandler.UpdateUserProfile).Methods(stdhttp.MethodPut)
+	users.HandleFunc("/{id}/outfit-plans", userHandler.GetUserOutfitPlans).Methods(stdhttp.MethodGet)
+	users.HandleFunc("/{id}/outfit-plans", userHandler.CreateOutfitPlan).Methods(stdhttp.MethodPost)
+	users.HandleFunc("/{id}/outfit-plans/{plan_id}", userHandler.DeleteOutfitPlan).Methods(stdhttp.MethodDelete)
 
 	return router
 }

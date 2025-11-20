@@ -1,0 +1,45 @@
+# Stage 1: Build the Go application
+FROM golang:1.22-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates tzdata gcc musl-dev linux-headers
+
+# Set working directory
+WORKDIR /app
+
+# Copy go.mod and go.sum
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the binary
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-w -s -extldflags '-static'" -o server ./cmd/server
+
+# Stage 2: Runtime
+FROM scratch
+
+# Copy certificates for HTTPS calls
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Copy timezone data
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+
+# Copy the binary
+COPY --from=builder /app/server /server
+
+# Create non-root user
+RUN adduser -D -u 1000 appuser
+USER appuser
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD ["/server", "health"]
+
+# Run the binary
+ENTRYPOINT ["/server"]

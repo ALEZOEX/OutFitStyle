@@ -1,9 +1,10 @@
-packagehandlers
+package handlers
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,20 +14,21 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.uber.org/zap"
 
-"outfitstyle/server/internal/core/application/services"
+	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/infrastructure/external"
-	"outfitstyle/server/internal/pkg/http"
+	resp "outfitstyle/server/internal/pkg/http"
 )
 
 var (
 	recommendationDuration = promauto.NewHistogram(prometheus.HistogramOpts{
-		Name:"outfitstyle_recommendation_duration_seconds",
+		Name:    "outfitstyle_recommendation_duration_seconds",
 		Help:    "Duration of recommendation requests in seconds",
 		Buckets: prometheus.ExponentialBuckets(0.1, 2, 10),
 	})
+
 	recommendationsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name:"outfitstyle_recommendations_total",
+		Name: "outfitstyle_recommendations_total",
 		Help: "Total number of recommendations requested",
 	}, []string{"user_id", "status"})
 )
@@ -34,7 +36,8 @@ var (
 // RecommendationHandler handles recommendation-related HTTP requests
 type RecommendationHandler struct {
 	recommendationService *services.RecommendationService
-	weatherService        *external.WeatherServicelogger    *zap.Logger
+	weatherService        *external.WeatherService
+	logger                *zap.Logger
 }
 
 // NewRecommendationHandler creates a new recommendation handler
@@ -44,7 +47,7 @@ func NewRecommendationHandler(
 	logger *zap.Logger,
 ) *RecommendationHandler {
 	return &RecommendationHandler{
-		recommendationService:recommendationService,
+		recommendationService: recommendationService,
 		weatherService:        weatherService,
 		logger:                logger,
 	}
@@ -53,104 +56,111 @@ func NewRecommendationHandler(
 // GetRecommendations handles GET /api/recommendations
 func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	defer func(){
-		duration:=time.Since(start).Seconds()
+	defer func() {
+		duration := time.Since(start).Seconds()
 		recommendationDuration.Observe(duration)
 	}()
 
 	// Parse query parameters
 	city := r.URL.Query().Get("city")
 	if city == "" {
-		http.BadRequest(w, fmt.Errorf("city parameter is required"))
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("city parameter is required"))
 		return
 	}
 
-	userIDStr:= r.URL.Query().Get("user_id")
-	userID := 1 // Default user ID for demo
+	userIDStr := r.URL.Query().Get("user_id")
+	userID := 1 // Default user ID
 	if userIDStr != "" {
 		id, err := strconv.Atoi(userIDStr)
 		if err != nil {
-			http.BadRequest(w, fmt.Errorf("invalid user_id parameter"))
+			resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id parameter"))
 			return
 		}
-		userID = id}
+		userID = id
+	}
 
 	// Create context with timeout
 	ctx := r.Context()
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	h.logger.Info("📍 Request: city=%s, user_id=%d",
+	h.logger.Info("Get recommendations request",
 		zap.String("city", city),
-		zap.Int("user_id", userID))
+		zap.Int("user_id", userID),
+	)
 
 	// Get weather data
 	weather, err := h.weatherService.GetWeather(ctxWithTimeout, city)
 	if err != nil {
-		h.logger.Error("❌ Weather error", zap.Error(err))
-		http.ServiceUnavailable(w, fmt.Errorf("Failed to get weather data"))
+		h.logger.Error("Weather error", zap.Error(err))
+		resp.Error(w, http.StatusServiceUnavailable, fmt.Errorf("failed to get weather data"))
 		recommendationsTotal.WithLabelValues(strconv.Itoa(userID), "error_weather").Inc()
 		return
 	}
 
-// Prepare recommendation request
+	// Prepare recommendation request
+	// ВАЖНО: Используем weather.WeatherData.Field, так как ExtendedWeatherData встраивает WeatherData
 	req := domain.RecommendationRequest{
-		UserID: userID,
+		UserID: domain.ID(userID),
 		WeatherData: domain.WeatherData{
-			Location:    weather.Location,
-		Temperature: weather.Temperature,
-			FeelsLike:   weather.FeelsLike,
-			Weather:     weather.Weather,
-			Humidity:    weather.Humidity,
-			WindSpeed:   weather.WindSpeed,
+			Location:    weather.WeatherData.Location,
+			Temperature: weather.WeatherData.Temperature,
+			FeelsLike:   weather.WeatherData.FeelsLike,
+			Weather:     weather.WeatherData.Weather,
+			Humidity:    weather.WeatherData.Humidity,
+			WindSpeed:   weather.WeatherData.WindSpeed,
+			MinTemp:     weather.WeatherData.MinTemp,
+			MaxTemp:     weather.WeatherData.MaxTemp,
+			WillRain:    weather.WeatherData.WillRain,
+			WillSnow:    weather.WeatherData.WillSnow,
 		},
 	}
 
 	// Get recommendations
 	recommendation, err := h.recommendationService.GetRecommendations(ctxWithTimeout, req)
 	if err != nil {
-		h.logger.Error("❌ Recommendation error",zap.Error(err))
-		http.InternalServerError(w, fmt.Errorf("Failed to get recommendations"))
+		h.logger.Error("Recommendation error", zap.Error(err))
+		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to get recommendations"))
 		recommendationsTotal.WithLabelValues(strconv.Itoa(userID), "error_recommendation").Inc()
-	return
+		return
 	}
 
-outfitScore := 0.0
-	if recommendation.OutfitScore != nil {
-		outfitScore =*recommendation.OutfitScore
+	outfitScore := 0.0
+	if recommendation.OutfitScore > 0 {
+		outfitScore = recommendation.OutfitScore
 	}
 
-	h.logger.Info("✅ Got recommendations",
+	h.logger.Info("Got recommendations",
 		zap.Int("user_id", userID),
-		zap.Int("item_count", len(recommendation.Recommendations)),
-	zap.Float64("score", outfitScore),
-		zap.Bool("ml_powered", recommendation.MLPowered))
+		zap.Int("item_count", len(recommendation.Items)), // Items, не Recommendations
+		zap.Float64("score", outfitScore),
+		zap.Bool("ml_powered", recommendation.MLPowered),
+	)
 
-	// Check for achievements
+	// Check for achievements (async)
 	go h.checkAchievements(userID, weather)
 
 	response := map[string]interface{}{
 		"location":        recommendation.Location,
 		"temperature":     recommendation.Temperature,
-"feels_like":     recommendation.FeelsLike,
+		"feels_like":      recommendation.FeelsLike,
 		"weather":         recommendation.Weather,
-"humidity":        recommendation.Humidity,
+		"humidity":        recommendation.Humidity,
 		"wind_speed":      recommendation.WindSpeed,
 		"min_temp":        recommendation.MinTemp,
 		"max_temp":        recommendation.MaxTemp,
-"will_rain":       recommendation.WillRain,
+		"will_rain":       recommendation.WillRain,
 		"will_snow":       recommendation.WillSnow,
-	"hourly_forecast": weather.HourlyForecast,
+		"hourly_forecast": weather.WeatherData.HourlyForecast,
 		"message":         h.getWeatherMessage(recommendation.Temperature),
-"items":           recommendation.Recommendations,
+		"items":           recommendation.Items,
 		"ml_powered":      recommendation.MLPowered,
 		"outfit_score":    outfitScore,
-"algorithm":       recommendation.Algorithm,
+		"algorithm":       recommendation.Algorithm,
 		"timestamp":       recommendation.Timestamp,
 	}
 
-	// Returnsuccess response
-	http.Success(w, http.StatusOK, response)
+	resp.Success(w, response)
 	recommendationsTotal.WithLabelValues(strconv.Itoa(userID), "success").Inc()
 }
 
@@ -158,223 +168,238 @@ outfitScore := 0.0
 func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get("user_id")
 	if userIDStr == "" {
-	http.BadRequest(w, fmt.Errorf("user_id parameteris required"))
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("user_id parameter is required"))
 		return
 	}
 
 	userID, err := strconv.Atoi(userIDStr)
-if err != nil {
-		http.BadRequest(w, fmt.Errorf("invalid user_id parameter"))
+	if err != nil {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id parameter"))
 		return
 	}
 
-limitStr:= r.URL.Query().Get("limit")
 	limit := 10
-	if limitStr!="" {
-l, err := strconv.Atoi(limitStr)
-		if err == nil && l >0 {
+	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
 			limit = l
 		}
 	}
 
 	ctx := r.Context()
-	history,err := h.recommendationService.GetRecommendationHistory(ctx, userID, limit)
+	history, err := h.recommendationService.GetRecommendationHistory(ctx, userID, limit)
 	if err != nil {
-	h.logger.Error("❌Failed to get recommendation history", zap.Error(err))
-		http.InternalServerError(w, fmt.Errorf("Failed to get recommendation history"))
+		h.logger.Error("Failed to get recommendation history", zap.Error(err))
+		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to get recommendation history"))
 		return
 	}
 
-response := map[string]interface{}{
-"history": history,
+	response := map[string]interface{}{
+		"history": history,
 		"count":   len(history),
 	}
 
-	http.Success(w, http.StatusOK, response)
+	resp.Success(w, response)
 }
 
 // GetRecommendationByID handles GET /api/recommendations/{id}
 func (h *RecommendationHandler) GetRecommendationByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
+
 	id, err := strconv.Atoi(idStr)
-	if err !=nil {
-		http.BadRequest(w, fmt.Errorf("invalid recommendation ID"))
+	if err != nil {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
 
-	ctx :=r.Context()
+	ctx := r.Context()
 	recommendation, err := h.recommendationService.GetRecommendationByID(ctx, id)
-	if err !=nil {
-		h.logger.Error("❌ Failed to get recommendation by ID", zap.Error(err))
-http.NotFound(w,fmt.Errorf("Recommendation not found"))
+	if err != nil {
+		h.logger.Error("Failed to get recommendation by ID", zap.Error(err), zap.Int("id", id))
+		resp.Error(w, http.StatusNotFound, fmt.Errorf("recommendation not found"))
 		return
 	}
 
-	http.Success(w,http.StatusOK, recommendation)
+	resp.Success(w, recommendation)
 }
 
-// RateRecommendation handlesPOST /api/recommendations/{id}/rate
+// RateRecommendation handles POST /api/recommendations/{id}/rate
 func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
+
 	id, err := strconv.Atoi(idStr)
-	if err != nil{
-		http.BadRequest(w, fmt.Errorf("invalid recommendation ID"))
+	if err != nil {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
 
-	// Parse request body
+	defer r.Body.Close()
+
 	var req struct {
 		UserID   int    `json:"user_id"`
 		Rating   int    `json:"rating"`
 		Feedback string `json:"feedback,omitempty"`
 	}
 
-	if err:= json.NewDecoder(r.Body).Decode(&req); err != nil{
-		http.BadRequest(w, fmt.Errorf("invalid request body"))
+	if !decodeJSONReq(w, r, &req) {
 		return
 	}
 
 	if req.Rating < 1 || req.Rating > 5 {
-		http.BadRequest(w, fmt.Errorf("rating must be between 1 and 5"))
-return
-	}
-
-	ctx := r.Context()
-	err = h.recommendationService.RateRecommendation(ctx, req.UserID, id, req.Rating, req.Feedback)
-	if err!= nil {
-		h.logger.Error("Failed to rate recommendation", zap.Error(err))
-		http.InternalServerError(w, fmt.Errorf("Failedto rate recommendation"))
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("rating must be between 1 and 5"))
 		return
 	}
 
-	http.Success(w, http.StatusOK, map[string]string{"message": "Rating saved successfully"})
+	ctx := r.Context()
+	if err := h.recommendationService.RateRecommendation(ctx, req.UserID, id, req.Rating, req.Feedback); err != nil {
+		h.logger.Error("Failed to rate recommendation",
+			zap.Error(err),
+			zap.Int("recommendation_id", id),
+			zap.Int("user_id", req.UserID),
+		)
+		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to rate recommendation"))
+		return
+	}
+
+	resp.Success(w, map[string]string{"message": "Rating saved successfully"})
 }
 
 // AddFavorite handles POST /api/recommendations/{id}/favorite
 func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
-	vars:= mux.Vars(r)
+	vars := mux.Vars(r)
 	idStr := vars["id"]
-	id, err :=strconv.Atoi(idStr)
-	if err != nil{
-		http.BadRequest(w, fmt.Errorf("invalid recommendation ID"))
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
 
-	// Parse request body
+	defer r.Body.Close()
+
 	var req struct {
-		UserID int`json:"user_id"`
+		UserID int `json:"user_id"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.BadRequest(w, fmt.Errorf("invalid request body"))
+	if !decodeJSONReq(w, r, &req) {
 		return
 	}
 
 	ctx := r.Context()
-	err = h.recommendationService.AddFavorite(ctx, req.UserID, id)
-	if err!=nil {
-		h.logger.Error("Failed to add favorite", zap.Error(err))
-		http.InternalServerError(w, fmt.Errorf("Failed to add favorite"))
+	if err := h.recommendationService.AddFavorite(ctx, req.UserID, id); err != nil {
+		h.logger.Error("Failed to add favorite",
+			zap.Error(err),
+			zap.Int("recommendation_id", id),
+			zap.Int("user_id", req.UserID),
+		)
+		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to add favorite"))
 		return
 	}
 
-	http.Success(w, http.StatusOK, map[string]string{"message": "Favorite added successfully"})
+	resp.Success(w, map[string]string{"message": "Favorite added successfully"})
 }
 
 // RemoveFavorite handles DELETE /api/recommendations/{id}/favorite
-func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter,r *http.Request) {
+func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
+
 	id, err := strconv.Atoi(idStr)
-	if err != nil{
-		http.BadRequest(w, fmt.Errorf("invalid recommendation ID"))
-return
+	if err != nil {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
+		return
 	}
 
-	//Parserequest body
+	defer r.Body.Close()
+
+	// Для DELETE тела может не быть, берем user_id из query или тела
+	// Упростим: ожидаем JSON как в AddFavorite
 	var req struct {
-		UserIDint`json:"user_id"`
+		UserID int `json:"user_id"`
 	}
-
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.BadRequest(w, fmt.Errorf("invalid request body"))
+	if !decodeJSONReq(w, r, &req) {
 		return
 	}
 
 	ctx := r.Context()
-	err = h.recommendationService.RemoveFavorite(ctx, req.UserID, id)
-	if err!=nil {
-		h.logger.Error("Failed to remove favorite", zap.Error(err))
-		http.InternalServerError(w, fmt.Errorf("Failed to remove favorite"))
+	if err := h.recommendationService.RemoveFavorite(ctx, req.UserID, id); err != nil {
+		h.logger.Error("Failed to remove favorite",
+			zap.Error(err),
+			zap.Int("recommendation_id", id),
+			zap.Int("user_id", req.UserID),
+		)
+		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to remove favorite"))
 		return
 	}
 
-	http.Success(w, http.StatusOK, map[string]string{"message": "Favorite removed successfully"})
+	resp.Success(w, map[string]string{"message": "Favorite removed successfully"})
 }
 
-// GetUserFavorites handles GET/api/users/{user_id}/favorites
-func (h *RecommendationHandler)GetUserFavorites(w http.ResponseWriter, r *http.Request) {
+// GetUserFavorites handles GET /api/users/{user_id}/favorites
+func (h *RecommendationHandler) GetUserFavorites(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr:= vars["user_id"]
+	userIDStr := vars["user_id"]
+
 	userID, err := strconv.Atoi(userIDStr)
-	if err != nil{
-		http.JSONError(w, http.StatusBadRequest,"invalid user ID")
+	if err != nil {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
 		return
 	}
 
-	ctx :=r.Context()
+	ctx := r.Context()
 	favorites, err := h.recommendationService.GetUserFavorites(ctx, userID)
-	if err != nil{
-		h.logger.Error("Failed to get user favorites", zap.Error(err))
-		http.JSONError(w, http.StatusInternalServerError,"Failedto getuser favorites")
-return
+	if err != nil {
+		h.logger.Error("Failed to get user favorites",
+			zap.Error(err),
+			zap.Int("user_id", userID),
+		)
+		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to get user favorites"))
+		return
 	}
 
 	response := map[string]interface{}{
-"favorites": favorites,
+		"favorites": favorites,
 		"count":     len(favorites),
 	}
 
-	http.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, response)
+}
+
+// Helper: decodeJSONReq
+func decodeJSONReq(w http.ResponseWriter, r *http.Request, dst interface{}) bool {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(dst); err != nil {
+		log.Printf("decodeJSON error: %v", err)
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid request body"))
+		return false
+	}
+	return true
 }
 
 // checkAchievements checks and unlocks achievements for the user
-func (h*RecommendationHandler) checkAchievements(userID int,weather *external.ExtendedWeatherData) {
-// First recommendation achievement
-	// In a real implementation, you would call a serviceto unlock achievements
-	// h.userService.UnlockAchievement(userID, "first_recommendation")
-
-	// Cold weather achievement
-if weather.Temperature<-10{
-// h.userService.UnlockAchievement(userID, "cold_warrior")
+func (h *RecommendationHandler) checkAchievements(userID int, weather *external.ExtendedWeatherData) {
+	// Здесь должна быть логика ачивок
+	// Например:
+	if weather.WeatherData.Temperature < -10 {
+		h.logger.Info("Achievement unlocked: Cold Warrior", zap.Int("user_id", userID))
 	}
-
-// Rainy day achievement
-	if weather.WillRain {
-		// h.userService.UnlockAchievement(userID,"rainy_day")
 }
 
-	// Hot weather achievement
-	if weather.Temperature > 30 {
-		// h.userService.UnlockAchievement(userID, "heat_master")
-}
-}
-
-// getWeatherMessagegenerates a friendly message based on temperature
+// getWeatherMessage generates a friendly message based on temperature
 func (h *RecommendationHandler) getWeatherMessage(temp float64) string {
-switch {
+	switch {
 	case temp < -10:
-		return "🥶 Экстремальный холод!Одевайтесь максимально тепло!"
-	case temp< 0:
+		return "🥶 Экстремальный холод! Одевайтесь максимально тепло!"
+	case temp < 0:
 		return "❄️ Морозно! Зимняя одежда обязательна"
 	case temp < 10:
-		return"🧥 Прохладно. Демисезонная одежда"
-case temp < 18:
-	return"🍂Комфортная температура. Легкая куртка"
+		return "🧥 Прохладно. Демисезонная одежда"
+	case temp < 18:
+		return "🍂 Комфортная температура. Легкая куртка"
 	case temp < 25:
-		return "☀️ Приятнаяпогода! Легкая одежда"
+		return "☀️ Приятная погода! Легкая одежда"
 	default:
 		return "🔥 Жарко! Летняя одежда"
 	}

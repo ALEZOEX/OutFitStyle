@@ -15,7 +15,6 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libgtk-3-dev \
     liblzma-dev \
-    libstdc++-11-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Flutter SDK

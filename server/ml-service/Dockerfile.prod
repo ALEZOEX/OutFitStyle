@@ -13,9 +13,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
-COPY . .
-
 # Stage 2: Create the production image
 FROM python:3.9-slim
 

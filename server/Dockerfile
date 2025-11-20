@@ -1,5 +1,5 @@
 # Stage 1: Build the Go application
-FROM golang:1.21-alpine AS builder
+FROM golang:1.24-alpine AS builder
 WORKDIR /app
 # Install build dependencies
 RUN apk add --no-cache gcc musl-dev linux-headers ca-certificates git
@@ -7,6 +7,8 @@ RUN apk add --no-cache gcc musl-dev linux-headers ca-certificates git
 COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
+# Tidy up modules to ensure all dependencies are properly resolved
+RUN go mod tidy
 # Copy the source code
 COPY . .
 # Build the binary

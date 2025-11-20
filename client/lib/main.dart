@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'screens/navigation_screen.dart'; // Changed from home_screen.dart
+
 import 'providers/theme_provider.dart';
+import 'services/api_service.dart';
+import 'screens/navigation_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,21 +17,28 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark, // Dark icons
+      statusBarIconBrightness: Brightness.dark,
       systemNavigationBarColor: Colors.white,
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+    MultiProvider(
+      providers: [
+        // ApiService будет доступен во всём приложении
+        Provider<ApiService>(
+          create: (_) =>
+              ApiService(), // без baseUrl, он берётся из AppConfig внутри сервиса
+        ),
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(),
+        ),
+      ],
       child: const MyApp(),
     ),
   );
 }
-
-class PrintConfig {}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -58,6 +67,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'OutfitStyle',
       debugShowCheckedModeBanner: false,
+      themeMode: themeProvider.themeMode,
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
@@ -67,13 +77,6 @@ class MyApp extends StatelessWidget {
           primary: Color(0xFF007bff),
           secondary: Color(0xFF6c757d),
           error: Color(0xFFdc3545),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF007bff),
-            foregroundColor: Colors.white,
-            elevation: 2,
-          ),
         ),
       ),
       darkTheme: ThemeData(
@@ -86,15 +89,7 @@ class MyApp extends StatelessWidget {
           secondary: Color(0xFF6c757d),
           error: Color(0xFFdc3545),
         ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF007bff),
-            foregroundColor: Colors.white,
-            elevation: 2,
-          ),
-        ),
       ),
-      themeMode: themeProvider.themeMode,
       home: const NavigationScreen(),
     );
   }

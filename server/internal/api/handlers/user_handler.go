@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -11,16 +11,16 @@ import (
 
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
-	"outfitstyle/server/internal/api"
+	resp "outfitstyle/server/internal/pkg/http"
 )
 
-// UserHandler handles user-related HTTP requests
+// UserHandler handles user-related HTTP requests.
 type UserHandler struct {
 	userService *services.UserService
 	logger      *zap.Logger
 }
 
-// NewUserHandler creates a new user handler
+// NewUserHandler creates a new user handler.
 func NewUserHandler(
 	userService *services.UserService,
 	logger *zap.Logger,
@@ -31,13 +31,21 @@ func NewUserHandler(
 	}
 }
 
-// GetUserProfile handles GET /api/users/{id}/profile
+// parseUserID is a small helper to parse user id from path vars.
+func parseUserID(vars map[string]string) (int, error) {
+	userIDStr, ok := vars["id"]
+	if !ok || userIDStr == "" {
+		return 0, errors.New("user ID is required")
+	}
+	return strconv.Atoi(userIDStr)
+}
+
+// GetUserProfile handles GET /api/users/{id}/profile.
 func (h *UserHandler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr := vars["id"]
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := parseUserID(vars)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid user ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
 
@@ -45,56 +53,52 @@ func (h *UserHandler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 	profile, err := h.userService.GetUserProfile(ctx, userID)
 	if err != nil {
 		h.logger.Error("Failed to get user profile", zap.Error(err))
-		api.JSONError(w, http.StatusInternalServerError, "Failed to get user profile")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to get user profile"))
 		return
 	}
 
 	if profile == nil {
-		api.JSONError(w, http.StatusNotFound, "User profile not found")
+		resp.Error(w, http.StatusNotFound, errors.New("user profile not found"))
 		return
 	}
 
-	api.JSONResponse(w, http.StatusOK, profile)
+	resp.Success(w, profile)
 }
 
-// UpdateUserProfile handles PUT /api/users/{id}/profile
+// UpdateUserProfile handles PUT /api/users/{id}/profile.
 func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr := vars["id"]
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := parseUserID(vars)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid user ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
+	defer r.Body.Close()
 
-	// Parse request body
 	var profile domain.UserProfile
 	if err := json.NewDecoder(r.Body).Decode(&profile); err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid request body")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
 		return
 	}
 
-	// Set the user ID
-	profile.UserID = userID
+	profile.UserID = domain.ID(userID)
 
 	ctx := r.Context()
-	err = h.userService.UpdateUserProfile(ctx, &profile)
-	if err != nil {
+	if err := h.userService.UpdateUserProfile(ctx, &profile); err != nil {
 		h.logger.Error("Failed to update user profile", zap.Error(err))
-		api.JSONError(w, http.StatusInternalServerError, "Failed to update user profile")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to update user profile"))
 		return
 	}
 
-	api.JSONResponse(w, http.StatusOK, map[string]string{"message": "Profile updated successfully"})
+	resp.Success(w, map[string]string{"message": "Profile updated successfully"})
 }
 
-// GetUserAchievements handles GET /api/users/{id}/achievements
+// GetUserAchievements handles GET /api/users/{id}/achievements.
 func (h *UserHandler) GetUserAchievements(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr := vars["id"]
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := parseUserID(vars)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid user ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
 
@@ -102,7 +106,7 @@ func (h *UserHandler) GetUserAchievements(w http.ResponseWriter, r *http.Request
 	achievements, err := h.userService.GetUserAchievements(ctx, userID)
 	if err != nil {
 		h.logger.Error("Failed to get user achievements", zap.Error(err))
-		api.JSONError(w, http.StatusInternalServerError, "Failed to get user achievements")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to get user achievements"))
 		return
 	}
 
@@ -110,17 +114,15 @@ func (h *UserHandler) GetUserAchievements(w http.ResponseWriter, r *http.Request
 		"achievements": achievements,
 		"count":        len(achievements),
 	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, response)
 }
 
-// GetUserRatings handles GET /api/users/{id}/ratings
+// GetUserRatings handles GET /api/users/{id}/ratings.
 func (h *UserHandler) GetUserRatings(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr := vars["id"]
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := parseUserID(vars)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid user ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
 
@@ -128,7 +130,7 @@ func (h *UserHandler) GetUserRatings(w http.ResponseWriter, r *http.Request) {
 	ratings, err := h.userService.GetUserRatings(ctx, userID)
 	if err != nil {
 		h.logger.Error("Failed to get user ratings", zap.Error(err))
-		api.JSONError(w, http.StatusInternalServerError, "Failed to get user ratings")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to get user ratings"))
 		return
 	}
 
@@ -136,48 +138,43 @@ func (h *UserHandler) GetUserRatings(w http.ResponseWriter, r *http.Request) {
 		"ratings": ratings,
 		"count":   len(ratings),
 	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, response)
 }
 
-// CreateOutfitPlan handles POST /api/users/{id}/outfit-plans
+// CreateOutfitPlan handles POST /api/users/{id}/outfit-plans.
 func (h *UserHandler) CreateOutfitPlan(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr := vars["id"]
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := parseUserID(vars)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid user ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
+	defer r.Body.Close()
 
-	// Parse request body
 	var plan domain.OutfitPlan
 	if err := json.NewDecoder(r.Body).Decode(&plan); err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid request body")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
 		return
 	}
 
-	// Set the user ID
-	plan.UserID = userID
+	plan.UserID = domain.ID(userID)
 
 	ctx := r.Context()
-	err = h.userService.CreateOutfitPlan(ctx, &plan)
-	if err != nil {
+	if err := h.userService.CreateOutfitPlan(ctx, &plan); err != nil {
 		h.logger.Error("Failed to create outfit plan", zap.Error(err))
-		api.JSONError(w, http.StatusInternalServerError, "Failed to create outfit plan")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to create outfit plan"))
 		return
 	}
 
-	api.JSONResponse(w, http.StatusOK, map[string]string{"message": "Outfit plan created successfully"})
+	resp.Success(w, map[string]string{"message": "Outfit plan created successfully"})
 }
 
-// GetUserOutfitPlans handles GET /api/users/{id}/outfit-plans
+// GetUserOutfitPlans handles GET /api/users/{id}/outfit-plans.
 func (h *UserHandler) GetUserOutfitPlans(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr := vars["id"]
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := parseUserID(vars)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid user ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
 
@@ -185,7 +182,7 @@ func (h *UserHandler) GetUserOutfitPlans(w http.ResponseWriter, r *http.Request)
 	plans, err := h.userService.GetUserOutfitPlans(ctx, userID)
 	if err != nil {
 		h.logger.Error("Failed to get user outfit plans", zap.Error(err))
-		api.JSONError(w, http.StatusInternalServerError, "Failed to get user outfit plans")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to get user outfit plans"))
 		return
 	}
 
@@ -193,45 +190,47 @@ func (h *UserHandler) GetUserOutfitPlans(w http.ResponseWriter, r *http.Request)
 		"plans": plans,
 		"count": len(plans),
 	}
-
-	api.JSONResponse(w, http.StatusOK, response)
+	resp.Success(w, response)
 }
 
-// DeleteOutfitPlan handles DELETE /api/users/{id}/outfit-plans/{plan_id}
+// DeleteOutfitPlan handles DELETE /api/users/{id}/outfit-plans/{plan_id}.
 func (h *UserHandler) DeleteOutfitPlan(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr := vars["id"]
-	userID, err := strconv.Atoi(userIDStr)
+
+	userID, err := parseUserID(vars)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid user ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
 
-	planIDStr := vars["plan_id"]
+	planIDStr, ok := vars["plan_id"]
+	if !ok || planIDStr == "" {
+		resp.Error(w, http.StatusBadRequest, errors.New("plan ID is required"))
+		return
+	}
+
 	planID, err := strconv.Atoi(planIDStr)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid plan ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid plan ID"))
 		return
 	}
 
 	ctx := r.Context()
-	err = h.userService.DeleteOutfitPlan(ctx, userID, planID)
-	if err != nil {
+	if err := h.userService.DeleteOutfitPlan(ctx, userID, planID); err != nil {
 		h.logger.Error("Failed to delete outfit plan", zap.Error(err))
-		api.JSONError(w, http.StatusInternalServerError, "Failed to delete outfit plan")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to delete outfit plan"))
 		return
 	}
 
-	api.JSONResponse(w, http.StatusOK, map[string]string{"message": "Outfit plan deleted successfully"})
+	resp.Success(w, map[string]string{"message": "Outfit plan deleted successfully"})
 }
 
-// GetUserStats handles GET /api/users/{id}/stats
+// GetUserStats handles GET /api/users/{id}/stats.
 func (h *UserHandler) GetUserStats(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userIDStr := vars["id"]
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := parseUserID(vars)
 	if err != nil {
-		api.JSONError(w, http.StatusBadRequest, "invalid user ID")
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
 
@@ -239,14 +238,14 @@ func (h *UserHandler) GetUserStats(w http.ResponseWriter, r *http.Request) {
 	stats, err := h.userService.GetUserStats(ctx, userID)
 	if err != nil {
 		h.logger.Error("Failed to get user stats", zap.Error(err))
-		api.JSONError(w, http.StatusInternalServerError, "Failed to get user stats")
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to get user stats"))
 		return
 	}
 
 	if stats == nil {
-		api.JSONError(w, http.StatusNotFound, "User stats not found")
+		resp.Error(w, http.StatusNotFound, errors.New("user stats not found"))
 		return
 	}
 
-	api.JSONResponse(w, http.StatusOK, stats)
+	resp.Success(w, stats)
 }

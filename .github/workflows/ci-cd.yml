@@ -24,7 +24,7 @@ jobs:
 
     - name: Build and test Go service
       run: |
-        cd server/api
+        cd server
         go build -v ./...
         go test -v ./...
 
@@ -36,3 +36,43 @@ jobs:
         
         cd ../marketplace-service
         pip install -r requirements.txt
+
+  build-and-push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push server
+      uses: docker/build-push-action@v4
+      with:
+        context: ./server
+        file: ./server/Dockerfile.prod
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/outfitstyle-server:latest
+
+    - name: Build and push ml-service
+      uses: docker/build-push-action@v4
+      with:
+        context: ./server/ml-service
+        file: ./server/ml-service/Dockerfile.prod
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/outfitstyle-ml:latest
+
+    - name: Build and push marketplace-service
+      uses: docker/build-push-action@v4
+      with:
+        context: ./server/marketplace-service
+        file: ./server/marketplace-service/Dockerfile.prod
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/outfitstyle-marketplace:latest

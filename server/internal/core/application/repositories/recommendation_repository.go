@@ -2,23 +2,23 @@ package repositories
 
 import (
 	"context"
+	"outfitstyle/server/internal/core/domain"
 )
 
 // RecommendationRepository defines the interface for recommendation data operations
 type RecommendationRepository interface {
 	// Recommendation operations
-	CreateRecommendation(ctx context.Context, recommendation *RecommendationResponse) (int, error)
-	GetRecommendationByID(ctx context.Context, id int) (*RecommendationResponse, error)
-	GetUserRecommendations(ctx context.Context, userID int, limit int) ([]RecommendationResponse, error)
-	
+	CreateRecommendation(ctx context.Context, recommendation *domain.RecommendationResponse) (int, error)
+	GetRecommendationByID(ctx context.Context, id int) (*domain.RecommendationResponse, error)
+	GetUserRecommendations(ctx context.Context, userID int, limit int) ([]domain.RecommendationResponse, error)
+
 	// Outfit operations
-	CreateOutfitSet(ctx context.Context, outfit *OutfitSet) (int, error)
-	GetOutfitSetByID(ctx context.Context, id int) (*OutfitSet, error)
-	
+	CreateOutfitSet(ctx context.Context, outfit *domain.OutfitSet) (int, error)
+	GetOutfitSetByID(ctx context.Context, id int) (*domain.OutfitSet, error)
 	// Clothing item operations
-	GetClothingItemByID(ctx context.Context, id int) (*ClothingItem, error)
-	GetUserClothingItems(ctx context.Context, userID int) ([]ClothingItem, error)
-	CreateClothingItem(ctx context.Context, item *ClothingItem) (int, error)
+	GetClothingItemByID(ctx context.Context, id int) (*domain.ClothingItem, error)
+	GetUserClothingItems(ctx context.Context, userID int) ([]domain.ClothingItem, error)
+	CreateClothingItem(ctx context.Context, item *domain.ClothingItem) (int, error)
 }
 
 // Since we don't have the domain package, we'll define the structs here for now
@@ -36,14 +36,14 @@ type RecommendationResponse struct {
 }
 
 type OutfitSet struct {
-	ID           int           `json:"id"`
-	Name         string        `json:"name"`
-	Description  string        `json:"description"`
-	Items        []ClothingItem `json:"items"`
-	Confidence   float64       `json:"confidence"`
-	WeatherType  string        `json:"weather_type"`
-	Temperature  float64       `json:"temperature"`
-	Season       string        `json:"season"`
+	ID          int            `json:"id"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Items       []ClothingItem `json:"items"`
+	Confidence  float64        `json:"confidence"`
+	WeatherType string         `json:"weather_type"`
+	Temperature float64        `json:"temperature"`
+	Season      string         `json:"season"`
 }
 
 type ClothingItem struct {

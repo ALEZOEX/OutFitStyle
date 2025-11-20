@@ -49,21 +49,21 @@ class OutfitPlan {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is OutfitPlan &&
-           other.id == id &&
-           other.date.year == date.year &&
-           other.date.month == date.month &&
-           other.date.day == date.day &&
-           listEquals(other.items, items);
+        other.id == id &&
+        other.date.year == date.year &&
+        other.date.month == date.month &&
+        other.date.day == date.day &&
+        listEquals(other.items, items);
   }
 
   @override
   int get hashCode => Object.hash(
-    id,
-    date.year,
-    date.month, 
-    date.day,
-    const DeepCollectionEquality().hash(items),
-  );
+        id,
+        date.year,
+        date.month,
+        date.day,
+        const DeepCollectionEquality().hash(items),
+      );
 }

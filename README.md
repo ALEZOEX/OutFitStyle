@@ -249,3 +249,30 @@ curl -X POST http://localhost:5000/api/ml/recommend \
 # Информация о модели
 curl http://localhost:5000/api/ml/model-info
 ```
+
+## 🚀 Deployment
+
+### GitHub Actions
+
+This repository is configured with GitHub Actions for CI/CD:
+
+1. **CI/CD Pipeline** - Builds and tests the application on every push/PR
+2. **Deploy to Production** - Automatically deploys to production when changes are merged to main
+
+### Production Deployment
+
+For production deployment, you'll need to:
+
+1. Set up the following secrets in your GitHub repository:
+   - `DOCKERHUB_USERNAME` - Your Docker Hub username
+   - `DOCKERHUB_TOKEN` - Your Docker Hub access token
+   - `HOST` - Your production server IP or hostname
+   - `USERNAME` - SSH username for your server
+   - `PRIVATE_KEY` - SSH private key for accessing your server
+
+2. Configure your production environment variables in `infrastructure/docker-compose/.env.prod`
+
+3. The deployment workflow will automatically:
+   - Build Docker images
+   - Push them to Docker Hub
+   - Deploy to your production server via SSH
