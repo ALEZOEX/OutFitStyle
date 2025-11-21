@@ -53,6 +53,10 @@ services:
     container_name: outfitstyle-server
     ports:
       - "8080:8080"
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server/.env:/app/.env
     environment:
       - SERVER_PORT=8080
       - DB_HOST=postgres
@@ -60,6 +64,7 @@ services:
       - DB_USER=Admin
       - DB_PASSWORD=password
       - DB_NAME=outfitstyle
+      - DB_SSL_MODE=disable
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - WEATHER_API_KEY=8e9f1a366923ec63437f21570c89fa17
