@@ -73,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
-    final theme = Theme.of(context); // Получаем текущую тему
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -183,7 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget buildSectionTitle(String title, bool isDark) {
-    final theme = Theme.of(context); // Получаем текущую тему
+    final theme = Theme.of(context);
 
     return Text(
       title,
@@ -202,15 +202,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isDark,
     void Function(bool) onChanged,
   ) {
-    final theme = Theme.of(context); // Получаем текущую тему
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border:
-            isDark ? Border.all(color: theme.primaryColor.withAlpha(76)) : null,
+        border: isDark
+            ? Border.all(
+                color: theme.primaryColor.withValues(alpha: 0.3),
+              )
+            : null,
       ),
       child: Row(
         children: [
@@ -246,15 +249,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     IconData icon,
     bool isDark,
   ) {
-    final theme = Theme.of(context); // Получаем текущую тему
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border:
-            isDark ? Border.all(color: theme.primaryColor.withAlpha(76)) : null,
+        border: isDark
+            ? Border.all(
+                color: theme.primaryColor.withValues(alpha: 0.3),
+              )
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,7 +292,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               value: option.$1,
+              // Эти два параметра помечены как deprecated в новых SDK.
+              // Мы осознанно их используем и глушим предупреждение.
+              // ignore: deprecated_member_use
               groupValue: groupValue,
+              // ignore: deprecated_member_use
               onChanged: onChanged,
               activeColor: theme.primaryColor,
               contentPadding: EdgeInsets.zero,

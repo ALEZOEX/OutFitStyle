@@ -34,7 +34,8 @@ class AlternativeOutfits extends StatelessWidget {
                   gradient: isDark
                       ? AppTheme.primaryGradient
                       : const LinearGradient(
-                          colors: [Color(0xFF007bff), Color(0xFF0056b3)]),
+                          colors: [Color(0xFF007bff), Color(0xFF0056b3)],
+                        ),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -46,8 +47,11 @@ class AlternativeOutfits extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.grid_view_rounded,
-                    color: Colors.white, size: 20),
+                child: const Icon(
+                  Icons.grid_view_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -183,50 +187,58 @@ class _AlternativeCardState extends State<_AlternativeCard>
         onTapUp: (_) => _controller.reverse(),
         onTapCancel: () => _controller.reverse(),
         onTap: widget.onTap,
-        child: AnimatedContainer(
+        child: AnimatedScale(
           duration: const Duration(milliseconds: 200),
-          transform: Matrix4.identity()..scale(_isHovered ? 1.03 : 1.0),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: widget.isDark
-                  ? [
-                      AppTheme.cardDark,
-                      AppTheme.cardDark.withValues(alpha: 0.8)
-                    ]
-                  : [Colors.white, const Color(0xFFFAFBFC)],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border:
-                Border.all(color: gradient[0].withValues(alpha: 0.4), width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: gradient[0].withValues(alpha: 0.2),
-                blurRadius: _isHovered ? 25 : 15,
-                offset: Offset(0, _isHovered ? 10 : 6),
-                spreadRadius: _isHovered ? 2 : 0,
+          scale: _isHovered ? 1.03 : 1.0,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: widget.isDark
+                    ? [
+                        AppTheme.cardDark,
+                        AppTheme.cardDark.withValues(alpha: 0.8),
+                      ]
+                    : [
+                        Colors.white,
+                        const Color(0xFFFAFBFC),
+                      ],
               ),
-              BoxShadow(
-                color:
-                    Colors.black.withValues(alpha: widget.isDark ? 0.2 : 0.05),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: gradient[0].withValues(alpha: 0.4),
+                width: 2,
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildHeader(gradient, confidence),
-                Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: _buildContent(gradient),
+              boxShadow: [
+                BoxShadow(
+                  color: gradient[0].withValues(alpha: 0.2),
+                  blurRadius: _isHovered ? 25 : 15,
+                  offset: Offset(0, _isHovered ? 10 : 6),
+                  spreadRadius: _isHovered ? 2 : 0,
                 ),
-                if (widget.onTap != null) _buildButton(gradient),
+                BoxShadow(
+                  color: Colors.black
+                      .withValues(alpha: widget.isDark ? 0.2 : 0.05),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
               ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildHeader(gradient, confidence),
+                  Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: _buildContent(gradient),
+                  ),
+                  if (widget.onTap != null) _buildButton(gradient),
+                ],
+              ),
             ),
           ),
         ),
@@ -239,14 +251,16 @@ class _AlternativeCardState extends State<_AlternativeCard>
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradient),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradient,
+        ),
         boxShadow: [
           BoxShadow(
-              color: gradient[0].withValues(alpha: 0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 3))
+            color: gradient[0].withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Row(
@@ -257,14 +271,17 @@ class _AlternativeCardState extends State<_AlternativeCard>
               color: Colors.white.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.4), width: 1.5),
+                color: Colors.white.withValues(alpha: 0.4),
+                width: 1.5,
+              ),
             ),
             child: Text(
               '№${widget.index + 2}',
               style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13),
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
             ),
           ),
           const Spacer(),
@@ -275,9 +292,10 @@ class _AlternativeCardState extends State<_AlternativeCard>
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2))
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
             child: Row(
@@ -288,9 +306,10 @@ class _AlternativeCardState extends State<_AlternativeCard>
                 Text(
                   '$confidence%',
                   style: TextStyle(
-                      color: gradient[0],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13),
+                    color: gradient[0],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -303,7 +322,7 @@ class _AlternativeCardState extends State<_AlternativeCard>
   Widget _buildContent(List<Color> gradient) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min, // Важно!
+      mainAxisSize: MainAxisSize.min,
       children: [
         ...widget.outfit.items.map((item) {
           return Padding(
@@ -314,17 +333,23 @@ class _AlternativeCardState extends State<_AlternativeCard>
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      gradient[0].withValues(alpha: 0.2),
-                      gradient[1].withValues(alpha: 0.1)
-                    ]),
+                    gradient: LinearGradient(
+                      colors: [
+                        gradient[0].withValues(alpha: 0.2),
+                        gradient[1].withValues(alpha: 0.1),
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(10),
-                    border:
-                        Border.all(color: gradient[0].withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: gradient[0].withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Center(
-                      child: Text(item.iconEmoji,
-                          style: const TextStyle(fontSize: 20))),
+                    child: Text(
+                      item.iconEmoji,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -368,7 +393,9 @@ class _AlternativeCardState extends State<_AlternativeCard>
                 ? const Color(0xFF121212)
                 : const Color(0xFFF8F9FA),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: gradient[0].withValues(alpha: 0.2)),
+            border: Border.all(
+              color: gradient[0].withValues(alpha: 0.2),
+            ),
           ),
           child: Row(
             children: [
@@ -378,11 +405,11 @@ class _AlternativeCardState extends State<_AlternativeCard>
                 child: Text(
                   widget.outfit.reason,
                   style: TextStyle(
-                      fontSize: 11,
-                      color: widget.isDark
-                          ? AppTheme.textSecondary
-                          : Colors.black54,
-                      fontWeight: FontWeight.w500),
+                    fontSize: 11,
+                    color:
+                        widget.isDark ? AppTheme.textSecondary : Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -403,9 +430,10 @@ class _AlternativeCardState extends State<_AlternativeCard>
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-                color: gradient[0].withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 4))
+              color: gradient[0].withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Material(
@@ -418,16 +446,20 @@ class _AlternativeCardState extends State<_AlternativeCard>
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle_outline,
-                      color: Colors.white, size: 18),
+                  Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                   SizedBox(width: 6),
                   Text(
                     'Выбрать',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5),
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ],
               ),

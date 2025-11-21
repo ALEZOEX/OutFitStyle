@@ -210,7 +210,7 @@ color: theme.primaryColor.withValues(alpha: 0.2),
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                  ],
                 ),
               ),

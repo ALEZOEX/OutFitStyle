@@ -29,6 +29,7 @@ dependencies:
   geolocator: ^10.0.0
   geocoding: ^3.0.0
 
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

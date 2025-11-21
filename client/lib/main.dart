@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/theme_provider.dart';
 import 'services/api_service.dart';
+import 'services/shopping_service.dart';
 import 'screens/navigation_screen.dart';
 
 void main() {
@@ -28,9 +29,15 @@ void main() {
       providers: [
         // ApiService будет доступен во всём приложении
         Provider<ApiService>(
-          create: (_) =>
-              ApiService(), // без baseUrl, он берётся из AppConfig внутри сервиса
+          create: (_) => ApiService(), // singleton, baseUrl из AppConfig
         ),
+
+        // ShoppingService — конструктор без аргументов
+        Provider<ShoppingService>(
+          create: (_) => ShoppingService(),
+        ),
+
+        // Тема
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(),
         ),
@@ -47,7 +54,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    // Update system UI based on theme
     SystemChrome.setSystemUIOverlayStyle(
       themeProvider.isDarkMode
           ? const SystemUiOverlayStyle(

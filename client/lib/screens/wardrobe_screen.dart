@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/user_wardrobe.dart'; // Новая модель
+
+import '../models/user_wardrobe.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
@@ -17,14 +18,22 @@ class WardrobeScreen extends StatefulWidget {
 class _WardrobeScreenState extends State<WardrobeScreen> {
   late Future<Map<String, List<WardrobeItem>>> _wardrobeFuture;
   late ApiService _apiService;
+
   bool _isSearching = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
+  bool _isDeleting = false;
+
   @override
   void initState() {
     super.initState();
+
     _apiService = Provider.of<ApiService>(context, listen: false);
+
+    // ИНИЦИАЛИЗАЦИЯ по умолчанию, чтобы не было LateInitializationError
+    _wardrobeFuture = Future.value(<String, List<WardrobeItem>>{});
+
     _loadWardrobe();
   }
 
@@ -35,11 +44,10 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       });
       await _wardrobeFuture;
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка загрузки гардероба: $e')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка загрузки гардероба: $e')),
+      );
     }
   }
 
@@ -49,7 +57,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       MaterialPageRoute(builder: (context) => const AddItemScreen()),
     );
     if (result == true) {
-      _loadWardrobe(); // Обновляем список после добавления
+      _loadWardrobe();
     }
   }
 
@@ -77,38 +85,33 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       Map<String, List<WardrobeItem>> wardrobe) {
     if (_searchQuery.isEmpty) return wardrobe;
 
-    final String lowerQuery = _searchQuery.toLowerCase();
-    final Map<String, List<WardrobeItem>> filteredWardrobe = {};
+    final lowerQuery = _searchQuery.toLowerCase();
+    final filtered = <String, List<WardrobeItem>>{};
 
     wardrobe.forEach((category, items) {
-      final List<WardrobeItem> filteredItems = items.where((item) {
+      final filteredItems = items.where((item) {
         return item.customName.toLowerCase().contains(lowerQuery) ||
             category.toLowerCase().contains(lowerQuery);
       }).toList();
 
       if (filteredItems.isNotEmpty) {
-        filteredWardrobe[category] = filteredItems;
+        filtered[category] = filteredItems;
       }
     });
 
-    return filteredWardrobe;
+    return filtered;
   }
 
-  bool _isDeleting = false; // Состояние удаления для UI
-
   Future<void> _deleteItem(int itemId) async {
-    // Показываем диалог подтверждения
     if (!await _showDeleteConfirmation()) return;
 
     try {
-      // Устанавливаем состояние удаления
       setState(() {
         _isDeleting = true;
       });
 
       await _apiService.deleteWardrobeItem(itemId);
 
-      // Обновляем список после удаления
       setState(() {
         _wardrobeFuture = _apiService.getWardrobe(userId: 1);
       });
@@ -126,7 +129,6 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
         );
       }
     } finally {
-      // Всегда сбрасываем состояние удаления
       if (mounted) {
         setState(() {
           _isDeleting = false;
@@ -136,37 +138,37 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
   }
 
   Future<bool> _showDeleteConfirmation() async {
-    return await showDialog<bool>(
+    final result = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Подтверждение удаления'),
             content: const Text(
-                'Вы уверены, что хотите удалить этот предмет?Это действие нельзя отменить.'),
+                'Вы уверены, что хотите удалить этот предмет? Это действие нельзя отменить.'),
             actions: [
               TextButton(
-                onPressed: () {
-                  if (mounted) Navigator.pop(context, false);
-                },
+                onPressed: () => Navigator.pop(context, false),
                 child: const Text('Отмена'),
               ),
               TextButton(
-                onPressed: () {
-                  if (mounted) Navigator.pop(context, true);
-                },
-                child:
-                    const Text('Удалить', style: TextStyle(color: Colors.red)),
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  'Удалить',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
         ) ??
-        false; // Возвращаем false если диалог закрыт без выбора
+        false;
+
+    return result;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Отключаем кнопки при удалении
-    final bool isInteractionEnabled = !_isDeleting;
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+
+    final isInteractionEnabled = !_isDeleting;
 
     return Scaffold(
       backgroundColor:
@@ -202,15 +204,16 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
             if (_isSearching && _searchQuery.isEmpty && !snapshot.hasData) {
               return const Center(child: Text('Введите запрос для поиска'));
             }
-            // Показываем индикатор загрузки только при первоначальной загрузке, а не во время поиска
+
             if (!_isSearching &&
                 snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
+
             if (snapshot.hasError) {
               return Center(child: Text('Ошибка загрузки: ${snapshot.error}'));
             }
-            // Показываем пустое состояние только если нет данных и не ведется поиск
+
             if (!snapshot.hasData ||
                 (_isSearching && _filterWardrobe(snapshot.data!).isEmpty)) {
               return _buildEmptyState();
@@ -218,30 +221,41 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
 
             final wardrobe =
                 _isSearching ? _filterWardrobe(snapshot.data!) : snapshot.data!;
+
             return ListView(
               padding: const EdgeInsets.all(16),
               children: wardrobe.entries.map((entry) {
+                final category = entry.key;
+                final items = entry.value;
+
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: ExpansionTile(
                     initiallyExpanded: true,
-                    title: Text('${entry.key} (${entry.value.length})',
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
-                    children: entry.value.map((item) {
+                    title: Text(
+                      '$category (${items.length})',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    children: items.map((item) {
                       return ListTile(
-                        leading: Text(item.customIcon,
-                            style: const TextStyle(fontSize: 28)),
+                        leading: Text(
+                          item.customIcon,
+                          style: const TextStyle(fontSize: 28),
+                        ),
                         title: Text(item.customName),
                         trailing: _isDeleting
                             ? const SizedBox(
                                 width: 24,
                                 height: 24,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : IconButton(
-                                icon: Icon(Icons.delete_outline,
-                                    color: Colors.red.withValues(alpha: 0.7)),
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.red.withValues(alpha: 0.7),
+                                ),
                                 onPressed: () => _deleteItem(item.id),
                               ),
                       );
@@ -273,11 +287,15 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
         children: [
           Icon(Icons.checkroom_outlined, size: 80, color: Colors.grey),
           SizedBox(height: 16),
-          Text('Ваш гардероб пуст',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(
+            'Ваш гардероб пуст',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 8),
-          Text('Нажмите "+", чтобы добавить первую вещь',
-              style: TextStyle(color: Colors.grey)),
+          Text(
+            'Нажмите "+", чтобы добавить первую вещь',
+            style: TextStyle(color: Colors.grey),
+          ),
         ],
       ),
     );

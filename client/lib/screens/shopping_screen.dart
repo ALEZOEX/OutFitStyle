@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/shopping_item.dart';
 import '../services/shopping_service.dart';
 
@@ -16,33 +17,35 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   @override
   void initState() {
     super.initState();
+
+    // ИНИЦИАЛИЗАЦИЯ по умолчанию, чтобы не было LateInitializationError
+    _wishlistFuture = Future.value(<ShoppingItem>[]);
+
     _loadWishlist();
   }
 
   Future<void> _loadWishlist() async {
-    final shoppingService =
-        Provider.of<ShoppingService>(context, listen: false);
+    final shoppingService = context.read<ShoppingService>();
+
     try {
       setState(() {
         _wishlistFuture = shoppingService.getShoppingWishlist(userId: 1);
       });
       await _wishlistFuture;
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка загрузки списка покупок: $e')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка загрузки списка покупок: $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
-    // final theme = Theme.of(context); // Получаем текущую тему
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('ШОПИНГ'),
         centerTitle: true,
@@ -65,13 +68,10 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
             final items = snapshot.data!;
             return ListView(
               children: [
-                // Shopping list
                 _buildShoppingList(items),
                 const SizedBox(height: 16),
-                // Size information
                 _buildSizeInfo(),
                 const SizedBox(height: 16),
-                // Wardrobe cost analysis
                 _buildCostAnalysis(items),
               ],
             );
@@ -79,7 +79,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addItem(),
+        onPressed: _addItem,
         child: const Icon(Icons.add),
       ),
     );
@@ -97,23 +97,25 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               children: [
                 const Icon(Icons.shopping_cart, size: 20),
                 const SizedBox(width: 8),
-                const Text('Список покупок',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Список покупок',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const Spacer(),
-                Text('${items.length} вещей',
-                    style: const TextStyle(color: Colors.grey)),
+                Text(
+                  '${items.length} вещей',
+                  style: const TextStyle(color: Colors.grey),
+                ),
               ],
             ),
           ),
-          ...items
-              .map((item) => _buildShoppingItem(item)),
+          ...items.map(_buildShoppingItem),
         ],
       ),
     );
   }
 
   Widget _buildShoppingItem(ShoppingItem item) {
-    // Исправлено имя метода
     return ListTile(
       leading: Container(
         width: 40,
@@ -127,9 +129,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
       title: Text(item.name),
       subtitle: item.brand != null ? Text(item.brand!) : null,
       trailing: Text(
-        item.price != null ? '${item.price?.toStringAsFixed(0)} ₽' : '',
-        style:
-            const TextStyle(fontWeight: FontWeight.bold), // Исправлена опечатка
+        item.price != null ? '${item.price!.toStringAsFixed(0)} ₽' : '',
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       onTap: () => _editItem(item),
     );
@@ -151,8 +152,10 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               ],
             ),
             SizedBox(height: 8),
-            Text('Запишите, чтобы использовать при покупках',
-                style: TextStyle(color: Colors.grey)),
+            Text(
+              'Запишите, чтобы использовать при покупках',
+              style: TextStyle(color: Colors.grey),
+            ),
             SizedBox(height: 8),
             Row(
               children: [
@@ -174,7 +177,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   }
 
   Widget _buildCostAnalysis(List<ShoppingItem> items) {
-    final totalCost = items.fold(0.0, (sum, item) => sum + (item.price ?? 0));
+    final totalCost =
+        items.fold<double>(0.0, (sum, item) => sum + (item.price ?? 0));
     final averagePrice = items.isNotEmpty ? totalCost / items.length : 0;
     final mostExpensive = items.isNotEmpty
         ? items.reduce((a, b) => (a.price ?? 0) > (b.price ?? 0) ? a : b)
@@ -224,8 +228,10 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                 style: const TextStyle(fontSize: 14, color: Colors.green),
               ),
             const SizedBox(height: 8),
-            const Text('Распределение по ценовым категориям:',
-                style: TextStyle(fontSize: 14)),
+            const Text(
+              'Распределение по ценовым категориям:',
+              style: TextStyle(fontSize: 14),
+            ),
             const SizedBox(height: 4),
             _buildPriceDistributionChart(items),
           ],
@@ -261,7 +267,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     return Column(
       children: priceRanges.entries.map((entry) {
         final count = entry.value;
-        final percentage = items.isNotEmpty ? (count / items.length * 100) : 0;
+        final percentage =
+            items.isNotEmpty ? (count / items.length * 100) : 0.0;
 
         Color getBarColor() {
           switch (entry.key) {
@@ -282,6 +289,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           padding: const EdgeInsets.symmetric(vertical: 2),
           child: Row(
             children: [
+              const SizedBox(width: 4),
               Expanded(
                 flex: 2,
                 child: Text(entry.key, style: const TextStyle(fontSize: 12)),
@@ -333,11 +341,15 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         children: [
           Icon(Icons.shopping_bag, size: 80, color: Colors.grey),
           SizedBox(height: 16),
-          Text('Список покупок пуст',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(
+            'Список покупок пуст',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 8),
-          Text('Добавляйте одежду со статусом «В списке покупок»',
-              style: TextStyle(color: Colors.grey)),
+          Text(
+            'Добавляйте одежду со статусом «В списке покупок»',
+            style: TextStyle(color: Colors.grey),
+          ),
         ],
       ),
     );
@@ -345,7 +357,9 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
 
   void _addItem() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Функция добавления товара в разработке')),
+      const SnackBar(
+        content: Text('Функция добавления товара в разработке'),
+      ),
     );
   }
 
