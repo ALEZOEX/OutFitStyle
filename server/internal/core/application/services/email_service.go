@@ -2,6 +2,9 @@ package services
 
 import (
 	"fmt"
+	"net/smtp"
+	"strings"
+
 	"go.uber.org/zap"
 )
 
@@ -47,22 +50,59 @@ func NewEmailService(
 	}
 }
 
+// sendEmail — общий метод для отправки писем
+func (s *SMTPEmailService) sendEmail(to, subject, body string) error {
+	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
+
+	// PlainAuth: подходит для Mailhog/локального SMTP и многих провайдеров.
+	// Для Gmail/Yandex с TLS могут понадобиться доп. настройки.
+	var auth smtp.Auth
+	if s.config.Username != "" && s.config.Password != "" {
+		auth = smtp.PlainAuth("", s.config.Username, s.config.Password, s.config.Host)
+	}
+
+	headers := map[string]string{
+		"From":         s.config.From,
+		"To":           to,
+		"Subject":      subject,
+		"MIME-Version": "1.0",
+		"Content-Type": "text/plain; charset=\"UTF-8\"",
+	}
+
+	var msgBuilder strings.Builder
+	for k, v := range headers {
+		msgBuilder.WriteString(fmt.Sprintf("%s: %s\r\n", k, v))
+	}
+	msgBuilder.WriteString("\r\n")
+	msgBuilder.WriteString(body)
+	msg := []byte(msgBuilder.String())
+
+	if err := smtp.SendMail(addr, auth, s.config.From, []string{to}, msg); err != nil {
+		s.logger.Error("Failed to send email",
+			zap.String("to", to),
+			zap.String("subject", subject),
+			zap.Error(err))
+		return err
+	}
+
+	s.logger.Info("Email sent",
+		zap.String("to", to),
+		zap.String("subject", subject))
+	return nil
+}
+
 // SendVerificationEmail sends a verification email
 func (s *SMTPEmailService) SendVerificationEmail(to, code string) error {
-	// In a real implementation, you would connect to an SMTP server and send the email
-	s.logger.Info("Sending verification email",
-		zap.String("to", to),
-		zap.String("code", code))
-	return nil
+	subject := "OutfitStyle: код подтверждения"
+	body := fmt.Sprintf("Ваш код подтверждения: %s\n\nЕсли вы не запрашивали код, просто игнорируйте это письмо.", code)
+	return s.sendEmail(to, subject, body)
 }
 
 // SendPasswordResetEmail sends a password reset email
 func (s *SMTPEmailService) SendPasswordResetEmail(to, token string) error {
-	// In a real implementation, you would connect to an SMTP server and send the email
-	s.logger.Info("Sending password reset email",
-		zap.String("to", to),
-		zap.String("token", token))
-	return nil
+	subject := "OutfitStyle: сброс пароля"
+	body := fmt.Sprintf("Чтобы сбросить пароль, используйте этот токен: %s\n\nЕсли вы не запрашивали сброс пароля, просто игнорируйте это письмо.", token)
+	return s.sendEmail(to, subject, body)
 }
 
 // NoopEmailService implements EmailService with no-op operations

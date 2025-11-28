@@ -76,18 +76,19 @@ func (r *RecommendationRepository) CreateRecommendation(
 	// Insert recommendation items
 	for _, item := range recommendation.Items {
 		_, err = tx.Exec(ctx, `
-			INSERT INTO recommendation_items (
-				recommendation_id, clothing_item_id, name, category, icon_emoji, ml_score, confidence
-			) VALUES ($1, $2, $3, $4, $5, $6, $7)
-			ON CONFLICT (recommendation_id, clothing_item_id) 
-			DO UPDATE SETname= EXCLUDED.name,
-				category = EXCLUDED.category,
-				icon_emoji = EXCLUDED.icon_emoji,
-				ml_score = EXCLUDED.ml_score,
-				confidence = EXCLUDED.confidence
+		  INSERT INTO recommendation_items (
+			recommendation_id, clothing_item_id, name, category, icon_emoji, ml_score, confidence
+		  ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+		  ON CONFLICT (recommendation_id, clothing_item_id) 
+		  DO UPDATE SET
+			name       = EXCLUDED.name,
+			category   = EXCLUDED.category,
+			icon_emoji = EXCLUDED.icon_emoji,
+			ml_score   = EXCLUDED.ml_score,
+			confidence = EXCLUDED.confidence
 		`,
 			recommendationID,
-			int(item.ID), // Преобразовано в int
+			int(item.ID),
 			item.Name,
 			item.Category,
 			item.IconEmoji,

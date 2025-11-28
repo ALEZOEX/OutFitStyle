@@ -22,13 +22,16 @@ FROM python:3.9-slim
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     libpq5 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy the application and dependencies from the builder stage
+# Копируем код приложения
 COPY --from=builder /app /app
+# ⬅️ ВАЖНО: копируем установленные пакеты Python
+COPY --from=builder /usr/local /usr/local
 
 # Create non-root user for security
 RUN groupadd -g 1000 outfitstyle && \

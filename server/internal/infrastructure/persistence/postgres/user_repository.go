@@ -473,30 +473,83 @@ func (r *UserRepository) CreateOutfitPlan(ctx context.Context, plan *domain.Outf
 		return errors.Wrap(err, "failed to marshal item IDs")
 	}
 
-	query := `
+	const query = `
 		INSERT INTO outfit_plans (user_id, date, item_ids, notes, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, NOW(), NOW())
+		RETURNING id, created_at, updated_at
 	`
 
-	_, err = r.db.pool.Exec(ctx, query,
+	if err := r.db.pool.QueryRow(ctx, query,
 		plan.UserID,
 		plan.Date,
 		itemIDsJSON,
 		plan.Notes,
-	)
-	if err != nil {
+	).Scan(&plan.ID, &plan.CreatedAt, &plan.UpdatedAt); err != nil {
 		return errors.Wrap(err, "failed to create outfit plan")
 	}
 
 	return nil
 }
 
-// GetUserOutfitPlans retrieves user's outfit plans.
-func (r *UserRepository) GetUserOutfitPlans(ctx context.Context, userID int) ([]domain.OutfitPlan, error) {
-	query := `
+// GetOutfitPlans retrieves outfit plans for a user in the given date range.
+func (r *UserRepository) GetOutfitPlans(ctx context.Context, userID int, startDate, endDate time.Time) ([]domain.OutfitPlan, error) {
+	const query = `
 		SELECT id, user_id, date, item_ids, notes, created_at, updated_at
 		FROM outfit_plans
 		WHERE user_id = $1
+		  AND date >= $2
+		  AND date <= $3
+		  AND deleted_at IS NULL
+		ORDER BY date ASC
+	`
+
+	rows, err := r.db.pool.Query(ctx, query, userID, startDate, endDate)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query outfit plans")
+	}
+	defer rows.Close()
+
+	var plans []domain.OutfitPlan
+	for rows.Next() {
+		var plan domain.OutfitPlan
+		var itemIDsJSON []byte
+
+		if err := rows.Scan(
+			&plan.ID,
+			&plan.UserID,
+			&plan.Date,
+			&itemIDsJSON,
+			&plan.Notes,
+			&plan.CreatedAt,
+			&plan.UpdatedAt,
+		); err != nil {
+			return nil, errors.Wrap(err, "failed to scan outfit plan")
+		}
+
+		if len(itemIDsJSON) > 0 {
+			if err := json.Unmarshal(itemIDsJSON, &plan.ItemIDs); err != nil {
+				return nil, errors.Wrap(err, "failed to parse item IDs")
+			}
+		}
+
+		plans = append(plans, plan)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "error iterating outfit plans")
+	}
+
+	return plans, nil
+}
+
+// GetUserOutfitPlans retrieves all user's outfit plans (without date filter).
+// Оставляем для обратной совместимости; при желании можно удалить и везде использовать GetOutfitPlans.
+func (r *UserRepository) GetUserOutfitPlans(ctx context.Context, userID int) ([]domain.OutfitPlan, error) {
+	const query = `
+		SELECT id, user_id, date, item_ids, notes, created_at, updated_at
+		FROM outfit_plans
+		WHERE user_id = $1
+		  AND deleted_at IS NULL
 		ORDER BY date ASC
 	`
 
@@ -510,7 +563,8 @@ func (r *UserRepository) GetUserOutfitPlans(ctx context.Context, userID int) ([]
 	for rows.Next() {
 		var plan domain.OutfitPlan
 		var itemIDsJSON []byte
-		err = rows.Scan(
+
+		if err := rows.Scan(
 			&plan.ID,
 			&plan.UserID,
 			&plan.Date,
@@ -518,12 +572,11 @@ func (r *UserRepository) GetUserOutfitPlans(ctx context.Context, userID int) ([]
 			&plan.Notes,
 			&plan.CreatedAt,
 			&plan.UpdatedAt,
-		)
-		if err != nil {
+		); err != nil {
 			return nil, errors.Wrap(err, "failed to scan outfit plan")
 		}
 
-		if itemIDsJSON != nil {
+		if len(itemIDsJSON) > 0 {
 			if err := json.Unmarshal(itemIDsJSON, &plan.ItemIDs); err != nil {
 				return nil, errors.Wrap(err, "failed to parse item IDs")
 			}
@@ -532,24 +585,29 @@ func (r *UserRepository) GetUserOutfitPlans(ctx context.Context, userID int) ([]
 		plans = append(plans, plan)
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, errors.Wrap(err, "error iterating outfit plans")
 	}
 
 	return plans, nil
 }
 
-// DeleteOutfitPlan deletes an outfit plan.
+// DeleteOutfitPlan performs a soft delete of an outfit plan.
 func (r *UserRepository) DeleteOutfitPlan(ctx context.Context, userID, planID int) error {
-	result, err := r.db.pool.Exec(ctx, `
-		DELETE FROM outfit_plans
-		WHERE id = $1 AND user_id = $2
-	`, planID, userID)
+	const query = `
+		UPDATE outfit_plans
+		SET deleted_at = NOW()
+		WHERE id = $1
+		  AND user_id = $2
+		  AND deleted_at IS NULL
+	`
+
+	cmdTag, err := r.db.pool.Exec(ctx, query, planID, userID)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete outfit plan")
 	}
 
-	if result.RowsAffected() == 0 {
+	if cmdTag.RowsAffected() == 0 {
 		return errors.New("outfit plan not found or not owned by user")
 	}
 

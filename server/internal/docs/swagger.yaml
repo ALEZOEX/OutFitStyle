@@ -1,0 +1,595 @@
+basePath: /api/v1
+definitions:
+  domain.ClothingItem:
+    properties:
+      category:
+        type: string
+      confidence:
+        type: number
+      icon_emoji:
+        type: string
+      id:
+        type: integer
+      ml_score:
+        type: number
+      name:
+        type: string
+      subcategory:
+        type: string
+      user_id:
+        type: integer
+      weather_suitability:
+        type: string
+    type: object
+  domain.HourlyWeather:
+    properties:
+      rain_probability:
+        description: 0..1
+        type: number
+      temperature:
+        description: C°
+        type: number
+      time:
+        description: ISO8601
+        type: string
+      weather:
+        description: '"Clear", "Rain" и т.п.'
+        type: string
+    type: object
+  domain.OutfitPlan:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      id:
+        type: integer
+      item_ids:
+        items:
+          type: integer
+        type: array
+      notes:
+        type: string
+      temperature:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      weather_condition:
+        type: string
+    type: object
+  domain.RecommendationResponse:
+    properties:
+      algorithm:
+        type: string
+      feels_like:
+        type: number
+      hourly_forecast:
+        items:
+          $ref: '#/definitions/domain.HourlyWeather'
+        type: array
+      humidity:
+        type: integer
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/domain.ClothingItem'
+        type: array
+      location:
+        type: string
+      max_temp:
+        type: number
+      min_temp:
+        type: number
+      ml_powered:
+        type: boolean
+      outfit_score:
+        type: number
+      temperature:
+        type: number
+      timestamp:
+        type: string
+      user_id:
+        type: integer
+      weather:
+        type: string
+      will_rain:
+        type: boolean
+      will_snow:
+        type: boolean
+      wind_speed:
+        type: number
+    type: object
+  domain.UserProfile:
+    properties:
+      age_range:
+        type: string
+      created_at:
+        type: string
+      disliked_colors:
+        items:
+          type: string
+        type: array
+      formality_preference:
+        type: string
+      height:
+        type: integer
+      id:
+        type: integer
+      preferred_colors:
+        items:
+          type: string
+        type: array
+      size:
+        type: string
+      style_preference:
+        type: string
+      style_preferences:
+        type: string
+      temperature_sensitivity:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      weight:
+        type: integer
+    type: object
+info:
+  contact: {}
+  title: OutfitStyle API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает состояние сервиса и его зависимостей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Проверка состояния сервиса
+      tags:
+      - health
+  /recommendations:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает комплект одежды для заданного города и пользователя
+      parameters:
+      - description: Город
+        example: Moscow
+        in: query
+        name: city
+        required: true
+        type: string
+      - description: ID пользователя
+        example: 1
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить рекомендацию по погоде
+      tags:
+      - recommendations
+  /recommendations/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает рекомендацию по её идентификатору
+      parameters:
+      - description: ID рекомендации
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.RecommendationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить рекомендацию по ID
+      tags:
+      - recommendations
+  /recommendations/{id}/favorite:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет рекомендацию из избранного пользователя
+      parameters:
+      - description: ID рекомендации
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID пользователя
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить рекомендацию из избранного
+      tags:
+      - recommendations
+    post:
+      consumes:
+      - application/json
+      description: Добавляет рекомендацию в избранное пользователя
+      parameters:
+      - description: ID рекомендации
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID пользователя
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Добавить рекомендацию в избранное
+      tags:
+      - recommendations
+  /recommendations/{id}/rate:
+    post:
+      consumes:
+      - application/json
+      description: Позволяет пользователю оценить рекомендацию
+      parameters:
+      - description: ID рекомендации
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Оценка и отзыв
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Оценить рекомендацию
+      tags:
+      - recommendations
+  /users/{id}/outfit-plans:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список планов образов пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить планы образов пользователя
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый план образа для пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные плана образа
+        in: body
+        name: plan
+        required: true
+        schema:
+          $ref: '#/definitions/domain.OutfitPlan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать план образа
+      tags:
+      - users
+  /users/{id}/outfit-plans/{plan_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет план образа пользователя по ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Plan ID
+        in: path
+        name: plan_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить план образа
+      tags:
+      - users
+  /users/{id}/profile:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает профиль пользователя по ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserProfile'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить профиль пользователя
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Обновляет профиль пользователя по ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные профиля
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserProfile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить профиль пользователя
+      tags:
+      - users
+  /users/{user_id}/favorites:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список избранных рекомендаций пользователя
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить избранные рекомендации пользователя
+      tags:
+      - users
+swagger: "2.0"

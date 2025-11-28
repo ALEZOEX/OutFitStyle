@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/user_settings.dart';
 import '../providers/theme_provider.dart';
+import '../services/user_settings_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final UserSettings settings;
@@ -18,6 +20,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late String temperatureUnit;
   late String language;
 
+  bool _hasChanges = false;
+  bool _isSaving = false;
+
   @override
   void initState() {
     super.initState();
@@ -27,10 +32,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ? widget.settings.temperatureUnit
         : 'celsius';
     language =
-        widget.settings.language.isNotEmpty ? widget.settings.language : 'ru';
+    widget.settings.language.isNotEmpty ? widget.settings.language : 'ru';
+  }
+
+  void _markChanged() {
+    if (!_hasChanges) setState(() => _hasChanges = true);
   }
 
   Future<void> saveSettings() async {
+    setState(() => _isSaving = true);
+
     final updated = UserSettings(
       userId: widget.settings.userId,
       name: widget.settings.name,
@@ -46,9 +57,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       language: language,
     );
 
-    await updated.save();
+    final service = context.read<UserSettingsService>();
 
-    if (mounted) {
+    try {
+      await service.updateSettings(updated);
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
@@ -60,12 +75,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           backgroundColor: const Color(0xFF28a745),
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
 
-      if (mounted) Navigator.pop(context, true);
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка сохранения настроек: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -85,84 +113,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // Appearance
-          buildSectionTitle('Внешний вид', isDark),
+          buildSectionTitle('Внешний вид'),
           const SizedBox(height: 12),
-
           buildSwitchTile(
-            'Темная тема',
-            isDark,
-            Icons.dark_mode,
-            isDark,
-            (value) => themeProvider.toggleTheme(),
+            title: 'Тёмная тема',
+            value: isDark,
+            icon: Icons.dark_mode,
+            onChanged: (_) {
+              themeProvider.toggleTheme();
+              _markChanged();
+            },
           ),
 
           const SizedBox(height: 24),
 
-          // Units
-          buildSectionTitle('Единицы измерения', isDark),
+          buildSectionTitle('Единицы измерения'),
           const SizedBox(height: 12),
-
           buildRadioGroup(
-            'Температура',
-            temperatureUnit,
-            [
+            title: 'Температура',
+            groupValue: temperatureUnit,
+            options: const [
               ('celsius', '°C (Цельсий)'),
               ('fahrenheit', '°F (Фаренгейт)'),
             ],
-            (value) => setState(() => temperatureUnit = value!),
-            Icons.thermostat,
-            isDark,
+            icon: Icons.thermostat,
+            onChanged: (v) {
+              setState(() => temperatureUnit = v!);
+              _markChanged();
+            },
           ),
 
           const SizedBox(height: 24),
 
-          // App behavior
-          buildSectionTitle('Поведение приложения', isDark),
+          buildSectionTitle('Поведение приложения'),
           const SizedBox(height: 12),
           buildSwitchTile(
-            'Уведомления',
-            notificationsEnabled,
-            Icons.notifications,
-            isDark,
-            (value) => setState(() => notificationsEnabled = value),
+            title: 'Уведомления',
+            value: notificationsEnabled,
+            icon: Icons.notifications,
+            onChanged: (v) {
+              setState(() => notificationsEnabled = v);
+              _markChanged();
+            },
           ),
-
           const SizedBox(height: 8),
-
           buildSwitchTile(
-            'Автосохранение комплектов',
-            autoSaveOutfits,
-            Icons.auto_awesome,
-            isDark,
-            (value) => setState(() => autoSaveOutfits = value),
+            title: 'Автосохранение комплектов',
+            value: autoSaveOutfits,
+            icon: Icons.auto_awesome,
+            onChanged: (v) {
+              setState(() => autoSaveOutfits = v);
+              _markChanged();
+            },
           ),
 
           const SizedBox(height: 24),
 
-          // Language
-          buildSectionTitle('Язык', isDark),
+          buildSectionTitle('Язык'),
           const SizedBox(height: 12),
-
           buildRadioGroup(
-            'Язык интерфейса',
-            language,
-            [
+            title: 'Язык интерфейса',
+            groupValue: language,
+            options: const [
               ('ru', 'Русский'),
               ('en', 'English'),
             ],
-            (value) => setState(() => language = value!),
-            Icons.language,
-            isDark,
+            icon: Icons.language,
+            onChanged: (v) {
+              setState(() => language = v!);
+              _markChanged();
+            },
           ),
 
           const SizedBox(height: 32),
 
-          // Save button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: saveSettings,
+              onPressed: _hasChanges && !_isSaving ? saveSettings : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.primaryColor,
                 foregroundColor: Colors.white,
@@ -171,9 +199,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
+              child: _isSaving
+                  ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+                  : const Text(
                 'Сохранить настройки',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style:
+                TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -182,7 +220,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget buildSectionTitle(String title, bool isDark) {
+  Widget buildSectionTitle(String title) {
     final theme = Theme.of(context);
 
     return Text(
@@ -195,14 +233,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget buildSwitchTile(
-    String title,
-    bool value,
-    IconData icon,
-    bool isDark,
-    void Function(bool) onChanged,
-  ) {
+  Widget buildSwitchTile({
+    required String title,
+    required bool value,
+    required IconData icon,
+    required ValueChanged<bool> onChanged,
+  }) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -210,17 +248,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: isDark
-            ? Border.all(
-                color: theme.primaryColor.withValues(alpha: 0.3),
-              )
-            : null,
+            ? Border.all(color: theme.primaryColor.withValues(alpha: 0.3))
+            : Border.all(color: Colors.grey.shade300),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: theme.primaryColor,
-          ),
+          Icon(icon, color: theme.primaryColor),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -241,15 +274,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget buildRadioGroup(
-    String title,
-    String groupValue,
-    List<(String, String)> options,
-    void Function(String?) onChanged,
-    IconData icon,
-    bool isDark,
-  ) {
+  Widget buildRadioGroup({
+    required String title,
+    required String groupValue,
+    required List<(String, String)> options,
+    required IconData icon,
+    required ValueChanged<String?> onChanged,
+  }) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -257,20 +290,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: isDark
-            ? Border.all(
-                color: theme.primaryColor.withValues(alpha: 0.3),
-              )
-            : null,
+            ? Border.all(color: theme.primaryColor.withValues(alpha: 0.3))
+            : Border.all(color: Colors.grey.shade300),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                color: theme.primaryColor,
-              ),
+              Icon(icon, color: theme.primaryColor),
               const SizedBox(width: 12),
               Text(
                 title,
@@ -292,8 +320,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               value: option.$1,
-              // Эти два параметра помечены как deprecated в новых SDK.
-              // Мы осознанно их используем и глушим предупреждение.
               // ignore: deprecated_member_use
               groupValue: groupValue,
               // ignore: deprecated_member_use

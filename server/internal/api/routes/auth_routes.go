@@ -17,4 +17,6 @@ func RegisterAuthRoutes(router *mux.Router, authHandler *handlers.AuthHandler) {
 	auth.HandleFunc("/logout", authHandler.Logout).Methods("POST")
 	auth.HandleFunc("/forgot-password", authHandler.ForgotPassword).Methods("POST")
 	auth.HandleFunc("/reset-password", authHandler.ResetPassword).Methods("POST")
+	
+	auth.HandleFunc("/google", authHandler.GoogleLogin).Methods("POST")
 }

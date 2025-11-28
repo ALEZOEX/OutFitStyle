@@ -51,7 +51,6 @@ type WeatherAPIConfig struct {
 	BaseURL string `env:"WEATHER_API_URL" default:"https://api.openweathermap.org/data/2.5"`
 	Timeout int    `env:"WEATHER_API_TIMEOUT" default:"10"` // seconds
 }
-
 type MLServiceConfig struct {
 	BaseURL string `env:"ML_SERVICE_URL" default:"http://localhost:5000"`
 	Timeout int    `env:"ML_SERVICE_TIMEOUT" default:"30"` // seconds
@@ -88,9 +87,11 @@ type CacheConfig struct {
 }
 
 func Load() (*AppConfig, error) {
-	// Load .env file in development environment only
-	if err := godotenv.Load(); err != nil {
-		log.Printf("Warning: .env file not found or invalid: %v", err)
+	// .env грузим ТОЛЬКО при локальном запуске, не в Docker
+	if os.Getenv("RUN_IN_DOCKER") == "" {
+		if err := godotenv.Load(); err != nil {
+			log.Printf("Warning: .env file not found or invalid: %v", err)
+		}
 	}
 
 	cfg := &AppConfig{

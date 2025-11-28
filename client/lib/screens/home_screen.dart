@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late final ApiService _api;
   final TextEditingController _cityController =
-      TextEditingController(text: 'Moscow');
+      TextEditingController(text: 'Москва');
   bool _isLocationLoading = true;
 
   Recommendation? _recommendation;

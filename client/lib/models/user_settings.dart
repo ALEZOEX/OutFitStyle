@@ -1,87 +1,124 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
 class UserSettings {
-  String userId;
-  String name;
-  String email;
-  String? avatarUrl;
-  
-  // Preferences
-  String temperatureSensitivity; // 'cold', 'normal', 'warm'
-  String stylePreference; // 'casual', 'business', 'sporty', 'elegant'
-  String ageRange; // '18-25', '25-35', '35-45', '45+'
-  List<String> preferredCategories;
-  
-  // App settings
-  bool notificationsEnabled;
-  bool autoSaveOutfits;
-  String temperatureUnit; // 'celsius', 'fahrenheit'
-  String language; // 'ru', 'en'
+  final int userId;
+  final String name;
+  final String email;
+  final String avatarUrl;
 
-  UserSettings({
+  /// 'cold' | 'normal' | 'warm'
+  final String temperatureSensitivity;
+
+  /// 'casual' | 'business' | 'sporty' | 'elegant' ...
+  final String stylePreference;
+
+  /// '18-25' | '25-35' | '35-45' | '45+'
+  final String ageRange;
+
+  /// ['outerwear', 'upper', 'lower', 'footwear', ...]
+  final List<String> preferredCategories;
+
+  final bool notificationsEnabled;
+  final bool autoSaveOutfits;
+
+  /// 'celsius' | 'fahrenheit'
+  final String temperatureUnit;
+
+  /// 'ru' | 'en'
+  final String language;
+
+  const UserSettings({
     required this.userId,
     required this.name,
     required this.email,
-    this.avatarUrl,
-    this.temperatureSensitivity = 'normal',
-    this.stylePreference = 'casual',
-    this.ageRange = '25-35',
-    this.preferredCategories = const [],
-    this.notificationsEnabled = true,
+    required this.avatarUrl,
+    required this.temperatureSensitivity,
+    required this.stylePreference,
+    required this.ageRange,
+    this.preferredCategories = const <String>[],
+    this.notificationsEnabled = false,
     this.autoSaveOutfits = false,
     this.temperatureUnit = 'celsius',
     this.language = 'ru',
   });
 
-  // Сохранение в SharedPreferences
-  Future<void> save() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_id', userId);
-    await prefs.setString('user_name', name);
-    await prefs.setString('user_email', email);
-    await prefs.setString('user_avatar', avatarUrl ?? '');
-    await prefs.setString('temp_sensitivity', temperatureSensitivity);
-    await prefs.setString('style_preference', stylePreference);
-    await prefs.setString('age_range', ageRange);
-    await prefs.setStringList('preferred_categories', preferredCategories);
-    await prefs.setBool('notifications_enabled', notificationsEnabled);
-    await prefs.setBool('auto_save_outfits', autoSaveOutfits);
-    await prefs.setString('temperature_unit', temperatureUnit);
-    await prefs.setString('language', language);
-  }
-
-  // Загрузка из SharedPreferences
-  static Future<UserSettings> load() async {
-    final prefs = await SharedPreferences.getInstance();
+  UserSettings copyWith({
+    int? userId,
+    String? name,
+    String? email,
+    String? avatarUrl,
+    String? temperatureSensitivity,
+    String? stylePreference,
+    String? ageRange,
+    List<String>? preferredCategories,
+    bool? notificationsEnabled,
+    bool? autoSaveOutfits,
+    String? temperatureUnit,
+    String? language,
+  }) {
     return UserSettings(
-      userId: prefs.getString('user_id') ?? '1',
-      name: prefs.getString('user_name') ?? 'Пользователь',
-      email: prefs.getString('user_email') ?? 'user@example.com',
-      avatarUrl: prefs.getString('user_avatar'),
-      temperatureSensitivity: prefs.getString('temp_sensitivity') ?? 'normal',
-      stylePreference: prefs.getString('style_preference') ?? 'casual',
-      ageRange: prefs.getString('age_range') ?? '25-35',
-      preferredCategories: prefs.getStringList('preferred_categories') ?? [],
-      notificationsEnabled: prefs.getBool('notifications_enabled') ?? true,
-      autoSaveOutfits: prefs.getBool('auto_save_outfits') ?? false,
-      temperatureUnit: prefs.getString('temperature_unit') ?? 'celsius',
-      language: prefs.getString('language') ?? 'ru',
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      temperatureSensitivity:
+      temperatureSensitivity ?? this.temperatureSensitivity,
+      stylePreference: stylePreference ?? this.stylePreference,
+      ageRange: ageRange ?? this.ageRange,
+      preferredCategories:
+      preferredCategories ?? List<String>.from(this.preferredCategories),
+      notificationsEnabled:
+      notificationsEnabled ?? this.notificationsEnabled,
+      autoSaveOutfits: autoSaveOutfits ?? this.autoSaveOutfits,
+      temperatureUnit: temperatureUnit ?? this.temperatureUnit,
+      language: language ?? this.language,
     );
   }
 
-  // Очистка (при удалении аккаунта)
-  static Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+  factory UserSettings.fromJson(Map<String, dynamic> json) {
+    // preferredCategories / preferred_categories могут быть либо List<String>, либо List<dynamic>
+    final rawCategories =
+        json['preferredCategories'] ?? json['preferred_categories'] ?? const <dynamic>[];
+    final categories = (rawCategories as List)
+        .map((e) => e.toString())
+        .toList();
+
+    return UserSettings(
+      userId: (json['userId'] ?? json['user_id']) as int,
+      name: (json['name'] ?? json['username'] ?? '') as String,
+      email: (json['email'] ?? '') as String,
+      avatarUrl: (json['avatarUrl'] ?? json['avatar_url'] ?? '') as String,
+      temperatureSensitivity:
+      (json['temperatureSensitivity'] ?? json['temperature_sensitivity'] ?? 'normal')
+      as String,
+      stylePreference:
+      (json['stylePreference'] ?? json['style_preference'] ?? 'casual')
+      as String,
+      ageRange:
+      (json['ageRange'] ?? json['age_range'] ?? '25-35') as String,
+      preferredCategories: categories,
+      notificationsEnabled:
+      (json['notificationsEnabled'] as bool?) ?? false,
+      autoSaveOutfits:
+      (json['autoSaveOutfits'] as bool?) ?? false,
+      temperatureUnit:
+      (json['temperatureUnit'] ?? 'celsius') as String,
+      language: (json['language'] ?? 'ru') as String,
+    );
   }
 
-  Map<String, dynamic> toJson() => {
-    'user_id': userId,
-    'name': name,
-    'email': email,
-    'temperature_sensitivity': temperatureSensitivity,
-    'style_preference': stylePreference,
-    'age_range': ageRange,
-    'preferred_categories': preferredCategories,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'name': name,
+      'email': email,
+      'avatarUrl': avatarUrl,
+      'temperatureSensitivity': temperatureSensitivity,
+      'stylePreference': stylePreference,
+      'ageRange': ageRange,
+      'preferredCategories': preferredCategories,
+      'notificationsEnabled': notificationsEnabled,
+      'autoSaveOutfits': autoSaveOutfits,
+      'temperatureUnit': temperatureUnit,
+      'language': language,
+    };
+  }
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -13,7 +15,10 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
-// WeatherService handles weather data retrieval.
+// ErrCityNotFound возвращается, если OpenWeatherMap вернул 404 по городу.
+var ErrCityNotFound = fmt.Errorf("city not found")
+
+// WeatherService инкапсулирует работу с OpenWeatherMap.
 type WeatherService struct {
 	baseURL string
 	apiKey  string
@@ -21,53 +26,13 @@ type WeatherService struct {
 	logger  *zap.Logger
 }
 
-// ExtendedWeatherData — алиас доменного типа, чтобы не дублировать структуру.
-type ExtendedWeatherData = domain.ExtendedWeatherData
-
-// weatherAPIResponse represents the response from the weather API
-type weatherAPIResponse struct {
-	Location struct {
-		Name string `json:"name"`
-	} `json:"location"`
-	Current struct {
-		TempC      float64 `json:"temp_c"`
-		FeelsLikeC float64 `json:"feelslike_c"`
-		Humidity   int     `json:"humidity"`
-		WindKph    float64 `json:"wind_kph"`
-		Condition  struct {
-			Text string `json:"text"`
-		} `json:"condition"`
-	} `json:"current"`
-	Forecast struct {
-		ForecastDay []struct {
-			Hour []struct {
-				TimeEpoch int64   `json:"time_epoch"`
-				TempC     float64 `json:"temp_c"`
-				Condition struct {
-					Text string `json:"text"`
-				} `json:"condition"`
-				WillItRain int `json:"will_it_rain"`
-				WillItSnow int `json:"will_it_snow"`
-			} `json:"hour"`
-		} `json:"forecastday"`
-	} `json:"forecast"`
-}
-
-// HourlyForecastItem — если тебе нужен отдельный тип для внешнего API,
-// но в домене уже есть domain.HourlyWeather, лучше использовать его.
-// Оставляю пример корректного объявления на будущее.
-type HourlyForecastItem struct {
-	Time          time.Time `json:"time"`
-	Temperature   float64   `json:"temperature"`
-	Weather       string    `json:"weather"`
-	Precipitation float64   `json:"precipitation,omitempty"`
-}
-
-// NewWeatherService creates a new weather service.
+// NewWeatherService создаёт новый сервис погоды.
 func NewWeatherService(apiKey, baseURL string, timeout time.Duration, logger *zap.Logger) *WeatherService {
 	if logger == nil {
 		logger = zap.NewNop()
 	}
+
+	baseURL = strings.TrimRight(baseURL, "/")
 
 	return &WeatherService{
 		baseURL: baseURL,
@@ -79,109 +44,121 @@ func NewWeatherService(apiKey, baseURL string, timeout time.Duration, logger *za
 	}
 }
 
-// GetWeather retrieves weather data for a given city.
-func (s *WeatherService) GetWeather(ctx context.Context, city string) (*ExtendedWeatherData, error) {
-	// If we don't have API credentials, return mock data
+// структура ответа OpenWeatherMap для current weather
+type owmCurrentResponse struct {
+	Name  string `json:"name"`
+	Coord struct {
+		Lat float64 `json:"lat"`
+		Lon float64 `json:"lon"`
+	} `json:"coord"`
+	Weather []struct {
+		Main        string `json:"main"`
+		Description string `json:"description"`
+	} `json:"weather"`
+	Main struct {
+		Temp      float64 `json:"temp"`
+		FeelsLike float64 `json:"feels_like"`
+		TempMin   float64 `json:"temp_min"`
+		TempMax   float64 `json:"temp_max"`
+		Humidity  int     `json:"humidity"`
+	} `json:"main"`
+	Wind struct {
+		Speed float64 `json:"speed"`
+	} `json:"wind"`
+	Dt int64 `json:"dt"`
+}
+
+// GetWeather возвращает доменную погоду по имени города.
+func (s *WeatherService) GetWeather(ctx context.Context, city string) (*domain.ExtendedWeatherData, error) {
 	if s.apiKey == "" || s.baseURL == "" {
-		s.logger.Warn("Using mock weather data - API key or base URL not configured")
-		return s.getMockWeather(city), nil
+		return nil, fmt.Errorf("weather service is not configured: empty apiKey or baseURL")
 	}
 
-	// Make real API call
-	url := fmt.Sprintf("%s/current.json?key=%s&q=%s&lang=ru", s.baseURL, s.apiKey, city)
+	endpoint := s.baseURL + "/weather"
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	// Собираем query-параметры
+	q := url.Values{}
+	q.Set("q", city)
+	q.Set("appid", s.apiKey)
+	q.Set("units", "metric")
+	q.Set("lang", "ru")
+
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("parse weather endpoint: %w", err)
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("create weather request: %w", err)
 	}
 
 	resp, err := s.client.Do(req)
 	if err != nil {
-		s.logger.Error("Weather API request failed", zap.Error(err))
-		// Fallback to mock data on API failure
-		return s.getMockWeather(city), nil
+		return nil, fmt.Errorf("weather api request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
+	body, _ := io.ReadAll(resp.Body)
+
+	// 404 — такого города нет
+	if resp.StatusCode == http.StatusNotFound {
+		s.logger.Warn("city not found in OpenWeatherMap",
+			zap.String("city", city),
+			zap.ByteString("body", body),
+		)
+		return nil, ErrCityNotFound
+	}
+
+	// Любой не 200 — ошибка провайдера или ключа
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		s.logger.Error("Weather API returned error status",
+		s.logger.Error("OpenWeatherMap returned error",
 			zap.Int("status", resp.StatusCode),
-			zap.String("body", string(body)))
-		// Fallback to mock data on API error
-		return s.getMockWeather(city), nil
+			zap.ByteString("body", body),
+		)
+		return nil, fmt.Errorf("weather api error: status=%d", resp.StatusCode)
 	}
 
-	var apiResp weatherAPIResponse
-	if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
-		s.logger.Error("Failed to decode weather API response", zap.Error(err))
-		// Fallback to mock data on decode error
-		return s.getMockWeather(city), nil
+	var apiResp owmCurrentResponse
+	if err := json.Unmarshal(body, &apiResp); err != nil {
+		return nil, fmt.Errorf("decode weather response: %w", err)
 	}
 
-	// Convert API response to domain model
-	hourlyForecasts := make([]domain.HourlyWeather, 0)
-	if len(apiResp.Forecast.ForecastDay) > 0 && len(apiResp.Forecast.ForecastDay[0].Hour) > 0 {
-		for _, hour := range apiResp.Forecast.ForecastDay[0].Hour {
-			hourlyForecasts = append(hourlyForecasts, domain.HourlyWeather{
-				Time:            time.Unix(hour.TimeEpoch, 0).Format(time.RFC3339),
-				Temperature:     hour.TempC,
-				Weather:         hour.Condition.Text,
-				RainProbability: float64(hour.WillItRain),
-			})
+	desc := ""
+	if len(apiResp.Weather) > 0 {
+		if apiResp.Weather[0].Description != "" {
+			desc = apiResp.Weather[0].Description
+		} else {
+			desc = apiResp.Weather[0].Main
 		}
 	}
 
 	weather := &domain.ExtendedWeatherData{
 		WeatherData: domain.WeatherData{
-			Location:       apiResp.Location.Name,
-			Temperature:    apiResp.Current.TempC,
-			FeelsLike:      apiResp.Current.FeelsLikeC,
-			Weather:        apiResp.Current.Condition.Text,
-			Humidity:       apiResp.Current.Humidity,
-			WindSpeed:      apiResp.Current.WindKph / 3.6, // kph -> m/s
-			HourlyForecast: hourlyForecasts,
+			Location:       apiResp.Name,
+			Temperature:    apiResp.Main.Temp,
+			FeelsLike:      apiResp.Main.FeelsLike,
+			Weather:        desc,
+			Humidity:       apiResp.Main.Humidity,
+			WindSpeed:      apiResp.Wind.Speed, // m/s при units=metric
+			MinTemp:        apiResp.Main.TempMin,
+			MaxTemp:        apiResp.Main.TempMax,
+			WillRain:       false,
+			WillSnow:       false,
+			HourlyForecast: []domain.HourlyWeather{},
 		},
-		Timestamp: time.Now(),
+		Timestamp: time.Now().UTC(),
 	}
 
 	return weather, nil
 }
 
-// getMockWeather returns mock weather data for testing purposes
-func (s *WeatherService) getMockWeather(city string) *ExtendedWeatherData {
-	return &domain.ExtendedWeatherData{
-		WeatherData: domain.WeatherData{
-			Location:    city,
-			Temperature: 20.0,
-			FeelsLike:   22.0,
-			Weather:     "Clear",
-			Humidity:    65,
-			WindSpeed:   3.5,
-			MinTemp:     15.0,
-			MaxTemp:     25.0,
-			WillRain:    false,
-			WillSnow:    false,
-			// HourlyForecast заполняется доменным типом domain.HourlyWeather.
-			HourlyForecast: []domain.HourlyWeather{
-				{
-					Time:            time.Now().Add(1 * time.Hour).Format(time.RFC3339),
-					Temperature:     21.0,
-					Weather:         "Clear",
-					RainProbability: 0,
-				},
-			},
-		},
-		Timestamp: time.Now(),
-	}
-}
-
-// HealthCheck implements the health check for the weather service.
+// HealthCheck реализует интерфейс health.Checker.
 func (s *WeatherService) HealthCheck() error {
 	if s.apiKey == "" {
 		return fmt.Errorf("weather service api key is missing")
 	}
-	// Дополнительно можно проверить baseURL или сделать лёгкий HEAD-запрос.
 	if s.baseURL == "" {
 		return fmt.Errorf("weather service base url is missing")
 	}

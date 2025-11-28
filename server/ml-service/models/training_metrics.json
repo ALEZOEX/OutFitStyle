@@ -61,5 +61,68 @@
     ],
     "version": 1,
     "timestamp": "2025-11-16T16:50:25.722074"
+  },
+  {
+    "accuracy": 0.8308009754267492,
+    "precision": 0.7749911691981632,
+    "recall": 0.7169153686962204,
+    "f1_score": 0.7448229037003508,
+    "auc": 0.8560955585067853,
+    "cv_mean": 0.8300365131841039,
+    "cv_std": 0.001834338727893978,
+    "top_features": [
+      {
+        "name": "temp_suitability",
+        "importance": 0.6444771735961842
+      },
+      {
+        "name": "category",
+        "importance": 0.11693990329720365
+      },
+      {
+        "name": "season",
+        "importance": 0.053816149625124855
+      },
+      {
+        "name": "wind_speed",
+        "importance": 0.04327958164795721
+      },
+      {
+        "name": "temperature",
+        "importance": 0.02587541083629029
+      },
+      {
+        "name": "temp_distance",
+        "importance": 0.018937652627005315
+      },
+      {
+        "name": "humidity",
+        "importance": 0.01729148514018095
+      },
+      {
+        "name": "feels_like",
+        "importance": 0.014480426737606463
+      },
+      {
+        "name": "temp_category",
+        "importance": 0.009199240994033344
+      },
+      {
+        "name": "min_temp",
+        "importance": 0.0071015017171879
+      }
+    ],
+    "confusion_matrix": [
+      [
+        15563,
+        1911
+      ],
+      [
+        2599,
+        6582
+      ]
+    ],
+    "version": 1,
+    "timestamp": "2025-11-25T20:07:01.917709"
   }
 ]

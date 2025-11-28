@@ -40,7 +40,18 @@ func parseUserID(vars map[string]string) (int, error) {
 	return strconv.Atoi(userIDStr)
 }
 
-// GetUserProfile handles GET /api/users/{id}/profile.
+// GetUserProfile godoc
+// @Summary      Получить профиль пользователя
+// @Description  Возвращает профиль пользователя по ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  domain.UserProfile
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/{id}/profile [get]
 func (h *UserHandler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := parseUserID(vars)
@@ -65,7 +76,18 @@ func (h *UserHandler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, profile)
 }
 
-// UpdateUserProfile handles PUT /api/users/{id}/profile.
+// UpdateUserProfile godoc
+// @Summary      Обновить профиль пользователя
+// @Description  Обновляет профиль пользователя по ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id     path      int              true  "User ID"
+// @Param        profile  body    domain.UserProfile  true  "Данные профиля"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/{id}/profile [put]
 func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := parseUserID(vars)
@@ -93,7 +115,7 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 	resp.Success(w, map[string]string{"message": "Profile updated successfully"})
 }
 
-// GetUserAchievements handles GET /api/users/{id}/achievements.
+// GetUserAchievements handles GET /api/v1/users/{id}/achievements.
 func (h *UserHandler) GetUserAchievements(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := parseUserID(vars)
@@ -117,7 +139,7 @@ func (h *UserHandler) GetUserAchievements(w http.ResponseWriter, r *http.Request
 	resp.Success(w, response)
 }
 
-// GetUserRatings handles GET /api/users/{id}/ratings.
+// GetUserRatings handles GET /api/v1/users/{id}/ratings.
 func (h *UserHandler) GetUserRatings(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := parseUserID(vars)
@@ -141,7 +163,18 @@ func (h *UserHandler) GetUserRatings(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, response)
 }
 
-// CreateOutfitPlan handles POST /api/users/{id}/outfit-plans.
+// CreateOutfitPlan godoc
+// @Summary      Создать план образа
+// @Description  Создаёт новый план образа для пользователя
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int             true  "User ID"
+// @Param        plan  body      domain.OutfitPlan  true  "Данные плана образа"
+// @Success      200   {object}  map[string]string
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /users/{id}/outfit-plans [post]
 func (h *UserHandler) CreateOutfitPlan(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := parseUserID(vars)
@@ -169,7 +202,17 @@ func (h *UserHandler) CreateOutfitPlan(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]string{"message": "Outfit plan created successfully"})
 }
 
-// GetUserOutfitPlans handles GET /api/users/{id}/outfit-plans.
+// GetUserOutfitPlans godoc
+// @Summary      Получить планы образов пользователя
+// @Description  Возвращает список планов образов пользователя
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/{id}/outfit-plans [get]
 func (h *UserHandler) GetUserOutfitPlans(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := parseUserID(vars)
@@ -193,7 +236,18 @@ func (h *UserHandler) GetUserOutfitPlans(w http.ResponseWriter, r *http.Request)
 	resp.Success(w, response)
 }
 
-// DeleteOutfitPlan handles DELETE /api/users/{id}/outfit-plans/{plan_id}.
+// DeleteOutfitPlan godoc
+// @Summary      Удалить план образа
+// @Description  Удаляет план образа пользователя по ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int  true  "User ID"
+// @Param        plan_id  path      int  true  "Plan ID"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/{id}/outfit-plans/{plan_id} [delete]
 func (h *UserHandler) DeleteOutfitPlan(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -225,7 +279,7 @@ func (h *UserHandler) DeleteOutfitPlan(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]string{"message": "Outfit plan deleted successfully"})
 }
 
-// GetUserStats handles GET /api/users/{id}/stats.
+// GetUserStats handles GET /api/v1/users/{id}/stats.
 func (h *UserHandler) GetUserStats(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := parseUserID(vars)

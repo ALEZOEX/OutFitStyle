@@ -9,10 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
+  flutter_secure_storage: ^9.2.4
+  google_sign_in: ^7.2.0
   # HTTP
-  http: ^1.1.0
-  url_launcher: ^6.2.2
+  http: ^1.6.0
+  url_launcher: 6.3.2
   
   # State Management
   provider: ^6.1.1
@@ -22,18 +24,19 @@ dependencies:
   shimmer: ^3.0.0
   
   # Utils
-  intl: ^0.19.0
+  intl: ^0.20.2
   shared_preferences: ^2.2.2
   
   # Location
-  geolocator: ^10.0.0
-  geocoding: ^3.0.0
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
 
   collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.7
 
 flutter:
   uses-material-design: true
@@ -41,3 +44,15 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/icons/app/favicon.png
+    - assets/icons/app/Icon-192.png
+    - assets/icons/app/Icon-512.png
+
+flutter_native_splash:
+  color: "#FFFFFF"  # Цвет фона сплэш-экрана
+  image: "assets/icons/app/app_icon.ico"  # Основная иконка (512x512)
+  android_12:  # Для Android 12+
+    image: "assets/icons/app/Icon-512.png"
+    icon_background_color: "#FFFFFF"
+  ios: true  # Включить для iOS
+  web: true  # Включить для Web

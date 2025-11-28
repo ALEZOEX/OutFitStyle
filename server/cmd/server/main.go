@@ -1,3 +1,8 @@
+// Package main OutfitStyle API.
+//
+// @title       OutfitStyle API
+// @version     1.0
+// @BasePath    /api/v1
 package main
 
 import (
@@ -10,48 +15,59 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/handlers"
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/config"
 	"outfitstyle/server/internal/core/application/services"
+	_ "outfitstyle/server/internal/docs"
 	"outfitstyle/server/internal/infrastructure/external"
 	"outfitstyle/server/internal/infrastructure/persistence/postgres"
 	"outfitstyle/server/internal/pkg/health"
 )
 
 func main() {
-	// Setup logger
+	// ---------- Логгер ----------
 	logger, err := setupLogger()
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
 	defer logger.Sync()
 
-	// Load configuration
+	// ---------- Конфиг приложения ----------
 	cfg, err := config.Load()
 	if err != nil {
 		logger.Fatal("Configuration loading failed", zap.Error(err))
 	}
 
-	// Validate configuration
 	if err := cfg.Validate(); err != nil {
 		logger.Fatal("Configuration validation failed", zap.Error(err))
 	}
 
-	// Initialize database
+	// ---------- БД ----------
 	db, err := postgres.NewDB(cfg.Database.DatabaseURL(), logger)
 	if err != nil {
-		logger.Fatal("Databaseconnection failed", zap.Error(err))
+		logger.Fatal("Database connection failed", zap.Error(err))
 	}
 	defer db.Close()
 
-	// Initialize external services
+	// ---------- Внешние сервисы ----------
+	weatherAPIKey := os.Getenv("WEATHER_API_KEY")
+	weatherBaseURL := os.Getenv("WEATHER_API_BASE_URL")
+	if weatherAPIKey == "" {
+		logger.Warn("WEATHER_API_KEY is not set")
+	}
+	if weatherBaseURL == "" {
+		weatherBaseURL = "https://api.openweathermap.org/data/2.5"
+	}
+
 	weatherService := external.NewWeatherService(
-		cfg.WeatherAPI.Key,
-		cfg.WeatherAPI.BaseURL,
-		time.Duration(cfg.WeatherAPI.Timeout)*time.Second,
+		weatherAPIKey,
+		weatherBaseURL,
+		10*time.Second,
 		logger,
 	)
 
@@ -60,40 +76,56 @@ func main() {
 		logger,
 	)
 
-	// Initialize repositories
+	googleAuth, err := external.NewGoogleAuthService()
+	if err != nil {
+		logger.Fatal("Google auth init failed", zap.Error(err))
+	}
+
+	// ---------- Репозитории ----------
 	userRepo := postgres.NewUserRepository(db, logger)
 	recommendationRepo := postgres.NewRecommendationRepository(db, logger)
 
-	// Initialize email service
+	// ---------- EmailService через cfg.Email ----------
 	var emailService services.EmailService
 	if cfg.Email.SMTPHost != "" {
-		emailSvc := services.NewEmailService(
+		from := os.Getenv("FROM_EMAIL")
+		if from == "" {
+			from = "noreply@outfitstyle.com"
+		}
+
+		logger.Info("SMTP email service enabled",
+			zap.String("host", cfg.Email.SMTPHost),
+			zap.Int("port", cfg.Email.SMTPPort),
+			zap.String("from", from),
+		)
+
+		emailService = services.NewEmailService(
 			cfg.Email.SMTPHost,
 			cfg.Email.SMTPPort,
 			cfg.Email.SMTPUsername,
 			cfg.Email.SMTPPassword,
-			"noreply@outfitstyle.com",
+			from,
 			logger,
 		)
-		emailService = emailSvc
 	} else {
+		logger.Warn("SMTP config not set, using NoopEmailService")
 		emailService = services.NewNoopEmailService()
 	}
 
-	// Initialize token service
+	// ---------- TokenService / AuthService ----------
 	tokenService := services.NewTokenService(
 		cfg.Security.JWTSecret,
 		time.Duration(cfg.Security.TokenExpiryHours)*time.Hour,
 		time.Duration(cfg.Security.RefreshTokenExpiryDays)*24*time.Hour,
 	)
 
-	// Initialize auth service
 	authConfig := services.AuthConfig{
 		TokenExpiryHours:       cfg.Security.TokenExpiryHours,
 		VerificationCodeExpiry: time.Duration(cfg.Security.VerificationCodeExpiry) * time.Minute,
 		MaxLoginAttempts:       cfg.Security.MaxLoginAttempts,
 		BlockDuration:          time.Duration(cfg.Security.BlockDuration) * time.Minute,
 	}
+
 	authService := services.NewAuthService(
 		userRepo,
 		emailService,
@@ -101,7 +133,7 @@ func main() {
 		authConfig,
 	)
 
-	// Initialize application services
+	// ---------- Доменные сервисы ----------
 	recommendationService := services.NewRecommendationService(
 		recommendationRepo,
 		userRepo,
@@ -112,15 +144,15 @@ func main() {
 
 	userService := services.NewUserService(userRepo, logger)
 
-	// Initialize handlers
+	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandler(recommendationService, weatherService, logger)
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, googleAuth)
 	userHandler := handlers.NewUserHandler(userService, logger)
 
-	// Setup router
+	// ---------- Роутер ----------
 	router := setupRouter(cfg, recommendationHandler, authHandler, userHandler, logger)
 
-	// Setup health checks
+	// ---------- Health checks ----------
 	checks := map[string]health.Checker{
 		"database": db,
 		"weather":  weatherService,
@@ -128,7 +160,7 @@ func main() {
 	}
 	health.RegisterChecks(checks)
 
-	// Setup server
+	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
 	srv := &stdhttp.Server{
 		Addr:         addr,
@@ -138,7 +170,7 @@ func main() {
 		IdleTimeout:  120 * time.Second,
 	}
 
-	// Start server in a goroutine
+	// Стартуем сервер
 	go func() {
 		logger.Info("Starting server", zap.String("address", addr))
 		if err := srv.ListenAndServe(); err != nil && err != stdhttp.ErrServerClosed {
@@ -146,7 +178,7 @@ func main() {
 		}
 	}()
 
-	// Graceful shutdown
+	// ---------- Graceful shutdown ----------
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 	<-shutdown
@@ -186,27 +218,26 @@ func setupRouter(
 ) *mux.Router {
 	router := mux.NewRouter()
 
-	// Enablemiddleware
+	// Middleware
 	router.Use(
 		middleware.CORSMiddleware(cfg.Security.GetAllowedOrigins()),
 		middleware.LoggerMiddleware(logger),
 		middleware.RateLimitMiddleware(cfg.Security.RateLimit, time.Minute),
 	)
 
-	// Health check endpoint
+	// Health
 	router.HandleFunc("/health", health.Handler).Methods(stdhttp.MethodGet)
 
-	// API routes
+	// Swagger UI: /swagger/index.html
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
+	// API v1
 	api := router.PathPrefix("/api/v1").Subrouter()
 
-	// Public routes (authentication)
-	auth := api.PathPrefix("/auth").Subrouter()
-	auth.HandleFunc("/register", authHandler.Register).Methods(stdhttp.MethodPost)
-	auth.HandleFunc("/login", authHandler.Login).Methods(stdhttp.MethodPost)
-	auth.HandleFunc("/verify", authHandler.VerifyCode).Methods(stdhttp.MethodPost)
-	auth.HandleFunc("/refresh", authHandler.RefreshToken).Methods(stdhttp.MethodPost)
+	// Auth routes: /api/v1/auth/...
+	authHandler.RegisterRoutes(api)
 
-	// Protected routes
+	// Protected routes (пока без auth‑middleware)
 	protected := api.PathPrefix("").Subrouter()
 
 	recommendations := protected.PathPrefix("/recommendations").Subrouter()
@@ -219,6 +250,10 @@ func setupRouter(
 	users.HandleFunc("/{id}/outfit-plans", userHandler.GetUserOutfitPlans).Methods(stdhttp.MethodGet)
 	users.HandleFunc("/{id}/outfit-plans", userHandler.CreateOutfitPlan).Methods(stdhttp.MethodPost)
 	users.HandleFunc("/{id}/outfit-plans/{plan_id}", userHandler.DeleteOutfitPlan).Methods(stdhttp.MethodDelete)
+	users.HandleFunc("/{id}/stats", userHandler.GetUserStats).Methods(stdhttp.MethodGet)
 
+	// Prometheus metrics
+	router.Handle("/metrics", promhttp.Handler()).Methods(stdhttp.MethodGet)
+	
 	return router
 }

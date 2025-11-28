@@ -194,13 +194,15 @@ type UserAchievement struct {
 // --------------------
 
 type OutfitPlan struct {
-	ID        ID        `json:"id"`
-	UserID    ID        `json:"user_id"`
-	Date      time.Time `json:"date"`
-	ItemIDs   []int     `json:"item_ids"`
-	Notes     string    `json:"notes,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID               int       `json:"id"`
+	UserID           ID        `json:"user_id"`
+	Date             time.Time `json:"date"`
+	ItemIDs          []int     `json:"item_ids"`
+	Notes            *string   `json:"notes,omitempty"`
+	WeatherCondition *string   `json:"weather_condition,omitempty"`
+	Temperature      *float64  `json:"temperature,omitempty"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 type MarketItem struct {

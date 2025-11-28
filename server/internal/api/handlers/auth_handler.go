@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/mail"
+	"outfitstyle/server/internal/infrastructure/external"
 	"strings"
 	"time"
 	"unicode"
@@ -37,11 +38,15 @@ var (
 // AuthHandler handles authentication-related HTTP requests
 type AuthHandler struct {
 	authService *services.AuthService
+	googleAuth  *external.GoogleAuthService
 }
 
 // NewAuthHandler creates a new authentication handler
-func NewAuthHandler(authService *services.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+func NewAuthHandler(authService *services.AuthService, googleAuth *external.GoogleAuthService) *AuthHandler {
+	return &AuthHandler{
+		authService: authService,
+		googleAuth:  googleAuth,
+	}
 }
 
 // DTO для запросов
@@ -121,7 +126,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	// Метод LoginUser теперь возвращает (string, error) - код подтверждения
 	_, err := h.authService.LoginUser(ctx, input.Email, input.Password)
 	if err != nil {
 		log.Printf("Login error: %v", err)
@@ -269,8 +273,9 @@ func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]interface{}{"message": "Password successfully reset. Please login with your new password."})
 }
 
+// Регистрируем все /api/v1/auth/... маршруты
 func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
-	auth := r.PathPrefix("/api/auth").Subrouter()
+	auth := r.PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/register", h.Register).Methods(http.MethodPost)
 	auth.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	auth.HandleFunc("/verify", h.VerifyCode).Methods(http.MethodPost)
@@ -278,6 +283,7 @@ func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	auth.HandleFunc("/reset-password", h.ResetPassword).Methods(http.MethodPost)
 	auth.HandleFunc("/refresh", h.RefreshToken).Methods(http.MethodPost)
 	auth.HandleFunc("/logout", h.Logout).Methods(http.MethodPost)
+	auth.HandleFunc("/google", h.GoogleLogin).Methods(http.MethodPost)
 }
 
 func validateRegistrationInput(input domain.UserRegistration) error {
@@ -343,4 +349,75 @@ func isValidEmail(email string) bool {
 	}
 	_, err := mail.ParseAddress(email)
 	return err == nil
+}
+
+// GoogleLogin — обработчик входа через Google OAuth
+func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var req struct {
+		IDToken string `json:"idToken"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+
+	req.IDToken = strings.TrimSpace(req.IDToken)
+	if req.IDToken == "" {
+		resp.Error(w, http.StatusBadRequest, errors.New("idToken is required"))
+		return
+	}
+
+	// 1. Проверяем Google ID токен и достаём email
+	email, err := h.googleAuth.VerifyIDToken(r.Context(), req.IDToken)
+	if err != nil {
+		log.Printf("GoogleLogin verify error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errors.New("invalid Google token"))
+		return
+	}
+
+	// 2. Ищем пользователя по email
+	user, err := h.authService.GetUserByEmail(r.Context(), email)
+	if err != nil || user == nil {
+		// Если нет — регистрируем автоматически
+		username := email
+		if at := strings.Index(email, "@"); at > 0 {
+			username = email[:at]
+		}
+
+		userReg := domain.UserRegistration{
+			Email:    email,
+			Password: "", // для OAuth пароль не нужен
+			Username: username,
+		}
+
+		user, err = h.authService.RegisterOAuthUser(r.Context(), userReg)
+		if err != nil {
+			log.Printf("GoogleLogin register error: %v", err)
+			resp.Error(w, http.StatusInternalServerError, errors.New("registration failed"))
+			return
+		}
+	}
+
+	// 3. Генерируем access (+пока фиктивный refresh) токен
+	accessToken, refreshToken, err := h.authService.GenerateTokens(user.ID)
+	if err != nil {
+		log.Printf("GoogleLogin token error: %v", err)
+		resp.Error(w, http.StatusInternalServerError, errors.New("token generation failed"))
+		return
+	}
+
+	response := map[string]interface{}{
+		"user": map[string]interface{}{
+			"id":         user.ID,
+			"email":      user.Email,
+			"username":   user.Username,
+			"isVerified": true, // OAuth = verified
+		},
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken, // сейчас будет пустая строка
+		"expiresIn":    accessTokenTTLSeconds,
+	}
+
+	resp.Success(w, response)
 }

@@ -33,14 +33,14 @@ var (
 	}, []string{"user_id", "status"})
 )
 
-// RecommendationHandler handles recommendation-related HTTP requests
+// RecommendationHandler handles recommendation-related HTTP requests.
 type RecommendationHandler struct {
 	recommendationService *services.RecommendationService
 	weatherService        *external.WeatherService
 	logger                *zap.Logger
 }
 
-// NewRecommendationHandler creates a new recommendation handler
+// NewRecommendationHandler creates a new recommendation handler.
 func NewRecommendationHandler(
 	recommendationService *services.RecommendationService,
 	weatherService *external.WeatherService,
@@ -53,7 +53,18 @@ func NewRecommendationHandler(
 	}
 }
 
-// GetRecommendations handles GET /api/recommendations
+// GetRecommendations godoc
+// @Summary      Получить рекомендацию по погоде
+// @Description  Возвращает комплект одежды для заданного города и пользователя
+// @Tags         recommendations
+// @Accept       json
+// @Produce      json
+// @Param        city     query  string true  "Город"              example(Moscow)
+// @Param        user_id  query  int    true  "ID пользователя"    example(1)
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /recommendations [get]
 func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	defer func() {
@@ -61,7 +72,7 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		recommendationDuration.Observe(duration)
 	}()
 
-	// Parse query parameters
+	// Параметры запроса
 	city := r.URL.Query().Get("city")
 	if city == "" {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("city parameter is required"))
@@ -69,7 +80,7 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 	}
 
 	userIDStr := r.URL.Query().Get("user_id")
-	userID := 1 // Default user ID
+	userID := 1 // default
 	if userIDStr != "" {
 		id, err := strconv.Atoi(userIDStr)
 		if err != nil {
@@ -79,7 +90,6 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		userID = id
 	}
 
-	// Create context with timeout
 	ctx := r.Context()
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
@@ -89,7 +99,7 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		zap.Int("user_id", userID),
 	)
 
-	// Get weather data
+	// Погода
 	weather, err := h.weatherService.GetWeather(ctxWithTimeout, city)
 	if err != nil {
 		h.logger.Error("Weather error", zap.Error(err))
@@ -98,8 +108,7 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		return
 	}
 
-	// Prepare recommendation request
-	// ВАЖНО: Используем weather.WeatherData.Field, так как ExtendedWeatherData встраивает WeatherData
+	// Собираем запрос в доменную модель
 	req := domain.RecommendationRequest{
 		UserID: domain.ID(userID),
 		WeatherData: domain.WeatherData{
@@ -116,7 +125,7 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		},
 	}
 
-	// Get recommendations
+	// Получаем рекомендацию
 	recommendation, err := h.recommendationService.GetRecommendations(ctxWithTimeout, req)
 	if err != nil {
 		h.logger.Error("Recommendation error", zap.Error(err))
@@ -132,12 +141,12 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 
 	h.logger.Info("Got recommendations",
 		zap.Int("user_id", userID),
-		zap.Int("item_count", len(recommendation.Items)), // Items, не Recommendations
+		zap.Int("item_count", len(recommendation.Items)),
 		zap.Float64("score", outfitScore),
 		zap.Bool("ml_powered", recommendation.MLPowered),
 	)
 
-	// Check for achievements (async)
+	// Проверка ачивок (асинхронно, плейсхолдер)
 	go h.checkAchievements(userID, weather)
 
 	response := map[string]interface{}{
@@ -164,7 +173,7 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 	recommendationsTotal.WithLabelValues(strconv.Itoa(userID), "success").Inc()
 }
 
-// GetRecommendationHistory handles GET /api/recommendations/history
+// GetRecommendationHistory handles GET /api/v1/recommendations/history
 func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get("user_id")
 	if userIDStr == "" {
@@ -201,7 +210,18 @@ func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, 
 	resp.Success(w, response)
 }
 
-// GetRecommendationByID handles GET /api/recommendations/{id}
+// GetRecommendationByID godoc
+// @Summary      Получить рекомендацию по ID
+// @Description  Возвращает рекомендацию по её идентификатору
+// @Tags         recommendations
+// @Accept       json
+// @Produce      json
+// @Param        id  path      int true  "ID рекомендации"
+// @Success      200  {object}  domain.RecommendationResponse
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /recommendations/{id} [get]
 func (h *RecommendationHandler) GetRecommendationByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
@@ -223,7 +243,18 @@ func (h *RecommendationHandler) GetRecommendationByID(w http.ResponseWriter, r *
 	resp.Success(w, recommendation)
 }
 
-// RateRecommendation handles POST /api/recommendations/{id}/rate
+// RateRecommendation godoc
+// @Summary      Оценить рекомендацию
+// @Description  Позволяет пользователю оценить рекомендацию
+// @Tags         recommendations
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int                     true "ID рекомендации"
+// @Param        body  body      map[string]interface{}  true "Оценка и отзыв"
+// @Success      200   {object}  map[string]string
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /recommendations/{id}/rate [post]
 func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
@@ -233,7 +264,6 @@ func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *htt
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
-
 	defer r.Body.Close()
 
 	var req struct {
@@ -265,7 +295,18 @@ func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *htt
 	resp.Success(w, map[string]string{"message": "Rating saved successfully"})
 }
 
-// AddFavorite handles POST /api/recommendations/{id}/favorite
+// AddFavorite godoc
+// @Summary      Добавить рекомендацию в избранное
+// @Description  Добавляет рекомендацию в избранное пользователя
+// @Tags         recommendations
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int                  true "ID рекомендации"
+// @Param        body  body      map[string]int       true "ID пользователя"
+// @Success      200   {object}  map[string]string
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /recommendations/{id}/favorite [post]
 func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
@@ -275,7 +316,6 @@ func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Reque
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
-
 	defer r.Body.Close()
 
 	var req struct {
@@ -300,7 +340,18 @@ func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Reque
 	resp.Success(w, map[string]string{"message": "Favorite added successfully"})
 }
 
-// RemoveFavorite handles DELETE /api/recommendations/{id}/favorite
+// RemoveFavorite godoc
+// @Summary      Удалить рекомендацию из избранного
+// @Description  Удаляет рекомендацию из избранного пользователя
+// @Tags         recommendations
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int                  true "ID рекомендации"
+// @Param        body  body      map[string]int       true "ID пользователя"
+// @Success      200   {object}  map[string]string
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /recommendations/{id}/favorite [delete]
 func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
@@ -310,11 +361,8 @@ func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Re
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
-
 	defer r.Body.Close()
 
-	// Для DELETE тела может не быть, берем user_id из query или тела
-	// Упростим: ожидаем JSON как в AddFavorite
 	var req struct {
 		UserID int `json:"user_id"`
 	}
@@ -336,7 +384,17 @@ func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Re
 	resp.Success(w, map[string]string{"message": "Favorite removed successfully"})
 }
 
-// GetUserFavorites handles GET /api/users/{user_id}/favorites
+// GetUserFavorites godoc
+// @Summary      Получить избранные рекомендации пользователя
+// @Description  Возвращает список избранных рекомендаций пользователя
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        user_id   path      int  true  "ID пользователя"
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/{user_id}/favorites [get]
 func (h *RecommendationHandler) GetUserFavorites(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userIDStr := vars["user_id"]
@@ -366,7 +424,7 @@ func (h *RecommendationHandler) GetUserFavorites(w http.ResponseWriter, r *http.
 	resp.Success(w, response)
 }
 
-// Helper: decodeJSONReq
+// decodeJSONReq decodes JSON body with strict mode.
 func decodeJSONReq(w http.ResponseWriter, r *http.Request, dst interface{}) bool {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
@@ -378,16 +436,18 @@ func decodeJSONReq(w http.ResponseWriter, r *http.Request, dst interface{}) bool
 	return true
 }
 
-// checkAchievements checks and unlocks achievements for the user
-func (h *RecommendationHandler) checkAchievements(userID int, weather *external.ExtendedWeatherData) {
-	// Здесь должна быть логика ачивок
-	// Например:
+// checkAchievements checks and unlocks achievements for the user (placeholder).
+func (h *RecommendationHandler) checkAchievements(userID int, weather *domain.ExtendedWeatherData) {
+	// Пример простой логики ачивок:
 	if weather.WeatherData.Temperature < -10 {
-		h.logger.Info("Achievement unlocked: Cold Warrior", zap.Int("user_id", userID))
+		h.logger.Info("Achievement unlocked: Cold Warrior",
+			zap.Int("user_id", userID),
+			zap.Float64("temp", weather.WeatherData.Temperature),
+		)
 	}
 }
 
-// getWeatherMessage generates a friendly message based on temperature
+// getWeatherMessage generates a friendly message based on temperature.
 func (h *RecommendationHandler) getWeatherMessage(temp float64) string {
 	switch {
 	case temp < -10:
@@ -397,7 +457,7 @@ func (h *RecommendationHandler) getWeatherMessage(temp float64) string {
 	case temp < 10:
 		return "🧥 Прохладно. Демисезонная одежда"
 	case temp < 18:
-		return "🍂 Комфортная температура. Легкая куртка"
+		return "🍂 Комфортная температура. Лёгкая куртка"
 	case temp < 25:
 		return "☀️ Приятная погода! Легкая одежда"
 	default:
