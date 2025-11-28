@@ -1,101 +1,70 @@
-#!/usr/bin/env python3
-"""
-OutfitStyle ML Service - Production-Ready Entry Point
-
-This is the main entry point for the OutfitStyle ML Service.
-It initializes the Flask application, loads necessary components,
-and sets up the production environment for the recommendation model.
-"""
-import os
-import sys
-import logging
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from prometheus_client import Counter, Histogram, generate_latest, multiprocess
-from prometheus_client import start_http_server
-from healthcheck import HealthCheck
 import psycopg2
 import psycopg2.extras
 import pandas as pd
-import numpy as np
+import os
+import logging
 from datetime import datetime
-import time
-
-# Add parent directory to path for module imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from model.advanced_trainer import AdvancedOutfitRecommender
+from model.predictor import AdvancedOutfitPredictor
 from model.enhanced_predictor import EnhancedOutfitPredictor
-from model.features import FeatureExtractor
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger('outfitstyle.ml_service')
+logger = logging.getLogger(__name__)
 
-# Initialize Prometheus metrics
-REQUEST_COUNT = Counter('outfitstyle_ml_service_request_count', 
-                      'Total request count', ['method', 'endpoint', 'status'])
-REQUEST_LATENCY = Histogram('outfitstyle_ml_service_request_latency_seconds', 
-                          'Request latency in seconds', ['method', 'endpoint'])
-
-# Global configuration
-DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'port': os.getenv('DB_PORT', '5432'),
-    'user': os.getenv('DB_USER', 'outfitstyle'),
-    'password': os.getenv('DB_PASSWORD', ''),
-    'database': os.getenv('DB_NAME', 'outfitstyle')
-}
-
-# Create Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Rate limiting
-limiter = Limiter(
-    key_func=get_remote_address,
-    app=app,
-    default_limits=["100 per minute"],
-    storage_uri="memory://"
-)
+recommender = AdvancedOutfitRecommender(model_type='gradient_boosting')
+predictor = EnhancedOutfitPredictor(recommender)
 
-# Health check
-health = HealthCheck(app)
+DB_CONFIG = {
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'port': os.getenv('DB_PORT', '5432'),
+    'user': os.getenv('DB_USER', 'Admin'),
+    'password': os.getenv('DB_PASSWORD', 'password'),
+    'database': os.getenv('DB_NAME', 'outfitstyle')
+}
+
 
 def get_db_connection():
-    """Create a new database connection."""
     try:
         conn = psycopg2.connect(**DB_CONFIG)
-        conn.cursor_factory = psycopg2.extras.RealDictCursor
         return conn
     except Exception as e:
-        logger.exception("Database connection error")
+        logger.error(f"DB connection error: {e}")
         raise
 
+
 def load_user_profile(user_id: int) -> dict:
-    """Load user profile from database with fallback to default values."""
+    """Загружаем профиль пользователя из user_profiles."""
     try:
         conn = get_db_connection()
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT age_range, style_preference, temperature_sensitivity, formality_preference
-                FROM user_profiles 
-                WHERE user_id = %s
-            """, (user_id,))
-            result = cursor.fetchone()
-            if result:
-                return {
-                    'age_range': result.get('age_range', '25-35'),
-                    'style_preference': result.get('style_preference', 'casual'),
-                    'temperature_sensitivity': result.get('temperature_sensitivity', 'normal'),
-                    'formality_preference': result.get('formality_preference', 'informal')
-                }
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""
+            SELECT gender,
+                   age_range,
+                   style_preference,
+                   temperature_sensitivity,
+                   preferred_categories
+            FROM user_profiles
+            WHERE user_id = %s
+        """, (user_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if result:
+            profile = dict(result)
+            profile.setdefault('formality_preference', 'informal')
+            return profile
+        else:
+            logger.warning(f"Profile not found for user {user_id}, using defaults")
             return {
                 'age_range': '25-35',
                 'style_preference': 'casual',
@@ -103,350 +72,321 @@ def load_user_profile(user_id: int) -> dict:
                 'formality_preference': 'informal'
             }
     except Exception as e:
-        logger.error(f"Error loading user profile: {str(e)}")
+        logger.error(f"Error loading user profile: {e}")
         return {
             'age_range': '25-35',
             'style_preference': 'casual',
             'temperature_sensitivity': 'normal',
             'formality_preference': 'informal'
         }
-    finally:
-        if 'conn' in locals():
-            conn.close()
+
 
 def load_clothing_items(weather_data: dict, user_profile: dict) -> list:
-    """Load clothing items from database based on weather and user profile."""
+    """Загружаем одежду из clothing_items по температуре и стилю."""
     try:
         conn = get_db_connection()
-        with conn.cursor() as cursor:
-            temperature = weather_data.get('temperature', 20)
-            cursor.execute("""
-                SELECT id, name, category, min_temp, max_temp, warmth_level, formality_level, style
-                FROM clothing_items
-                WHERE min_temp <= %s + 10 AND max_temp >= %s - 10
-                ORDER BY 
-                    CASE WHEN style = %s THEN 1 ELSE 2 END,
-                    ABS(((min_temp + max_temp) / 2) - %s)
-                LIMIT 100
-            """, (temperature, temperature, user_profile.get('style_preference', 'casual'), temperature))
-            items = cursor.fetchall()
-            return items if items else []
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        temperature = float(weather_data.get('temperature', 20.0))
+
+        cursor.execute("""
+            SELECT id, name, category, subcategory, min_temp, max_temp,
+                   weather_conditions, style, warmth_level, formality_level, icon_emoji
+            FROM clothing_items
+            WHERE min_temp <= %s + 10 AND max_temp >= %s - 10
+            ORDER BY
+                CASE WHEN style = %s THEN 1 ELSE 2 END,
+                ABS(((min_temp + max_temp) / 2) - %s)
+            LIMIT 50
+        """, (
+            temperature,
+            temperature,
+            user_profile.get('style_preference', 'casual'),
+            temperature,
+        ))
+
+        items = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        logger.info(f"Loaded {len(items)} clothing items from DB")
+
+        normalized = []
+        for item in items:
+            d = dict(item)
+            if d.get('min_temp') is not None:
+                d['min_temp'] = float(d['min_temp'])
+            if d.get('max_temp') is not None:
+                d['max_temp'] = float(d['max_temp'])
+            normalized.append(d)
+
+        return normalized
+
     except Exception as e:
-        logger.error(f"Error loading clothing items: {str(e)}")
+        logger.error(f"Error loading clothing items: {e}")
         return []
-    finally:
-        if 'conn' in locals():
-            conn.close()
 
-def save_recommendation_to_db(user_id: int, weather_data: dict, recommendations: list, 
-                           algorithm: str, confidence: float) -> int:
-    """Save recommendation to database with error handling and transaction management."""
+
+def save_recommendation_to_db(
+    user_id: int,
+    weather_data: dict,
+    recommendations: list,
+    algorithm: str,
+    outfit_score: float,
+    ml_powered: bool,
+) -> int:
+    """
+    Сохраняем рекомендацию в recommendations и recommendation_items
+    под новую схему (init.sql):
+
+    recommendations:
+      user_id, temperature, weather, min_temp, max_temp,
+      will_rain, will_snow, location, outfit_score, ml_powered, algorithm
+
+    recommendation_items:
+      recommendation_id, clothing_item_id, confidence_score, position
+    """
+    conn = None
     try:
         conn = get_db_connection()
-        conn.autocommit = False
-        with conn.cursor() as cursor:
+        cursor = conn.cursor()
+
+        temp = weather_data.get('temperature')
+        weather = weather_data.get('weather', '')
+        location = weather_data.get('location', 'Unknown')
+
+        min_temp = None
+        max_temp = None
+        if recommendations:
+            temps_min = [it.get('min_temp') for it in recommendations if it.get('min_temp') is not None]
+            temps_max = [it.get('max_temp') for it in recommendations if it.get('max_temp') is not None]
+            if temps_min:
+                min_temp = min(temps_min)
+            if temps_max:
+                max_temp = max(temps_max)
+
+        will_rain = False
+        will_snow = False
+        if isinstance(weather, str):
+            low = weather.lower()
+            if 'rain' in low or 'дожд' in low:
+                will_rain = True
+            if 'snow' in low or 'снег' in low:
+                will_snow = True
+
+        cursor.execute("""
+            INSERT INTO recommendations (
+                user_id, temperature, weather, min_temp, max_temp,
+                will_rain, will_snow, location, outfit_score, ml_powered, algorithm
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            user_id,
+            temp,
+            weather,
+            min_temp,
+            max_temp,
+            will_rain,
+            will_snow,
+            location,
+            outfit_score,
+            ml_powered,
+            algorithm,
+        ))
+
+        recommendation_id = cursor.fetchone()[0]
+
+        for position, item in enumerate(recommendations, 1):
             cursor.execute("""
-                INSERT INTO recommendations 
-                (user_id, location, temperature, feels_like, weather, 
-                 humidity, wind_speed, algorithm, confidence)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
+                INSERT INTO recommendation_items (
+                    recommendation_id, clothing_item_id, confidence_score, position
+                )
+                VALUES (%s, %s, %s, %s)
             """, (
-                user_id,
-                weather_data.get('location', 'Unknown'),
-                weather_data.get('temperature'),
-                weather_data.get('feels_like'),
-                weather_data.get('weather'),
-                weather_data.get('humidity'),
-                weather_data.get('wind_speed'),
-                algorithm,
-                confidence
+                recommendation_id,
+                item['id'],
+                item.get('ml_score', 0.0),
+                position,
             ))
-            recommendation_id = cursor.fetchone()[0]
-            
-            for position, item in enumerate(recommendations, 1):
-                cursor.execute("""
-                    INSERT INTO recommendation_items 
-                    (recommendation_id, clothing_item_id, confidence, position)
-                    VALUES (%s, %s, %s, %s)
-                """, (
-                    recommendation_id,
-                    item['id'],
-                    item.get('ml_score', 0.0),
-                    position
-                ))
+
         conn.commit()
+        cursor.close()
+        conn.close()
+
+        logger.info(f"Saved recommendation {recommendation_id}")
         return recommendation_id
+
     except Exception as e:
-        if 'conn' in locals():
+        logger.error(f"Error saving recommendation: {e}", exc_info=True)
+        if conn:
             conn.rollback()
-        logger.exception("Error saving recommendation to database")
         return -1
-    finally:
-        if 'conn' in locals():
-            conn.close()
 
-def load_ml_model(model_path: str) -> AdvancedOutfitRecommender:
-    """Load ML model from file with error handling and fallbacks."""
-    model = AdvancedOutfitRecommender()
-    try:
-        model.load(model_path)
-        logger.info(f"✅ Loaded ML model from {model_path}")
-        return model
-    except FileNotFoundError:
-        logger.warning(f"⚠️ Model file not found: {model_path}")
-        return None
-    except Exception as e:
-        logger.exception(f"Error loading model from {model_path}")
-        return None
-
-@app.before_request
-def log_request_info():
-    """Log request details for monitoring and debugging."""
-    logger.info(f"Request: {request.method} {request.path}")
-    if request.data:
-        logger.debug(f"Request data: {request.data}")
-    request.start_time = time.time()
-
-@app.after_request
-def log_response_info(response):
-    """Log response details and update Prometheus metrics."""
-    # Calculate request duration
-    duration = time.time() - request.start_time
-    REQUEST_LATENCY.labels(
-        method=request.method, 
-        endpoint=request.path
-    ).observe(duration)
-    
-    # Update request counter
-    REQUEST_COUNT.labels(
-        method=request.method,
-        endpoint=request.path,
-        status=response.status_code
-    ).inc()
-    
-    # Add request duration header for debugging
-    response.headers['X-Request-Duration'] = f"{duration:.4f}"
-    return response
-
-@app.route('/metrics', methods=['GET'])
-def metrics():
-    """Prometheus metrics endpoint."""
-    return Response(generate_latest(), mimetype='text/plain; version=0.0.4; charset=utf-8')
 
 @app.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint for Kubernetes and monitoring systems."""
+def health():
     try:
-        # Check database connection
         conn = get_db_connection()
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT 1")
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        cursor.close()
         conn.close()
-        
-        # Check model loading
-        model_path = os.getenv('MODEL_PATH', 'models/advanced_recommender.pkl')
-        model = load_ml_model(model_path)
-        model_status = "loaded" if model and model.is_trained else "not_loaded"
-        
-        return jsonify({
-            'status': 'healthy',
-            'service': 'ml-service',
-            'database': 'connected',
-            'model_status': model_status,
-            'timestamp': datetime.utcnow().isoformat()
-        }), 200
-    except Exception as e:
-        logger.exception("Health check failed")
-        return jsonify({
-            'status': 'unhealthy',
-            'service': 'ml-service',
-            'error': str(e),
-            'timestamp': datetime.utcnow().isoformat()
-        }), 500
+        db_status = "connected"
+    except Exception:
+        db_status = "disconnected"
+
+    return jsonify({
+        'status': 'ok',
+        'service': 'Advanced ML Service',
+        'model_trained': getattr(recommender, "is_trained", False),
+        'database': db_status,
+    })
+
 
 @app.route('/api/ml/recommend', methods=['POST'])
-@REQUEST_LATENCY.labels('POST', '/api/ml/recommend').time()
 def recommend():
-    """Main recommendation endpoint with comprehensive error handling."""
     try:
-        data = request.json
-        if not data:
-            return jsonify({'error': 'No JSON data provided'}), 400
-        
+        data = request.json or {}
         user_id = data.get('user_id', 1)
         weather_data = data.get('weather', {})
-        min_confidence = data.get('min_confidence', 0.5)
-        
-        # Validate required parameters
-        if not weather_data:
-            return jsonify({'error': 'Weather data is required'}), 400
-        
-        # Load model
-        model_path = os.getenv('MODEL_PATH', 'models/advanced_recommender.pkl')
-        model = load_ml_model(model_path)
-        if not model or not model.is_trained:
-            logger.error("ML model is not trained or could not be loaded")
-            return jsonify({'error': 'ML model is not available'}), 503
-        
-        # Load user profile
+        min_confidence = float(data.get('min_confidence', 0.5))
+
+        logger.info(
+            f"🎯 Recommendation request: user={user_id}, temp={weather_data.get('temperature')}°C"
+        )
+
         user_profile = load_user_profile(user_id)
-        
-        # Load clothing items
+        logger.info(f"Loaded user profile: {user_profile}")
+
         available_items = load_clothing_items(weather_data, user_profile)
+        logger.info(f"Loaded {len(available_items)} clothing items")
+
         if not available_items:
             return jsonify({'error': 'No suitable clothing items found'}), 404
-        
-        # Create predictor
-        predictor = EnhancedOutfitPredictor(model)
-        
-        # Build outfit
+
+        adjusted_min_confidence = min(0.3, min_confidence)
+
         outfit = predictor.build_outfit(
             weather_data,
             user_profile,
             available_items,
-            min_confidence=min_confidence
+            min_confidence=adjusted_min_confidence,
         )
-        
-        # Save to database
+
+        outfit_items = outfit.get('items', [])
+        outfit_score = float(outfit.get('outfit_score', 0.0))
+        ml_powered = bool(outfit.get('ml_powered', True))
+        algorithm = outfit.get('algorithm', 'advanced_recommender')
+
         recommendation_id = save_recommendation_to_db(
-            user_id,
-            weather_data,
-            outfit['items'],
-            outfit['algorithm'],
-            outfit['outfit_score']
+            user_id=user_id,
+            weather_data=weather_data,
+            recommendations=outfit_items,
+            algorithm=algorithm,
+            outfit_score=outfit_score,
+            ml_powered=ml_powered,
         )
-        
-        # Prepare response
+
         response = {
             'recommendation_id': recommendation_id,
             'user_id': user_id,
             'weather': weather_data,
-            'recommendations': outfit['items'],
-            'outfit_score': outfit['outfit_score'],
-            'ml_powered': outfit['ml_powered'],
-            'algorithm': outfit['algorithm'],
-            'timestamp': datetime.utcnow().isoformat()
+            'recommendations': outfit_items,
+            'outfit_score': outfit_score,
+            'ml_powered': ml_powered,
+            'algorithm': algorithm,
         }
-        
+
         return jsonify(response)
-    
+
     except Exception as e:
-        logger.exception("Recommendation error")
-        return jsonify({
-            'error': 'Internal server error',
-            'details': str(e)
-        }), 500
+        logger.error(f"Error in recommend endpoint: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/ml/train', methods=['POST'])
 def train_model():
-    """Train model endpoint with comprehensive monitoring and logging."""
     try:
         data = request.json or {}
-        optimize = data.get('optimize_hyperparameters', False)
-        
-        # Load training data
+        optimize = bool(data.get('optimize_hyperparameters', False))
+
         conn = get_db_connection()
         query = """
-        SELECT 
+        SELECT
             r.temperature,
             r.weather,
-            r.humidity,
-            r.wind_speed,
+            NULL::DOUBLE PRECISION    AS humidity,
+            NULL::DOUBLE PRECISION    AS wind_speed,
+            up.gender,
             up.age_range,
             up.style_preference,
             up.temperature_sensitivity,
-            up.formality_preference,
             ci.category,
             ci.style,
             ci.warmth_level,
             ci.formality_level,
-            ri.confidence as ml_score,
-            CASE WHEN rat.overall_rating >= 4 THEN 1 ELSE 0 END as is_recommended
+            ri.confidence_score       AS ml_score,
+            1                         AS is_liked
         FROM recommendations r
-        JOIN user_profiles up ON r.user_id = up.user_id
-        JOIN recommendation_items ri ON r.id = ri.recommendation_id
-        JOIN clothing_items ci ON ri.clothing_item_id = ci.id
-        LEFT JOIN ratings rat ON r.id = rat.recommendation_id AND ci.id = rat.clothing_item_id
+        JOIN user_profiles up
+            ON r.user_id = up.user_id
+        JOIN recommendation_items ri
+            ON r.id = ri.recommendation_id
+        JOIN clothing_items ci
+            ON ri.clothing_item_id = ci.id
         WHERE r.created_at >= NOW() - INTERVAL '30 days'
-            AND ri.confidence IS NOT NULL
         ORDER BY r.created_at DESC
         LIMIT 10000
         """
         df = pd.read_sql(query, conn)
         conn.close()
-        
-        if len(df) < 50:
-            return jsonify({
-                'status': 'error',
-                'message': 'Not enough training data'
-            }), 400
-        
-        # Train model
-        model = AdvancedOutfitRecommender()
-        metrics = model.train(df, optimize_hyperparameters=optimize)
-        
-        # Save model
-        model_path = os.getenv('MODEL_PATH', 'models/advanced_recommender.pkl')
-        os.makedirs(os.path.dirname(model_path), exist_ok=True)
-        model.save(model_path)
-        
-        # Prepare response
-        response = {
-            'status': 'success',
-            'metrics': {
-                'accuracy': metrics.get('accuracy', 0.0),
-                'precision': metrics.get('precision', 0.0),
-                'recall': metrics.get('recall', 0.0),
-                'f1_score': metrics.get('f1_score', 0.0),
-                'auc': metrics.get('auc', 0.0),
-                'cv_mean': metrics.get('cv_mean', 0.0),
-                'cv_std': metrics.get('cv_std', 0.0),
-                'samples': len(df),
-                'timestamp': datetime.utcnow().isoformat()
-            }
-        }
-        
-        return jsonify(response)
-    
-    except Exception as e:
-        logger.exception("Training error")
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
 
-def initialize_service():
-    """Initialize the ML service with necessary setup."""
-    # Set up Prometheus multiprocess mode
-    if 'PROMETHEUS_MULTIPROC_DIR' in os.environ:
-        multiprocess.MultiProcessCollector(os.environ['PROMETHEUS_MULTIPROC_DIR'])
-    
-    # Start Prometheus metrics server in a separate thread
-    metrics_port = int(os.getenv('METRICS_PORT', '9090'))
-    start_http_server(metrics_port)
-    logger.info(f"✅ Prometheus metrics server started on port {metrics_port}")
-    
-    # Load model
-    model_path = os.getenv('MODEL_PATH', 'models/advanced_recommender.pkl')
-    model = load_ml_model(model_path)
-    
-    if not model or not model.is_trained:
-        logger.warning("⚠️ No trained model found, using fallback model")
-        # Here we could load a default model or set up model training
-    else:
-        logger.info("✅ ML service initialized with trained model")
+        if len(df) < 50:
+            return jsonify({'error': 'Not enough training data'}), 400
+
+        metrics = recommender.train(df, optimize_hyperparameters=optimize)
+        recommender.save('models/advanced_recommender.pkl')
+
+        return jsonify({'status': 'success', 'metrics': metrics})
+    except Exception as e:
+        logger.error(f"Training error: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
-    # Initialize service
-    initialize_service()
-    
-    # Run Flask app
-    port = int(os.getenv('PORT', '5000'))
-    logger.info(f"🚀 Starting ML service on port {port}")
-    app.run(
-        host='0.0.0.0',
-        port=port,
-        debug=os.getenv('DEBUG', 'false').lower() == 'true',
-        threaded=True
-    )
+    model_loaded = False
+
+    model_paths = [
+        'models/kaggle_trained_recommender.pkl',
+        'models/advanced_recommender.pkl',
+    ]
+
+    # Создаём папку models если не существует
+    os.makedirs('models', exist_ok=True)
+
+    for model_path in model_paths:
+        if os.path.exists(model_path):
+            try:
+                recommender.load(model_path)
+                predictor = EnhancedOutfitPredictor(recommender)
+                logger.info(f"✅ Loaded trained ML model from {model_path}")
+                model_loaded = True
+                break
+            except ModuleNotFoundError as e:
+                # Несовместимая версия sklearn - удаляем старую модель
+                logger.warning(f"⚠️ Model {model_path} incompatible with current sklearn: {e}")
+                try:
+                    os.remove(model_path)
+                    logger.info(f"🗑️ Removed incompatible model: {model_path}")
+                except Exception as del_err:
+                    logger.warning(f"Could not delete {model_path}: {del_err}")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to load {model_path}: {e}")
+
+    if not model_loaded:
+        logger.warning("⚠️ No trained model found - using rule-based recommendations")
+        logger.info("💡 Train a new model via POST /api/ml/train")
+
+    logger.info("🚀 Starting Advanced ML Service on port 5000")
+    app.run(host='0.0.0.0', port=5000, debug=True)

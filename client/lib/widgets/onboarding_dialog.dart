@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
 import '../screens/profile_screen.dart';
+import '../utils/dialog_state_manager.dart';
 
 class OnboardingDialog extends StatefulWidget {
   const OnboardingDialog({super.key});
@@ -10,48 +12,70 @@ class OnboardingDialog extends StatefulWidget {
   @override
   State<OnboardingDialog> createState() => _OnboardingDialogState();
 
-  static Future<void> showIfNeeded(BuildContext context) async {
-    // Проверяем, нужно ли показывать онбординг (например, по флагу в SharedPreferences)
-    const shouldShow = true; // Заглушка, заменить на реальную логику
+  static bool _isShowing = false;
 
-    if (shouldShow) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (context.mounted) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const OnboardingDialog(),
-        );
+  /// Показывает онбординг один раз, если он ещё не был показан.
+  static Future<void> showIfNeeded(BuildContext context) async {
+    // Если уже идёт показ диалога – не запускаем второй раз
+    if (_isShowing) return;
+
+    _isShowing = true;
+    try {
+      bool alreadyShown = false;
+      try {
+        alreadyShown = await DialogStateManager.isOnboardingShown();
+      } catch (_) {
+        // В случае ошибки SharedPreferences считаем, что ещё не показывали
+        alreadyShown = false;
       }
+
+      if (alreadyShown || !context.mounted) return;
+
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        useRootNavigator: true,
+        builder: (_) => const OnboardingDialog(),
+      );
+
+      if (!context.mounted) return;
+
+      try {
+        await DialogStateManager.setOnboardingShown(true);
+      } catch (_) {
+        // Ошибка сохранения флага – не критично для UX
+      }
+    } finally {
+      _isShowing = false;
     }
   }
 }
 
 class _OnboardingDialogState extends State<OnboardingDialog>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
 
   int _currentStep = 0;
 
-  final List<_OnboardingStep> _steps = [
+  final List<_OnboardingStep> _steps = const [
     _OnboardingStep(
       icon: Icons.waving_hand,
-      title: 'Добро пожаловать!',
+      title: 'Добро пожаловать в OutfitStyle',
       description:
-          'OutfitStyle поможет вам подобрать идеальный комплект одежды на основе погоды',
-      gradient: const LinearGradient(
+      'Приложение подберёт удобные образы с учётом погоды и ваших предпочтений.',
+      gradient: LinearGradient(
         colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
       ),
     ),
     _OnboardingStep(
       icon: Icons.psychology,
-      title: 'AI Персонализация',
+      title: 'Персональные рекомендации с ИИ',
       description:
-          'Наш умный алгоритм учитывает ваши предпочтения и обучается на ваших оценках',
-      gradient: const LinearGradient(
+      'Алгоритм анализирует погоду, ваш стиль и оценки образов, чтобы предлагать всё точнее.',
+      gradient: LinearGradient(
         colors: [Color(0xFF10B981), Color(0xFF3B82F6)],
       ),
     ),
@@ -59,8 +83,8 @@ class _OnboardingDialogState extends State<OnboardingDialog>
       icon: Icons.settings,
       title: 'Настройте профиль',
       description:
-          'Укажите ваш стиль, чувствительность к температуре и другие предпочтения для точных рекомендаций',
-      gradient: const LinearGradient(
+      'Укажите свой стиль и чувствительность к температуре, чтобы получать максимально точные подсказки.',
+      gradient: LinearGradient(
         colors: [Color(0xFFEC4899), Color(0xFFF43F5E)],
       ),
     ),
@@ -69,21 +93,24 @@ class _OnboardingDialogState extends State<OnboardingDialog>
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 450),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
+      begin: const Offset(0, 0.15),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
@@ -100,9 +127,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
 
   void _nextStep() {
     if (_currentStep < _steps.length - 1) {
-      setState(() {
-        _currentStep++;
-      });
+      setState(() => _currentStep++);
       _controller.forward(from: 0);
     } else {
       _finish();
@@ -111,161 +136,99 @@ class _OnboardingDialogState extends State<OnboardingDialog>
 
   void _previousStep() {
     if (_currentStep > 0) {
-      setState(() {
-        _currentStep--;
-      });
+      setState(() => _currentStep--);
       _controller.forward(from: 0);
     }
   }
 
   void _finish() {
-    if (mounted) {
-      Navigator.pop(context);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
-      );
-    }
+    if (!mounted) return;
+
+    final navigator = Navigator.of(context, rootNavigator: true);
+    navigator.pop(); // закрываем диалог
+    navigator.push(
+      MaterialPageRoute<void>(
+        builder: (_) => const ProfileScreen(),
+      ),
+    );
   }
 
   void _skip() {
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    if (!mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
     final currentStep = _steps[_currentStep];
 
+    final textTheme = Theme.of(context).textTheme;
+    final titleStyle = textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: isDark ? AppTheme.textPrimary : Colors.black87,
+    );
+    final bodyStyle = textTheme.bodyMedium?.copyWith(
+      color: isDark ? AppTheme.textSecondary : Colors.grey[700],
+      height: 1.5,
+    );
+
     return Dialog(
       backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: ScaleTransition(
           scale: _scaleAnimation,
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
+            constraints: const BoxConstraints(maxWidth: 420),
             decoration: BoxDecoration(
               color: isDark ? AppTheme.cardDark : Colors.white,
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 32,
+                  offset: const Offset(0, 12),
                 ),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header with gradient
-                Container(
-                  padding: const EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    gradient: currentStep.gradient,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Step indicator
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(_steps.length, (index) {
-                          return Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: index == _currentStep ? 24 : 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: index == _currentStep
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          );
-                        }),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Icon
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 600),
-                        curve: Curves.elasticOut,
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: value,
-                            child: Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.3),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                currentStep.icon,
-                                size: 50,
-                                color: Colors.white,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                _Header(
+                  stepCount: _steps.length,
+                  currentStep: _currentStep,
+                  step: currentStep,
                 ),
-
-                // Content
                 SlideTransition(
                   position: _slideAnimation,
                   child: Padding(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
                           currentStep.title,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                isDark ? AppTheme.textPrimary : Colors.black87,
-                          ),
+                          style: titleStyle,
                           textAlign: TextAlign.center,
                         ),
-
-                        const SizedBox(height: 16),
-
+                        const SizedBox(height: 12),
                         Text(
                           currentStep.description,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: isDark
-                                ? AppTheme.textSecondary
-                                : Colors.grey[600],
-                            height: 1.5,
-                          ),
+                          style: bodyStyle,
                           textAlign: TextAlign.center,
                         ),
-
-                        const SizedBox(height: 32),
-
-                        // Buttons
+                        const SizedBox(height: 28),
                         Row(
                           children: [
-                            // Skip/Back button
                             if (_currentStep == 0)
                               TextButton(
                                 onPressed: _skip,
                                 child: Text(
                                   'Пропустить',
-                                  style: TextStyle(
+                                  style: textTheme.bodyMedium?.copyWith(
                                     color: isDark
                                         ? AppTheme.textSecondary
                                         : Colors.grey[600],
@@ -275,22 +238,19 @@ class _OnboardingDialogState extends State<OnboardingDialog>
                             else
                               TextButton.icon(
                                 onPressed: _previousStep,
-                                icon: const Icon(Icons.arrow_back),
+                                icon: const Icon(Icons.arrow_back, size: 18),
                                 label: const Text('Назад'),
                               ),
-
                             const Spacer(),
-
-                            // Next/Finish button
                             ElevatedButton(
                               onPressed: _nextStep,
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 16,
+                                  horizontal: 28,
+                                  vertical: 14,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
                               child: Row(
@@ -301,7 +261,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
                                         ? 'Начать'
                                         : 'Далее',
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 15,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -330,13 +290,84 @@ class _OnboardingDialogState extends State<OnboardingDialog>
   }
 }
 
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.stepCount,
+    required this.currentStep,
+    required this.step,
+  });
+
+  final int stepCount;
+  final int currentStep;
+  final _OnboardingStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        gradient: step.gradient,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(stepCount, (index) {
+              final isActive = index == currentStep;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: isActive ? 22 : 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: isActive ? 1 : 0.4),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 24),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: child,
+              );
+            },
+            child: Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.25),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                step.icon,
+                size: 48,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _OnboardingStep {
   final IconData icon;
   final String title;
   final String description;
   final LinearGradient gradient;
 
-  _OnboardingStep({
+  const _OnboardingStep({
     required this.icon,
     required this.title,
     required this.description,

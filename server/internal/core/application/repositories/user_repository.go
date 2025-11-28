@@ -22,11 +22,12 @@ type UserRepository interface {
 	RemoveFavorite(ctx context.Context, userID, favoriteID int) error
 	GetUserFavorites(ctx context.Context, userID int) ([]domain.FavoriteOutfit, error)
 	GetUserRatings(ctx context.Context, userID int) ([]domain.UserRating, error)
-	CreateOutfitPlan(ctx context.Context, plan *domain.OutfitPlan) error
 	GetUserOutfitPlans(ctx context.Context, userID int) ([]domain.OutfitPlan, error)
-	DeleteOutfitPlan(ctx context.Context, userID, planID int) error
 	GetUserStats(ctx context.Context, userID int) (*domain.UserStats, error)
 	UpdateUserStats(ctx context.Context, userID int, stats *domain.UserStats) error
+	GetOutfitPlans(ctx context.Context, userID int, startDate, endDate time.Time) ([]domain.OutfitPlan, error)
+	CreateOutfitPlan(ctx context.Context, plan *domain.OutfitPlan) error
+	DeleteOutfitPlan(ctx context.Context, userID, planID int) error
 }
 
 // Userrepresents a user in the system
