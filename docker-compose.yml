@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -53,23 +51,45 @@ services:
     container_name: outfitstyle-server
     ports:
       - "8080:8080"
+
+    # .env можно оставить только для локального go run,
+    # внутри контейнера мы им больше не пользуемся
     env_file:
       - ./server/.env
-    volumes:
-      - ./server/.env:/app/.env
+
     environment:
-      - SERVER_PORT=8080
+      # флаг, по которому в config.Load() НЕ вызываем godotenv.Load()
+      - RUN_IN_DOCKER=1
+
+      # сервер
+      - HOST=0.0.0.0
+      - PORT=8080
+
+      # база
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=Admin
       - DB_PASSWORD=password
       - DB_NAME=outfitstyle
       - DB_SSL_MODE=disable
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+
+      # redis / cache
+      - CACHE_ENABLED=true
+      - REDIS_URL=redis://redis:6379
+      - CACHE_EXPIRATION=300
+
+      # погода (OpenWeatherMap)
       - WEATHER_API_KEY=8e9f1a366923ec63437f21570c89fa17
+      - WEATHER_API_URL=https://api.openweathermap.org/data/2.5
+      - WEATHER_API_TIMEOUT=10
+
+      # ML‑сервис
       - ML_SERVICE_URL=http://ml-service:5000
+      - ML_SERVICE_TIMEOUT=30
+
+      # безопасность
       - JWT_SECRET=your-jwt-secret-key
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -84,22 +104,13 @@ services:
       context: ./server/marketplace-service
     container_name: outfitstyle-marketplace
     ports:
-      - "5001:5001"
+      - "5002:5000"
     environment:
       - PORT=5001
       - WB_AFFILIATE_ID=${WB_AFFILIATE_ID:-YOUR_WB_ID}
       - OZON_AFFILIATE_ID=${OZON_AFFILIATE_ID:-YOUR_OZON_ID}
     restart: unless-stopped
 
-  web-client:
-    build:
-      context: ./client
-    container_name: outfitstyle-web-client
-    ports:
-      - "80:80"
-    depends_on:
-      - server
-    restart: unless-stopped
 
 volumes:
   postgres_data:

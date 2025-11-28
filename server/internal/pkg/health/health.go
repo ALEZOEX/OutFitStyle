@@ -29,40 +29,48 @@ func RegisterChecks(newChecks map[string]Checker) {
 	}
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	results := make(map[string]Check)
-	allHealthy := true
+// runChecks выполняет все зарегистрированные проверки здоровья
+func runChecks() map[string]interface{} {
+	results := make(map[string]interface{})
+	results["status"] = "ok"
+	checkResults := make(map[string]map[string]string)
 
 	for name, checker := range checks {
-		err := checker.HealthCheck()
-		status := "healthy"
-		message := ""
-
-		if err != nil {
-			status = "unhealthy"
-			message = err.Error()
-			allHealthy = false
+		checkResult := make(map[string]string)
+		if err := checker.HealthCheck(); err != nil {
+			checkResult["status"] = "error"
+			checkResult["message"] = err.Error()
+			results["status"] = "error"
+		} else {
+			checkResult["status"] = "ok"
 		}
-
-		results[name] = Check{
-			Status:  status,
-			Message: message,
-		}
+		checkResults[name] = checkResult
 	}
 
-	response := HealthResponse{
-		Status:  map[bool]string{true: "healthy", false: "unhealthy"}[allHealthy],
-		Checks:  results,
-		Version: version,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if !allHealthy {
-		w.WriteHeader(http.StatusServiceUnavailable)
-	}
-	json.NewEncoder(w).Encode(response)
+	results["checks"] = checkResults
+	results["version"] = version
+	return results
 }
 
+// Handler godoc
+// @Summary      Проверка состояния сервиса
+// @Description  Возвращает состояние сервиса и его зависимостей
+// @Tags         health
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       /health [get]
+func Handler(w http.ResponseWriter, r *http.Request) {
+	results := runChecks()
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(results); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+// ReadyHandler проверяет готовность сервиса
 func ReadyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

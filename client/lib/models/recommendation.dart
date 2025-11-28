@@ -1,32 +1,3 @@
-class WeatherData {
-  final String location;
-  final double temperature;
-  final double feelsLike;
-  final String weather;
-  final int humidity;
-  final double windSpeed;
-
-  WeatherData({
-    required this.location,
-    required this.temperature,
-    required this.feelsLike,
-    required this.weather,
-    required this.humidity,
-    required this.windSpeed,
-  });
-
-  factory WeatherData.fromJson(Map<String, dynamic> json) {
-    return WeatherData(
-      location: json['location'] ?? '',
-      temperature: (json['temperature'] ?? 0).toDouble(),
-      feelsLike: (json['feels_like'] ?? 0).toDouble(),
-      weather: json['weather'] ?? '',
-      humidity: json['humidity'] ?? 0,
-      windSpeed: (json['wind_speed'] ?? 0).toDouble(),
-    );
-  }
-}
-
 class ClothingItem {
   final int id;
   final String name;
