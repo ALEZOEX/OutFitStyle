@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/user_wardrobe.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
+import '../services/auth_storage.dart';
 import '../theme/app_theme.dart';
 import 'add_item_screen.dart';
 import '../widgets/search_bar.dart' as custom_search_bar;
@@ -18,29 +19,46 @@ class WardrobeScreen extends StatefulWidget {
 class _WardrobeScreenState extends State<WardrobeScreen> {
   late Future<Map<String, List<WardrobeItem>>> _wardrobeFuture;
   late ApiService _apiService;
+  late AuthStorage _authStorage;
 
   bool _isSearching = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
   bool _isDeleting = false;
+  bool _didInitDeps = false;
 
   @override
   void initState() {
     super.initState();
-
-    _apiService = Provider.of<ApiService>(context, listen: false);
-
-    // ИНИЦИАЛИЗАЦИЯ по умолчанию, чтобы не было LateInitializationError
     _wardrobeFuture = Future.value(<String, List<WardrobeItem>>{});
+  }
 
-    _loadWardrobe();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInitDeps) {
+      _apiService = Provider.of<ApiService>(context, listen: false);
+      _authStorage = Provider.of<AuthStorage>(context, listen: false);
+      _didInitDeps = true;
+      _loadWardrobe();
+    }
   }
 
   Future<void> _loadWardrobe() async {
     try {
+      final userId = await _authStorage.readUserId();
+      if (!mounted) return;
+
+      if (userId == null) {
+        setState(() {
+          _wardrobeFuture = Future.value(<String, List<WardrobeItem>>{});
+        });
+        return;
+      }
+
       setState(() {
-        _wardrobeFuture = _apiService.getWardrobe(userId: 1);
+        _wardrobeFuture = _apiService.getWardrobe(userId: userId);
       });
       await _wardrobeFuture;
     } catch (e) {
@@ -112,10 +130,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
 
       await _apiService.deleteWardrobeItem(itemId);
 
-      setState(() {
-        _wardrobeFuture = _apiService.getWardrobe(userId: 1);
-      });
-      await _wardrobeFuture;
+      await _loadWardrobe();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,26 +154,26 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
 
   Future<bool> _showDeleteConfirmation() async {
     final result = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Подтверждение удаления'),
-            content: const Text(
-                'Вы уверены, что хотите удалить этот предмет? Это действие нельзя отменить.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Отмена'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  'Удалить',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Подтверждение удаления'),
+        content: const Text(
+            'Вы уверены, что хотите удалить этот предмет? Это действие нельзя отменить.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Отмена'),
           ),
-        ) ??
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Удалить',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    ) ??
         false;
 
     return result;
@@ -167,34 +182,35 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
 
     final isInteractionEnabled = !_isDeleting;
 
     return Scaffold(
       backgroundColor:
-          isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
+      isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
       appBar: AppBar(
         title: _isSearching
             ? custom_search_bar.SearchBar(
-                onQueryChanged: _onSearchQueryChanged,
-                onSearchCancelled: _cancelSearch,
-              )
+          onQueryChanged: _onSearchQueryChanged,
+          onSearchCancelled: _cancelSearch,
+        )
             : const Text('Мой гардероб'),
         centerTitle: true,
         leading: _isSearching
             ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: _cancelSearch,
-              )
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _cancelSearch,
+        )
             : null,
         actions: _isSearching
             ? []
             : [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: isInteractionEnabled ? _startSearch : null,
-                ),
-              ],
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: isInteractionEnabled ? _startSearch : null,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadWardrobe,
@@ -219,8 +235,9 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
               return _buildEmptyState();
             }
 
-            final wardrobe =
-                _isSearching ? _filterWardrobe(snapshot.data!) : snapshot.data!;
+            final wardrobe = _isSearching
+                ? _filterWardrobe(snapshot.data!)
+                : snapshot.data!;
 
             return ListView(
               padding: const EdgeInsets.all(16),
@@ -245,19 +262,20 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                         title: Text(item.customName),
                         trailing: _isDeleting
                             ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
                             : IconButton(
-                                icon: Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.red.withValues(alpha: 0.7),
-                                ),
-                                onPressed: () => _deleteItem(item.id),
-                              ),
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color:
+                            Colors.red.withOpacity(0.7),
+                          ),
+                          onPressed: () => _deleteItem(item.id),
+                        ),
                       );
                     }).toList(),
                   ),
@@ -269,12 +287,14 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: isInteractionEnabled ? _addItem : null,
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
         child: _isDeleting
             ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        )
             : const Icon(Icons.add),
       ),
     );

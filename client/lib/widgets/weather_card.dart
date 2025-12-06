@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import'package:flutter/material.dart';
 import '../models/recommendation.dart';
 import '../theme/app_theme.dart';
 
@@ -11,7 +11,7 @@ class WeatherCard extends StatelessWidget {
   });
 
   String _getWeatherEmoji(String weather) {
-    final weatherLower = weather.toLowerCase();
+    final weatherLower =weather.toLowerCase();
     if (weatherLower.contains('ясно')) return '☀️';
     if (weatherLower.contains('облач')) return '☁️';
     if (weatherLower.contains('дожд')) return '🌧️';
@@ -27,19 +27,19 @@ class WeatherCard extends StatelessWidget {
         gradient: AppTheme.cardGradient,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: AppTheme.primary.withValues(alpha: 0.3),
-          width: 1,
+          color: AppTheme.primary.withOpacity(0.3),
+         width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withValues(alpha: 0.1),
+            color: AppTheme.primary.withOpacity(0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
-        ],
-      ),
+    ],
+     ),
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: constEdgeInsets.all(24.0),
         child: Column(
           children: [
             // Location
@@ -49,7 +49,7 @@ class WeatherCard extends StatelessWidget {
                 const Icon(
                   Icons.location_on,
                   color: AppTheme.primary,
-                  size: 20,
+                  size:20,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -65,7 +65,7 @@ class WeatherCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+children: [
                 Text(
                   _getWeatherEmoji(recommendation.weather),
                   style: const TextStyle(fontSize: 64),
@@ -76,7 +76,7 @@ class WeatherCard extends StatelessWidget {
                   children: [
                     Text(
                       '${recommendation.temperature.round()}°',
-                      style: const TextStyle(
+style:const TextStyle(
                         fontSize: 72,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
@@ -88,24 +88,24 @@ class WeatherCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 18,
                         color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
+),
+),
+],
+),
               ],
             ),
 
-            const SizedBox(height: 24),
+const SizedBox(height: 24),
 
             // Details
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.backgroundDark.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(16),
-              ),
+                color: AppTheme.backgroundDark.withOpacity(0.5),
+               borderRadius: BorderRadius.circular(16),
+),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+               mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildDetailItem(
                     icon: Icons.water_drop,
@@ -113,9 +113,9 @@ class WeatherCard extends StatelessWidget {
                     value: '${recommendation.humidity}%',
                   ),
                   _buildDetailItem(
-                    icon: Icons.air,
-                    label: 'Ветер',
-                    value: '${recommendation.windSpeed.toStringAsFixed(1)} м/с',
+icon: Icons.air,
+                   label: 'Ветер',
+value:'${recommendation.windSpeed.toStringAsFixed(1)} м/с',
                   ),
                 ],
               ),
@@ -127,8 +127,8 @@ class WeatherCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
+               color: AppTheme.primary.withOpacity(0.1),
+               borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 recommendation.message,
@@ -137,12 +137,12 @@ class WeatherCard extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: AppTheme.textPrimary,
-                ),
-              ),
-            ),
-          ],
+               ),
+             ),
+),
+         ],
         ),
-      ),
+     ),
     );
   }
 
@@ -155,11 +155,11 @@ class WeatherCard extends StatelessWidget {
       children: [
         Icon(
           icon,
-          color: AppTheme.primary,
+color: AppTheme.primary,
           size: 24,
-        ),
-        const SizedBox(height: 8),
-        Text(
+),
+const SizedBox(height: 8),
+Text(
           label,
           style: const TextStyle(
             fontSize: 12,
@@ -168,11 +168,11 @@ class WeatherCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          value,
+value,
           style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+            fontSize:16,
+           fontWeight: FontWeight.bold,
+            color:AppTheme.textPrimary,
           ),
         ),
       ],

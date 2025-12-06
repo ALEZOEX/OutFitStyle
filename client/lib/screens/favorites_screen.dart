@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+
 import '../models/favorite.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
+import '../services/auth_storage.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -13,20 +15,34 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  final ApiService _apiService = ApiService();
   late Future<List<FavoriteOutfit>> _favoritesFuture;
 
   @override
   void initState() {
     super.initState();
+    _favoritesFuture = Future.value(<FavoriteOutfit>[]);
     _loadFavorites();
   }
 
-  Future<void> _loadFavorites() {
+  Future<void> _loadFavorites() async {
+    final apiService = context.read<ApiService>();
+    final authStorage = context.read<AuthStorage>();
+    final userId = await authStorage.readUserId();
+
+    if (!mounted) return;
+
+    if (userId == null) {
+      setState(() {
+        _favoritesFuture = Future.value(<FavoriteOutfit>[]);
+      });
+      return;
+    }
+
     setState(() {
-      _favoritesFuture = _apiService.getFavorites(userId: 1);
+      _favoritesFuture = apiService.getFavorites(userId: userId);
     });
-    return _favoritesFuture;
+
+    await _favoritesFuture;
   }
 
   @override
@@ -45,7 +61,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           future: _favoritesFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return _buildSkeletonLoader(isDark);
+              return _buildSkeletonLoader(isDark, theme);
             }
             if (snapshot.hasError) {
               return Center(child: Text('Ошибка: ${snapshot.error}'));
@@ -68,7 +84,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildSkeletonLoader(bool isDark) {
+  Widget _buildSkeletonLoader(bool isDark, ThemeData theme) {
     return Shimmer.fromColors(
       baseColor: isDark ? Colors.grey[850]! : Colors.grey[300]!,
       highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
@@ -79,7 +95,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           margin: const EdgeInsets.only(bottom: 16),
           height: 120,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(16),
           ),
         ),
@@ -94,8 +110,11 @@ class _FavoriteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
+      color: theme.cardColor,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -103,14 +122,23 @@ class _FavoriteCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                Icon(Icons.location_on,
+                    size: 16, color: theme.textTheme.bodyMedium?.color),
                 const SizedBox(width: 4),
-                Text(outfit.location,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  outfit.location,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
+                ),
                 const Spacer(),
                 Text(
                   outfit.savedAt,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.textTheme.bodyMedium?.color,
+                  ),
                 ),
               ],
             ),
@@ -121,13 +149,14 @@ class _FavoriteCard extends StatelessWidget {
                 Row(
                   children: outfit.items
                       .map((item) => Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Text(item['icon_emoji'] ?? '?',
-                                style: const TextStyle(fontSize: 32)),
-                          ))
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Text(
+                      item['icon_emoji'] ?? '?',
+                      style: const TextStyle(fontSize: 32),
+                    ),
+                  ))
                       .toList(),
                 ),
-                // ...
               ],
             ),
           ],

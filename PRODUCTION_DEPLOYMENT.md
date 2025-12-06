@@ -1,195 +1,194 @@
-# Production Deployment Guide for OutfitStyle
 
-This guide provides step-by-step instructions for deploying the OutfitStyle application to a production environment.
 
-## Architecture Overview
+# 📦 Гайд по продакшен‑деплою OutfitStyle
 
-OutfitStyle uses a microservices architecture with the following components:
+Этот раздел описывает, как развернуть OutfitStyle в продакшене.
 
-1. **Go API Server** - Main backend service
-2. **ML Service** - Python-based machine learning service
-3. **PostgreSQL** - Primary database
-4. **Redis** - Caching and session storage
-5. **Nginx** - Reverse proxy and SSL termination
+## Обзор архитектуры (prod)
 
-## Prerequisites
+В продакшене используется микросервисная архитектура:
 
-Before deployment, ensure you have:
+1. **Go API‑сервер** – основной backend.
+2. **ML‑сервис** – Python/Flask ML‑модуль.
+3. **PostgreSQL** – основная БД приложения.
+4. **Redis** – кэш и сессии/лимиты.
+5. **Nginx** – reverse proxy + SSL‑терминация (если используется HTTPS).
 
-- Docker and Docker Compose installed
-- A domain name configured for SSL
-- Environment variables properly configured
-- SSL certificates (if using HTTPS)
+Все сервисы упакованы в Docker‑образы и стартуют через `docker-compose` или Kubernetes.
 
-## Deployment Steps
+---
 
-### 1. Prepare Environment Variables
+## Предварительные требования
 
-Create a production environment file:
+Перед деплоем нужно:
+
+- установленный Docker и Docker Compose на сервере;
+- домен для HTTPS (если нужен SSL);
+- подготовленные переменные окружения:
+    - настройки БД,
+    - секреты JWT,
+    - ключи для внешних API (OpenWeatherMap и т.п.);
+- сгенерированные SSL‑сертификаты (если используете HTTPS через Nginx).
+
+---
+
+## Шаг 1. Подготовка переменных окружения
+
+Создаём `.env.prod`:
 
 ```bash
 cp infrastructure/docker-compose/.env.example infrastructure/docker-compose/.env.prod
 ```
 
-Edit `.env.prod` with your production values:
+Правим `infrastructure/docker-compose/.env.prod`:
 
 ```env
-# Database configuration
-DB_USER=your_db_user
-DB_PASSWORD=your_secure_password
-DB_NAME=your_db_name
+# База данных
+DB_USER=prod_db_user
+DB_PASSWORD=prod_db_password
+DB_NAME=outfitstyle
 
-# JWT configuration
-JWT_SECRET=your_secure_jwt_secret
+# JWT
+JWT_SECRET=prod_secure_jwt_secret
 
-# Weather API
+# Погода
 WEATHER_API_KEY=your_openweathermap_api_key
 
-# CORS configuration
+# CORS
 CORS_ALLOWED_ORIGINS=https://yourdomain.com
 
-# Server configuration
+# Общий режим
 ENVIRONMENT=production
 ```
 
-### 2. Build Docker Images
+---
 
-Build the production Docker images:
+## Шаг 2. Сборка продакшен‑образов
 
 ```bash
-# Build Go API
+# Go API
 cd server
 docker build -t outfitstyle/api:latest -f Dockerfile.prod .
 
-# Build ML Service
-cd ml-service
+# ML-сервис
+cd ../server/ml-service
 docker build -t outfitstyle/ml-service:latest -f Dockerfile.prod .
+
+# Marketplace-сервис (при необходимости)
+cd ../marketplace-service
+docker build -t outfitstyle/marketplace-service:latest -f Dockerfile.prod .
 ```
 
-### 3. Deploy Services
+(Теги можно поменять на свои, например, с указанием версии.)
 
-Deploy the services using Docker Compose:
+---
+
+## Шаг 3. Запуск через docker-compose.prod.yml
 
 ```bash
 cd infrastructure/docker-compose
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 ```
 
-### 4. Verify Deployment
-
-Check that all services are running:
+Проверка статусов:
 
 ```bash
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 ```
 
-Verify health checks:
+Проверка health‑эндпоинтов:
 
 ```bash
-curl http://localhost/health
-curl http://localhost:5000/health
+curl http://yourdomain.com/health           # проксируется через Nginx на API
+curl http://yourdomain.com/api/ml/health    # если пробрасываете ML напрямую или через под-путь
 ```
 
-### 5. Monitor Services
+---
 
-Check logs for any issues:
+## Шаг 4. Логи и мониторинг
+
+Просмотр логов:
 
 ```bash
-docker-compose -f docker-compose.prod.yml logs -f
+docker compose -f docker-compose.prod.yml logs -f
+docker compose -f docker-compose.prod.yml logs -f api
+docker compose -f docker-compose.prod.yml logs -f ml-service
 ```
 
-## Production Readiness Checklist
+Мониторинг:
 
-✅ **ML Service**:
-- [x] Health checks implemented
-- [x] Metrics and monitoring with Prometheus
-- [x] Circuit breaker for resilience
-- [x] Production Dockerfile
+- `/metrics` на API‑сервере – метрики для Prometheus.
+- Nginx‑логи – для анализа трафика и статуса.
 
-✅ **Go API**:
-- [x] Proper error handling
-- [x] Graceful shutdown
-- [x] Rate limiting
-- [x] Security headers
+---
 
-✅ **Frontend (Flutter)**:
-- [x] Production build configuration
-- [x] Error boundaries
-- [x] Offline support
-- [x] Performance optimization
+## Чек‑лист готовности к продакшену
 
-✅ **Infrastructure**:
-- [x] Docker Compose for production
-- [x] Nginx reverse proxy with SSL
-- [x] Health checks for all services
-- [x] Monitoring and alerting ready
+✅ **ML‑сервис**
 
-## Monitoring and Maintenance
+- [x] `/health` реализован.
+- [x] Метрики и логирование включены (по мере необходимости).
+- [x] Обновление модели через файл/volume.
+- [x] Продакшен‑Dockerfile.
 
-### Health Checks
+✅ **Go API**
 
-All services expose health check endpoints:
-- API: `GET /health`
-- ML Service: `GET /health`
+- [x] Обработка ошибок с человекочитаемыми сообщениями и корректными статусами.
+- [x] Graceful shutdown (контекст с таймаутом, закрытие соединений).
+- [x] Rate limiting и защита от DDoS на уровне middleware + Nginx.
+- [x] CORS настроен только на доверенные origin’ы.
 
-### Metrics
+✅ **Инфраструктура**
 
-Prometheus metrics are available:
-- API: `GET /metrics`
-- ML Service: Port 9090
+- [x] `docker-compose.prod.yml` c отдельными сетями и volume’ами.
+- [x] Nginx‑конфиг с SSL (Let’s Encrypt/Certbot или ваши сертификаты).
+- [x] Health‑чеки для всех сервисов.
+- [x] Мониторинг и алерты на основе метрик и логов.
 
-### Logs
+---
 
-Logs are available through Docker:
-```bash
-docker-compose -f docker-compose.prod.yml logs -f <service_name>
-```
+## Поддержка и обслуживание
 
-## Troubleshooting
+### Health‑чеки
 
-### Service Won't Start
+- API‑сервер: `GET /health`
+- ML‑сервис: `GET /health`
+- (Nginx часто проксирует их наружу для систем мониторинга.)
 
-1. Check logs: `docker-compose -f docker-compose.prod.yml logs -f`
-2. Verify environment variables
-3. Check database connectivity
-4. Ensure dependencies are healthy
+### Метрики
 
-### Performance Issues
+- API:
+    - `GET /metrics` – Prometheus‑формат
+- ML‑сервис:
+    - либо отдельный `/metrics`,
+    - либо экспорт логов/метрик в общую систему.
 
-1. Monitor resource usage: `docker stats`
-2. Check application logs for errors
-3. Review Prometheus metrics
-4. Scale services if needed
+### Резервные копии
 
-### Database Issues
+Регулярно бэкапим:
 
-1. Verify database connection settings
-2. Check PostgreSQL logs
-3. Ensure migrations have been applied
+- БД `PostgreSQL`:
 
-## Security Considerations
+  ```bash
+  docker compose -f docker-compose.prod.yml exec postgres \
+    pg_dump -U "$DB_USER" "$DB_NAME" > backup_$(date +%F).sql
+  ```
 
-- All services run with non-root users
-- Secrets are managed through environment variables
-- API keys and passwords are not hardcoded
-- Services communicate over internal Docker network
-- Nginx provides SSL termination
+- Модельные файлы (`server/ml-service/models/*`).
+- Важные логи (если нужны для аналитики/отладки).
 
-## Backup and Recovery
+---
 
-Regular backups should be implemented for:
-- PostgreSQL database
-- ML model files
-- Application logs
+## Масштабирование
 
-Example backup command:
-```bash
-docker-compose -f docker-compose.prod.yml exec postgres pg_dump -U outfitstyle outfitstyle > backup.sql
-```
+Для горизонтального масштабирования:
 
-## Scaling
+- в Docker Swarm / Kubernetes:
+    - увеличиваем `replicas` API, ML‑сервиса;
+    - ставим общий Redis/БД;
+    - используем Ingress / LoadBalancer.
 
-To scale services, modify the Docker Compose file:
+Для простого docker‑compose:
 
 ```yaml
 services:
@@ -198,8 +197,21 @@ services:
       replicas: 3
 ```
 
-Or use Docker Swarm or Kubernetes for orchestration.
+(в чистом docker‑compose `deploy`‑секция не обрабатывается; для реального масштабирования лучше Swarm/K8s.)
 
-## Conclusion
+---
 
-The OutfitStyle application is now ready for production use. All services are properly configured with health checks, monitoring, and security measures. Regular maintenance and monitoring will ensure continued reliability and performance.
+## Итог
+
+- Архитектура разделена на:
+    - Go API,
+    - ML‑сервис,
+    - marketplace‑сервис (каталог),
+    - PostgreSQL,
+    - Redis,
+    - Nginx.
+- Для разработки есть удобный `docker compose up --build`.
+- Для продакшена – `docker-compose.prod.yml` + понятный набор ENV.
+- ML‑сервис и API готовы к постепенному улучшению (переобучение на логах, расширение фичей и персонализации).
+
+Дальше можно спокойно углубляться в качество модели (features, loss, A/B‑тесты), не трогая инфраструктурный скелет.

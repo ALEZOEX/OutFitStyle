@@ -28,11 +28,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     notificationsEnabled = widget.settings.notificationsEnabled;
     autoSaveOutfits = widget.settings.autoSaveOutfits;
-    temperatureUnit = widget.settings.temperatureUnit.isNotEmpty
+    temperatureUnit =
+    widget.settings.temperatureUnit.isNotEmpty
         ? widget.settings.temperatureUnit
         : 'celsius';
     language =
-    widget.settings.language.isNotEmpty ? widget.settings.language : 'ru';
+    widget.settings.language.isNotEmpty
+        ? widget.settings.language
+        : 'ru';
   }
 
   void _markChanged() {
@@ -99,7 +102,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
     final theme = Theme.of(context);
 
@@ -124,7 +127,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _markChanged();
             },
           ),
-
           const SizedBox(height: 24),
 
           buildSectionTitle('Единицы измерения'),
@@ -142,7 +144,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _markChanged();
             },
           ),
-
           const SizedBox(height: 24),
 
           buildSectionTitle('Поведение приложения'),
@@ -166,7 +167,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _markChanged();
             },
           ),
-
           const SizedBox(height: 24),
 
           buildSectionTitle('Язык'),
@@ -184,13 +184,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _markChanged();
             },
           ),
-
           const SizedBox(height: 32),
 
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _hasChanges && !_isSaving ? saveSettings : null,
+              onPressed:
+              _hasChanges && !_isSaving ? saveSettings : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.primaryColor,
                 foregroundColor: Colors.white,
@@ -210,8 +210,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               )
                   : const Text(
                 'Сохранить настройки',
-                style:
-                TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -240,16 +242,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required ValueChanged<bool> onChanged,
   }) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: isDark
-            ? Border.all(color: theme.primaryColor.withValues(alpha: 0.3))
-            : Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: isDark
+              ? theme.primaryColor.withOpacity(0.3)
+              : Colors.grey.shade300,
+        ),
       ),
       child: Row(
         children: [
@@ -267,7 +271,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: theme.primaryColor,
+            activeColor: theme.primaryColor,
           ),
         ],
       ),
@@ -282,16 +286,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required ValueChanged<String?> onChanged,
   }) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: isDark
-            ? Border.all(color: theme.primaryColor.withValues(alpha: 0.3))
-            : Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: isDark
+              ? theme.primaryColor.withOpacity(0.3)
+              : Colors.grey.shade300,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,17 +318,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 12),
           ...options.map((option) {
+            final value = option.$1;
+            final label = option.$2;
             return RadioListTile<String>(
               title: Text(
-                option.$2,
+                label,
                 style: TextStyle(
                   color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
-              value: option.$1,
-              // ignore: deprecated_member_use
+              value: value,
               groupValue: groupValue,
-              // ignore: deprecated_member_use
               onChanged: onChanged,
               activeColor: theme.primaryColor,
               contentPadding: EdgeInsets.zero,

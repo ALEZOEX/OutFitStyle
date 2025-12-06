@@ -11,7 +11,8 @@ WORKDIR /app
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Add retry mechanism for pip install
+RUN pip install --retries 5 --timeout 30 --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY . .
@@ -34,14 +35,14 @@ COPY --from=builder /app /app
 COPY --from=builder /usr/local /usr/local
 
 # Create non-root user for security
-RUN groupadd -g 1000 outfitstyle && \
-    useradd -u 1000 -g outfitstyle -d /app outfitstyle
+RUN groupadd -g 1000 mluser && \
+    useradd -u 1000 -g mluser -d /app mluser
 
 # Set permissions
-RUN chown -R outfitstyle:outfitstyle /app
+RUN chown -R mluser:mluser /app
 
 # Switch to non-root user
-USER outfitstyle
+USER mluser
 
 # Set environment variables for production
 ENV PYTHONUNBUFFERED=1 \
@@ -58,4 +59,4 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
 # Command to run the application
-CMD ["python", "app/main.py"]
+CMD ["python", "main.py"]

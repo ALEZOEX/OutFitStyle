@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
@@ -13,13 +13,14 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
-// RecommendationRepository implements the RecommendationRepository interface for PostgreSQL
+// RecommendationRepository реализует repositories.RecommendationRepository для PostgreSQL через pgxpool.
 type RecommendationRepository struct {
 	db     *DB
 	logger *zap.Logger
 }
 
-// NewRecommendationRepository creates a new recommendation repository
+// NewRecommendationRepository создаёт новый репозиторий.
+// Сигнатура совпадает с тем, как он вызывается в cmd/server/main.go.
 func NewRecommendationRepository(db *DB, logger *zap.Logger) repositories.RecommendationRepository {
 	return &RecommendationRepository{
 		db:     db,
@@ -27,408 +28,373 @@ func NewRecommendationRepository(db *DB, logger *zap.Logger) repositories.Recomm
 	}
 }
 
-// CreateRecommendation saves a recommendation to the database
+// CreateRecommendation сохраняет рекомендацию и связанные recommendation_items.
+// Возвращает сгенерированный ID рекомендации.
 func (r *RecommendationRepository) CreateRecommendation(
 	ctx context.Context,
-	recommendation *domain.RecommendationResponse,
+	rec *domain.RecommendationResponse,
 ) (int, error) {
 	tx, err := r.db.pool.Begin(ctx)
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to begin transaction")
+		return 0, errors.Wrap(err, "begin tx")
 	}
 	defer func() {
-		if err != nil {
-			tx.Rollback(ctx)
+		if p := recover(); p != nil {
+			_ = tx.Rollback(ctx)
+			panic(p)
 		}
 	}()
 
-	// Convert int64 to int for PostgreSQL
-	userID := int(recommendation.UserID)
-
-	//Insert recommendation
-	recommendationID := 0
-	outfitScore := recommendation.OutfitScore
-
-	err = tx.QueryRow(ctx, `
-		INSERT INTO recommendations (
-			user_id, temperature, weather, outfit_score, ml_powered, algorithm, location,
-			min_temp, max_temp, will_rain,will_snow
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-		RETURNING id
-	`,
-		userID, // Преобразовано в int
-		recommendation.Temperature,
-		recommendation.Weather,
-		outfitScore,
-		recommendation.MLPowered,
-		recommendation.Algorithm,
-		recommendation.Location,
-		recommendation.MinTemp,
-		recommendation.MaxTemp,
-		recommendation.WillRain,
-		recommendation.WillSnow,
-	).Scan(&recommendationID)
-
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to insert recommendation")
+	createdAt := rec.Timestamp
+	if createdAt.IsZero() {
+		createdAt = time.Now()
 	}
 
-	// Insert recommendation items
-	for _, item := range recommendation.Items {
+	// --- INSERT INTO recommendations ---
+	var recommendationID int
+	err = tx.QueryRow(ctx, `
+		INSERT INTO recommendations (
+			user_id,
+			temperature,
+			weather,
+			min_temp,
+			max_temp,
+			will_rain,
+			will_snow,
+			location,
+			outfit_score,
+			ml_powered,
+			algorithm,
+			created_at
+		)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		RETURNING id
+	`,
+		int(rec.UserID),
+		rec.Temperature,
+		rec.Weather,
+		rec.MinTemp,
+		rec.MaxTemp,
+		rec.WillRain,
+		rec.WillSnow,
+		rec.Location,
+		rec.OutfitScore,
+		rec.MLPowered,
+		rec.Algorithm,
+		createdAt,
+	).Scan(&recommendationID)
+	if err != nil {
+		_ = tx.Rollback(ctx)
+		return 0, errors.Wrap(err, "insert into recommendations")
+	}
+
+	// --- INSERT INTO recommendation_items ---
+	// Таблица:
+	//   recommendation_id, clothing_item_id, name, category, icon_emoji,
+	//   ml_score, confidence, confidence_score, position
+	//
+	// В домене Items []domain.ClothingItem:
+	//   ID, UserID, Name, Category, Subcategory, IconEmoji, MLScore, Confidence, WeatherSuitability.
+	// Позиции в домене нет — используем индекс+1.
+	for i, it := range rec.Items {
+		position := i + 1
+
 		_, err = tx.Exec(ctx, `
-		  INSERT INTO recommendation_items (
-			recommendation_id, clothing_item_id, name, category, icon_emoji, ml_score, confidence
-		  ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-		  ON CONFLICT (recommendation_id, clothing_item_id) 
-		  DO UPDATE SET
-			name       = EXCLUDED.name,
-			category   = EXCLUDED.category,
-			icon_emoji = EXCLUDED.icon_emoji,
-			ml_score   = EXCLUDED.ml_score,
-			confidence = EXCLUDED.confidence
+			INSERT INTO recommendation_items (
+				recommendation_id,
+				clothing_item_id,
+				name,
+				category,
+				icon_emoji,
+				ml_score,
+				confidence,
+				confidence_score,
+				position
+			)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
 		`,
 			recommendationID,
-			int(item.ID),
-			item.Name,
-			item.Category,
-			item.IconEmoji,
-			item.MLScore,
-			item.Confidence,
+			int(it.ID),
+			nullOrString(it.Name),
+			nullOrString(it.Category),
+			nullOrString(it.IconEmoji),
+			it.MLScore,
+			it.Confidence,
+			it.MLScore, // для простоты confidence_score = ml_score
+			position,
 		)
 		if err != nil {
-			return 0, errors.Wrap(err, "failed to insert recommendation item")
+			_ = tx.Rollback(ctx)
+			return 0, errors.Wrap(err, "insert into recommendation_items")
 		}
 	}
 
-	// Update user stats
-	_, err = tx.Exec(ctx, `
-		INSERT INTO user_stats (user_id, total_recommendations, last_active)
-		VALUES ($1, 1, NOW())
-		ON CONFLICT (user_id) 
-		DO UPDATE SET 
-			total_recommendations = user_stats.total_recommendations + 1,
-			last_active= NOW()
-	`, userID) // Используем преобразованный userID
-
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to update user stats")
+	if err := tx.Commit(ctx); err != nil {
+		return 0, errors.Wrap(err, "commit tx")
 	}
 
-	// Commit transaction
-	if err = tx.Commit(ctx); err != nil {
-		return 0, errors.Wrap(err, "failed to commit transaction")
-	}
-
+	rec.ID = domain.ID(recommendationID)
 	return recommendationID, nil
 }
 
-// GetRecommendationByID retrieves a specific recommendation by ID
-func (r *RecommendationRepository) GetRecommendationByID(ctx context.Context, id int) (*domain.RecommendationResponse, error) {
-	query := `
-		SELECT 
-			r.id, r.user_id, r.temperature, r.weather, r.outfit_score, r.ml_powered, 
-			r.algorithm, r.location, r.created_at,r.min_temp,r.max_temp, r.will_rain, r.will_snow,
-			COALESCE(
-				JSON_AGG(
-			JSON_BUILD_OBJECT(
-						'id', ri.clothing_item_id,
-						'name', ri.name,
-						'category', ri.category,
-						'icon_emoji', ri.icon_emoji,
-						'ml_score', ri.ml_score,
-						'confidence', ri.confidence
-					)
-		) FILTER (WHERE ri.id IS NOT NULL),
-				'[]'
-			) as items
-		FROM recommendations r
-		LEFT JOIN recommendation_items ri ON r.id = ri.recommendation_id
-		WHERE r.id = $1
-		GROUP BY r.id, r.user_id, r.temperature,r.weather, r.outfit_score, r.ml_powered, 
-		         r.algorithm, r.location, r.created_at, r.min_temp, r.max_temp, r.will_rain, r.will_snow
-`
+// GetUserRecommendations возвращает последние N рекомендаций пользователя.
+func (r *RecommendationRepository) GetUserRecommendations(
+	ctx context.Context,
+	userID, limit int,
+) ([]domain.RecommendationResponse, error) {
 
-	row := r.db.pool.QueryRow(ctx, query, id)
-	item := domain.RecommendationResponse{}
-	var itemsJSON []byte
-	var outfitScore sql.NullFloat64
-
-	err := row.Scan(
-		&item.ID,
-		&item.UserID,
-		&item.Temperature,
-		&item.Weather,
-		&outfitScore,
-		&item.MLPowered,
-		&item.Algorithm,
-		&item.Location,
-		&item.Timestamp,
-		&item.MinTemp,
-		&item.MaxTemp,
-		&item.WillRain,
-		&item.WillSnow,
-		&itemsJSON,
-	)
-
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, errors.New("recommendation not found")
-		}
-		return nil, errors.Wrap(err, "failed to get recommendation by ID")
-	}
-
-	// Handle nullable outfit score
-	if outfitScore.Valid {
-		item.OutfitScore = outfitScore.Float64
-	}
-
-	var items []domain.ClothingItem
-	if err := json.Unmarshal(itemsJSON, &items); err != nil {
-		return nil, errors.Wrap(err, "failed to unmarshal items JSON")
-	}
-	item.Items = items
-
-	return &item, nil
-}
-
-// GetUserRecommendations retrieves recommendation history for auser
-func (r *RecommendationRepository) GetUserRecommendations(ctx context.Context, userID int, limit int) ([]domain.RecommendationResponse, error) {
-	query := `
-		SELECT 
-			r.id, r.user_id, r.temperature, r.weather, r.outfit_score, r.ml_powered, 
-			r.algorithm, r.location, r.created_at,r.min_temp,r.max_temp, r.will_rain, r.will_snow,
-			COALESCE(
-				JSON_AGG(
-					JSON_BUILD_OBJECT(
-						'id', ri.clothing_item_id,
-						'name', ri.name,
-						'category', ri.category,
-						'icon_emoji', ri.icon_emoji,
-						'ml_score', ri.ml_score,
-						'confidence', ri.confidence
-			)
-				) FILTER (WHERE ri.id IS NOT NULL),
-				'[]'
-			) as items
-		FROM recommendations r
-		LEFT JOIN recommendation_items ri ON r.id = ri.recommendation_id
-		WHERE r.user_id = $1
-		GROUP BY r.id, r.user_id, r.temperature, r.weather, r.outfit_score, r.ml_powered, 
-		         r.algorithm, r.location, r.created_at, r.min_temp, r.max_temp, r.will_rain, r.will_snow
-	ORDERBYr.created_at DESC
-		LIMIT $2
-	`
-
-	rows, err := r.db.pool.Query(ctx, query, userID, limit)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to query recommendation history")
-	}
-	defer rows.Close()
-
-	var history []domain.RecommendationResponse
-	for rows.Next() {
-		var item domain.RecommendationResponse
-		var itemsJSON []byte
-		var outfitScore sql.NullFloat64
-
-		err = rows.Scan(
-			&item.ID,
-			&item.UserID,
-			&item.Temperature,
-			&item.Weather,
-			&outfitScore,
-			&item.MLPowered,
-			&item.Algorithm,
-			&item.Location,
-			&item.Timestamp,
-			&item.MinTemp,
-			&item.MaxTemp,
-			&item.WillRain,
-			&item.WillSnow,
-			&itemsJSON,
-		)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to scan recommendation history row")
-		}
-
-		// Handle nullable outfit score
-		if outfitScore.Valid {
-			item.OutfitScore = outfitScore.Float64
-		}
-
-		var items []domain.ClothingItem
-		if err := json.Unmarshal(itemsJSON, &items); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal items JSON")
-		}
-		item.Items = items
-		history = append(history, item)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, errors.Wrap(err, "error iterating recommendation historyrows")
-	}
-
-	return history, nil
-}
-
-// CreateOutfitSet saves an outfit set to the database
-func (r *RecommendationRepository) CreateOutfitSet(ctx context.Context, outfit *domain.OutfitSet) (int, error) {
-	// Convert slice to JSON
-	itemsJSON, err := json.Marshal(outfit.Items)
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to marshal outfit items")
-	}
-
-	query := `
-		INSERT INTO outfit_sets (items, confidence, reason, created_at)
-		VALUES ($1, $2, $3, NOW())
-		RETURNING id`
-
-	var outfitID int
-	err = r.db.pool.QueryRow(ctx, query, itemsJSON, outfit.Confidence, outfit.Reason).Scan(&outfitID)
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to insert outfit set")
-	}
-
-	return outfitID, nil
-}
-
-// GetOutfitSetByID retrieves an outfit set by ID
-func (r *RecommendationRepository) GetOutfitSetByID(ctx context.Context, id int) (*domain.OutfitSet, error) {
-	query := `
-	SELECT id, items, confidence, reason, created_at
-		FROM outfit_sets
-		WHEREid= $1
-	`
-
-	row := r.db.pool.QueryRow(ctx, query, id)
-	outfit := domain.OutfitSet{}
-	var itemsJSON []byte
-
-	err := row.Scan(
-		&outfit.ID,
-		&itemsJSON,
-		&outfit.Confidence,
-		&outfit.Reason,
-		&outfit.CreatedAt,
-	)
-
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, errors.New("outfit set not found")
-		}
-		return nil, errors.Wrap(err, "failed to get outfit set by ID")
-	}
-
-	//Parse JSON array
-	if itemsJSON != nil {
-		if err := json.Unmarshal(itemsJSON, &outfit.Items); err != nil {
-			return nil, errors.Wrap(err, "failed to parse outfititems")
-		}
-	}
-
-	return &outfit, nil
-}
-
-// GetClothingItemByID retrieves a clothing item by ID
-func (r *RecommendationRepository) GetClothingItemByID(ctx context.Context, id int) (*domain.ClothingItem, error) {
-	query := `
-		SELECT id,user_id, name, category, subcategory, icon_emoji, ml_score, confidence, weather_suitability
-		FROM clothing_items
-		WHERE id = $1
-	`
-
-	row := r.db.pool.QueryRow(ctx, query, id)
-	item := domain.ClothingItem{}
-
-	err := row.Scan(
-		&item.ID,
-		&item.UserID,
-		&item.Name,
-		&item.Category,
-		&item.Subcategory,
-		&item.IconEmoji,
-		&item.MLScore,
-		&item.Confidence,
-		&item.WeatherSuitability,
-	)
-
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, errors.New("clothing item not found")
-		}
-		return nil, errors.Wrap(err, "failed to get clothing item by ID")
-	}
-
-	return &item, nil
-}
-
-// GetUserClothingItems retrieves all clothing items fora user
-func (r *RecommendationRepository) GetUserClothingItems(ctx context.Context, userID int) ([]domain.ClothingItem, error) {
-	query := `
-		SELECT id, user_id, name, category, subcategory, icon_emoji, ml_score, confidence, weather_suitability
-		FROMclothing_items
+	rows, err := r.db.pool.Query(ctx, `
+		SELECT
+			id,
+			user_id,
+			temperature,
+			weather,
+			min_temp,
+			max_temp,
+			will_rain,
+			will_snow,
+			location,
+			outfit_score,
+			ml_powered,
+			algorithm,
+			created_at
+		FROM recommendations
 		WHERE user_id = $1
-		ORDER BY category, name
-	`
-
-	rows, err := r.db.pool.Query(ctx, query, userID)
+		ORDER BY created_at DESC
+		LIMIT $2
+	`, userID, limit)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to query clothing items")
+		return nil, errors.Wrap(err, "query recommendations")
+	}
+	defer rows.Close()
+
+	var result []domain.RecommendationResponse
+
+	for rows.Next() {
+		var rec domain.RecommendationResponse
+		var (
+			idDB, userIDDB     int
+			minTemp, maxTemp   sql.NullFloat64
+			willRain, willSnow sql.NullBool
+			location           sql.NullString
+			outfitScore        sql.NullFloat64
+			algorithm          sql.NullString
+			createdAt          time.Time
+		)
+
+		if err := rows.Scan(
+			&idDB,
+			&userIDDB,
+			&rec.Temperature,
+			&rec.Weather,
+			&minTemp,
+			&maxTemp,
+			&willRain,
+			&willSnow,
+			&location,
+			&outfitScore,
+			&rec.MLPowered,
+			&algorithm,
+			&createdAt,
+		); err != nil {
+			return nil, errors.Wrap(err, "scan recommendation")
+		}
+
+		rec.ID = domain.ID(idDB)
+		rec.UserID = domain.ID(userIDDB)
+		rec.MinTemp = nullFloat64ToFloat64(minTemp)
+		rec.MaxTemp = nullFloat64ToFloat64(maxTemp)
+		rec.WillRain = willRain.Valid && willRain.Bool
+		rec.WillSnow = willSnow.Valid && willSnow.Bool
+		rec.Location = location.String
+		if outfitScore.Valid {
+			rec.OutfitScore = outfitScore.Float64
+		}
+		rec.Algorithm = algorithm.String
+		rec.Timestamp = createdAt
+
+		// Humidity / WindSpeed / HourlyForecast в БД не храним — остаются нулевые значения.
+
+		items, err := r.loadRecommendationItems(ctx, idDB)
+		if err != nil {
+			return nil, errors.Wrap(err, "load recommendation items")
+		}
+		rec.Items = items
+
+		result = append(result, rec)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "rows err")
+	}
+
+	return result, nil
+}
+
+// GetRecommendationByID возвращает одну рекомендацию по ID.
+func (r *RecommendationRepository) GetRecommendationByID(
+	ctx context.Context,
+	id int,
+) (*domain.RecommendationResponse, error) {
+
+	row := r.db.pool.QueryRow(ctx, `
+		SELECT
+			id,
+			user_id,
+			temperature,
+			weather,
+			min_temp,
+			max_temp,
+			will_rain,
+			will_snow,
+			location,
+			outfit_score,
+			ml_powered,
+			algorithm,
+			created_at
+		FROM recommendations
+		WHERE id = $1
+	`, id)
+
+	var rec domain.RecommendationResponse
+	var (
+		idDB, userIDDB     int
+		minTemp, maxTemp   sql.NullFloat64
+		willRain, willSnow sql.NullBool
+		location           sql.NullString
+		outfitScore        sql.NullFloat64
+		algorithm          sql.NullString
+		createdAt          time.Time
+	)
+
+	if err := row.Scan(
+		&idDB,
+		&userIDDB,
+		&rec.Temperature,
+		&rec.Weather,
+		&minTemp,
+		&maxTemp,
+		&willRain,
+		&willSnow,
+		&location,
+		&outfitScore,
+		&rec.MLPowered,
+		&algorithm,
+		&createdAt,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "scan recommendation by id")
+	}
+
+	rec.ID = domain.ID(idDB)
+	rec.UserID = domain.ID(userIDDB)
+	rec.MinTemp = nullFloat64ToFloat64(minTemp)
+	rec.MaxTemp = nullFloat64ToFloat64(maxTemp)
+	rec.WillRain = willRain.Valid && willRain.Bool
+	rec.WillSnow = willSnow.Valid && willSnow.Bool
+	rec.Location = location.String
+	if outfitScore.Valid {
+		rec.OutfitScore = outfitScore.Float64
+	}
+	rec.Algorithm = algorithm.String
+	rec.Timestamp = createdAt
+
+	items, err := r.loadRecommendationItems(ctx, idDB)
+	if err != nil {
+		return nil, errors.Wrap(err, "load recommendation items by id")
+	}
+	rec.Items = items
+
+	return &rec, nil
+}
+
+// loadRecommendationItems подтягивает вещи для рекомендации и маппит в []domain.ClothingItem.
+func (r *RecommendationRepository) loadRecommendationItems(
+	ctx context.Context,
+	recommendationID int,
+) ([]domain.ClothingItem, error) {
+
+	rows, err := r.db.pool.Query(ctx, `
+		SELECT
+			clothing_item_id,
+			name,
+			category,
+			icon_emoji,
+			ml_score,
+			confidence,
+			position
+		FROM recommendation_items
+		WHERE recommendation_id = $1
+		ORDER BY position, id
+	`, recommendationID)
+	if err != nil {
+		return nil, errors.Wrap(err, "query recommendation_items")
 	}
 	defer rows.Close()
 
 	var items []domain.ClothingItem
+
 	for rows.Next() {
-		var item domain.ClothingItem
-		err = rows.Scan(
-			&item.ID,
-			&item.UserID,
-			&item.Name,
-			&item.Category,
-			&item.Subcategory,
-			&item.IconEmoji,
-			&item.MLScore,
-			&item.Confidence,
-			&item.WeatherSuitability,
+		var (
+			itemID     int
+			name       sql.NullString
+			category   sql.NullString
+			iconEmoji  sql.NullString
+			mlScore    sql.NullFloat64
+			confidence sql.NullFloat64
+			position   sql.NullInt32 // сейчас не используется в домене
 		)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to scan clothing item")
+
+		if err := rows.Scan(
+			&itemID,
+			&name,
+			&category,
+			&iconEmoji,
+			&mlScore,
+			&confidence,
+			&position,
+		); err != nil {
+			return nil, errors.Wrap(err, "scan recommendation_item")
 		}
-		items = append(items, item)
+
+		var it domain.ClothingItem
+		it.ID = domain.ID(itemID)
+		it.Name = name.String
+		it.Category = category.String
+		it.IconEmoji = iconEmoji.String
+		if mlScore.Valid {
+			it.MLScore = mlScore.Float64
+		}
+		if confidence.Valid {
+			it.Confidence = confidence.Float64
+		}
+
+		items = append(items, it)
 	}
 
-	if err = rows.Err(); err != nil {
-		return nil, errors.Wrap(err, "error iterating clothingitems")
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "rows err")
 	}
 
 	return items, nil
 }
 
-// CreateClothingItem creates a new clothing item
-func (r *RecommendationRepository) CreateClothingItem(ctx context.Context, item *domain.ClothingItem) (int, error) {
-	query := `
-		INSERT INTO clothing_items (
-			user_id,name, category, subcategory, icon_emoji, ml_score, confidence, weather_suitability
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		RETURNING id
-	`
+// --------------------
+// Вспомогательные функции
+// --------------------
 
-	var itemID int
-	err := r.db.pool.QueryRow(ctx, query,
-		item.UserID,
-		item.Name,
-		item.Category,
-		item.Subcategory,
-		item.IconEmoji,
-		item.MLScore,
-		item.Confidence,
-		item.WeatherSuitability,
-	).Scan(&itemID)
-
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to insert clothing item")
+func nullOrString(s string) sql.NullString {
+	if s == "" {
+		return sql.NullString{}
 	}
+	return sql.NullString{String: s, Valid: true}
+}
 
-	return itemID, nil
+func nullFloat64ToFloat64(n sql.NullFloat64) float64 {
+	if !n.Valid {
+		return 0
+	}
+	return n.Float64
 }

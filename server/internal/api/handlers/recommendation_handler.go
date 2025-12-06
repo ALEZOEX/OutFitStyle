@@ -59,10 +59,12 @@ func NewRecommendationHandler(
 // @Tags         recommendations
 // @Accept       json
 // @Produce      json
-// @Param        city     query  string true  "Город"              example(Moscow)
-// @Param        user_id  query  int    true  "ID пользователя"    example(1)
+// @Param        city     query  string true  "Город"                    example(Moscow)
+// @Param        user_id  query  int    true  "ID пользователя"          example(1)
+// @Param        source   query  string false "Источник вещей: wardrobe (гардероб), catalog (каталог), mixed (оба). По умолчанию mixed."
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
 // @Router       /recommendations [get]
 func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +74,8 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		recommendationDuration.Observe(duration)
 	}()
 
-	// Параметры запроса
+	// ---------------- ПАРАМЕТРЫ ЗАПРОСА ----------------
+
 	city := r.URL.Query().Get("city")
 	if city == "" {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("city parameter is required"))
@@ -80,14 +83,20 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 	}
 
 	userIDStr := r.URL.Query().Get("user_id")
-	userID := 1 // default
-	if userIDStr != "" {
-		id, err := strconv.Atoi(userIDStr)
-		if err != nil {
-			resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id parameter"))
-			return
-		}
-		userID = id
+	if userIDStr == "" {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("user_id parameter is required"))
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil || userID <= 0 {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id parameter"))
+		return
+	}
+
+	source := r.URL.Query().Get("source")
+	if source == "" {
+		source = "mixed"
 	}
 
 	ctx := r.Context()
@@ -97,9 +106,11 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 	h.logger.Info("Get recommendations request",
 		zap.String("city", city),
 		zap.Int("user_id", userID),
+		zap.String("source", source),
 	)
 
-	// Погода
+	// ---------------- ПОГОДА ----------------
+
 	weather, err := h.weatherService.GetWeather(ctxWithTimeout, city)
 	if err != nil {
 		h.logger.Error("Weather error", zap.Error(err))
@@ -108,26 +119,35 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		return
 	}
 
-	// Собираем запрос в доменную модель
+	// ---------------- ДОМЕННЫЙ ЗАПРОС ----------------
+
 	req := domain.RecommendationRequest{
 		UserID: domain.ID(userID),
 		WeatherData: domain.WeatherData{
-			Location:    weather.WeatherData.Location,
-			Temperature: weather.WeatherData.Temperature,
-			FeelsLike:   weather.WeatherData.FeelsLike,
-			Weather:     weather.WeatherData.Weather,
-			Humidity:    weather.WeatherData.Humidity,
-			WindSpeed:   weather.WeatherData.WindSpeed,
-			MinTemp:     weather.WeatherData.MinTemp,
-			MaxTemp:     weather.WeatherData.MaxTemp,
-			WillRain:    weather.WeatherData.WillRain,
-			WillSnow:    weather.WeatherData.WillSnow,
+			Location:       weather.WeatherData.Location,
+			Temperature:    weather.WeatherData.Temperature,
+			FeelsLike:      weather.WeatherData.FeelsLike,
+			Weather:        weather.WeatherData.Weather,
+			Humidity:       weather.WeatherData.Humidity,
+			WindSpeed:      weather.WeatherData.WindSpeed,
+			MinTemp:        weather.WeatherData.MinTemp,
+			MaxTemp:        weather.WeatherData.MaxTemp,
+			WillRain:       weather.WeatherData.WillRain,
+			WillSnow:       weather.WeatherData.WillSnow,
+			HourlyForecast: weather.WeatherData.HourlyForecast,
 		},
 	}
 
-	// Получаем рекомендацию
-	recommendation, err := h.recommendationService.GetRecommendations(ctxWithTimeout, req)
+	// ---------------- ВЫЗОВ СЕРВИСА ----------------
+
+	recommendation, err := h.recommendationService.GetRecommendations(ctxWithTimeout, req, source)
 	if err != nil {
+		if err == services.ErrUserNotFound {
+			resp.Error(w, http.StatusNotFound, fmt.Errorf("user not found"))
+			recommendationsTotal.WithLabelValues(strconv.Itoa(userID), "error_user_not_found").Inc()
+			return
+		}
+
 		h.logger.Error("Recommendation error", zap.Error(err))
 		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to get recommendations"))
 		recommendationsTotal.WithLabelValues(strconv.Itoa(userID), "error_recommendation").Inc()
@@ -146,8 +166,10 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		zap.Bool("ml_powered", recommendation.MLPowered),
 	)
 
-	// Проверка ачивок (асинхронно, плейсхолдер)
+	// Проверка ачивок (асинхронно)
 	go h.checkAchievements(userID, weather)
+
+	// ---------------- ОТВЕТ ----------------
 
 	response := map[string]interface{}{
 		"location":        recommendation.Location,
@@ -182,7 +204,7 @@ func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, 
 	}
 
 	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
+	if err != nil || userID <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id parameter"))
 		return
 	}
@@ -227,7 +249,7 @@ func (h *RecommendationHandler) GetRecommendationByID(w http.ResponseWriter, r *
 	idStr := vars["id"]
 
 	id, err := strconv.Atoi(idStr)
-	if err != nil {
+	if err != nil || id <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
@@ -260,7 +282,7 @@ func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *htt
 	idStr := vars["id"]
 
 	id, err := strconv.Atoi(idStr)
-	if err != nil {
+	if err != nil || id <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
@@ -273,6 +295,11 @@ func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *htt
 	}
 
 	if !decodeJSONReq(w, r, &req) {
+		return
+	}
+
+	if req.UserID <= 0 {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id"))
 		return
 	}
 
@@ -312,7 +339,7 @@ func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Reque
 	idStr := vars["id"]
 
 	id, err := strconv.Atoi(idStr)
-	if err != nil {
+	if err != nil || id <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
@@ -323,6 +350,11 @@ func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Reque
 	}
 
 	if !decodeJSONReq(w, r, &req) {
+		return
+	}
+
+	if req.UserID <= 0 {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id"))
 		return
 	}
 
@@ -357,7 +389,7 @@ func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Re
 	idStr := vars["id"]
 
 	id, err := strconv.Atoi(idStr)
-	if err != nil {
+	if err != nil || id <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid recommendation ID"))
 		return
 	}
@@ -367,6 +399,11 @@ func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Re
 		UserID int `json:"user_id"`
 	}
 	if !decodeJSONReq(w, r, &req) {
+		return
+	}
+
+	if req.UserID <= 0 {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id"))
 		return
 	}
 
@@ -400,7 +437,7 @@ func (h *RecommendationHandler) GetUserFavorites(w http.ResponseWriter, r *http.
 	userIDStr := vars["user_id"]
 
 	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
+	if err != nil || userID <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
 		return
 	}

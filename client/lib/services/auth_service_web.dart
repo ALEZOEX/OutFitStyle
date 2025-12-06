@@ -9,8 +9,9 @@ class AuthService {
     scopes: ['email', 'profile'],
   );
 
-  // TODO: вынести в конфиг/переменную окружения
-  static const String _baseUrl = 'http://localhost:8080/api/v1';
+  final String baseUrl;
+
+  AuthService({required this.baseUrl});
 
   // ================== Email / Password / Code ==================
 
@@ -19,7 +20,7 @@ class AuthService {
     required String password,
     required String username,
   }) async {
-    final uri = Uri.parse('$_baseUrl/auth/register');
+    final uri = Uri.parse('$baseUrl/auth/register');
 
     final resp = await http.post(
       uri,
@@ -40,7 +41,7 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final uri = Uri.parse('$_baseUrl/auth/login');
+    final uri = Uri.parse('$baseUrl/auth/login');
 
     final resp = await http.post(
       uri,
@@ -58,7 +59,7 @@ class AuthService {
 
   /// Подтверждаем код и получаем user + accessToken
   Future<Map<String, dynamic>> verifyCode(String code) async {
-    final uri = Uri.parse('$_baseUrl/auth/verify');
+    final uri = Uri.parse('$baseUrl/auth/verify');
 
     final resp = await http.post(
       uri,
@@ -90,7 +91,7 @@ class AuthService {
       return null;
     }
 
-    final uri = Uri.parse('$_baseUrl/auth/google');
+    final uri = Uri.parse('$baseUrl/auth/google');
     final resp = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},

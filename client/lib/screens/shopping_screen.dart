@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/shopping_item.dart';
 import '../services/shopping_service.dart';
+import '../services/auth_storage.dart';
 
 class ShoppingScreen extends StatefulWidget {
   const ShoppingScreen({super.key});
@@ -17,19 +18,28 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   @override
   void initState() {
     super.initState();
-
-    // ИНИЦИАЛИЗАЦИЯ по умолчанию, чтобы не было LateInitializationError
     _wishlistFuture = Future.value(<ShoppingItem>[]);
-
     _loadWishlist();
   }
 
   Future<void> _loadWishlist() async {
     final shoppingService = context.read<ShoppingService>();
+    final authStorage = context.read<AuthStorage>();
 
     try {
+      final userId = await authStorage.readUserId();
+      if (!mounted) return;
+
+      if (userId == null) {
+        setState(() {
+          _wishlistFuture = Future.value(<ShoppingItem>[]);
+        });
+        return;
+      }
+
       setState(() {
-        _wishlistFuture = shoppingService.getShoppingWishlist(userId: 1);
+        _wishlistFuture =
+            shoppingService.getShoppingWishlist(userId: userId);
       });
       await _wishlistFuture;
     } catch (e) {
@@ -55,11 +65,13 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         child: FutureBuilder<List<ShoppingItem>>(
           future: _wishlistFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                (snapshot.data == null || snapshot.data!.isEmpty)) {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return Center(child: Text('Ошибка загрузки: ${snapshot.error}'));
+              return Center(
+                  child: Text('Ошибка загрузки: ${snapshot.error}'));
             }
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return _buildEmptyState();
@@ -178,7 +190,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
 
   Widget _buildCostAnalysis(List<ShoppingItem> items) {
     final totalCost =
-        items.fold<double>(0.0, (sum, item) => sum + (item.price ?? 0));
+    items.fold<double>(0.0, (sum, item) => sum + (item.price ?? 0));
     final averagePrice = items.isNotEmpty ? totalCost / items.length : 0;
     final mostExpensive = items.isNotEmpty
         ? items.reduce((a, b) => (a.price ?? 0) > (b.price ?? 0) ? a : b)
@@ -210,7 +222,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
             const SizedBox(height: 8),
             Text(
               'Общая стоимость: ${totalCost.toStringAsFixed(0)} ₽',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
@@ -254,13 +267,17 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
       if (price < 1000) {
         priceRanges['До 1000 ₽'] = (priceRanges['До 1000 ₽'] ?? 0) + 1;
       } else if (price < 3000) {
-        priceRanges['1000-3000 ₽'] = (priceRanges['1000-3000 ₽'] ?? 0) + 1;
+        priceRanges['1000-3000 ₽'] =
+            (priceRanges['1000-3000 ₽'] ?? 0) + 1;
       } else if (price < 5000) {
-        priceRanges['3000-5000 ₽'] = (priceRanges['3000-5000 ₽'] ?? 0) + 1;
+        priceRanges['3000-5000 ₽'] =
+            (priceRanges['3000-5000 ₽'] ?? 0) + 1;
       } else if (price < 10000) {
-        priceRanges['5000-10000 ₽'] = (priceRanges['5000-10000 ₽'] ?? 0) + 1;
+        priceRanges['5000-10000 ₽'] =
+            (priceRanges['5000-10000 ₽'] ?? 0) + 1;
       } else {
-        priceRanges['Более 10000 ₽'] = (priceRanges['Более 10000 ₽'] ?? 0) + 1;
+        priceRanges['Более 10000 ₽'] =
+            (priceRanges['Более 10000 ₽'] ?? 0) + 1;
       }
     }
 
@@ -268,7 +285,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
       children: priceRanges.entries.map((entry) {
         final count = entry.value;
         final percentage =
-            items.isNotEmpty ? (count / items.length * 100) : 0.0;
+        items.isNotEmpty ? (count / items.length * 100) : 0.0;
 
         Color getBarColor() {
           switch (entry.key) {
@@ -290,6 +307,13 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           child: Row(
             children: [
               const SizedBox(width: 4),
+              const Expanded(
+                flex: 2,
+                child: Text(
+                  '',
+                  style: TextStyle(fontSize: 0),
+                ),
+              ),
               Expanded(
                 flex: 2,
                 child: Text(entry.key, style: const TextStyle(fontSize: 12)),
@@ -320,7 +344,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               ),
               Expanded(
                 flex: 1,
-                child: Text('$count шт', style: const TextStyle(fontSize: 12)),
+                child: Text('$count шт',
+                    style: const TextStyle(fontSize: 12)),
               ),
               Expanded(
                 flex: 1,
