@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:intl/intl.dart';
+
 import '../models/history.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
-import 'package:intl/intl.dart';
+import '../services/auth_storage.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -19,21 +21,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
+    _historyFuture = Future.value(<HistoryItem>[]);
     _loadHistory();
   }
 
-  Future<void> _loadHistory() {
-    final apiService = Provider.of<ApiService>(context, listen: false);
+  Future<void> _loadHistory() async {
+    final apiService = context.read<ApiService>();
+    final authStorage = context.read<AuthStorage>();
+    final userId = await authStorage.readUserId();
+
+    if (!mounted) return;
+
+    if (userId == null) {
+      setState(() {
+        _historyFuture = Future.value(<HistoryItem>[]);
+      });
+      return;
+    }
+
     setState(() {
-      _historyFuture = apiService.getRecommendationHistory(userId: 1);
+      _historyFuture = apiService.getRecommendationHistory(userId: userId);
     });
-    return _historyFuture;
+
+    await _historyFuture;
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
-    final theme = Theme.of(context); // Получаем текущую тему
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -48,7 +64,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           future: _historyFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return _buildSkeletonLoader(isDark);
+              return _buildSkeletonLoader(isDark, theme);
             }
             if (snapshot.hasError) {
               return Center(child: Text('Ошибка: ${snapshot.error}'));
@@ -63,7 +79,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
               itemCount: history.length,
               itemBuilder: (context, index) {
                 return _HistoryCard(
-                    recommendation: history[index], isDark: isDark);
+                  recommendation: history[index],
+                  isDark: isDark,
+                );
               },
             );
           },
@@ -72,7 +90,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildSkeletonLoader(bool isDark) {
+  Widget _buildSkeletonLoader(bool isDark, ThemeData theme) {
     return Shimmer.fromColors(
       baseColor: isDark ? Colors.grey[850]! : Colors.grey[300]!,
       highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
@@ -83,7 +101,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           margin: const EdgeInsets.only(bottom: 16),
           height: 120,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(16),
           ),
         ),
@@ -100,11 +118,12 @@ class _HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Получаем текущую тему
+    final theme = Theme.of(context);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: isDark ? 1 : 4,
+      color: theme.cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -116,14 +135,21 @@ class _HistoryCard extends StatelessWidget {
                 Icon(Icons.location_on,
                     size: 16, color: theme.textTheme.bodyMedium?.color),
                 const SizedBox(width: 4),
-                Text(recommendation.location,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  recommendation.location,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
+                ),
                 const Spacer(),
                 Text(
                   DateFormat('dd.MM.yyyy HH:mm')
                       .format(recommendation.createdAt),
                   style: TextStyle(
-                      fontSize: 12, color: theme.textTheme.bodyMedium?.color),
+                    fontSize: 12,
+                    color: theme.textTheme.bodyMedium?.color,
+                  ),
                 ),
               ],
             ),
@@ -134,17 +160,19 @@ class _HistoryCard extends StatelessWidget {
                 Row(
                   children: recommendation.items
                       .map((item) => Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Text(item['icon_emoji'] ?? '👕',
-                                style: const TextStyle(fontSize: 32)),
-                          ))
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Text(
+                      item['icon_emoji'] ?? '👕',
+                      style: const TextStyle(fontSize: 32),
+                    ),
+                  ))
                       .toList(),
                 ),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: theme.primaryColor.withValues(alpha: 0.1),
+                    color: theme.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(

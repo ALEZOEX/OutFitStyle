@@ -109,7 +109,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  InputDecoration _inputDecoration(BuildContext context, String label, IconData icon) {
+  InputDecoration _inputDecoration(
+      BuildContext context, String label, IconData icon) {
     final theme = Theme.of(context);
     return InputDecoration(
       labelText: label,
@@ -133,7 +134,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
     final theme = Theme.of(context);
 
@@ -165,9 +166,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle('Личная информация', isDark),
+              _buildSectionTitle('Личная информация'),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _nameController,
                 decoration: _inputDecoration(context, 'Имя', Icons.person),
@@ -182,9 +182,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _emailController,
                 decoration: _inputDecoration(context, 'Email', Icons.email),
@@ -200,66 +198,68 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   return null;
                 },
               ),
-
               const SizedBox(height: 32),
 
-              _buildSectionTitle('Предпочтения', isDark),
+              _buildSectionTitle('Предпочтения'),
               const SizedBox(height: 16),
 
+              // Стиль одежды
               _buildDropdown(
-                'Стиль одежды',
-                _stylePreference,
-                [
-                  ('casual', 'Повседневный'),
-                  ('business', 'Деловой'),
-                  ('sporty', 'Спортивный'),
-                  ('elegant', 'Элегантный'),
+                label: 'Стиль одежды',
+                value: _stylePreference,
+                items: const [
+                  {'value': 'casual', 'label': 'Повседневный'},
+                  {'value': 'business', 'label': 'Деловой'},
+                  {'value': 'sporty', 'label': 'Спортивный'},
+                  {'value': 'elegant', 'label': 'Элегантный'},
                 ],
-                    (value) {
-                  setState(() => _stylePreference = value!);
+                icon: Icons.style,
+                isDark: isDark,
+                onChanged: (v) {
+                  if (v == null) return;
+                  setState(() => _stylePreference = v);
                   _markChanged();
                 },
-                Icons.style,
-                isDark,
               ),
-
               const SizedBox(height: 16),
 
+              // Чувствительность к температуре
               _buildDropdown(
-                'Чувствительность к температуре',
-                _temperatureSensitivity,
-                [
-                  ('cold', 'Мерзну'),
-                  ('normal', 'Нормально'),
-                  ('warm', 'Жарко'),
+                label: 'Чувствительность к температуре',
+                value: _temperatureSensitivity,
+                items: const [
+                  {'value': 'cold', 'label': 'Мерзну'},
+                  {'value': 'normal', 'label': 'Нормально'},
+                  {'value': 'warm', 'label': 'Жарко'},
                 ],
-                    (value) {
-                  setState(() => _temperatureSensitivity = value!);
+                icon: Icons.thermostat,
+                isDark: isDark,
+                onChanged: (v) {
+                  if (v == null) return;
+                  setState(() => _temperatureSensitivity = v);
                   _markChanged();
                 },
-                Icons.thermostat,
-                isDark,
               ),
-
               const SizedBox(height: 16),
 
+              // Возраст
               _buildDropdown(
-                'Возраст',
-                _ageRange,
-                [
-                  ('18-25', '18-25'),
-                  ('25-35', '25-35'),
-                  ('35-45', '35-45'),
-                  ('45+', '45+'),
+                label: 'Возраст',
+                value: _ageRange,
+                items: const [
+                  {'value': '18-25', 'label': '18-25'},
+                  {'value': '25-35', 'label': '25-35'},
+                  {'value': '35-45', 'label': '35-45'},
+                  {'value': '45+', 'label': '45+'},
                 ],
-                    (value) {
-                  setState(() => _ageRange = value!);
+                icon: Icons.calendar_today,
+                isDark: isDark,
+                onChanged: (v) {
+                  if (v == null) return;
+                  setState(() => _ageRange = v);
                   _markChanged();
                 },
-                Icons.calendar_today,
-                isDark,
               ),
-
               const SizedBox(height: 32),
 
               if (_hasChanges)
@@ -270,7 +270,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.primaryColor,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding:
+                      const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -287,7 +288,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         : const Text(
                       'Сохранить изменения',
                       style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -298,7 +301,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title, bool isDark) {
+  Widget _buildSectionTitle(String title) {
     final theme = Theme.of(context);
     return Text(
       title,
@@ -310,24 +313,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildDropdown(
-      String label,
-      String value,
-      List<(String, String)> items,
-      void Function(String?) onChanged,
-      IconData icon,
-      bool isDark,
-      ) {
+  Widget _buildDropdown({
+    required String label,
+    required String value,
+    required List<Map<String, String>> items,
+    required ValueChanged<String?> onChanged,
+    required IconData icon,
+    required bool isDark,
+  }) {
     final theme = Theme.of(context);
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding:
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDark
-              ? theme.primaryColor.withValues(alpha: 0.2)
+              ? theme.primaryColor.withOpacity(0.2)
               : Colors.grey[300]!,
         ),
       ),
@@ -346,9 +349,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 dropdownColor: theme.cardColor,
                 items: items.map((item) {
-                  return DropdownMenuItem(
-                    value: item.$1,
-                    child: Text(item.$2),
+                  return DropdownMenuItem<String>(
+                    value: item['value'],
+                    child: Text(item['label'] ?? ''),
                   );
                 }).toList(),
                 onChanged: onChanged,

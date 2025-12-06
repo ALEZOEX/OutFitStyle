@@ -10,6 +10,7 @@ import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
 import '../services/weather_service.dart';
 import '../services/location_service.dart';
+import '../services/auth_storage.dart';
 import '../theme/app_theme.dart';
 import '../widgets/outfit_dialog.dart';
 
@@ -24,6 +25,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
   late Future<List<OutfitPlan>> _plansFuture;
   late ApiService _apiService;
   late LocationService _locationService;
+  late AuthStorage _authStorage;
 
   DateTime _selectedDate = DateTime.now();
   String _currentCity = 'Moscow';
@@ -31,17 +33,24 @@ class _PlanningScreenState extends State<PlanningScreen> {
   WeatherData? _weatherData;
   String? _weatherError;
 
+  bool _didInitDeps = false;
+
   @override
   void initState() {
     super.initState();
-
-    _apiService = Provider.of<ApiService>(context, listen: false);
-    _locationService = LocationService();
-
-    // безопасное начальное значение, чтобы не было LateInitializationError
     _plansFuture = Future.value(<OutfitPlan>[]);
+    _locationService = LocationService();
+  }
 
-    _loadLocationAndPlans();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInitDeps) {
+      _apiService = Provider.of<ApiService>(context, listen: false);
+      _authStorage = Provider.of<AuthStorage>(context, listen: false);
+      _didInitDeps = true;
+      _loadLocationAndPlans();
+    }
   }
 
   Future<void> _loadLocationAndPlans() async {
@@ -135,9 +144,19 @@ class _PlanningScreenState extends State<PlanningScreen> {
   }
 
   Future<void> _loadPlans() async {
+    final userId = await _authStorage.readUserId();
+    if (!mounted) return;
+
+    if (userId == null) {
+      setState(() {
+        _plansFuture = Future.value(<OutfitPlan>[]);
+      });
+      return;
+    }
+
     setState(() {
       _plansFuture = _apiService.getOutfitPlans(
-        userId: 1,
+        userId: userId,
         startDate: DateTime.now().subtract(const Duration(days: 7)),
         endDate: DateTime.now().add(const Duration(days: 14)),
       );
@@ -154,7 +173,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
         title: const Text('Сервисы локации отключены'),
         content: const Text(
           'Пожалуйста, включите сервисы локации в настройках устройства '
-          'для автоматического определения вашего города.',
+              'для автоматического определения вашего города.',
         ),
         actions: [
           TextButton(
@@ -183,7 +202,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
         title: const Text('Нет доступа к локации'),
         content: const Text(
           'Вы навсегда запретили доступ к местоположению. '
-          'Пожалуйста, вручную выберите город в настройках профиля.',
+              'Пожалуйста, вручную выберите город в настройках профиля.',
         ),
         actions: [
           TextButton(
@@ -213,7 +232,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
     }
 
     try {
-      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final themeProvider = context.read<ThemeProvider>();
       final isDark = themeProvider.isDarkMode;
 
       if (!mounted) return;
@@ -230,7 +249,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: Colors.black.withOpacity(0.3),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -241,7 +260,21 @@ class _PlanningScreenState extends State<PlanningScreen> {
         ),
       );
 
-      final recommendation = await _apiService.getRecommendations(_currentCity);
+      final userId = await _authStorage.readUserId();
+      if (userId == null) {
+        Navigator.pop(context);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Пользователь не авторизован'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final recommendation =
+      await _apiService.getRecommendations(_currentCity, userId: userId);
 
       if (!mounted) return;
       Navigator.pop(context); // закрываем диалог загрузки
@@ -272,12 +305,11 @@ class _PlanningScreenState extends State<PlanningScreen> {
   }
 
   Future<void> _showAddPlanDialog(
-    List<Map<String, dynamic>> outfitItems,
-  ) async {
+      List<Map<String, dynamic>> outfitItems,
+      ) async {
     final theme = Theme.of(context);
     final isDark = context.read<ThemeProvider>().isDarkMode;
 
-    // состояние диалога живёт всё время его существования
     String notes = '';
     bool isCreating = false;
 
@@ -296,7 +328,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Colors.black.withOpacity(0.3),
                     blurRadius: 30,
                     offset: const Offset(0, 10),
                   ),
@@ -310,7 +342,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
                     height: 4,
                     decoration: BoxDecoration(
                       color: theme.textTheme.bodyMedium?.color
-                          ?.withValues(alpha: 0.3),
+                          ?.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -379,7 +411,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color:
-                                      theme.primaryColor.withValues(alpha: 0.2),
+                                  theme.primaryColor.withOpacity(0.2),
                                 ),
                               ),
                               child: Row(
@@ -462,8 +494,8 @@ class _PlanningScreenState extends State<PlanningScreen> {
                                 borderSide: BorderSide(
                                   color: isDark
                                       ? theme.textTheme.bodyMedium?.color
-                                              ?.withValues(alpha: 0.3) ??
-                                          Colors.grey
+                                      ?.withOpacity(0.3) ??
+                                      Colors.grey
                                       : Colors.grey,
                                 ),
                               ),
@@ -488,17 +520,20 @@ class _PlanningScreenState extends State<PlanningScreen> {
                           child: OutlinedButton(
                             onPressed: () => Navigator.pop(dialogContext),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding:
+                              const EdgeInsets.symmetric(vertical: 14),
                               side: BorderSide(
-                                color:
-                                    isDark ? Colors.grey : theme.primaryColor,
+                                color: isDark
+                                    ? Colors.grey
+                                    : theme.primaryColor,
                               ),
                             ),
                             child: Text(
                               'Отмена',
                               style: TextStyle(
-                                color:
-                                    isDark ? Colors.grey : theme.primaryColor,
+                                color: isDark
+                                    ? Colors.grey
+                                    : theme.primaryColor,
                                 fontSize: 16,
                               ),
                             ),
@@ -510,55 +545,55 @@ class _PlanningScreenState extends State<PlanningScreen> {
                             onPressed: isCreating
                                 ? null
                                 : () async {
-                                    setState(() => isCreating = true);
+                              setState(() => isCreating = true);
 
-                                    // сохраняем навигатор и messenger ДО await
-                                    final nav = Navigator.of(dialogContext);
-                                    final messenger =
-                                        ScaffoldMessenger.of(dialogContext);
+                              final nav = Navigator.of(dialogContext);
+                              final messenger =
+                              ScaffoldMessenger.of(dialogContext);
 
-                                    final success = await _createOutfitPlan(
-                                      _selectedDate,
-                                      outfitItems
-                                          .map((item) => item['id'] as int)
-                                          .toList(),
-                                      notes,
-                                    );
+                              final success = await _createOutfitPlan(
+                                _selectedDate,
+                                outfitItems
+                                    .map((item) => item['id'] as int)
+                                    .toList(),
+                                notes,
+                              );
 
-                                    setState(() => isCreating = false);
+                              setState(() => isCreating = false);
 
-                                    if (success) {
-                                      nav.pop(); // закрываем диалог
-                                      _loadPlans();
-                                      messenger.showSnackBar(
-                                        const SnackBar(
-                                          content:
-                                              Text('План успешно добавлен!'),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                    }
-                                  },
+                              if (success) {
+                                nav.pop();
+                                _loadPlans();
+                                messenger.showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                    Text('План успешно добавлен!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding:
+                              const EdgeInsets.symmetric(vertical: 14),
                               backgroundColor: theme.primaryColor,
                             ),
                             child: isCreating
                                 ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
                                 : const Text(
-                                    'Добавить план',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                    ),
-                                  ),
+                              'Добавить план',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -574,13 +609,26 @@ class _PlanningScreenState extends State<PlanningScreen> {
   }
 
   Future<bool> _createOutfitPlan(
-    DateTime date,
-    List<int> itemIds,
-    String notes,
-  ) async {
+      DateTime date,
+      List<int> itemIds,
+      String notes,
+      ) async {
     try {
+      final userId = await _authStorage.readUserId();
+      if (userId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Пользователь не авторизован'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return false;
+      }
+
       await _apiService.createOutfitPlan(
-        userId: 1,
+        userId: userId,
         date: date,
         itemIds: itemIds,
         notes: notes.isNotEmpty ? notes : null,
@@ -596,19 +644,6 @@ class _PlanningScreenState extends State<PlanningScreen> {
       );
       return false;
     }
-  }
-
-  void _fabAction() {
-    _showRecommendations();
-  }
-
-  void _editPlan(OutfitPlan plan) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Функция редактирования плана будет реализована позже'),
-      ),
-    );
   }
 
   Future<void> _deletePlan(OutfitPlan plan) async {
@@ -632,23 +667,50 @@ class _PlanningScreenState extends State<PlanningScreen> {
           ),
         ],
       ),
-    );
+    ) ??
+        false;
 
-    if (confirm == true) {
-      try {
-        await _apiService.deleteOutfitPlan(1, plan.id);
-        await _loadPlans();
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('План успешно удален')),
-        );
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка удаления плана: $e')),
-        );
+    if (!confirm) return;
+
+    try {
+      final userId = await _authStorage.readUserId();
+      if (userId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Пользователь не авторизован'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
       }
+
+      await _apiService.deleteOutfitPlan(userId, plan.id);
+      await _loadPlans();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('План успешно удален')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка удаления плана: $e')),
+      );
     }
+  }
+
+  void _fabAction() {
+    _showRecommendations();
+  }
+
+  void _editPlan(OutfitPlan plan) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Функция редактирования плана будет реализована позже'),
+      ),
+    );
   }
 
   @override
@@ -658,7 +720,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
 
     return Scaffold(
       backgroundColor:
-          isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF0F2F5),
+      isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF0F2F5),
       appBar: AppBar(
         title: const Text('Планировщик'),
         centerTitle: true,
@@ -666,8 +728,8 @@ class _PlanningScreenState extends State<PlanningScreen> {
         foregroundColor: isDark ? Colors.white : Colors.black,
         elevation: 1,
         shadowColor: isDark
-            ? Colors.black.withValues(alpha: 0.3)
-            : Colors.grey.withValues(alpha: 0.2),
+            ? Colors.black.withOpacity(0.3)
+            : Colors.grey.withOpacity(0.2),
       ),
       body: RefreshIndicator(
         onRefresh: _loadPlans,
@@ -675,7 +737,8 @@ class _PlanningScreenState extends State<PlanningScreen> {
         child: FutureBuilder<List<OutfitPlan>>(
           future: _plansFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                (snapshot.data == null || snapshot.data!.isEmpty)) {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
@@ -691,7 +754,8 @@ class _PlanningScreenState extends State<PlanningScreen> {
             }
 
             return ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               children: [
                 _buildCityHeader(theme, isDark),
                 const SizedBox(height: 16),
@@ -711,8 +775,6 @@ class _PlanningScreenState extends State<PlanningScreen> {
         onPressed: _fabAction,
         backgroundColor: theme.primaryColor,
         foregroundColor: Colors.white,
-        elevation: 4,
-        tooltip: 'Получить рекомендации и создать план',
         child: const Icon(Icons.add),
       ),
     );
@@ -725,7 +787,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
         color: isDark ? const Color(0xFF2D2D2D) : const Color(0xFFF8F9FA),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.primaryColor.withValues(alpha: 0.3),
+          color: theme.primaryColor.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -756,7 +818,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
     final today = DateTime.now();
     final days = List<DateTime>.generate(
       7,
-      (i) => today.subtract(Duration(days: 3 - i)),
+          (i) => today.subtract(Duration(days: 3 - i)),
     );
 
     return Container(
@@ -771,7 +833,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
           final isSelected = DateUtils.isSameDay(_selectedDate, day);
           final isToday = DateUtils.isSameDay(today, day);
           final hasPlan =
-              plans.any((plan) => DateUtils.isSameDay(plan.date, day));
+          plans.any((plan) => DateUtils.isSameDay(plan.date, day));
 
           return GestureDetector(
             onTap: () {
@@ -785,15 +847,15 @@ class _PlanningScreenState extends State<PlanningScreen> {
                 color: isSelected
                     ? theme.primaryColor
                     : isDark
-                        ? const Color(0xFF2D2D2D)
-                        : Colors.white,
+                    ? const Color(0xFF2D2D2D)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: isToday && !isSelected
                     ? Border.all(color: theme.primaryColor, width: 2)
                     : null,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 2,
                     offset: const Offset(0, 1),
                   ),
@@ -860,58 +922,58 @@ class _PlanningScreenState extends State<PlanningScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.today, color: theme.primaryColor, size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.today, color: theme.primaryColor, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     headerText,
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                ),
-                IconButton(
-                  icon: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      gradient: isDark
-                          ? AppTheme.primaryGradientDark
-                          : AppTheme.primaryGradientLight,
-                      shape: BoxShape.circle,
+                  const SizedBox(height: 4),
+                  if (selectedDatePlans.isNotEmpty)
+                    Text(
+                      'Запланировано: ${selectedDatePlans.length} комплектов',
+                      style: const TextStyle(fontSize: 15),
+                    )
+                  else
+                    const Text(
+                      'На этот день планов нет. Добавьте комплект!',
+                      style: TextStyle(color: Colors.grey, fontSize: 15),
                     ),
-                    child: const Center(
-                      child: Icon(Icons.add, color: Colors.white, size: 20),
-                    ),
-                  ),
-                  onPressed: _showRecommendations,
-                  tooltip: 'Создать план',
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (selectedDatePlans.isNotEmpty)
-              Text(
-                'Запланировано: ${selectedDatePlans.length} комплектов',
-                style: const TextStyle(fontSize: 15),
-              )
-            else
-              const Text(
-                'На этот день планов нет. Добавьте комплект!',
-                style: TextStyle(color: Colors.grey, fontSize: 15),
+                ],
               ),
+            ),
+            IconButton(
+              icon: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  gradient: isDark
+                      ? AppTheme.primaryGradientDark
+                      : AppTheme.primaryGradientLight,
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(Icons.add, color: Colors.white, size: 20),
+                ),
+              ),
+              onPressed: _showRecommendations,
+              tooltip: 'Создать план',
+            ),
           ],
         ),
       ),
@@ -934,17 +996,18 @@ class _PlanningScreenState extends State<PlanningScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: theme.primaryColor.withValues(alpha: 0.1),
+                    color: theme.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child:
-                      Icon(Icons.wb_sunny, color: theme.primaryColor, size: 24),
+                  Icon(Icons.wb_sunny, color: theme.primaryColor, size: 24),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
                     'Рекомендации по погоде',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                 ),
               ],
@@ -961,37 +1024,38 @@ class _PlanningScreenState extends State<PlanningScreen> {
                 style: const TextStyle(color: Colors.red),
               )
             else if (_weatherData != null)
-              Column(
-                children: [
-                  Text(
-                    'Температура: ${_weatherData!.temperature.toStringAsFixed(1)}°C, ${_weatherData!.condition}',
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: _showRecommendations,
-                      icon: const Icon(Icons.lightbulb_outline, size: 18),
-                      label: const Text('Получить рекомендации'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        side: BorderSide(color: theme.primaryColor, width: 1.5),
-                        foregroundColor: theme.primaryColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                Column(
+                  children: [
+                    Text(
+                      'Температура: ${_weatherData!.temperature.toStringAsFixed(1)}°C, ${_weatherData!.condition}',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _showRecommendations,
+                        icon: const Icon(Icons.lightbulb_outline, size: 18),
+                        label: const Text('Получить рекомендации'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          side: BorderSide(
+                              color: theme.primaryColor, width: 1.5),
+                          foregroundColor: theme.primaryColor,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              )
-            else
-              const Text(
-                'Не удалось загрузить данные о погоде',
-                style: TextStyle(color: Colors.grey),
-              ),
+                  ],
+                )
+              else
+                const Text(
+                  'Не удалось загрузить данные о погоде',
+                  style: TextStyle(color: Colors.grey),
+                ),
           ],
         ),
       ),
@@ -1016,7 +1080,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: theme.primaryColor.withValues(alpha: 0.15),
+            color: theme.primaryColor.withOpacity(0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
@@ -1082,7 +1146,8 @@ class _PlanningScreenState extends State<PlanningScreen> {
                       onPressed: () => _deletePlan(plan),
                       icon: const Icon(Icons.delete, size: 18),
                       label: const Text('Удалить'),
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      style:
+                      TextButton.styleFrom(foregroundColor: Colors.red),
                     ),
                   ],
                 ),
@@ -1106,7 +1171,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
               borderRadius: BorderRadius.circular(100),
               boxShadow: [
                 BoxShadow(
-                  color: theme.primaryColor.withValues(alpha: 0.2),
+                  color: theme.primaryColor.withOpacity(0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),

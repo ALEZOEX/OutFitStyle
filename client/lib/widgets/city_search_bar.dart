@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../theme/app_theme.dart';
+
 import '../providers/theme_provider.dart';
+import '../theme/app_theme.dart';
 
 class CitySearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -15,14 +16,15 @@ class CitySearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
 
     return Container(
       decoration: BoxDecoration(
         gradient: isDark ? AppTheme.cardGradientDark : AppTheme.cardGradient,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.primary.withValues(alpha: 0.3),
+          color: AppTheme.primary.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -32,11 +34,19 @@ class CitySearchBar extends StatelessWidget {
             child: TextField(
               controller: controller,
               style: TextStyle(
-                  color: isDark ? Colors.white : AppTheme.textPrimary),
+                color: isDark
+                    ? Colors.white
+                    : theme.textTheme.bodyLarge?.color ?? AppTheme.textPrimary,
+              ),
               decoration: InputDecoration(
                 hintText: 'Введите город...',
                 hintStyle: TextStyle(
-                    color: isDark ? Colors.grey[400] : AppTheme.textSecondary),
+                  color: isDark
+                      ? Colors.grey[400]
+                      : theme.textTheme.bodyMedium?.color
+                      ?.withOpacity(0.7) ??
+                      AppTheme.textSecondary,
+                ),
                 prefixIcon: const Icon(
                   Icons.location_city,
                   color: AppTheme.primary,

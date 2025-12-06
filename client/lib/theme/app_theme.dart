@@ -8,9 +8,9 @@ class AppTheme {
   static const Color secondary = Color(0xFF8B5CF6);
   static const Color success = Color(0xFF4CAF50);
   static const Color danger = Color(0xFFf44336);
-  static const Color warning = Color(0xFFF59E0B); // Added warning color
+  static const Color warning = Color(0xFFF59E0B);
   static const Color cardDark = Color(0xFF1E1E1E);
-  static const Color backgroundDark = Color(0xFF0F172A); // Added missing backgroundDark
+  static const Color backgroundDark = Color(0xFF0F172A);
   static const Color textPrimary = Color(0xFF000000);
   static const Color textSecondary = Color(0xFF666666);
 
@@ -150,6 +150,6 @@ class AppTheme {
   );
 
   static Color withOpacity(Color color, double opacity) {
-    return color.withValues(alpha: opacity);
+    return color.withOpacity(opacity);
   }
 }

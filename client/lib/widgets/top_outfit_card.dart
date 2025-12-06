@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import'package:flutter/material.dart';
 import '../models/outfit.dart';
 import '../theme/app_theme.dart';
 
@@ -37,13 +37,13 @@ class TopOutfitCard extends StatelessWidget {
                       BoxShadow(
                         color: (isDark
                                 ? AppTheme.primary
-                                : AppTheme.primary)
-                            .withValues(alpha: 0.3),
+                                :AppTheme.primary)
+                            .withOpacity(0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 3),
                       ),
                     ],
-                  ),
+                 ),
                   child: const Icon(Icons.checkroom,
                       color: Colors.white, size: 20),
                 ),
@@ -63,11 +63,11 @@ class TopOutfitCard extends StatelessWidget {
                       Text(
                         'Рекомендован AI с уверенностью ${outfit.confidence * 100}%',
                         style: TextStyle(
-                          fontSize: 12,
+fontSize: 12,
                           color: isDark
                               ? AppTheme.textSecondary
                               : Colors.grey[600],
-                        ),
+),
                       ),
                     ],
                   ),
@@ -77,13 +77,13 @@ class TopOutfitCard extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Items
-            ...outfit.items.map((item) {
+            ...outfit.items.map((item){
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
                     Container(
-                      width: 48,
+                     width: 48,
                       height: 48,
                       decoration: BoxDecoration(
                         gradient: isDark
@@ -91,8 +91,8 @@ class TopOutfitCard extends StatelessWidget {
                             : AppTheme.cardGradient, // Используем light-градиент для элементов в светлой теме
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                            color: AppTheme.primary.withValues(alpha: 0.3)),
-                      ),
+                            color: AppTheme.primary.withOpacity(0.3)),
+                     ),
                       child: Center(
                           child: Text(item.iconEmoji,
                               style: const TextStyle(fontSize: 24))),
@@ -102,20 +102,20 @@ class TopOutfitCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                         Text(
                             item.name,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: isDark
-                                  ? AppTheme.textPrimary
+                                 ? AppTheme.textPrimary
                                   : Colors.black87,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                          ),
+                         ),
                           const SizedBox(height: 2),
-                          Text(
+                         Text(
                             _getCategoryName(item.category),
                             style: TextStyle(
                               fontSize: 12,
@@ -127,7 +127,7 @@ class TopOutfitCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ],
+                 ],
                 ),
               );
             }),
@@ -137,35 +137,35 @@ class TopOutfitCard extends StatelessWidget {
             // Reason
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
+             decoration: BoxDecoration(
                 color:
                     isDark ? AppTheme.backgroundDark : const Color(0xFFF8F9FA),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
-              ),
+                border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+             ),
               child: Row(
                 children: [
                   const Icon(Icons.info_outline, size: 16, color: AppTheme.primary),
                   const SizedBox(width: 6),
                   Expanded(
-                    child: Text(
+                   child: Text(
                       outfit.reason,
                       style: TextStyle(
                           fontSize: 12,
                           color:
-                              isDark ? AppTheme.textSecondary : Colors.black54,
+                             isDark ? AppTheme.textSecondary : Colors.black54,
                           fontWeight: FontWeight.w500),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ],
+],
               ),
             ),
 
-            if (onSelect != null) ...[
+            if (onSelect!= null) ...[
               const SizedBox(height: 20),
-              ElevatedButton.icon(
+ElevatedButton.icon(
                 onPressed: () => onSelect!(outfit),
                 icon: const Icon(Icons.check_circle_outline, size: 18),
                 label: const Text('Выбрать'),
@@ -180,21 +180,21 @@ class TopOutfitCard extends StatelessWidget {
                 ),
               ),
             ],
-          ],
+         ],
         ),
       ),
     );
   }
 
-  // Исправлена опечатка: Stringcategory -> String category
+  //Исправлена опечатка: Stringcategory -> Stringcategory
   String _getCategoryName(String category) {
     switch (category.toLowerCase()) {
       case 'outerwear':
         return 'Верхняя одежда';
       case 'upper':
-        return 'Верх';
+return 'Верх';
       case 'lower':
-        return 'Низ';
+return 'Низ';
       case 'footwear':
         return 'Обувь';
       case 'accessories':

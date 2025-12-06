@@ -22,14 +22,14 @@ COPY data /app/data
 COPY models /app/models
 
 # Create non-root user for security
-RUN groupadd -g 1000 outfitstyle && \
-    useradd -u 1000 -g outfitstyle -d /app outfitstyle
+RUN groupadd -g 1000 mluser && \
+    useradd -u 1000 -g mluser -d /app mluser
 
 # Set permissions
-RUN chown -R outfitstyle:outfitstyle /app
+RUN chown -R mluser:mluser /app
 
 # Switch to non-root user
-USER outfitstyle
+USER mluser
 
 # Command to run the training script
 CMD ["python", "scripts/train_comprehensive.py"]

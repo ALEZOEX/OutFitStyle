@@ -16,8 +16,7 @@ class OnboardingDialog extends StatefulWidget {
 
   /// Показывает онбординг один раз, если он ещё не был показан.
   static Future<void> showIfNeeded(BuildContext context) async {
-    // Если уже идёт показ диалога – не запускаем второй раз
-    if (_isShowing) return;
+    if (_isShowing) return; // уже показываем
 
     _isShowing = true;
     try {
@@ -25,7 +24,6 @@ class OnboardingDialog extends StatefulWidget {
       try {
         alreadyShown = await DialogStateManager.isOnboardingShown();
       } catch (_) {
-        // В случае ошибки SharedPreferences считаем, что ещё не показывали
         alreadyShown = false;
       }
 
@@ -43,7 +41,7 @@ class OnboardingDialog extends StatefulWidget {
       try {
         await DialogStateManager.setOnboardingShown(true);
       } catch (_) {
-        // Ошибка сохранения флага – не критично для UX
+        // не критично
       }
     } finally {
       _isShowing = false;
@@ -72,7 +70,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
     ),
     _OnboardingStep(
       icon: Icons.psychology,
-      title: 'Персональные рекомендации с ИИ',
+      title: 'Персональные рекомендации ИИ',
       description:
       'Алгоритм анализирует погоду, ваш стиль и оценки образов, чтобы предлагать всё точнее.',
       gradient: LinearGradient(
@@ -160,11 +158,11 @@ class _OnboardingDialogState extends State<OnboardingDialog>
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     final currentStep = _steps[_currentStep];
 
-    final textTheme = Theme.of(context).textTheme;
     final titleStyle = textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.w700,
       color: isDark ? AppTheme.textPrimary : Colors.black87,
@@ -188,7 +186,7 @@ class _OnboardingDialogState extends State<OnboardingDialog>
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.25),
+                  color: Colors.black.withOpacity(0.25),
                   blurRadius: 32,
                   offset: const Offset(0, 12),
                 ),
@@ -205,7 +203,8 @@ class _OnboardingDialogState extends State<OnboardingDialog>
                 SlideTransition(
                   position: _slideAnimation,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
+                    padding:
+                    const EdgeInsets.fromLTRB(28, 24, 28, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -320,11 +319,12 @@ class _Header extends StatelessWidget {
               final isActive = index == currentStep;
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+                margin:
+                const EdgeInsets.symmetric(horizontal: 4),
                 width: isActive ? 22 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: isActive ? 1 : 0.4),
+                  color: Colors.white.withOpacity(isActive ? 1 : 0.4),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
@@ -345,7 +345,7 @@ class _Header extends StatelessWidget {
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.25),
+                color: Colors.white.withOpacity(0.25),
                 shape: BoxShape.circle,
               ),
               child: Icon(

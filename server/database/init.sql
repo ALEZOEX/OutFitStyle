@@ -1,22 +1,26 @@
--- ============================================
---  OutfitStyle – initial schema (Go + ML)
--- ============================================
 
--- Чистим на случай повторной инициализации (для пустой БД безопасно)
-DROP TABLE IF EXISTS user_ratings CASCADE;
-DROP TABLE IF EXISTS user_achievements CASCADE;
-DROP TABLE IF EXISTS achievements CASCADE;
-DROP TABLE IF EXISTS favorite_outfits CASCADE;
-DROP TABLE IF EXISTS recommendation_items CASCADE;
-DROP TABLE IF EXISTS recommendations CASCADE;
-DROP TABLE IF EXISTS outfit_plans CASCADE;
-DROP TABLE IF EXISTS clothing_items CASCADE;
-DROP TABLE IF EXISTS clothing_categories CASCADE;
-DROP TABLE IF EXISTS user_profiles CASCADE;
-DROP TABLE IF EXISTS user_stats CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
 
-DROP FUNCTION IF EXISTS update_updated_at_column();
+SET TIME ZONE 'UTC';
+
+BEGIN;
+
+-- --------------------------------------------
+-- DEV‑сброс (для локалки / CI)
+-- --------------------------------------------
+DROP TABLE IF EXISTS user_ratings          CASCADE;
+DROP TABLE IF EXISTS user_achievements     CASCADE;
+DROP TABLE IF EXISTS achievements          CASCADE;
+DROP TABLE IF EXISTS favorite_outfits      CASCADE;
+DROP TABLE IF EXISTS recommendation_items  CASCADE;
+DROP TABLE IF EXISTS recommendations       CASCADE;
+DROP TABLE IF EXISTS outfit_plans          CASCADE;
+DROP TABLE IF EXISTS clothing_items        CASCADE;
+DROP TABLE IF EXISTS clothing_categories   CASCADE;
+DROP TABLE IF EXISTS user_profiles         CASCADE;
+DROP TABLE IF EXISTS user_stats            CASCADE;
+DROP TABLE IF EXISTS users                 CASCADE;
+
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
 
 -- ============================================
 -- USERS
@@ -30,14 +34,18 @@ CREATE TABLE users (
                        avatar_url  TEXT,
                        is_verified BOOLEAN      NOT NULL DEFAULT FALSE,
                        created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-                       updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+                       updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+                       CHECK (email <> ''),
+                       CHECK (username <> '')
 );
 
+-- Профиль пользователя (данные для ML + доменные поля)
 CREATE TABLE user_profiles (
                                id                       SERIAL PRIMARY KEY,
-                               user_id                  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                               user_id                  INTEGER NOT NULL
+                                   REFERENCES users(id) ON DELETE CASCADE,
 
-    -- то, что ожидает ML-сервис
+    -- то, что ожидает ML‑сервис
                                gender                   TEXT,
                                age_range                TEXT,
                                style_preference         TEXT,
@@ -45,7 +53,7 @@ CREATE TABLE user_profiles (
                                preferred_categories     JSONB,
                                formality_preference     TEXT,
 
-    -- дополнительные поля из Go-домена
+    -- дополнительные поля из Go‑домена
                                style_preferences        TEXT,
                                size                     TEXT,
                                height                   INTEGER,
@@ -55,15 +63,18 @@ CREATE TABLE user_profiles (
 
                                created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
                                UNIQUE (user_id)
 );
 
+-- Агрегированная статистика по пользователю
 CREATE TABLE user_stats (
-                            user_id               INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-                            total_recommendations INTEGER         NOT NULL DEFAULT 0,
+                            user_id               INTEGER PRIMARY KEY
+                                REFERENCES users(id) ON DELETE CASCADE,
+                            total_recommendations INTEGER          NOT NULL DEFAULT 0,
                             average_rating        DOUBLE PRECISION NOT NULL DEFAULT 0,
-                            favorite_count        INTEGER         NOT NULL DEFAULT 0,
-                            achievement_count     INTEGER         NOT NULL DEFAULT 0,
+                            favorite_count        INTEGER          NOT NULL DEFAULT 0,
+                            achievement_count     INTEGER          NOT NULL DEFAULT 0,
                             last_active           TIMESTAMPTZ,
                             most_used_category    TEXT
 );
@@ -72,6 +83,7 @@ CREATE TABLE user_stats (
 -- CLOTHING
 -- ============================================
 
+-- Справочник категорий (для UI/аналитики)
 CREATE TABLE clothing_categories (
                                      id          SERIAL PRIMARY KEY,
                                      name        VARCHAR(50) UNIQUE NOT NULL,
@@ -79,9 +91,22 @@ CREATE TABLE clothing_categories (
                                      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Можно сразу завести базовые категории
+INSERT INTO clothing_categories (name, description)
+VALUES
+    ('outerwear', 'Верхняя одежда'),
+    ('upper',     'Верх (футболки, свитшоты, рубашки)'),
+    ('lower',     'Низ (штаны, юбки, шорты)'),
+    ('footwear',  'Обувь'),
+    ('accessories', 'Аксессуары')
+    ON CONFLICT (name) DO NOTHING;
+
+-- Основная таблица вещей
 CREATE TABLE clothing_items (
                                 id                  SERIAL PRIMARY KEY,
-                                user_id             INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                                user_id             INTEGER
+                                    REFERENCES users(id) ON DELETE CASCADE,
+
                                 name                VARCHAR(100) NOT NULL,
                                 category            VARCHAR(50)  NOT NULL,
                                 subcategory         VARCHAR(50),
@@ -92,20 +117,21 @@ CREATE TABLE clothing_items (
                                 confidence          DOUBLE PRECISION,
                                 weather_suitability VARCHAR(50),
 
-    -- то, что ожидает ML-сервис
+    -- признаки, которые ожидает ML‑сервис
                                 min_temp            DOUBLE PRECISION,
                                 max_temp            DOUBLE PRECISION,
                                 weather_conditions  TEXT,
                                 style               TEXT,
-                                warmth_level        DOUBLE PRECISION,
-                                formality_level     TEXT,
+                                warmth_level        DOUBLE PRECISION,      -- используется как числовой признак
+                                formality_level     TEXT,                  -- может быть числом или категорией (как в датасете)
 
-                                created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-                                updated_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+                                created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                                updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_clothing_items_user_id ON clothing_items(user_id);
-CREATE INDEX idx_clothing_items_category ON clothing_items(category);
+CREATE INDEX idx_clothing_items_user_id   ON clothing_items(user_id);
+CREATE INDEX idx_clothing_items_category  ON clothing_items(category);
+CREATE INDEX idx_clothing_items_created_at ON clothing_items(created_at);
 
 -- ============================================
 -- RECOMMENDATIONS
@@ -113,7 +139,8 @@ CREATE INDEX idx_clothing_items_category ON clothing_items(category);
 
 CREATE TABLE recommendations (
                                  id           SERIAL PRIMARY KEY,
-                                 user_id      INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                                 user_id      INTEGER
+                                     REFERENCES users(id) ON DELETE CASCADE,
 
     -- Погода на момент рекомендации:
                                  temperature  DOUBLE PRECISION NOT NULL,
@@ -132,10 +159,13 @@ CREATE TABLE recommendations (
                                  created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
+-- Элементы рекомендации (снапшот вещи на момент выдачи)
 CREATE TABLE recommendation_items (
                                       id                SERIAL PRIMARY KEY,
-                                      recommendation_id INTEGER NOT NULL REFERENCES recommendations(id) ON DELETE CASCADE,
-                                      clothing_item_id  INTEGER NOT NULL REFERENCES clothing_items(id)   ON DELETE CASCADE,
+                                      recommendation_id INTEGER NOT NULL
+                                          REFERENCES recommendations(id) ON DELETE CASCADE,
+                                      clothing_item_id  INTEGER NOT NULL
+                                          REFERENCES clothing_items(id)   ON DELETE CASCADE,
 
     -- поля, с которыми работает RecommendationRepository
                                       name              VARCHAR(100),
@@ -149,11 +179,15 @@ CREATE TABLE recommendation_items (
                                       position          INTEGER,
 
                                       created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
                                       UNIQUE (recommendation_id, clothing_item_id)
 );
 
-CREATE INDEX idx_recommendations_user_id    ON recommendations(user_id);
-CREATE INDEX idx_recommendations_created_at ON recommendations(created_at);
+CREATE INDEX idx_recommendations_user_id     ON recommendations(user_id);
+CREATE INDEX idx_recommendations_created_at  ON recommendations(created_at);
+
+CREATE INDEX idx_recommendation_items_rec_id       ON recommendation_items(recommendation_id);
+CREATE INDEX idx_recommendation_items_clothing_id  ON recommendation_items(clothing_item_id);
 
 -- ============================================
 -- FAVORITES, ACHIEVEMENTS, RATINGS
@@ -161,9 +195,12 @@ CREATE INDEX idx_recommendations_created_at ON recommendations(created_at);
 
 CREATE TABLE favorite_outfits (
                                   id                SERIAL PRIMARY KEY,
-                                  user_id           INTEGER NOT NULL REFERENCES users(id)          ON DELETE CASCADE,
-                                  recommendation_id INTEGER NOT NULL REFERENCES recommendations(id) ON DELETE CASCADE,
+                                  user_id           INTEGER NOT NULL
+                                      REFERENCES users(id)          ON DELETE CASCADE,
+                                  recommendation_id INTEGER NOT NULL
+                                      REFERENCES recommendations(id) ON DELETE CASCADE,
                                   created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
                                   UNIQUE (user_id, recommendation_id)
 );
 
@@ -178,25 +215,32 @@ CREATE TABLE achievements (
 
 CREATE TABLE user_achievements (
                                    id             SERIAL PRIMARY KEY,
-                                   user_id        INTEGER NOT NULL REFERENCES users(id)        ON DELETE CASCADE,
-                                   achievement_id INTEGER NOT NULL REFERENCES achievements(id) ON DELETE CASCADE,
+                                   user_id        INTEGER NOT NULL
+                                       REFERENCES users(id)        ON DELETE CASCADE,
+                                   achievement_id INTEGER NOT NULL
+                                       REFERENCES achievements(id) ON DELETE CASCADE,
                                    unlocked_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
                                    UNIQUE (user_id, achievement_id)
 );
 
 CREATE TABLE user_ratings (
                               id                SERIAL PRIMARY KEY,
-                              user_id           INTEGER NOT NULL REFERENCES users(id)          ON DELETE CASCADE,
-                              recommendation_id INTEGER NOT NULL REFERENCES recommendations(id) ON DELETE CASCADE,
+                              user_id           INTEGER NOT NULL
+                                  REFERENCES users(id)          ON DELETE CASCADE,
+                              recommendation_id INTEGER NOT NULL
+                                  REFERENCES recommendations(id) ON DELETE CASCADE,
                               rating            INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
                               feedback          TEXT,
                               created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
                               UNIQUE (user_id, recommendation_id)
 );
 
-CREATE INDEX idx_user_favorites_user_id    ON favorite_outfits(user_id);
-CREATE INDEX idx_user_achievements_user_id ON user_achievements(user_id);
-CREATE INDEX idx_user_ratings_user_id      ON user_ratings(user_id);
+CREATE INDEX idx_user_favorites_user_id     ON favorite_outfits(user_id);
+CREATE INDEX idx_user_achievements_user_id  ON user_achievements(user_id);
+CREATE INDEX idx_user_achievements_ach_id   ON user_achievements(achievement_id);
+CREATE INDEX idx_user_ratings_user_id       ON user_ratings(user_id);
 
 -- ============================================
 -- OUTFIT PLANS
@@ -204,13 +248,16 @@ CREATE INDEX idx_user_ratings_user_id      ON user_ratings(user_id);
 
 CREATE TABLE outfit_plans (
                               id         SERIAL PRIMARY KEY,
-                              user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                              user_id    INTEGER NOT NULL
+                                  REFERENCES users(id) ON DELETE CASCADE,
                               date       DATE    NOT NULL,
-                              item_ids   JSONB   NOT NULL,
+                              item_ids   JSONB   NOT NULL,  -- список id вещей на день
                               notes      TEXT,
                               created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                               updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                              deleted_at TIMESTAMPTZ
+                              deleted_at TIMESTAMPTZ,
+
+                              UNIQUE (user_id, date, deleted_at)
 );
 
 CREATE INDEX idx_outfit_plans_user_date ON outfit_plans(user_id, date);
@@ -242,3 +289,5 @@ CREATE TRIGGER trg_user_profiles_updated_at
 CREATE TRIGGER trg_outfit_plans_updated_at
     BEFORE UPDATE ON outfit_plans
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+COMMIT;

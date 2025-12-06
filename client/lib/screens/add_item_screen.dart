@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../exceptions/api_exceptions.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
+import '../services/auth_storage.dart';
 import '../theme/app_theme.dart';
 
 class AddItemScreen extends StatefulWidget {
@@ -15,13 +17,11 @@ class AddItemScreen extends StatefulWidget {
 class _AddItemScreenState extends State<AddItemScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final ApiService _apiService = ApiService();
   bool _isSaving = false;
 
   String _selectedCategoryId = 'upper';
   String _selectedIcon = '👕';
 
-  // Данные вынесены как статическая константа
   static const Map<String, List<String>> _categories = {
     'Верх': ['upper', '👕', '👚', '👔'],
     'Верхняя одежда': ['outerwear', '🧥', '🦺'],
@@ -38,41 +38,55 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   Future<void> _onSave() async {
     if (_isSaving) return;
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isSaving = true);
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
-      final itemName = _nameController.text.trim();
+    setState(() => _isSaving = true);
 
-      try {
-        await _apiService.addWardrobeItem(
-          userId: 1, // ЗАГЛУШКА: Заменить на реальный ID пользователя
-          name: itemName,
-          category: _selectedCategoryId,
-          icon: _selectedIcon,
-        );
+    final itemName = _nameController.text.trim();
+    final apiService = context.read<ApiService>();
+    final authStorage = context.read<AuthStorage>();
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Вещь успешно добавлена!'),
-              backgroundColor: AppTheme.success,
-            ),
-          );
-          if (mounted) Navigator.pop(context, true);
-        }
-      } on ApiException catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Ошибка: ${e.message}'),
-              backgroundColor: AppTheme.danger,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isSaving = false);
-        }
+    try {
+      final userId = await authStorage.readUserId();
+      if (userId == null) {
+        throw const ApiException('Пользователь не авторизован');
+      }
+
+      await apiService.addWardrobeItem(
+        userId: userId,
+        name: itemName,
+        category: _selectedCategoryId,
+        icon: _selectedIcon,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Вещь успешно добавлена!'),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+      Navigator.pop(context, true);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка: ${e.message}'),
+          backgroundColor: AppTheme.danger,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Не удалось добавить вещь: $e'),
+          backgroundColor: AppTheme.danger,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
       }
     }
   }
@@ -91,10 +105,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
             const Padding(
               padding: EdgeInsets.only(right: 16.0),
               child: Center(
-                  child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
             )
           else
             IconButton(
@@ -129,7 +145,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
               Text('Категория', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                initialValue: _selectedCategoryId,
+                value: _selectedCategoryId,
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.category_outlined),
                 ),
@@ -166,21 +182,24 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       height: 64,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? theme.primaryColor.withValues(alpha: 0.2)
+                            ? theme.primaryColor.withOpacity(0.2)
                             : theme.cardColor,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isSelected
                               ? theme.primaryColor
                               : (isDark
-                                  ? Colors.grey.shade700
-                                  : Colors.grey.shade300),
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300),
                           width: isSelected ? 2.5 : 1.0,
                         ),
                       ),
                       child: Center(
-                          child:
-                              Text(icon, style: const TextStyle(fontSize: 32))),
+                        child: Text(
+                          icon,
+                          style: const TextStyle(fontSize: 32),
+                        ),
+                      ),
                     ),
                   );
                 }).toList(),

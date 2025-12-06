@@ -12,6 +12,9 @@ import (
 	"outfitstyle/server/internal/infrastructure/external"
 )
 
+// ErrUserNotFound возвращается, если пользователь не найден в БД.
+var ErrUserNotFound = errors.New("user not found")
+
 // RecommendationService handles recommendation-related business logic.
 type RecommendationService struct {
 	recommendationRepo repositories.RecommendationRepository
@@ -39,12 +42,39 @@ func NewRecommendationService(
 }
 
 // GetRecommendations generates outfit recommendations for a user based on weather data.
+//
+// source управляет источником вещей для ML:
+// - "wardrobe"    -> личный гардероб пользователя (clothing_items.user_id = userID)
+// - "catalog"     -> общий каталог (user_id IS NULL)
+// - "mixed"       -> и гардероб, и каталог.
 func (s *RecommendationService) GetRecommendations(
 	ctx context.Context,
 	req domain.RecommendationRequest,
+	source string,
 ) (*domain.RecommendationResponse, error) {
 
-	// Подготавливаем данные погоды для ML-сервиса
+	if req.UserID <= 0 {
+		return nil, ErrUserNotFound
+	}
+
+	// 1. Проверяем, что пользователь существует
+	user, err := s.userRepo.GetUser(ctx, int(req.UserID))
+	if err != nil {
+		s.logger.Error("Failed to load user",
+			zap.Error(err),
+			zap.Int64("user_id", int64(req.UserID)),
+		)
+		return nil, errors.Wrap(err, "failed to load user")
+	}
+	if user == nil {
+		return nil, ErrUserNotFound
+	}
+
+	if source == "" {
+		source = "wardrobe"
+	}
+
+	// 2. Подготавливаем данные погоды для ML‑сервиса
 	mlWeather := domain.WeatherData{
 		Location:       req.WeatherData.Location,
 		Temperature:    req.WeatherData.Temperature,
@@ -59,50 +89,35 @@ func (s *RecommendationService) GetRecommendations(
 		HourlyForecast: req.WeatherData.HourlyForecast,
 	}
 
-	// ML-сервис ожидает int, а в домене у нас ID (int64)
+	// ML‑сервис ожидает int, а в домене у нас ID (int64)
 	userID := int(req.UserID)
 
-	// Получаем рекомендации от ML-сервиса
-	mlResp, err := s.mlService.GetRecommendations(ctx, userID, mlWeather)
+	// 3. Получаем рекомендацию от ML‑сервиса (ML только считает, без записи в БД)
+	mlRec, err := s.mlService.GetRecommendations(ctx, userID, mlWeather, source)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get ML recommendations")
 	}
 
-	// Формируем доменную рекомендацию
-	recommendation := &domain.RecommendationResponse{
-		UserID:         req.UserID,
-		Location:       mlWeather.Location,
-		Temperature:    mlWeather.Temperature,
-		FeelsLike:      mlWeather.FeelsLike,
-		Weather:        mlWeather.Weather,
-		Humidity:       mlWeather.Humidity,
-		WindSpeed:      mlWeather.WindSpeed,
-		MinTemp:        mlWeather.MinTemp,
-		MaxTemp:        mlWeather.MaxTemp,
-		WillRain:       mlWeather.WillRain,
-		WillSnow:       mlWeather.WillSnow,
-		HourlyForecast: mlWeather.HourlyForecast,
-		Items:          mlResp.Items,
-		OutfitScore:    mlResp.OutfitScore,
-		MLPowered:      mlResp.MLPowered,
-		Algorithm:      mlResp.Algorithm,
-		Timestamp:      time.Now(),
+	// 4. Гарантируем корректный UserID и Timestamp в доменной модели
+	mlRec.UserID = req.UserID
+	if mlRec.Timestamp.IsZero() {
+		mlRec.Timestamp = time.Now()
 	}
 
-	// Асинхронно сохраняем рекомендацию в БД (если есть привязанный пользователь)
-	if req.UserID > 0 {
-		go func(rec *domain.RecommendationResponse, uid domain.ID) {
-			saveCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
+	recommendation := mlRec
 
-			if _, err := s.recommendationRepo.CreateRecommendation(saveCtx, rec); err != nil {
-				s.logger.Error("Failed to save recommendation",
-					zap.Int64("user_id", int64(uid)),
-					zap.Error(err),
-				)
-			}
-		}(recommendation, req.UserID)
-	}
+	// 5. Асинхронно сохраняем рекомендацию в БД (единая точка записи)
+	go func(rec *domain.RecommendationResponse, uid domain.ID) {
+		saveCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if _, err := s.recommendationRepo.CreateRecommendation(saveCtx, rec); err != nil {
+			s.logger.Error("Failed to save recommendation",
+				zap.Int64("user_id", int64(uid)),
+				zap.Error(err),
+			)
+		}
+	}(recommendation, req.UserID)
 
 	return recommendation, nil
 }

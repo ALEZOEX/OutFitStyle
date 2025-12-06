@@ -15,23 +15,14 @@ import '../models/weather_data.dart';
 
 class ApiService {
   final http.Client _client;
-  final String _baseUrl = AppConfig.apiBaseUrl;
+  final String _baseUrl; // Ожидаем что-то вроде http://localhost:8080/api/v1
   final Map<String, String> _headers;
 
-  static const String _apiPrefix = '/api/v1';
-
-  // Singleton
-  static final ApiService _instance = ApiService._internal();
-
-  factory ApiService({http.Client? client}) {
-    if (client != null) {
-      return ApiService._internal(client: client);
-    }
-    return _instance;
-  }
-
-  ApiService._internal({http.Client? client})
-      : _client = client ?? http.Client(),
+  ApiService({
+    required String baseUrl,
+    http.Client? client,
+  })  : _baseUrl = baseUrl,
+        _client = client ?? http.Client(),
         _headers = const {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -39,84 +30,156 @@ class ApiService {
 
   // --- РЕКОМЕНДАЦИИ / ПОГОДА ---
 
-  Future<Recommendation> getRecommendations(String city,
-      {int userId = 1}) async {
+  Future<Recommendation> getRecommendations(
+      String city, {
+        required int userId,
+        String source = 'mixed',
+      }) async {
     final uri = _buildUri(
-      '$_apiPrefix/recommendations',
-      {'city': city, 'user_id': userId.toString()},
+      '/recommendations',
+      {
+        'city': city,
+        'user_id': userId.toString(),
+        'source': source,
+      },
     );
-    final response = await _get(uri);
-    return Recommendation.fromJson(response);
+    final data = await _get(uri);
+    return Recommendation.fromJson(data as Map<String, dynamic>);
   }
 
   Future<WeatherData> getWeather(String city) async {
-    final uri = _buildUri('$_apiPrefix/weather', {'city': city});
+    final uri = _buildUri('/weather', {'city': city});
     final data = await _get(uri);
-    return WeatherData.fromJson(data);
+    return WeatherData.fromJson(data as Map<String, dynamic>);
   }
 
   // --- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ---
 
   Future<Map<String, dynamic>> getUserProfile(int userId) async {
     // сервер: GET /api/v1/users/{id}/profile
-    final uri = _buildUri('$_apiPrefix/users/$userId/profile');
-    return await _get(uri);
+    final uri = _buildUri('/users/$userId/profile');
+    final data = await _get(uri);
+    return data as Map<String, dynamic>;
   }
 
   // --- ИЗБРАННОЕ ---
 
+  /// Список избранных рекомендаций пользователя.
+  ///
+  /// сервер: GET /api/v1/users/{user_id}/favorites
+  /// ответ: { "favorites": [...], "count": N }
   Future<List<FavoriteOutfit>> getFavorites({required int userId}) async {
-    final uri = _buildUri(
-      '$_apiPrefix/favorites',
-      {'user_id': userId.toString()},
-    );
-    final List<dynamic> data = await _get(uri);
-    return data.map((json) => FavoriteOutfit.fromJson(json)).toList();
+    final uri = _buildUri('/users/$userId/favorites');
+    final data = await _get(uri);
+
+    if (data is Map<String, dynamic>) {
+      final list = data['favorites'] as List<dynamic>? ?? const [];
+      return list
+          .whereType<Map<String, dynamic>>()
+          .map(FavoriteOutfit.fromJson)
+          .toList();
+    }
+
+    // fallback на старый формат (чистый массив)
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(FavoriteOutfit.fromJson)
+          .toList();
+    }
+
+    return [];
   }
 
-  Future<void> addFavorite(int userId, int recommendationId) async {
-    final uri = _buildUri('$_apiPrefix/favorites');
-    final body = json.encode({
-      'user_id': userId,
-      'recommendation_id': recommendationId,
-    });
-    await _post(uri, body: body, expectedStatusCode: 201);
+  /// Добавить рекомендацию в избранное.
+  ///
+  /// сервер: POST /api/v1/recommendations/{id}/favorite
+  /// body: { "user_id": int }
+  Future<void> addFavorite({
+    required int userId,
+    required int recommendationId,
+  }) async {
+    final uri = _buildUri('/recommendations/$recommendationId/favorite');
+    final body = json.encode({'user_id': userId});
+    await _post(uri, body: body, expectedStatusCode: 200);
   }
 
-  Future<void> deleteFavorite(int favoriteId) async {
-    final uri = _buildUri('$_apiPrefix/favorites/$favoriteId');
-    await _delete(uri, expectedStatusCode: 204);
+  /// Удалить рекомендацию из избранного.
+  ///
+  /// сервер: DELETE /api/v1/recommendations/{id}/favorite
+  /// body: { "user_id": int }
+  Future<void> removeFavorite({
+    required int userId,
+    required int recommendationId,
+  }) async {
+    final uri = _buildUri('/recommendations/$recommendationId/favorite');
+    final body = json.encode({'user_id': userId});
+    await _delete(uri, body: body, expectedStatusCode: 200);
   }
 
   // --- ИСТОРИЯ ---
 
-  Future<List<HistoryItem>> getRecommendationHistory(
-      {required int userId}) async {
+  /// История рекомендаций пользователя.
+  ///
+  /// сервер: GET /api/v1/recommendations/history?user_id=...&limit=...
+  /// ответ: { "history": [...], "count": N }
+  Future<List<HistoryItem>> getRecommendationHistory({
+    required int userId,
+    int limit = 10,
+  }) async {
     final uri = _buildUri(
-      '$_apiPrefix/recommendations/history',
-      {'user_id': userId.toString()},
+      '/recommendations/history',
+      {
+        'user_id': userId.toString(),
+        'limit': limit.toString(),
+      },
     );
     final data = await _get(uri);
-    final List<dynamic> historyData = data['history'] ?? [];
-    return historyData.map((json) => HistoryItem.fromJson(json)).toList();
+
+    if (data is Map<String, dynamic>) {
+      final List<dynamic> historyData = data['history'] ?? [];
+      return historyData
+          .whereType<Map<String, dynamic>>()
+          .map(HistoryItem.fromJson)
+          .toList();
+    }
+
+    // fallback, если вдруг вернули просто массив
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(HistoryItem.fromJson)
+          .toList();
+    }
+
+    return [];
   }
 
   // --- ГАРДЕРОБ ---
 
-  Future<Map<String, List<WardrobeItem>>> getWardrobe(
-      {required int userId}) async {
-    final uri = _buildUri(
-      '$_apiPrefix/wardrobe',
-      {'user_id': userId.toString()},
-    );
-    final Map<String, dynamic> data = await _get(uri);
+  /// Получить гардероб пользователя.
+  ///
+  /// сервер: предположительно GET /api/v1/wardrobe?user_id=...
+  /// ответ: { "upper": [...], "lower": [...], ... }
+  Future<Map<String, List<WardrobeItem>>> getWardrobe({
+    required int userId,
+  }) async {
+    final uri = _buildUri('/wardrobe', {'user_id': userId.toString()});
+    final data = await _get(uri);
+
     final Map<String, List<WardrobeItem>> wardrobe = {};
-    data.forEach((category, items) {
-      if (items is List) {
-        wardrobe[category] =
-            items.map((item) => WardrobeItem.fromJson(item)).toList();
-      }
-    });
+
+    if (data is Map<String, dynamic>) {
+      data.forEach((category, items) {
+        if (items is List) {
+          wardrobe[category] = items
+              .whereType<Map<String, dynamic>>()
+              .map(WardrobeItem.fromJson)
+              .toList();
+        }
+      });
+    }
+
     return wardrobe;
   }
 
@@ -126,37 +189,59 @@ class ApiService {
     required String category,
     required String icon,
   }) async {
-    final uri = _buildUri('$_apiPrefix/wardrobe');
+    final uri = _buildUri('/wardrobe');
     final body = json.encode({
       'user_id': userId,
       'name': name,
       'category': category,
       'icon': icon,
     });
-    final response = await _post(uri, body: body, expectedStatusCode: 201);
+    final response =
+    await _post(uri, body: body, expectedStatusCode: 201) as Map<String, dynamic>;
     return WardrobeItem.fromJson(response);
   }
 
   Future<void> deleteWardrobeItem(int itemId) async {
-    final uri = _buildUri('$_apiPrefix/wardrobe/$itemId');
+    final uri = _buildUri('/wardrobe/$itemId');
     await _delete(uri, expectedStatusCode: 204);
   }
 
   // --- ПЛАНИРОВЩИК ---
 
+  /// Получить планы нарядов пользователя.
+  ///
+  /// сервер: GET /api/v1/users/{user_id}/outfit-plans
+  /// ответ: { "plans": [...], "count": N }
   Future<List<OutfitPlan>> getOutfitPlans({
     required int userId,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
     final query = <String, String>{};
-    if (startDate != null) query['start_date'] = startDate.toIso8601String();
-    if (endDate != null) query['end_date'] = endDate.toIso8601String();
+    if (startDate != null) {
+      query['start_date'] = startDate.toIso8601String();
+    }
+    if (endDate != null) {
+      query['end_date'] = endDate.toIso8601String();
+    }
 
-    // сервер: GET /api/v1/users/{id}/outfit-plans
-    final uri = _buildUri('$_apiPrefix/users/$userId/outfit-plans', query);
-    final List<dynamic> data = await _get(uri);
-    return data.map((json) => OutfitPlan.fromJson(json)).toList();
+    final uri = _buildUri('/users/$userId/outfit-plans', query);
+    final data = await _get(uri);
+
+    List<dynamic> rawList;
+
+    if (data is Map<String, dynamic>) {
+      rawList = data['plans'] as List<dynamic>? ?? const [];
+    } else if (data is List) {
+      rawList = data;
+    } else {
+      rawList = const [];
+    }
+
+    return rawList
+        .whereType<Map<String, dynamic>>()
+        .map(OutfitPlan.fromJson)
+        .toList();
   }
 
   Future<OutfitPlan> createOutfitPlan({
@@ -165,39 +250,57 @@ class ApiService {
     required List<int> itemIds,
     String? notes,
   }) async {
-    final uri = _buildUri('$_apiPrefix/users/$userId/outfit-plans');
+    final uri = _buildUri('/users/$userId/outfit-plans');
     final body = json.encode({
       'date': date.toIso8601String().substring(0, 10),
       'item_ids': itemIds,
       'notes': notes,
     });
-    final response = await _post(uri, body: body, expectedStatusCode: 201);
+    final response =
+    await _post(uri, body: body, expectedStatusCode: 201) as Map<String, dynamic>;
     return OutfitPlan.fromJson(response);
   }
 
   Future<void> deleteOutfitPlan(int userId, int planId) async {
-    final uri = _buildUri('$_apiPrefix/users/$userId/outfit-plans/$planId');
+    final uri = _buildUri('/users/$userId/outfit-plans/$planId');
     await _delete(uri, expectedStatusCode: 204);
   }
 
   // --- ДОСТИЖЕНИЯ ---
 
+  /// Достижения пользователя.
+  ///
+  /// текущий путь зависит от бэка; оставляю как было (achievements?user_id=)
   Future<List<Achievement>> getAchievements({required int userId}) async {
-    final uri = _buildUri(
-      '$_apiPrefix/achievements',
-      {'user_id': userId.toString()},
-    );
-    final List<dynamic> data = await _get(uri);
-    return data.map((json) => Achievement.fromJson(json)).toList();
+    final uri = _buildUri('/achievements', {'user_id': userId.toString()});
+    final data = await _get(uri);
+
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(Achievement.fromJson)
+          .toList();
+    }
+
+    return [];
   }
 
   // --- SHOPPING WISHLIST ---
 
-  Future<List<ShoppingItem>> getShoppingWishlist({required int userId}) async {
-    final uri =
-    _buildUri('$_apiPrefix/users/$userId/shopping-wishlist');
-    final List<dynamic> data = await _get(uri);
-    return data.map((json) => ShoppingItem.fromJson(json)).toList();
+  Future<List<ShoppingItem>> getShoppingWishlist({
+    required int userId,
+  }) async {
+    final uri = _buildUri('/users/$userId/shopping-wishlist');
+    final data = await _get(uri);
+
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(ShoppingItem.fromJson)
+          .toList();
+    }
+
+    return [];
   }
 
   Future<ShoppingItem> addShoppingItem({
@@ -207,49 +310,47 @@ class ApiService {
     required String imageUrl,
     required String purchaseLink,
   }) async {
-    final uri =
-    _buildUri('$_apiPrefix/users/$userId/shopping-wishlist');
+    final uri = _buildUri('/users/$userId/shopping-wishlist');
     final body = json.encode({
       'item_name': itemName,
       'price': price,
       'image_url': imageUrl,
       'purchase_link': purchaseLink,
     });
-    final response = await _post(uri, body: body, expectedStatusCode: 201);
-    return ShoppingItem.fromJson(response as Map<String, dynamic>);
+    final response =
+    await _post(uri, body: body, expectedStatusCode: 201) as Map<String, dynamic>;
+    return ShoppingItem.fromJson(response);
   }
 
   Future<void> removeShoppingItem({
     required int userId,
     required int itemId,
   }) async {
-    final uri = _buildUri(
-        '$_apiPrefix/users/$userId/shopping-wishlist/$itemId');
+    final uri = _buildUri('/users/$userId/shopping-wishlist/$itemId');
     await _delete(uri, expectedStatusCode: 204);
   }
 
   // --- РЕЙТИНГИ ---
 
+  /// Оценка рекомендации.
+  ///
+  /// сервер: POST /api/v1/recommendations/{id}/rate
+  /// body: { "user_id": int, "rating": 1..5, "feedback": string }
   Future<bool> submitRating({
     required int userId,
     required int recommendationId,
     required int rating,
     String? feedback,
   }) async {
-    final uri = _buildUri('$_apiPrefix/ratings');
+    final uri = _buildUri('/recommendations/$recommendationId/rate');
     final body = json.encode({
       'user_id': userId,
-      'recommendation_id': recommendationId,
       'rating': rating,
       'feedback': feedback,
     });
 
-    try {
-      await _post(uri, body: body, expectedStatusCode: 201);
-      return true;
-    } catch (e) {
-      throw Exception('Failed to submit rating: $e');
-    }
+    await _post(uri, body: body, expectedStatusCode: 200);
+    return true;
   }
 
   // --- БАЗОВЫЕ HTTP МЕТОДЫ ---
@@ -258,7 +359,7 @@ class ApiService {
     try {
       final response = await _client
           .get(uri, headers: _headers)
-          .timeout(const Duration(seconds: 15));
+          .timeout(Duration(seconds: AppConfig.requestTimeout));
       return _processResponse(response);
     } on TimeoutException {
       throw const NetworkException('Превышено время ожидания от сервера.');
@@ -275,7 +376,7 @@ class ApiService {
     try {
       final response = await _client
           .post(uri, headers: _headers, body: body)
-          .timeout(const Duration(seconds: 15));
+          .timeout(Duration(seconds: AppConfig.requestTimeout));
       return _processResponse(
         response,
         expectedStatusCode: expectedStatusCode,
@@ -289,12 +390,13 @@ class ApiService {
 
   Future<void> _delete(
       Uri uri, {
+        dynamic body,
         int expectedStatusCode = 204,
       }) async {
     try {
       final response = await _client
-          .delete(uri, headers: _headers)
-          .timeout(const Duration(seconds: 15));
+          .delete(uri, headers: _headers, body: body)
+          .timeout(Duration(seconds: AppConfig.requestTimeout));
       if (response.statusCode != expectedStatusCode) {
         throw _handleError(response);
       }
@@ -338,25 +440,31 @@ class ApiService {
     );
   }
 
+  /// Собираем Uri на основе baseUrl (включающего /api/v1) и относительного path.
+  ///
+  /// Пример:
+  ///   baseUrl: http://localhost:8080/api/v1
+  ///   path:    /recommendations
+  ///   → http://localhost:8080/api/v1/recommendations
   Uri _buildUri(String path, [Map<String, String>? queryParams]) {
-    final url = _baseUrl;
-    if (url.startsWith('https')) {
-      return Uri.https(
-        url.replaceFirst('https://', ''),
-        path,
-        queryParams,
-      );
-    } else {
-      final authority = url.replaceFirst('http://', '');
-      return Uri.http(authority, path, queryParams);
-    }
+    final base = Uri.parse(_baseUrl); // может быть с путём (/api/v1)
+    final basePath = base.path.endsWith('/')
+        ? base.path.substring(0, base.path.length - 1)
+        : base.path;
+    final relPath = path.startsWith('/') ? path : '/$path';
+    final fullPath = '$basePath$relPath';
+
+    return base.replace(
+      path: fullPath,
+      queryParameters: (queryParams?.isNotEmpty ?? false) ? queryParams : null,
+    );
   }
 
-  // Простые GET/POST по произвольному URL (если ещё нужны)
+  // Вспомогательные методы для произвольных URL (если ещё нужны)
   Future<dynamic> get(String url) async {
     final response = await _client.get(Uri.parse(url));
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return json.decode(utf8.decode(response.bodyBytes));
     } else {
       throw Exception('Failed to load data');
     }
@@ -369,7 +477,7 @@ class ApiService {
       body: json.encode(body),
     );
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return json.decode(utf8.decode(response.bodyBytes));
     } else {
       throw Exception('Failed to load data');
     }

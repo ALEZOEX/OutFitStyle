@@ -1,244 +1,209 @@
-import numpy as np
-from typing import Dict, List
+import logging
+from typing import Dict, Any, List
 
-class FeatureExtractor:
-    """Извлечение признаков для ML модели"""
-    
-    # Словари для кодирования категориальных признаков
-    SENSITIVITY_MAP = {
-        'very_cold': 0,
-        'cold': 1,
-        'normal': 2,
-        'warm': 3,
-        'very_warm': 4
+import pandas as pd
+
+logger = logging.getLogger(__name__)
+
+# =========================
+#  MAPPINGS
+# =========================
+
+_WEATHER_MAP = {
+    "ясно": "clear",
+    "облачно": "clouds",
+    "дождь": "rain",
+    "морось": "drizzle",
+    "снег": "snow",
+    "туман": "mist",
+    "гроза": "thunderstorm",
+}
+
+_STYLE_MAP = {
+    "casual": 0.2,
+    "sport": 0.1,
+    "smart": 0.6,
+    "business": 0.7,
+    "formal": 0.8,
+}
+
+_FORMALITY_MAP = {
+    "casual": 0.2,
+    "smart": 0.6,
+    "business": 0.7,
+    "formal": 0.8,
+}
+
+_TEMP_SENS_MAP = {
+    "cold": -1.0,
+    "normal": 0.0,
+    "warm": 1.0,
+}
+
+_SEASON_MAP = {
+    "winter": 0,
+    "spring": 1,
+    "summer": 2,
+    "autumn": 3,
+}
+
+_CATEGORY_MAP = {
+    "outerwear": 0,
+    "upper": 1,
+    "lower": 2,
+    "footwear": 3,
+    "accessories": 4,
+}
+
+
+# =========================
+#  WEATHER FEATURES
+# =========================
+
+def prepare_weather_features(weather_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Подготавливает погодные признаки в числовом виде."""
+    weather_condition = (weather_data.get("weather") or "Ясно").lower()
+    weather_condition = _WEATHER_MAP.get(weather_condition, weather_condition)
+
+    temp = float(weather_data.get("temperature", 20.0))
+
+    if temp < 0:
+        season = "winter"
+    elif temp < 15:
+        season = "spring"
+    elif temp < 25:
+        season = "summer"
+    else:
+        season = "autumn"
+
+    return {
+        "temperature": temp,
+        "feels_like": float(
+            weather_data.get("feels_like", weather_data.get("temperature", 20.0))
+        ),
+        "humidity": float(weather_data.get("humidity", 50.0)),
+        "wind_speed": float(weather_data.get("wind_speed", 0.0)),
+        "weather_condition": weather_condition,
+        "season": season,
+        "season_idx": _SEASON_MAP.get(season, 2),
     }
-    
-    STYLE_MAP = {
-        'casual': 0,
-        'business': 1,
-        'sporty': 2,
-        'elegant': 3
+
+
+# =========================
+#  USER FEATURES
+# =========================
+
+def prepare_user_features(user_profile: Dict[str, Any]) -> Dict[str, Any]:
+    """Подготавливает признаки пользователя (частично числовые)."""
+    style = (user_profile.get("style_preference") or "casual").lower()
+    temp_sens = (user_profile.get("temperature_sensitivity") or "normal").lower()
+    formality_pref = (user_profile.get("formality_preference") or "informal").lower()
+
+    return {
+        "age_range": user_profile.get("age_range", "25-35"),
+        "style_preference": style,
+        "style_pref_score": _STYLE_MAP.get(style, 0.2),
+        "temperature_sensitivity": temp_sens,
+        "temp_sens_score": _TEMP_SENS_MAP.get(temp_sens, 0.0),
+        "formality_preference": formality_pref,
     }
-    
-    WEATHER_MAP = {
-        'ясно': 0,
-        'облачно': 1,
-        'дождь': 2,
-        'морось': 2,
-        'снег': 3,
-        'туман': 4,
-        'гроза': 5
+
+
+# =========================
+#  ITEM HELPERS
+# =========================
+
+def _get_float(item: Dict[str, Any], key: str, default: float) -> float:
+    raw = item.get(key, default)
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        logger.debug(
+            "Cannot parse %s=%r for item %s, using default=%s",
+            key,
+            raw,
+            item.get("name"),
+            default,
+        )
+        return float(default)
+
+
+def _get_warmth_level(item: Dict[str, Any], default: float = 5.0) -> float:
+    return _get_float(item, "warmth_level", default)
+
+
+def _get_formality_level(item: Dict[str, Any], default: float = 5.0) -> float:
+    raw = item.get("formality_level", default)
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        if isinstance(raw, str):
+            label = raw.strip().lower()
+            mapped = _FORMALITY_MAP.get(label)
+            if mapped is not None:
+                # приводим к шкале 0..10, если модель на этом тренировалась
+                return mapped * 10.0
+        return float(default)
+
+
+def _get_category_idx(category: str) -> int:
+    return _CATEGORY_MAP.get((category or "upper").lower(), 1)
+
+
+# =========================
+#  ITEM FEATURES
+# =========================
+
+def prepare_item_features(item: Dict[str, Any]) -> Dict[str, Any]:
+    """Подготавливает признаки предмета одежды."""
+    category = item.get("category", "upper")
+
+    return {
+        "item_name": item.get("name", ""),
+        "category": category,
+        "category_idx": _get_category_idx(category),
+        "min_temp": _get_float(item, "min_temp", 0.0),
+        "max_temp": _get_float(item, "max_temp", 30.0),
+        "warmth_level": _get_warmth_level(item, default=5.0),
+        "formality_level": _get_formality_level(item, default=5.0),
+        "item_style": (item.get("style") or "casual").lower(),
     }
-    
-    CATEGORY_MAP = {
-        'upper': 0,
-        'lower': 1,
-        'outerwear': 2,
-        'footwear': 3,
-        'accessories': 4
-    }
-    
-    @staticmethod
-    def extract_weather_features(weather_data: Dict) -> np.ndarray:
-        """
-        Извлекает признаки из погодных данных
-        
-        Features:
-        - temperature (numeric)
-        - feels_like (numeric)
-        - humidity (numeric)
-        - wind_speed (numeric)
-        - weather_condition (one-hot encoded)
-        - temperature_category (one-hot encoded)
-        """
-        temp = weather_data.get('temperature', 20)
-        feels = weather_data.get('feels_like', temp)
-        humidity = weather_data.get('humidity', 50)
-        wind = weather_data.get('wind_speed', 0)
-        weather = weather_data.get('weather', 'Ясно').lower()
-        
-        # Числовые признаки
-        numeric_features = [
-            temp,
-            feels,
-            humidity,
-            wind,
-            abs(temp - feels),  # Разница между реальной и ощущаемой температурой
-        ]
-        
-        # Погодные условия (one-hot)
-        weather_encoded = FeatureExtractor.WEATHER_MAP.get(weather, 0)
-        weather_onehot = [0] * 6
-        weather_onehot[weather_encoded] = 1
-        
-        # Температурные категории
-        temp_categories = [
-            1 if temp < -10 else 0,  # Экстремальный холод
-            1 if -10 <= temp < 0 else 0,  # Мороз
-            1 if 0 <= temp < 10 else 0,  # Холод
-            1 if 10 <= temp < 18 else 0,  # Прохладно
-            1 if 18 <= temp < 25 else 0,  # Комфорт
-            1 if temp >= 25 else 0,  # Жара
-        ]
-        
-        return np.array(numeric_features + weather_onehot + temp_categories)
-    
-    @staticmethod
-    def extract_user_features(user_profile: Dict) -> np.ndarray:
-        """
-        Извлекает признаки профиля пользователя
-        
-        Features:
-        - temperature_sensitivity (encoded)
-        - style_preference (encoded)
-        - age_range (one-hot encoded)
-        """
-        sensitivity = user_profile.get('temperature_sensitivity', 'normal')
-        style = user_profile.get('style_preference', 'casual')
-        age_range = user_profile.get('age_range', '25-35')
-        
-        # Чувствительность к температуре
-        sensitivity_encoded = FeatureExtractor.SENSITIVITY_MAP.get(sensitivity, 2)
-        
-        # Стиль
-        style_encoded = FeatureExtractor.STYLE_MAP.get(style, 0)
-        
-        # Возрастные группы
-        age_features = [
-            1 if age_range == '18-25' else 0,
-            1 if age_range == '25-35' else 0,
-            1 if age_range == '35-45' else 0,
-            1 if age_range == '45+' else 0,
-        ]
-        
-        return np.array([sensitivity_encoded, style_encoded] + age_features)
-    
-    @staticmethod
-    def extract_item_features(item: Dict) -> np.ndarray:
-        """
-        Извлекает признаки предмета одежды
-        
-        Features:
-        - warmth_level (numeric)
-        - formality_level (numeric)
-        - min_temp (numeric)
-        - max_temp (numeric)
-        - avg_temp (numeric)
-        - temp_range (numeric)
-        - category (one-hot encoded)
-        - style (encoded)
-        """
-        warmth = item.get('warmth_level', 5)
-        formality = item.get('formality_level', 5)
-        min_temp = item.get('min_temp', 0)
-        max_temp = item.get('max_temp', 30)
-        avg_temp = (min_temp + max_temp) / 2
-        temp_range = max_temp - min_temp
-        category = item.get('category', 'upper')
-        style = item.get('style', 'casual')
-        
-        # Числовые признаки
-        numeric_features = [
-            warmth,
-            formality,
-            min_temp,
-            max_temp,
-            avg_temp,
-            temp_range,
-        ]
-        
-        # Категория (one-hot)
-        category_encoded = FeatureExtractor.CATEGORY_MAP.get(category, 0)
-        category_onehot = [0] * 5
-        category_onehot[category_encoded] = 1
-        
-        # Стиль
-        style_encoded = FeatureExtractor.STYLE_MAP.get(style, 0)
-        
-        return np.array(numeric_features + category_onehot + [style_encoded])
-    
-    @staticmethod
-    def extract_interaction_features(weather_data: Dict, user_profile: Dict, item: Dict) -> np.ndarray:
-        """
-        Извлекает признаки взаимодействия между погодой, пользователем и предметом
-        """
-        temp = weather_data.get('temperature', 20)
-        min_temp = item.get('min_temp', 0)
-        max_temp = item.get('max_temp', 30)
-        warmth = item.get('warmth_level', 5)
-        sensitivity = user_profile.get('temperature_sensitivity', 'normal')
-        user_style = user_profile.get('style_preference', 'casual')
-        item_style = item.get('style', 'casual')
-        
-        # Насколько температура подходит для предмета
-        if min_temp <= temp <= max_temp:
-            temp_suitability = 1.0
-        elif min_temp - 5 <= temp <= max_temp + 5:
-            temp_suitability = 0.5
-        else:
-            temp_suitability = 0.0
-        
-        # Насколько предмет теплый для пользователя
-        sensitivity_warmth_match = 0.5
-        if sensitivity == 'cold' and warmth >= 7:
-            sensitivity_warmth_match = 1.0
-        elif sensitivity == 'warm' and warmth <= 3:
-            sensitivity_warmth_match = 1.0
-        elif sensitivity == 'normal' and 4 <= warmth <= 6:
-            sensitivity_warmth_match = 1.0
-        
-        # Совпадение стилей
-        style_match = 1.0 if user_style == item_style else 0.3
-        
-        # Расстояние до оптимальной температуры
-        optimal_temp = (min_temp + max_temp) / 2
-        temp_distance = abs(temp - optimal_temp)
-        
-        return np.array([
-            temp_suitability,
-            sensitivity_warmth_match,
-            style_match,
-            temp_distance,
-        ])
-    
-    @staticmethod
-    def combine_features(weather_features: np.ndarray, 
-                         user_features: np.ndarray,
-                         item_features: np.ndarray,
-                         interaction_features: np.ndarray) -> np.ndarray:
-        """
-        Объединяет все признаки в один вектор
-        """
-        return np.concatenate([
-            weather_features,
-            user_features,
-            item_features,
-            interaction_features
-        ])
-    
-    @staticmethod
-    def get_feature_names() -> List[str]:
-        """Возвращает названия всех признаков"""
-        weather_names = [
-            'temp', 'feels_like', 'humidity', 'wind_speed', 'temp_diff',
-            'weather_clear', 'weather_clouds', 'weather_rain', 'weather_snow', 
-            'weather_mist', 'weather_thunder',
-            'temp_extreme_cold', 'temp_frost', 'temp_cold', 'temp_cool', 'temp_comfort', 'temp_hot'
-        ]
-        
-        user_names = [
-            'sensitivity', 'style_pref',
-            'age_18_25', 'age_25_35', 'age_35_45', 'age_45_plus'
-        ]
-        
-        item_names = [
-            'warmth', 'formality', 'min_temp', 'max_temp', 'avg_temp', 'temp_range',
-            'cat_upper', 'cat_lower', 'cat_outerwear', 'cat_footwear', 'cat_accessories',
-            'item_style'
-        ]
-        
-        interaction_names = [
-            'temp_suitability', 'sensitivity_warmth_match', 'style_match', 'temp_distance'
-        ]
-        
-        return weather_names + user_names + item_names + interaction_names
+
+
+# =========================
+#  HIGH-LEVEL BUILDERS
+# =========================
+
+def build_feature_rows(
+    weather_data: Dict[str, Any],
+    user_profile: Dict[str, Any],
+    items: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Собирает список dict'ов фичей для каждого item."""
+    rows: List[Dict[str, Any]] = []
+
+    base_weather = prepare_weather_features(weather_data)
+    base_user = prepare_user_features(user_profile)
+
+    for item in items:
+        row = {
+            **base_weather,
+            **base_user,
+            **prepare_item_features(item),
+        }
+        rows.append(row)
+
+    return rows
+
+
+def build_feature_frame(
+    weather_data: Dict[str, Any],
+    user_profile: Dict[str, Any],
+    items: List[Dict[str, Any]],
+) -> pd.DataFrame:
+    """Готовит pandas DataFrame для подачи в модель."""
+    rows = build_feature_rows(weather_data, user_profile, items)
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    return df
