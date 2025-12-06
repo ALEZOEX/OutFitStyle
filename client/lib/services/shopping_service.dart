@@ -1,100 +1,154 @@
 import 'dart:convert';
+import 'dart:async';
+
+import 'package:http/http.dart' as http;
+
+import '../config/app_config.dart';
 import '../models/product.dart';
 import '../models/shopping_item.dart';
-import '../config/app_config.dart';
-import 'api_service.dart';
 
 class ShoppingService {
-  final ApiService _apiService = ApiService();
+  final String _baseUrl;
+  final http.Client _client;
 
-  /// Get user's shopping wishlist
+  ShoppingService({
+    String? baseUrl,
+    http.Client? client,
+  })  : _baseUrl = baseUrl ?? AppConfig.shoppingApiUrl,
+        _client = client ?? http.Client();
+
+  /// GET /wishlist?user_id={id}
   Future<List<ShoppingItem>> getShoppingWishlist({required int userId}) async {
+    final uri = Uri.parse('$_baseUrl/wishlist?user_id=$userId');
+
     try {
-      final response = await _apiService.get(
-        '${AppConfig.shoppingApiUrl}/wishlist?user_id=$userId',
+      final response = await _client.get(uri).timeout(
+        const Duration(seconds: AppConfig.requestTimeout),
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => ShoppingItem.fromJson(json)).toList();
+        final List<dynamic> data =
+        json.decode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map(ShoppingItem.fromJson)
+            .toList();
       } else {
         throw Exception('Failed to load wishlist: ${response.statusCode}');
       }
+    } on TimeoutException {
+      throw Exception('Timeout while loading wishlist');
     } catch (e) {
       throw Exception('Error fetching wishlist: $e');
     }
   }
 
-  /// Get products by category
+  /// GET /categories/{categoryId}/products
   Future<List<Product>> getProductsByCategory(int categoryId) async {
+    final uri = Uri.parse('$_baseUrl/categories/$categoryId/products');
+
     try {
-      final response = await _apiService.get(
-        '${AppConfig.shoppingApiUrl}/categories/$categoryId/products',
+      final response = await _client.get(uri).timeout(
+        const Duration(seconds: AppConfig.requestTimeout),
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => Product.fromJson(json)).toList();
+        final List<dynamic> data =
+        json.decode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map(Product.fromJson)
+            .toList();
       } else {
         throw Exception('Failed to load products: ${response.statusCode}');
       }
+    } on TimeoutException {
+      throw Exception('Timeout while loading products');
     } catch (e) {
       throw Exception('Error fetching products: $e');
     }
   }
 
-  /// Search products by query
+  /// GET /products/search?q={query}
   Future<List<Product>> searchProducts(String query) async {
+    final uri = Uri.parse('$_baseUrl/products/search?q=$query');
+
     try {
-      final response = await _apiService.get(
-        '${AppConfig.shoppingApiUrl}/products/search?q=$query',
+      final response = await _client.get(uri).timeout(
+        const Duration(seconds: AppConfig.requestTimeout),
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => Product.fromJson(json)).toList();
+        final List<dynamic> data =
+        json.decode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map(Product.fromJson)
+            .toList();
       } else {
         throw Exception('Failed to search products: ${response.statusCode}');
       }
+    } on TimeoutException {
+      throw Exception('Timeout while searching products');
     } catch (e) {
       throw Exception('Error searching products: $e');
     }
   }
 
-  /// Get product by ID
+  /// GET /products/{productId}
   Future<Product> getProductById(int productId) async {
+    final uri = Uri.parse('$_baseUrl/products/$productId');
+
     try {
-      final response = await _apiService.get(
-        '${AppConfig.shoppingApiUrl}/products/$productId',
+      final response = await _client.get(uri).timeout(
+        const Duration(seconds: AppConfig.requestTimeout),
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
+        final Map<String, dynamic> data =
+        json.decode(utf8.decode(response.bodyBytes))
+        as Map<String, dynamic>;
         return Product.fromJson(data);
       } else {
         throw Exception('Failed to load product: ${response.statusCode}');
       }
+    } on TimeoutException {
+      throw Exception('Timeout while loading product');
     } catch (e) {
       throw Exception('Error fetching product: $e');
     }
   }
 
-  /// Get product recommendations
+  /// POST /recommendations
   Future<List<Product>> getProductRecommendations(
       List<int> outfitItemIds) async {
+    final uri = Uri.parse('$_baseUrl/recommendations');
+
     try {
-      final response = await _apiService.post(
-        '${AppConfig.shoppingApiUrl}/recommendations',
-        {'outfit_item_ids': outfitItemIds},
+      final response = await _client
+          .post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'outfit_item_ids': outfitItemIds}),
+      )
+          .timeout(
+        const Duration(seconds: AppConfig.requestTimeout),
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => Product.fromJson(json)).toList();
+        final List<dynamic> data =
+        json.decode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map(Product.fromJson)
+            .toList();
       } else {
         throw Exception(
-            'Failed to load recommendations: ${response.statusCode}');
+          'Failed to load recommendations: ${response.statusCode}',
+        );
       }
+    } on TimeoutException {
+      throw Exception('Timeout while loading recommendations');
     } catch (e) {
       throw Exception('Error fetching recommendations: $e');
     }

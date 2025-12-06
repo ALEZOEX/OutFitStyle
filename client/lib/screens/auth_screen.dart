@@ -154,7 +154,6 @@ class _AuthScreenState extends State<AuthScreen>
         throw Exception('Некорректный ответ сервера');
       }
 
-      // >>> СЮДА: сохраняем и userId, и токен
       final userId = (user['id'] as num).toInt();
       await authStorage.saveSession(
         userId: userId,
@@ -163,7 +162,6 @@ class _AuthScreenState extends State<AuthScreen>
 
       if (!mounted) return;
 
-      // сбрасываем состояние шага кода
       setState(() {
         _awaitingCode = false;
         _codeController.clear();
@@ -197,7 +195,6 @@ class _AuthScreenState extends State<AuthScreen>
         throw Exception('Некорректный ответ сервера');
       }
 
-      // >>> СЮДА: сохраняем и userId, и токен
       final userId = (user['id'] as num).toInt();
       await authStorage.saveSession(
         userId: userId,
@@ -215,7 +212,7 @@ class _AuthScreenState extends State<AuthScreen>
     }
   }
 
-  // -------------------- UI --------------------
+  // -------------------- UI helpers --------------------
 
   InputDecoration _fieldDecoration(String label, IconData icon) {
     final theme = Theme.of(context);
@@ -261,8 +258,8 @@ class _AuthScreenState extends State<AuthScreen>
             ),
             child: Center(
               child: SingleChildScrollView(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 32),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth: isWide ? 480 : 520,
@@ -283,7 +280,8 @@ class _AuthScreenState extends State<AuthScreen>
                             const SizedBox(height: 8),
                             Text(
                               'OutfitStyle',
-                              style: theme.textTheme.headlineMedium?.copyWith(
+                              style:
+                              theme.textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -293,9 +291,10 @@ class _AuthScreenState extends State<AuthScreen>
                                   ? 'Шаг 2 из 2: подтвердите вход'
                                   : 'Подберите образ под любую погоду',
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              style:
+                              theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.textTheme.bodyMedium?.color
-                                    ?.withValues(alpha: 0.7),
+                                    ?.withOpacity(0.7),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -306,7 +305,8 @@ class _AuthScreenState extends State<AuthScreen>
                               _buildAuthTabs(theme),
 
                             const SizedBox(height: 12),
-                            if (_isLoading) const LinearProgressIndicator(),
+                            if (_isLoading)
+                              const LinearProgressIndicator(),
                           ],
                         ),
                       ),
@@ -328,7 +328,7 @@ class _AuthScreenState extends State<AuthScreen>
           controller: _tabController,
           labelColor: theme.colorScheme.primary,
           unselectedLabelColor:
-          theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+          theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
           indicatorColor: theme.colorScheme.primary,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600),
           tabs: const [
@@ -364,7 +364,9 @@ class _AuthScreenState extends State<AuthScreen>
               final email = value?.trim() ?? '';
               if (email.isEmpty) return 'Введите email';
               final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-              if (!emailRegex.hasMatch(email)) return 'Некорректный email';
+              if (!emailRegex.hasMatch(email)) {
+                return 'Некорректный email';
+              }
               return null;
             },
           ),
@@ -384,7 +386,8 @@ class _AuthScreenState extends State<AuthScreen>
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleLogin,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding:
+                const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -400,7 +403,8 @@ class _AuthScreenState extends State<AuthScreen>
               icon: const Icon(Icons.login),
               label: const Text('Войти через Google'),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding:
+                const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -419,7 +423,8 @@ class _AuthScreenState extends State<AuthScreen>
         children: [
           TextFormField(
             controller: _regUsernameController,
-            decoration: _fieldDecoration('Имя пользователя', Icons.person),
+            decoration:
+            _fieldDecoration('Имя пользователя', Icons.person),
             validator: (value) {
               final v = value?.trim() ?? '';
               if (v.isEmpty) return 'Введите имя пользователя';
@@ -461,7 +466,8 @@ class _AuthScreenState extends State<AuthScreen>
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleRegister,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding:
+                const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -488,7 +494,7 @@ class _AuthScreenState extends State<AuthScreen>
           'Мы отправили код на $_currentEmailForCode',
           style: theme.textTheme.bodyMedium?.copyWith(
             color:
-            theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
           ),
         ),
         const SizedBox(height: 20),
@@ -496,7 +502,8 @@ class _AuthScreenState extends State<AuthScreen>
           key: _codeFormKey,
           child: TextFormField(
             controller: _codeController,
-            decoration: _fieldDecoration('Код из письма', Icons.verified),
+            decoration:
+            _fieldDecoration('Код из письма', Icons.verified),
             keyboardType: TextInputType.number,
             validator: (value) {
               final v = value?.trim() ?? '';
@@ -512,7 +519,8 @@ class _AuthScreenState extends State<AuthScreen>
           child: ElevatedButton(
             onPressed: _isLoading ? null : _handleVerifyCode,
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding:
+              const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),

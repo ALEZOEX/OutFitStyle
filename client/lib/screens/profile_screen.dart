@@ -28,13 +28,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<UserSettings> _loadSettings() async {
-    // 1) Пробуем взять из аргументов маршрута (если кто-то их передал)
+    // 1) Если кто-то передал UserSettings через arguments — используем их
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is UserSettings) {
       return args;
     }
 
-    // 2) Иначе — грузим с backend'а
+    // 2) Иначе грузим с бэкенда
     final service = context.read<UserSettingsService>();
     return service.fetchSettings();
   }
@@ -60,7 +60,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: FutureBuilder<UserSettings>(
         future: _settingsFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
@@ -76,9 +77,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           final settings = snapshot.data!;
-
           return RefreshIndicator(
             onRefresh: _reload,
+            color: theme.primaryColor,
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
@@ -103,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -113,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
+            backgroundColor: theme.primaryColor.withOpacity(0.1),
             backgroundImage: settings.avatarUrl.isNotEmpty
                 ? NetworkImage(settings.avatarUrl)
                 : null,
@@ -146,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   settings.email,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.textTheme.bodyMedium?.color
-                        ?.withValues(alpha: 0.7),
+                        ?.withOpacity(0.7),
                   ),
                 ),
               ],
@@ -191,7 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -248,7 +249,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: theme.cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: theme.primaryColor.withValues(alpha: 0.2)),
+        side: BorderSide(
+          color: theme.primaryColor.withOpacity(0.2),
+        ),
       ),
     );
   }

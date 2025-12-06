@@ -82,6 +82,7 @@ services:
     ports:
       - "5001:5001"
     environment:
+      - MARKETPLACE_SERVICE_URL=http://marketplace-service:5000
       - PORT=5001
       - WB_AFFILIATE_ID=${WB_AFFILIATE_ID}
       - OZON_AFFILIATE_ID=${OZON_AFFILIATE_ID}

@@ -12,7 +12,7 @@ class OutfitGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context){
-    return Column(
+return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -24,7 +24,7 @@ class OutfitGrid extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Рекомендуем надеть',
+              'Рекомендуемнадеть',
               style: Theme.of(context).textTheme.displaySmall,
             ),
             const Spacer(),
@@ -63,14 +63,14 @@ class OutfitGrid extends StatelessWidget {
         const SizedBox(height: 16),
         GridView.builder(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
             childAspectRatio: 0.85,
           ),
-         itemCount: items.length,
+         itemCount:items.length,
           itemBuilder: (context, index) {
             return _OutfitItemCard(item: items[index]);
           },
@@ -85,8 +85,7 @@ class _OutfitItemCard extends StatefulWidget {
 
   const _OutfitItemCard({required this.item});
 
- @override
-  State<_OutfitItemCard> createState() => _OutfitItemCardState();
+ @overrideState<_OutfitItemCard> createState() => _OutfitItemCardState();
 }
 
 class _OutfitItemCardState extends State<_OutfitItemCard>
@@ -96,13 +95,13 @@ class _OutfitItemCardState extends State<_OutfitItemCard>
 
   @override
 void initState() {
-    super.initState();
+ super.initState();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _controller, curve:Curves.easeInOut),
     );
   }
 
@@ -117,7 +116,7 @@ void initState() {
       case 'outerwear':
         return AppTheme.primary;
 case 'upper':
-        return AppTheme.secondary;
+        returnAppTheme.secondary;
       case 'lower':
         return AppTheme.success;
       case 'footwear':
@@ -130,14 +129,14 @@ case 'upper':
  }
 
   @override
-  Widget build(BuildContext context) {
+Widget build(BuildContextcontext) {
     final categoryColor = _getCategoryColor(widget.item.category);
     final hasMLScore = widget.item.mlScore != null;
     final confidence = hasMLScore ? widget.item.mlScore! : 0.0;
 
     return GestureDetector(
       onTapDown:(_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
+      onTapUp:(_) => _controller.reverse(),
       onTapCancel: () => _controller.reverse(),
       onTap: () => _showItemDetails(context),
       child: ScaleTransition(
@@ -147,21 +146,21 @@ case 'upper':
             gradient: AppTheme.cardGradient,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: categoryColor.withValues(alpha: 0.3),
+              color: categoryColor.withOpacity(0.3),
               width: 1,
             ),
-          ),
+         ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Stack(
               children: [
                 // Main Content
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding:constEdgeInsets.all(16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Icon with confidence ring
+                      // Icon withconfidence ring
                       if (hasMLScore)
                         Stack(
                           alignment: Alignment.center,
@@ -169,48 +168,48 @@ case 'upper':
                            // Confidence ring
                             SizedBox(
                               width: 90,
-                              height: 90,
+                              height:90,
                               child: CircularProgressIndicator(
                                 value: confidence,
                                 strokeWidth: 3,
                                 backgroundColor:
-                                    categoryColor.withValues(alpha: 0.1),
-                                valueColor: AlwaysStoppedAnimation<Color>(
+                                   categoryColor.withOpacity(0.1),
+                               valueColor: AlwaysStoppedAnimation<Color>(
                                     categoryColor),
 ),
                             ),
                             // Icon
                             Container(
-                              width: 75,
-                              height: 75,
+                              width:75,
+height: 75,
                               decoration: BoxDecoration(
-                                color: categoryColor.withValues(alpha: 0.15),
-                                shape: BoxShape.circle,
+                                color: categoryColor.withOpacity(0.15),
+                               shape: BoxShape.circle,
                               ),
                               child: Center(
                                 child: Text(
                                  widget.item.iconEmoji,
                                   style: const TextStyle(fontSize: 40),
-                                ),
-                              ),
+                               ),
+),
                             ),
-                          ],
-                        )
+],
+)
                       else
-                        Container(
+Container(
                           width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: categoryColor.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
+                          height:80,
+                         decoration: BoxDecoration(
+                            color: categoryColor.withOpacity(0.15),
+                           shape: BoxShape.circle,
                           ),
                           child: Center(
-                            child: Text(
-                              widget.item.iconEmoji,
-                              style: const TextStyle(fontSize: 48),
+                            child:Text(
+widget.item.iconEmoji,
+                             style: const TextStyle(fontSize: 48),
                             ),
                           ),
-                        ),
+                       ),
 
                       const SizedBox(height: 12),
 
@@ -219,10 +218,10 @@ case 'upper':
                         widget.item.name,
                        textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textPrimary,
-                        ),
+                          fontSize:15,
+                         fontWeight:FontWeight.w600,
+color: AppTheme.textPrimary,
+),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -232,104 +231,104 @@ case 'upper':
                       // Categorybadge
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
+                          horizontal:12,
+                         vertical:4,
                         ),
-                        decoration: BoxDecoration(
-                          color: categoryColor.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
+decoration: BoxDecoration(
+                          color: categoryColor.withOpacity(0.2),
+                         borderRadius:BorderRadius.circular(12),
                         ),
                         child: Text(
                           _getCategoryName(widget.item.category),
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize:11,
                             color: categoryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
+fontWeight:FontWeight.w600,
+                         ),
                         ),
                       ),
 
-                      // ML Confidence
-                      if (hasMLScore) ...[
+                     // MLConfidence
+                      if(hasMLScore) ...[
                         const SizedBox(height: 8),
                         Text(
                          '${(confidence * 100).toInt()}% match',
-                          style: const TextStyle(
+                         style: const TextStyle(
                             fontSize: 11,
-                            color: AppTheme.textSecondary,
-                            fontWeight: FontWeight.w500,
+color: AppTheme.textSecondary,
+fontWeight: FontWeight.w500,
                           ),
-                        ),
-                      ],
+),
+                     ],
                     ],
                   ),
                 ),
 
                 // ML Badge (top-left)
                if (hasMLScore && confidence >= 0.8)
-                  Positioned(
+Positioned(
                     top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
+                    left:8,
+child: Container(
+                     padding:constEdgeInsets.symmetric(
+                       horizontal: 6,
+vertical:3,
                       ),
                       decoration: BoxDecoration(
                         gradient: AppTheme.primaryGradient,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Row(
+                     child:constRow(
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.stars,
-                            color: Colors.white,
-                            size: 10,
+                       children: [
+Icon(
+Icons.stars,
+color:Colors.white,
+                            size:10,
                           ),
                           SizedBox(width: 2),
                           Text(
                             'TOP',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
+                              color:Colors.white,
+fontSize:9,
+                              fontWeight:FontWeight.bold,
                             ),
                           ),
-                        ],
+                       ],
                       ),
-                    ),
+),
                   ),
-              ],
-            ),
-          ),
-        ),
+],
+),
+         ),
+       ),
       ),
-    );
-  }
+);
+}
 
-  void _showItemDetails(BuildContext context) {
+void _showItemDetails(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+     builder: (context) => Container(
         decoration: const BoxDecoration(
-          gradient: AppTheme.cardGradient,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.all(24),
+         gradient: AppTheme.cardGradient,
+borderRadius: BorderRadius.vertical(top:Radius.circular(24)),
+       ),
+padding:constEdgeInsets.all(24),
         child: Column(
 mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle
-            Container(
-              width: 40,
+            //Handle
+           Container(
+width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppTheme.textSecondary.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+color: AppTheme.textSecondary.withOpacity(0.3),
+borderRadius:BorderRadius.circular(2),
               ),
-            ),
+),
 const SizedBox(height: 24),
 
             // Icon
@@ -337,83 +336,82 @@ const SizedBox(height: 24),
               widget.item.iconEmoji,
               style: const TextStyle(fontSize: 64),
             ),
-            const SizedBox(height: 16),
+const SizedBox(height: 16),
 
-            // Name
-            Text(
-              widget.item.name,
+// NameText(
+widget.item.name,
               style: Theme.of(context).textTheme.displaySmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
 
-            // Category
+           // Category
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
+              padding:constEdgeInsets.symmetric(
+               horizontal: 16,
+vertical:8,
               ),
-              decoration: BoxDecoration(
-                color: _getCategoryColor(widget.item.category)
-                    .withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
+             decoration: BoxDecoration(
+color:_getCategoryColor(widget.item.category)
+                   .withOpacity(0.2),
+               borderRadius: BorderRadius.circular(16),
+             ),
               child: Text(
                 _getCategoryName(widget.item.category),
                 style: TextStyle(
-                  color: _getCategoryColor(widget.item.category),
-                  fontWeight: FontWeight.w600,
+color:_getCategoryColor(widget.item.category),
+                  fontWeight:FontWeight.w600,
                 ),
-              ),
+),
             ),
 
 if (widget.item.mlScore != null) ...[
-              const SizedBox(height: 24),
+const SizedBox(height:24),
 
-              // ML Confidence
+// ML Confidence
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
+color: AppTheme.primary.withOpacity(0.1),
+borderRadius: BorderRadius.circular(16),
+),
                 child: Column(
-                  children: [
+children: [
                     Row(
-                      children: [
-                        const Icon(
+children: [
+                       const Icon(
                           Icons.psychology,
                           color: AppTheme.primary,
                           size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'AI Уверенность',
-                          style: TextStyle(
+),
+const SizedBox(width: 8),
+const Text(
+'AI Уверенность',
+                          style:TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
-                          ),
+),
                         ),
                         const Spacer(),
                         Text(
                           '${(widget.item.mlScore! * 100).toInt()}%',
                           style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
+fontSize:20,
+                            fontWeight:FontWeight.bold,
+                           color:AppTheme.primary,
                           ),
-                        ),
+                       ),
                       ],
-                    ),
-                    const SizedBox(height: 12),
+),
+                    constSizedBox(height: 12),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
+child:LinearProgressIndicator(
                        value: widget.item.mlScore,
-                        minHeight: 8,
+minHeight:8,
                         backgroundColor:
-                            AppTheme.cardDark.withValues(alpha: 0.5),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppTheme.cardDark.withOpacity(0.5),
+                       valueColor:const AlwaysStoppedAnimation<Color>(
                             AppTheme.primary),
                       ),
                     ),
@@ -423,26 +421,26 @@ if (widget.item.mlScore != null) ...[
             ],
 
             const SizedBox(height: 24),
-          ],
+],
         ),
       ),
     );
-  }
+}
 
-  String _getCategoryName(String category) {
-    switch (category.toLowerCase()) {
+String_getCategoryName(Stringcategory) {
+switch (category.toLowerCase()) {
       case 'outerwear':
-        return 'Верхняя одежда';
-      case 'upper':
+       return 'Верхняя одежда';
+      case'upper':
         return 'Верх';
       case 'lower':
         return 'Низ';
-      case 'footwear':
+     case 'footwear':
         return 'Обувь';
-      case 'accessories':
-        return 'Аксессуары';
-      default:
-        return category;
-    }
+case 'accessories':
+return 'Аксессуары';
+     default:
+        returncategory;
+  }
   }
 }

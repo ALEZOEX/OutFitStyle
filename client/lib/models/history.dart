@@ -19,8 +19,12 @@ class HistoryItem {
 
   factory HistoryItem.fromJson(Map<String, dynamic> json) {
     return HistoryItem(
-      recommendationId: json['recommendation_id'] ?? 0,
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      recommendationId:
+      (json['recommendation_id'] ?? json['id'] ?? 0) as int,
+      createdAt: DateTime.tryParse(
+        (json['created_at'] ?? json['timestamp'] ?? '') as String,
+      ) ??
+          DateTime.now(),
       location: json['location'] ?? '',
       temperature: (json['temperature'] ?? 0.0).toDouble(),
       weather: json['weather'] ?? '',

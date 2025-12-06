@@ -26,19 +26,24 @@ type MLService struct {
 
 // MLRecommendationRequest – DTO-запрос к ML-сервису.
 type MLRecommendationRequest struct {
-	UserID  int                `json:"user_id"`
-	Weather domain.WeatherData `json:"weather"`
+	UserID        int                `json:"user_id"`
+	Weather       domain.WeatherData `json:"weather"`
+	MinConfidence float64            `json:"min_confidence"`
+	Source        string             `json:"source,omitempty"` // "wardrobe" | "marketplace"
 }
 
 // MLRecommendationResponse – DTO-ответ от ML-сервиса.
 type MLRecommendationResponse struct {
-	Recommendations []domain.ClothingItem `json:"recommendations"`
-	OutfitScore     float64               `json:"outfit_score"`
-	Algorithm       string                `json:"algorithm"`
+	RecommendationID int                   `json:"recommendation_id"`
+	UserID           int                   `json:"user_id"`
+	Weather          map[string]any        `json:"weather"`         // сейчас не используем, но оставляем для совместимости
+	Recommendations  []domain.ClothingItem `json:"recommendations"` // список вещей
+	OutfitScore      float64               `json:"outfit_score"`    // итоговый скор комплекта
+	MLPowered        bool                  `json:"ml_powered"`      // true, если работала ML-модель
+	Algorithm        string                `json:"algorithm"`       // идентификатор алгоритма
 }
 
 // NewMLService создаёт клиент ML-сервиса.
-// Сигнатура оставлена такой же, как у тебя, чтобы не ломать вызовы в main.go.
 func NewMLService(baseURL string, logger *zap.Logger) *MLService {
 	if logger == nil {
 		logger = zap.NewNop()
@@ -71,16 +76,26 @@ func NewMLService(baseURL string, logger *zap.Logger) *MLService {
 }
 
 // GetRecommendations запрашивает рекомендации у ML-сервиса.
-// Контракт оставлен как в твоём коде: (ctx, userID int, weather domain.WeatherData) -> *domain.RecommendationResponse.
+//
+// Теперь мы дополнительно передаём source, который управляет тем,
+// откуда ML берёт вещи: "wardrobe" (личный гардероб) или "marketplace" (каталог).
+// Для совместимости наружный контракт RecommendationService сам выбирает source.
 func (s *MLService) GetRecommendations(
 	ctx context.Context,
 	userID int,
 	weather domain.WeatherData,
+	source string,
 ) (*domain.RecommendationResponse, error) {
 
+	if source == "" {
+		source = "wardrobe"
+	}
+
 	reqPayload := MLRecommendationRequest{
-		UserID:  userID,
-		Weather: weather,
+		UserID:        userID,
+		Weather:       weather,
+		MinConfidence: 0.5,    // разумный дефолт, дальше ML сам опустит до 0.3
+		Source:        source, // прокидываем в ML-сервис
 	}
 
 	jsonData, err := json.Marshal(reqPayload)
@@ -114,7 +129,7 @@ func (s *MLService) GetRecommendations(
 		HourlyForecast: weather.HourlyForecast,
 		Items:          mlResp.Recommendations,
 		OutfitScore:    mlResp.OutfitScore,
-		MLPowered:      true,
+		MLPowered:      mlResp.MLPowered,
 		Algorithm:      mlResp.Algorithm,
 		Timestamp:      time.Now(),
 	}
@@ -127,7 +142,7 @@ func (s *MLService) HealthCheck() error {
 	if s.baseURL == "" {
 		return fmt.Errorf("ml service base url is empty")
 	}
-	// Здесь можно сделать лёгкий ping /health, если он есть в ML-сервисе.
+	// При желании можно дергать /health у ML-сервиса.
 	return nil
 }
 
@@ -156,8 +171,6 @@ func (s *MLService) doRequest(
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	// TODO: брать API-ключ из конфига, а не хардкодить.
-	// req.Header.Set("X-API-Key", s.apiKey)
 	req.Header.Set("User-Agent", "OutfitStyle-Backend/1.0")
 
 	s.logger.Debug("ml request",

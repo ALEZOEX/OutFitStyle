@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/achievement.dart';
 import '../services/api_service.dart';
+import '../services/auth_storage.dart';
 import '../theme/app_theme.dart';
 
 class AchievementsScreen extends StatefulWidget {
@@ -18,21 +19,28 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Безопасная инициализация, чтобы не ловить LateInitializationError
     _achievementsFuture = Future.value(<Achievement>[]);
-
     _loadAchievements();
   }
 
   Future<void> _loadAchievements() async {
     final apiService = context.read<ApiService>();
+    final authStorage = context.read<AuthStorage>();
+    final userId = await authStorage.readUserId();
+
+    if (!mounted) return;
+
+    if (userId == null) {
+      setState(() {
+        _achievementsFuture = Future.value(<Achievement>[]);
+      });
+      return;
+    }
 
     setState(() {
-      _achievementsFuture = apiService.getAchievements(userId: 1);
+      _achievementsFuture = apiService.getAchievements(userId: userId);
     });
 
-    // Если нужно, чтобы RefreshIndicator ждал завершения:
     await _achievementsFuture;
   }
 
@@ -89,8 +97,13 @@ class _AchievementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     final isUnlocked = achievement.isUnlocked;
+
+    // Для заблокированных используем цвета темы, чтобы не было черного на тёмном
+    final textColorPrimary = theme.textTheme.bodyLarge?.color ?? Colors.white;
+    final textColorSecondary =
+        theme.textTheme.bodyMedium?.color?.withOpacity(0.8) ??
+            Colors.grey[400]!;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -99,16 +112,16 @@ class _AchievementCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         gradient: isUnlocked
             ? const LinearGradient(
-                colors: [Color(0xFFFFD700), Color(0xFFFBBF24)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
+          colors: [Color(0xFFFFD700), Color(0xFFFBBF24)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        )
             : null,
         color: isUnlocked ? null : theme.cardColor,
         boxShadow: [
           if (isUnlocked)
             BoxShadow(
-              color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+              color: const Color(0xFFFFD700).withOpacity(0.4),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -130,7 +143,7 @@ class _AchievementCard extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: isUnlocked ? Colors.black87 : null,
+              color: isUnlocked ? Colors.black87 : textColorPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -139,7 +152,7 @@ class _AchievementCard extends StatelessWidget {
             achievement.description,
             style: TextStyle(
               fontSize: 11,
-              color: isUnlocked ? Colors.black54 : Colors.grey[600],
+              color: isUnlocked ? Colors.black54 : textColorSecondary,
             ),
             textAlign: TextAlign.center,
             maxLines: 2,

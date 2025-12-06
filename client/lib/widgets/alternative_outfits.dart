@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 class AlternativeOutfits extends StatelessWidget {
   final List<OutfitSet> alternatives;
   final bool isDark;
-  final Function(OutfitSet)? onSelect;
+  final void Function(OutfitSet)? onSelect;
 
   const AlternativeOutfits({
     super.key,
@@ -19,6 +19,7 @@ class AlternativeOutfits extends StatelessWidget {
     if (alternatives.isEmpty) return const SizedBox.shrink();
 
     final displayAlternatives = alternatives.take(3).toList();
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,16 +33,13 @@ class AlternativeOutfits extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: isDark
-                      ? AppTheme.primaryGradient
-                      : const LinearGradient(
-                          colors: [Color(0xFF007bff), Color(0xFF0056b3)],
-                        ),
+                      ? AppTheme.primaryGradientDark
+                      : AppTheme.primaryGradientLight,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          (isDark ? AppTheme.primary : const Color(0xFF007bff))
-                              .withValues(alpha: 0.3),
+                      color: (isDark ? AppTheme.primary : AppTheme.primary)
+                          .withOpacity(0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -60,18 +58,15 @@ class AlternativeOutfits extends StatelessWidget {
                   children: [
                     Text(
                       'Альтернативные варианты',
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isDark ? AppTheme.textPrimary : Colors.black87,
                       ),
                     ),
                     Text(
                       'Другие подходящие комплекты',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color:
-                            isDark ? AppTheme.textSecondary : Colors.grey[600],
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.textTheme.bodySmall?.color
+                            ?.withOpacity(0.7),
                       ),
                     ),
                   ],
@@ -85,11 +80,12 @@ class AlternativeOutfits extends StatelessWidget {
         // Адаптивная сетка с карточками
         LayoutBuilder(
           builder: (context, constraints) {
-            final itemWidth = (constraints.maxWidth > 700)
-                ? (constraints.maxWidth - 32) / 3
-                : (constraints.maxWidth > 480
-                    ? (constraints.maxWidth - 16) / 2
-                    : constraints.maxWidth);
+            final maxWidth = constraints.maxWidth;
+            final itemWidth = maxWidth > 700
+                ? (maxWidth - 32) / 3
+                : maxWidth > 480
+                ? (maxWidth - 16) / 2
+                : maxWidth;
 
             return Wrap(
               spacing: 16.0,
@@ -171,6 +167,7 @@ class _AlternativeCardState extends State<_AlternativeCard>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final confidence = (widget.outfit.confidence * 100).toInt();
     final gradients = [
       [const Color(0xFF6366F1), const Color(0xFF8B5CF6)],
@@ -197,30 +194,25 @@ class _AlternativeCardState extends State<_AlternativeCard>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: widget.isDark
-                    ? [
-                        AppTheme.cardDark,
-                        AppTheme.cardDark.withValues(alpha: 0.8),
-                      ]
-                    : [
-                        Colors.white,
-                        const Color(0xFFFAFBFC),
-                      ],
+                    ? [AppTheme.cardDark, AppTheme.cardDark.withOpacity(0.8)]
+                    : [Colors.white, const Color(0xFFFAFBFC)],
               ),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: gradient[0].withValues(alpha: 0.4),
+                color: gradient[0].withOpacity(0.4),
                 width: 2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: gradient[0].withValues(alpha: 0.2),
+                  color: gradient[0].withOpacity(0.2),
                   blurRadius: _isHovered ? 25 : 15,
                   offset: Offset(0, _isHovered ? 10 : 6),
                   spreadRadius: _isHovered ? 2 : 0,
                 ),
                 BoxShadow(
-                  color: Colors.black
-                      .withValues(alpha: widget.isDark ? 0.2 : 0.05),
+                  color: Colors.black.withOpacity(
+                    widget.isDark ? 0.2 : 0.05,
+                  ),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
@@ -231,10 +223,10 @@ class _AlternativeCardState extends State<_AlternativeCard>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildHeader(gradient, confidence),
+                  _buildHeader(theme, gradient, confidence),
                   Padding(
                     padding: const EdgeInsets.all(18),
-                    child: _buildContent(gradient),
+                    child: _buildContent(theme, gradient),
                   ),
                   if (widget.onTap != null) _buildButton(gradient),
                 ],
@@ -246,7 +238,8 @@ class _AlternativeCardState extends State<_AlternativeCard>
     );
   }
 
-  Widget _buildHeader(List<Color> gradient, int confidence) {
+  Widget _buildHeader(
+      ThemeData theme, List<Color> gradient, int confidence) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -257,7 +250,7 @@ class _AlternativeCardState extends State<_AlternativeCard>
         ),
         boxShadow: [
           BoxShadow(
-            color: gradient[0].withValues(alpha: 0.3),
+            color: gradient[0].withOpacity(0.3),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -266,12 +259,13 @@ class _AlternativeCardState extends State<_AlternativeCard>
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: Colors.white.withOpacity(0.3),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.4),
+                color: Colors.white.withOpacity(0.4),
                 width: 1.5,
               ),
             ),
@@ -286,13 +280,14 @@ class _AlternativeCardState extends State<_AlternativeCard>
           ),
           const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: Colors.black.withOpacity(0.1),
                   blurRadius: 5,
                   offset: const Offset(0, 2),
                 ),
@@ -319,7 +314,7 @@ class _AlternativeCardState extends State<_AlternativeCard>
     );
   }
 
-  Widget _buildContent(List<Color> gradient) {
+  Widget _buildContent(ThemeData theme, List<Color> gradient) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -335,13 +330,13 @@ class _AlternativeCardState extends State<_AlternativeCard>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        gradient[0].withValues(alpha: 0.2),
-                        gradient[1].withValues(alpha: 0.1),
+                        gradient[0].withOpacity(0.2),
+                        gradient[1].withOpacity(0.1),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: gradient[0].withValues(alpha: 0.3),
+                      color: gradient[0].withOpacity(0.3),
                     ),
                   ),
                   child: Center(
@@ -361,9 +356,7 @@ class _AlternativeCardState extends State<_AlternativeCard>
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: widget.isDark
-                              ? AppTheme.textPrimary
-                              : Colors.black87,
+                          color: theme.textTheme.bodyLarge?.color,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -373,9 +366,8 @@ class _AlternativeCardState extends State<_AlternativeCard>
                         _getCategoryName(item.category),
                         style: TextStyle(
                           fontSize: 10,
-                          color: widget.isDark
-                              ? AppTheme.textSecondary
-                              : Colors.grey[600],
+                          color: theme.textTheme.bodyMedium?.color
+                              ?.withOpacity(0.8),
                         ),
                       ),
                     ],
@@ -394,7 +386,7 @@ class _AlternativeCardState extends State<_AlternativeCard>
                 : const Color(0xFFF8F9FA),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: gradient[0].withValues(alpha: 0.2),
+              color: gradient[0].withOpacity(0.2),
             ),
           ),
           child: Row(
@@ -406,8 +398,7 @@ class _AlternativeCardState extends State<_AlternativeCard>
                   widget.outfit.reason,
                   style: TextStyle(
                     fontSize: 11,
-                    color:
-                        widget.isDark ? AppTheme.textSecondary : Colors.black54,
+                    color: theme.textTheme.bodyMedium?.color,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 2,
@@ -430,7 +421,7 @@ class _AlternativeCardState extends State<_AlternativeCard>
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: gradient[0].withValues(alpha: 0.3),
+              color: gradient[0].withOpacity(0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

@@ -22,7 +22,9 @@ class ClothingItem {
       category: json['category'] ?? '',
       subcategory: json['subcategory'],
       iconEmoji: json['icon_emoji'] ?? '👕',
-      mlScore: json['ml_score']?.toDouble(),
+      mlScore: (json['ml_score'] is num)
+          ? (json['ml_score'] as num).toDouble()
+          : null,
     );
   }
 }
@@ -55,20 +57,23 @@ class Recommendation {
   });
 
   factory Recommendation.fromJson(Map<String, dynamic> json) {
+    final rawItems = json['items'] as List<dynamic>? ?? const [];
     return Recommendation(
       location: json['location'] ?? '',
       temperature: (json['temperature'] ?? 0).toDouble(),
       weather: json['weather'] ?? '',
       message: json['message'] ?? '',
-      items: (json['items'] as List?)
-              ?.map((item) => ClothingItem.fromJson(item))
-              .toList() ??
-          [],
-      id: json['id'] ?? 0,
+      items: rawItems
+          .whereType<Map<String, dynamic>>()
+          .map(ClothingItem.fromJson)
+          .toList(),
+      id: json['id'] ?? json['recommendation_id'],
       humidity: json['humidity'] ?? 0,
       windSpeed: (json['wind_speed'] ?? 0).toDouble(),
       mlPowered: json['ml_powered'] ?? false,
-      outfitScore: json['outfit_score']?.toDouble(),
+      outfitScore: (json['outfit_score'] is num)
+          ? (json['outfit_score'] as num).toDouble()
+          : null,
       algorithm: json['algorithm'],
     );
   }

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import'package:flutter/material.dart';
 import '../services/wildberries_service.dart';
 import '../theme/app_theme.dart';
 
@@ -24,20 +24,20 @@ class WildberriesProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isDark
-                ? AppTheme.primary.withValues(alpha: 0.3)
-                : const Color(0xFF007bff).withValues(alpha: 0.2),
+                ? AppTheme.primary.withOpacity(0.3)
+                : const Color(0xFF007bff).withOpacity(0.2),
           ),
-          boxShadow: [
+         boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : Colors.black.withValues(alpha: 0.08),
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.black.withOpacity(0.08),
               blurRadius: 15,
               offset: const Offset(0, 5),
               spreadRadius: -5,
             ),
           ],
-        ),
+       ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -48,7 +48,7 @@ class WildberriesProductCard extends StatelessWidget {
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(16)),
                 image: product.imageUrl.isNotEmpty
-                    ? DecorationImage(
+? DecorationImage(
                         image: NetworkImage(product.imageUrl),
                         fit: BoxFit.cover,
                       )
@@ -57,7 +57,7 @@ class WildberriesProductCard extends StatelessWidget {
                     isDark ? const Color(0xFF121212) : const Color(0xFFf8f9fa),
               ),
               child: product.imageUrl.isEmpty
-                  ? Icon(
+? Icon(
                       Icons.checkroom,
                       size: 50,
                       color: isDark ? AppTheme.textSecondary : Colors.grey,
@@ -71,7 +71,7 @@ class WildberriesProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Brand
+                  //Brand
                   if (product.brand.isNotEmpty)
                     Text(
                       product.brand,
@@ -81,9 +81,9 @@ class WildberriesProductCard extends StatelessWidget {
                         color:
                             isDark ? AppTheme.primary : const Color(0xFF007bff),
                       ),
-                    ),
+),
 
-                  if (product.brand.isNotEmpty) const SizedBox(height: 4),
+                  if (product.brand.isNotEmpty)const SizedBox(height: 4),
 
                   // Product name
                   Text(
@@ -92,9 +92,9 @@ class WildberriesProductCard extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isDark ? AppTheme.textPrimary : Colors.black87,
-                    ),
+),
                     maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                   overflow: TextOverflow.ellipsis,
                   ),
 
                   const SizedBox(height: 8),
@@ -107,7 +107,7 @@ class WildberriesProductCard extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (product.salePrice < product.price &&
+                          if(product.salePrice < product.price &&
                               product.salePrice > 0) ...[
                             Text(
                               '${product.salePrice ~/ 100} ₽',
@@ -118,7 +118,7 @@ class WildberriesProductCard extends StatelessWidget {
                                     ? AppTheme.textPrimary
                                     : Colors.black87,
                               ),
-                            ),
+),
                             Text(
                               '${product.price ~/ 100} ₽',
                               style: TextStyle(
@@ -126,7 +126,7 @@ class WildberriesProductCard extends StatelessWidget {
                                 decoration: TextDecoration.lineThrough,
                                 color: isDark
                                     ? AppTheme.textSecondary
-                                    : Colors.grey,
+                                    :Colors.grey,
                               ),
                             ),
                           ] else ...[
@@ -140,9 +140,9 @@ class WildberriesProductCard extends StatelessWidget {
                                     : Colors.black87,
                               ),
                             ),
-                          ],
+                         ],
                         ],
-                      ),
+                     ),
 
                       // Rating
                       if (product.rating > 0)
@@ -156,7 +156,7 @@ class WildberriesProductCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               product.rating.toStringAsFixed(1),
-                              style: TextStyle(
+style: TextStyle(
                                 fontSize: 12,
                                 color: isDark
                                     ? AppTheme.textSecondary
@@ -170,7 +170,7 @@ class WildberriesProductCard extends StatelessWidget {
 
                   if (product.feedbackCount > 0)
                     Text(
-                      '${product.feedbackCount} отзывов',
+                      '${product.feedbackCount}отзывов',
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark ? AppTheme.textSecondary : Colors.grey,

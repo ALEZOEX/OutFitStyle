@@ -1,4 +1,4 @@
-class WardrobeItem {
+class WardrobeListItem {
   final int id;
   final String name;
   final String iconEmoji;
@@ -6,7 +6,7 @@ class WardrobeItem {
   final String customName;
   final String customIcon;
 
-  WardrobeItem({
+  WardrobeListItem({
     required this.id,
     required this.name,
     required this.iconEmoji,
@@ -15,8 +15,8 @@ class WardrobeItem {
     required this.customIcon,
   });
 
-  factory WardrobeItem.fromJson(Map<String, dynamic> json) {
-    return WardrobeItem(
+  factory WardrobeListItem.fromJson(Map<String, dynamic> json) {
+    return WardrobeListItem(
       id: json['id'] ?? 0,
       name: json['name'] ?? 'Без названия',
       iconEmoji: json['icon_emoji'] ?? '👕',

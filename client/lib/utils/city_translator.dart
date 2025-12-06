@@ -90,44 +90,39 @@ class CityTranslator {
 
     final normalized = city.toLowerCase().trim();
 
-    // Проверяем прямое совпадение
     if (_cityMap.containsKey(normalized)) {
       return _cityMap[normalized]!;
     }
 
-    // Проверяем частичное совпадение
     for (var entry in _cityMap.entries) {
       if (normalized.contains(entry.key) || entry.key.contains(normalized)) {
         return entry.value;
       }
     }
 
-    // Если не нашли - возвращаем оригинал (может быть уже на английском)
     return city;
   }
 
-  /// Проверяет, является ли строка кириллицей
+  /// Проверяет, есть ли кириллица
   static bool isCyrillic(String text) {
     if (text.isEmpty) return false;
     final cyrillicPattern = RegExp(r'[а-яА-ЯёЁ]');
     return cyrillicPattern.hasMatch(text);
   }
 
-  /// Получает список популярных городов для автодополнения
+  /// Подсказки по городам для автодополнения
   static List<String> getSuggestions(String query) {
     if (query.isEmpty) return [];
 
     final normalized = query.toLowerCase().trim();
     final suggestions = <String>[];
 
-    // Поиск по русским названиям
     for (var entry in _cityMap.entries) {
       if (entry.key.startsWith(normalized)) {
         suggestions.add('${_capitalize(entry.key)} (${entry.value})');
       }
     }
 
-    // Поиск по английским названиям
     for (var entry in _cityMap.entries) {
       if (entry.value.toLowerCase().startsWith(normalized)) {
         suggestions.add(entry.value);
@@ -142,16 +137,14 @@ class CityTranslator {
     return text[0].toUpperCase() + text.substring(1);
   }
 
-  /// Форматирует отображаемое имя города
+  /// Формат отображения: "Москва (Moscow)" или просто "London"
   static String getDisplayName(String city) {
     final normalized = city.toLowerCase().trim();
 
-    // Если это русское название - возвращаем с английским вариантом
     if (_cityMap.containsKey(normalized)) {
       return '${_capitalize(normalized)} (${_cityMap[normalized]})';
     }
 
-    // Если английское - возвращаем как есть
     return city;
   }
 }

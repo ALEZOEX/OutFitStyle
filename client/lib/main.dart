@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'config/app_config.dart';
 import 'services/user_settings_service.dart';
 import 'providers/theme_provider.dart';
 import 'services/api_service.dart';
@@ -12,11 +13,31 @@ import 'screens/auth_screen.dart';
 import 'screens/navigation_screen.dart';
 import 'screens/profile_screen.dart';
 
-// Можно переопределить при билде: --dart-define=API_BASE_URL=http://...
-const String _apiBaseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'http://localhost:8080/api/v1',
-);
+/// Берём API_BASE_URL из --dart-define, если он передан при сборке.
+/// Например:
+///   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080/api/v1
+const String _envApiBaseUrl = String.fromEnvironment('API_BASE_URL');
+
+/// Унифицированное вычисление baseUrl для backend API.
+///
+/// Приоритет:
+/// 1) Если передали через --dart-define=API_BASE_URL, используем его.
+/// 2) Иначе используем AppConfig.apiBaseUrl (с автоматическим /api/v1).
+String _resolveApiBaseUrl() {
+  // 1. Явный override через --dart-define
+  if (_envApiBaseUrl.isNotEmpty) {
+    return _envApiBaseUrl;
+  }
+
+  // 2. AppConfig.apiBaseUrl
+  final base = AppConfig.apiBaseUrl;
+
+  if (base.endsWith('/api/v1')) {
+    return base;
+  }
+
+  return '$base/api/v1';
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +47,6 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Стартовый стиль системы (потом в MyApp будет подстраиваться под тему)
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -36,27 +56,36 @@ Future<void> main() async {
     ),
   );
 
+  final apiBaseUrl = _resolveApiBaseUrl();
+  // ignore: avoid_print
+  print('✅ API base URL: $apiBaseUrl');
+
   final authStorage = AuthStorage();
   final token = await authStorage.readAccessToken();
 
   runApp(
     MultiProvider(
       providers: [
-        Provider<ApiService>(create: (_) => ApiService()),
+        // Теперь ApiService тоже получает baseUrl
+        Provider<ApiService>(
+          create: (_) => ApiService(baseUrl: apiBaseUrl),
+        ),
+
         Provider<ShoppingService>(create: (_) => ShoppingService()),
+
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(),
         ),
-        // Хранилище токена/ID пользователя
+
         Provider<AuthStorage>.value(value: authStorage),
 
-        // Сервис аутентификации (login/register/verify/google)
-        Provider<AuthService>(create: (_) => AuthService()),
+        Provider<AuthService>(
+          create: (_) => AuthService(baseUrl: apiBaseUrl),
+        ),
 
-        // Сервис пользовательских настроек (профиль)
         Provider<UserSettingsService>(
           create: (_) => UserSettingsService(
-            baseUrl: _apiBaseUrl,
+            baseUrl: apiBaseUrl,
             authStorage: authStorage,
           ),
         ),
@@ -77,7 +106,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    // Подстраиваем цвет статусбара под текущую тему
     SystemChrome.setSystemUIOverlayStyle(
       themeProvider.isDarkMode
           ? const SystemUiOverlayStyle(
