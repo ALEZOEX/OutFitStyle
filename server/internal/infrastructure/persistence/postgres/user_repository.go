@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -106,7 +108,14 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *domain.User) erro
 		user.CreatedAt,
 		user.UpdatedAt,
 	).Scan(&user.ID)
+
 	if err != nil {
+		// Проверяем, не дубликат ли email (unique_violation: 23505)
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+			if pgErr.ConstraintName == "users_email_key" {
+				return repositories.ErrEmailAlreadyExists
+			}
+		}
 		return errors.Wrap(err, "failed to create user")
 	}
 
@@ -543,7 +552,6 @@ func (r *UserRepository) GetOutfitPlans(ctx context.Context, userID int, startDa
 }
 
 // GetUserOutfitPlans retrieves all user's outfit plans (without date filter).
-// Оставляем для обратной совместимости; при желании можно удалить и везде использовать GetOutfitPlans.
 func (r *UserRepository) GetUserOutfitPlans(ctx context.Context, userID int) ([]domain.OutfitPlan, error) {
 	const query = `
 		SELECT id, user_id, date, item_ids, notes, created_at, updated_at
