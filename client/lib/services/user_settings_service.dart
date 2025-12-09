@@ -26,12 +26,12 @@ class UserSettingsService {
     final userId = await authStorage.readUserId();
 
     if (token == null || userId == null) {
-      throw const ApiException('Пользователь не авторизован');
+      throw const AuthExpiredException('Пользователь не авторизован');
     }
 
     final uri = Uri.parse('$baseUrl/users/$userId/profile');
-
     http.Response resp;
+
     try {
       resp = await _client
           .get(
@@ -39,7 +39,6 @@ class UserSettingsService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          // Если бэк пока не проверяет JWT — это не мешает
           'Authorization': 'Bearer $token',
         },
       )
@@ -50,15 +49,21 @@ class UserSettingsService {
       throw NetworkException('Ошибка сети: ${e.message}');
     }
 
+    // Сессия недействительна / юзер пропал — чистим и даём AuthExpiredException
+    if (resp.statusCode == 401 ||
+        resp.statusCode == 403 ||
+        resp.statusCode == 404) {
+      await authStorage.clearSession();
+      throw const AuthExpiredException(
+          'Пользователь не найден или сессия истекла, войдите заново');
+    }
+
     if (resp.statusCode != 200) {
       throw _buildApiError(resp, 'Ошибка загрузки профиля');
     }
 
     final decoded = jsonDecode(utf8.decode(resp.bodyBytes));
 
-    // Поддерживаем два формата:
-    // 1) чистый объект профиля: { ... }
-    // 2) обёртка: { "data": { ... }, "meta": { ... } }
     final Map<String, dynamic> data;
     if (decoded is Map<String, dynamic> && decoded['data'] is Map) {
       data = decoded['data'] as Map<String, dynamic>;

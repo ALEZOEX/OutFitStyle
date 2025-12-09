@@ -4,13 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../config/app_config.dart';
+import '../exceptions/api_exceptions.dart';
 import '../models/outfit_plan.dart';
 import '../models/weather_data.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
-import '../services/weather_service.dart';
-import '../services/location_service.dart';
 import '../services/auth_storage.dart';
+import '../services/location_service.dart';
+import '../services/weather_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/outfit_dialog.dart';
 
@@ -144,25 +145,39 @@ class _PlanningScreenState extends State<PlanningScreen> {
   }
 
   Future<void> _loadPlans() async {
-    final userId = await _authStorage.readUserId();
-    if (!mounted) return;
+    try {
+      final userId = await _authStorage.readUserId();
+      if (!mounted) return;
 
-    if (userId == null) {
+      if (userId == null) {
+        setState(() {
+          _plansFuture = Future.value(<OutfitPlan>[]);
+        });
+        return;
+      }
+
       setState(() {
-        _plansFuture = Future.value(<OutfitPlan>[]);
+        _plansFuture = _apiService.getOutfitPlans(
+          userId: userId,
+          startDate: DateTime.now().subtract(const Duration(days: 7)),
+          endDate: DateTime.now().add(const Duration(days: 14)),
+        );
       });
-      return;
-    }
 
-    setState(() {
-      _plansFuture = _apiService.getOutfitPlans(
-        userId: userId,
-        startDate: DateTime.now().subtract(const Duration(days: 7)),
-        endDate: DateTime.now().add(const Duration(days: 14)),
+      await _plansFuture;
+    } on AuthExpiredException catch (e) {
+      await _authStorage.clearSession();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
       );
-    });
-
-    await _plansFuture;
+      Navigator.pushReplacementNamed(context, '/auth');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка загрузки планов: $e')),
+      );
+    }
   }
 
   void _showLocationServicesDisabledDialog() {
@@ -273,8 +288,10 @@ class _PlanningScreenState extends State<PlanningScreen> {
         return;
       }
 
-      final recommendation =
-      await _apiService.getRecommendations(_currentCity, userId: userId);
+      final recommendation = await _apiService.getRecommendations(
+        _currentCity,
+        userId: userId,
+      );
 
       if (!mounted) return;
       Navigator.pop(context); // закрываем диалог загрузки
@@ -291,10 +308,21 @@ class _PlanningScreenState extends State<PlanningScreen> {
           },
         ),
       );
+    } on AuthExpiredException catch (e) {
+      if (Navigator.of(context).canPop()) {
+        Navigator.pop(context);
+      }
+      await _authStorage.clearSession();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+      Navigator.pushReplacementNamed(context, '/auth');
     } catch (e) {
       if (!mounted) return;
-      Navigator.pop(context); // закрываем диалог, если он ещё висит
-      if (!mounted) return;
+      if (Navigator.of(context).canPop()) {
+        Navigator.pop(context);
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Ошибка получения рекомендаций: $e'),
@@ -520,8 +548,8 @@ class _PlanningScreenState extends State<PlanningScreen> {
                           child: OutlinedButton(
                             onPressed: () => Navigator.pop(dialogContext),
                             style: OutlinedButton.styleFrom(
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 14),
                               side: BorderSide(
                                 color: isDark
                                     ? Colors.grey
@@ -547,7 +575,8 @@ class _PlanningScreenState extends State<PlanningScreen> {
                                 : () async {
                               setState(() => isCreating = true);
 
-                              final nav = Navigator.of(dialogContext);
+                              final nav =
+                              Navigator.of(dialogContext);
                               final messenger =
                               ScaffoldMessenger.of(dialogContext);
 
@@ -566,16 +595,16 @@ class _PlanningScreenState extends State<PlanningScreen> {
                                 _loadPlans();
                                 messenger.showSnackBar(
                                   const SnackBar(
-                                    content:
-                                    Text('План успешно добавлен!'),
+                                    content: Text(
+                                        'План успешно добавлен!'),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 14),
                               backgroundColor: theme.primaryColor,
                             ),
                             child: isCreating
@@ -634,6 +663,14 @@ class _PlanningScreenState extends State<PlanningScreen> {
         notes: notes.isNotEmpty ? notes : null,
       );
       return true;
+    } on AuthExpiredException catch (e) {
+      await _authStorage.clearSession();
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+      Navigator.pushReplacementNamed(context, '/auth');
+      return false;
     } catch (e) {
       if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -692,6 +729,13 @@ class _PlanningScreenState extends State<PlanningScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('План успешно удален')),
       );
+    } on AuthExpiredException catch (e) {
+      await _authStorage.clearSession();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+      Navigator.pushReplacementNamed(context, '/auth');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
