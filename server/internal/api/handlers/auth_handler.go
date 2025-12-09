@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
+	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/infrastructure/external"
 	"strings"
 	"time"
@@ -95,6 +97,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.authService.RegisterUser(ctx, userInput)
 	if err != nil {
+		// Проверка на дубликат email
+		if errors.Is(err, repositories.ErrEmailAlreadyExists) {
+			resp.Error(w, http.StatusConflict, fmt.Errorf("user with this email already exists"))
+			return
+		}
+
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to register user"))
 		log.Printf("Registration error: %v", err)
 		return
