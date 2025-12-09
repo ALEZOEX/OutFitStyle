@@ -423,21 +423,41 @@ class ApiService {
 
   ApiException _handleError(http.Response response) {
     String message = 'Неизвестная ошибка сервера';
+    final path = response.request?.url.path ?? '';
+
     if (response.body.isNotEmpty) {
       try {
         final body = json.decode(utf8.decode(response.bodyBytes));
-        message = body['error'] ??
-            body['message'] ??
-            'Сервер вернул ошибку без описания.';
+        if (body is Map<String, dynamic>) {
+          message = body['error']?.toString() ??
+              body['message']?.toString() ??
+              message;
+        } else {
+          message = utf8.decode(response.bodyBytes).trim();
+        }
       } catch (_) {
         message = utf8.decode(response.bodyBytes).trim();
       }
     }
-    return ApiServiceException(
-      message,
-      response.statusCode,
-      response.request?.url.path ?? '',
-    );
+
+    final lowerMsg = message.toLowerCase();
+
+    // Считаем сессию истёкшей / битой, если:
+    // - 401/403
+    // - 404 и это профиль/пользователь
+    final isAuthError =
+        response.statusCode == 401 ||
+            response.statusCode == 403 ||
+            (response.statusCode == 404 &&
+                (path.contains('/users/') ||
+                    lowerMsg.contains('user not found') ||
+                    lowerMsg.contains('profile not found')));
+
+    if (isAuthError) {
+      return AuthExpiredException(message);
+    }
+
+    return ApiServiceException(message, response.statusCode, path);
   }
 
   /// Собираем Uri на основе baseUrl (включающего /api/v1) и относительного path.

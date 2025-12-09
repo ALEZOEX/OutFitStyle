@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
+import '../exceptions/api_exceptions.dart';
 import '../models/outfit.dart';
 import '../models/recommendation.dart';
 import '../providers/theme_provider.dart';
@@ -169,15 +170,8 @@ class _HomeScreenState extends State<HomeScreen>
 
     try {
       final userId = await _authStorage.readUserId();
-
       if (userId == null) {
-        setState(() {
-          _error = 'Пользователь не авторизован';
-          _errorDetails =
-          'Войдите в аккаунт, чтобы получать персональные рекомендации.';
-          _isLoading = false;
-        });
-        return;
+        throw const AuthExpiredException('Пользователь не авторизован');
       }
 
       final recommendation = await _api.getRecommendations(
@@ -191,44 +185,55 @@ class _HomeScreenState extends State<HomeScreen>
         _isLoading = false;
       });
       _animationController.forward(from: 0.0);
+    } on AuthExpiredException catch (e) {
+      await _authStorage.clearSession();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+      Navigator.pushReplacementNamed(context, '/auth');
     } catch (e) {
       if (!mounted) return;
-
-      String errorMessage = 'Ошибка загрузки данных';
-      String? details;
-      final errorDescription = e.toString().toLowerCase();
-
-      if (errorDescription.contains('404') ||
-          errorDescription.contains('city not found')) {
-        errorMessage = 'Город не найден';
-        details =
-        'Проверьте правильность названия города. Попробуйте использовать английское название (например, "New York").';
-      } else if (errorDescription.contains('400')) {
-        errorMessage = 'Неверный запрос';
-        details =
-        'Попробуйте ввести название города на английском языке, например: Moscow, London, Paris.';
-      } else if (errorDescription.contains('timeout')) {
-        errorMessage = 'Сервер не отвечает';
-        details =
-        'Превышено время ожидания. Проверьте подключение к интернету или попробуйте позже.';
-      } else if (errorDescription.contains('failed hostlookup') ||
-          errorDescription.contains('socketexception')) {
-        errorMessage = 'Нет подключения к интернету';
-        details = 'Проверьте сетевое подключение и попробуйте снова.';
-      } else if (errorDescription.contains('connection refused')) {
-        errorMessage = 'Сервер недоступен';
-        details =
-        'Не удаётся подключиться к серверу. Убедитесь, что все сервисы запущены.';
-      } else {
-        details = e.toString();
-      }
-
-      setState(() {
-        _error = errorMessage;
-        _errorDetails = details;
-        _isLoading = false;
-      });
+      _setErrorFromException(e);
     }
+  }
+
+  void _setErrorFromException(Object e) {
+    String errorMessage = 'Ошибка загрузки данных';
+    String? details;
+    final errorDescription = e.toString().toLowerCase();
+
+    if (errorDescription.contains('404') ||
+        errorDescription.contains('city not found')) {
+      errorMessage = 'Город не найден';
+      details =
+      'Проверьте правильность названия города. Попробуйте использовать английское название (например, "New York").';
+    } else if (errorDescription.contains('400')) {
+      errorMessage = 'Неверный запрос';
+      details =
+      'Попробуйте ввести название города на английском языке, например: Moscow, London, Paris.';
+    } else if (errorDescription.contains('timeout')) {
+      errorMessage = 'Сервер не отвечает';
+      details =
+      'Превышено время ожидания. Проверьте подключение к интернету или попробуйте позже.';
+    } else if (errorDescription.contains('failed hostlookup') ||
+        errorDescription.contains('socketexception')) {
+      errorMessage = 'Нет подключения к интернету';
+      details = 'Проверьте сетевое подключение и попробуйте снова.';
+    } else if (errorDescription.contains('connection refused')) {
+      errorMessage = 'Сервер недоступен';
+      details =
+      'Не удаётся подключиться к серверу. Убедитесь, что все сервисы запущены.';
+    } else {
+      details = e.toString();
+    }
+
+    setState(() {
+      _error = errorMessage;
+      _errorDetails = details;
+      _isLoading = false;
+      _recommendation = null;
+    });
   }
 
   Future<void> _loadData() async {
@@ -565,8 +570,8 @@ class _HomeScreenState extends State<HomeScreen>
                     ? 'Определяем ваше местоположение...'
                     : 'Введите город (например: Moscow)',
                 hintStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color
-                      ?.withOpacity(0.7),
+                  color:
+                  theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                   fontSize: 14,
                 ),
                 prefixIcon: _isLocationLoading
@@ -574,10 +579,11 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: EdgeInsets.all(8.0),
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-                    : Icon(Icons.location_city, color: theme.primaryColor),
+                    : Icon(Icons.location_city,
+                    color: theme.primaryColor),
                 border: InputBorder.none,
-                contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
               ),
               onSubmitted: (_) => _loadData(),
             ),
