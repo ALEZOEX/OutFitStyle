@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../exceptions/api_exceptions.dart';
 import '../models/user_settings.dart';
 import '../providers/theme_provider.dart';
+import '../services/auth_storage.dart';
 import '../services/user_settings_service.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
@@ -28,15 +30,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<UserSettings> _loadSettings() async {
-    // 1) Если кто-то передал UserSettings через arguments — используем их
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is UserSettings) {
       return args;
     }
 
-    // 2) Иначе грузим с бэкенда
     final service = context.read<UserSettingsService>();
-    return service.fetchSettings();
+    final authStorage = context.read<AuthStorage>();
+
+    try {
+      return await service.fetchSettings();
+    } on AuthExpiredException catch (e) {
+      await authStorage.clearSession();
+      if (!mounted) rethrow;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+      Navigator.pushReplacementNamed(context, '/auth');
+      rethrow;
+    }
   }
 
   Future<void> _reload() async {
