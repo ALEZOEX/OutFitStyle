@@ -74,6 +74,49 @@ class AuthService {
     return jsonDecode(resp.body) as Map<String, dynamic>;
   }
 
+  // ================== СБРОС ПАРОЛЯ ==================
+
+  /// Запрос на сброс пароля.
+  /// Бэкенд: POST /auth/forgot-password { "email": "..." }
+  Future<void> requestPasswordReset(String email) async {
+    final uri = Uri.parse('$baseUrl/auth/forgot-password');
+
+    final resp = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email.trim()}),
+    );
+
+    // Бэкенд всегда возвращает 200, даже если email не найден.
+    if (resp.statusCode != 200) {
+      throw Exception(
+        'Не удалось отправить письмо для сброса пароля: ${resp.body}',
+      );
+    }
+  }
+
+  /// Подтверждение сброса пароля.
+  /// Бэкенд: POST /auth/reset-password { "token": "...", "newPassword": "..." }
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    final uri = Uri.parse('$baseUrl/auth/reset-password');
+
+    final resp = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'token': token.trim(),
+        'newPassword': newPassword,
+      }),
+    );
+
+    if (resp.statusCode != 200) {
+      throw Exception('Не удалось сбросить пароль: ${resp.body}');
+    }
+  }
+
   // ================== Google Sign-In (Web) ==================
 
   Future<String?> _getGoogleIdToken() async {
