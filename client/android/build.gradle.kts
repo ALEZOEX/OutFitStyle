@@ -1,3 +1,10 @@
+// android/build.gradle.kts (ПРОЕКТНЫЙ уровень)
+
+plugins {
+    // Подключаем плагин Google Services, версия 4.4.0 или 4.3.15
+    id("com.google.gms.google-services") version "4.3.15" apply false
+}
+
 allprojects {
     repositories {
         google()
