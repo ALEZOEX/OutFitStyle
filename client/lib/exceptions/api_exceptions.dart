@@ -1,13 +1,15 @@
 class ApiException implements Exception {
   final String message;
-  const ApiException(this.message);
+  final String? errorMessage;
+  
+  const ApiException(this.message, [this.errorMessage]);
 
   @override
   String toString() => message;
 }
 
 class NetworkException extends ApiException {
-  const NetworkException(super.message);
+  const NetworkException(String message) : super(message);
 }
 
 class ApiServiceException extends ApiException {
@@ -15,14 +17,10 @@ class ApiServiceException extends ApiException {
   final String endpoint;
 
   const ApiServiceException(
-      super.message,
-      this.statusCode,
-      this.endpoint,
-      );
-
-  @override
-  String toString() =>
-      'Ошибка API: $message (Статус: $statusCode, Эндпоинт: $endpoint)';
+    String message,
+    this.statusCode,
+    this.endpoint,
+  ) : super(message);
 }
 
 /// Сессия недействительна (пользователь не найден / токен протух)

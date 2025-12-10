@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 
 import '../config/app_config.dart';
@@ -44,13 +46,29 @@ class ApiService {
       },
     );
     final data = await _get(uri);
-    return Recommendation.fromJson(data as Map<String, dynamic>);
+
+    final map = _ensureMapResponse(
+      data: data,
+      uri: uri,
+      operation: 'получении рекомендаций',
+      statusCode: 200,
+    );
+
+    return Recommendation.fromJson(map);
   }
 
   Future<WeatherData> getWeather(String city) async {
     final uri = _buildUri('/weather', {'city': city});
     final data = await _get(uri);
-    return WeatherData.fromJson(data as Map<String, dynamic>);
+
+    final map = _ensureMapResponse(
+      data: data,
+      uri: uri,
+      operation: 'получении данных о погоде',
+      statusCode: 200,
+    );
+
+    return WeatherData.fromJson(map);
   }
 
   // --- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ---
@@ -59,7 +77,15 @@ class ApiService {
     // сервер: GET /api/v1/users/{id}/profile
     final uri = _buildUri('/users/$userId/profile');
     final data = await _get(uri);
-    return data as Map<String, dynamic>;
+
+    final map = _ensureMapResponse(
+      data: data,
+      uri: uri,
+      operation: 'получении профиля пользователя',
+      statusCode: 200,
+    );
+
+    return map;
   }
 
   // --- ИЗБРАННОЕ ---
@@ -67,17 +93,20 @@ class ApiService {
   /// Список избранных рекомендаций пользователя.
   ///
   /// сервер: GET /api/v1/users/{user_id}/favorites
-  /// ответ: { "favorites": [...], "count": N }
+  /// ответ: { "favorites": [...], "count": N } или просто [... ]
   Future<List<FavoriteOutfit>> getFavorites({required int userId}) async {
     final uri = _buildUri('/users/$userId/favorites');
     final data = await _get(uri);
 
     if (data is Map<String, dynamic>) {
-      final list = data['favorites'] as List<dynamic>? ?? const [];
-      return list
-          .whereType<Map<String, dynamic>>()
-          .map(FavoriteOutfit.fromJson)
-          .toList();
+      final favorites = data['favorites'];
+      if (favorites is List) {
+        return favorites
+            .whereType<Map<String, dynamic>>()
+            .map(FavoriteOutfit.fromJson)
+            .toList();
+      }
+      return [];
     }
 
     // fallback на старый формат (чистый массив)
@@ -122,7 +151,7 @@ class ApiService {
   /// История рекомендаций пользователя.
   ///
   /// сервер: GET /api/v1/recommendations/history?user_id=...&limit=...
-  /// ответ: { "history": [...], "count": N }
+  /// ответ: { "history": [...], "count": N } или просто [...]
   Future<List<HistoryItem>> getRecommendationHistory({
     required int userId,
     int limit = 10,
@@ -137,14 +166,17 @@ class ApiService {
     final data = await _get(uri);
 
     if (data is Map<String, dynamic>) {
-      final List<dynamic> historyData = data['history'] ?? [];
-      return historyData
-          .whereType<Map<String, dynamic>>()
-          .map(HistoryItem.fromJson)
-          .toList();
+      final historyData = data['history'];
+      if (historyData is List) {
+        return historyData
+            .whereType<Map<String, dynamic>>()
+            .map(HistoryItem.fromJson)
+            .toList();
+      }
+      return [];
     }
 
-    // fallback, если вдруг вернули просто массив
+    // fallback, если вернули просто массив
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
@@ -196,9 +228,15 @@ class ApiService {
       'category': category,
       'icon': icon,
     });
-    final response =
-    await _post(uri, body: body, expectedStatusCode: 201) as Map<String, dynamic>;
-    return WardrobeItem.fromJson(response);
+    final raw =
+    await _post(uri, body: body, expectedStatusCode: 201);
+    final map = _ensureMapResponse(
+      data: raw,
+      uri: uri,
+      operation: 'добавлении предмета гардероба',
+      statusCode: 201,
+    );
+    return WardrobeItem.fromJson(map);
   }
 
   Future<void> deleteWardrobeItem(int itemId) async {
@@ -211,7 +249,7 @@ class ApiService {
   /// Получить планы нарядов пользователя.
   ///
   /// сервер: GET /api/v1/users/{user_id}/outfit-plans
-  /// ответ: { "plans": [...], "count": N }
+  /// ответ: { "plans": [...], "count": N } или просто [...]
   Future<List<OutfitPlan>> getOutfitPlans({
     required int userId,
     DateTime? startDate,
@@ -256,9 +294,15 @@ class ApiService {
       'item_ids': itemIds,
       'notes': notes,
     });
-    final response =
-    await _post(uri, body: body, expectedStatusCode: 201) as Map<String, dynamic>;
-    return OutfitPlan.fromJson(response);
+    final raw =
+    await _post(uri, body: body, expectedStatusCode: 201);
+    final map = _ensureMapResponse(
+      data: raw,
+      uri: uri,
+      operation: 'создании плана наряда',
+      statusCode: 201,
+    );
+    return OutfitPlan.fromJson(map);
   }
 
   Future<void> deleteOutfitPlan(int userId, int planId) async {
@@ -317,9 +361,15 @@ class ApiService {
       'image_url': imageUrl,
       'purchase_link': purchaseLink,
     });
-    final response =
-    await _post(uri, body: body, expectedStatusCode: 201) as Map<String, dynamic>;
-    return ShoppingItem.fromJson(response);
+    final raw =
+    await _post(uri, body: body, expectedStatusCode: 201);
+    final map = _ensureMapResponse(
+      data: raw,
+      uri: uri,
+      operation: 'добавлении товара в wishlist',
+      statusCode: 201,
+    );
+    return ShoppingItem.fromJson(map);
   }
 
   Future<void> removeShoppingItem({
@@ -363,8 +413,12 @@ class ApiService {
       return _processResponse(response);
     } on TimeoutException {
       throw const NetworkException('Превышено время ожидания от сервера.');
+    } on SocketException catch (e) {
+      throw NetworkException('Проблема с соединением: ${e.message}');
     } on http.ClientException catch (e) {
       throw NetworkException('Ошибка сети: ${e.message}');
+    } catch (e) {
+      throw NetworkException('Неизвестная сетевая ошибка: $e');
     }
   }
 
@@ -383,8 +437,12 @@ class ApiService {
       );
     } on TimeoutException {
       throw const NetworkException('Превышено время ожидания от сервера.');
+    } on SocketException catch (e) {
+      throw NetworkException('Проблема с соединением: ${e.message}');
     } on http.ClientException catch (e) {
       throw NetworkException('Ошибка сети: ${e.message}');
+    } catch (e) {
+      throw NetworkException('Неизвестная сетевая ошибка: $e');
     }
   }
 
@@ -402,8 +460,12 @@ class ApiService {
       }
     } on TimeoutException {
       throw const NetworkException('Превышено время ожидания от сервера.');
+    } on SocketException catch (e) {
+      throw NetworkException('Проблема с соединением: ${e.message}');
     } on http.ClientException catch (e) {
       throw NetworkException('Ошибка сети: ${e.message}');
+    } catch (e) {
+      throw NetworkException('Неизвестная сетевая ошибка: $e');
     }
   }
 
@@ -411,13 +473,24 @@ class ApiService {
       http.Response response, {
         int expectedStatusCode = 200,
       }) {
-    if (response.statusCode == expectedStatusCode) {
-      if (response.body.isEmpty) {
-        return null;
-      }
-      return json.decode(utf8.decode(response.bodyBytes));
-    } else {
+    if (response.statusCode != expectedStatusCode) {
       throw _handleError(response);
+    }
+
+    if (response.body.isEmpty) {
+      return null;
+    }
+
+    final rawBody = utf8.decode(response.bodyBytes);
+    try {
+      return json.decode(rawBody);
+    } catch (_) {
+      final path = response.request?.url.path ?? '';
+      throw ApiServiceException(
+        'Ошибка разбора ответа сервера',
+        response.statusCode,
+        path,
+      );
     }
   }
 
@@ -480,26 +553,40 @@ class ApiService {
     );
   }
 
-  // Вспомогательные методы для произвольных URL (если ещё нужны)
+  /// Закрыть http.Client, если сервис больше не нужен.
+  void dispose() {
+    _client.close();
+  }
+
+  // Вспомогательные методы для произвольных URL
+  // Теперь используют те же таймауты и обработку ошибок, что и основной код.
+
   Future<dynamic> get(String url) async {
-    final response = await _client.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      return json.decode(utf8.decode(response.bodyBytes));
-    } else {
-      throw Exception('Failed to load data');
-    }
+    final uri = Uri.parse(url);
+    return _get(uri);
   }
 
   Future<dynamic> post(String url, dynamic body) async {
-    final response = await _client.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(body),
-    );
-    if (response.statusCode == 200) {
-      return json.decode(utf8.decode(response.bodyBytes));
-    } else {
-      throw Exception('Failed to load data');
+    final uri = Uri.parse(url);
+    final encodedBody = body is String ? body : json.encode(body);
+    return _post(uri, body: encodedBody, expectedStatusCode: 200);
+  }
+
+  // --- ВСПОМОГАТЕЛЬНЫЕ УТИЛИТЫ ---
+
+  Map<String, dynamic> _ensureMapResponse({
+    required dynamic data,
+    required Uri uri,
+    required String operation,
+    required int statusCode,
+  }) {
+    if (data is Map<String, dynamic>) {
+      return data;
     }
+    throw ApiServiceException(
+      'Неожиданный формат ответа сервера при $operation',
+      statusCode,
+      uri.path,
+    );
   }
 }

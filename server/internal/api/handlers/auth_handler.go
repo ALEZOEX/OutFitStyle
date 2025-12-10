@@ -25,7 +25,7 @@ const accessTokenTTLSeconds = 3600
 
 var (
 	errInvalidRequestBody         = errors.New("invalid request body")
-	errInvalidCredentials         = errors.New("invalid credentials")
+	errInvalidCredentials         = errors.New("неверный email или пароль")
 	errCodeRequired               = errors.New("code is required")
 	errInvalidOrExpiredCode       = errors.New("invalid or expired code")
 	errAuthHeaderRequired         = errors.New("authorization header required")
@@ -232,6 +232,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, response)
 }
 
+// Запрос на сброс пароля — всегда 200 (чтобы не палить существование email)
 func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var input emailRequest
@@ -247,13 +248,16 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	if err := h.authService.ForgotPassword(ctx, input.Email); err != nil {
+		// Логируем, но наружу не раскрываем детали
 		log.Printf("Password reset request error: %v", err)
-		resp.Error(w, http.StatusInternalServerError, errFailedToProcessReset)
-		return
 	}
-	resp.Success(w, map[string]interface{}{"message": "Password reset instructions sent to your email"})
+
+	resp.Success(w, map[string]interface{}{
+		"message": "Если аккаунт с таким email существует, мы отправили инструкции по сбросу пароля.",
+	})
 }
 
+// Подтверждение сброса пароля по токену
 func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var input resetPasswordRequest
@@ -275,10 +279,12 @@ func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.authService.ResetPassword(ctx, input.Token, input.NewPassword); err != nil {
 		log.Printf("ResetPassword error: %v", err)
-		resp.Error(w, http.StatusUnauthorized, errInvalidOrExpiredResetToken)
+		resp.Error(w, http.StatusBadRequest, errInvalidOrExpiredResetToken)
 		return
 	}
-	resp.Success(w, map[string]interface{}{"message": "Password successfully reset. Please login with your new password."})
+	resp.Success(w, map[string]interface{}{
+		"message": "Password successfully reset. Please login with your new password.",
+	})
 }
 
 // Регистрируем все /api/v1/auth/... маршруты
@@ -407,7 +413,7 @@ func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// 3. Генерируем access (+пока фиктивный refresh) токен
+	// 3. Генерируем access/refresh токены
 	accessToken, refreshToken, err := h.authService.GenerateTokens(user.ID)
 	if err != nil {
 		log.Printf("GoogleLogin token error: %v", err)
@@ -423,7 +429,7 @@ func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 			"isVerified": true, // OAuth = verified
 		},
 		"accessToken":  accessToken,
-		"refreshToken": refreshToken, // сейчас будет пустая строка
+		"refreshToken": refreshToken,
 		"expiresIn":    accessTokenTTLSeconds,
 	}
 
