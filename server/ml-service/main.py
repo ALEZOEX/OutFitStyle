@@ -121,7 +121,10 @@ def load_user_profile(user_id: int) -> Dict[str, Any]:
         }
 
 
-def load_clothing_items(weather_data: Dict[str, Any], user_profile: Dict[str, Any]) -> List[Dict[str, Any]]:
+def load_clothing_items(
+    weather_data: Dict[str, Any],
+    user_profile: Dict[str, Any],
+) -> List[Dict[str, Any]]:
     """
     Fallback: загружаем одежду напрямую из clothing_items по диапазону температур и стилю.
     """
@@ -297,12 +300,13 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
             },
         )
 
+        # 1. Профиль пользователя
         user_profile = load_user_profile(user_id)
         logger.info(f"Loaded user profile: {user_profile}")
 
         available_items: List[Dict[str, Any]] = []
 
-        # 1) вещи из гардероба
+        # 2. Вещи из гардероба
         if source in ("wardrobe", "mixed"):
             wardrobe_items = fetch_clothing_items_from_marketplace(
                 user_id=user_id,
@@ -315,7 +319,7 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
                 it.setdefault("source", "wardrobe")
             available_items.extend(wardrobe_items)
 
-        # 2) вещи из каталога
+        # 3. Вещи из каталога
         if source in ("catalog", "mixed"):
             catalog_items = fetch_clothing_items_from_marketplace(
                 user_id=user_id,
@@ -328,7 +332,7 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
                 it.setdefault("source", "catalog")
             available_items.extend(catalog_items)
 
-        # 3) Fallback: если маркетплейс ничего не вернул
+        # 4. Fallback в БД clothing_items
         if not available_items:
             logger.warning(
                 "Marketplace returned no items (all sources), "
@@ -338,9 +342,37 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
 
         logger.info(f"Loaded {len(available_items)} clothing items")
 
+        # 5. Если нет вещей ни в гардеробе, ни в каталоге, ни в clothing_items –
+        #    пробуем внутренний датасет
         if not available_items:
-            raise HTTPException(status_code=404, detail="no suitable clothing items found")
+            logger.warning(
+                "No items from marketplace/DB. Trying internal dataset items..."
+            )
+            internal_items = load_internal_dataset_items()
+            if internal_items:
+                available_items = internal_items
+                logger.info(
+                    f"Using {len(available_items)} internal dataset items as candidates"
+                )
 
+        # 6. Если даже датасет пуст – возвращаем пустой ответ (safety net)
+        if not available_items:
+            logger.warning(
+                "No suitable clothing items found anywhere. "
+                "Returning empty outfit recommendation."
+            )
+
+            return RecommendResponse(
+                recommendation_id=-1,
+                user_id=user_id,
+                weather=req.weather,
+                recommendations=[],
+                outfit_score=0.0,
+                ml_powered=False,
+                algorithm="no_items_fallback",
+            )
+
+        # 7. Есть вещи – строим образ через ML
         adjusted_min_confidence = min(0.3, float(min_confidence))
 
         outfit = predictor.build_outfit(
@@ -425,6 +457,59 @@ def train_model(req: TrainRequest) -> Dict[str, Any]:
         logger.error(f"Training error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+# --------------------------------------------------
+# Внутренний fallback‑датасет (например, Kaggle)
+# --------------------------------------------------
+INTERNAL_DATASET_ITEMS: List[Dict[str, Any]] = []
+
+
+def load_internal_dataset_items() -> List[Dict[str, Any]]:
+    """
+    Загружаем fallback‑вещи из локального датасета (Kaggle и т.п.).
+    Формат должен быть совместим с marketplace/DB: поля name, category, style и т.п.
+    """
+    global INTERNAL_DATASET_ITEMS
+
+    if INTERNAL_DATASET_ITEMS:
+        return INTERNAL_DATASET_ITEMS
+
+    try:
+        csv_path = os.path.join("data", "kaggle_items.csv")
+        df = pd.read_csv(csv_path)
+
+        items: List[Dict[str, Any]] = []
+        for _, row in df.iterrows():
+            item = {
+                "id": int(row.get("id", 0)),
+                "name": row.get("name", "Item"),
+                "category": row.get("category", "upper"),
+                "subcategory": row.get("subcategory") or None,
+                "style": row.get("style", "casual"),
+                "min_temp": float(row["min_temp"])
+                if not pd.isna(row.get("min_temp"))
+                else None,
+                "max_temp": float(row["max_temp"])
+                if not pd.isna(row.get("max_temp"))
+                else None,
+                "warmth_level": int(row["warmth_level"])
+                if not pd.isna(row.get("warmth_level"))
+                else None,
+                "formality_level": int(row["formality_level"])
+                if not pd.isna(row.get("formality_level"))
+                else None,
+                "icon_emoji": row.get("icon_emoji") or "",
+                "source": "internal_dataset",
+            }
+            items.append(item)
+
+        INTERNAL_DATASET_ITEMS = items
+        logger.info(f"Loaded {len(items)} internal dataset clothing items")
+        return INTERNAL_DATASET_ITEMS
+
+    except Exception as e:
+        logger.error(f"Error loading internal dataset items: {e}", exc_info=True)
+        INTERNAL_DATASET_ITEMS = []
+        return INTERNAL_DATASET_ITEMS
 
 # --------------------------------------------------
 # Стартовая загрузка модели
@@ -432,6 +517,9 @@ def train_model(req: TrainRequest) -> Dict[str, Any]:
 @app.on_event("startup")
 def load_model_on_startup() -> None:
     global recommender, predictor
+
+    # заранее подгружаем внутренний датасет в память
+    load_internal_dataset_items()
 
     model_paths = [
         "models/kaggle_trained_recommender.pkl",
