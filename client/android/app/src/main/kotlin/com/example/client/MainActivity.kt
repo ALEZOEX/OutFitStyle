@@ -1,4 +1,4 @@
-package com.example.client
+package com.example.outfitstyle
 
 import io.flutter.embedding.android.FlutterActivity
 

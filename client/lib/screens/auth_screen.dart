@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../exceptions/api_exceptions.dart';
 import '../services/auth_service.dart';
 import '../services/auth_storage.dart';
 
@@ -52,11 +53,45 @@ class _AuthScreenState extends State<AuthScreen>
     super.dispose();
   }
 
+  String _mapAuthError(Object e, {required bool isRegister}) {
+    final msg = e.toString().toLowerCase();
+
+    // Логин: неверные данные
+    if (msg.contains('invalid credentials') ||
+        msg.contains('неверный email или пароль')) {
+      return 'Неверный email или пароль';
+    }
+
+    // Регистрация: занято
+    if (msg.contains('email already exists') ||
+        msg.contains('users_email_key') ||
+        msg.contains('duplicate key')) {
+      return 'Пользователь с таким email уже зарегистрирован';
+    }
+
+    // Сеть
+    if (msg.contains('timeout') ||
+        msg.contains('hostlookup') ||
+        msg.contains('socketexception') ||
+        msg.contains('connection refused')) {
+      return 'Проблема с подключением к серверу';
+    }
+
+    // Общий fallback без длинного текста исключения
+    return isRegister
+        ? 'Не удалось завершить регистрацию. Попробуйте позже.'
+        : 'Не удалось выполнить вход. Попробуйте позже.';
+  }
+
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(
+          message,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        ),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),
@@ -95,7 +130,11 @@ class _AuthScreenState extends State<AuthScreen>
         ),
       );
     } catch (e) {
-      _showError('Ошибка регистрации: $e');
+      if (e is ApiException && e.errorMessage != null) {
+        _showError('Ошибка регистрации: ${e.errorMessage}');
+      } else {
+        _showError(_mapAuthError(e, isRegister: true));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -128,7 +167,11 @@ class _AuthScreenState extends State<AuthScreen>
         ),
       );
     } catch (e) {
-      _showError('Ошибка входа: $e');
+      if (e is ApiException && e.errorMessage != null) {
+        _showError('Ошибка входа: ${e.errorMessage}');
+      } else {
+        _showError(_mapAuthError(e, isRegister: false));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -169,7 +212,11 @@ class _AuthScreenState extends State<AuthScreen>
 
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      _showError('Ошибка подтверждения кода: $e');
+      if (e is ApiException && e.errorMessage != null) {
+        _showError('Ошибка подтверждения кода: ${e.errorMessage}');
+      } else {
+        _showError(_mapAuthError(e, isRegister: false));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -206,7 +253,11 @@ class _AuthScreenState extends State<AuthScreen>
     } on UnsupportedError {
       _showError('Вход через Google недоступен на этой платформе');
     } catch (e) {
-      _showError('Ошибка входа через Google: $e');
+      if (e is ApiException && e.errorMessage != null) {
+        _showError('Ошибка входа через Google: ${e.errorMessage}');
+      } else {
+        _showError(_mapAuthError(e, isRegister: false));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -258,8 +309,8 @@ class _AuthScreenState extends State<AuthScreen>
             ),
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 32),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth: isWide ? 480 : 520,
@@ -291,6 +342,8 @@ class _AuthScreenState extends State<AuthScreen>
                                   ? 'Шаг 2 из 2: подтвердите вход'
                                   : 'Подберите образ под любую погоду',
                               textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style:
                               theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.textTheme.bodyMedium?.color
@@ -305,8 +358,7 @@ class _AuthScreenState extends State<AuthScreen>
                               _buildAuthTabs(theme),
 
                             const SizedBox(height: 12),
-                            if (_isLoading)
-                              const LinearProgressIndicator(),
+                            if (_isLoading) const LinearProgressIndicator(),
                           ],
                         ),
                       ),
@@ -323,9 +375,11 @@ class _AuthScreenState extends State<AuthScreen>
 
   Widget _buildAuthTabs(ThemeData theme) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         TabBar(
           controller: _tabController,
+          isScrollable: true, // чтобы текст вкладок не вылезал
           labelColor: theme.colorScheme.primary,
           unselectedLabelColor:
           theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
@@ -338,12 +392,19 @@ class _AuthScreenState extends State<AuthScreen>
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 320,
+          // фиксированная, но достаточная высота, + скролл внутри вкладки
+          height: 340,
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildLoginForm(),
-              _buildRegisterForm(),
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 4),
+                child: _buildLoginForm(),
+              ),
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 4),
+                child: _buildRegisterForm(),
+              ),
             ],
           ),
         ),
@@ -354,12 +415,16 @@ class _AuthScreenState extends State<AuthScreen>
   Widget _buildLoginForm() {
     return Form(
       key: _loginFormKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
             controller: _loginEmailController,
             decoration: _fieldDecoration('Email', Icons.email),
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.username, AutofillHints.email],
             validator: (value) {
               final email = value?.trim() ?? '';
               if (email.isEmpty) return 'Введите email';
@@ -375,6 +440,9 @@ class _AuthScreenState extends State<AuthScreen>
             controller: _loginPasswordController,
             decoration: _fieldDecoration('Пароль', Icons.lock),
             obscureText: true,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _handleLogin(),
+            autofillHints: const [AutofillHints.password],
             validator: (value) {
               if (value == null || value.isEmpty) return 'Введите пароль';
               return null;
@@ -386,8 +454,7 @@ class _AuthScreenState extends State<AuthScreen>
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleLogin,
               style: ElevatedButton.styleFrom(
-                padding:
-                const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -401,10 +468,12 @@ class _AuthScreenState extends State<AuthScreen>
             child: OutlinedButton.icon(
               onPressed: _isLoading ? null : _handleGoogleLogin,
               icon: const Icon(Icons.login),
-              label: const Text('Войти через Google'),
+              label: const Text(
+                'Войти через Google',
+                overflow: TextOverflow.ellipsis,
+              ),
               style: OutlinedButton.styleFrom(
-                padding:
-                const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -419,12 +488,14 @@ class _AuthScreenState extends State<AuthScreen>
   Widget _buildRegisterForm() {
     return Form(
       key: _regFormKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
             controller: _regUsernameController,
-            decoration:
-            _fieldDecoration('Имя пользователя', Icons.person),
+            decoration: _fieldDecoration('Имя пользователя', Icons.person),
+            textInputAction: TextInputAction.next,
             validator: (value) {
               final v = value?.trim() ?? '';
               if (v.isEmpty) return 'Введите имя пользователя';
@@ -437,6 +508,8 @@ class _AuthScreenState extends State<AuthScreen>
             controller: _regEmailController,
             decoration: _fieldDecoration('Email', Icons.email),
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.email],
             validator: (value) {
               final email = value?.trim() ?? '';
               if (email.isEmpty) return 'Введите email';
@@ -450,6 +523,9 @@ class _AuthScreenState extends State<AuthScreen>
             controller: _regPasswordController,
             decoration: _fieldDecoration('Пароль', Icons.lock),
             obscureText: true,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _handleRegister(),
+            autofillHints: const [AutofillHints.newPassword],
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Введите пароль';
@@ -466,8 +542,7 @@ class _AuthScreenState extends State<AuthScreen>
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleRegister,
               style: ElevatedButton.styleFrom(
-                padding:
-                const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -492,19 +567,22 @@ class _AuthScreenState extends State<AuthScreen>
         const SizedBox(height: 8),
         Text(
           'Мы отправили код на $_currentEmailForCode',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color:
-            theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
           ),
         ),
         const SizedBox(height: 20),
         Form(
           key: _codeFormKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: TextFormField(
             controller: _codeController,
-            decoration:
-            _fieldDecoration('Код из письма', Icons.verified),
+            decoration: _fieldDecoration('Код из письма', Icons.verified),
             keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _handleVerifyCode(),
             validator: (value) {
               final v = value?.trim() ?? '';
               if (v.isEmpty) return 'Введите код';
@@ -519,8 +597,7 @@ class _AuthScreenState extends State<AuthScreen>
           child: ElevatedButton(
             onPressed: _isLoading ? null : _handleVerifyCode,
             style: ElevatedButton.styleFrom(
-              padding:
-              const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -529,16 +606,21 @@ class _AuthScreenState extends State<AuthScreen>
           ),
         ),
         const SizedBox(height: 8),
-        TextButton(
-          onPressed: _isLoading
-              ? null
-              : () {
-            setState(() {
-              _awaitingCode = false;
-              _codeController.clear();
-            });
-          },
-          child: const Text('Изменить email или пароль'),
+        Center(
+          child: TextButton(
+            onPressed: _isLoading
+                ? null
+                : () {
+              setState(() {
+                _awaitingCode = false;
+                _codeController.clear();
+              });
+            },
+            child: const Text(
+              'Изменить email или пароль',
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ],
     );
