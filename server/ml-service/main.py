@@ -121,6 +121,117 @@ def load_user_profile(user_id: int) -> Dict[str, Any]:
         }
 
 
+def get_candidate_items(user_id: int,
+                        weather: Dict[str, Any],
+                        profile: Dict[str, Any],
+                        limit_per_cat: int = 300) -> List[Dict[str, Any]]:
+    """
+    Возвращает список candidate-вещей с приоритетом:
+    1) гардероб (wardrobe),
+    2) реальные новые (catalog/marketplace),
+    3) kaggle_seed.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+    feels_like = float(weather.get("feels_like") or weather.get("temperature") or 20.0)
+    style_pref = profile.get("style_preference", "casual")
+    gender = profile.get("gender", None)
+
+    required_categories = ["upper", "lower", "footwear", "accessory"]
+
+    candidates: List[Dict[str, Any]] = []
+
+    # 1. Wardrobe (личные вещи пользователя)
+    cursor.execute(
+        """
+        SELECT ci.*, w.user_id as owner_user_id
+        FROM clothing_items ci
+        JOIN wardrobe_items w ON w.clothing_item_id = ci.id
+        WHERE w.user_id = %s
+          AND ci.category = ANY(%s)
+          AND (ci.min_temp IS NULL OR ci.min_temp <= %s + 5)
+          AND (ci.max_temp IS NULL OR ci.max_temp >= %s - 5)
+        """,
+        (user_id, required_categories, feels_like, feels_like),
+    )
+    wardrobe_items = [dict(r) for r in cursor.fetchall()]
+    for it in wardrobe_items:
+        it.setdefault("source", "wardrobe")
+        it.setdefault("is_owned", True)
+    candidates.extend(wardrobe_items)
+
+    # Посчитаем покрытие по категориям
+    coverage = {cat: 0 for cat in required_categories}
+    for it in wardrobe_items:
+        cat = it.get("category")
+        if cat in coverage:
+            coverage[cat] += 1
+
+    # 2. Catalog/marketplace для недостающих категорий
+    missing_cats = [c for c, cnt in coverage.items() if cnt == 0]
+    if missing_cats:
+        cursor.execute(
+            """
+            SELECT ci.*, ci.owner_user_id
+            FROM clothing_items ci
+            WHERE ci.source IN ('catalog', 'marketplace')
+              AND ci.category = ANY(%s)
+              AND (ci.min_temp IS NULL OR ci.min_temp <= %s + 5)
+              AND (ci.max_temp IS NULL OR ci.max_temp >= %s - 5)
+            ORDER BY RANDOM()
+            LIMIT %s
+            """,
+            (missing_cats, feels_like, feels_like, len(missing_cats) * limit_per_cat),
+        )
+        new_items = [dict(r) for r in cursor.fetchall()]
+        for it in new_items:
+            it.setdefault("source", "catalog")
+            it.setdefault("is_owned", False)
+        candidates.extend(new_items)
+
+    # 3. Kaggle_seed для тех категорий, где всё равно пусто
+    coverage2 = {cat: 0 for cat in required_categories}
+    for it in candidates:
+        cat = it.get("category")
+        if cat in coverage2:
+            coverage2[cat] += 1
+    still_missing = [c for c, cnt in coverage2.items() if cnt == 0]
+
+    if still_missing:
+        cursor.execute(
+            """
+            SELECT ci.*, ci.owner_user_id
+            FROM clothing_items ci
+            WHERE ci.source = 'kaggle_seed'
+              AND ci.category = ANY(%s)
+              AND (ci.min_temp IS NULL OR ci.min_temp <= %s + 10)
+              AND (ci.max_temp IS NULL OR ci.max_temp >= %s - 10)
+            ORDER BY RANDOM()
+            LIMIT %s
+            """,
+            (still_missing, feels_like, feels_like, len(still_missing) * limit_per_cat),
+        )
+        k_items = [dict(r) for r in cursor.fetchall()]
+        for it in k_items:
+            it.setdefault("source", "kaggle_seed")
+            it.setdefault("is_owned", False)
+        candidates.extend(k_items)
+
+    cursor.close()
+    conn.close()
+
+    # Ограничиваем общее кол-во кандидатов, чтобы не убивать модель
+    MAX_TOTAL = 1000
+    if len(candidates) > MAX_TOTAL:
+        import random
+        random.shuffle(candidates)
+        candidates = candidates[:MAX_TOTAL]
+
+    logger.info(f"Total candidate items: {len(candidates)}")
+    return candidates
+
+
 def load_clothing_items(
     weather_data: Dict[str, Any],
     user_profile: Dict[str, Any],
@@ -305,57 +416,20 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
         logger.info(f"Loaded user profile: {user_profile}")
 
         available_items: List[Dict[str, Any]] = []
+        used_kaggle_dataset = False
 
-        # 2. Вещи из гардероба
-        if source in ("wardrobe", "mixed"):
-            wardrobe_items = fetch_clothing_items_from_marketplace(
-                user_id=user_id,
-                weather_data=weather_data,
-                user_profile=user_profile,
-                limit=50,
-                source="wardrobe",
-            )
-            for it in wardrobe_items:
-                it.setdefault("source", "wardrobe")
-            available_items.extend(wardrobe_items)
+        # 2. Получаем кандидатов через Retrieval из БД
+        available_items = get_candidate_items(user_id, weather_data, user_profile)
 
-        # 3. Вещи из каталога
-        if source in ("catalog", "mixed"):
-            catalog_items = fetch_clothing_items_from_marketplace(
-                user_id=user_id,
-                weather_data=weather_data,
-                user_profile=user_profile,
-                limit=50,
-                source="catalog",
-            )
-            for it in catalog_items:
-                it.setdefault("source", "catalog")
-            available_items.extend(catalog_items)
-
-        # 4. Fallback в БД clothing_items
+        # 3. Если нет подходящих вещей ни в гардеробе, ни в каталоге, ни в kaggle_seed –
+        #    используем fallback к обычным вещам из clothing_items
         if not available_items:
             logger.warning(
-                "Marketplace returned no items (all sources), "
-                "falling back to DB clothing_items"
+                "No items from retrieval. Falling back to DB clothing_items"
             )
             available_items = load_clothing_items(weather_data, user_profile)
 
-        logger.info(f"Loaded {len(available_items)} clothing items")
-
-        # 5. Если нет вещей ни в гардеробе, ни в каталоге, ни в clothing_items –
-        #    пробуем внутренний датасет
-        if not available_items:
-            logger.warning(
-                "No items from marketplace/DB. Trying internal dataset items..."
-            )
-            internal_items = load_internal_dataset_items()
-            if internal_items:
-                available_items = internal_items
-                logger.info(
-                    f"Using {len(available_items)} internal dataset items as candidates"
-                )
-
-        # 6. Если даже датасет пуст – возвращаем пустой ответ (safety net)
+        # 4. Если даже fallback пуст – возвращаем пустой ответ (safety net)
         if not available_items:
             logger.warning(
                 "No suitable clothing items found anywhere. "
@@ -372,7 +446,9 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
                 algorithm="no_items_fallback",
             )
 
-        # 7. Есть вещи – строим образ через ML
+        logger.info(f"Loaded {len(available_items)} candidate items for recommendation")
+
+        # 5. Есть вещи – строим образ через ML
         adjusted_min_confidence = min(0.3, float(min_confidence))
 
         outfit = predictor.build_outfit(
@@ -387,7 +463,10 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
         ml_powered = bool(outfit.get("ml_powered", True))
         algorithm = outfit.get("algorithm", "advanced_recommender")
 
-        # ML‑сервис НЕ пишет в recommendations — только считает
+        # Если использовали kaggle_seed – помечаем алгоритм
+        if used_kaggle_dataset:
+            algorithm = f"{algorithm}_kaggle_dataset"
+
         recommendation_id = -1
 
         return RecommendResponse(
@@ -458,58 +537,10 @@ def train_model(req: TrainRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 # --------------------------------------------------
-# Внутренний fallback‑датасет (например, Kaggle)
+# Внутренний fallback-датасет больше не нужен (styles.csv из Kaggle)
 # --------------------------------------------------
-INTERNAL_DATASET_ITEMS: List[Dict[str, Any]] = []
-
-
-def load_internal_dataset_items() -> List[Dict[str, Any]]:
-    """
-    Загружаем fallback‑вещи из локального датасета (Kaggle и т.п.).
-    Формат должен быть совместим с marketplace/DB: поля name, category, style и т.п.
-    """
-    global INTERNAL_DATASET_ITEMS
-
-    if INTERNAL_DATASET_ITEMS:
-        return INTERNAL_DATASET_ITEMS
-
-    try:
-        csv_path = os.path.join("data", "kaggle_items.csv")
-        df = pd.read_csv(csv_path)
-
-        items: List[Dict[str, Any]] = []
-        for _, row in df.iterrows():
-            item = {
-                "id": int(row.get("id", 0)),
-                "name": row.get("name", "Item"),
-                "category": row.get("category", "upper"),
-                "subcategory": row.get("subcategory") or None,
-                "style": row.get("style", "casual"),
-                "min_temp": float(row["min_temp"])
-                if not pd.isna(row.get("min_temp"))
-                else None,
-                "max_temp": float(row["max_temp"])
-                if not pd.isna(row.get("max_temp"))
-                else None,
-                "warmth_level": int(row["warmth_level"])
-                if not pd.isna(row.get("warmth_level"))
-                else None,
-                "formality_level": int(row["formality_level"])
-                if not pd.isna(row.get("formality_level"))
-                else None,
-                "icon_emoji": row.get("icon_emoji") or "",
-                "source": "internal_dataset",
-            }
-            items.append(item)
-
-        INTERNAL_DATASET_ITEMS = items
-        logger.info(f"Loaded {len(items)} internal dataset clothing items")
-        return INTERNAL_DATASET_ITEMS
-
-    except Exception as e:
-        logger.error(f"Error loading internal dataset items: {e}", exc_info=True)
-        INTERNAL_DATASET_ITEMS = []
-        return INTERNAL_DATASET_ITEMS
+# Удаляем старую функцию load_internal_dataset_items и глобальную переменную INTERNAL_DATASET_ITEMS
+# Теперь датасет Kaggle загружен в базу данных как source='kaggle_seed'
 
 # --------------------------------------------------
 # Стартовая загрузка модели
@@ -517,9 +548,6 @@ def load_internal_dataset_items() -> List[Dict[str, Any]]:
 @app.on_event("startup")
 def load_model_on_startup() -> None:
     global recommender, predictor
-
-    # заранее подгружаем внутренний датасет в память
-    load_internal_dataset_items()
 
     model_paths = [
         "models/kaggle_trained_recommender.pkl",

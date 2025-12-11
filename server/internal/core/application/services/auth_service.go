@@ -23,11 +23,13 @@ type UserRepository interface {
 
 // AuthService handles authentication-related operations
 type AuthService struct {
-	userRepo       UserRepository
-	emailService   EmailService
-	tokenService   *TokenService
-	verificationDB map[string]domain.VerificationCode
-	blacklistDB    map[string]bool
+	userRepo            UserRepository
+	emailService        EmailService
+	tokenService        *TokenService
+	verificationDB      map[string]domain.VerificationCode
+	blacklistDB         map[string]bool
+	passwordResetTokens map[string]PasswordResetToken
+	passwordResetLimiter map[string]time.Time // email -> время последнего запроса
 }
 
 // AuthConfig holds authentication configuration
@@ -46,11 +48,13 @@ func NewAuthService(
 	config AuthConfig,
 ) *AuthService {
 	return &AuthService{
-		userRepo:       userRepo,
-		emailService:   emailService,
-		tokenService:   tokenService,
-		verificationDB: make(map[string]domain.VerificationCode),
-		blacklistDB:    make(map[string]bool),
+		userRepo:            userRepo,
+		emailService:        emailService,
+		tokenService:        tokenService,
+		verificationDB:      make(map[string]domain.VerificationCode),
+		blacklistDB:         make(map[string]bool),
+		passwordResetTokens: make(map[string]PasswordResetToken),
+		passwordResetLimiter: make(map[string]time.Time),
 	}
 }
 
@@ -213,15 +217,46 @@ func (s *AuthService) generateVerificationCode(length int) (string, error) {
 	return base64.URLEncoding.EncodeToString(bytes)[:length], nil
 }
 
+// PasswordResetToken holds information about a password reset token
+type PasswordResetToken struct {
+	Token     string
+	UserID    domain.ID
+	ExpiresAt time.Time
+}
+
 // ForgotPassword initiates password reset process
 func (s *AuthService) ForgotPassword(ctx context.Context, email string) error {
+	// Очищаем устаревшие данные
+	s.cleanupExpiredData()
+
 	user, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil || user == nil {
 		// не раскрываем, есть ли пользователь
 		return nil
 	}
 
-	resetToken := "mock-reset-token" // TODO: заменить на реальный токен
+	// Проверяем ограничение частоты запросов - один раз в 5 минут
+	if lastRequest, exists := s.passwordResetLimiter[email]; exists {
+		if time.Since(lastRequest) < 5*time.Minute {
+			// Не раскрываем причину, просто выходим
+			return nil
+		}
+	}
+	s.passwordResetLimiter[email] = time.Now()
+
+	resetToken, err := s.generatePasswordResetToken(32) // 32-byte token
+	if err != nil {
+		return fmt.Errorf("failed to generate password reset token: %w", err)
+	}
+
+	// Сохраняем токен с временем истечения
+	reset := PasswordResetToken{
+		Token:     resetToken,
+		UserID:    user.ID,
+		ExpiresAt: time.Now().Add(24 * time.Hour), // токен действителен 24 часа
+	}
+
+	s.passwordResetTokens[resetToken] = reset
 
 	if err := s.emailService.SendPasswordResetEmail(user.Email, resetToken); err != nil {
 		log.Printf("Warning: failed to send password reset email: %v", err)
@@ -232,11 +267,16 @@ func (s *AuthService) ForgotPassword(ctx context.Context, email string) error {
 
 // ResetPassword resets a user's password
 func (s *AuthService) ResetPassword(ctx context.Context, token, newPassword string) error {
-	if token != "mock-reset-token" {
+	// Очищаем устаревшие данные
+	s.cleanupExpiredData()
+
+	// Проверяем токен
+	reset, exists := s.passwordResetTokens[token]
+	if !exists {
 		return fmt.Errorf("invalid or expired reset token")
 	}
 
-	user, err := s.userRepo.GetUser(ctx, 1) // mock
+	user, err := s.userRepo.GetUser(ctx, int(reset.UserID))
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -252,14 +292,49 @@ func (s *AuthService) ResetPassword(ctx context.Context, token, newPassword stri
 	user.Password = string(hashedPassword)
 	user.UpdatedAt = time.Now()
 
-	// можно добавить UpdateUser, если хочешь реальное сохранение
-	// _ = s.userRepo.UpdateUser(ctx, user)
+	if err := s.userRepo.UpdateUser(ctx, user); err != nil {
+		return fmt.Errorf("failed to update user password: %w", err)
+	}
+
+	// Удаляем использованный токен
+	delete(s.passwordResetTokens, token)
 
 	return nil
 }
 
+// generatePasswordResetToken generates a random password reset token
+func (s *AuthService) generatePasswordResetToken(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
+}
+
+// cleanupExpiredData удаляет устаревшие данные из хранилищ
+func (s *AuthService) cleanupExpiredData() {
+	now := time.Now()
+
+	// Очищаем устаревшие токены сброса пароля
+	for token, reset := range s.passwordResetTokens {
+		if now.After(reset.ExpiresAt) {
+			delete(s.passwordResetTokens, token)
+		}
+	}
+
+	// Очищаем устаревшие ограничения частоты (старше 1 часа)
+	for email, lastRequest := range s.passwordResetLimiter {
+		if now.Sub(lastRequest) > time.Hour {
+			delete(s.passwordResetLimiter, email)
+		}
+	}
+}
+
 // ValidateToken validates an access token and returns the associated user.
 func (s *AuthService) ValidateToken(tokenString string) (*domain.User, error) {
+	// Очищаем устаревшие данные периодически
+	s.cleanupExpiredData()
+
 	userID, err := s.tokenService.ValidateAccessToken(tokenString)
 	if err != nil {
 		return nil, fmt.Errorf("invalid token: %w", err)

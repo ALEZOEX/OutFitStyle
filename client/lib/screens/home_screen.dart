@@ -10,6 +10,7 @@ import '../services/api_service.dart';
 import '../services/auth_storage.dart';
 import '../theme/app_theme.dart';
 import '../utils/city_translator.dart';
+import '../utils/item_translator.dart';
 import '../utils/location_helper.dart';
 import '../widgets/alternative_outfits.dart';
 import '../widgets/onboarding_dialog.dart';
@@ -938,7 +939,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
                 Text(
-                  item.category,
+                  ItemTranslator.translateAnyField(item.category, 'category'),
                   style: TextStyle(
                     fontSize: 14,
                     color: theme.textTheme.bodyMedium?.color,

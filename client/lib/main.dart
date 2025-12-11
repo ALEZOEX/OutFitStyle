@@ -11,6 +11,7 @@ import 'services/auth_storage.dart';
 import 'services/auth_service.dart';
 import 'screens/auth_screen.dart';
 import 'screens/navigation_screen.dart';
+import 'screens/password_reset_screen.dart';
 import 'screens/profile_screen.dart';
 
 /// Берём API_BASE_URL из --dart-define, если он передан при сборке.
@@ -152,6 +153,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/auth': (context) => const AuthScreen(),
         '/home': (context) => const NavigationScreen(),
+        '/password-reset': (context) => const PasswordResetScreen(),
         '/profile': (context) => const ProfileScreen(),
       },
     );

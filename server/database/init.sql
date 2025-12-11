@@ -125,6 +125,16 @@ CREATE TABLE clothing_items (
                                 warmth_level        DOUBLE PRECISION,      -- используется как числовой признак
                                 formality_level     TEXT,                  -- может быть числом или категорией (как в датасете)
 
+    -- расширенные атрибуты для единой модели вещей
+                                gender              TEXT,
+                                master_category     TEXT,
+                                season              TEXT,
+                                base_colour         TEXT,
+                                usage               TEXT,
+                                source              TEXT DEFAULT 'catalog',  -- 'wardrobe', 'catalog', 'kaggle_seed', ...
+                                is_owned            BOOLEAN DEFAULT FALSE,
+                                owner_user_id       BIGINT,
+
                                 created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                 updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -132,6 +142,58 @@ CREATE TABLE clothing_items (
 CREATE INDEX idx_clothing_items_user_id   ON clothing_items(user_id);
 CREATE INDEX idx_clothing_items_category  ON clothing_items(category);
 CREATE INDEX idx_clothing_items_created_at ON clothing_items(created_at);
+
+-- Create wardrobe_items table for personal wardrobe items
+CREATE TABLE wardrobe_items (
+    user_id          BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    clothing_item_id BIGINT NOT NULL REFERENCES clothing_items(id) ON DELETE CASCADE,
+    created_at       TIMESTAMPTZ DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (user_id, clothing_item_id)
+);
+
+-- Add indexes for performance optimization
+CREATE INDEX idx_clothing_items_cat_temp
+    ON clothing_items (category, COALESCE(gender, 'unknown'), COALESCE(season, 'all'));
+
+CREATE INDEX idx_clothing_items_source_cat
+    ON clothing_items (source, category);
+
+CREATE INDEX idx_clothing_items_gender
+    ON clothing_items (gender);
+
+CREATE INDEX idx_clothing_items_season
+    ON clothing_items (season);
+
+CREATE INDEX idx_clothing_items_source
+    ON clothing_items (source);
+
+CREATE INDEX idx_wardrobe_items_user
+    ON wardrobe_items (user_id);
+
+CREATE INDEX idx_clothing_items_owner
+    ON clothing_items (owner_user_id);
+
+-- Update existing clothing_items to have 'wardrobe' source for user-owned items
+UPDATE clothing_items
+SET source = 'wardrobe',
+    is_owned = TRUE,
+    owner_user_id = user_id
+WHERE user_id IS NOT NULL;
+
+-- Add updated_at trigger for wardrobe_items table
+CREATE OR REPLACE FUNCTION update_wardrobe_items_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER trg_wardrobe_items_updated_at
+    BEFORE UPDATE ON wardrobe_items
+    FOR EACH ROW
+    EXECUTE FUNCTION update_wardrobe_items_updated_at();
 
 -- ============================================
 -- RECOMMENDATIONS

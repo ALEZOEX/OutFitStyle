@@ -158,6 +158,15 @@ def prepare_item_features(item: Dict[str, Any]) -> Dict[str, Any]:
     """Подготавливает признаки предмета одежды."""
     category = item.get("category", "upper")
 
+    # Извлекаем source и is_owned
+    source = item.get("source", "catalog")
+    is_owned = bool(item.get("is_owned", False))
+
+    # One-hot кодирование для source
+    is_wardrobe = 1 if source == "wardrobe" else 0
+    is_catalog = 1 if source == "catalog" else 0
+    is_kaggle_seed = 1 if source == "kaggle_seed" else 0
+
     return {
         "item_name": item.get("name", ""),
         "category": category,
@@ -167,6 +176,12 @@ def prepare_item_features(item: Dict[str, Any]) -> Dict[str, Any]:
         "warmth_level": _get_warmth_level(item, default=5.0),
         "formality_level": _get_formality_level(item, default=5.0),
         "item_style": (item.get("style") or "casual").lower(),
+        # Новые признаки для источника и принадлежности
+        "is_wardrobe": is_wardrobe,
+        "is_catalog": is_catalog,
+        "is_kaggle_seed": is_kaggle_seed,
+        "is_owned": 1 if is_owned else 0,
+        "source": source,  # для возможности визуализации/анализа
     }
 
 

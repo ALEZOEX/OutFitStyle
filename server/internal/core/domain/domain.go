@@ -101,15 +101,26 @@ type ExtendedWeatherData struct {
 // --------------------
 
 type ClothingItem struct {
-	ID                 ID      `json:"id"`
-	UserID             ID      `json:"user_id"`
-	Name               string  `json:"name"`
-	Category           string  `json:"category"`
-	Subcategory        string  `json:"subcategory,omitempty"`
-	IconEmoji          string  `json:"icon_emoji"`
-	MLScore            float64 `json:"ml_score,omitempty"`
-	Confidence         float64 `json:"confidence,omitempty"`
-	WeatherSuitability string  `json:"weather_suitability,omitempty"`
+	ID              ID      `json:"id"`
+	UserID          ID      `json:"user_id"`
+	Name            string  `json:"name"`
+	Category        string  `json:"category"`
+	CategoryID      int     `json:"category_id"`  // Добавлено для работы с базой данных
+	Subcategory     string  `json:"subcategory,omitempty"`
+	IconEmoji       string  `json:"icon_emoji"`
+	MLScore         float64 `json:"ml_score,omitempty"`
+	Confidence      float64 `json:"confidence,omitempty"`
+	WeatherSuitability string `json:"weather_suitability,omitempty"`
+
+	// Extended attributes for unified catalog
+	Gender          *string `json:"gender,omitempty"`
+	MasterCategory  *string `json:"master_category,omitempty"`
+	Season          *string `json:"season,omitempty"`
+	BaseColour      *string `json:"base_colour,omitempty"`
+	Usage           *string `json:"usage,omitempty"`
+	Source          string  `json:"source"`  // wardrobe, catalog, kaggle_seed
+	IsOwned         bool    `json:"is_owned"`
+	OwnerUserID     *ID     `json:"owner_user_id,omitempty"`
 }
 
 // OutfitSet представляет комплект одежды (набор вещей).
@@ -122,6 +133,19 @@ type OutfitSet struct {
 	Confidence  float64        `json:"confidence,omitempty"`
 	Reason      string         `json:"reason,omitempty"`
 	CreatedAt   time.Time      `json:"created_at"`
+}
+
+// ClothingItemFilters определяет фильтры для поиска вещей
+type ClothingItemFilters struct {
+	UserID       *ID
+	CategoryID   *int
+	Gender       *string
+	Season       *string
+	Source       *string
+	IsOwned      *bool
+	Temperature  *float64  // Для фильтрации по температуре
+	MaxTemp      *float64  // Для фильтрации по температуре
+	MinTemp      *float64  // Для фильтрации по температуре
 }
 
 // Запрос на генерацию рекомендации

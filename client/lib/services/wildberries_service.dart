@@ -81,8 +81,12 @@ class WildberriesService {
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-       final productData = data['data']['products'][0];
-        return WildberriesProduct.fromJson(productData);
+        final products = data['data']['products'] as List?;
+        if (products != null && products.isNotEmpty) {
+          final productData = products[0];
+          return WildberriesProduct.fromJson(productData);
+        }
+        return null;
       }
       return null;
     } catch (e) {

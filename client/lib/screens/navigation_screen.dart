@@ -69,12 +69,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today_outlined),
             activeIcon: Icon(Icons.calendar_today),
-            label: 'ПЛАН',
+            label: 'План',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag_outlined),
             activeIcon: Icon(Icons.shopping_bag),
-            label: 'ШОПИНГ',
+            label: 'Шопинг',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
