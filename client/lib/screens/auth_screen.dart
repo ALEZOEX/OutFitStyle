@@ -462,6 +462,15 @@ class _AuthScreenState extends State<AuthScreen>
               child: const Text('Войти'),
             ),
           ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: _isLoading
+                ? null
+                : () {
+                    Navigator.pushNamed(context, '/password-reset');
+                  },
+            child: const Text('Забыли пароль?'),
+          ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,

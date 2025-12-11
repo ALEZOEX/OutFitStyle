@@ -1,6 +1,7 @@
 import'package:flutter/material.dart';
 import '../models/recommendation.dart';
 import '../theme/app_theme.dart';
+import '../utils/item_translator.dart';
 
 class OutfitGrid extends StatelessWidget {
   final List<ClothingItem> items;
@@ -239,7 +240,7 @@ decoration: BoxDecoration(
                          borderRadius:BorderRadius.circular(12),
                         ),
                         child: Text(
-                          _getCategoryName(widget.item.category),
+                          ItemTranslator.translateAnyField(widget.item.category, 'category'),
                           style: TextStyle(
                             fontSize:11,
                             color: categoryColor,

@@ -68,7 +68,7 @@ func NewMLService(baseURL string, logger *zap.Logger) *MLService {
 	return &MLService{
 		baseURL: baseURL,
 		client: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: 60 * time.Second,  // Увеличенный таймаут для ML-запросов
 		},
 		circuitBreaker: cb,
 		logger:         logger,

@@ -57,7 +57,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('ШОПИНГ'),
+        title: const Text('Шопинг'),
         centerTitle: true,
       ),
       body: RefreshIndicator(

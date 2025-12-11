@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/outfit.dart';
 import '../theme/app_theme.dart';
+import '../utils/item_translator.dart';
 
 class AlternativeOutfits extends StatelessWidget {
   final List<OutfitSet> alternatives;
@@ -362,13 +363,36 @@ class _AlternativeCardState extends State<_AlternativeCard>
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        _getCategoryName(item.category),
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: theme.textTheme.bodyMedium?.color
-                              ?.withOpacity(0.8),
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              ItemTranslator.translateAnyField(item.category, 'category'),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: theme.textTheme.bodyMedium?.color
+                                    ?.withOpacity(0.8),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: Color(int.parse(item.getTagColor().substring(1), radix: 16) + 0xFF000000),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              item.getSourceDisplayText().length > 3
+                                ? '${item.getSourceDisplayText().substring(0, 3)}..'
+                                : item.getSourceDisplayText(),
+                              style: TextStyle(
+                                fontSize: 8,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

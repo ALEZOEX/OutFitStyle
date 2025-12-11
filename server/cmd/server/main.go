@@ -84,6 +84,7 @@ func main() {
 	// ---------- Репозитории ----------
 	userRepo := postgres.NewUserRepository(db, logger)
 	recommendationRepo := postgres.NewRecommendationRepository(db, logger)
+	clothingItemRepo := postgres.NewClothingItemRepository(db, logger)
 
 	// ---------- EmailService через cfg.Email ----------
 	var emailService services.EmailService
@@ -137,6 +138,7 @@ func main() {
 	recommendationService := services.NewRecommendationService(
 		recommendationRepo,
 		userRepo,
+		clothingItemRepo,
 		weatherService,
 		mlService,
 		logger,
