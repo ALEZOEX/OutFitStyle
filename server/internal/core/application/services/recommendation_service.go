@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -19,6 +20,7 @@ var ErrUserNotFound = errors.New("user not found")
 type RecommendationService struct {
 	recommendationRepo repositories.RecommendationRepository
 	userRepo           repositories.UserRepository
+	clothingItemRepo   repositories.ClothingItemRepository
 	weatherService     *external.WeatherService
 	mlService          *external.MLService
 	logger             *zap.Logger
@@ -28,6 +30,7 @@ type RecommendationService struct {
 func NewRecommendationService(
 	recommendationRepo repositories.RecommendationRepository,
 	userRepo repositories.UserRepository,
+	clothingItemRepo repositories.ClothingItemRepository,
 	weatherService *external.WeatherService,
 	mlService *external.MLService,
 	logger *zap.Logger,
@@ -35,6 +38,7 @@ func NewRecommendationService(
 	return &RecommendationService{
 		recommendationRepo: recommendationRepo,
 		userRepo:           userRepo,
+		clothingItemRepo:   clothingItemRepo,
 		weatherService:     weatherService,
 		mlService:          mlService,
 		logger:             logger,
@@ -95,6 +99,28 @@ func (s *RecommendationService) GetRecommendations(
 	// 3. Получаем рекомендацию от ML‑сервиса (ML только считает, без записи в БД)
 	mlRec, err := s.mlService.GetRecommendations(ctx, userID, mlWeather, source)
 	if err != nil {
+		// Проверяем, является ли ошибка таймаутом или нет соединения
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "context deadline exceeded") {
+			s.logger.Warn("ML service timeout",
+				zap.String("error", errMsg),
+				zap.Int("user_id", userID),
+			)
+			return nil, errors.New("ml service timeout: recommendations unavailable, please try again later")
+		}
+
+		if strings.Contains(errMsg, "connection refused") || strings.Contains(errMsg, "connection reset") {
+			s.logger.Error("ML service connection error",
+				zap.String("error", errMsg),
+				zap.Int("user_id", userID),
+			)
+			return nil, errors.New("ml service temporarily unavailable, please try again later")
+		}
+
+		s.logger.Error("Failed to get ML recommendations",
+			zap.Error(err),
+			zap.Int("user_id", userID),
+		)
 		return nil, errors.Wrap(err, "failed to get ML recommendations")
 	}
 
@@ -106,7 +132,9 @@ func (s *RecommendationService) GetRecommendations(
 
 	recommendation := mlRec
 
-	// 5. Асинхронно сохраняем рекомендацию в БД (единая точка записи)
+	// 5. Сохраняем рекомендацию в БД (теперь все вещи из базы данных, без костылей)
+	// Так как теперь все вещи находятся в базе данных (wardrobe, catalog, kaggle_seed),
+	// можно сохранять все рекомендации без исключений
 	go func(rec *domain.RecommendationResponse, uid domain.ID) {
 		saveCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()

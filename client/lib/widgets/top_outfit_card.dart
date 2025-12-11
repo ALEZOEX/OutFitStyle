@@ -1,6 +1,7 @@
 import'package:flutter/material.dart';
 import '../models/outfit.dart';
 import '../theme/app_theme.dart';
+import '../utils/item_translator.dart';
 
 class TopOutfitCard extends StatelessWidget {
   final OutfitSet outfit;
@@ -57,17 +58,17 @@ class TopOutfitCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? AppTheme.textPrimary : Colors.black87,
+                          color: isDark ? Colors.white : Colors.black87,
                         ),
                       ),
                       Text(
-                        'Рекомендован AI с уверенностью ${outfit.confidence * 100}%',
+                        'Рекомендован AI с уверенностью ${(outfit.confidence * 100).toInt()}%',
                         style: TextStyle(
-fontSize: 12,
+                          fontSize: 12,
                           color: isDark
-                              ? AppTheme.textSecondary
+                              ? Colors.grey[300]
                               : Colors.grey[600],
-),
+                        ),
                       ),
                     ],
                   ),
@@ -108,21 +109,42 @@ fontSize: 12,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: isDark
-                                 ? AppTheme.textPrimary
+                                 ? Colors.white
                                   : Colors.black87,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                          ),
                           const SizedBox(height: 2),
-                         Text(
-                            _getCategoryName(item.category),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark
-                                  ? AppTheme.textSecondary
-                                  : Colors.grey[600],
-                            ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  ItemTranslator.translateAnyField(item.category, 'category'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Color(int.parse(item.getTagColor().substring(1), radix: 16) + 0xFF000000),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  item.getSourceDisplayText(),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -153,7 +175,7 @@ fontSize: 12,
                       style: TextStyle(
                           fontSize: 12,
                           color:
-                             isDark ? AppTheme.textSecondary : Colors.black54,
+                             isDark ? Colors.white70 : Colors.black54,
                           fontWeight: FontWeight.w500),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
