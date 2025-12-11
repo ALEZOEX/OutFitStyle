@@ -404,9 +404,32 @@ class EnhancedOutfitPredictor:
                 noise = random.uniform(0.95, 1.05)
                 adjusted_prob = min(0.99, probabilities[i] * noise)
 
-                if adjusted_prob >= min_confidence:
+                # Добавляем приоритеты на основе источника и принадлежности
+                source = item.get("source", "catalog")
+                is_owned = bool(item.get("is_owned", False))
+
+                # Определяем приоритет
+                priority_bonus = 0.0
+                if source == "wardrobe" and is_owned:
+                    # Владелец -> +α к score если вещь подходит по погоде
+                    temp = weather_data.get("temperature", 20.0)
+                    min_temp = item.get("min_temp", 0.0)
+                    max_temp = item.get("max_temp", 30.0)
+                    if min_temp <= temp <= max_temp:
+                        priority_bonus = 0.1  # +α к score для личных вещей
+                elif source == "catalog":
+                    # Каталог -> чуть меньший приоритет
+                    priority_bonus = -0.05
+                elif source == "kaggle_seed":
+                    # Kaggle seed -> базовая линия (0)
+                    priority_bonus = 0.0
+
+                # Применяем приоритет
+                final_score = min(0.99, adjusted_prob + priority_bonus)
+
+                if final_score >= min_confidence:
                     item_copy = item.copy()
-                    item_copy["ml_score"] = float(adjusted_prob)
+                    item_copy["ml_score"] = float(final_score)
                     item_copy["is_recommended"] = bool(predictions[i])
                     scored_items.append(item_copy)
 
@@ -507,11 +530,29 @@ class EnhancedOutfitPredictor:
                 if warmth < 4:
                     score += 0.1
 
-            score = max(0.1, min(0.95, score))
+            # Добавляем приоритеты на основе источника и принадлежности (как в основном методе)
+            source = item.get("source", "catalog")
+            is_owned = bool(item.get("is_owned", False))
+
+            # Определяем приоритет
+            priority_bonus = 0.0
+            if source == "wardrobe" and is_owned:
+                # Владелец -> +α к score если вещь подходит по погоде
+                if min_temp <= temp <= max_temp:
+                    priority_bonus = 0.1  # +α к score для личных вещей
+            elif source == "catalog":
+                # Каталог -> чуть меньший приоритет
+                priority_bonus = -0.05
+            elif source == "kaggle_seed":
+                # Kaggle seed -> базовая линия (0)
+                priority_bonus = 0.0
+
+            # Применяем приоритет
+            final_score = max(0.1, min(0.95, score + priority_bonus))
 
             item_copy = item.copy()
-            item_copy["ml_score"] = score * random.uniform(0.95, 1.05)
-            item_copy["is_recommended"] = score >= 0.3
+            item_copy["ml_score"] = final_score * random.uniform(0.95, 1.05)
+            item_copy["is_recommended"] = final_score >= 0.3
             scored_items.append(item_copy)
 
         scored_items.sort(key=lambda x: x["ml_score"], reverse=True)
