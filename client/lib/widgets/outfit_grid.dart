@@ -357,12 +357,35 @@ color:_getCategoryColor(widget.item.category)
                    .withOpacity(0.2),
                borderRadius: BorderRadius.circular(16),
              ),
-              child: Text(
-                _getCategoryName(widget.item.category),
-                style: TextStyle(
-color:_getCategoryColor(widget.item.category),
-                  fontWeight:FontWeight.w600,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _getCategoryName(widget.item.category),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: _getCategoryColor(widget.item.category),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Color(int.parse(widget.item.getTagColor().substring(1), radix: 16) + 0xFF000000),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      widget.item.getSourceDisplayText().length > 3
+                        ? '${widget.item.getSourceDisplayText().substring(0, 3)}..'
+                        : widget.item.getSourceDisplayText(),
+                      style: const TextStyle(
+                        fontSize: 8,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
 ),
             ),
 

@@ -1,124 +1,80 @@
+version: '3.8'
+
 services:
   postgres:
-    image: postgres:15-alpine
-    container_name: outfitstyle-db
+    image: postgres:15
     environment:
+      POSTGRES_DB: outfitstyle
       POSTGRES_USER: Admin
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: outfitstyle
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./server/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./server/migrations/0001_v2_init_schema.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U Admin -d outfitstyle"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: outfitstyle-redis
     ports:
       - "6379:6379"
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   ml-service:
     build:
-      context: ./server/ml-service
-    container_name: outfitstyle-ml
+      context: .
+      dockerfile: Dockerfile.ml-service
     ports:
       - "5000:5000"
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=Admin
-      - DB_PASSWORD=password
-      - DB_NAME=outfitstyle
+      - MODEL_PATH=/app/models/model.pkl
+      - LOG_LEVEL=info
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     volumes:
       - ./server/ml-service/models:/app/models
-      - ./server/ml-service/data:/app/data
-    restart: unless-stopped
 
-  server:
+  api-gateway:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: outfitstyle-server
     ports:
       - "8080:8080"
-
-    # .env можно оставить только для локального go run,
-    # внутри контейнера мы им больше не пользуемся
-    env_file:
-      - ./server/.env
-
     environment:
-      # флаг, по которому в config.Load() НЕ вызываем godotenv.Load()
-      - RUN_IN_DOCKER=1
-
-      # сервер
-      - HOST=0.0.0.0
-      - PORT=8080
-
-      # база
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=Admin
       - DB_PASSWORD=password
       - DB_NAME=outfitstyle
-      - DB_SSL_MODE=disable
-
-      # redis / cache
-      - CACHE_ENABLED=true
-      - REDIS_URL=redis://redis:6379
-      - CACHE_EXPIRATION=300
-
-      # погода (OpenWeatherMap)
-      - WEATHER_API_KEY=8e9f1a366923ec63437f21570c89fa17
-      - WEATHER_API_URL=https://api.openweathermap.org/data/2.5
-      - WEATHER_API_TIMEOUT=10
-
-      # ML‑сервис
       - ML_SERVICE_URL=http://ml-service:5000
-      - ML_SERVICE_TIMEOUT=30
-
-      # безопасность
-      - JWT_SECRET=your-jwt-secret-key
-
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - LOG_LEVEL=info
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       ml-service:
         condition: service_started
-    restart: unless-stopped
-
-  marketplace-service:
-    build:
-      context: ./server/marketplace-service
-    container_name: outfitstyle-marketplace
-    ports:
-      - "5002:5000"
-    environment:
-      - PORT=5000
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=Admin
-      - DB_PASSWORD=password
-      - DB_NAME=outfitstyle
-      - WB_AFFILIATE_ID=${WB_AFFILIATE_ID:-YOUR_WB_ID}
-      - OZON_AFFILIATE_ID=${OZON_AFFILIATE_ID:-YOUR_OZON_ID}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:

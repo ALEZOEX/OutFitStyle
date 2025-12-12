@@ -38,13 +38,13 @@ func NewDB(connectionString string, logger *zap.Logger) (*DB, error) {
 		return nil, fmt.Errorf("failed to parse connection string: %w", err)
 	}
 
-	// Configure pool settings
-	poolConfig.MaxConns = 25
-	poolConfig.MinConns = 5
-	poolConfig.MaxConnLifetime = time.Hour
-	poolConfig.MaxConnIdleTime = 30 * time.Minute
-	poolConfig.HealthCheckPeriod = time.Minute
-	poolConfig.ConnConfig.ConnectTimeout = 5 * time.Second
+	// Configure pool settings with production-safe limits
+	poolConfig.MaxConns = 20           // Production-safe limit to prevent overwhelming DB
+	poolConfig.MinConns = 3            // Minimum connections to keep alive
+	poolConfig.MaxConnLifetime = 30 * time.Minute  // Prevent stale connections
+	poolConfig.MaxConnIdleTime = 10 * time.Minute  // Clean up idle connections
+	poolConfig.HealthCheckPeriod = 30 * time.Second // Health check period
+	poolConfig.ConnConfig.ConnectTimeout = 5 * time.Second  // Connection timeout
 
 	if poolConfig.ConnConfig.RuntimeParams == nil {
 		poolConfig.ConnConfig.RuntimeParams = make(map[string]string)
