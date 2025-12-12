@@ -30,7 +30,7 @@ require (
 )
 
 require (
-	github.com/prometheus/client_golang v1.23.2
+	github.com/prometheus/client_golang v1.37.0
 	github.com/swaggo/http-swagger v1.3.4
 )
 
@@ -84,4 +84,8 @@ require (
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
+)
+
+replace (
+	outfit-style-rec/contracts => ../contracts
 )

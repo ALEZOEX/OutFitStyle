@@ -1,47 +1,57 @@
-# Stage 1: Build the Go application
 FROM golang:1.24-alpine AS builder
-WORKDIR /app
-# Install build dependencies
-RUN apk add --no-cache gcc musl-dev linux-headers ca-certificates git
 
-# Copy Go module files
-COPY go.mod go.sum ./
-# Download dependencies with retry mechanism
-RUN for i in $(seq 1 3); do \
-        echo "Attempt $i to download modules"; \
-        go mod download && break || \
-        if [ $i -lt 3 ]; then sleep 5; else exit 1; fi; \
-    done
+# Install dependencies
+RUN apk add --no-cache git ca-certificates
 
-# Tidy up modules to ensure all dependencies are properly resolved
-RUN for i in $(seq 1 3); do \
-        echo "Attempt $i to tidy modules"; \
-        go mod tidy && break || \
-        if [ $i -lt 3 ]; then sleep 5; else exit 1; fi; \
-    done
-
-# Copy the source code
-COPY . .
-# Build the binary
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-w -s" -o server ./cmd/server
-
-# Stage 2: Create minimal runtime image
-FROM alpine:latest
-# Install ca-certificates for HTTPS calls
-RUN apk --no-cache add ca-certificates
-# Create appuser
-RUN adduser -D -s /bin/sh appuser
 # Set working directory
 WORKDIR /app
-# Copy the binary from builder stage
-COPY --from=builder /app/server .
-# Change ownership to appuser
-RUN chown -R appuser:appuser ./
-# Switch to appuser
-USER appuser
+
+# Copy go mod files
+COPY server/go.mod server/go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY server/ .
+
+# Build the migration tool
+RUN CGO_ENABLED=0 GOOS=linux go build -o migrate ./cmd/migrate
+
+# Build the main server
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
+
+# Final stage
+FROM alpine:latest
+
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+# Copy binaries from builder stage
+COPY --from=builder /app/migrate .
+COPY --from=builder /app/main .
+
+# Copy database schema and migrations
+COPY server/migrations/ ./migrations/
+COPY server/database/init_v2.sql ./database/
+
+# Security: Create non-root user
+RUN addgroup -g 65532 nonroot &&\
+    adduser -D -u 65532 -G nonroot nonroot
+
+# Change ownership to non-root user
+RUN chown -R nonroot:nonroot /root/
+
+USER nonroot
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -q -O /dev/null http://localhost:8080/health || exit 1
+
 # Expose port
 EXPOSE 8080
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
-# Run the binary
-ENTRYPOINT ["./server"]
+
+# Run migrations first, then start the main service
+CMD ["sh", "-c", "./migrate && ./main"]

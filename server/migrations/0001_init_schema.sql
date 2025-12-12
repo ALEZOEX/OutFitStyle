@@ -1,7 +1,13 @@
--- OutfitStyle Database Schema
--- Complete schema with Planner → Retrieval → Ranking architecture
+-- Migration: Initialize OutfitStyle schema with Planner → Retrieval → Ranking architecture
 
-BEGIN;
+-- Create schema migrations table for tracking applied migrations
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version VARCHAR(20) PRIMARY KEY,
+    applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Insert initial migration version
+INSERT INTO schema_migrations (version) VALUES ('0001') ON CONFLICT (version) DO NOTHING;
 
 -- Create enum types
 CREATE TYPE source_type AS ENUM ('synthetic', 'user', 'partner', 'manual');
@@ -17,17 +23,17 @@ CREATE TYPE pattern_type AS ENUM ('solid', 'striped', 'checked', 'printed', 'cam
 CREATE TABLE subcategory_specs (
   category        TEXT NOT NULL,
   subcategory     TEXT NOT NULL,
-  
+
   warmth_min      SMALLINT NOT NULL CHECK (warmth_min BETWEEN 1 AND 10),
   temp_min_reco   SMALLINT NOT NULL,
   temp_max_reco   SMALLINT NOT NULL CHECK (temp_min_reco <= temp_max_reco),
-  
+
   rain_ok         BOOLEAN NOT NULL DEFAULT TRUE,
   snow_ok         BOOLEAN NOT NULL DEFAULT TRUE,
   wind_ok         BOOLEAN NOT NULL DEFAULT TRUE,
-  
+
   PRIMARY KEY (category, subcategory),
-  
+
   CONSTRAINT subcategory_specs_category_check
     CHECK (category IN ('outerwear','upper','lower','footwear','accessory'))
 );
@@ -52,37 +58,37 @@ CREATE TABLE users (
 CREATE TABLE clothing_items (
   id               BIGINT PRIMARY KEY,
   name             TEXT NOT NULL,
-  
+
   category         TEXT NOT NULL,
   subcategory      TEXT NOT NULL,
-  
+
   gender           TEXT NOT NULL DEFAULT 'unisex' CHECK (gender IN ('unisex')),
-  
+
   style            TEXT NOT NULL CHECK (style IN ('casual','sport','street','classic','business','smart_casual','outdoor')),
   usage            TEXT NOT NULL CHECK (usage IN ('daily','work','formal','sport','outdoor','travel','party')),
   season           TEXT NOT NULL CHECK (season IN ('winter','spring','summer','autumn','all')),
   base_colour      TEXT NOT NULL CHECK (base_colour IN ('black','white','gray','navy','beige','brown','green','blue','red','pink','yellow','orange','purple')),
-  
+
   formality_level  SMALLINT NOT NULL CHECK (formality_level BETWEEN 1 AND 5),
   warmth_level     SMALLINT NOT NULL CHECK (warmth_level BETWEEN 1 AND 10),
-  
+
   min_temp         SMALLINT NOT NULL,
   max_temp         SMALLINT NOT NULL,
   CONSTRAINT clothing_items_temp_check CHECK (min_temp <= max_temp),
-  
+
   materials        TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
-  
+
   fit              TEXT NOT NULL CHECK (fit IN ('slim','regular','relaxed','oversized')),
   pattern          TEXT NOT NULL CHECK (pattern IN ('solid','striped','checked','printed','camo')),
-  
+
   icon_emoji       TEXT NOT NULL,
   source           TEXT NOT NULL DEFAULT 'synthetic',
   is_owned         BOOLEAN NOT NULL DEFAULT FALSE,
-  
+
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
-  
+
   CONSTRAINT clothing_items_source_check CHECK (source IN ('synthetic','user','partner','manual')),
-  
+
   CONSTRAINT clothing_items_subcategory_fk
     FOREIGN KEY (category, subcategory)
     REFERENCES subcategory_specs (category, subcategory)
@@ -256,5 +262,3 @@ ON CONFLICT (category, subcategory) DO UPDATE SET
   rain_ok       = EXCLUDED.rain_ok,
   snow_ok       = EXCLUDED.snow_ok,
   wind_ok       = EXCLUDED.wind_ok;
-
-COMMIT;
