@@ -16,6 +16,7 @@ import (
 
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/middleware"
 	"outfitstyle/server/internal/infrastructure/external"
 	resp "outfitstyle/server/internal/pkg/http"
 )
@@ -60,12 +61,13 @@ func NewRecommendationHandler(
 // @Accept       json
 // @Produce      json
 // @Param        city     query  string true  "Город"                    example(Moscow)
-// @Param        user_id  query  int    true  "ID пользователя"          example(1)
 // @Param        source   query  string false "Источник вещей: wardrobe (гардероб), catalog (каталог), mixed (оба). По умолчанию mixed."
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
 // @Failure      404  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
+// @Security     BearerAuth
 // @Router       /recommendations [get]
 func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -73,6 +75,14 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		duration := time.Since(start).Seconds()
 		recommendationDuration.Observe(duration)
 	}()
+
+	// Extract user ID from context (authenticated by middleware)
+	ctxUserID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		h.logger.Error("User ID not found in context")
+		resp.Error(w, http.StatusUnauthorized, fmt.Errorf("authentication required"))
+		return
+	}
 
 	// ---------------- ПАРАМЕТРЫ ЗАПРОСА ----------------
 
@@ -82,22 +92,12 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 		return
 	}
 
-	userIDStr := r.URL.Query().Get("user_id")
-	if userIDStr == "" {
-		resp.Error(w, http.StatusBadRequest, fmt.Errorf("user_id parameter is required"))
-		return
-	}
-
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil || userID <= 0 {
-		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id parameter"))
-		return
-	}
-
 	source := r.URL.Query().Get("source")
 	if source == "" {
 		source = "mixed"
 	}
+
+	userID := ctxUserID  // Use user ID from context instead of query param
 
 	ctx := r.Context()
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
@@ -197,15 +197,11 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 
 // GetRecommendationHistory handles GET /api/v1/recommendations/history
 func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("user_id")
-	if userIDStr == "" {
-		resp.Error(w, http.StatusBadRequest, fmt.Errorf("user_id parameter is required"))
-		return
-	}
-
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil || userID <= 0 {
-		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id parameter"))
+	// Extract user ID from context (authenticated by middleware)
+	ctxUserID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		h.logger.Error("User ID not found in context")
+		resp.Error(w, http.StatusUnauthorized, fmt.Errorf("authentication required"))
 		return
 	}
 
@@ -215,6 +211,8 @@ func (h *RecommendationHandler) GetRecommendationHistory(w http.ResponseWriter, 
 			limit = l
 		}
 	}
+
+	userID := ctxUserID  // Use user ID from context instead of query param
 
 	ctx := r.Context()
 	history, err := h.recommendationService.GetRecommendationHistory(ctx, userID, limit)
@@ -275,7 +273,9 @@ func (h *RecommendationHandler) GetRecommendationByID(w http.ResponseWriter, r *
 // @Param        body  body      map[string]interface{}  true "Оценка и отзыв"
 // @Success      200   {object}  map[string]string
 // @Failure      400   {object}  map[string]string
+// @Failure      401   {object}  map[string]string
 // @Failure      500   {object}  map[string]string
+// @Security     BearerAuth
 // @Router       /recommendations/{id}/rate [post]
 func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -288,8 +288,15 @@ func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *htt
 	}
 	defer r.Body.Close()
 
+	// Extract user ID from context (authenticated by middleware)
+	ctxUserID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		h.logger.Error("User ID not found in context")
+		resp.Error(w, http.StatusUnauthorized, fmt.Errorf("authentication required"))
+		return
+	}
+
 	var req struct {
-		UserID   int    `json:"user_id"`
 		Rating   int    `json:"rating"`
 		Feedback string `json:"feedback,omitempty"`
 	}
@@ -298,7 +305,7 @@ func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *htt
 		return
 	}
 
-	if req.UserID <= 0 {
+	if ctxUserID <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id"))
 		return
 	}
@@ -308,12 +315,14 @@ func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *htt
 		return
 	}
 
+	userID := ctxUserID  // Use user ID from context instead of request body
+
 	ctx := r.Context()
-	if err := h.recommendationService.RateRecommendation(ctx, req.UserID, id, req.Rating, req.Feedback); err != nil {
+	if err := h.recommendationService.RateRecommendation(ctx, userID, id, req.Rating, req.Feedback); err != nil {
 		h.logger.Error("Failed to rate recommendation",
 			zap.Error(err),
 			zap.Int("recommendation_id", id),
-			zap.Int("user_id", req.UserID),
+			zap.Int("user_id", userID),
 		)
 		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to rate recommendation"))
 		return
@@ -329,10 +338,12 @@ func (h *RecommendationHandler) RateRecommendation(w http.ResponseWriter, r *htt
 // @Accept       json
 // @Produce      json
 // @Param        id    path      int                  true "ID рекомендации"
-// @Param        body  body      map[string]int       true "ID пользователя"
+// @Param        body  body      object               true "Пустой объект"
 // @Success      200   {object}  map[string]string
 // @Failure      400   {object}  map[string]string
+// @Failure      401   {object}  map[string]string
 // @Failure      500   {object}  map[string]string
+// @Security     BearerAuth
 // @Router       /recommendations/{id}/favorite [post]
 func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -345,25 +356,27 @@ func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Reque
 	}
 	defer r.Body.Close()
 
-	var req struct {
-		UserID int `json:"user_id"`
-	}
-
-	if !decodeJSONReq(w, r, &req) {
+	// Extract user ID from context (authenticated by middleware)
+	ctxUserID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		h.logger.Error("User ID not found in context")
+		resp.Error(w, http.StatusUnauthorized, fmt.Errorf("authentication required"))
 		return
 	}
 
-	if req.UserID <= 0 {
+	if ctxUserID <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id"))
 		return
 	}
 
+	userID := ctxUserID  // Use user ID from context instead of request body
+
 	ctx := r.Context()
-	if err := h.recommendationService.AddFavorite(ctx, req.UserID, id); err != nil {
+	if err := h.recommendationService.AddFavorite(ctx, userID, id); err != nil {
 		h.logger.Error("Failed to add favorite",
 			zap.Error(err),
 			zap.Int("recommendation_id", id),
-			zap.Int("user_id", req.UserID),
+			zap.Int("user_id", userID),
 		)
 		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to add favorite"))
 		return
@@ -379,10 +392,12 @@ func (h *RecommendationHandler) AddFavorite(w http.ResponseWriter, r *http.Reque
 // @Accept       json
 // @Produce      json
 // @Param        id    path      int                  true "ID рекомендации"
-// @Param        body  body      map[string]int       true "ID пользователя"
+// @Param        body  body      object               true "Пустой объект"
 // @Success      200   {object}  map[string]string
 // @Failure      400   {object}  map[string]string
+// @Failure      401   {object}  map[string]string
 // @Failure      500   {object}  map[string]string
+// @Security     BearerAuth
 // @Router       /recommendations/{id}/favorite [delete]
 func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -395,24 +410,27 @@ func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Re
 	}
 	defer r.Body.Close()
 
-	var req struct {
-		UserID int `json:"user_id"`
-	}
-	if !decodeJSONReq(w, r, &req) {
+	// Extract user ID from context (authenticated by middleware)
+	ctxUserID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		h.logger.Error("User ID not found in context")
+		resp.Error(w, http.StatusUnauthorized, fmt.Errorf("authentication required"))
 		return
 	}
 
-	if req.UserID <= 0 {
+	if ctxUserID <= 0 {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id"))
 		return
 	}
 
+	userID := ctxUserID  // Use user ID from context instead of request body
+
 	ctx := r.Context()
-	if err := h.recommendationService.RemoveFavorite(ctx, req.UserID, id); err != nil {
+	if err := h.recommendationService.RemoveFavorite(ctx, userID, id); err != nil {
 		h.logger.Error("Failed to remove favorite",
 			zap.Error(err),
 			zap.Int("recommendation_id", id),
-			zap.Int("user_id", req.UserID),
+			zap.Int("user_id", userID),
 		)
 		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to remove favorite"))
 		return
@@ -427,20 +445,26 @@ func (h *RecommendationHandler) RemoveFavorite(w http.ResponseWriter, r *http.Re
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        user_id   path      int  true  "ID пользователя"
 // @Success      200  {object}  map[string]interface{}
-// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
-// @Router       /users/{user_id}/favorites [get]
+// @Security     BearerAuth
+// @Router       /users/favorites [get]
 func (h *RecommendationHandler) GetUserFavorites(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userIDStr := vars["user_id"]
-
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil || userID <= 0 {
-		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
+	// Extract user ID from context (authenticated by middleware)
+	ctxUserID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		h.logger.Error("User ID not found in context")
+		resp.Error(w, http.StatusUnauthorized, fmt.Errorf("authentication required"))
 		return
 	}
+
+	if ctxUserID <= 0 {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid user_id"))
+		return
+	}
+
+	userID := ctxUserID  // Use user ID from context instead of path parameter
 
 	ctx := r.Context()
 	favorites, err := h.recommendationService.GetUserFavorites(ctx, userID)

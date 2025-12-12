@@ -1,0 +1,136 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint-and-test-go:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+        
+    - name: Install dependencies
+      working-directory: ./server
+      run: go mod download
+      
+    - name: Run linters
+      working-directory: ./server
+      run: |
+        go vet ./...
+        gofmt -l .
+        
+    - name: Run unit tests
+      working-directory: ./server
+      run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+      
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+
+  lint-and-test-python:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      working-directory: ./server/ml-service
+      run: |
+        pip install flake8 pytest
+        pip install -r requirements.txt
+        
+    - name: Run linters
+      working-directory: ./server/ml-service
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Stop build if there are Python syntax errors or undefined names
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+    - name: Run Python tests
+      working-directory: ./server/ml-service
+      run: pytest -v
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      
+    - name: Build Go API image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./server
+        file: ./server/Dockerfile
+        tags: outfitstyle-api:test
+        load: true
+        
+    - name: Build ML Service image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./Dockerfile.ml-service
+        tags: outfitstyle-ml:test
+        load: true
+
+  migration-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: outfitstyle_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+        
+    - name: Run migrations
+      run: |
+        cd server
+        # Run all migrations to test compatibility
+        for sql_file in ../migrations/*.sql; do
+          echo "Running migration: $sql_file"
+          psql -h localhost -U Admin -d outfitstyle_test -f "$sql_file"
+        done
+      env:
+        PGPASSWORD: password
+
+  contract-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      working-directory: ./server/ml-service
+      run: |
+        pip install pytest requests
+        
+    - name: Run contract tests
+      run: |
+        python -m pytest scripts/test_ranking_performance.py -k "test_ranking_performance"

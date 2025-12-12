@@ -113,7 +113,8 @@ func main() {
 		emailService = services.NewNoopEmailService()
 	}
 
-	// ---------- TokenService / AuthService ----------
+	// ---------- Services ----------
+	clothingItemService := services.NewClothingItemService(clothingItemRepo)
 	tokenService := services.NewTokenService(
 		cfg.Security.JWTSecret,
 		time.Duration(cfg.Security.TokenExpiryHours)*time.Hour,
@@ -147,12 +148,13 @@ func main() {
 	userService := services.NewUserService(userRepo, logger)
 
 	// ---------- HTTP‑обработчики ----------
+	clothingItemHandler := handlers.NewClothingItemHandler(clothingItemService, logger)
 	recommendationHandler := handlers.NewRecommendationHandler(recommendationService, weatherService, logger)
 	authHandler := handlers.NewAuthHandler(authService, googleAuth)
 	userHandler := handlers.NewUserHandler(userService, logger)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, recommendationHandler, authHandler, userHandler, logger)
+	router := setupRouter(cfg, clothingItemHandler, recommendationHandler, authHandler, userHandler, logger)
 
 	// ---------- Health checks ----------
 	checks := map[string]health.Checker{
@@ -213,6 +215,7 @@ func setupLogger() (*zap.Logger, error) {
 
 func setupRouter(
 	cfg *config.AppConfig,
+	clothingItemHandler *handlers.ClothingItemHandler,
 	recommendationHandler *handlers.RecommendationHandler,
 	authHandler *handlers.AuthHandler,
 	userHandler *handlers.UserHandler,
@@ -253,6 +256,20 @@ func setupRouter(
 	users.HandleFunc("/{id}/outfit-plans", userHandler.CreateOutfitPlan).Methods(stdhttp.MethodPost)
 	users.HandleFunc("/{id}/outfit-plans/{plan_id}", userHandler.DeleteOutfitPlan).Methods(stdhttp.MethodDelete)
 	users.HandleFunc("/{id}/stats", userHandler.GetUserStats).Methods(stdhttp.MethodGet)
+
+	// Clothing items routes
+	clothingItems := protected.PathPrefix("/clothing-items").Subrouter()
+	clothingItems.HandleFunc("", clothingItemHandler.GetAllClothingItems).Methods(stdhttp.MethodGet)
+	clothingItems.HandleFunc("", clothingItemHandler.CreateClothingItem).Methods(stdhttp.MethodPost)
+	clothingItems.HandleFunc("/{id:[0-9]+}", clothingItemHandler.GetClothingItem).Methods(stdhttp.MethodGet)
+	clothingItems.HandleFunc("/{id:[0-9]+}", clothingItemHandler.UpdateClothingItem).Methods(stdhttp.MethodPut)
+	clothingItems.HandleFunc("/{id:[0-9]+}", clothingItemHandler.DeleteClothingItem).Methods(stdhttp.MethodDelete)
+
+	// Wardrobe routes
+	wardrobe := protected.PathPrefix("/wardrobe").Subrouter()
+	wardrobe.HandleFunc("/users/{user_id:[0-9]+}", clothingItemHandler.GetWardrobeItems).Methods(stdhttp.MethodGet)
+	wardrobe.HandleFunc("/users/{user_id:[0-9]+}/items/{item_id:[0-9]+}", clothingItemHandler.AddItemToWardrobe).Methods(stdhttp.MethodPost)
+	wardrobe.HandleFunc("/users/{user_id:[0-9]+}/items/{item_id:[0-9]+}", clothingItemHandler.RemoveItemFromWardrobe).Methods(stdhttp.MethodDelete)
 
 	// Prometheus metrics
 	router.Handle("/metrics", promhttp.Handler()).Methods(stdhttp.MethodGet)
