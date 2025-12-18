@@ -39,6 +39,7 @@ AccessTokenTTL      time.Duration
 RefreshTokenTTL     time.Duration
 CORSAllowedOrigins  []string
 RateLimitPerMinute  int
+GoogleClientID      string
 }
 
 type MLServiceConfig struct {
@@ -169,6 +170,7 @@ AccessTokenTTL:     getEnvDurationFirst([]string{"JWT_ACCESS_TOKEN_TTL"}, 15*tim
 RefreshTokenTTL:    getEnvDurationFirst([]string{"JWT_REFRESH_TOKEN_TTL"}, 720*time.Hour),
 CORSAllowedOrigins: splitCSV(getEnvFirst([]string{"CORS_ALLOWED_ORIGINS"}, "*")),
 RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", getEnvInt("RATE_LIMIT", 100, 1, 100000), 1, 100000),
+GoogleClientID:     getEnvFirst([]string{"GOOGLE_CLIENT_ID"}, ""),
 },
 MLService: MLServiceConfig{
 BaseURL: getEnvFirst([]string{"ML_SERVICE_URL"}, "http://localhost:8000"),

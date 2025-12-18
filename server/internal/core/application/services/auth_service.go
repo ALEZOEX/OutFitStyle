@@ -11,6 +11,7 @@ import (
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/external"
 )
 
 var (
@@ -22,6 +23,7 @@ type AuthService struct {
 	userRepo    repositories.UserRepository
 	sessionRepo repositories.SessionRepository
 	tokenSvc    *TokenService
+	google      *external.GoogleAuthClient
 }
 
 type RegisterResult struct {
@@ -39,8 +41,14 @@ func NewAuthService(
 	userRepo repositories.UserRepository,
 	sessionRepo repositories.SessionRepository,
 	tokenSvc *TokenService,
+	google *external.GoogleAuthClient,
 ) *AuthService {
-	return &AuthService{userRepo: userRepo, sessionRepo: sessionRepo, tokenSvc: tokenSvc}
+	return &AuthService{
+		userRepo:    userRepo,
+		sessionRepo: sessionRepo,
+		tokenSvc:    tokenSvc,
+		google:      google,
+	}
 }
 
 type DeviceInfo struct {
@@ -154,6 +162,68 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 		RefreshToken: newRefresh,
 		ExpiresAt:    exp,
 	}, nil
+}
+
+func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device DeviceInfo) (*LoginResult, error) {
+	// 1. Валидируем токен через Google
+	gUser, err := s.google.Verify(ctx, idToken)
+	if err != nil {
+		return nil, ErrInvalidCredentials // Или более специфичная ошибка
+	}
+
+	if !gUser.EmailVerified {
+		return nil, errors.New("google email not verified")
+	}
+
+	// 2. Ищем пользователя в БД
+	u, err := s.userRepo.GetUserByEmail(ctx, gUser.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	var resultUser *domain.User
+
+	if u == nil {
+		// 3. Пользователя нет -> Регистрируем автоматически
+		displayName := gUser.FirstName
+		if gUser.LastName != "" {
+			displayName += " " + gUser.LastName
+		}
+
+		provider := "google"
+
+		newUser := &domain.User{
+			Email:         gUser.Email,
+			PasswordHash:  "", // Пароля нет - пустая строка
+			DisplayName:   &displayName,
+			AvatarURL:     &gUser.Picture,
+			IsActive:      true,
+			IsVerified:    true, // Google уже проверил
+			OAuthProvider: &provider,
+			OAuthID:       nil, // Можно сохранить sub из токена, если нужно
+			Locale:        "ru",
+			Timezone:      "Europe/Moscow",
+		}
+
+		if err := s.userRepo.CreateUser(ctx, newUser); err != nil {
+			return nil, err
+		}
+		resultUser = newUser
+	} else {
+		// Пользователь есть. Можно обновить аватарку или OAuth поля, если нужно.
+		// Для MVP просто логиним.
+		resultUser = u
+	}
+
+	// 4. Генерируем сессию и токены (ИСПРАВЛЕНИЕ ТВОЕЙ ОШИБКИ)
+	// Используем тот же хелпер, что и в Login/Register.
+	// Он сам разберется с GenerateAccessToken(3 аргумента) и SessionRepo.Create.
+	pair, err := s.createSessionAndTokens(ctx, resultUser.ID, device)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResult{User: resultUser, Tokens: pair}, nil
 }
 
 func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool) error {

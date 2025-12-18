@@ -122,7 +122,8 @@ func main() {
 	// var clothingItemService *services.ClothingItemService
 	// clothingItemService = nil
 	tokenSvc := services.NewTokenService(cfg.Security.JWTSecret, cfg.Security.AccessTokenTTL, cfg.Security.RefreshTokenTTL)
-	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc)
+	googleClient := ext.NewGoogleAuthClient(cfg.Security.GoogleClientID)
+	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient)
 
 	// ---------- Rate limit violation repository ----------
 	rateLimitRepo := pg.NewRateLimitViolationRepository(db)
