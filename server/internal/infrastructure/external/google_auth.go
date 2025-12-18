@@ -7,35 +7,39 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-type GoogleAuthService struct {
-	verifier *idtoken.Validator
+type GoogleUser struct {
+	Email         string
+	EmailVerified bool
+	FirstName     string
+	LastName      string
+	Picture       string
 }
 
-func NewGoogleAuthService() (*GoogleAuthService, error) {
-	verifier, err := idtoken.NewValidator(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("failed to create token validator: %w", err)
-	}
-	return &GoogleAuthService{verifier: verifier}, nil
+type GoogleAuthClient struct {
+	clientID string
 }
 
-// VerifyIDToken проверяет ID-токен и возвращает email
-func (g *GoogleAuthService) VerifyIDToken(ctx context.Context, idToken string) (string, error) {
-	payload, err := g.verifier.Validate(ctx, idToken, "")
+func NewGoogleAuthClient(clientID string) *GoogleAuthClient {
+	return &GoogleAuthClient{clientID: clientID}
+}
+
+func (c *GoogleAuthClient) Verify(ctx context.Context, tokenString string) (*GoogleUser, error) {
+	payload, err := idtoken.Validate(ctx, tokenString, c.clientID)
 	if err != nil {
-		return "", fmt.Errorf("invalid Google ID token: %w", err)
+		return nil, fmt.Errorf("google token invalid: %w", err)
 	}
 
-	email, ok := payload.Claims["email"].(string)
-	if !ok || email == "" {
-		return "", fmt.Errorf("email not found in token")
-	}
-
-	// Опционально: проверить verified_email
+	email, _ := payload.Claims["email"].(string)
 	verified, _ := payload.Claims["email_verified"].(bool)
-	if !verified {
-		return "", fmt.Errorf("email not verified")
-	}
+	givenName, _ := payload.Claims["given_name"].(string)
+	familyName, _ := payload.Claims["family_name"].(string)
+	picture, _ := payload.Claims["picture"].(string)
 
-	return email, nil
+	return &GoogleUser{
+		Email:         email,
+		EmailVerified: verified,
+		FirstName:     givenName,
+		LastName:      familyName,
+		Picture:       picture,
+	}, nil
 }
