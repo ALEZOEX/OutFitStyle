@@ -1,97 +1,94 @@
 package services
 
 import (
-	"fmt"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
 	"outfitstyle/server/internal/core/domain"
 )
 
-// TokenService handles JWT token generation and validation
 type TokenService struct {
-	jwtSecret          []byte
-	accessTokenExpiry  time.Duration
-	refreshTokenExpiry time.Duration
+	secret          []byte
+	accessTTL       time.Duration
+	refreshTTL      time.Duration
 }
 
-// NewTokenService creates a new token service
-func NewTokenService(
-	jwtSecret string,
-	accessTokenExpiry time.Duration,
-	refreshTokenExpiry time.Duration,
-) *TokenService {
+type AccessClaims struct {
+	jwt.RegisteredClaims
+	SessionID string `json:"sid"`
+}
+
+func NewTokenService(jwtSecret string, accessTTL, refreshTTL time.Duration) *TokenService {
 	return &TokenService{
-		jwtSecret:          []byte(jwtSecret),
-		accessTokenExpiry:  accessTokenExpiry,
-		refreshTokenExpiry: refreshTokenExpiry,
+		secret:     []byte(jwtSecret),
+		accessTTL:  accessTTL,
+		refreshTTL: refreshTTL,
 	}
 }
 
-// GenerateAccessToken generates a new access token for a user
-func (s *TokenService) GenerateAccessToken(user *domain.User) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id":  user.ID,
-		"email":    user.Email,
-		"username": user.Username,
-		"exp":      time.Now().Add(s.accessTokenExpiry).Unix(),
+func (s *TokenService) AccessTTL() time.Duration  { return s.accessTTL }
+func (s *TokenService) RefreshTTL() time.Duration { return s.refreshTTL }
+
+func (s *TokenService) GenerateAccessToken(userID, sessionID domain.ID) (token string, expiresAt time.Time, err error) {
+	now := time.Now()
+	expiresAt = now.Add(s.accessTTL)
+
+	claims := AccessClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   userID.String(),
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+		},
+		SessionID: sessionID.String(),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(s.jwtSecret)
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err = t.SignedString(s.secret)
+	return token, expiresAt, err
 }
 
-// GenerateRefreshToken generates a new refresh token for a user
-func (s *TokenService) GenerateRefreshToken(user *domain.User) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(s.refreshTokenExpiry).Unix(),
-	}
+func (s *TokenService) ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, err error) {
+	parser := jwt.NewParser(jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}))
+	var claims AccessClaims
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(s.jwtSecret)
-}
-
-// ValidateAccessToken validates an access token and returns the user ID
-func (s *TokenService) ValidateAccessToken(tokenString string) (int, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return s.jwtSecret, nil
+	_, err = parser.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (any, error) {
+		return s.secret, nil
 	})
-
 	if err != nil {
-		return 0, err
+		return domain.ID{}, domain.ID{}, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		if userID, ok := claims["user_id"].(float64); ok {
-			return int(userID), nil
-		}
+	if claims.Subject == "" || claims.SessionID == "" {
+		return domain.ID{}, domain.ID{}, errors.New("missing claims")
 	}
 
-	return 0, fmt.Errorf("invalid token")
+	userID, err = domain.ParseID(claims.Subject)
+	if err != nil {
+		return domain.ID{}, domain.ID{}, err
+	}
+	sessionID, err = domain.ParseID(claims.SessionID)
+	if err != nil {
+		return domain.ID{}, domain.ID{}, err
+	}
+
+	return userID, sessionID, nil
 }
 
-// ValidateRefreshToken validates a refresh token and returns the user ID
-func (s *TokenService) ValidateRefreshToken(tokenString string) (int, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return s.jwtSecret, nil
-	})
-
-	if err != nil {
-		return 0, err
+func (s *TokenService) GenerateRefreshToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
 	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		if userID, ok := claims["user_id"].(float64); ok {
-			return int(userID), nil
-		}
-	}
-
-	return 0, fmt.Errorf("invalid token")
+func (s *TokenService) HashRefreshToken(refreshToken string) string {
+	sum := sha256.Sum256([]byte(refreshToken))
+	return hex.EncodeToString(sum[:])
 }

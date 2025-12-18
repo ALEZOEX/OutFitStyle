@@ -11,11 +11,44 @@ RUN apt-get update && apt-get install -y \
 COPY server/ml-service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the ML service code
+# Copy the ML service code (includes contracts subdirectory)
 COPY server/ml-service/ ./
+
+# Ensure models directory exists
+RUN mkdir -p /app/models
+
+# Copy model files
+COPY server/ml-service/models/ /app/models/
+
+# List the contents of models directory to debug
+RUN ls -la /app/models/
+
+# Create model.pkl if it doesn't exist by copying from available models, or create a dummy one if none exist
+RUN if [ -f /app/models/kaggle_trained_recommender.pkl ]; then \
+        cp /app/models/kaggle_trained_recommender.pkl /app/models/model.pkl; \
+    elif [ -f /app/models/advanced_recommender.pkl ]; then \
+        cp /app/models/advanced_recommender.pkl /app/models/model.pkl; \
+    elif [ -f /app/models/advanced_recommender_v1.pkl ]; then \
+        cp /app/models/advanced_recommender_v1.pkl /app/models/model.pkl; \
+    else \
+        echo "No model files found in /app/models/, creating a dummy model.pkl"; \
+        python -c "import pickle; pickle.dump({'dummy': True}, open('/app/models/model.pkl', 'wb'))"; \
+    fi
+
+# Also create the model file in the expected relative location for the application
+RUN mkdir -p /app/api/models && \
+    if [ -f /app/models/model.pkl ]; then \
+        cp /app/models/model.pkl /app/api/models/model.pkl; \
+    else \
+        python -c "import pickle; pickle.dump({'dummy': True}, open('/app/api/models/model.pkl', 'wb'))"; \
+    fi
 
 # Expose port
 EXPOSE 5000
 
-# Run the application
-CMD ["python", "api/main.py"]
+# Add the app directory to PYTHONPATH so that contracts module can be found
+ENV PYTHONPATH=/app:$PYTHONPATH
+
+# Set the working directory and run the application
+WORKDIR /app/api
+CMD ["python", "main.py"]

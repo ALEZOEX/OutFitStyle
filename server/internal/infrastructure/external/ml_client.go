@@ -5,201 +5,51 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
-	"github.com/sony/gobreaker"
-	"go.uber.org/zap"
-
-	"outfitstyle/server/internal/core/domain"
+	"github.com/pkg/errors"
 )
 
-// MLService отвечает за общение с ML-сервисом рекомендаций.
-type MLService struct {
-	baseURL        string
-	client         *http.Client
-	circuitBreaker *gobreaker.CircuitBreaker
-	logger         *zap.Logger
+type MLClient struct {
+	baseURL string
+	http    *http.Client
 }
 
-// MLRecommendationRequest – DTO-запрос к ML-сервису.
-type MLRecommendationRequest struct {
-	UserID        int                `json:"user_id"`
-	Weather       domain.WeatherData `json:"weather"`
-	MinConfidence float64            `json:"min_confidence"`
-	Source        string             `json:"source,omitempty"` // "wardrobe" | "marketplace"
-}
-
-// MLRecommendationResponse – DTO-ответ от ML-сервиса.
-type MLRecommendationResponse struct {
-	RecommendationID int                   `json:"recommendation_id"`
-	UserID           int                   `json:"user_id"`
-	Weather          map[string]any        `json:"weather"`         // сейчас не используем, но оставляем для совместимости
-	Recommendations  []domain.ClothingItem `json:"recommendations"` // список вещей
-	OutfitScore      float64               `json:"outfit_score"`    // итоговый скор комплекта
-	MLPowered        bool                  `json:"ml_powered"`      // true, если работала ML-модель
-	Algorithm        string                `json:"algorithm"`       // идентификатор алгоритма
-}
-
-// NewMLService создаёт клиент ML-сервиса.
-func NewMLService(baseURL string, logger *zap.Logger) *MLService {
-	if logger == nil {
-		logger = zap.NewNop()
-	}
-
-	cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
-		Name:        "MLService",
-		MaxRequests: 3,
-		Interval:    30 * time.Second,
-		Timeout:     5 * time.Minute,
-		ReadyToTrip: func(counts gobreaker.Counts) bool {
-			return counts.ConsecutiveFailures > 2
-		},
-		OnStateChange: func(name string, from gobreaker.State, to gobreaker.State) {
-			logger.Info("circuit breaker state changed",
-				zap.String("name", name),
-				zap.String("from", from.String()),
-				zap.String("to", to.String()))
-		},
-	})
-
-	return &MLService{
+func NewMLClient(baseURL string, timeout time.Duration) *MLClient {
+	return &MLClient{
 		baseURL: baseURL,
-		client: &http.Client{
-			Timeout: 60 * time.Second,  // Увеличенный таймаут для ML-запросов
-		},
-		circuitBreaker: cb,
-		logger:         logger,
+		http:    &http.Client{Timeout: timeout},
 	}
 }
 
-// GetRecommendations запрашивает рекомендации у ML-сервиса.
-//
-// Теперь мы дополнительно передаём source, который управляет тем,
-// откуда ML берёт вещи: "wardrobe" (личный гардероб) или "marketplace" (каталог).
-// Для совместимости наружный контракт RecommendationService сам выбирает source.
-func (s *MLService) GetRecommendations(
-	ctx context.Context,
-	userID int,
-	weather domain.WeatherData,
-	source string,
-) (*domain.RecommendationResponse, error) {
+func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankResponse, error) {
+	var out TZMLRankResponse
 
-	if source == "" {
-		source = "wardrobe"
-	}
-
-	reqPayload := MLRecommendationRequest{
-		UserID:        userID,
-		Weather:       weather,
-		MinConfidence: 0.5,    // разумный дефолт, дальше ML сам опустит до 0.3
-		Source:        source, // прокидываем в ML-сервис
-	}
-
-	jsonData, err := json.Marshal(reqPayload)
+	body, err := json.Marshal(req)
 	if err != nil {
-		return nil, fmt.Errorf("ml: failed to marshal request: %w", err)
+		return out, errors.Wrap(err, "marshal rank request")
 	}
 
-	var mlResp MLRecommendationResponse
-
-	// Выполняем запрос с circuit breaker и экспоненциальным backoff.
-	if err := s.doWithCircuitBreaker(func() error {
-		return s.doRequest(ctx, "/api/ml/recommend", http.MethodPost, jsonData, &mlResp)
-	}); err != nil {
-		return nil, fmt.Errorf("ml: request failed: %w", err)
-	}
-
-	// Маппим DTO в доменную модель.
-	rec := &domain.RecommendationResponse{
-		// ID заполняется ниже по слою (БД), здесь его нет.
-		UserID:         domain.ID(userID),
-		Location:       weather.Location,
-		Temperature:    weather.Temperature,
-		FeelsLike:      weather.FeelsLike,
-		Weather:        weather.Weather,
-		Humidity:       weather.Humidity,
-		WindSpeed:      weather.WindSpeed,
-		MinTemp:        weather.MinTemp,
-		MaxTemp:        weather.MaxTemp,
-		WillRain:       weather.WillRain,
-		WillSnow:       weather.WillSnow,
-		HourlyForecast: weather.HourlyForecast,
-		Items:          mlResp.Recommendations,
-		OutfitScore:    mlResp.OutfitScore,
-		MLPowered:      mlResp.MLPowered,
-		Algorithm:      mlResp.Algorithm,
-		Timestamp:      time.Now(),
-	}
-
-	return rec, nil
-}
-
-// HealthCheck реализует интерфейс health.Checker.
-func (s *MLService) HealthCheck() error {
-	if s.baseURL == "" {
-		return fmt.Errorf("ml service base url is empty")
-	}
-	// При желании можно дергать /health у ML-сервиса.
-	return nil
-}
-
-// doWithCircuitBreaker оборачивает операцию в circuit breaker + backoff.
-func (s *MLService) doWithCircuitBreaker(operation func() error) error {
-	_, err := s.circuitBreaker.Execute(func() (interface{}, error) {
-		bo := backoff.NewExponentialBackOff()
-		bo.MaxElapsedTime = 60 * time.Second
-		return nil, backoff.Retry(operation, backoff.WithMaxRetries(bo, 3))
-	})
-	return err
-}
-
-// doRequest выполняет HTTP-запрос к ML-сервису и декодирует ответ в result.
-func (s *MLService) doRequest(
-	ctx context.Context,
-	endpoint, method string,
-	body []byte,
-	result interface{},
-) error {
-	url := s.baseURL + endpoint
-
-	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewReader(body))
+	u := fmt.Sprintf("%s/api/v1/rank", c.baseURL)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(body))
 	if err != nil {
-		return fmt.Errorf("ml: failed to create request: %w", err)
+		return out, errors.Wrap(err, "new request")
 	}
+	httpReq.Header.Set("Content-Type", "application/json")
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "OutfitStyle-Backend/1.0")
-
-	s.logger.Debug("ml request",
-		zap.String("url", url),
-		zap.String("method", method))
-
-	start := time.Now()
-	resp, err := s.client.Do(req)
-	latency := time.Since(start)
-
-	s.logger.Debug("ml response",
-		zap.Duration("latency", latency),
-		zap.Error(err))
-
+	res, err := c.http.Do(httpReq)
 	if err != nil {
-		return fmt.Errorf("ml: request error: %w", err)
+		return out, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	defer res.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("ml: status %d, body: %s", resp.StatusCode, string(bodyBytes))
-	}
-
-	if result != nil {
-		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
-			return fmt.Errorf("ml: failed to decode response: %w", err)
-		}
+	if res.StatusCode/100 != 2 {
+		return out, errors.Errorf("ml bad status: %d", res.StatusCode)
 	}
 
-	return nil
+	if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
+		return out, errors.Wrap(err, "decode response")
+	}
+	return out, nil
 }

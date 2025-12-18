@@ -2,37 +2,33 @@ package repositories
 
 import (
 	"context"
-	"time"
-
 	"outfitstyle/server/internal/core/domain"
 )
 
-// UserRepository defines the interface for user data operations.
 type UserRepository interface {
-	GetUser(ctx context.Context, id int) (*domain.User, error)
+	GetUser(ctx context.Context, id domain.ID) (*domain.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
+
 	CreateUser(ctx context.Context, user *domain.User) error
 	UpdateUser(ctx context.Context, user *domain.User) error
 
-	GetUserProfile(ctx context.Context, userID int) (*domain.UserProfile, error)
-	UpdateUserProfile(ctx context.Context, profile *domain.UserProfile) error
+	// TZ-style profile/stat projection
+	GetUserProfile(ctx context.Context, userID domain.ID) (*domain.User, error)
+	UpdateUserProfile(ctx context.Context, userID domain.ID, patch domain.UserProfileUpdate) (*domain.User, error)
 
-	GetUserAchievements(ctx context.Context, userID int) ([]domain.Achievement, error)
-	UnlockAchievement(ctx context.Context, userID int, achievementCode string) error
+	GetUserStats(ctx context.Context, userID domain.ID) (*domain.UserStats, error)
 
-	RateRecommendation(ctx context.Context, userID, recommendationID, rating int, feedback string) error
+	// Achievements
+	GetUserAchievements(ctx context.Context, userID domain.ID) ([]domain.Achievement, error)
+	UnlockAchievement(ctx context.Context, userID domain.ID, achievementCode string) error
 
-	AddFavorite(ctx context.Context, userID, recommendationID int) error
-	RemoveFavorite(ctx context.Context, userID, favoriteID int) error
-	GetUserFavorites(ctx context.Context, userID int) ([]domain.FavoriteOutfit, error)
+	// Preferences and measurements
+	UpdatePreferences(ctx context.Context, userID domain.ID, prefs domain.UserPreferences) (*domain.User, error)
+	UpdateBodyMeasurements(ctx context.Context, userID domain.ID, bm domain.BodyMeasurements) (*domain.User, error)
 
-	GetUserRatings(ctx context.Context, userID int) ([]domain.UserRating, error)
+	// Default coordinates and timezone
+	GetDefaultCoords(ctx context.Context, userID domain.ID) (lat *float64, lon *float64, err error)
+	GetUserTimezone(ctx context.Context, userID domain.ID) (tz string, err error)
 
-	GetUserOutfitPlans(ctx context.Context, userID int) ([]domain.OutfitPlan, error)
-	GetOutfitPlans(ctx context.Context, userID int, startDate, endDate time.Time) ([]domain.OutfitPlan, error)
-	CreateOutfitPlan(ctx context.Context, plan *domain.OutfitPlan) error
-	DeleteOutfitPlan(ctx context.Context, userID, planID int) error
-
-	GetUserStats(ctx context.Context, userID int) (*domain.UserStats, error)
-	UpdateUserStats(ctx context.Context, userID int, stats *domain.UserStats) error
+	DeleteUser(ctx context.Context, userID domain.ID) error
 }

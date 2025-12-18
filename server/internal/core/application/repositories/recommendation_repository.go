@@ -2,19 +2,36 @@ package repositories
 
 import (
 	"context"
-
 	"outfitstyle/server/internal/core/domain"
 )
 
-// RecommendationRepository defines operations for working with outfit recommendations.
+type RecommendationItemCreate struct {
+	ClothingItemID   domain.ID
+	Category         string
+	LayerPosition    *int
+	Score            *float64
+	Source           string // clothing_source
+	IsFromWardrobe   bool
+	AlternativesJSON []byte // nullable JSON
+}
+
+type RecommendationItemRow struct {
+	ClothingItemID   domain.ID
+	Category         string
+	Source           string
+	IsFromWardrobe   bool
+	AlternativesJSON []byte
+}
+
 type RecommendationRepository interface {
-	// CreateRecommendation сохраняет рекомендацию и её вещи.
-	// Возвращает сгенерированный ID рекомендации.
-	CreateRecommendation(ctx context.Context, rec *domain.RecommendationResponse) (int, error)
+	Create(ctx context.Context, rec *domain.RecommendationRecord, items []RecommendationItemCreate) (domain.ID, error)
+	GetByID(ctx context.Context, id domain.ID) (*domain.RecommendationRecord, error)
 
-	// GetUserRecommendations возвращает истории рекомендаций пользователя (последние N штук).
-	GetUserRecommendations(ctx context.Context, userID, limit int) ([]domain.RecommendationResponse, error)
+	ListByUser(ctx context.Context, userID domain.ID, q domain.RecommendationListQuery) (items []domain.RecommendationRecord, total int, err error)
 
-	// GetRecommendationByID возвращает рекомендацию с её вещами по ID.
-	GetRecommendationByID(ctx context.Context, id int) (*domain.RecommendationResponse, error)
+	GetItemRows(ctx context.Context, recommendationID domain.ID) ([]RecommendationItemRow, error)
+
+	SetRating(ctx context.Context, userID, recommendationID domain.ID, rating int, thermalFeedback *string, feedback *string) (changedToPerfect bool, err error)
+	SetFavorite(ctx context.Context, userID, recommendationID domain.ID, isFavorite bool) error
+	ListFavorites(ctx context.Context, userID domain.ID, limit int) ([]domain.RecommendationRecord, error)
 }

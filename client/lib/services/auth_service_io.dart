@@ -5,25 +5,27 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
 import '../exceptions/api_exceptions.dart';
+import 'auth_storage.dart';
 
 class AuthService {
-  final String baseUrl;
+  final String baseUrl; // ожидается .../api/v1
   final http.Client _client;
   final GoogleSignIn _googleSignIn;
+  final AuthStorage _authStorage;
 
   AuthService({
     required this.baseUrl,
+    required AuthStorage authStorage,
     http.Client? client,
     GoogleSignIn? googleSignIn,
   })  : _client = client ?? http.Client(),
+        _authStorage = authStorage,
         _googleSignIn =
             googleSignIn ?? GoogleSignIn(scopes: const ['email', 'profile']);
 
-  // ================== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==================
-
   Uri _buildUri(String path) {
     final normalizedBase =
-    baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+        baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
     final normalizedPath = path.startsWith('/') ? path : '/$path';
     return Uri.parse('$normalizedBase$normalizedPath');
   }
@@ -43,20 +45,17 @@ class AuthService {
     }
   }
 
-  ApiException _apiExceptionFromResponse(
-      http.Response resp,
-      String baseMessage,
-      ) {
+  ApiException _apiExceptionFromResponse(http.Response resp, String baseMessage) {
     final msg = _extractErrorMessage(resp, baseMessage);
     return ApiException('$baseMessage: $msg', msg);
   }
 
   Future<Map<String, dynamic>> _postJson(
-      String path,
-      Map<String, dynamic> body, {
-        int expectedStatusCode = 200,
-        required String errorContext,
-      }) async {
+    String path,
+    Map<String, dynamic> body, {
+    int expectedStatusCode = 200,
+    required String errorContext,
+  }) async {
     final uri = _buildUri(path);
 
     late http.Response resp;
@@ -80,28 +79,38 @@ class AuthService {
       throw _apiExceptionFromResponse(resp, errorContext);
     }
 
-    if (resp.body.isEmpty) {
-      return <String, dynamic>{};
-    }
+    if (resp.body.isEmpty) return <String, dynamic>{};
 
     try {
       final decoded = json.decode(resp.body);
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      }
-      throw ApiException(
-        '$errorContext: некорректный формат ответа сервера',
-        'Unexpected JSON type',
-      );
+      if (decoded is Map<String, dynamic>) return decoded;
+      throw ApiException('$errorContext: некорректный формат ответа сервера', 'Unexpected JSON type');
     } catch (e) {
-      throw ApiException(
-        '$errorContext: ошибка разбора ответа сервера',
-        e.toString(),
-      );
+      throw ApiException('$errorContext: ошибка разбора ответа сервера', e.toString());
     }
   }
 
-  // ================== Email / Password / Code ==================
+  Future<void> _saveSessionFromBackend(Map<String, dynamic> result) async {
+    final accessToken = (result['accessToken'] ?? result['access_token']) as String?;
+    final refreshToken = (result['refreshToken'] ?? result['refresh_token']) as String?;
+
+    final user = result['user'];
+    int? userId;
+    if (user is Map<String, dynamic>) {
+      final rawId = user['id'] ?? user['user_id'];
+      if (rawId is num) userId = rawId.toInt();
+      if (rawId is String) userId = int.tryParse(rawId);
+    }
+
+    if (accessToken == null || userId == null) return;
+
+    await _authStorage.saveFullSession(
+      userId: userId,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      expiresAt: null,
+    );
+  }
 
   Future<void> register({
     required String email,
@@ -110,11 +119,7 @@ class AuthService {
   }) async {
     await _postJson(
       '/auth/register',
-      {
-        'email': email.trim(),
-        'password': password,
-        'username': username.trim(),
-      },
+      {'email': email.trim(), 'password': password, 'username': username.trim()},
       expectedStatusCode: 200,
       errorContext: 'Не удалось зарегистрироваться',
     );
@@ -126,25 +131,22 @@ class AuthService {
   }) async {
     await _postJson(
       '/auth/login',
-      {
-        'email': email.trim(),
-        'password': password,
-      },
+      {'email': email.trim(), 'password': password},
       expectedStatusCode: 200,
       errorContext: 'Ошибка входа',
     );
   }
 
   Future<Map<String, dynamic>> verifyCode(String code) async {
-    return _postJson(
+    final result = await _postJson(
       '/auth/verify',
       {'code': code.trim()},
       expectedStatusCode: 200,
       errorContext: 'Неверный или просроченный код',
     );
+    await _saveSessionFromBackend(result);
+    return result;
   }
-
-  // ================== СБРОС ПАРОЛЯ ==================
 
   Future<void> requestPasswordReset(String email) async {
     await _postJson(
@@ -161,33 +163,21 @@ class AuthService {
   }) async {
     await _postJson(
       '/auth/reset-password',
-      {
-        'token': token.trim(),
-        'newPassword': newPassword,
-      },
+      {'token': token.trim(), 'newPassword': newPassword},
       expectedStatusCode: 200,
       errorContext: 'Не удалось сбросить пароль',
     );
   }
 
-
-  // ================== Google Sign-In ==================
-
   Future<Map<String, dynamic>?> signInWithGoogleAndBackend() async {
     try {
       final account = await _googleSignIn.signIn();
-      if (account == null) {
-        // Пользователь отменил выбор аккаунта
-        return null;
-      }
+      if (account == null) return null;
 
       final auth = await account.authentication;
       final idToken = auth.idToken;
       if (idToken == null) {
-        throw ApiException(
-          'Не удалось получить ID-токен Google',
-          'idToken is null',
-        );
+        throw ApiException('Не удалось получить ID-токен Google', 'idToken is null');
       }
 
       final result = await _postJson(
@@ -197,37 +187,20 @@ class AuthService {
         errorContext: 'Ошибка входа через Google',
       );
 
+      await _saveSessionFromBackend(result);
       return result;
     } on MissingPluginException {
-      // Плагин не зарегистрирован / не поддерживается (Windows, Linux, macOS)
-      throw UnsupportedError(
-        'Google Sign-In не поддерживается на этой платформе',
-      );
+      throw UnsupportedError('Google Sign-In не поддерживается на этой платформе');
     } on PlatformException catch (e) {
-      // Ошибки плагина на Android/iOS
-      throw ApiException(
-        'Ошибка Google Sign-In: ${e.message}',
-        e.message ?? 'PlatformException',
-      );
-    } on ApiException {
-      rethrow;
-    } catch (e) {
-      throw ApiException(
-        'Ошибка Google Sign-In',
-        e.toString(),
-      );
+      throw ApiException('Ошибка Google Sign-In: ${e.message}', e.message ?? 'PlatformException');
     }
   }
 
   Future<void> signOutGoogle() async {
     try {
       await _googleSignIn.signOut();
-    } catch (_) {
-      // Игнорируем
-    }
+    } catch (_) {}
   }
 
-  void dispose() {
-    _client.close();
-  }
+  void dispose() => _client.close();
 }

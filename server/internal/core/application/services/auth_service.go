@@ -2,403 +2,234 @@ package services
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
-	"fmt"
-	"log"
+	"errors"
+	"net"
+	"strings"
 	"time"
 
-	"outfitstyle/server/internal/core/domain"
-
 	"golang.org/x/crypto/bcrypt"
+
+	"outfitstyle/server/internal/core/application/repositories"
+	"outfitstyle/server/internal/core/domain"
 )
 
-// UserRepository defines the interface for user data operations
-type UserRepository interface {
-	GetUser(ctx context.Context, id int) (*domain.User, error)
-	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
-	CreateUser(ctx context.Context, user *domain.User) error
-	UpdateUser(ctx context.Context, user *domain.User) error
-}
+var (
+	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrUnauthorized       = errors.New("unauthorized")
+)
 
-// AuthService handles authentication-related operations
 type AuthService struct {
-	userRepo            UserRepository
-	emailService        EmailService
-	tokenService        *TokenService
-	verificationDB      map[string]domain.VerificationCode
-	blacklistDB         map[string]bool
-	passwordResetTokens map[string]PasswordResetToken
-	passwordResetLimiter map[string]time.Time // email -> время последнего запроса
+	userRepo    repositories.UserRepository
+	sessionRepo repositories.SessionRepository
+	tokenSvc    *TokenService
 }
 
-// AuthConfig holds authentication configuration
-type AuthConfig struct {
-	TokenExpiryHours       int
-	VerificationCodeExpiry time.Duration
-	MaxLoginAttempts       int
-	BlockDuration          time.Duration
+type RegisterResult struct {
+	User   *domain.User      `json:"user"`
+	Tokens domain.TokenPair  `json:"tokens"`
 }
 
-// NewAuthService creates a new authentication service
+type LoginResult struct {
+	User   *domain.User     `json:"user"`
+	Tokens domain.TokenPair `json:"tokens"`
+	// subscription добавим позже (модуль subscriptions)
+}
+
 func NewAuthService(
-	userRepo UserRepository,
-	emailService EmailService,
-	tokenService *TokenService,
-	config AuthConfig,
+	userRepo repositories.UserRepository,
+	sessionRepo repositories.SessionRepository,
+	tokenSvc *TokenService,
 ) *AuthService {
-	return &AuthService{
-		userRepo:            userRepo,
-		emailService:        emailService,
-		tokenService:        tokenService,
-		verificationDB:      make(map[string]domain.VerificationCode),
-		blacklistDB:         make(map[string]bool),
-		passwordResetTokens: make(map[string]PasswordResetToken),
-		passwordResetLimiter: make(map[string]time.Time),
-	}
+	return &AuthService{userRepo: userRepo, sessionRepo: sessionRepo, tokenSvc: tokenSvc}
 }
 
-// RegisterUser registers a new user
-func (s *AuthService) RegisterUser(ctx context.Context, userInput domain.UserRegistration) (*domain.User, error) {
-	// Hash password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userInput.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, fmt.Errorf("failed to hash password: %w", err)
-	}
-
-	// Create user
-	user := &domain.User{
-		Email:      userInput.Email,
-		Password:   string(hashedPassword),
-		Username:   userInput.Username,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		IsVerified: false,
-	}
-
-	// Сохраняем пользователя в БД
-	if err := s.userRepo.CreateUser(ctx, user); err != nil {
-		return nil, fmt.Errorf("failed to create user: %w", err)
-	}
-
-	// Generate verification code
-	code, err := s.generateVerificationCode(6)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate verification code: %w", err)
-	}
-
-	// Save verification code
-	verification := domain.VerificationCode{
-		Code:      code,
-		UserID:    user.ID,
-		ExpiresAt: time.Now().Add(10 * time.Minute),
-		Type:      "registration",
-	}
-	s.verificationDB[code] = verification
-
-	// Send verification email
-	if err := s.emailService.SendVerificationEmail(user.Email, code); err != nil {
-		log.Printf("Warning: failed to send verification email: %v", err)
-	}
-
-	return user, nil
+type DeviceInfo struct {
+	DeviceID   *string
+	DeviceName *string
+	DeviceType *string
+	IPAddress  *string
+	UserAgent  *string
 }
 
-// LoginUser initiates login process
-func (s *AuthService) LoginUser(ctx context.Context, email, password string) (string, error) {
-	// Ищем пользователя по email
-	user, err := s.userRepo.GetUserByEmail(ctx, email)
-	if err != nil || user == nil {
-		return "", fmt.Errorf("invalid credentials")
+func (s *AuthService) Register(ctx context.Context, input domain.UserRegistration, device DeviceInfo) (*RegisterResult, error) {
+	email := strings.TrimSpace(strings.ToLower(input.Email))
+	if email == "" || input.Password == "" {
+		return nil, ErrInvalidCredentials
 	}
 
-	// Проверяем пароль
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return "", fmt.Errorf("invalid credentials")
-	}
-
-	// Generate verification code
-	code, err := s.generateVerificationCode(6)
+	existing, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate verification code: %w", err)
+		return nil, err
+	}
+	if existing != nil {
+		return nil, repositories.ErrEmailAlreadyExists
 	}
 
-	verification := domain.VerificationCode{
-		Code:      code,
-		UserID:    user.ID,
-		ExpiresAt: time.Now().Add(10 * time.Minute),
-		Type:      "login",
-	}
-	s.verificationDB[code] = verification
-
-	if err := s.emailService.SendVerificationEmail(user.Email, code); err != nil {
-		log.Printf("Warning: failed to send verification email: %v", err)
+	hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
 	}
 
-	return code, nil
+	u := &domain.User{
+		Email:        email,
+		PasswordHash: string(hash),
+		DisplayName:  input.DisplayName,
+		IsActive:     true,
+		IsVerified:   false,
+		Locale:       "ru",
+		Timezone:     "Europe/Moscow",
+	}
+	if input.Locale != nil && *input.Locale != "" {
+		u.Locale = *input.Locale
+	}
+
+	if err := s.userRepo.CreateUser(ctx, u); err != nil {
+		return nil, err
+	}
+
+	pair, err := s.createSessionAndTokens(ctx, u.ID, device)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RegisterResult{User: u, Tokens: pair}, nil
 }
 
-// VerifyCode verifies a verification code
-func (s *AuthService) VerifyCode(ctx context.Context, code string) (*domain.User, string, error) {
-	verification, ok := s.verificationDB[code]
-	if !ok {
-		return nil, "", fmt.Errorf("invalid verification code")
+func (s *AuthService) Login(ctx context.Context, input domain.UserLogin, device DeviceInfo) (*LoginResult, error) {
+	email := strings.TrimSpace(strings.ToLower(input.Email))
+	if email == "" || input.Password == "" {
+		return nil, ErrInvalidCredentials
 	}
 
-	if time.Now().After(verification.ExpiresAt) {
-		delete(s.verificationDB, code)
-		return nil, "", fmt.Errorf("verification code expired")
+	u, err := s.userRepo.GetUserByEmail(ctx, email)
+	if err != nil || u == nil {
+		return nil, ErrInvalidCredentials
 	}
 
-	user, err := s.userRepo.GetUser(ctx, int(verification.UserID))
+	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(input.Password)); err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	pair, err := s.createSessionAndTokens(ctx, u.ID, device)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to get user: %w", err)
-	}
-	if user == nil {
-		return nil, "", fmt.Errorf("user not found")
+		return nil, err
 	}
 
-	if verification.Type == "registration" {
-		user.IsVerified = true
-		user.UpdatedAt = time.Now()
-		if err := s.userRepo.UpdateUser(ctx, user); err != nil {
-			return nil, "", fmt.Errorf("failed to update user: %w", err)
-		}
-	}
-
-	accessToken, err := s.tokenService.GenerateAccessToken(user)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to generate access token: %w", err)
-	}
-
-	delete(s.verificationDB, code)
-
-	return user, accessToken, nil
+	return &LoginResult{User: u, Tokens: pair}, nil
 }
 
-// RefreshToken refreshes an access token
-func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
-	userID, err := s.tokenService.ValidateRefreshToken(refreshToken)
+func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.TokenPair, error) {
+	if refreshToken == "" {
+		return domain.TokenPair{}, ErrUnauthorized
+	}
+
+	hash := s.tokenSvc.HashRefreshToken(refreshToken)
+	sess, err := s.sessionRepo.GetByRefreshHash(ctx, hash)
 	if err != nil {
-		return "", fmt.Errorf("invalid refresh token: %w", err)
+		return domain.TokenPair{}, err
+	}
+	if sess == nil || !sess.IsActive || time.Now().After(sess.ExpiresAt) {
+		return domain.TokenPair{}, ErrUnauthorized
 	}
 
-	if s.blacklistDB[refreshToken] {
-		return "", fmt.Errorf("token has been revoked")
-	}
-
-	user, err := s.userRepo.GetUser(ctx, int(userID))
+	// rotate refresh
+	newRefresh, err := s.tokenSvc.GenerateRefreshToken()
 	if err != nil {
-		return "", fmt.Errorf("failed to get user: %w", err)
+		return domain.TokenPair{}, err
 	}
-	if user == nil {
-		return "", fmt.Errorf("user not found")
+	newHash := s.tokenSvc.HashRefreshToken(newRefresh)
+	newRefreshExp := time.Now().Add(s.tokenSvc.RefreshTTL())
+
+	if err := s.sessionRepo.RotateRefresh(ctx, sess.ID, newHash, newRefreshExp); err != nil {
+		return domain.TokenPair{}, err
 	}
 
-	accessToken, err := s.tokenService.GenerateAccessToken(user)
+	access, exp, err := s.tokenSvc.GenerateAccessToken(sess.UserID, sess.ID)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate accesstoken: %w", err)
+		return domain.TokenPair{}, err
 	}
 
-	return accessToken, nil
+	return domain.TokenPair{
+		AccessToken:  access,
+		RefreshToken: newRefresh,
+		ExpiresAt:    exp,
+	}, nil
 }
 
-// RevokeToken revokes a refresh token
-func (s *AuthService) RevokeToken(refreshToken string) {
-	s.blacklistDB[refreshToken] = true
-}
-
-// generateVerificationCode generates a random verification code
-func (s *AuthService) generateVerificationCode(length int) (string, error) {
-	bytes := make([]byte, length)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
+func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool) error {
+	if allDevices {
+		return s.sessionRepo.RevokeAllForUser(ctx, userID)
 	}
-	return base64.URLEncoding.EncodeToString(bytes)[:length], nil
+	return s.sessionRepo.Revoke(ctx, sessionID)
 }
 
-// PasswordResetToken holds information about a password reset token
-type PasswordResetToken struct {
-	Token     string
-	UserID    domain.ID
-	ExpiresAt time.Time
+// ValidateAccessToken: JWT + проверка, что session active (logout invalidates access immediately)
+func (s *AuthService) ValidateAccessToken(ctx context.Context, accessToken string) (domain.ID, domain.ID, error) {
+	userID, sessionID, err := s.tokenSvc.ValidateAccessToken(accessToken)
+	if err != nil {
+		return domain.ID{}, domain.ID{}, ErrUnauthorized
+	}
+
+	sess, err := s.sessionRepo.GetByID(ctx, sessionID)
+	if err != nil {
+		return domain.ID{}, domain.ID{}, ErrUnauthorized
+	}
+	if sess == nil || !sess.IsActive || sess.UserID != userID {
+		return domain.ID{}, domain.ID{}, ErrUnauthorized
+	}
+
+	_ = s.sessionRepo.Touch(ctx, sessionID)
+
+	return userID, sessionID, nil
 }
 
-// ForgotPassword initiates password reset process
-func (s *AuthService) ForgotPassword(ctx context.Context, email string) error {
-	// Очищаем устаревшие данные
-	s.cleanupExpiredData()
+func (s *AuthService) createSessionAndTokens(ctx context.Context, userID domain.ID, device DeviceInfo) (domain.TokenPair, error) {
+	refresh, err := s.tokenSvc.GenerateRefreshToken()
+	if err != nil {
+		return domain.TokenPair{}, err
+	}
+	hash := s.tokenSvc.HashRefreshToken(refresh)
+	refreshExp := time.Now().Add(s.tokenSvc.RefreshTTL())
 
-	user, err := s.userRepo.GetUserByEmail(ctx, email)
-	if err != nil || user == nil {
-		// не раскрываем, есть ли пользователь
+	sessionID, err := s.sessionRepo.Create(ctx, repositories.CreateSessionParams{
+		UserID:           userID,
+		RefreshTokenHash: hash,
+		DeviceID:         device.DeviceID,
+		DeviceName:       device.DeviceName,
+		DeviceType:       device.DeviceType,
+		IPAddress:        device.IPAddress,
+		UserAgent:        device.UserAgent,
+		ExpiresAt:        refreshExp,
+	})
+	if err != nil {
+		return domain.TokenPair{}, err
+	}
+
+	access, accessExp, err := s.tokenSvc.GenerateAccessToken(userID, sessionID)
+	if err != nil {
+		return domain.TokenPair{}, err
+	}
+
+	return domain.TokenPair{
+		AccessToken:  access,
+		RefreshToken: refresh,
+		ExpiresAt:    accessExp,
+	}, nil
+}
+
+// helpers
+func ExtractIP(remoteAddr string) *string {
+	if remoteAddr == "" {
 		return nil
 	}
-
-	// Проверяем ограничение частоты запросов - один раз в 5 минут
-	if lastRequest, exists := s.passwordResetLimiter[email]; exists {
-		if time.Since(lastRequest) < 5*time.Minute {
-			// Не раскрываем причину, просто выходим
-			return nil
-		}
-	}
-	s.passwordResetLimiter[email] = time.Now()
-
-	resetToken, err := s.generatePasswordResetToken(32) // 32-byte token
+	host, _, err := net.SplitHostPort(remoteAddr)
 	if err != nil {
-		return fmt.Errorf("failed to generate password reset token: %w", err)
+		// иногда приходит просто IP без порта
+		host = remoteAddr
 	}
-
-	// Сохраняем токен с временем истечения
-	reset := PasswordResetToken{
-		Token:     resetToken,
-		UserID:    user.ID,
-		ExpiresAt: time.Now().Add(24 * time.Hour), // токен действителен 24 часа
+	host = strings.TrimSpace(host)
+	if host == "" {
+		return nil
 	}
-
-	s.passwordResetTokens[resetToken] = reset
-
-	if err := s.emailService.SendPasswordResetEmail(user.Email, resetToken); err != nil {
-		log.Printf("Warning: failed to send password reset email: %v", err)
-	}
-
-	return nil
-}
-
-// ResetPassword resets a user's password
-func (s *AuthService) ResetPassword(ctx context.Context, token, newPassword string) error {
-	// Очищаем устаревшие данные
-	s.cleanupExpiredData()
-
-	// Проверяем токен
-	reset, exists := s.passwordResetTokens[token]
-	if !exists {
-		return fmt.Errorf("invalid or expired reset token")
-	}
-
-	user, err := s.userRepo.GetUser(ctx, int(reset.UserID))
-	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
-	}
-	if user == nil {
-		return fmt.Errorf("user not found")
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("failed to hash password: %w", err)
-	}
-
-	user.Password = string(hashedPassword)
-	user.UpdatedAt = time.Now()
-
-	if err := s.userRepo.UpdateUser(ctx, user); err != nil {
-		return fmt.Errorf("failed to update user password: %w", err)
-	}
-
-	// Удаляем использованный токен
-	delete(s.passwordResetTokens, token)
-
-	return nil
-}
-
-// generatePasswordResetToken generates a random password reset token
-func (s *AuthService) generatePasswordResetToken(length int) (string, error) {
-	bytes := make([]byte, length)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.EncodeToString(bytes), nil
-}
-
-// cleanupExpiredData удаляет устаревшие данные из хранилищ
-func (s *AuthService) cleanupExpiredData() {
-	now := time.Now()
-
-	// Очищаем устаревшие токены сброса пароля
-	for token, reset := range s.passwordResetTokens {
-		if now.After(reset.ExpiresAt) {
-			delete(s.passwordResetTokens, token)
-		}
-	}
-
-	// Очищаем устаревшие ограничения частоты (старше 1 часа)
-	for email, lastRequest := range s.passwordResetLimiter {
-		if now.Sub(lastRequest) > time.Hour {
-			delete(s.passwordResetLimiter, email)
-		}
-	}
-}
-
-// ValidateToken validates an access token and returns the associated user.
-func (s *AuthService) ValidateToken(tokenString string) (*domain.User, error) {
-	// Очищаем устаревшие данные периодически
-	s.cleanupExpiredData()
-
-	userID, err := s.tokenService.ValidateAccessToken(tokenString)
-	if err != nil {
-		return nil, fmt.Errorf("invalid token: %w", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	user, err := s.userRepo.GetUser(ctx, int(userID))
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
-	}
-	if user == nil {
-		return nil, fmt.Errorf("user not found")
-	}
-
-	return user, nil
-}
-
-// ===== Дополнения для Google OAuth =====
-
-// GetUserByEmail ищет пользователя по email
-func (s *AuthService) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
-	return s.userRepo.GetUserByEmail(ctx, email)
-}
-
-// RegisterOAuthUser регистрирует пользователя через OAuth (Google)
-func (s *AuthService) RegisterOAuthUser(ctx context.Context, input domain.UserRegistration) (*domain.User, error) {
-	user := &domain.User{
-		Email:      input.Email,
-		Password:   "",
-		Username:   input.Username,
-		IsVerified: true,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-	}
-
-	if err := s.userRepo.CreateUser(ctx, user); err != nil {
-		return nil, fmt.Errorf("failed to create oauth user: %w", err)
-	}
-
-	return user, nil
-}
-
-// GenerateTokens генерирует access + (пока пустой) refresh токен
-func (s *AuthService) GenerateTokens(userID domain.ID) (string, string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	user, err := s.userRepo.GetUser(ctx, int(userID))
-	if err != nil {
-		return "", "", fmt.Errorf("failed to get user: %w", err)
-	}
-	if user == nil {
-		return "", "", fmt.Errorf("user not found")
-	}
-
-	accessToken, err := s.tokenService.GenerateAccessToken(user)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to generate access token: %w", err)
-	}
-
-	// Пока refresh-токен не используем
-	refreshToken := ""
-
-	return accessToken, refreshToken, nil
+	return &host
 }
