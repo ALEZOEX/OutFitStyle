@@ -11,6 +11,7 @@ import hashlib
 from concurrent.futures import ThreadPoolExecutor
 
 from contracts.rank_contract import MLRankRequest, MLRankResponse, RankedItem
+from contracts.tz_rank_contract import TZRankRequest, TZRankResponse, TZRankedItem
 from contracts.translation_contracts import TranslationRequest, TranslationResponse, BatchTranslationRequest, BatchTranslationResponse
 from model.enhanced_predictor import EnhancedPredictor
 from model.features_with_priorities import build_feature_frame
@@ -40,8 +41,8 @@ except Exception as e:
 
 # Yandex Translate API configuration
 YANDEX_TRANSLATE_API_URL = "https://translate.api.cloud.yandex.net/translate/v2/translate"
-YANDEX_API_KEY = os.getenv("YANDEX_TRANSLATE_API_KEY", "aje36hbuc3e2ntrh5e21")  # Default fallback key
-YANDEX_FOLDER_ID = os.getenv("YANDEX_FOLDER_ID", "b1ghje4lg8jt69h4tsck")  # Default folder ID
+YANDEX_API_KEY = os.getenv("YANDEX_TRANSLATE_API_KEY")
+YANDEX_FOLDER_ID = os.getenv("YANDEX_FOLDER_ID")
 
 # Thread pool for translation requests
 translation_executor = ThreadPoolExecutor(max_workers=10)
@@ -156,6 +157,106 @@ async def rank_candidates(request: MLRankRequest) -> MLRankResponse:
         )
 
 
+@app.post("/api/v1/rank", response_model=TZRankResponse)
+async def rank_candidates_v1(request: TZRankRequest) -> TZRankResponse:
+    start_time = time.time()
+
+    if predictor is None:
+        raise HTTPException(status_code=503, detail="ML model not available")
+
+    # Map user prefs to legacy user_profile schema for your feature builder
+    preferred_style = (request.user_preferences.preferred_styles[0] if request.user_preferences.preferred_styles else "casual")
+
+    # temperature_sensitivity int -> label
+    ts = request.user_preferences.temperature_sensitivity
+    if ts <= -1:
+        ts_label = "cold"
+    elif ts >= 1:
+        ts_label = "warm"
+    else:
+        ts_label = "normal"
+
+    # Build items for feature builder
+    items = []
+    for c in request.candidates:
+        f = c.features
+        items.append({
+            "id": c.id,
+            "name": "",  # not used by model
+            "category": c.category,
+            "subcategory": c.subcategory,
+            "gender": "unisex",
+            "style": f.style,
+            "usage": "daily",
+            "season": "all",
+            "base_colour": f.base_colour or "black",
+            "formality_level": f.formality_level,
+            "warmth_level": f.warmth_level,
+            "min_temp": f.min_temp,
+            "max_temp": f.max_temp,
+            "materials": [],
+            "fit": "regular",
+            "pattern": f.pattern or "solid",
+            "icon_emoji": "",
+            "source": c.source,
+            "is_owned": True if c.source == "user" else False,
+            "source_priority": c.source_priority,
+        })
+
+    feature_df = build_feature_frame(
+        weather_data={
+            "temperature": request.context.temperature,
+            "feels_like": request.context.feels_like,
+            "humidity": request.context.humidity,
+            "wind_speed": request.context.wind_speed,
+            "weather": request.context.weather_code or "clear",
+        },
+        user_profile={
+            "age_range": "25-35",
+            "style_preference": preferred_style,
+            "temperature_sensitivity": ts_label,
+            "formality_preference": "business" if request.context.formality >= 4 else "casual",
+            "gender": "unisex",
+        },
+        items=items
+    )
+
+    scores = predictor.predict(feature_df)
+
+    # build rankings by category
+    rankings: Dict[str, List[TZRankedItem]] = {}
+    for i, score in enumerate(scores):
+        cat = request.candidates[i].category
+        rankings.setdefault(cat, []).append(TZRankedItem(
+            id=request.candidates[i].id,
+            score=float(score),
+            confidence=float(min(1.0, max(0.0, score))),
+            factors={"source_priority": request.candidates[i].source_priority}
+        ))
+
+    for cat in rankings:
+        rankings[cat].sort(key=lambda x: x.score, reverse=True)
+
+    # outfit_score = mean of top scores in main categories
+    top_scores = []
+    for cat in ["outerwear", "upper", "lower", "footwear", "accessory"]:
+        if cat in rankings and len(rankings[cat]) > 0:
+            top_scores.append(rankings[cat][0].score)
+    outfit_score = float(sum(top_scores) / len(top_scores)) if top_scores else 0.0
+
+    processing_time = int((time.time() - start_time) * 1000)
+
+    return TZRankResponse(
+        request_id=request.request_id,
+        rankings=rankings,
+        outfit_score=outfit_score,
+        style_coherence=0.5,
+        color_harmony=0.5,
+        model_version=predictor.get_model_version(),
+        processing_time_ms=processing_time,
+    )
+
+
 @app.get("/metrics")
 async def get_metrics():
     """Placeholder for Prometheus metrics endpoint"""
@@ -165,10 +266,11 @@ async def get_metrics():
 
 if __name__ == "__main__":
     import uvicorn
+    port = int(os.getenv("PORT", "8000"))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=5000,
+        port=port,
         reload=True,
         log_level="info"
     )

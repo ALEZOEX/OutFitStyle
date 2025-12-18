@@ -95,13 +95,13 @@ def main():
 
         values = (
             product_display_name,
-            article_type,      # category
+            master_category,   # category
             sub_category,      # subcategory
-            float(min_temp_for_item),
-            float(max_temp_for_item),
+            min_temp_for_item,
+            max_temp_for_item,
             style,
-            int(warmth_level),
-            int(formality_level),
+            warmth_level,
+            formality_level,
             icon,
         )
 

@@ -1,4 +1,5 @@
 -- Migration: Initialize OutfitStyle schema with Planner → Retrieval → Ranking architecture
+-- This migration is idempotent and can be run multiple times
 
 -- Create schema migrations table for tracking applied migrations
 CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -6,21 +7,73 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
     applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Insert initial migration version
-INSERT INTO schema_migrations (version) VALUES ('0001') ON CONFLICT (version) DO NOTHING;
+-- Create enum types with exception handling to make migration idempotent
+DO $$ 
+BEGIN
+    CREATE TYPE source_type AS ENUM ('synthetic', 'user', 'partner', 'manual');
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
 
--- Create enum types
-CREATE TYPE source_type AS ENUM ('synthetic', 'user', 'partner', 'manual');
-CREATE TYPE gender_type AS ENUM ('unisex');
-CREATE TYPE style_type AS ENUM ('casual', 'sport', 'street', 'classic', 'business', 'smart_casual', 'outdoor');
-CREATE TYPE usage_type AS ENUM ('daily', 'work', 'formal', 'sport', 'outdoor', 'travel', 'party');
-CREATE TYPE season_type AS ENUM ('winter', 'spring', 'summer', 'autumn', 'all');
-CREATE TYPE colour_type AS ENUM ('black', 'white', 'gray', 'navy', 'beige', 'brown', 'green', 'blue', 'red', 'pink', 'yellow', 'orange', 'purple');
-CREATE TYPE fit_type AS ENUM ('slim', 'regular', 'relaxed', 'oversized');
-CREATE TYPE pattern_type AS ENUM ('solid', 'striped', 'checked', 'printed', 'camo');
+DO $$ 
+BEGIN
+    CREATE TYPE gender_type AS ENUM ('unisex');
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
+
+DO $$ 
+BEGIN
+    CREATE TYPE style_type AS ENUM ('casual', 'sport', 'street', 'classic', 'business', 'smart_casual', 'outdoor');
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
+
+DO $$ 
+BEGIN
+    CREATE TYPE usage_type AS ENUM ('daily', 'work', 'formal', 'sport', 'outdoor', 'travel', 'party');
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
+
+DO $$ 
+BEGIN
+    CREATE TYPE season_type AS ENUM ('winter', 'spring', 'summer', 'autumn', 'all');
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
+
+DO $$ 
+BEGIN
+    CREATE TYPE colour_type AS ENUM ('black', 'white', 'gray', 'navy', 'beige', 'brown', 'green', 'blue', 'red', 'pink', 'yellow', 'orange', 'purple');
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
+
+DO $$ 
+BEGIN
+    CREATE TYPE fit_type AS ENUM ('slim', 'regular', 'relaxed', 'oversized');
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
+
+DO $$ 
+BEGIN
+    CREATE TYPE pattern_type AS ENUM ('solid', 'striped', 'checked', 'printed', 'camo');
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
 
 -- Create subcategory_specs table (dictionary + planner norms)
-CREATE TABLE subcategory_specs (
+CREATE TABLE IF NOT EXISTS subcategory_specs (
   category        TEXT NOT NULL,
   subcategory     TEXT NOT NULL,
 
@@ -39,7 +92,7 @@ CREATE TABLE subcategory_specs (
 );
 
 -- Create users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -55,7 +108,7 @@ CREATE TABLE users (
 );
 
 -- Create clothing_items table (catalog)
-CREATE TABLE clothing_items (
+CREATE TABLE IF NOT EXISTS clothing_items (
   id               BIGINT PRIMARY KEY,
   name             TEXT NOT NULL,
 
@@ -97,7 +150,7 @@ CREATE TABLE clothing_items (
 );
 
 -- Create wardrobe_items table (user's personal items)
-CREATE TABLE wardrobe_items (
+CREATE TABLE IF NOT EXISTS wardrobe_items (
   id               BIGINT PRIMARY KEY,
   user_id          BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   clothing_item_id BIGINT NOT NULL REFERENCES clothing_items(id) ON DELETE CASCADE,
@@ -107,7 +160,7 @@ CREATE TABLE wardrobe_items (
 );
 
 -- Create weather data table
-CREATE TABLE weather_data (
+CREATE TABLE IF NOT EXISTS weather_data (
     id SERIAL PRIMARY KEY,
     location VARCHAR(100) NOT NULL,
     temperature DECIMAL(5, 2) NOT NULL,
@@ -119,7 +172,7 @@ CREATE TABLE weather_data (
 );
 
 -- Create recommendations table
-CREATE TABLE recommendations (
+CREATE TABLE IF NOT EXISTS recommendations (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     weather_id INTEGER REFERENCES weather_data(id) ON DELETE SET NULL,
@@ -130,18 +183,22 @@ CREATE TABLE recommendations (
 );
 
 -- Create recommendation items table (junction table)
-CREATE TABLE recommendation_items (
+CREATE TABLE IF NOT EXISTS recommendation_items (
     id SERIAL PRIMARY KEY,
     recommendation_id INTEGER REFERENCES recommendations(id) ON DELETE CASCADE,
     clothing_item_id INTEGER REFERENCES clothing_items(id) ON DELETE CASCADE,
-    confidence_score DECIMAL(5, 4),
-    position INTEGER,
+    name TEXT, -- Added for storing item name
+    category TEXT, -- Added for storing category
+    icon_emoji TEXT, -- Added for storing emoji icon
+    ml_score DECIMAL(5, 4), -- Added for ML score
+    confidence DECIMAL(5, 4), -- Added for confidence
+    position INTEGER, -- Added for position
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(recommendation_id, clothing_item_id)
 );
 
 -- Create user favorites table
-CREATE TABLE user_favorites (
+CREATE TABLE IF NOT EXISTS user_favorites (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     recommendation_id INTEGER REFERENCES recommendations(id) ON DELETE CASCADE,
@@ -150,7 +207,7 @@ CREATE TABLE user_favorites (
 );
 
 -- Create achievements table
-CREATE TABLE achievements (
+CREATE TABLE IF NOT EXISTS achievements (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
     description TEXT,
@@ -159,7 +216,7 @@ CREATE TABLE achievements (
 );
 
 -- Create user achievements table
-CREATE TABLE user_achievements (
+CREATE TABLE IF NOT EXISTS user_achievements (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     achievement_id INTEGER REFERENCES achievements(id) ON DELETE CASCADE,
@@ -168,7 +225,7 @@ CREATE TABLE user_achievements (
 );
 
 -- Create user ratings table
-CREATE TABLE user_ratings (
+CREATE TABLE IF NOT EXISTS user_ratings (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     recommendation_id INTEGER REFERENCES recommendations(id) ON DELETE CASCADE,
@@ -179,23 +236,23 @@ CREATE TABLE user_ratings (
 );
 
 -- Create indexes for efficient retrieval
-CREATE INDEX clothing_items_cat_subcat_idx ON clothing_items (category, subcategory);
-CREATE INDEX clothing_items_cat_warmth_idx ON clothing_items (category, warmth_level);
-CREATE INDEX clothing_items_cat_style_idx ON clothing_items (category, style);
-CREATE INDEX clothing_items_temp_idx ON clothing_items (min_temp, max_temp);
-CREATE INDEX wardrobe_items_user_idx ON wardrobe_items (user_id);
-CREATE INDEX wardrobe_items_clothing_item_idx ON wardrobe_items (clothing_item_id);
+CREATE INDEX IF NOT EXISTS clothing_items_cat_subcat_idx ON clothing_items (category, subcategory);
+CREATE INDEX IF NOT EXISTS clothing_items_cat_warmth_idx ON clothing_items (category, warmth_level);
+CREATE INDEX IF NOT EXISTS clothing_items_cat_style_idx ON clothing_items (category, style);
+CREATE INDEX IF NOT EXISTS clothing_items_temp_idx ON clothing_items (min_temp, max_temp);
+CREATE INDEX IF NOT EXISTS wardrobe_items_user_idx ON wardrobe_items (user_id);
+CREATE INDEX IF NOT EXISTS wardrobe_items_clothing_item_idx ON wardrobe_items (clothing_item_id);
 
 -- Create indexes for performance
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_clothing_items_category ON clothing_items(category);
-CREATE INDEX idx_clothing_items_subcategory ON clothing_items(subcategory);
-CREATE INDEX idx_recommendations_user_id ON recommendations(user_id);
-CREATE INDEX idx_recommendations_created_at ON recommendations(created_at);
-CREATE INDEX idx_user_favorites_user_id ON user_favorites(user_id);
-CREATE INDEX idx_user_achievements_user_id ON user_achievements(user_id);
-CREATE INDEX idx_user_ratings_user_id ON user_ratings(user_id);
-CREATE INDEX idx_weather_data_location_timestamp ON weather_data(location, timestamp);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_clothing_items_category ON clothing_items(category);
+CREATE INDEX IF NOT EXISTS idx_clothing_items_subcategory ON clothing_items(subcategory);
+CREATE INDEX IF NOT EXISTS idx_recommendations_user_id ON recommendations(user_id);
+CREATE INDEX IF NOT EXISTS idx_recommendations_created_at ON recommendations(created_at);
+CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id ON user_achievements(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_ratings_user_id ON user_ratings(user_id);
+CREATE INDEX IF NOT EXISTS idx_weather_data_location_timestamp ON weather_data(location, timestamp);
 
 -- Add updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -207,14 +264,35 @@ END;
 $$ language 'plpgsql';
 
 -- Create triggers for updated_at columns
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+DO $$
+BEGIN
+    CREATE TRIGGER update_users_updated_at 
+    BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
 
-CREATE TRIGGER update_clothing_items_updated_at BEFORE UPDATE ON clothing_items
+DO $$
+BEGIN
+    CREATE TRIGGER update_clothing_items_updated_at 
+    BEFORE UPDATE ON clothing_items
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
 
-CREATE TRIGGER update_wardrobe_items_updated_at BEFORE UPDATE ON wardrobe_items
+DO $$
+BEGIN
+    CREATE TRIGGER update_wardrobe_items_updated_at 
+    BEFORE UPDATE ON wardrobe_items
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
+END $$;
 
 -- Insert default subcategory specs (25 subcategories with norms)
 INSERT INTO subcategory_specs

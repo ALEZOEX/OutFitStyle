@@ -1,39 +1,36 @@
-# Makefile for OutfitStyle project
+SHELL := /bin/bash
 
-.PHONY: help build run stop logs test clean
-
+.PHONY: help
 help:
-	@echo "OutfitStyle Project Commands:"
-	@echo "  build    - Build all services"
-	@echo "  run      - Run all services"
-	@echo "  stop     - Stop all services"
-	@echo "  logs     - View service logs"
-	@echo "  test     - Run tests"
-	@echo "  clean    - Clean build artifacts"
+	@echo "Targets:"
+	@echo "  compose-up         - docker compose dev up"
+	@echo "  compose-down       - docker compose dev down"
+	@echo "  migrate            - run Go migrator"
+	@echo "  seed               - seed catalog/specs"
+	@echo "  test               - go test"
+	@echo "  test-integration   - go test -tags=integration"
+	@echo ""
 
-build:
-	@echo "Building all services..."
-	cd infrastructure/docker-compose && docker-compose build
+.PHONY: compose-up
+compose-up:
+	docker compose -f infrastructure/docker-compose.yml up --build
 
-run:
-	@echo "Starting all services..."
-	cd infrastructure/docker-compose && docker-compose up -d
+.PHONY: compose-down
+compose-down:
+	docker compose -f infrastructure/docker-compose.yml down -v
 
-stop:
-	@echo "Stopping all services..."
-	cd infrastructure/docker-compose && docker-compose down
+.PHONY: migrate
+migrate:
+	cd server && DATABASE_URL=$$DATABASE_URL MIGRATIONS_DIR=./migrations go run ./cmd/migrate
 
-logs:
-	@echo "Viewing service logs..."
-	cd infrastructure/docker-compose && docker-compose logs -f
+.PHONY: seed
+seed:
+	./scripts/seed.sh
 
+.PHONY: test
 test:
-	@echo "Running tests..."
-	cd server/api && go test -v ./...
-	cd server/ml-service && python -m pytest tests/
-	cd server/marketplace-service && python -m pytest tests/
+	cd server && go test ./...
 
-clean:
-	@echo "Cleaning build artifacts..."
-	cd server/api && rm -f server
-	cd infrastructure/docker-compose && docker-compose down -v
+.PHONY: test-integration
+test-integration:
+	cd server && go test -tags=integration ./...

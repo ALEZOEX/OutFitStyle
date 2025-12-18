@@ -14,29 +14,32 @@ dependencies:
   google_sign_in: ^6.1.5
   # HTTP
   http: ^1.6.0
+  http_parser: ^4.0.2
   url_launcher: 6.3.2
-  
+
   # State Management
   provider: ^6.1.1
-  
+
   # UI
   google_fonts: ^6.1.0
   shimmer: ^3.0.0
-  
+
   # Utils
   intl: ^0.20.2
   shared_preferences: ^2.2.2
-  
+
   # Location
   geolocator: ^14.0.2
   geocoding: ^4.0.0
 
   collection: any
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_native_splash: ^2.4.7
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -50,9 +53,20 @@ flutter:
 
 flutter_native_splash:
   color: "#FFFFFF"  # Цвет фона сплэш-экрана
-  image: "assets/icons/app/app_icon.ico"  # Основная иконка (512x512)
+  image: "assets/icons/app/Icon-512.png"  # Основная иконка (512x512)
   android_12:  # Для Android 12+
     image: "assets/icons/app/Icon-512.png"
     icon_background_color: "#FFFFFF"
   ios: true  # Включить для iOS
   web: true  # Включить для Web
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app/Icon-512.png"
+  windows:
+    generate: true
+    image_path: "assets/icons/app/Icon-512.png"
+  macos:
+    generate: true
+    image_path: "assets/icons/app/Icon-512.png"

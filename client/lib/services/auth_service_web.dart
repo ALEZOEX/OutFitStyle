@@ -1,152 +1,97 @@
 import 'dart:convert';
-
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
-/// Реализация AuthService для Web (с Google Sign-In)
+import '../exceptions/api_exceptions.dart';
+import 'auth_storage.dart';
+
 class AuthService {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-  );
-
   final String baseUrl;
+  final AuthStorage _authStorage;
+  final http.Client _client;
+  final GoogleSignIn _googleSignIn;
 
-  AuthService({required this.baseUrl});
+  AuthService({
+    required this.baseUrl,
+    required AuthStorage authStorage,
+    http.Client? client,
+    GoogleSignIn? googleSignIn,
+  })  : _authStorage = authStorage,
+        _client = client ?? http.Client(),
+        _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: const ['email', 'profile']);
 
-  // ================== Email / Password / Code ==================
-
-  Future<void> register({
-    required String email,
-    required String password,
-    required String username,
-  }) async {
-    final uri = Uri.parse('$baseUrl/auth/register');
-
-    final resp = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email.trim(),
-        'password': password,
-        'username': username.trim(),
-      }),
-    );
-
-    if (resp.statusCode != 200) {
-      throw Exception('Не удалось зарегистрироваться: ${resp.body}');
-    }
+  Uri _uri(String path) {
+    final b = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+    final p = path.startsWith('/') ? path : '/$path';
+    return Uri.parse('$b$p');
   }
 
-  Future<void> login({
-    required String email,
-    required String password,
-  }) async {
-    final uri = Uri.parse('$baseUrl/auth/login');
-
-    final resp = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email.trim(),
-        'password': password,
-      }),
+  Future<Map<String, dynamic>> _postJson(String path, Map<String, dynamic> body) async {
+    final resp = await _client.post(
+      _uri(path),
+      headers: const {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: jsonEncode(body),
     );
-
     if (resp.statusCode != 200) {
-      throw Exception('Ошибка входа: ${resp.body}');
+      throw ApiException('Ошибка запроса', resp.body);
     }
+    return resp.body.isEmpty ? <String, dynamic>{} : (jsonDecode(resp.body) as Map<String, dynamic>);
   }
 
-  /// Подтверждаем код и получаем user + accessToken
+  Future<void> _saveSessionFromBackend(Map<String, dynamic> result) async {
+    final accessToken = (result['accessToken'] ?? result['access_token']) as String?;
+    final refreshToken = (result['refreshToken'] ?? result['refresh_token']) as String?;
+    final user = result['user'];
+
+    int? userId;
+    if (user is Map<String, dynamic>) {
+      final rawId = user['id'];
+      if (rawId is num) userId = rawId.toInt();
+    }
+    if (accessToken == null || userId == null) return;
+
+    await _authStorage.saveFullSession(
+      userId: userId,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      expiresAt: null,
+    );
+  }
+
+  Future<void> register({required String email, required String password, required String username}) async {
+    await _postJson('/auth/register', {'email': email.trim(), 'password': password, 'username': username.trim()});
+  }
+
+  Future<void> login({required String email, required String password}) async {
+    await _postJson('/auth/login', {'email': email.trim(), 'password': password});
+  }
+
   Future<Map<String, dynamic>> verifyCode(String code) async {
-    final uri = Uri.parse('$baseUrl/auth/verify');
-
-    final resp = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'code': code.trim()}),
-    );
-
-    if (resp.statusCode != 200) {
-      throw Exception('Неверный или просроченный код: ${resp.body}');
-    }
-
-    return jsonDecode(resp.body) as Map<String, dynamic>;
+    final result = await _postJson('/auth/verify', {'code': code.trim()});
+    await _saveSessionFromBackend(result);
+    return result;
   }
 
-  // ================== СБРОС ПАРОЛЯ ==================
-
-  /// Запрос на сброс пароля.
-  /// Бэкенд: POST /auth/forgot-password { "email": "..." }
   Future<void> requestPasswordReset(String email) async {
-    final uri = Uri.parse('$baseUrl/auth/forgot-password');
-
-    final resp = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email.trim()}),
-    );
-
-    // Бэкенд всегда возвращает 200, даже если email не найден.
-    if (resp.statusCode != 200) {
-      throw Exception(
-        'Не удалось отправить письмо для сброса пароля: ${resp.body}',
-      );
-    }
+    await _postJson('/auth/forgot-password', {'email': email.trim()});
   }
 
-  /// Подтверждение сброса пароля.
-  /// Бэкенд: POST /auth/reset-password { "token": "...", "newPassword": "..." }
-  Future<void> resetPassword({
-    required String token,
-    required String newPassword,
-  }) async {
-    final uri = Uri.parse('$baseUrl/auth/reset-password');
-
-    final resp = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'token': token.trim(),
-        'newPassword': newPassword,
-      }),
-    );
-
-    if (resp.statusCode != 200) {
-      throw Exception('Не удалось сбросить пароль: ${resp.body}');
-    }
+  Future<void> resetPassword({required String token, required String newPassword}) async {
+    await _postJson('/auth/reset-password', {'token': token.trim(), 'newPassword': newPassword});
   }
 
-  // ================== Google Sign-In (Web) ==================
-
-  Future<String?> _getGoogleIdToken() async {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) return null; // пользователь отменил вход
-
-    final googleAuth = await googleUser.authentication;
-    return googleAuth.idToken;
-  }
-
-  /// Полный цикл: Google → backend → user + tokens
   Future<Map<String, dynamic>?> signInWithGoogleAndBackend() async {
-    final idToken = await _getGoogleIdToken();
-    if (idToken == null) {
-      return null;
-    }
+    final user = await _googleSignIn.signIn();
+    if (user == null) return null;
+    final auth = await user.authentication;
+    final idToken = auth.idToken;
+    if (idToken == null) throw ApiException('Не удалось получить Google idToken', 'idToken is null');
 
-    final uri = Uri.parse('$baseUrl/auth/google');
-    final resp = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'idToken': idToken}),
-    );
-
-    if (resp.statusCode != 200) {
-      throw Exception('Google login failed: ${resp.statusCode} ${resp.body}');
-    }
-
-    return jsonDecode(resp.body) as Map<String, dynamic>;
+    final result = await _postJson('/auth/google', {'idToken': idToken});
+    await _saveSessionFromBackend(result);
+    return result;
   }
 
   Future<void> signOutGoogle() => _googleSignIn.signOut();
+  void dispose() => _client.close();
 }

@@ -1,0 +1,110 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: outfitstyle
+      POSTGRES_USER: outfitstyle
+      POSTGRES_PASSWORD: outfitstyle
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U outfitstyle -d outfitstyle"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  ml-service:
+    build:
+      context: ../ml-service
+    environment:
+      PORT: "8000"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      # никаких дефолтных ключей!
+      YANDEX_TRANSLATE_API_KEY: ""
+      YANDEX_FOLDER_ID: ""
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ../server
+    environment:
+      ENVIRONMENT: development
+
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: "8080"
+
+      DATABASE_URL: postgres://outfitstyle:outfitstyle@postgres:5432/outfitstyle?sslmode=disable
+
+      REDIS_URL: redis://redis:6379/0
+
+      JWT_SECRET: "dev-secret-dev-secret-dev-secret-dev-secret"
+      JWT_ACCESS_TOKEN_TTL: 15m
+      JWT_REFRESH_TOKEN_TTL: 720h
+
+      OPENWEATHER_API_KEY: "${OPENWEATHER_API_KEY:-}"
+      OPENWEATHER_CACHE_TTL: 10m
+      OPENWEATHER_BASE_URL: "https://api.openweathermap.org/data/2.5"
+
+      ML_SERVICE_URL: http://ml-service:8000
+      ML_SERVICE_TIMEOUT: 30s
+
+      SENTRY_DSN: "${SENTRY_DSN:-}"
+
+      API_KEY_PEPPER: "dev-pepper"
+
+      ADMIN_API_KEY: "dev-admin-key"
+
+      # queue uses same redis
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+
+  worker:
+    build:
+      context: ../server
+    command: ["/bin/sh", "-c", "/app/migrate && /app/worker"]
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgres://outfitstyle:outfitstyle@postgres:5432/outfitstyle?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      # Push можно подключить позже:
+      FCM_CREDENTIALS_FILE: ""
+      APNS_KEY_FILE: ""
+      APNS_KEY_ID: ""
+      APNS_TEAM_ID: ""
+      APNS_BUNDLE_ID: ""
+      APNS_ENVIRONMENT: development
+      SENTRY_DSN: "${SENTRY_DSN:-}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:

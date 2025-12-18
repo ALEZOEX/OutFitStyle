@@ -2,104 +2,81 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15-alpine
-    container_name: outfitstyle-db
+    image: postgres:15
     environment:
-      POSTGRES_USER: outfitstyle
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: outfitstyle
+      POSTGRES_DB: ${DB_NAME:-outfitstyle}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U outfitstyle -d outfitstyle"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-outfitstyle}"]
+      interval: 5s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
-    container_name: outfitstyle-redis
     ports:
       - "6379:6379"
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   ml-service:
     build:
-      context: ./server/ml-service
-      dockerfile: Dockerfile.prod
-    container_name: outfitstyle-ml
+      context: .
+      dockerfile: Dockerfile.ml-service
     ports:
       - "5000:5000"
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=outfitstyle
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=outfitstyle
+      - MODEL_PATH=/app/models/model.pkl
+      - LOG_LEVEL=info
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     volumes:
-      - ml_models:/app/models
-    restart: unless-stopped
+      - ./server/ml-service/models:/app/models
 
-  server:
+  api-gateway:
     build:
       context: ./server
-      dockerfile: Dockerfile.prod
-    container_name: outfitstyle-server
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
-      - SERVER_PORT=8080
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=outfitstyle
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=outfitstyle
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_NAME=${DB_NAME:-outfitstyle}
       - ML_SERVICE_URL=http://ml-service:5000
-      - JWT_SECRET=${JWT_SECRET}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-very-long-secret-key-change-in-production}
+      - YANDEX_TRANSLATE_API_KEY=${YANDEX_TRANSLATE_API_KEY:-aje36hbuc3e2ntrh5e21}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - LOG_LEVEL=info
+      - ENVIRONMENT=production
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       ml-service:
         condition: service_started
-    restart: unless-stopped
-
-  marketplace-service:
-    build:
-      context: ./server/marketplace-service
-      dockerfile: Dockerfile.prod
-    container_name: outfitstyle-marketplace
-    ports:
-      - "5001:5001"
-    environment:
-      - MARKETPLACE_SERVICE_URL=http://marketplace-service:5000
-      - PORT=5001
-      - WB_AFFILIATE_ID=${WB_AFFILIATE_ID}
-      - OZON_AFFILIATE_ID=${OZON_AFFILIATE_ID}
-    restart: unless-stopped
-
-  web-client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile.prod
-    container_name: outfitstyle-web-client
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - server
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:
-  ml_models:

@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/user_wardrobe.dart';
-import '../providers/theme_provider.dart';
-import '../services/api_service.dart';
-import '../services/auth_storage.dart';
-import '../theme/app_theme.dart';
-import 'add_item_screen.dart';
-import '../widgets/search_bar.dart' as custom_search_bar;
+import '../providers/wardrobe_provider.dart';
+import '../models/wardrobe_models.dart';
 
 class WardrobeScreen extends StatefulWidget {
   const WardrobeScreen({super.key});
@@ -17,304 +12,130 @@ class WardrobeScreen extends StatefulWidget {
 }
 
 class _WardrobeScreenState extends State<WardrobeScreen> {
-  late Future<Map<String, List<WardrobeItem>>> _wardrobeFuture;
-  late ApiService _apiService;
-  late AuthStorage _authStorage;
-
-  bool _isSearching = false;
-  String _searchQuery = '';
-  final TextEditingController _searchController = TextEditingController();
-
-  bool _isDeleting = false;
-  bool _didInitDeps = false;
-
   @override
   void initState() {
     super.initState();
-    _wardrobeFuture = Future.value(<String, List<WardrobeItem>>{});
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_didInitDeps) {
-      _apiService = Provider.of<ApiService>(context, listen: false);
-      _authStorage = Provider.of<AuthStorage>(context, listen: false);
-      _didInitDeps = true;
-      _loadWardrobe();
-    }
-  }
-
-  Future<void> _loadWardrobe() async {
-    try {
-      final userId = await _authStorage.readUserId();
-      if (!mounted) return;
-
-      if (userId == null) {
-        setState(() {
-          _wardrobeFuture = Future.value(<String, List<WardrobeItem>>{});
-        });
-        return;
-      }
-
-      setState(() {
-        _wardrobeFuture = _apiService.getWardrobe(userId: userId);
-      });
-      await _wardrobeFuture;
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка загрузки гардероба: $e')),
-      );
-    }
-  }
-
-  void _addItem() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AddItemScreen()),
-    );
-    if (result == true) {
-      _loadWardrobe();
-    }
-  }
-
-  void _startSearch() {
-    setState(() {
-      _isSearching = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WardrobeProvider>().refresh();
     });
-  }
-
-  void _cancelSearch() {
-    setState(() {
-      _isSearching = false;
-      _searchQuery = '';
-      _searchController.clear();
-    });
-  }
-
-  void _onSearchQueryChanged(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
-  }
-
-  Map<String, List<WardrobeItem>> _filterWardrobe(
-      Map<String, List<WardrobeItem>> wardrobe) {
-    if (_searchQuery.isEmpty) return wardrobe;
-
-    final lowerQuery = _searchQuery.toLowerCase();
-    final filtered = <String, List<WardrobeItem>>{};
-
-    wardrobe.forEach((category, items) {
-      final filteredItems = items.where((item) {
-        return item.customName.toLowerCase().contains(lowerQuery) ||
-            category.toLowerCase().contains(lowerQuery);
-      }).toList();
-
-      if (filteredItems.isNotEmpty) {
-        filtered[category] = filteredItems;
-      }
-    });
-
-    return filtered;
-  }
-
-  Future<void> _deleteItem(int itemId) async {
-    if (!await _showDeleteConfirmation()) return;
-
-    try {
-      setState(() {
-        _isDeleting = true;
-      });
-
-      await _apiService.deleteWardrobeItem(itemId);
-
-      await _loadWardrobe();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Предмет успешно удален')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка при удалении: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isDeleting = false;
-        });
-      }
-    }
-  }
-
-  Future<bool> _showDeleteConfirmation() async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Подтверждение удаления'),
-        content: const Text(
-            'Вы уверены, что хотите удалить этот предмет? Это действие нельзя отменить.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Удалить',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    ) ??
-        false;
-
-    return result;
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.watch<ThemeProvider>().isDarkMode;
-    final theme = Theme.of(context);
-
-    final isInteractionEnabled = !_isDeleting;
+    final p = context.watch<WardrobeProvider>();
 
     return Scaffold(
-      backgroundColor:
-      isDark ? AppTheme.backgroundDark : const Color(0xFFF0F2F5),
       appBar: AppBar(
-        title: _isSearching
-            ? custom_search_bar.SearchBar(
-          onQueryChanged: _onSearchQueryChanged,
-          onSearchCancelled: _cancelSearch,
-        )
-            : const Text('Мой гардероб'),
-        centerTitle: true,
-        leading: _isSearching
-            ? IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _cancelSearch,
-        )
-            : null,
-        actions: _isSearching
-            ? []
-            : [
+        title: const Text('Гардероб'),
+        actions: [
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: isInteractionEnabled ? _startSearch : null,
+            onPressed: () => _showAddDialog(context),
+            icon: const Icon(Icons.add),
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadWardrobe,
-        child: FutureBuilder<Map<String, List<WardrobeItem>>>(
-          future: _wardrobeFuture,
-          builder: (context, snapshot) {
-            if (_isSearching && _searchQuery.isEmpty && !snapshot.hasData) {
-              return const Center(child: Text('Введите запрос для поиска'));
-            }
-
-            if (!_isSearching &&
-                snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return Center(child: Text('Ошибка загрузки: ${snapshot.error}'));
-            }
-
-            if (!snapshot.hasData ||
-                (_isSearching && _filterWardrobe(snapshot.data!).isEmpty)) {
-              return _buildEmptyState();
-            }
-
-            final wardrobe = _isSearching
-                ? _filterWardrobe(snapshot.data!)
-                : snapshot.data!;
-
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: wardrobe.entries.map((entry) {
-                final category = entry.key;
-                final items = entry.value;
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: ExpansionTile(
-                    initiallyExpanded: true,
-                    title: Text(
-                      '$category (${items.length})',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    children: items.map((item) {
-                      return ListTile(
-                        leading: Text(
-                          item.customIcon,
-                          style: const TextStyle(fontSize: 28),
-                        ),
-                        title: Text(item.customName),
-                        trailing: _isDeleting
-                            ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                            : IconButton(
-                          icon: Icon(
-                            Icons.delete_outline,
-                            color:
-                            Colors.red.withOpacity(0.7),
-                          ),
-                          onPressed: () => _deleteItem(item.id),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+        onRefresh: () => context.read<WardrobeProvider>().refresh(),
+        child: ListView.builder(
+          itemCount: p.items.length + 1,
+          itemBuilder: (ctx, i) {
+            if (i == p.items.length) {
+              if (p.isLoadingMore) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(child: CircularProgressIndicator()),
                 );
-              }).toList(),
-            );
+              }
+              if (p.hasMore) {
+                // auto-load more
+                WidgetsBinding.instance.addPostFrameCallback((_) => context.read<WardrobeProvider>().loadMore());
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(child: Text('Загружаем...')),
+                );
+              }
+              return const SizedBox(height: 24);
+            }
+
+            final item = p.items[i];
+            return _WardrobeTile(item: item);
           },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: isInteractionEnabled ? _addItem : null,
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-        child: _isDeleting
-            ? const SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        )
-            : const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.checkroom_outlined, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Ваш гардероб пуст',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  Future<void> _showAddDialog(BuildContext context) async {
+    final name = TextEditingController();
+    final category = TextEditingController(text: 'upper');
+    final subcategory = TextEditingController(text: 'tshirt');
+    final style = TextEditingController(text: 'casual');
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Добавить вещь (ручной ввод)'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: name, decoration: const InputDecoration(labelText: 'Название')),
+            TextField(controller: category, decoration: const InputDecoration(labelText: 'Категория (upper/...)')),
+            TextField(controller: subcategory, decoration: const InputDecoration(labelText: 'Подкатегория')),
+            TextField(controller: style, decoration: const InputDecoration(labelText: 'Стиль (casual/...)')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Отмена')),
+          FilledButton(
+            onPressed: () async {
+              await context.read<WardrobeProvider>().addManual(
+                    name: name.text.trim(),
+                    category: category.text.trim(),
+                    subcategory: subcategory.text.trim(),
+                    style: style.text.trim(),
+                  );
+              if (context.mounted) Navigator.pop(context);
+            },
+            child: const Text('Добавить'),
           ),
-          SizedBox(height: 8),
-          Text(
-            'Нажмите "+", чтобы добавить первую вещь',
-            style: TextStyle(color: Colors.grey),
+        ],
+      ),
+    );
+  }
+}
+
+class _WardrobeTile extends StatelessWidget {
+  final WardrobeItem item;
+
+  const _WardrobeTile({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final emoji = item.item.iconEmoji ?? '';
+    final title = item.item.name;
+    final subtitle = '${item.item.category} / ${item.item.subcategory} • ${item.item.style} • ${item.item.source}';
+
+    return ListTile(
+      leading: Text(emoji.isEmpty ? '👕' : emoji, style: const TextStyle(fontSize: 22)),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: Wrap(
+        spacing: 6,
+        children: [
+          IconButton(
+            onPressed: () => context.read<WardrobeProvider>().markWorn(item),
+            icon: const Icon(Icons.check),
+            tooltip: 'Надел',
+          ),
+          IconButton(
+            onPressed: () => context.read<WardrobeProvider>().toggleFavorite(item),
+            icon: Icon(item.isFavorite ? Icons.favorite : Icons.favorite_border),
+            tooltip: 'Избранное',
+          ),
+          IconButton(
+            onPressed: () => context.read<WardrobeProvider>().toggleArchive(item),
+            icon: Icon(item.isArchived ? Icons.archive : Icons.archive_outlined),
+            tooltip: 'Архив',
           ),
         ],
       ),

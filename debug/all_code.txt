@@ -1,0 +1,2680 @@
+SERVER FILES:
+
+C:\Users\Admin\GolandProjects\outfitstyle\server\cmd\server\main.go:
+// Package main OutfitStyle API.
+//
+// @title       OutfitStyle API
+// @version     1.0
+// @BasePath    /api/v1
+package main
+
+import (
+	"context"
+	"log"
+	stdhttp "net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httpSwagger "github.com/swaggo/http-swagger"
+	"go.uber.org/zap"
+
+	"outfitstyle/server/internal/api/handlers"
+	"outfitstyle/server/internal/api/middleware"
+	"outfitstyle/server/internal/config"
+	"outfitstyle/server/internal/core/application/services"
+	_ "outfitstyle/server/internal/docs"
+	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
+	pg "outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
+	ext "outfitstyle/server/internal/infrastructure/external"
+	"outfitstyle/server/internal/pkg/health"
+	infra_services "outfitstyle/server/internal/infrastructure/services"
+)
+
+func main() {
+	// ---------- Логгер ----------
+	logger, err := setupLogger()
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer logger.Sync()
+
+	// ---------- Конфиг приложения ----------
+	cfg, err := config.Load()
+	if err != nil {
+		logger.Fatal("Configuration loading failed", zap.Error(err))
+	}
+
+	if err := cfg.Validate(); err != nil {
+		logger.Fatal("Configuration validation failed", zap.Error(err))
+	}
+
+	// ---------- БД ----------
+	db, err := dbpg.NewDB(cfg.Database.DatabaseURL(), logger)
+	if err != nil {
+		logger.Fatal("Database connection failed", zap.Error(err))
+	}
+	defer db.Close()
+
+	// ---------- Внешние сервисы ----------
+	weatherAPIKey := os.Getenv("WEATHER_API_KEY")
+	weatherBaseURL := os.Getenv("WEATHER_API_BASE_URL")
+	if weatherAPIKey == "" {
+		logger.Warn("WEATHER_API_KEY is not set")
+	}
+	if weatherBaseURL == "" {
+		weatherBaseURL = "https://api.openweathermap.org/data/2.5"
+	}
+
+	weatherService := ext.NewWeatherService(
+		weatherAPIKey,
+		weatherBaseURL,
+		10*time.Second,
+		logger,
+	)
+
+	mlService := ext.NewMLService(
+		cfg.MLService.BaseURL,
+		logger,
+	)
+
+	googleAuth, err := ext.NewGoogleAuthService()
+	if err != nil {
+		logger.Fatal("Google auth init failed", zap.Error(err))
+	}
+
+	// ---------- Redis клиент для кэширования ----------
+	redisClient, err := dbpg.NewRedisClient(cfg.Cache.RedisURL)
+	if err != nil {
+		logger.Warn("Redis connection failed, translation caching will be disabled", zap.Error(err))
+		redisClient = nil
+	} else {
+		defer redisClient.Close()
+	}
+
+	// ---------- Сервис перевода ----------
+	var translationService infra_services.ServiceInterface
+	if redisClient != nil {
+		// Получаем Yandex API ключ из переменной окружения
+		yandexAPIKey := os.Getenv("YANDEX_TRANSLATE_API_KEY")
+		if yandexAPIKey != "" {
+			translationService = infra_services.NewTranslationService(redisClient, yandexAPIKey)
+			logger.Info("Translation service initialized with Yandex API and Redis caching")
+		} else {
+			logger.Warn("YANDEX_TRANSLATE_API_KEY not set, translation service disabled")
+		}
+	} else {
+		logger.Warn("Redis not available, translation service disabled")
+	}
+
+	// ---------- Репозитории ----------
+	userRepo := pg.NewUserRepository(db, logger)
+	recommendationRepo := pg.NewRecommendationRepository(db, logger)
+	clothingItemRepo := pg.NewClothingItemRepository(db, logger)
+	specRepo := pg.NewSubcategorySpecRepo(db.Pool())
+
+	// ---------- EmailService через cfg.Email ----------
+	var emailService services.EmailService
+	if cfg.Email.SMTPHost != "" {
+		from := os.Getenv("FROM_EMAIL")
+		if from == "" {
+			from = "noreply@outfitstyle.com"
+		}
+
+		logger.Info("SMTP email service enabled",
+			zap.String("host", cfg.Email.SMTPHost),
+			zap.Int("port", cfg.Email.SMTPPort),
+			zap.String("from", from),
+		)
+
+		emailService = services.NewEmailService(
+			cfg.Email.SMTPHost,
+			cfg.Email.SMTPPort,
+			cfg.Email.SMTPUsername,
+			cfg.Email.SMTPPassword,
+			from,
+			logger,
+		)
+	} else {
+		logger.Warn("SMTP config not set, using NoopEmailService")
+		emailService = services.NewNoopEmailService()
+	}
+
+	// ---------- Services ----------
+	// Пока не создаем ML клиент, передаем nil для него
+	var clothingItemService *services.ClothingItemService
+	if translationService != nil {
+		clothingItemService = services.NewClothingItemService(clothingItemRepo, specRepo, nil, translationService)
+		logger.Info("ClothingItemService initialized with translation service")
+	} else {
+		clothingItemService = services.NewClothingItemService(clothingItemRepo, specRepo, nil, nil)
+		logger.Info("ClothingItemService initialized without translation service")
+	}
+	tokenService := services.NewTokenService(
+		cfg.Security.JWTSecret,
+		time.Duration(cfg.Security.TokenExpiryHours)*time.Hour,
+		time.Duration(cfg.Security.RefreshTokenExpiryDays)*24*time.Hour,
+	)
+
+	authConfig := services.AuthConfig{
+		TokenExpiryHours:       cfg.Security.TokenExpiryHours,
+		VerificationCodeExpiry: time.Duration(cfg.Security.VerificationCodeExpiry) * time.Minute,
+		MaxLoginAttempts:       cfg.Security.MaxLoginAttempts,
+		BlockDuration:          time.Duration(cfg.Security.BlockDuration) * time.Minute,
+	}
+
+	authService := services.NewAuthService(
+		userRepo,
+		emailService,
+		tokenService,
+		authConfig,
+	)
+
+	// ---------- Доменные сервисы ----------
+	recommendationService := services.NewRecommendationService(
+		recommendationRepo,
+		userRepo,
+		clothingItemRepo,
+		weatherService,
+		mlService,
+		logger,
+	)
+
+	userService := services.NewUserService(userRepo, logger)
+
+	// ---------- HTTP‑обработчики ----------
+	clothingItemHandler := handlers.NewClothingItemHandler(clothingItemService, logger)
+	recommendationHandler := handlers.NewRecommendationHandler(recommendationService, weatherService, logger)
+	authHandler := handlers.NewAuthHandler(authService, googleAuth)
+	userHandler := handlers.NewUserHandler(userService, logger)
+
+	// ---------- Роутер ----------
+	router := setupRouter(cfg, clothingItemHandler, recommendationHandler, authHandler, userHandler, logger, authService)
+
+	// ---------- Health checks ----------
+	checks := map[string]health.Checker{
+		"database": db,
+		"weather":  weatherService,
+		"ml":       mlService,
+	}
+	health.RegisterChecks(checks)
+
+	// ---------- HTTP‑сервер ----------
+	addr := cfg.Server.Host + ":" + cfg.Server.Port
+	srv := &stdhttp.Server{
+		Addr:         addr,
+		Handler:      router,
+		ReadTimeout:  time.Duration(cfg.Server.ReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(cfg.Server.WriteTimeout) * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
+	// Стартуем сервер
+	go func() {
+		logger.Info("Starting server", zap.String("address", addr))
+		if err := srv.ListenAndServe(); err != nil && err != stdhttp.ErrServerClosed {
+			logger.Fatal("Server failed to start", zap.Error(err))
+		}
+	}()
+
+	// ---------- Graceful shutdown ----------
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+	<-shutdown
+	logger.Info("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.Server.ShutdownTimeout)*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Error("Server forced to shutdown", zap.Error(err))
+	}
+
+	logger.Info("Server stopped successfully")
+}
+
+func setupLogger() (*zap.Logger, error) {
+	var cfg zap.Config
+	if os.Getenv("ENVIRONMENT") == "production" {
+		cfg = zap.NewProductionConfig()
+	} else {
+		cfg = zap.NewDevelopmentConfig()
+	}
+
+	logger, err := cfg.Build()
+	if err != nil {
+		return nil, err
+	}
+	return logger, nil
+}
+
+func setupRouter(
+	cfg *config.AppConfig,
+	clothingItemHandler *handlers.ClothingItemHandler,
+	recommendationHandler *handlers.RecommendationHandler,
+	authHandler *handlers.AuthHandler,
+	userHandler *handlers.UserHandler,
+	logger *zap.Logger,
+	authService *services.AuthService,
+) *mux.Router {
+	router := mux.NewRouter()
+
+	// Middleware
+	router.Use(
+		middleware.CORSMiddleware(cfg.Security.GetAllowedOrigins()),
+		middleware.LoggerMiddleware(logger),
+		middleware.RateLimitMiddleware(cfg.Security.RateLimit, time.Minute),
+	)
+
+	// Health
+	router.HandleFunc("/health", health.Handler).Methods(stdhttp.MethodGet)
+
+	// Swagger UI: /swagger/index.html
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
+	// API v1
+	api := router.PathPrefix("/api/v1").Subrouter()
+
+	// Auth routes: /api/v1/auth/...
+	authHandler.RegisterRoutes(api)
+
+	// Public routes (no auth required)
+	public := api.PathPrefix("").Subrouter()
+
+	// Clothing items routes (public)
+	clothingItemsPublic := public.PathPrefix("/clothing-items").Subrouter()
+	clothingItemsPublic.HandleFunc("", clothingItemHandler.GetAllClothingItems).Methods(stdhttp.MethodGet)
+	clothingItemsPublic.HandleFunc("/{id:[0-9]+}", clothingItemHandler.GetClothingItem).Methods(stdhttp.MethodGet)
+
+	// Protected routes (auth required)
+	protected := api.PathPrefix("").Subrouter()
+	protected.Use(middleware.AuthMiddleware(authService))
+
+	// Protected recommendations routes (auth required)
+	recommendationsProtected := protected.PathPrefix("/recommendations").Subrouter()
+	recommendationsProtected.HandleFunc("", recommendationHandler.GetRecommendations).Methods(stdhttp.MethodGet)
+
+	// Public recommendation route (get specific recommendation by ID)
+	public.HandleFunc("/recommendations/{id}", recommendationHandler.GetRecommendationByID).Methods(stdhttp.MethodGet)
+
+	// User routes requiring auth
+	users := protected.PathPrefix("/users").Subrouter()
+	users.HandleFunc("/{id}/profile", userHandler.GetUserProfile).Methods(stdhttp.MethodGet)
+	users.HandleFunc("/{id}/profile", userHandler.UpdateUserProfile).Methods(stdhttp.MethodPut)
+	users.HandleFunc("/{id}/outfit-plans", userHandler.GetUserOutfitPlans).Methods(stdhttp.MethodGet)
+	users.HandleFunc("/{id}/outfit-plans", userHandler.CreateOutfitPlan).Methods(stdhttp.MethodPost)
+	users.HandleFunc("/{id}/outfit-plans/{plan_id}", userHandler.DeleteOutfitPlan).Methods(stdhttp.MethodDelete)
+	users.HandleFunc("/{id}/stats", userHandler.GetUserStats).Methods(stdhttp.MethodGet)
+
+	// Protected clothing items routes
+	clothingItemsProtected := protected.PathPrefix("/clothing-items").Subrouter()
+	clothingItemsProtected.HandleFunc("", clothingItemHandler.CreateClothingItem).Methods(stdhttp.MethodPost)
+	clothingItemsProtected.HandleFunc("/{id:[0-9]+}", clothingItemHandler.UpdateClothingItem).Methods(stdhttp.MethodPut)
+	clothingItemsProtected.HandleFunc("/{id:[0-9]+}", clothingItemHandler.DeleteClothingItem).Methods(stdhttp.MethodDelete)
+
+	// Wardrobe routes (require auth)
+	wardrobe := protected.PathPrefix("/wardrobe").Subrouter()
+	wardrobe.HandleFunc("/users/{user_id:[0-9]+}", clothingItemHandler.GetWardrobeItems).Methods(stdhttp.MethodGet)
+	wardrobe.HandleFunc("/users/{user_id:[0-9]+}/items/{item_id:[0-9]+}", clothingItemHandler.AddItemToWardrobe).Methods(stdhttp.MethodPost)
+	wardrobe.HandleFunc("/users/{user_id:[0-9]+}/items/{item_id:[0-9]+}", clothingItemHandler.RemoveItemFromWardrobe).Methods(stdhttp.MethodDelete)
+	// Prometheus metrics
+	router.Handle("/metrics", promhttp.Handler()).Methods(stdhttp.MethodGet)
+	
+	return router
+}
+  
+AUTH.MIDDLEWARE.GO: 
+package middleware
+
+import (
+	"context"
+	"net/http"
+	"strings"
+
+	"outfitstyle/server/internal/api"
+	"outfitstyle/server/internal/core/application/services"
+)
+
+// AuthMiddleware creates a middleware that validates JWT tokens
+func AuthMiddleware(authService *services.AuthService) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			if authHeader == "" {
+				api.JSONError(w, http.StatusUnauthorized, "Authorization header required")
+				return
+			}
+
+			if !strings.HasPrefix(authHeader, "Bearer ") {
+				api.JSONError(w, http.StatusUnauthorized, "Invalid authorization header format")
+				return
+			}
+
+			token := authHeader[7:] // Remove "Bearer " prefix
+
+			user, err := authService.ValidateToken(token)
+			if err != nil {
+				api.JSONError(w, http.StatusUnauthorized, "Invalid or expired token")
+				return
+			}
+
+			// Add user to request context
+			ctx := context.WithValue(r.Context(), "user", user)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+  
+AUTH_HANDLER.GO: 
+package handlers
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log"
+	"net/http"
+	"net/mail"
+	"outfitstyle/server/internal/core/application/repositories"
+	"outfitstyle/server/internal/infrastructure/external"
+	"strings"
+	"time"
+	"unicode"
+
+	"github.com/gorilla/mux"
+
+	"outfitstyle/server/internal/core/application/services"
+	"outfitstyle/server/internal/core/domain"
+	resp "outfitstyle/server/internal/pkg/http"
+)
+
+const accessTokenTTLSeconds = 3600
+
+var (
+	errInvalidRequestBody         = errors.New("invalid request body")
+	errInvalidCredentials         = errors.New("неверный email или пароль")
+	errCodeRequired               = errors.New("code is required")
+	errInvalidOrExpiredCode       = errors.New("invalid or expired code")
+	errAuthHeaderRequired         = errors.New("authorization header required")
+	errInvalidAuthHeaderFormat    = errors.New("invalid authorization header format")
+	errInvalidRefreshToken        = errors.New("invalid refresh token")
+	errInvalidEmailFormat         = errors.New("invalid email format")
+	errFailedToProcessReset       = errors.New("failed to process password reset")
+	errTokenRequired              = errors.New("token is required")
+	errInvalidOrExpiredResetToken = errors.New("invalid or expired reset token")
+)
+
+// AuthHandler handles authentication-related HTTP requests
+type AuthHandler struct {
+	authService *services.AuthService
+	googleAuth  *external.GoogleAuthService
+}
+
+// NewAuthHandler creates a new authentication handler
+func NewAuthHandler(authService *services.AuthService, googleAuth *external.GoogleAuthService) *AuthHandler {
+	return &AuthHandler{
+		authService: authService,
+		googleAuth:  googleAuth,
+	}
+}
+
+// DTO для запросов
+type loginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type verifyCodeRequest struct {
+	Code string `json:"code"`
+}
+
+type emailRequest struct {
+	Email string `json:"email"`
+}
+
+type resetPasswordRequest struct {
+	Token       string `json:"token"`
+	NewPassword string `json:"newPassword"`
+}
+
+func decodeJSON(w http.ResponseWriter, r *http.Request, dst interface{}) bool {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(dst); err != nil {
+		log.Printf("decodeJSON error: %v", err)
+		resp.Error(w, http.StatusBadRequest, errInvalidRequestBody)
+		return false
+	}
+	return true
+}
+
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	var userInput domain.UserRegistration
+	if !decodeJSON(w, r, &userInput) {
+		return
+	}
+
+	if err := validateRegistrationInput(userInput); err != nil {
+		resp.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	user, err := h.authService.RegisterUser(ctx, userInput)
+	if err != nil {
+		// Проверка на дубликат email
+		if errors.Is(err, repositories.ErrEmailAlreadyExists) {
+			resp.Error(w, http.StatusConflict, fmt.Errorf("user with this email already exists"))
+			return
+		}
+
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to register user"))
+		log.Printf("Registration error: %v", err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"user": map[string]interface{}{
+			"id":         user.ID,
+			"email":      user.Email,
+			"username":   user.Username,
+			"isVerified": user.IsVerified,
+		},
+		"message": "Verification code sent to your email. Please check your inbox.",
+	}
+	resp.Success(w, response)
+}
+
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var input loginRequest
+	if !decodeJSON(w, r, &input) {
+		return
+	}
+	if err := validateLoginInput(input); err != nil {
+		resp.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	_, err := h.authService.LoginUser(ctx, input.Email, input.Password)
+	if err != nil {
+		log.Printf("Login error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errInvalidCredentials)
+		return
+	}
+
+	response := map[string]interface{}{
+		"message": "Verification code sent to your email. Please check your inbox.",
+	}
+	resp.Success(w, response)
+}
+
+func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var input verifyCodeRequest
+	if !decodeJSON(w, r, &input) {
+		return
+	}
+	input.Code = strings.TrimSpace(input.Code)
+	if input.Code == "" {
+		resp.Error(w, http.StatusBadRequest, errCodeRequired)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	user, accessToken, err := h.authService.VerifyCode(ctx, input.Code)
+	if err != nil {
+		log.Printf("VerifyCode error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errInvalidOrExpiredCode)
+		return
+	}
+
+	response := map[string]interface{}{
+		"user": map[string]interface{}{
+			"id":         user.ID,
+			"email":      user.Email,
+			"username":   user.Username,
+			"isVerified": user.IsVerified,
+		},
+		"accessToken": accessToken,
+		"expiresIn":   accessTokenTTLSeconds,
+	}
+	resp.Success(w, response)
+}
+
+func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authHeader == "" {
+		resp.Error(w, http.StatusUnauthorized, errAuthHeaderRequired)
+		return
+	}
+	const prefix = "Bearer "
+	if !strings.HasPrefix(authHeader, prefix) || len(authHeader) <= len(prefix) {
+		resp.Error(w, http.StatusUnauthorized, errInvalidAuthHeaderFormat)
+		return
+	}
+	refreshToken := strings.TrimSpace(authHeader[len(prefix):])
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	accessToken, err := h.authService.RefreshToken(ctx, refreshToken)
+	if err != nil {
+		log.Printf("RefreshToken error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errInvalidRefreshToken)
+		return
+	}
+
+	response := map[string]interface{}{
+		"accessToken": accessToken,
+		"expiresIn":   accessTokenTTLSeconds,
+	}
+	resp.Success(w, response)
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authHeader == "" {
+		resp.Error(w, http.StatusUnauthorized, errAuthHeaderRequired)
+		return
+	}
+	const prefix = "Bearer "
+	if !strings.HasPrefix(authHeader, prefix) || len(authHeader) <= len(prefix) {
+		resp.Error(w, http.StatusUnauthorized, errInvalidAuthHeaderFormat)
+		return
+	}
+	refreshToken := strings.TrimSpace(authHeader[len(prefix):])
+	h.authService.RevokeToken(refreshToken)
+
+	response := map[string]interface{}{
+		"message": "Successfully logged out",
+	}
+	resp.Success(w, response)
+}
+
+// Запрос на сброс пароля — всегда 200 (чтобы не палить существование email)
+func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var input emailRequest
+	if !decodeJSON(w, r, &input) {
+		return
+	}
+	if !isValidEmail(input.Email) {
+		resp.Error(w, http.StatusBadRequest, errInvalidEmailFormat)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	if err := h.authService.ForgotPassword(ctx, input.Email); err != nil {
+		// Логируем, но наружу не раскрываем детали
+		log.Printf("Password reset request error: %v", err)
+	}
+
+	resp.Success(w, map[string]interface{}{
+		"message": "Если аккаунт с таким email существует, мы отправили инструкции по сбросу пароля.",
+	})
+}
+
+// Подтверждение сброса пароля по токену
+func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var input resetPasswordRequest
+	if !decodeJSON(w, r, &input) {
+		return
+	}
+	input.Token = strings.TrimSpace(input.Token)
+	if input.Token == "" {
+		resp.Error(w, http.StatusBadRequest, errTokenRequired)
+		return
+	}
+	if err := validatePasswordStrength(input.NewPassword); err != nil {
+		resp.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	if err := h.authService.ResetPassword(ctx, input.Token, input.NewPassword); err != nil {
+		log.Printf("ResetPassword error: %v", err)
+		resp.Error(w, http.StatusBadRequest, errInvalidOrExpiredResetToken)
+		return
+	}
+	resp.Success(w, map[string]interface{}{
+		"message": "Password successfully reset. Please login with your new password.",
+	})
+}
+
+// Регистрируем все /api/v1/auth/... маршруты
+func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
+	auth := r.PathPrefix("/auth").Subrouter()
+	auth.HandleFunc("/register", h.Register).Methods(http.MethodPost)
+	auth.HandleFunc("/login", h.Login).Methods(http.MethodPost)
+	auth.HandleFunc("/verify", h.VerifyCode).Methods(http.MethodPost)
+	auth.HandleFunc("/forgot-password", h.ForgotPassword).Methods(http.MethodPost)
+	auth.HandleFunc("/reset-password", h.ResetPassword).Methods(http.MethodPost)
+	auth.HandleFunc("/refresh", h.RefreshToken).Methods(http.MethodPost)
+	auth.HandleFunc("/logout", h.Logout).Methods(http.MethodPost)
+	auth.HandleFunc("/google", h.GoogleLogin).Methods(http.MethodPost)
+}
+
+func validateRegistrationInput(input domain.UserRegistration) error {
+	input.Email = strings.TrimSpace(input.Email)
+	input.Username = strings.TrimSpace(input.Username)
+	if input.Email == "" {
+		return errors.New("email is required")
+	}
+	if !isValidEmail(input.Email) {
+		return errors.New("invalid email format")
+	}
+	if input.Password == "" {
+		return errors.New("password is required")
+	}
+	if len(input.Password) < 8 {
+		return errors.New("password must be at least 8 characters")
+	}
+	if input.Username == "" {
+		return errors.New("username is required")
+	}
+	return nil
+}
+
+func validateLoginInput(input loginRequest) error {
+	input.Email = strings.TrimSpace(input.Email)
+	if input.Email == "" {
+		return errors.New("email is required")
+	}
+	if !isValidEmail(input.Email) {
+		return errors.New("invalid email format")
+	}
+	if input.Password == "" {
+		return errors.New("password is required")
+	}
+	return nil
+}
+
+func validatePasswordStrength(password string) error {
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters")
+	}
+	var hasDigit, hasSpecial bool
+	for _, r := range password {
+		if unicode.IsDigit(r) {
+			hasDigit = true
+		}
+		if unicode.IsPunct(r) || unicode.IsSymbol(r) {
+			hasSpecial = true
+		}
+	}
+	if !hasDigit {
+		return errors.New("password must contain at least one number")
+	}
+	if !hasSpecial {
+		return errors.New("password must contain at least one special character")
+	}
+	return nil
+}
+
+func isValidEmail(email string) bool {
+	if email == "" {
+		return false
+	}
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
+
+// GoogleLogin — обработчик входа через Google OAuth
+func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var req struct {
+		IDToken string `json:"idToken"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+
+	req.IDToken = strings.TrimSpace(req.IDToken)
+	if req.IDToken == "" {
+		resp.Error(w, http.StatusBadRequest, errors.New("idToken is required"))
+		return
+	}
+
+	// 1. Проверяем Google ID токен и достаём email
+	email, err := h.googleAuth.VerifyIDToken(r.Context(), req.IDToken)
+	if err != nil {
+		log.Printf("GoogleLogin verify error: %v", err)
+		resp.Error(w, http.StatusUnauthorized, errors.New("invalid Google token"))
+		return
+	}
+
+	// 2. Ищем пользователя по email
+	user, err := h.authService.GetUserByEmail(r.Context(), email)
+	if err != nil || user == nil {
+		// Если нет — регистрируем автоматически
+		username := email
+		if at := strings.Index(email, "@"); at > 0 {
+			username = email[:at]
+		}
+
+		userReg := domain.UserRegistration{
+			Email:    email,
+			Password: "", // для OAuth пароль не нужен
+			Username: username,
+		}
+
+		user, err = h.authService.RegisterOAuthUser(r.Context(), userReg)
+		if err != nil {
+			log.Printf("GoogleLogin register error: %v", err)
+			resp.Error(w, http.StatusInternalServerError, errors.New("registration failed"))
+			return
+		}
+	}
+
+	// 3. Генерируем access/refresh токены
+	accessToken, refreshToken, err := h.authService.GenerateTokens(user.ID)
+	if err != nil {
+		log.Printf("GoogleLogin token error: %v", err)
+		resp.Error(w, http.StatusInternalServerError, errors.New("token generation failed"))
+		return
+	}
+
+	response := map[string]interface{}{
+		"user": map[string]interface{}{
+			"id":         user.ID,
+			"email":      user.Email,
+			"username":   user.Username,
+			"isVerified": true, // OAuth = verified
+		},
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
+		"expiresIn":    accessTokenTTLSeconds,
+	}
+
+	resp.Success(w, response)
+}
+  
+API_SERVICE.DART: 
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
+
+import '../config/app_config.dart';
+import '../exceptions/api_exceptions.dart';
+import '../models/achievement.dart';
+import '../models/favorite.dart';
+import '../models/history.dart';
+import '../models/outfit_plan.dart';
+import '../models/recommendation.dart';
+import '../models/user_wardrobe.dart';
+import '../models/shopping_item.dart';
+import '../models/weather_data.dart';
+import 'auth_storage.dart';
+
+class ApiService {
+  final http.Client _client;
+  final String _baseUrl; // Ожидаем что-то вроде http://localhost:8080/api/v1
+  final Map<String, String> _baseHeaders;
+  final AuthStorage _authStorage;
+
+  ApiService({
+    required String baseUrl,
+    required AuthStorage authStorage,
+    http.Client? client,
+  })  : _baseUrl = baseUrl,
+        _authStorage = authStorage,
+        _client = client ?? http.Client(),
+        _baseHeaders = const {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        };
+
+  // --- РЕКОМЕНДАЦИИ / ПОГОДА ---
+
+  Future<Recommendation> getRecommendations(
+      String city, {
+        required int userId,
+        String source = 'mixed',
+      }) async {
+    final uri = _buildUri(
+      '/recommendations',
+      {
+        'city': city,
+        'user_id': userId.toString(),
+        'source': source,
+      },
+    );
+    final data = await _get(uri);
+
+    final map = _ensureMapResponse(
+      data: data,
+      uri: uri,
+      operation: 'получении рекомендаций',
+      statusCode: 200,
+    );
+
+    return Recommendation.fromJson(map);
+  }
+
+  Future<WeatherData> getWeather(String city) async {
+    final uri = _buildUri('/weather', {'city': city});
+    final data = await _get(uri);
+
+    final map = _ensureMapResponse(
+      data: data,
+      uri: uri,
+      operation: 'получении данных о погоде',
+      statusCode: 200,
+    );
+
+    return WeatherData.fromJson(map);
+  }
+
+  // --- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ---
+
+  Future<Map<String, dynamic>> getUserProfile(int userId) async {
+    // сервер: GET /api/v1/users/{id}/profile
+    final uri = _buildUri('/users/$userId/profile');
+    final data = await _get(uri);
+
+    final map = _ensureMapResponse(
+      data: data,
+      uri: uri,
+      operation: 'получении профиля пользователя',
+      statusCode: 200,
+    );
+
+    return map;
+  }
+
+  // --- ИЗБРАННОЕ ---
+
+  /// Список избранных рекомендаций пользователя.
+  ///
+  /// сервер: GET /api/v1/users/{user_id}/favorites
+  /// ответ: { "favorites": [...], "count": N } или просто [... ]
+  Future<List<FavoriteOutfit>> getFavorites({required int userId}) async {
+    final uri = _buildUri('/users/$userId/favorites');
+    final data = await _get(uri);
+
+    if (data is Map<String, dynamic>) {
+      final favorites = data['favorites'];
+      if (favorites is List) {
+        return favorites
+            .whereType<Map<String, dynamic>>()
+            .map(FavoriteOutfit.fromJson)
+            .toList();
+      }
+      return [];
+    }
+
+    // fallback на старый формат (чистый массив)
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(FavoriteOutfit.fromJson)
+          .toList();
+    }
+
+    return [];
+  }
+
+  /// Добавить рекомендацию в избранное.
+  ///
+  /// сервер: POST /api/v1/recommendations/{id}/favorite
+  /// body: { "user_id": int }
+  Future<void> addFavorite({
+    required int userId,
+    required int recommendationId,
+  }) async {
+    final uri = _buildUri('/recommendations/$recommendationId/favorite');
+    final body = json.encode({'user_id': userId});
+    await _post(uri, body: body, expectedStatusCode: 200);
+  }
+
+  /// Удалить рекомендацию из избранного.
+  ///
+  /// сервер: DELETE /api/v1/recommendations/{id}/favorite
+  /// body: { "user_id": int }
+  Future<void> removeFavorite({
+    required int userId,
+    required int recommendationId,
+  }) async {
+    final uri = _buildUri('/recommendations/$recommendationId/favorite');
+    final body = json.encode({'user_id': userId});
+    await _delete(uri, body: body, expectedStatusCode: 200);
+  }
+
+  // --- ИСТОРИЯ ---
+
+  /// История рекомендаций пользователя.
+  ///
+  /// сервер: GET /api/v1/recommendations/history?user_id=...&limit=...
+  /// ответ: { "history": [...], "count": N } или просто [...]
+  Future<List<HistoryItem>> getRecommendationHistory({
+    required int userId,
+    int limit = 10,
+  }) async {
+    final uri = _buildUri(
+      '/recommendations/history',
+      {
+        'user_id': userId.toString(),
+        'limit': limit.toString(),
+      },
+    );
+    final data = await _get(uri);
+
+    if (data is Map<String, dynamic>) {
+      final historyData = data['history'];
+      if (historyData is List) {
+        return historyData
+            .whereType<Map<String, dynamic>>()
+            .map(HistoryItem.fromJson)
+            .toList();
+      }
+      return [];
+    }
+
+    // fallback, если вернули просто массив
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(HistoryItem.fromJson)
+          .toList();
+    }
+
+    return [];
+  }
+
+  // --- ГАРДЕРОБ ---
+
+  /// Получить гардероб пользователя.
+  ///
+  /// сервер: предположительно GET /api/v1/wardrobe?user_id=...
+  /// ответ: { "upper": [...], "lower": [...], ... }
+  Future<Map<String, List<WardrobeItem>>> getWardrobe({
+    required int userId,
+  }) async {
+    final uri = _buildUri('/wardrobe', {'user_id': userId.toString()});
+    final data = await _get(uri);
+
+    final Map<String, List<WardrobeItem>> wardrobe = {};
+
+    if (data is Map<String, dynamic>) {
+      data.forEach((category, items) {
+        if (items is List) {
+          wardrobe[category] = items
+              .whereType<Map<String, dynamic>>()
+              .map(WardrobeItem.fromJson)
+              .toList();
+        }
+      });
+    }
+
+    return wardrobe;
+  }
+
+  Future<WardrobeItem> addWardrobeItem({
+    required int userId,
+    required String name,
+    required String category,
+    required String icon,
+  }) async {
+    final uri = _buildUri('/wardrobe');
+    final body = json.encode({
+      'user_id': userId,
+      'name': name,
+      'category': category,
+      'icon': icon,
+    });
+    final raw =
+    await _post(uri, body: body, expectedStatusCode: 201);
+    final map = _ensureMapResponse(
+      data: raw,
+      uri: uri,
+      operation: 'добавлении предмета гардероба',
+      statusCode: 201,
+    );
+    return WardrobeItem.fromJson(map);
+  }
+
+  Future<void> deleteWardrobeItem(int itemId) async {
+    final uri = _buildUri('/wardrobe/$itemId');
+    await _delete(uri, expectedStatusCode: 204);
+  }
+
+  // --- ПЛАНИРОВЩИК ---
+
+  /// Получить планы нарядов пользователя.
+  ///
+  /// сервер: GET /api/v1/users/{user_id}/outfit-plans
+  /// ответ: { "plans": [...], "count": N } или просто [...]
+  Future<List<OutfitPlan>> getOutfitPlans({
+    required int userId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final query = <String, String>{};
+    if (startDate != null) {
+      query['start_date'] = startDate.toIso8601String();
+    }
+    if (endDate != null) {
+      query['end_date'] = endDate.toIso8601String();
+    }
+
+    final uri = _buildUri('/users/$userId/outfit-plans', query);
+    final data = await _get(uri);
+
+    List<dynamic> rawList;
+
+    if (data is Map<String, dynamic>) {
+      rawList = data['plans'] as List<dynamic>? ?? const [];
+    } else if (data is List) {
+      rawList = data;
+    } else {
+      rawList = const [];
+    }
+
+    return rawList
+        .whereType<Map<String, dynamic>>()
+        .map(OutfitPlan.fromJson)
+        .toList();
+  }
+
+  Future<OutfitPlan> createOutfitPlan({
+    required int userId,
+    required DateTime date,
+    required List<int> itemIds,
+    String? notes,
+  }) async {
+    final uri = _buildUri('/users/$userId/outfit-plans');
+    final body = json.encode({
+      'date': date.toIso8601String().substring(0, 10),
+      'item_ids': itemIds,
+      'notes': notes,
+    });
+    final raw =
+    await _post(uri, body: body, expectedStatusCode: 201);
+    final map = _ensureMapResponse(
+      data: raw,
+      uri: uri,
+      operation: 'создании плана наряда',
+      statusCode: 201,
+    );
+    return OutfitPlan.fromJson(map);
+  }
+
+  Future<void> deleteOutfitPlan(int userId, int planId) async {
+    final uri = _buildUri('/users/$userId/outfit-plans/$planId');
+    await _delete(uri, expectedStatusCode: 204);
+  }
+
+  // --- ДОСТИЖЕНИЯ ---
+
+  /// Достижения пользователя.
+  ///
+  /// текущий путь зависит от бэка; оставляю как было (achievements?user_id=)
+  Future<List<Achievement>> getAchievements({required int userId}) async {
+    final uri = _buildUri('/achievements', {'user_id': userId.toString()});
+    final data = await _get(uri);
+
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(Achievement.fromJson)
+          .toList();
+    }
+
+    return [];
+  }
+
+  // --- SHOPPING WISHLIST ---
+
+  Future<List<ShoppingItem>> getShoppingWishlist({
+    required int userId,
+  }) async {
+    final uri = _buildUri('/users/$userId/shopping-wishlist');
+    final data = await _get(uri);
+
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(ShoppingItem.fromJson)
+          .toList();
+    }
+
+    return [];
+  }
+
+  Future<ShoppingItem> addShoppingItem({
+    required int userId,
+    required String itemName,
+    required double price,
+    required String imageUrl,
+    required String purchaseLink,
+  }) async {
+    final uri = _buildUri('/users/$userId/shopping-wishlist');
+    final body = json.encode({
+      'item_name': itemName,
+      'price': price,
+      'image_url': imageUrl,
+      'purchase_link': purchaseLink,
+    });
+    final raw =
+    await _post(uri, body: body, expectedStatusCode: 201);
+    final map = _ensureMapResponse(
+      data: raw,
+      uri: uri,
+      operation: 'добавлении товара в wishlist',
+      statusCode: 201,
+    );
+    return ShoppingItem.fromJson(map);
+  }
+
+  Future<void> removeShoppingItem({
+    required int userId,
+    required int itemId,
+  }) async {
+    final uri = _buildUri('/users/$userId/shopping-wishlist/$itemId');
+    await _delete(uri, expectedStatusCode: 204);
+  }
+
+  // --- РЕЙТИНГИ ---
+
+  /// Оценка рекомендации.
+  ///
+  /// сервер: POST /api/v1/recommendations/{id}/rate
+  /// body: { "user_id": int, "rating": 1..5, "feedback": string }
+  Future<bool> submitRating({
+    required int userId,
+    required int recommendationId,
+    required int rating,
+    String? feedback,
+  }) async {
+    final uri = _buildUri('/recommendations/$recommendationId/rate');
+    final body = json.encode({
+      'user_id': userId,
+      'rating': rating,
+      'feedback': feedback,
+    });
+
+    await _post(uri, body: body, expectedStatusCode: 200);
+    return true;
+  }
+
+  // --- БАЗОВЫЕ HTTP МЕТОДЫ ---
+
+  Future<Map<String, String>> _getHeaders() async {
+    final headers = Map<String, String>.from(_baseHeaders);
+    final token = await _authStorage.readAccessToken();
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
+
+  Future<dynamic> _get(Uri uri) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await _client
+          .get(uri, headers: headers)
+          .timeout(Duration(seconds: AppConfig.requestTimeout));
+      return _processResponse(response);
+    } on TimeoutException {
+      throw const NetworkException('Превышено время ожидания от сервера.');
+    } on SocketException catch (e) {
+      throw NetworkException('Проблема с соединением: ${e.message}');
+    } on http.ClientException catch (e) {
+      throw NetworkException('Ошибка сети: ${e.message}');
+    } catch (e) {
+      throw NetworkException('Неизвестная сетевая ошибка: $e');
+    }
+  }
+
+  Future<dynamic> _post(
+      Uri uri, {
+        dynamic body,
+        int expectedStatusCode = 200,
+      }) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await _client
+          .post(uri, headers: headers, body: body)
+          .timeout(Duration(seconds: AppConfig.requestTimeout));
+      return _processResponse(
+        response,
+        expectedStatusCode: expectedStatusCode,
+      );
+    } on TimeoutException {
+      throw const NetworkException('Превышено время ожидания от сервера.');
+    } on SocketException catch (e) {
+      throw NetworkException('Проблема с соединением: ${e.message}');
+    } on http.ClientException catch (e) {
+      throw NetworkException('Ошибка сети: ${e.message}');
+    } catch (e) {
+      throw NetworkException('Неизвестная сетевая ошибка: $e');
+    }
+  }
+
+  Future<void> _delete(
+      Uri uri, {
+        dynamic body,
+        int expectedStatusCode = 204,
+      }) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await _client
+          .delete(uri, headers: headers, body: body)
+          .timeout(Duration(seconds: AppConfig.requestTimeout));
+      if (response.statusCode != expectedStatusCode) {
+        throw _handleError(response);
+      }
+    } on TimeoutException {
+      throw const NetworkException('Превышено время ожидания от сервера.');
+    } on SocketException catch (e) {
+      throw NetworkException('Проблема с соединением: ${e.message}');
+    } on http.ClientException catch (e) {
+      throw NetworkException('Ошибка сети: ${e.message}');
+    } catch (e) {
+      throw NetworkException('Неизвестная сетевая ошибка: $e');
+    }
+  }
+
+  dynamic _processResponse(
+      http.Response response, {
+        int expectedStatusCode = 200,
+      }) {
+    if (response.statusCode != expectedStatusCode) {
+      throw _handleError(response);
+    }
+
+    if (response.body.isEmpty) {
+      return null;
+    }
+
+    final rawBody = utf8.decode(response.bodyBytes);
+    try {
+      return json.decode(rawBody);
+    } catch (_) {
+      final path = response.request?.url.path ?? '';
+      throw ApiServiceException(
+        'Ошибка разбора ответа сервера',
+        response.statusCode,
+        path,
+      );
+    }
+  }
+
+  ApiException _handleError(http.Response response) {
+    String message = 'Неизвестная ошибка сервера';
+    final path = response.request?.url.path ?? '';
+
+    if (response.body.isNotEmpty) {
+      try {
+        final body = json.decode(utf8.decode(response.bodyBytes));
+        if (body is Map<String, dynamic>) {
+          message = body['error']?.toString() ??
+              body['message']?.toString() ??
+              message;
+        } else {
+          message = utf8.decode(response.bodyBytes).trim();
+        }
+      } catch (_) {
+        message = utf8.decode(response.bodyBytes).trim();
+      }
+    }
+
+    final lowerMsg = message.toLowerCase();
+
+    // Считаем сессию истёкшей / битой, если:
+    // - 401/403
+    // - 404 и это профиль/пользователь
+    final isAuthError =
+        response.statusCode == 401 ||
+            response.statusCode == 403 ||
+            (response.statusCode == 404 &&
+                (path.contains('/users/') ||
+                    lowerMsg.contains('user not found') ||
+                    lowerMsg.contains('profile not found')));
+
+    if (isAuthError) {
+      return AuthExpiredException(message);
+    }
+
+    return ApiServiceException(message, response.statusCode, path);
+  }
+
+  /// Собираем Uri на основе baseUrl (включающего /api/v1) и относительного path.
+  ///
+  /// Пример:
+  ///   baseUrl: http://localhost:8080/api/v1
+  ///   path:    /recommendations
+  ///   → http://localhost:8080/api/v1/recommendations
+  Uri _buildUri(String path, [Map<String, String>? queryParams]) {
+    final base = Uri.parse(_baseUrl); // может быть с путём (/api/v1)
+    final basePath = base.path.endsWith('/')
+        ? base.path.substring(0, base.path.length - 1)
+        : base.path;
+    final relPath = path.startsWith('/') ? path : '/$path';
+    final fullPath = '$basePath$relPath';
+
+    return base.replace(
+      path: fullPath,
+      queryParameters: (queryParams?.isNotEmpty ?? false) ? queryParams : null,
+    );
+  }
+
+  /// Закрыть http.Client, если сервис больше не нужен.
+  void dispose() {
+    _client.close();
+  }
+
+  // Вспомогательные методы для произвольных URL
+  // Теперь используют те же таймауты и обработку ошибок, что и основной код.
+
+  Future<dynamic> get(String url) async {
+    final uri = Uri.parse(url);
+    return _get(uri);
+  }
+
+  Future<dynamic> post(String url, dynamic body) async {
+    final uri = Uri.parse(url);
+    final encodedBody = body is String ? body : json.encode(body);
+    return _post(uri, body: encodedBody, expectedStatusCode: 200);
+  }
+
+  // --- ВСПОМОГАТЕЛЬНЫЕ УТИЛИТЫ ---
+
+  Map<String, dynamic> _ensureMapResponse({
+    required dynamic data,
+    required Uri uri,
+    required String operation,
+    required int statusCode,
+  }) {
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    throw ApiServiceException(
+      'Неожиданный формат ответа сервера при $operation',
+      statusCode,
+      uri.path,
+    );
+  }
+}  
+AUTH_SERVICE_IO.DART: 
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+
+import '../exceptions/api_exceptions.dart';
+import 'auth_storage.dart';
+
+class AuthService {
+  final String baseUrl;
+  final http.Client _client;
+  final GoogleSignIn _googleSignIn;
+  final AuthStorage _authStorage;
+
+  AuthService({
+    required this.baseUrl,
+    required AuthStorage authStorage,
+    http.Client? client,
+    GoogleSignIn? googleSignIn,
+  })  : _client = client ?? http.Client(),
+        _authStorage = authStorage,
+        _googleSignIn =
+            googleSignIn ?? GoogleSignIn(scopes: const ['email', 'profile']);
+
+  // ================== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==================
+
+  Uri _buildUri(String path) {
+    final normalizedBase =
+    baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+    final normalizedPath = path.startsWith('/') ? path : '/$path';
+    return Uri.parse('$normalizedBase$normalizedPath');
+  }
+
+  String _extractErrorMessage(http.Response resp, String fallback) {
+    if (resp.body.isEmpty) return fallback;
+    try {
+      final body = json.decode(resp.body);
+      if (body is Map<String, dynamic>) {
+        return body['error']?.toString() ??
+            body['message']?.toString() ??
+            fallback;
+      }
+      return resp.body.trim();
+    } catch (_) {
+      return resp.body.trim().isNotEmpty ? resp.body.trim() : fallback;
+    }
+  }
+
+  ApiException _apiExceptionFromResponse(
+      http.Response resp,
+      String baseMessage,
+      ) {
+    final msg = _extractErrorMessage(resp, baseMessage);
+    return ApiException('$baseMessage: $msg', msg);
+  }
+
+  Future<Map<String, dynamic>> _postJson(
+      String path,
+      Map<String, dynamic> body, {
+        int expectedStatusCode = 200,
+        required String errorContext,
+      }) async {
+    final uri = _buildUri(path);
+
+    late http.Response resp;
+    try {
+      resp = await _client.post(
+        uri,
+        headers: const {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+    } catch (e) {
+      throw ApiException(
+        '$errorContext: проблема с подключением к серверу',
+        e.toString(),
+      );
+    }
+
+    if (resp.statusCode != expectedStatusCode) {
+      throw _apiExceptionFromResponse(resp, errorContext);
+    }
+
+    if (resp.body.isEmpty) {
+      return <String, dynamic>{};
+    }
+
+    try {
+      final decoded = json.decode(resp.body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      throw ApiException(
+        '$errorContext: некорректный формат ответа сервера',
+        'Unexpected JSON type',
+      );
+    } catch (e) {
+      throw ApiException(
+        '$errorContext: ошибка разбора ответа сервера',
+        e.toString(),
+      );
+    }
+  }
+
+  // ================== Email / Password / Code ==================
+
+  Future<void> register({
+    required String email,
+    required String password,
+    required String username,
+  }) async {
+    final result = await _postJson(
+      '/auth/register',
+      {
+        'email': email.trim(),
+        'password': password,
+        'username': username.trim(),
+      },
+      expectedStatusCode: 200,
+      errorContext: 'Не удалось зарегистрироваться',
+    );
+
+    // Сохраняем токены если они есть в ответе
+    if (result['access_token'] != null && result['user_id'] != null) {
+      await _authStorage.saveFullSession(
+        userId: result['user_id'],
+        accessToken: result['access_token'],
+        refreshToken: result['refresh_token'],
+        expiresAt: result['expires_at'] != null
+          ? DateTime.parse(result['expires_at'])
+          : null,
+      );
+    }
+  }
+
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
+    final result = await _postJson(
+      '/auth/login',
+      {
+        'email': email.trim(),
+        'password': password,
+      },
+      expectedStatusCode: 200,
+      errorContext: 'Ошибка входа',
+    );
+
+    // Сохраняем токены если они есть в ответе
+    if (result['access_token'] != null && result['user_id'] != null) {
+      await _authStorage.saveFullSession(
+        userId: result['user_id'],
+        accessToken: result['access_token'],
+        refreshToken: result['refresh_token'],
+        expiresAt: result['expires_at'] != null
+          ? DateTime.parse(result['expires_at'])
+          : null,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyCode(String code) async {
+    final result = await _postJson(
+      '/auth/verify',
+      {'code': code.trim()},
+      expectedStatusCode: 200,
+      errorContext: 'Неверный или просроченный код',
+    );
+
+    // Сохраняем токены если они есть в ответе
+    if (result['access_token'] != null && result['user_id'] != null) {
+      await _authStorage.saveFullSession(
+        userId: result['user_id'],
+        accessToken: result['access_token'],
+        refreshToken: result['refresh_token'],
+        expiresAt: result['expires_at'] != null
+          ? DateTime.parse(result['expires_at'])
+          : null,
+      );
+    }
+
+    return result;
+  }
+
+  // ================== СБРОС ПАРОЛЯ ==================
+
+  Future<void> requestPasswordReset(String email) async {
+    await _postJson(
+      '/auth/forgot-password',
+      {'email': email.trim()},
+      expectedStatusCode: 200,
+      errorContext: 'Не удалось отправить письмо для сброса пароля',
+    );
+  }
+
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    await _postJson(
+      '/auth/reset-password',
+      {
+        'token': token.trim(),
+        'newPassword': newPassword,
+      },
+      expectedStatusCode: 200,
+      errorContext: 'Не удалось сбросить пароль',
+    );
+  }
+
+
+  // ================== Google Sign-In ==================
+
+  Future<Map<String, dynamic>?> signInWithGoogleAndBackend() async {
+    try {
+      final account = await _googleSignIn.signIn();
+      if (account == null) {
+        // Пользователь отменил выбор аккаунта
+        return null;
+      }
+
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+      if (idToken == null) {
+        throw ApiException(
+          'Не удалось получить ID-токен Google',
+          'idToken is null',
+        );
+      }
+
+      final result = await _postJson(
+        '/auth/google',
+        {'idToken': idToken},
+        expectedStatusCode: 200,
+        errorContext: 'Ошибка входа через Google',
+      );
+
+      // Сохраняем токены если они есть в ответе
+      if (result['access_token'] != null && result['user_id'] != null) {
+        await _authStorage.saveFullSession(
+          userId: result['user_id'],
+          accessToken: result['access_token'],
+          refreshToken: result['refresh_token'],
+          expiresAt: result['expires_at'] != null
+            ? DateTime.parse(result['expires_at'])
+            : null,
+        );
+      }
+
+      return result;
+    } on MissingPluginException {
+      // Плагин не зарегистрирован / не поддерживается (Windows, Linux, macOS)
+      throw UnsupportedError(
+        'Google Sign-In не поддерживается на этой платформе',
+      );
+    } on PlatformException catch (e) {
+      // Ошибки плагина на Android/iOS
+      throw ApiException(
+        'Ошибка Google Sign-In: ${e.message}',
+        e.message ?? 'PlatformException',
+      );
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        'Ошибка Google Sign-In',
+        e.toString(),
+      );
+    }
+  }
+
+  Future<void> signOutGoogle() async {
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {
+      // Игнорируем
+    }
+  }
+
+  void dispose() {
+    _client.close();
+  }
+}  
+MAIN.DART: 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
+import 'config/app_config.dart';
+import 'services/user_settings_service.dart';
+import 'providers/theme_provider.dart';
+import 'services/api_service.dart';
+import 'services/shopping_service.dart';
+import 'services/auth_storage.dart';
+import 'services/auth_service.dart';
+import 'screens/auth_screen.dart';
+import 'screens/navigation_screen.dart';
+import 'screens/password_reset_screen.dart';
+import 'screens/profile_screen.dart';
+
+/// Берём API_BASE_URL из --dart-define, если он передан при сборке.
+/// Например:
+///   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080/api/v1
+const String _envApiBaseUrl = String.fromEnvironment('API_BASE_URL');
+
+/// Унифицированное вычисление baseUrl для backend API.
+///
+/// Приоритет:
+/// 1) Если передали через --dart-define=API_BASE_URL, используем его.
+/// 2) Иначе используем AppConfig.apiBaseUrl (с автоматическим /api/v1).
+String _resolveApiBaseUrl() {
+  // 1. Явный override через --dart-define
+  if (_envApiBaseUrl.isNotEmpty) {
+    return _envApiBaseUrl;
+  }
+
+  // 2. AppConfig.apiBaseUrl
+  final base = AppConfig.apiBaseUrl;
+
+  if (base.endsWith('/api/v1')) {
+    return base;
+  }
+
+  return '$base/api/v1';
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+
+  final apiBaseUrl = _resolveApiBaseUrl();
+  // ignore: avoid_print
+  print('✅ API base URL: $apiBaseUrl');
+
+  final authStorage = AuthStorage();
+  final token = await authStorage.readAccessToken();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<ShoppingService>(create: (_) => ShoppingService()),
+
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(),
+        ),
+
+        Provider<AuthStorage>.value(value: authStorage),
+
+        Provider<ApiService>(
+          create: (context) => ApiService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<AuthService>(
+          create: (context) => AuthService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<UserSettingsService>(
+          create: (_) => UserSettingsService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+      ],
+      child: MyApp(
+        initialRoute: token != null ? '/home' : '/auth',
+      ),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  final String initialRoute;
+
+  const MyApp({super.key, required this.initialRoute});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      themeProvider.isDarkMode
+          ? const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Color(0xFF0F172A),
+        systemNavigationBarIconBrightness: Brightness.light,
+      )
+          : const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Color(0xFFF0F2F5),
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+
+    return MaterialApp(
+      title: 'OutfitStyle',
+      debugShowCheckedModeBanner: false,
+      themeMode: themeProvider.themeMode,
+      theme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
+        primaryColor: const Color(0xFF007bff),
+        scaffoldBackgroundColor: const Color(0xFFF0F2F5),
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF007bff),
+          secondary: Color(0xFF6c757d),
+          error: Color(0xFFdc3545),
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFF007bff),
+        scaffoldBackgroundColor: const Color(0xFF1a1a2e),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF007bff),
+          secondary: Color(0xFF6c757d),
+          error: Color(0xFFdc3545),
+        ),
+      ),
+      initialRoute: initialRoute,
+      routes: {
+        '/auth': (context) => const AuthScreen(),
+        '/home': (context) => const NavigationScreen(),
+        '/password-reset': (context) => const PasswordResetScreen(),
+        '/profile': (context) => const ProfileScreen(),
+      },
+    );
+  }
+}  
+AUTH_SCREEN.DART: 
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../exceptions/api_exceptions.dart';
+import '../services/auth_service.dart';
+import '../services/auth_storage.dart';
+
+class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key});
+
+  @override
+  State<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends State<AuthScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  // Регистрация
+  final _regFormKey = GlobalKey<FormState>();
+  final _regEmailController = TextEditingController();
+  final _regPasswordController = TextEditingController();
+  final _regUsernameController = TextEditingController();
+
+  // Логин
+  final _loginFormKey = GlobalKey<FormState>();
+  final _loginEmailController = TextEditingController();
+  final _loginPasswordController = TextEditingController();
+
+  // Код подтверждения
+  final _codeFormKey = GlobalKey<FormState>();
+  final _codeController = TextEditingController();
+
+  bool _isLoading = false;
+  bool _awaitingCode = false; // шаг 2 – ввод кода
+  String _currentEmailForCode = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _regEmailController.dispose();
+    _regPasswordController.dispose();
+    _regUsernameController.dispose();
+    _loginEmailController.dispose();
+    _loginPasswordController.dispose();
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  String _mapAuthError(Object e, {required bool isRegister}) {
+    final msg = e.toString().toLowerCase();
+
+    // Логин: неверные данные
+    if (msg.contains('invalid credentials') ||
+        msg.contains('неверный email или пароль')) {
+      return 'Неверный email или пароль';
+    }
+
+    // Регистрация: занято
+    if (msg.contains('email already exists') ||
+        msg.contains('users_email_key') ||
+        msg.contains('duplicate key')) {
+      return 'Пользователь с таким email уже зарегистрирован';
+    }
+
+    // Сеть
+    if (msg.contains('timeout') ||
+        msg.contains('hostlookup') ||
+        msg.contains('socketexception') ||
+        msg.contains('connection refused')) {
+      return 'Проблема с подключением к серверу';
+    }
+
+    // Общий fallback без длинного текста исключения
+    return isRegister
+        ? 'Не удалось завершить регистрацию. Попробуйте позже.'
+        : 'Не удалось выполнить вход. Попробуйте позже.';
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        ),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  // -------------------- Регистрация --------------------
+
+  Future<void> _handleRegister() async {
+    if (!_regFormKey.currentState!.validate()) return;
+
+    final authService = context.read<AuthService>();
+    final email = _regEmailController.text.trim();
+    final password = _regPasswordController.text;
+    final username = _regUsernameController.text.trim();
+
+    setState(() => _isLoading = true);
+    try {
+      await authService.register(
+        email: email,
+        password: password,
+        username: username,
+      );
+
+      setState(() {
+        _awaitingCode = true;
+        _currentEmailForCode = email;
+        _codeController.clear();
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Код подтверждения отправлен на email'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (e is ApiException && e.errorMessage != null) {
+        _showError('Ошибка регистрации: ${e.errorMessage}');
+      } else {
+        _showError(_mapAuthError(e, isRegister: true));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // -------------------- Логин --------------------
+
+  Future<void> _handleLogin() async {
+    if (!_loginFormKey.currentState!.validate()) return;
+
+    final authService = context.read<AuthService>();
+    final email = _loginEmailController.text.trim();
+    final password = _loginPasswordController.text;
+
+    setState(() => _isLoading = true);
+    try {
+      await authService.login(email: email, password: password);
+
+      setState(() {
+        _awaitingCode = true;
+        _currentEmailForCode = email;
+        _codeController.clear();
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Код отправлен на email, введите его ниже'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (e is ApiException && e.errorMessage != null) {
+        _showError('Ошибка входа: ${e.errorMessage}');
+      } else {
+        _showError(_mapAuthError(e, isRegister: false));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // -------------------- Подтверждение кода --------------------
+
+  Future<void> _handleVerifyCode() async {
+    if (!_codeFormKey.currentState!.validate()) return;
+
+    final authService = context.read<AuthService>();
+    final authStorage = context.read<AuthStorage>();
+
+    final code = _codeController.text.trim();
+
+    setState(() => _isLoading = true);
+    try {
+      final result = await authService.verifyCode(code);
+      final accessToken = result['accessToken'] as String?;
+      final user = result['user'] as Map<String, dynamic>?;
+
+      if (accessToken == null || user == null) {
+        throw Exception('Некорректный ответ сервера');
+      }
+
+      final userId = (user['id'] as num).toInt();
+      await authStorage.saveSession(
+        userId: userId,
+        accessToken: accessToken,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _awaitingCode = false;
+        _codeController.clear();
+      });
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      if (e is ApiException && e.errorMessage != null) {
+        _showError('Ошибка подтверждения кода: ${e.errorMessage}');
+      } else {
+        _showError(_mapAuthError(e, isRegister: false));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // -------------------- Google Login --------------------
+
+  Future<void> _handleGoogleLogin() async {
+    final authService = context.read<AuthService>();
+    final authStorage = context.read<AuthStorage>();
+
+    setState(() => _isLoading = true);
+    try {
+      final result = await authService.signInWithGoogleAndBackend();
+      if (result == null) {
+        // пользователь отменил вход
+        return;
+      }
+      final accessToken = result['accessToken'] as String?;
+      final user = result['user'] as Map<String, dynamic>?;
+
+      if (accessToken == null || user == null) {
+        throw Exception('Некорректный ответ сервера');
+      }
+
+      final userId = (user['id'] as num).toInt();
+      await authStorage.saveSession(
+        userId: userId,
+        accessToken: accessToken,
+      );
+
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/home');
+    } on UnsupportedError {
+      _showError('Вход через Google недоступен на этой платформе');
+    } catch (e) {
+      if (e is ApiException && e.errorMessage != null) {
+        _showError('Ошибка входа через Google: ${e.errorMessage}');
+      } else {
+        _showError(_mapAuthError(e, isRegister: false));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // -------------------- UI helpers --------------------
+
+  InputDecoration _fieldDecoration(String label, IconData icon) {
+    final theme = Theme.of(context);
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon),
+      filled: true,
+      fillColor: theme.cardColor.withOpacity(0.98),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.8),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth > 700;
+
+          return Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0F172A),
+                  Color(0xFF1F2937),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(
+              child: SingleChildScrollView(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isWide ? 480 : 520,
+                  ),
+                  child: Card(
+                    color: theme.cardColor.withOpacity(0.98),
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: AnimatedSize(
+                        duration: const Duration(milliseconds: 200),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(height: 8),
+                            Text(
+                              'OutfitStyle',
+                              style:
+                              theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _awaitingCode
+                                  ? 'Шаг 2 из 2: подтвердите вход'
+                                  : 'Подберите образ под любую погоду',
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style:
+                              theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.textTheme.bodyMedium?.color
+                                    ?.withOpacity(0.7),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            if (_awaitingCode)
+                              _buildCodeStep(theme)
+                            else
+                              _buildAuthTabs(theme),
+
+                            const SizedBox(height: 12),
+                            if (_isLoading) const LinearProgressIndicator(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAuthTabs(ThemeData theme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TabBar(
+          controller: _tabController,
+          isScrollable: true, // чтобы текст вкладок не вылезал
+          labelColor: theme.colorScheme.primary,
+          unselectedLabelColor:
+          theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+          indicatorColor: theme.colorScheme.primary,
+          labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+          tabs: const [
+            Tab(text: 'Вход'),
+            Tab(text: 'Регистрация'),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          // фиксированная, но достаточная высота, + скролл внутри вкладки
+          height: 340,
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 4),
+                child: _buildLoginForm(),
+              ),
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 4),
+                child: _buildRegisterForm(),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginForm() {
+    return Form(
+      key: _loginFormKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _loginEmailController,
+            decoration: _fieldDecoration('Email', Icons.email),
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.username, AutofillHints.email],
+            validator: (value) {
+              final email = value?.trim() ?? '';
+              if (email.isEmpty) return 'Введите email';
+              final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+              if (!emailRegex.hasMatch(email)) {
+                return 'Некорректный email';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _loginPasswordController,
+            decoration: _fieldDecoration('Пароль', Icons.lock),
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _handleLogin(),
+            autofillHints: const [AutofillHints.password],
+            validator: (value) {
+              if (value == null || value.isEmpty) return 'Введите пароль';
+              return null;
+            },
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleLogin,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text('Войти'),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: _isLoading
+                ? null
+                : () {
+                    Navigator.pushNamed(context, '/password-reset');
+                  },
+            child: const Text('Забыли пароль?'),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _isLoading ? null : _handleGoogleLogin,
+              icon: const Icon(Icons.login),
+              label: const Text(
+                'Войти через Google',
+                overflow: TextOverflow.ellipsis,
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRegisterForm() {
+    return Form(
+      key: _regFormKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _regUsernameController,
+            decoration: _fieldDecoration('Имя пользователя', Icons.person),
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              final v = value?.trim() ?? '';
+              if (v.isEmpty) return 'Введите имя пользователя';
+              if (v.length < 3) return 'Минимум 3 символа';
+              return null;
+            },
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _regEmailController,
+            decoration: _fieldDecoration('Email', Icons.email),
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.email],
+            validator: (value) {
+              final email = value?.trim() ?? '';
+              if (email.isEmpty) return 'Введите email';
+              final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+              if (!emailRegex.hasMatch(email)) return 'Некорректный email';
+              return null;
+            },
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _regPasswordController,
+            decoration: _fieldDecoration('Пароль', Icons.lock),
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _handleRegister(),
+            autofillHints: const [AutofillHints.newPassword],
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Введите пароль';
+              }
+              if (value.length < 8) {
+                return 'Минимум 8 символов';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleRegister,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text('Создать аккаунт'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCodeStep(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Введите код подтверждения',
+          style: theme.textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Мы отправили код на $_currentEmailForCode',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Form(
+          key: _codeFormKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: TextFormField(
+            controller: _codeController,
+            decoration: _fieldDecoration('Код из письма', Icons.verified),
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _handleVerifyCode(),
+            validator: (value) {
+              final v = value?.trim() ?? '';
+              if (v.isEmpty) return 'Введите код';
+              if (v.length < 4) return 'Код слишком короткий';
+              return null;
+            },
+          ),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _handleVerifyCode,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: const Text('Подтвердить код'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: TextButton(
+            onPressed: _isLoading
+                ? null
+                : () {
+              setState(() {
+                _awaitingCode = false;
+                _codeController.clear();
+              });
+            },
+            child: const Text(
+              'Изменить email или пароль',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}  
+AUTH_STORAGE.DART: 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+/// Модель сессии аутентификации.
+class AuthSession {
+  final int userId;
+  final String accessToken;
+  final String? refreshToken;
+  final DateTime? expiresAt;
+
+  const AuthSession({
+    required this.userId,
+    required this.accessToken,
+    this.refreshToken,
+    this.expiresAt,
+  });
+
+  bool get isExpired =>
+      expiresAt != null && DateTime.now().isAfter(expiresAt!);
+}
+
+class AuthStorage {
+  // Можно при желании настроить опции для платформ (шифрование, accessibility и т.п.)
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  static const String _keyAccessToken = 'access_token';
+  static const String _keyRefreshToken = 'refresh_token';
+  static const String _keyUserId = 'user_id';
+  static const String _keyTokenExpiresAt = 'token_expires_at';
+
+  /// Старые методы — оставляем для совместимости
+
+  /// Прочитать сохранённый access token (JWT/opaque) или null.
+  Future<String?> readAccessToken() async {
+    return _storage.read(key: _keyAccessToken);
+  }
+
+  /// Прочитать сохранённый userId (int) или null.
+  Future<int?> readUserId() async {
+    final raw = await _storage.read(key: _keyUserId);
+    if (raw == null) return null;
+    return int.tryParse(raw);
+  }
+
+  /// Сохранить текущую сессию пользователя (минимальный вариант).
+  Future<void> saveSession({
+    required int userId,
+    required String accessToken,
+  }) async {
+    await _storage.write(key: _keyUserId, value: userId.toString());
+    await _storage.write(key: _keyAccessToken, value: accessToken);
+  }
+
+  /// Очистить все сохранённые данные (НЕ только auth).
+  Future<void> clear() async {
+    await _storage.deleteAll();
+  }
+
+  // -----------------------------
+  // Новые, более удобные методы
+  // -----------------------------
+
+  /// Прочитать полную сессию (userId + accessToken + refreshToken + expiresAt) или null.
+  Future<AuthSession?> readSession() async {
+    final userIdStr = await _storage.read(key: _keyUserId);
+    final accessToken = await _storage.read(key: _keyAccessToken);
+
+    if (userIdStr == null || accessToken == null) {
+      return null;
+    }
+
+    final userId = int.tryParse(userIdStr);
+    if (userId == null) {
+      // данные повреждены — очищаем только auth-ключи
+      await clearSession();
+      return null;
+    }
+
+    final refreshToken = await _storage.read(key: _keyRefreshToken);
+    final expiresAtStr = await _storage.read(key: _keyTokenExpiresAt);
+    DateTime? expiresAt;
+    if (expiresAtStr != null && expiresAtStr.isNotEmpty) {
+      try {
+        expiresAt = DateTime.parse(expiresAtStr);
+      } catch (_) {
+        expiresAt = null;
+      }
+    }
+
+    return AuthSession(
+      userId: userId,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      expiresAt: expiresAt,
+    );
+  }
+
+  /// Проверить, есть ли вообще сохранённая сессия (без проверки истечения).
+  Future<bool> hasSession() async {
+    final session = await readSession();
+    return session != null;
+  }
+
+  /// Проверить, есть ли активная (не истёкшая) сессия.
+  ///
+  /// Если expiresAt не задан — считаем, что токен активен и проверяем только наличие userId + accessToken.
+  Future<bool> hasActiveSession() async {
+    final session = await readSession();
+    if (session == null) return false;
+    if (session.expiresAt == null) return true;
+    return !session.isExpired;
+  }
+
+  /// Сохранить полную сессию (с поддержкой refreshToken и expiresAt).
+  ///
+  /// expiresAt — момент истечения accessToken (если backend его отдаёт).
+  Future<void> saveFullSession({
+    required int userId,
+    required String accessToken,
+    String? refreshToken,
+    DateTime? expiresAt,
+  }) async {
+    await _storage.write(key: _keyUserId, value: userId.toString());
+    await _storage.write(key: _keyAccessToken, value: accessToken);
+
+    if (refreshToken != null) {
+      await _storage.write(
+        key: _keyRefreshToken,
+        value: refreshToken,
+      );
+    } else {
+      await _storage.delete(key: _keyRefreshToken);
+    }
+
+    if (expiresAt != null) {
+      await _storage.write(
+        key: _keyTokenExpiresAt,
+        value: expiresAt.toIso8601String(),
+      );
+    } else {
+      await _storage.delete(key: _keyTokenExpiresAt);
+    }
+  }
+
+  /// Обновить только accessToken и, при необходимости, expiresAt.
+  ///
+  /// Удобно использовать при обновлении токена по refreshToken.
+  Future<void> updateAccessToken({
+    required String accessToken,
+    DateTime? expiresAt,
+  }) async {
+    await _storage.write(key: _keyAccessToken, value: accessToken);
+
+    if (expiresAt != null) {
+      await _storage.write(
+        key: _keyTokenExpiresAt,
+        value: expiresAt.toIso8601String(),
+      );
+    }
+  }
+
+  /// Очистить только auth-сессию (не трогая другие возможные ключи в secure storage).
+  Future<void> clearSession() async {
+    await _storage.delete(key: _keyAccessToken);
+    await _storage.delete(key: _keyRefreshToken);
+    await _storage.delete(key: _keyUserId);
+    await _storage.delete(key: _keyTokenExpiresAt);
+  }
+}

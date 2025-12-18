@@ -3,8 +3,8 @@ package planner
 import (
 	"context"
 	"fmt"
-	"outfit-style-rec/server/internal/core/domain"
-	"outfit-style-rec/server/internal/core/repo"
+	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/core/repo/clothing"
 )
 
 type WeatherCondition string
@@ -20,10 +20,10 @@ const (
 )
 
 type OutfitPlanner struct {
-	specRepo repo.SubcategorySpecRepository
+	specRepo clothing.SubcategorySpecRepository
 }
 
-func NewOutfitPlanner(specRepo repo.SubcategorySpecRepository) *OutfitPlanner {
+func NewOutfitPlanner(specRepo clothing.SubcategorySpecRepository) *OutfitPlanner {
 	return &OutfitPlanner{
 		specRepo: specRepo,
 	}

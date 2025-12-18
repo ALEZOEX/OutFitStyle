@@ -70,7 +70,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await authService.requestPasswordReset(email);
+      await authService.requestPasswordReset(email: email);
 
       if (!mounted) return;
       

@@ -99,3 +99,10 @@ Thumbs.db
 # IDE specific files
 *.swp
 *.swo
+
+# Environment variable files
+.env
+.env.local
+.env.development
+.env.test
+.env.production

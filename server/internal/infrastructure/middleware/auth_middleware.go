@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -124,11 +123,6 @@ func (m *AuthMiddleware) validateToken(tokenString string) (jwt.MapClaims, error
 	return claims, nil
 }
 
-// GetUserIDFromContext extracts user ID from context
-func GetUserIDFromContext(ctx context.Context) (int, bool) {
-	userID, ok := ctx.Value(UserIDKey).(int)
-	return userID, ok
-}
 
 // RequireAuth wraps a handler to require authentication
 func (m *AuthMiddleware) RequireAuth(handler http.HandlerFunc) http.HandlerFunc {
