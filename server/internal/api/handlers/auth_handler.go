@@ -27,6 +27,7 @@ func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	r.HandleFunc("/refresh", h.Refresh).Methods(http.MethodPost)
 	r.HandleFunc("/logout", h.Logout).Methods(http.MethodPost) // требует AuthMiddleware
+	r.HandleFunc("/google", h.GoogleSignIn).Methods(http.MethodPost)
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -137,4 +138,34 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Success(w, map[string]any{"success": true})
+}
+
+type googleSignInRequest struct {
+	IDToken string `json:"id_token"`
+}
+
+func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var req googleSignInRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	device := services.DeviceInfo{
+		IPAddress: services.ExtractIP(r.RemoteAddr),
+	}
+	ua := r.UserAgent()
+	if ua != "" {
+		device.UserAgent = &ua
+	}
+
+	out, err := h.auth.GoogleSignIn(r.Context(), req.IDToken, device)
+	if err != nil {
+		resp.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	resp.Success(w, out)
 }
