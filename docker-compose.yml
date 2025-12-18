@@ -4,16 +4,15 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: outfitstyle
-      POSTGRES_USER: Admin
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DB_NAME:-outfitstyle}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./server/migrations/0001_v2_init_schema.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U Admin -d outfitstyle"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-outfitstyle}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -31,7 +30,7 @@ services:
   ml-service:
     build:
       context: .
-      dockerfile: Dockerfile.ml-service
+      dockerfile: ./Dockerfile.ml-service
     ports:
       - "5000:5000"
     environment:
@@ -47,25 +46,46 @@ services:
     volumes:
       - ./server/ml-service/models:/app/models
 
-  api-gateway:
+  migrate:
     build:
-      context: ./server
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
+      context: .
+      dockerfile: ./server/Dockerfile
+    command: /app/migrate
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=Admin
-      - DB_PASSWORD=password
-      - DB_NAME=outfitstyle
-      - ML_SERVICE_URL=http://ml-service:5000
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_NAME=${DB_NAME:-outfitstyle}
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-outfitstyle}?sslmode=disable
       - LOG_LEVEL=info
+      - ENVIRONMENT=production
     depends_on:
       postgres:
         condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    command: /app/server
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_NAME=${DB_NAME:-outfitstyle}
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-outfitstyle}?sslmode=disable
+      - ML_SERVICE_URL=http://ml-service:5000
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-very-long-secret-key-change-in-production}
+      - YANDEX_TRANSLATE_API_KEY=${YANDEX_TRANSLATE_API_KEY:-aje36hbuc3e2ntrh5e21}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - LOG_LEVEL=info
+      - ENVIRONMENT=production
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
       ml-service:
@@ -76,5 +96,47 @@ services:
       timeout: 10s
       retries: 3
 
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./infrastructure/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./infrastructure/grafana/provisioning/dashboards/json:/etc/grafana/provisioning/dashboards/json:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  prometheus_data:
+  grafana_data:

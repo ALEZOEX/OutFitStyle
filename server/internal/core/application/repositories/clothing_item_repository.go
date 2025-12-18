@@ -19,4 +19,8 @@ type ClothingItemRepository interface {
 	UnlinkFromWardrobe(ctx context.Context, userID, itemID domain.ID) error
 	GetByUserWardrobe(ctx context.Context, userID domain.ID) ([]domain.ClothingItem, error)
 	IsInWardrobe(ctx context.Context, userID, itemID domain.ID) (bool, error)
+
+	// Additional methods for outfit planning
+	BulkInsert(ctx context.Context, items []domain.ClothingItem) error
+	FindCandidatesByPlan(ctx context.Context, category string, subcategories []string, warmthMin int16, temp int16, limit int) ([]domain.ClothingItem, error)
 }

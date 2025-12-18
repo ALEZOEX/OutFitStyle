@@ -3,6 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'config/app_config.dart';
+import 'providers/wardrobe_provider.dart';
+import 'providers/recommendation_provider.dart';
+import 'providers/profile_provider.dart';
+import 'services/wardrobe_service.dart';
+import 'services/recommendation_service.dart';
 import 'services/user_settings_service.dart';
 import 'providers/theme_provider.dart';
 import 'services/api_service.dart';
@@ -13,6 +18,15 @@ import 'screens/auth_screen.dart';
 import 'screens/navigation_screen.dart';
 import 'screens/password_reset_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/splash_gate_screen.dart';
+
+// Import newly added services and providers
+import 'services/weather_service.dart';
+import 'providers/weather_provider.dart';
+import 'services/geo_service.dart';
+import 'screens/onboarding_wizard_screen.dart';
+import 'screens/preferences_screen.dart';
+import 'screens/body_measurements_screen.dart';
 
 /// Берём API_BASE_URL из --dart-define, если он передан при сборке.
 /// Например:
@@ -67,11 +81,6 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        // Теперь ApiService тоже получает baseUrl
-        Provider<ApiService>(
-          create: (_) => ApiService(baseUrl: apiBaseUrl),
-        ),
-
         Provider<ShoppingService>(create: (_) => ShoppingService()),
 
         ChangeNotifierProvider<ThemeProvider>(
@@ -80,28 +89,85 @@ Future<void> main() async {
 
         Provider<AuthStorage>.value(value: authStorage),
 
-        Provider<AuthService>(
-          create: (_) => AuthService(baseUrl: apiBaseUrl),
-        ),
-
-        Provider<UserSettingsService>(
-          create: (_) => UserSettingsService(
+        Provider<ApiService>(
+          create: (context) => ApiService(
             baseUrl: apiBaseUrl,
             authStorage: authStorage,
           ),
         ),
+
+        Provider<AuthService>(
+          create: (context) => AuthService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<UserSettingsService>(
+          create: (context) => UserSettingsService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<WeatherService>(
+          create: (context) => WeatherService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+        ChangeNotifierProvider<WeatherProvider>(
+          create: (context) => WeatherProvider(
+            context.read<WeatherService>(),
+          ),
+        ),
+
+        Provider<GeoService>(
+          create: (context) => GeoService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<WardrobeService>(
+          create: (context) => WardrobeService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        ChangeNotifierProvider<WardrobeProvider>(
+          create: (context) => WardrobeProvider(
+            context.read<WardrobeService>(),
+          ),
+        ),
+
+        Provider<RecommendationService>(
+          create: (context) => RecommendationService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        ChangeNotifierProvider<RecommendationProvider>(
+          create: (context) => RecommendationProvider(
+            context.read<RecommendationService>(),
+          ),
+        ),
+
+        ChangeNotifierProvider<ProfileProvider>(
+          create: (context) => ProfileProvider(
+            context.read<UserSettingsService>(),
+          ),
+        ),
       ],
-      child: MyApp(
-        initialRoute: token != null ? '/home' : '/auth',
-      ),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final String initialRoute;
-
-  const MyApp({super.key, required this.initialRoute});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -149,12 +215,16 @@ class MyApp extends StatelessWidget {
           error: Color(0xFFdc3545),
         ),
       ),
-      initialRoute: initialRoute,
+      initialRoute: '/splash',
       routes: {
+        '/splash': (_) => const SplashGateScreen(),
         '/auth': (context) => const AuthScreen(),
+        '/onboarding': (_) => const OnboardingWizardScreen(),
         '/home': (context) => const NavigationScreen(),
         '/password-reset': (context) => const PasswordResetScreen(),
         '/profile': (context) => const ProfileScreen(),
+        '/preferences': (context) => const PreferencesScreen(),
+        '/body-measurements': (context) => const BodyMeasurementsScreen(),
       },
     );
   }

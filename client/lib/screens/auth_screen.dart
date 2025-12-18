@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../exceptions/api_exceptions.dart';
 import '../services/auth_service.dart';
 import '../services/auth_storage.dart';
+import '../models/tokens.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -189,18 +191,21 @@ class _AuthScreenState extends State<AuthScreen>
 
     setState(() => _isLoading = true);
     try {
-      final result = await authService.verifyCode(code);
-      final accessToken = result['accessToken'] as String?;
+      final result = await authService.verifyCode(
+        email: _currentEmailForCode!,
+        code: code,
+      );
+      final tokens = TokenPair.fromJson(result['tokens'] as Map<String, dynamic>);
       final user = result['user'] as Map<String, dynamic>?;
 
-      if (accessToken == null || user == null) {
+      if (tokens.accessToken == null || user == null) {
         throw Exception('Некорректный ответ сервера');
       }
 
-      final userId = (user['id'] as num).toInt();
-      await authStorage.saveSession(
-        userId: userId,
-        accessToken: accessToken,
+      await authStorage.saveTokens(
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresAt: tokens.expiresAt,
       );
 
       if (!mounted) return;
@@ -210,7 +215,7 @@ class _AuthScreenState extends State<AuthScreen>
         _codeController.clear();
       });
 
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushNamedAndRemoveUntil(context, '/splash', (r) => false);
     } catch (e) {
       if (e is ApiException && e.errorMessage != null) {
         _showError('Ошибка подтверждения кода: ${e.errorMessage}');
@@ -230,26 +235,40 @@ class _AuthScreenState extends State<AuthScreen>
 
     setState(() => _isLoading = true);
     try {
-      final result = await authService.signInWithGoogleAndBackend();
-      if (result == null) {
+      // Получаем учетные данные Google
+      final googleSignIn = GoogleSignIn(
+        scopes: [
+          'email',
+          'profile',
+        ],
+      );
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
         // пользователь отменил вход
         return;
       }
-      final accessToken = result['accessToken'] as String?;
-      final user = result['user'] as Map<String, dynamic>?;
 
-      if (accessToken == null || user == null) {
-        throw Exception('Некорректный ответ сервера');
+      final googleAuth = await googleUser.authentication;
+      final String idToken = googleAuth.idToken ?? '';
+
+      if (idToken.isEmpty) {
+        throw Exception('Не удалось получить ID токен от Google');
       }
 
-      final userId = (user['id'] as num).toInt();
-      await authStorage.saveSession(
-        userId: userId,
+      final result = await authService.signInWithGoogle(idToken: idToken);
+      final accessToken = result.accessToken;
+      final refreshToken = result.refreshToken;
+      final expiresAt = result.expiresAt;
+
+      await authStorage.saveTokens(
         accessToken: accessToken,
+        refreshToken: refreshToken,
+        expiresAt: expiresAt,
       );
 
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushNamedAndRemoveUntil(context, '/splash', (r) => false);
     } on UnsupportedError {
       _showError('Вход через Google недоступен на этой платформе');
     } catch (e) {

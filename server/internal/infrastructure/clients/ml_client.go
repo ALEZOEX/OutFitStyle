@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"outfit-style-rec/contracts"
+	"outfitstyle/server/internal/contracts"
 )
 
 const (

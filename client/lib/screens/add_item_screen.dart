@@ -27,7 +27,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     'Верхняя одежда': ['outerwear', '🧥', '🦺'],
     'Низ': ['lower', '👖', '🩳', '👗'],
     'Обувь': ['footwear', '👟', '👢', '👞'],
-    'Аксессуары': ['accessories', '🧢', '🧣', '🧤', '🎒'],
+    'Аксессуары': ['accessory', '🧢', '🧣', '🧤', '🎒'],
   };
 
   @override

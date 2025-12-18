@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
@@ -19,6 +20,16 @@ var dbInstance *DB
 type DB struct {
 	pool   *pgxpool.Pool
 	logger *zap.Logger
+}
+
+// Pool возвращает пул подключений к базе данных
+func (d *DB) Pool() *pgxpool.Pool {
+	return d.pool
+}
+
+// Logger возвращает логгер
+func (d *DB) Logger() *zap.Logger {
+	return d.logger
 }
 
 func NewDB(connectionString string, logger *zap.Logger) (*DB, error) {
@@ -232,4 +243,24 @@ func (d *DB) SaveRecommendation(
 // HealthCheck implements the health check for the database.
 func (d *DB) HealthCheck() error {
 	return d.Ping()
+}
+
+// NewRedisClient creates a new Redis client
+func NewRedisClient(redisURL string) (*redis.Client, error) {
+	opts, err := redis.ParseURL(redisURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse Redis URL: %w", err)
+	}
+
+	client := redis.NewClient(opts)
+
+	// Test the connection
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Ping(ctx).Err(); err != nil {
+		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
+	}
+
+	return client, nil
 }

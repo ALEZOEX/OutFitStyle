@@ -106,6 +106,112 @@ outfitstyle/
 
 ## 🚀 Запуск
 
+### Подготовка
+
+1. Установите зависимости:
+   - Docker и Docker Compose
+   - Go 1.24+
+   - Python 3.11+
+
+2. Скопируйте файл `.env.example` в `.env` и укажите:
+   - `DB_PASSWORD` - пароль для базы данных
+   - `JWT_SECRET` - секретный ключ для JWT (не менее 32 символов)
+   - `YANDEX_TRANSLATE_API_KEY` - API ключ для Yandex Translate (получите в облаке Яндекса)
+   - `WEATHER_API_KEY` - ключ для OpenWeatherMap API
+   - Другие настройки по необходимости
+
+### Запуск с Docker Compose
+
+1. **Создайте файл `.env`** в корне проекта и укажите:
+   ```bash
+   cp .env.example .env
+   ```
+   Затем установите:
+   - `DB_PASSWORD` - надежный пароль для базы данных
+   - `JWT_SECRET` - секретный ключ для JWT (не менее 32 символов)
+   - `YANDEX_TRANSLATE_API_KEY` - API ключ для Yandex Cloud Translate (получите в облаке Яндекса)
+   - `WEATHER_API_KEY` - ключ для OpenWeatherMap API
+
+2. **Выполните миграции базы данных**:
+   ```bash
+   docker-compose run --rm api-gateway migrate
+   ```
+
+3. **Запустите все сервисы**:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **API будет доступен на** `http://localhost:8080`
+   - Swagger UI: `http://localhost:8080/swagger/index.html`
+   - Health check: `http://localhost:8080/health`
+
+## 🚀 Production-готовность
+
+### Архитектура V2: Planner → Retrieval → Ranking
+- **Planner**: Генерирует план подбора на основе норм подкатегорий
+- **Retrieval**: Эффективно извлекает кандидатов из базы данных
+- **Ranking**: ML-ранжирование с учетом приоритетов источников
+
+### Безопасность
+- JWT-аутентификация с короткими токенами
+- Пользователь может получить/изменить только свои данные
+- Rate limiting для защиты от DDoS-атак
+- Валидация всех входных параметров
+- Защита от SQL-инъекций и XSS
+- Проверка принадлежности ресурсов при сохранении оценок: пользователь может оценить только свои рекомендации
+
+### Система перевода
+- Интеграция с Yandex Cloud Translate API
+- Кэширование переводов через Redis на 24 часа
+- Поддержка многоязычности с встроенными переводами для часто используемых терминов
+- Поддержка русского/английского языка для названий одежды
+
+### ML-ранжирование
+- Градиентный бустинг для точных рекомендаций
+- Учет предпочтений пользователя
+- Ранжирование с учетом приоритетов источников (пользовательские > синтетические)
+
+### Наблюдаемость
+- Prometheus метрики для мониторинга
+- Структурированные логи через Zap
+- Health check endpoints
+- Docker-контейнеризация всех сервисов
+
+### Запуск вручную (для разработки)
+
+1. Запустите зависимости:
+   ```bash
+   docker-compose up -d postgres redis
+   ```
+
+2. Установите переменные окружения:
+   ```bash
+   export DB_HOST=localhost
+   export DB_PORT=5432
+   export DB_USER=postgres
+   export DB_PASSWORD=your_password
+   export DB_NAME=outfitstyle
+   export ML_SERVICE_URL=http://localhost:5000
+   export REDIS_URL=redis://localhost:6379
+   export JWT_SECRET=your_secret_key
+   export YANDEX_TRANSLATE_API_KEY=your_yandex_translate_key
+   export WEATHER_API_KEY=your_weather_api_key
+   ```
+
+3. Запустите ML-сервис:
+   ```bash
+   cd server/ml-service
+   pip install -r requirements.txt
+   python api/main.py
+   ```
+
+4. В другом терминале запустите Go-сервер:
+   ```bash
+   cd server
+   go run cmd/server/main.go
+   ```
+
 ### Через Docker (рекомендуется)
 
 ```bash

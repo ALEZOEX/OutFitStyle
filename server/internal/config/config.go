@@ -1,292 +1,345 @@
-// internal/infrastructure/config/config.go
 package config
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"strconv"
-	"strings"
-	"time"
+"fmt"
+"log"
+"os"
+"strconv"
+"strings"
+"time"
 
-	"github.com/joho/godotenv"
-	"github.com/pkg/errors"
+"github.com/joho/godotenv"
+"github.com/pkg/errors"
 )
 
-type AppConfig struct {
-	Server     ServerConfig
-	Database   DatabaseConfig
-	WeatherAPI WeatherAPIConfig
-	MLService  MLServiceConfig
-	Email      EmailConfig
-	Security   SecurityConfig
-	Logging    LoggingConfig
-	Cache      CacheConfig
-}
 
 type ServerConfig struct {
-	Port            string        `env:"PORT" default:"8080"`
-	Host            string        `env:"HOST" default:"0.0.0.0"`
-	Environment     string        `env:"ENVIRONMENT" default:"development"`
-	Debug           bool          `env:"DEBUG" default:"false"`
-	ReadTimeout     time.Duration `env:"READ_TIMEOUT" default:"15s"`
-	WriteTimeout    time.Duration `env:"WRITE_TIMEOUT" default:"30s"`
-	ShutdownTimeout time.Duration `env:"SHUTDOWN_TIMEOUT" default:"30s"`
-	EnablePprof     bool          `env:"ENABLE_PPROF" default:"false"`
+Host            string
+Port            string
+Environment     string
+ReadTimeout     time.Duration
+WriteTimeout    time.Duration
+ShutdownTimeout time.Duration
 }
 
 type DatabaseConfig struct {
-	Host         string `env:"DB_HOST" default:"localhost"`
-	Port         string `env:"DB_PORT" default:"5432"`
-	User         string `env:"DB_USER" default:"outfitstyle"`
-	Password     string `env:"DB_PASSWORD"`
-	Name         string `env:"DB_NAME" default:"outfitstyle"`
-	SSLMode      string `env:"DB_SSL_MODE" default:"require"`
-	MaxOpenConns int    `env:"DB_MAX_OPEN_CONNS" default:"25"`
-	MaxIdleConns int    `env:"DB_MAX_IDLE_CONNS" default:"5"`
+URL               string
+MaxConnections    int
+MaxIdleConnections int
 }
 
-type WeatherAPIConfig struct {
-	Key     string `env:"WEATHER_API_KEY"`
-	BaseURL string `env:"WEATHER_API_URL" default:"https://api.openweathermap.org/data/2.5"`
-	Timeout int    `env:"WEATHER_API_TIMEOUT" default:"10"` // seconds
-}
-type MLServiceConfig struct {
-	BaseURL string `env:"ML_SERVICE_URL" default:"http://localhost:5000"`
-	Timeout int    `env:"ML_SERVICE_TIMEOUT" default:"30"` // seconds
-}
-
-type EmailConfig struct {
-	SMTPHost     string `env:"SMTP_HOST"`
-	SMTPPort     int    `env:"SMTP_PORT" default:"587"`
-	SMTPUsername string `env:"SMTP_USERNAME"`
-	SMTPPassword string `env:"SMTP_PASSWORD"`
-	FromEmail    string `env:"SMTP_FROM_EMAIL"`
+type RedisConfig struct {
+URL      string
+Password string
 }
 
 type SecurityConfig struct {
-	JWTSecret              string `env:"JWT_SECRET"`
-	TokenExpiryHours       int    `env:"TOKEN_EXPIRY_HOURS" default:"24"`
-	RefreshTokenExpiryDays int    `env:"REFRESH_TOKEN_EXPIRY_DAYS" default:"7"`
-	VerificationCodeExpiry int    `env:"VERIFICATION_CODE_EXPIRY" default:"10"` // minutes
-	MaxLoginAttempts       int    `env:"MAX_LOGIN_ATTEMPTS" default:"5"`
-	BlockDuration          int    `env:"BLOCK_DURATION" default:"30"` // minutes
-	CORSAllowedOrigins     string `env:"CORS_ALLOWED_ORIGINS" default:"*"`
-	RateLimit              int    `env:"RATE_LIMIT" default:"100"` // requests per minute
+JWTSecret           string
+AccessTokenTTL      time.Duration
+RefreshTokenTTL     time.Duration
+CORSAllowedOrigins  []string
+RateLimitPerMinute  int
 }
 
-type LoggingConfig struct {
-	Level  string `env:"LOG_LEVEL" default:"info"`
-	Format string `env:"LOG_FORMAT" default:"json"`
+type MLServiceConfig struct {
+BaseURL  string
+Timeout  time.Duration
 }
 
-type CacheConfig struct {
-	Enabled    bool   `env:"CACHE_ENABLED" default:"true"`
-	RedisURL   string `env:"REDIS_URL" default:"redis://localhost:6379"`
-	Expiration int    `env:"CACHE_EXPIRATION" default:"300"` // seconds
+type OpenWeatherConfig struct {
+APIKey   string
+CacheTTL time.Duration
+BaseURL  string
+}
+
+type WeatherProviderConfig struct {
+Provider       string // openweather|openmeteo
+OpenMeteoBaseURL string
+}
+
+type EmailConfig struct {
+SMTPHost     string
+SMTPPort     int
+SMTPUser     string
+SMTPPassword string
+From         string
+}
+
+type SentryConfig struct {
+DSN string
+}
+
+type StorageConfig struct {
+S3Endpoint  string
+S3Bucket    string
+S3AccessKey string
+S3SecretKey string
+S3Region    string
+
+PublicBaseURL string        // например https://cdn.outfitstyle.app
+PresignTTL    time.Duration // например 1h
+}
+
+type PaymentsConfig struct {
+	YooKassaShopID    string
+	YooKassaSecretKey string
+
+	StripeSecretKey     string
+	StripeWebhookSecret string
+}
+
+type PushConfig struct {
+	FCMCredentialsFile string
+
+	APNSKeyFile string
+	APNSKeyID   string
+	APNSTeamID  string
+	APNSBundleID string
+
+	APNSEnvironment string // "production"|"development"
+}
+
+type QueueConfig struct {
+	RedisURL string
+}
+
+type FeaturesConfig struct {
+	ABTesting      bool
+	PartnerCatalog bool
+	Achievements   bool
+	Trips          bool
+}
+
+type APIKeysConfig struct {
+	Pepper string // для хеширования ключей (server-side secret)
+}
+
+type AdminConfig struct {
+	APIKey string
+}
+
+type AppConfig struct {
+	Server      ServerConfig
+	Database    DatabaseConfig
+	Redis       RedisConfig
+	Security    SecurityConfig
+	MLService   MLServiceConfig
+	OpenWeather OpenWeatherConfig
+	WeatherProvider WeatherProviderConfig
+	Email       EmailConfig
+	Sentry      SentryConfig
+	Storage     StorageConfig
+	Payments    PaymentsConfig
+	Admin       AdminConfig
+	Push        PushConfig
+	Queue       QueueConfig
+	Features    FeaturesConfig
+	APIKeys     APIKeysConfig
 }
 
 func Load() (*AppConfig, error) {
-	// .env грузим ТОЛЬКО при локальном запуске, не в Docker
-	if os.Getenv("RUN_IN_DOCKER") == "" {
-		if err := godotenv.Load(); err != nil {
-			log.Printf("Warning: .env file not found or invalid: %v", err)
-		}
-	}
+// .env грузим только локально
+if os.Getenv("RUN_IN_DOCKER") == "" {
+if err := godotenv.Load(); err != nil {
+log.Printf("Warning: .env file not found or invalid: %v", err)
+}
+}
 
-	cfg := &AppConfig{
-		Server:     loadServerConfig(),
-		Database:   loadDatabaseConfig(),
-		WeatherAPI: loadWeatherAPIConfig(),
-		MLService:  loadMLServiceConfig(),
-		Email:      loadEmailConfig(),
-		Security:   loadSecurityConfig(),
-		Logging:    loadLoggingConfig(),
-		Cache:      loadCacheConfig(),
-	}
+cfg := &AppConfig{
+Server: ServerConfig{
+Host:            getEnvFirst([]string{"SERVER_HOST", "HOST"}, "0.0.0.0"),
+Port:            getEnvFirst([]string{"SERVER_PORT", "PORT"}, "8080"),
+Environment:     getEnvFirst([]string{"ENVIRONMENT"}, "development"),
+ReadTimeout:     getEnvDurationFirst([]string{"SERVER_READ_TIMEOUT", "READ_TIMEOUT"}, 15*time.Second),
+WriteTimeout:    getEnvDurationFirst([]string{"SERVER_WRITE_TIMEOUT", "WRITE_TIMEOUT"}, 30*time.Second),
+ShutdownTimeout: getEnvDurationFirst([]string{"SERVER_SHUTDOWN_TIMEOUT", "SHUTDOWN_TIMEOUT"}, 30*time.Second),
+},
+Database: DatabaseConfig{
+URL:                getEnvFirst([]string{"DATABASE_URL"}, ""),
+MaxConnections:     getEnvInt("DATABASE_MAX_CONNECTIONS", 100, 1, 1000),
+MaxIdleConnections: getEnvInt("DATABASE_MAX_IDLE_CONNECTIONS", 10, 1, 500),
+},
+Redis: RedisConfig{
+URL:      getEnvFirst([]string{"REDIS_URL"}, "redis://localhost:6379/0"),
+Password: getEnvFirst([]string{"REDIS_PASSWORD"}, ""),
+},
+Security: SecurityConfig{
+JWTSecret:          getEnvFirst([]string{"JWT_SECRET"}, ""),
+AccessTokenTTL:     getEnvDurationFirst([]string{"JWT_ACCESS_TOKEN_TTL"}, 15*time.Minute),
+RefreshTokenTTL:    getEnvDurationFirst([]string{"JWT_REFRESH_TOKEN_TTL"}, 720*time.Hour),
+CORSAllowedOrigins: splitCSV(getEnvFirst([]string{"CORS_ALLOWED_ORIGINS"}, "*")),
+RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", getEnvInt("RATE_LIMIT", 100, 1, 100000), 1, 100000),
+},
+MLService: MLServiceConfig{
+BaseURL: getEnvFirst([]string{"ML_SERVICE_URL"}, "http://localhost:8000"),
+Timeout: getEnvDurationFirst([]string{"ML_SERVICE_TIMEOUT"}, 30*time.Second),
+},
+OpenWeather: OpenWeatherConfig{
+APIKey:   getEnvFirst([]string{"OPENWEATHER_API_KEY", "WEATHER_API_KEY"}, ""),
+CacheTTL: getEnvDurationFirst([]string{"OPENWEATHER_CACHE_TTL"}, 10*time.Minute),
+BaseURL:  getEnvFirst([]string{"OPENWEATHER_BASE_URL"}, "https://api.openweathermap.org/data/2.5"),
+},
+WeatherProvider: WeatherProviderConfig{
+Provider:       getEnvFirst([]string{"WEATHER_PROVIDER"}, "openweather"),
+OpenMeteoBaseURL: getEnvFirst([]string{"OPENMETEO_BASE_URL"}, "https://api.open-meteo.com"),
+},
+Email: EmailConfig{
+SMTPHost:     getEnvFirst([]string{"SMTP_HOST"}, ""),
+SMTPPort:     getEnvInt("SMTP_PORT", 587, 1, 65535),
+SMTPUser:     getEnvFirst([]string{"SMTP_USER", "SMTP_USERNAME"}, ""),
+SMTPPassword: getEnvFirst([]string{"SMTP_PASSWORD"}, ""),
+From:         getEnvFirst([]string{"EMAIL_FROM", "SMTP_FROM_EMAIL", "FROM_EMAIL"}, "noreply@outfitstyle.app"),
+},
+Sentry: SentryConfig{
+DSN: getEnvFirst([]string{"SENTRY_DSN"}, ""),
+},
+Storage: StorageConfig{
+S3Endpoint:  getEnvFirst([]string{"S3_ENDPOINT"}, ""),
+S3Bucket:    getEnvFirst([]string{"S3_BUCKET"}, ""),
+S3AccessKey: getEnvFirst([]string{"S3_ACCESS_KEY"}, ""),
+S3SecretKey: getEnvFirst([]string{"S3_SECRET_KEY"}, ""),
+S3Region:    getEnvFirst([]string{"S3_REGION"}, ""),
 
-	if err := validateConfig(cfg); err != nil {
-		return nil, errors.Wrap(err, "config validation failed")
-	}
+PublicBaseURL: getEnvFirst([]string{"S3_PUBLIC_BASE_URL"}, ""),
+PresignTTL:    getEnvDurationFirst([]string{"S3_PRESIGN_TTL"}, 1*time.Hour),
+},
+Payments: PaymentsConfig{
+	YooKassaShopID:    getEnvFirst([]string{"YOOKASSA_SHOP_ID"}, ""),
+	YooKassaSecretKey: getEnvFirst([]string{"YOOKASSA_SECRET_KEY"}, ""),
 
-	return cfg, nil
+	StripeSecretKey:     getEnvFirst([]string{"STRIPE_SECRET_KEY"}, ""),
+	StripeWebhookSecret: getEnvFirst([]string{"STRIPE_WEBHOOK_SECRET"}, ""),
+},
+Admin: AdminConfig{
+	APIKey: getEnvFirst([]string{"ADMIN_API_KEY"}, ""),
+},
+Push: PushConfig{
+	FCMCredentialsFile: getEnvFirst([]string{"FCM_CREDENTIALS_FILE"}, ""),
+
+	APNSKeyFile:  getEnvFirst([]string{"APNS_KEY_FILE"}, ""),
+	APNSKeyID:    getEnvFirst([]string{"APNS_KEY_ID"}, ""),
+	APNSTeamID:   getEnvFirst([]string{"APNS_TEAM_ID"}, ""),
+	APNSBundleID: getEnvFirst([]string{"APNS_BUNDLE_ID"}, ""),
+
+	APNSEnvironment: getEnvFirst([]string{"APNS_ENVIRONMENT"}, "development"),
+},
+Queue: QueueConfig{
+	RedisURL: getEnvFirst([]string{"REDIS_URL"}, "redis://localhost:6379/0"),
+},
+Features: FeaturesConfig{
+	PartnerCatalog: getEnvBool("FEATURE_PARTNER_CATALOG", true),
+	ABTesting:      getEnvBool("FEATURE_AB_TESTING", true),
+	Achievements:   getEnvBool("FEATURE_ACHIEVEMENTS", true),
+	Trips:          getEnvBool("FEATURE_TRIPS", false),
+},
+APIKeys: APIKeysConfig{
+	Pepper: getEnvFirst([]string{"API_KEY_PEPPER"}, getEnvFirst([]string{"JWT_SECRET"}, "")),
+},
+}
+
+if err := cfg.Validate(); err != nil {
+return nil, err
+}
+return cfg, nil
 }
 
 func (c *AppConfig) Validate() error {
-	return validateConfig(c)
+if c.Database.URL == "" {
+// оставляем понятную ошибку именно по ТЗ
+return errors.New("DATABASE_URL is required")
+}
+if c.OpenWeather.APIKey == "" {
+return errors.New("OPENWEATHER_API_KEY is required")
 }
 
-// Load configuration functions
-func loadServerConfig() ServerConfig {
-	return ServerConfig{
-		Port:            getEnv("PORT", "8080"),
-		Host:            getEnv("HOST", "0.0.0.0"),
-		Environment:     getEnv("ENVIRONMENT", "development"),
-		Debug:           getEnvBool("DEBUG", false),
-		ReadTimeout:     getEnvDuration("READ_TIMEOUT", 15*time.Second),
-		WriteTimeout:    getEnvDuration("WRITE_TIMEOUT", 30*time.Second),
-		ShutdownTimeout: getEnvDuration("SHUTDOWN_TIMEOUT", 30*time.Second),
-		EnablePprof:     getEnvBool("ENABLE_PPROF", false),
-	}
+if c.Server.Environment == "production" {
+if len(c.Security.JWTSecret) < 32 {
+return errors.New("JWT_SECRET must be at least 32 chars in production")
+}
+}
+return nil
 }
 
-func loadDatabaseConfig() DatabaseConfig {
-	return DatabaseConfig{
-		Host:         getEnv("DB_HOST", "localhost"),
-		Port:         getEnv("DB_PORT", "5432"),
-		User:         getEnv("DB_USER", "outfitstyle"),
-		Password:     getEnv("DB_PASSWORD", ""),
-		Name:         getEnv("DB_NAME", "outfitstyle"),
-		SSLMode:      getEnv("DB_SSL_MODE", "require"),
-		MaxOpenConns: getEnvInt("DB_MAX_OPEN_CONNS", 25, 1, 100),
-		MaxIdleConns: getEnvInt("DB_MAX_IDLE_CONNS", 5, 1, 50),
-	}
+func (c *DatabaseConfig) DatabaseURL() string { return c.URL }
+
+func splitCSV(v string) []string {
+v = strings.TrimSpace(v)
+if v == "" {
+return []string{"*"}
+}
+if v == "*" {
+return []string{"*"}
+}
+parts := strings.Split(v, ",")
+out := make([]string, 0, len(parts))
+for _, p := range parts {
+p = strings.TrimSpace(p)
+if p != "" {
+out = append(out, p)
+}
+}
+if len(out) == 0 {
+return []string{"*"}
+}
+return out
 }
 
-func loadWeatherAPIConfig() WeatherAPIConfig {
-	return WeatherAPIConfig{
-		Key:     getEnv("WEATHER_API_KEY", ""),
-		BaseURL: getEnv("WEATHER_API_URL", "https://api.openweathermap.org/data/2.5"),
-		Timeout: getEnvInt("WEATHER_API_TIMEOUT", 10, 1, 300),
-	}
+func getEnvFirst(keys []string, def string) string {
+for _, k := range keys {
+if v := os.Getenv(k); v != "" {
+return v
+}
+}
+return def
 }
 
-func loadMLServiceConfig() MLServiceConfig {
-	return MLServiceConfig{
-		BaseURL: getEnv("ML_SERVICE_URL", "http://localhost:5000"),
-		Timeout: getEnvInt("ML_SERVICE_TIMEOUT", 30, 1, 300),
-	}
+func getEnvInt(key string, def, min, max int) int {
+v := os.Getenv(key)
+if v == "" {
+return def
+}
+i, err := strconv.Atoi(v)
+if err != nil {
+return def
+}
+if i < min {
+return min
+}
+if i > max {
+return max
+}
+return i
 }
 
-func loadEmailConfig() EmailConfig {
-	return EmailConfig{
-		SMTPHost:     getEnv("SMTP_HOST", ""),
-		SMTPPort:     getEnvInt("SMTP_PORT", 587, 1, 65535),
-		SMTPUsername: getEnv("SMTP_USERNAME", ""),
-		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
-		FromEmail:    getEnv("SMTP_FROM_EMAIL", ""),
-	}
+func getEnvDurationFirst(keys []string, def time.Duration) time.Duration {
+for _, k := range keys {
+if v := os.Getenv(k); v != "" {
+d, err := time.ParseDuration(v)
+if err == nil {
+return d
+}
+}
+}
+return def
 }
 
-func loadSecurityConfig() SecurityConfig {
-	return SecurityConfig{
-		JWTSecret:              getEnv("JWT_SECRET", ""),
-		TokenExpiryHours:       getEnvInt("TOKEN_EXPIRY_HOURS", 24, 1, 168),
-		RefreshTokenExpiryDays: getEnvInt("REFRESH_TOKEN_EXPIRY_DAYS", 7, 1, 365),
-		VerificationCodeExpiry: getEnvInt("VERIFICATION_CODE_EXPIRY", 10, 1, 1440),
-		MaxLoginAttempts:       getEnvInt("MAX_LOGIN_ATTEMPTS", 5, 1, 100),
-		BlockDuration:          getEnvInt("BLOCK_DURATION", 30, 1, 1440),
-		CORSAllowedOrigins:     getEnv("CORS_ALLOWED_ORIGINS", "*"),
-		RateLimit:              getEnvInt("RATE_LIMIT", 100, 1, 10000),
-	}
+func getEnvBool(key string, def bool) bool {
+v := os.Getenv(key)
+if v == "" {
+return def
+}
+// поддерживаем разные форматы
+v = strings.ToLower(strings.TrimSpace(v))
+switch v {
+case "1", "true", "yes", "on":
+return true
+case "0", "false", "no", "off":
+return false
+default:
+return def
+}
 }
 
-func loadLoggingConfig() LoggingConfig {
-	return LoggingConfig{
-		Level:  getEnv("LOG_LEVEL", "info"),
-		Format: getEnv("LOG_FORMAT", "json"),
-	}
-}
-
-func loadCacheConfig() CacheConfig {
-	return CacheConfig{
-		Enabled:    getEnvBool("CACHE_ENABLED", true),
-		RedisURL:   getEnv("REDIS_URL", "redis://localhost:6379"),
-		Expiration: getEnvInt("CACHE_EXPIRATION", 300, 1, 3600),
-	}
-}
-
-func validateConfig(cfg *AppConfig) error {
-	if cfg.WeatherAPI.Key == "" {
-		return errors.New("WEATHER_API_KEY is required")
-	}
-
-	if cfg.Server.Environment != "development" {
-		if cfg.Database.Password == "" {
-			return errors.New("DB_PASSWORD is required in production")
-		}
-		if cfg.Security.JWTSecret == "" {
-			return errors.New("JWT_SECRET is required in production")
-		}
-	}
-
-	// Validate SSL mode
-	validSSLmodes := []string{"disable", "require", "verify-ca", "verify-full"}
-	if !contains(validSSLmodes, cfg.Database.SSLMode) {
-		return fmt.Errorf("invalid DB_SSL_MODE: %s (must be one of: %s)",
-			cfg.Database.SSLMode, strings.Join(validSSLmodes, ", "))
-	}
-
-	// Validate connection limits
-	if cfg.Database.MaxOpenConns < cfg.Database.MaxIdleConns {
-		return errors.New("DB_MAX_OPEN_CONNS cannot be less than DB_MAX_IDLE_CONNS")
-	}
-
-	return nil
-}
-
-// DatabaseURL returns properly formatted database connection string
-func (c *DatabaseConfig) DatabaseURL() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		c.Host, c.Port, c.User, c.Password, c.Name, c.SSLMode)
-}
-
-// GetAllowedOrigins returns list of allowed CORS origins
-func (c *SecurityConfig) GetAllowedOrigins() []string {
-	if c.CORSAllowedOrigins == "*" {
-		return []string{"*"}
-	}
-	return strings.Split(c.CORSAllowedOrigins, ",")
-}
-
-// Helper functions for environment variables
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
-
-func getEnvBool(key string, defaultValue bool) bool {
-	if value := os.Getenv(key); value != "" {
-		if b, err := strconv.ParseBool(value); err == nil {
-			return b
-		}
-	}
-	return defaultValue
-}
-
-func getEnvInt(key string, defaultValue, min, max int) int {
-	if value := os.Getenv(key); value != "" {
-		if i, err := strconv.Atoi(value); err == nil {
-			if i < min {
-				log.Printf("Warning: %s value %d below minimum %d, using %d", key, i, min, min)
-				return min
-			}
-			if i > max {
-				log.Printf("Warning: %s value %d above maximum %d, using %d", key, i, max, max)
-				return max
-			}
-			return i
-		}
-	}
-	return defaultValue
-}
-
-func getEnvDuration(key string, defaultValue time.Duration) time.Duration {
-	if value := os.Getenv(key); value != "" {
-		if d, err := time.ParseDuration(value); err == nil {
-			return d
-		}
-	}
-	return defaultValue
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
+func (c *AppConfig) Addr() string {
+return fmt.Sprintf("%s:%s", c.Server.Host, c.Server.Port)
 }

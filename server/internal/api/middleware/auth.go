@@ -1,40 +1,58 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
-	"outfitstyle/server/internal/api"
+	"github.com/gorilla/mux"
+
 	"outfitstyle/server/internal/core/application/services"
+	resp "outfitstyle/server/internal/pkg/http"
 )
 
-// AuthMiddleware creates a middleware that validates JWT tokens
-func AuthMiddleware(authService *services.AuthService) func(http.Handler) http.Handler {
+func AuthMiddleware(authService *services.AuthService, apiKeyService *services.APIKeyService) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				api.JSONError(w, http.StatusUnauthorized, "Authorization header required")
+			// 1) Bearer JWT
+			h := r.Header.Get("Authorization")
+			if strings.HasPrefix(h, "Bearer ") {
+				token := strings.TrimSpace(strings.TrimPrefix(h, "Bearer "))
+				userID, sessionID, err := authService.ValidateAccessToken(r.Context(), token)
+				if err != nil {
+					resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
+					return
+				}
+				ctx := WithUserID(r.Context(), userID)
+				ctx = WithSessionID(ctx, sessionID)
+				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
 
-			if !strings.HasPrefix(authHeader, "Bearer ") {
-				api.JSONError(w, http.StatusUnauthorized, "Invalid authorization header format")
+			// 2) API key (Business): X-API-Key
+			apiKey := strings.TrimSpace(r.Header.Get("X-API-Key"))
+			if apiKey != "" && apiKeyService != nil {
+				res, err := apiKeyService.Authenticate(r.Context(), apiKey)
+				if err != nil {
+					resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
+					return
+				}
+				ctx := WithUserID(r.Context(), res.UserID)
+				// session_id нет, но кладём api_key_id
+				ctx = WithAPIKeyID(ctx, res.APIKeyID)
+
+				ctx = WithAPIKeyMeta(ctx, APIKeyMeta{
+					APIKeyID: res.APIKeyID,
+					RateLimitPerMinute: res.RateLimitPerMinute,
+					RateLimitPerDay:    res.RateLimitPerDay,
+					Permissions:        res.Permissions,
+					AllowedOrigins:     res.AllowedOrigins,
+				})
+
+				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
 
-			token := authHeader[7:] // Remove "Bearer " prefix
-
-			user, err := authService.ValidateToken(token)
-			if err != nil {
-				api.JSONError(w, http.StatusUnauthorized, "Invalid or expired token")
-				return
-			}
-
-			// Add user to request context
-			ctx := context.WithValue(r.Context(), "user", user)
-			next.ServeHTTP(w, r.WithContext(ctx))
+			resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
 		})
 	}
 }

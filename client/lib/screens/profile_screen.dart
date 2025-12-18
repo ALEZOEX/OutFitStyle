@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../exceptions/api_exceptions.dart';
-import '../models/user_settings.dart';
-import '../providers/theme_provider.dart';
-import '../services/auth_storage.dart';
+import '../providers/profile_provider.dart';
+import '../services/auth_service.dart';
 import '../services/user_settings_service.dart';
-import 'edit_profile_screen.dart';
-import 'settings_screen.dart';
+import 'city_picker_screen.dart';
+import 'preferences_screen.dart';
+import 'body_measurements_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,315 +16,225 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late Future<UserSettings> _settingsFuture;
-  bool _initialized = false;
+  int _tempSens = 0;
+  final Set<String> _preferredStyles = {'casual'};
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      _settingsFuture = _loadSettings();
-      _initialized = true;
-    }
-  }
-
-  Future<UserSettings> _loadSettings() async {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is UserSettings) {
-      return args;
-    }
-
-    final service = context.read<UserSettingsService>();
-    final authStorage = context.read<AuthStorage>();
-
-    try {
-      return await service.fetchSettings();
-    } on AuthExpiredException catch (e) {
-      await authStorage.clearSession();
-      if (!mounted) rethrow;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
-      Navigator.pushReplacementNamed(context, '/auth');
-      rethrow;
-    }
-  }
-
-  Future<void> _reload() async {
-    setState(() {
-      _settingsFuture = _loadSettings();
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<ProfileProvider>().load();
+      _syncFromProfile();
     });
+  }
+
+  void _syncFromProfile() {
+    final p = context.read<ProfileProvider>();
+    final user = p.user;
+    if (user == null) return;
+
+    final prefs = (user['preferences'] as Map?)?.cast<String, dynamic>();
+    if (prefs == null) return;
+
+    final ts = prefs['temperature_sensitivity'];
+    if (ts is int) _tempSens = ts;
+
+    final styles = prefs['preferred_styles'];
+    if (styles is List) {
+      _preferredStyles
+        ..clear()
+        ..addAll(styles.map((e) => e.toString()));
+      if (_preferredStyles.isEmpty) _preferredStyles.add('casual');
+    }
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final p = context.watch<ProfileProvider>();
+    final user = p.user;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Профиль'),
-        backgroundColor: theme.cardColor,
-        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await context.read<AuthService>().logout(allDevices: false);
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(context, '/auth', (r) => false);
+              }
+            },
+            icon: const Icon(Icons.logout),
+            tooltip: 'Выйти',
+          ),
+        ],
       ),
-      body: FutureBuilder<UserSettings>(
-        future: _settingsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting &&
-              !snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  'Ошибка загрузки профиля: ${snapshot.error}',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            );
-          }
+      body: p.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : (user == null)
+              ? Center(child: Text(p.error ?? 'Нет данных'))
+              : ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // Проверяем, есть ли координаты у пользователя
+                    if (user['default_latitude'] == null || user['default_longitude'] == null) ...[
+                      Card(
+                        color: Theme.of(context).colorScheme.primary,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Укажите город',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Выберите ваш город, чтобы получать персонализированные рекомендации по погоде и использовать его по умолчанию.',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              const SizedBox(height: 12),
+                              FilledButton.icon(
+                                onPressed: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const CityPickerScreen()),
+                                  );
+                                  if (result is CityPickerResult) {
+                                    await context.read<UserSettingsService>().updateProfile(
+                                      defaultLocation: result.displayName,
+                                      defaultLatitude: result.lat,
+                                      defaultLongitude: result.lon,
+                                    );
+                                    await context.read<ProfileProvider>().load();
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                        content: Text('Город установлен'),
+                                      ));
+                                    }
+                                  }
+                                },
+                                icon: const Icon(Icons.location_on, color: Colors.white),
+                                label: const Text('Выбрать город'),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    Text('Email: ${user['email'] ?? ''}'),
+                    const SizedBox(height: 16),
 
-          final settings = snapshot.data!;
-          return RefreshIndicator(
-            onRefresh: _reload,
-            color: theme.primaryColor,
-            child: ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                _buildHeader(settings, theme),
-                const SizedBox(height: 24),
-                _buildPreferences(settings, theme),
-                const SizedBox(height: 24),
-                _buildActions(settings, theme, isDark),
-              ],
-            ),
-          );
+                    const Text('Персонализация', style: TextStyle(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+
+                    Text('Чувствительность к температуре: $_tempSens'),
+                    Slider(
+                      value: _tempSens.toDouble(),
+                      min: -2,
+                      max: 2,
+                      divisions: 4,
+                      label: '$_tempSens',
+                      onChanged: (v) => setState(() => _tempSens = v.round()),
+                    ),
+
+                    const SizedBox(height: 8),
+                    const Text('Предпочитаемые стили'),
+                    const SizedBox(height: 8),
+
+                    Wrap(
+                      spacing: 8,
+                      children: _styleChips(),
+                    ),
+
+                    const SizedBox(height: 8),
+                    ListTile(
+                      leading: const Icon(Icons.tune),
+                      title: const Text('Предпочтения'),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PreferencesScreen())),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.straighten),
+                      title: const Text('Размеры и тело'),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BodyMeasurementsScreen())),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.location_on),
+                      title: const Text('Город по умолчанию'),
+                      subtitle: Text(user['default_location'] ?? 'Не выбран'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CityPickerScreen()),
+                        );
+                        if (result is CityPickerResult) {
+                          await context.read<UserSettingsService>().updateProfile(
+                            defaultLocation: result.displayName,
+                            defaultLatitude: result.lat,
+                            defaultLongitude: result.lon,
+                          );
+                          await context.read<ProfileProvider>().load();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text('Город установлен'),
+                            ));
+                          }
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: () async {
+                        await context.read<ProfileProvider>().updatePreferences({
+                          'preferred_styles': _preferredStyles.toList(),
+                          'temperature_sensitivity': _tempSens,
+                        });
+                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Сохранено')));
+                      },
+                      child: const Text('Сохранить preferences'),
+                    ),
+
+                    if (p.error != null) ...[
+                      const SizedBox(height: 8),
+                      Text(p.error!, style: const TextStyle(color: Colors.red)),
+                    ],
+                  ],
+                ),
+    );
+  }
+
+  List<Widget> _styleChips() {
+    const styles = ['casual', 'street', 'classic', 'sport', 'business', 'smart_casual', 'outdoor'];
+    return styles.map((s) {
+      final selected = _preferredStyles.contains(s);
+      return FilterChip(
+        label: Text(s),
+        selected: selected,
+        onSelected: (v) {
+          setState(() {
+            if (v) {
+              _preferredStyles.add(s);
+            } else {
+              if (_preferredStyles.length > 1) {
+                _preferredStyles.remove(s);
+              }
+            }
+          });
         },
-      ),
-    );
-  }
-
-  Widget _buildHeader(UserSettings settings, ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: theme.primaryColor.withOpacity(0.1),
-            backgroundImage: settings.avatarUrl.isNotEmpty
-                ? NetworkImage(settings.avatarUrl)
-                : null,
-            child: settings.avatarUrl.isEmpty
-                ? Text(
-              settings.name.isNotEmpty
-                  ? settings.name[0].toUpperCase()
-                  : '?',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: theme.primaryColor,
-              ),
-            )
-                : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  settings.name.isNotEmpty ? settings.name : 'Без имени',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  settings.email,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.textTheme.bodyMedium?.color
-                        ?.withOpacity(0.7),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPreferences(UserSettings settings, ThemeData theme) {
-    String styleLabel(String v) {
-      switch (v) {
-        case 'business':
-          return 'Деловой стиль';
-        case 'sporty':
-          return 'Спортивный стиль';
-        case 'elegant':
-          return 'Элегантный стиль';
-        case 'casual':
-        default:
-          return 'Повседневный стиль';
-      }
-    }
-
-    String tempLabel(String v) {
-      switch (v) {
-        case 'cold':
-          return 'Мерзну';
-        case 'warm':
-          return 'Жарко';
-        case 'normal':
-        default:
-          return 'Нормально';
-      }
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Предпочтения',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildChip(
-                icon: Icons.style,
-                label: styleLabel(settings.stylePreference),
-                theme: theme,
-              ),
-              _buildChip(
-                icon: Icons.thermostat,
-                label: tempLabel(settings.temperatureSensitivity),
-                theme: theme,
-              ),
-              _buildChip(
-                icon: Icons.calendar_today,
-                label: 'Возраст: ${settings.ageRange}',
-                theme: theme,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip({
-    required IconData icon,
-    required String label,
-    required ThemeData theme,
-  }) {
-    return Chip(
-      avatar: Icon(
-        icon,
-        size: 18,
-        color: theme.primaryColor,
-      ),
-      label: Text(label),
-      backgroundColor: theme.cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: theme.primaryColor.withOpacity(0.2),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActions(
-      UserSettings settings, ThemeData theme, bool isDark) {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.edit),
-            label: const Text('Редактировать профиль'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            onPressed: () async {
-              final result = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditProfileScreen(settings: settings),
-                ),
-              );
-              if (result == true) {
-                await _reload();
-              }
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            icon: const Icon(Icons.settings),
-            label: const Text('Настройки'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              side: BorderSide(color: theme.primaryColor),
-              foregroundColor: theme.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            onPressed: () async {
-              final result = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SettingsScreen(settings: settings),
-                ),
-              );
-              if (result == true) {
-                await _reload();
-              }
-            },
-          ),
-        ),
-      ],
-    );
+      );
+    }).toList();
   }
 }
