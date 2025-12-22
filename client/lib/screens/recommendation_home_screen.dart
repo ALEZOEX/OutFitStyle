@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../providers/recommendation_provider.dart';
 import '../providers/weather_provider.dart';
 import '../models/recommendation_models.dart';
+import '../utils/preferences_constants.dart';
+import '../widgets/recommendation_card.dart';
 import 'regenerate_screen.dart';
 
 class RecommendationHomeScreen extends StatefulWidget {
@@ -19,7 +21,9 @@ class _RecommendationHomeScreenState extends State<RecommendationHomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<WeatherProvider>().load();
+      // Загружаем историю и создаем новую рекомендацию на основе профиля
       context.read<RecommendationProvider>().loadHistory(refresh: true);
+      context.read<RecommendationProvider>().createUsingProfile();
     });
   }
 
@@ -45,31 +49,6 @@ class _RecommendationHomeScreenState extends State<RecommendationHomeScreen> {
             if (wp.error != null) Text(wp.error!, style: const TextStyle(color: Colors.red)),
             if (wp.current != null) _WeatherCard(data: wp.current!),
 
-            const SizedBox(height: 16),
-
-            // Кнопки создания образа
-            Wrap(
-              spacing: 8,
-              children: [
-                FilledButton.icon(
-                  onPressed: rp.isLoading
-                      ? null
-                      : () => context.read<RecommendationProvider>().createUsingProfile(),
-                  icon: const Icon(Icons.auto_awesome),
-                  label: Text(rp.isLoading ? 'Думаем...' : 'Подобрать по городу профиля'),
-                ),
-                FilledButton.icon(
-                  onPressed: rp.isLoading
-                      ? null
-                      : () => _showCoordinatesInput(context),
-                  icon: const Icon(Icons.location_on),
-                  label: Text(rp.isLoading ? 'Думаем...' : 'По координатам'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.grey[700],
-                  ),
-                ),
-              ],
-            ),
 
             if (rp.error != null) ...[
               const SizedBox(height: 8),
@@ -82,7 +61,8 @@ class _RecommendationHomeScreenState extends State<RecommendationHomeScreen> {
             if (rp.latest != null) ...[
               const Text('Ваш образ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              _RecommendationCard(
+              RecommendationCard(
+                key: ValueKey(rp.latest!.id),
                 rec: rp.latest!,
                 showActions: true,
                 onRegenerate: () => _openRegenerate(context, rp.latest!),
@@ -93,7 +73,7 @@ class _RecommendationHomeScreenState extends State<RecommendationHomeScreen> {
             const Text('История', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
 
-            ...rp.history.map((r) => _RecommendationCard(rec: r)),
+            ...rp.history.map((r) => RecommendationCard(key: ValueKey(r.id), rec: r)),
 
             if (rp.hasMore)
               TextButton(
@@ -234,12 +214,13 @@ class _RecommendationCard extends StatelessWidget {
             const SizedBox(height: 8),
             ...lines.map((l) {
               final cat = l['category'];
+              final catRu = translateCategory(cat);
               final item = l['item'] ?? {};
               final name = item['name'] ?? '';
               final emoji = item['icon_emoji'] ?? '';
               return Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Text('$cat: $emoji $name'),
+                child: Text('$catRu: $emoji $name'),
               );
             }),
             if (showActions) ...[
