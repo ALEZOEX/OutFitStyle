@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/wardrobe_provider.dart';
 import '../models/wardrobe_models.dart';
+import '../utils/preferences_constants.dart';
 
 class WardrobeScreen extends StatefulWidget {
   const WardrobeScreen({super.key});
@@ -88,13 +89,26 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Отмена')),
           FilledButton(
             onPressed: () async {
-              await context.read<WardrobeProvider>().addManual(
-                    name: name.text.trim(),
-                    category: category.text.trim(),
-                    subcategory: subcategory.text.trim(),
-                    style: style.text.trim(),
+              try {
+                await context.read<WardrobeProvider>().addManual(
+                      name: name.text.trim(),
+                      category: category.text.trim(),
+                      subcategory: subcategory.text.trim(),
+                      style: style.text.trim(),
+                    );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Вещь успешно добавлена в гардероб')),
                   );
-              if (context.mounted) Navigator.pop(context);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Ошибка при добавлении вещи: $e')),
+                  );
+                }
+              }
             },
             child: const Text('Добавить'),
           ),
@@ -113,7 +127,10 @@ class _WardrobeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final emoji = item.item.iconEmoji ?? '';
     final title = item.item.name;
-    final subtitle = '${item.item.category} / ${item.item.subcategory} • ${item.item.style} • ${item.item.source}';
+    final cat = translateCategory(item.item.category);
+    final sub = translateSubcategory(item.item.subcategory);
+    final style = translateStyle(item.item.style);
+    final subtitle = '$cat / $sub • $style • ${item.item.source}';
 
     return ListTile(
       leading: Text(emoji.isEmpty ? '👕' : emoji, style: const TextStyle(fontSize: 22)),

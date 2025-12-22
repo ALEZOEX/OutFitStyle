@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -39,14 +40,30 @@ func (s *SubscriptionService) GetCurrent(ctx context.Context, userID domain.ID) 
 		if err != nil {
 			return nil, err
 		}
+
+		// ФИКС: Если в БД нет плана free, создаем временный объект, чтобы не крашиться
+		var plan domain.SubscriptionPlan
 		if freePlan == nil {
-			return nil, errors.New("free plan not found in DB")
+			limit := 3
+			wardrobeLimit := 30
+			plan = domain.SubscriptionPlan{
+				Code: "free",
+				Name: "Free (Fallback)",
+				RecommendationsPerDay: &limit,
+				WardrobeItemsLimit: &wardrobeLimit,
+				PriceMonthly: 0,
+				PriceYearly: 0,
+				Currency: "USD",
+				IsActive: true,
+			}
+		} else {
+			plan = *freePlan
 		}
 
 		effective = domain.UserSubscription{
 			ID:     nil,
 			UserID: userIDInt,
-			Plan:   *freePlan,
+			Plan:   plan,
 		}
 	} else {
 		effective = *sub

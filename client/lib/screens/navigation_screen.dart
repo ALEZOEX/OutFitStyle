@@ -3,6 +3,7 @@ import 'recommendation_home_screen.dart';
 import 'wardrobe_screen.dart';
 import 'profile_screen.dart';
 import 'recommendation_history_screen.dart';
+import 'catalog_screen.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
@@ -18,6 +19,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     RecommendationHomeScreen(),
     WardrobeScreen(),
     RecommendationHistoryScreen(),
+    CatalogScreen(),
     ProfileScreen(),
   ];
 
@@ -32,6 +34,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           NavigationDestination(icon: Icon(Icons.auto_awesome), label: 'Образ'),
           NavigationDestination(icon: Icon(Icons.checkroom), label: 'Гардероб'),
           NavigationDestination(icon: Icon(Icons.history), label: 'История'),
+          NavigationDestination(icon: Icon(Icons.store), label: 'Каталог'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Профиль'),
         ],
       ),

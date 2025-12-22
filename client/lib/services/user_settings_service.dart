@@ -63,6 +63,11 @@ class UserSettingsService {
     return data;
   }
 
+  Future<Map<String, dynamic>> deleteAccount({required String password}) async {
+    final data = await _api.deleteJson('/user/account', body: {'password': password}) as Map<String, dynamic>;
+    return data;
+  }
+
   Future<Map<String, dynamic>> listSessions() async {
     final data = await _api.getJson('/user/sessions') as Map<String, dynamic>;
     return data;
