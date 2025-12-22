@@ -57,6 +57,9 @@ func (h *UserHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/profile", h.GetMyProfile).Methods(http.MethodGet)
 	r.HandleFunc("/profile", h.UpdateMyProfile).Methods(http.MethodPut)
 
+	r.HandleFunc("/preferences", h.GetPreferences).Methods(http.MethodGet)
+	r.HandleFunc("/preferences", h.UpdatePreferences).Methods(http.MethodPut)
+
 	r.HandleFunc("/avatar", h.UploadAvatar).Methods(http.MethodPost)
 
 	r.HandleFunc("/export", h.Export).Methods(http.MethodGet)
@@ -221,6 +224,28 @@ type deleteAccountBody struct {
 	Password string  `json:"password"`
 	Reason   *string `json:"reason,omitempty"`
 	Feedback *string `json:"feedback,omitempty"`
+}
+
+func (h *UserHandler) GetPreferences(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
+		return
+	}
+
+	out, err := h.userService.GetUserProfile(r.Context(), userID)
+	if err != nil {
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to get preferences"))
+		return
+	}
+
+	if out == nil || out.User == nil {
+		resp.Error(w, http.StatusNotFound, errors.New("user not found"))
+		return
+	}
+
+	// Возвращаем только предпочтения
+	resp.Success(w, map[string]any{"preferences": out.User.Preferences})
 }
 
 func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {

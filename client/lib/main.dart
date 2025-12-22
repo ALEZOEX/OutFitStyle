@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'config/app_config.dart';
@@ -160,6 +161,18 @@ Future<void> main() async {
             context.read<UserSettingsService>(),
           ),
         ),
+
+        Provider<CatalogService>(
+          create: (context) => CatalogService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+        ChangeNotifierProvider<CatalogProvider>(
+          create: (context) => CatalogProvider(
+            context.read<CatalogService>(),
+          ),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -215,6 +228,15 @@ class MyApp extends StatelessWidget {
           error: Color(0xFFdc3545),
         ),
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ru'), // Русский
+        Locale('en'),
+      ],
       initialRoute: '/splash',
       routes: {
         '/splash': (_) => const SplashGateScreen(),

@@ -1,1158 +1,1058 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
-import '../exceptions/api_exceptions.dart';
-import '../models/outfit.dart';
-import '../models/recommendation.dart';
-import '../providers/theme_provider.dart';
-import '../services/api_service.dart';
-import '../services/auth_storage.dart';
+import '../providers/profile_provider.dart';
 import '../theme/app_theme.dart';
-import '../utils/city_translator.dart';
-import '../utils/item_translator.dart';
-import '../utils/location_helper.dart';
-import '../widgets/alternative_outfits.dart';
-import '../widgets/onboarding_dialog.dart';
-import '../widgets/top_outfit_card.dart';
-import 'profile_screen.dart';
+import '../utils/preferences_constants.dart';
+import 'city_picker_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class OnboardingWizardScreen extends StatefulWidget {
+  const OnboardingWizardScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<OnboardingWizardScreen> createState() => _OnboardingWizardScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  final TextEditingController _cityController =
-  TextEditingController(text: 'Москва');
-  bool _isLocationLoading = true;
-
-  Recommendation? _recommendation;
-  bool _isLoading = true;
+class _OnboardingWizardScreenState extends State<OnboardingWizardScreen> {
+  final PageController _pageController = PageController();
+  int _step = 0;
+  bool _saving = false;
   String? _error;
-  String? _errorDetails;
-  int _selectedRating = 0;
 
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+  // Preferences state
+  final Set<String> _preferredStyles = {'casual'};
+  final Set<String> _avoidStyles = {};
+  final Set<String> _colorPrefs = {'black'};
+  final Set<String> _avoidColors = {};
+  int _tempSens = 0;
+  bool _notificationsEnabled = true;
+  final _reminderTime = TextEditingController(text: '08:00');
+  CityPickerResult? _location;
 
-  bool _didInitDependencies = false;
-  late ApiService _api;
-  late AuthStorage _authStorage;
+  final int _totalSteps = 5;
 
   @override
   void initState() {
     super.initState();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    );
-
-    _requestLocationPermission();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      OnboardingDialog.showIfNeeded(context);
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_didInitDependencies) {
-      _api = context.read<ApiService>();
-      _authStorage = context.read<AuthStorage>();
-      _didInitDependencies = true;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadFromProfile());
   }
 
   @override
   void dispose() {
-    _cityController.dispose();
-    _animationController.dispose();
+    _pageController.dispose();
+    _reminderTime.dispose();
     super.dispose();
   }
 
-  // ------------------- Локация и город -------------------
+  void _loadFromProfile() {
+    final p = context.read<ProfileProvider>();
+    final user = p.user;
+    final prefs = (user?['preferences'] as Map?)?.cast<String, dynamic>();
 
-  Future<void> _requestLocationPermission() async {
-    try {
-      final serviceEnabled = await LocationHelper.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _showLocationServicesDisabledDialog();
-        return;
+    if (prefs != null) {
+      final ps = prefs['preferred_styles'];
+      if (ps is List && ps.isNotEmpty) {
+        _preferredStyles
+          ..clear()
+          ..addAll(ps.map((e) => e.toString()));
       }
 
-      final permission = await LocationHelper.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-        _showPermissionDeniedDialog();
-        return;
+      final as = prefs['avoid_styles'];
+      if (as is List) {
+        _avoidStyles
+          ..clear()
+          ..addAll(as.map((e) => e.toString()));
+        _avoidStyles.removeWhere(_preferredStyles.contains);
       }
 
-      if (permission == LocationPermission.deniedForever) {
-        _showPermissionDeniedForeverDialog();
-        return;
+      final cp = prefs['color_preferences'];
+      if (cp is List && cp.isNotEmpty) {
+        _colorPrefs
+          ..clear()
+          ..addAll(cp.map((e) => e.toString()));
       }
 
-      if (permission == LocationPermission.always ||
-          permission == LocationPermission.whileInUse) {
-        _getCurrentPosition();
+      final ac = prefs['avoid_colors'];
+      if (ac is List) {
+        _avoidColors
+          ..clear()
+          ..addAll(ac.map((e) => e.toString()));
+        _avoidColors.removeWhere(_colorPrefs.contains);
       }
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _cityController.text = 'Moscow';
-        _isLocationLoading = false;
-      });
-      _loadData();
+
+      final ts = prefs['temperature_sensitivity'];
+      if (ts is int) _tempSens = ts;
+
+      final ne = prefs['notifications_enabled'];
+      if (ne is bool) _notificationsEnabled = ne;
+
+      final rt = prefs['morning_reminder_time'];
+      if (rt is String && rt.isNotEmpty) _reminderTime.text = rt;
     }
+
+    setState(() {});
   }
 
-  Future<void> _getCurrentPosition() async {
-    try {
-      setState(() => _isLocationLoading = true);
-
-      final position = await LocationHelper.getCurrentPosition();
-      if (position == null) {
-        _fallbackToDefaultCity();
-        return;
-      }
-
-      final city = await LocationHelper.getCityFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (city != null) {
-        final translatedCity = CityTranslator.translate(city);
-
-        if (mounted) {
-          setState(() {
-            _cityController.text = city;
-            _isLocationLoading = false;
-          });
-          _loadDataWithCity(translatedCity);
-        }
-      } else {
-        _fallbackToDefaultCity();
-      }
-    } catch (_) {
-      _fallbackToDefaultCity();
-    }
-  }
-
-  void _fallbackToDefaultCity() {
-    if (!mounted) return;
+  Future<void> _savePreferencesPatch(Map<String, dynamic> patch) async {
     setState(() {
-      _cityController.text = 'Moscow';
-      _isLocationLoading = false;
-    });
-    _loadData();
-  }
-
-  // ------------------- Загрузка рекомендаций -------------------
-
-  Future<void> _loadDataWithCity(String city) async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
+      _saving = true;
       _error = null;
-      _errorDetails = null;
     });
-
     try {
-      final userId = await _authStorage.readUserId();
-      if (userId == null) {
-        throw const AuthExpiredException('Пользователь не авторизован');
-      }
-
-      final recommendation = await _api.getRecommendations(
-        city,
-        userId: userId,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _recommendation = recommendation;
-        _isLoading = false;
-      });
-      _animationController.forward(from: 0.0);
-    } on AuthExpiredException catch (e) {
-      await _authStorage.clearSession();
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
-      Navigator.pushReplacementNamed(context, '/auth');
+      await context.read<ProfileProvider>().updatePreferences(patch);
     } catch (e) {
-      if (!mounted) return;
-      _setErrorFromException(e);
+      _error = e.toString();
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
-  void _setErrorFromException(Object e) {
-    String errorMessage = 'Ошибка загрузки данных';
-    String? details;
-    final errorDescription = e.toString().toLowerCase();
-
-    if (errorDescription.contains('404') ||
-        errorDescription.contains('city not found')) {
-      errorMessage = 'Город не найден';
-      details =
-      'Проверьте правильность названия города. Попробуйте использовать английское название (например, "New York").';
-    } else if (errorDescription.contains('400')) {
-      errorMessage = 'Неверный запрос';
-      details =
-      'Попробуйте ввести название города на английском языке, например: Moscow, London, Paris.';
-    } else if (errorDescription.contains('timeout')) {
-      errorMessage = 'Сервер не отвечает';
-      details =
-      'Превышено время ожидания. Проверьте подключение к интернету или попробуйте позже.';
-    } else if (errorDescription.contains('failed hostlookup') ||
-        errorDescription.contains('socketexception')) {
-      errorMessage = 'Нет подключения к интернету';
-      details = 'Проверьте сетевое подключение и попробуйте снова.';
-    } else if (errorDescription.contains('connection refused')) {
-      errorMessage = 'Сервер недоступен';
-      details =
-      'Не удаётся подключиться к серверу. Убедитесь, что все сервисы запущены.';
-    } else {
-      details = e.toString();
-    }
-
+  Future<void> _saveProfilePatch(Map<String, dynamic> patch) async {
     setState(() {
-      _error = errorMessage;
-      _errorDetails = details;
-      _isLoading = false;
-      _recommendation = null;
+      _saving = true;
+      _error = null;
     });
+    try {
+      await context.read<ProfileProvider>().updateProfilePatch(patch);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
-  Future<void> _loadData() async {
-    if (_isLocationLoading) return;
+  Future<void> _next() async {
+    if (_saving) return;
 
-    final cityText = _cityController.text;
-    if (cityText.isEmpty || cityText == '...') {
-      _fallbackToDefaultCity();
+    if (_step == 0) {
+      await _savePreferencesPatch({
+        'preferred_styles': _preferredStyles.toList(),
+        'avoid_styles': _avoidStyles.toList(),
+      });
+    } else if (_step == 1) {
+      await _savePreferencesPatch({
+        'color_preferences': _colorPrefs.toList(),
+        'avoid_colors': _avoidColors.toList(),
+      });
+    } else if (_step == 2) {
+      await _savePreferencesPatch({'temperature_sensitivity': _tempSens});
+    } else if (_step == 3) {
+      if (_location == null) {
+        setState(() => _error = 'Выберите город');
+        return;
+      }
+      await _saveProfilePatch({
+        'default_location': _location!.displayName,
+        'default_latitude': _location!.lat,
+        'default_longitude': _location!.lon,
+      });
+    } else if (_step == 4) {
+      await _savePreferencesPatch({
+        'notifications_enabled': _notificationsEnabled,
+        'morning_reminder_time': _reminderTime.text.trim(),
+      });
+    }
+
+    if (_error != null) return;
+
+    if (_step >= _totalSteps - 1) {
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
+      }
       return;
     }
 
-    final translatedCity = CityTranslator.translate(cityText);
-    await _loadDataWithCity(translatedCity);
-  }
-
-  // ------------------- Диалоги локации -------------------
-
-  void _showLocationServicesDisabledDialog() {
-    if (!mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Сервисы локации отключены'),
-        content: const Text(
-            'Пожалуйста, включите сервисы локации в настройках устройства для автоматического определения вашего города.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await LocationHelper.openLocationSettings();
-              if (mounted) {
-                _requestLocationPermission();
-              }
-            },
-            child: const Text('Настройки'),
-          ),
-        ],
-      ),
+    setState(() => _step++);
+    _pageController.animateToPage(
+      _step,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
     );
   }
 
-  void _showPermissionDeniedDialog() {
-    if (!mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Разрешение на локацию'),
-        content: const Text(
-            'Пожалуйста, разрешите доступ к вашему местоположению для автоматического определения города.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await LocationHelper.openAppSettings();
-              if (mounted) {
-                _requestLocationPermission();
-              }
-            },
-            child: const Text('Настроить'),
-          ),
-        ],
-      ),
+  void _back() {
+    if (_step == 0) return;
+    setState(() => _step--);
+    _pageController.animateToPage(
+      _step,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
     );
   }
-
-  void _showPermissionDeniedForeverDialog() {
-    if (!mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Нет доступа к локации'),
-        content: const Text(
-            'Вы навсегда запретили доступ к местоположению. Пожалуйста, вручную введите город в поиске.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Понятно'),
-          ),
-        ],
-      ),
-    ).then((_) {
-      if (!mounted) return;
-      setState(() {
-        _cityController.text = 'Moscow';
-        _isLocationLoading = false;
-      });
-      _loadData();
-    });
-  }
-
-  // ------------------- Рейтинг -------------------
-
-  Future<void> _submitRating() async {
-    if (_selectedRating == 0 || _recommendation == null) return;
-
-    try {
-      final userId = await _authStorage.readUserId();
-      if (userId == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Пользователь не авторизован'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return;
-      }
-
-      await _api.submitRating(
-        userId: userId,
-        recommendationId: _recommendation!.id,
-        rating: _selectedRating,
-        feedback: null,
-      );
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Спасибо за вашу оценку!'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      setState(() {
-        _selectedRating = 0;
-      });
-
-      _loadData();
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ошибка отправки оценки. Попробуйте позже.'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  // ------------------- UI -------------------
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bgGradient = isDark
+        ? const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF0B1025),
+              Color(0xFF0F172A),
+              Color(0xFF121212),
+            ],
+          )
+        : const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF3F4F6),
+              Color(0xFFF8FAFC),
+              Color(0xFFFFFFFF),
+            ],
+          );
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadData,
-          color: theme.primaryColor,
-          child: _buildBody(isDark, themeProvider),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: BoxDecoration(gradient: bgGradient),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                child: _Header(
+                  step: _step,
+                  total: _totalSteps,
+                  onBack: _step > 0 ? _back : null,
+                ),
+              ),
+
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _buildPage(
+                      title: 'Какой у вас стиль?',
+                      subtitle: 'Выберите то, что вам ближе',
+                      icon: Icons.checkroom,
+                      child: _stylesStep(),
+                    ),
+                    _buildPage(
+                      title: 'Любимые цвета',
+                      subtitle: 'Что вам нравится носить?',
+                      icon: Icons.palette,
+                      child: _colorsStep(),
+                    ),
+                    _buildPage(
+                      title: 'Как вы переносите холод?',
+                      subtitle: 'Настроим подбор одежды под вас',
+                      icon: Icons.thermostat,
+                      child: _tempStep(),
+                    ),
+                    _buildPage(
+                      title: 'Где вы находитесь?',
+                      subtitle: 'Чтобы знать погоду за окном',
+                      icon: Icons.location_on,
+                      child: _locationStep(),
+                    ),
+                    _buildPage(
+                      title: 'Быть в курсе?',
+                      subtitle: 'Напоминания о погоде утром',
+                      icon: Icons.notifications_active,
+                      child: _notificationsStep(),
+                    ),
+                  ],
+                ),
+              ),
+
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: _ErrorBanner(text: _error!),
+                ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: _PrimaryGradientButton(
+                  text: _step == _totalSteps - 1 ? 'Завершить' : 'Далее',
+                  isLoading: _saving,
+                  onPressed: _saving ? null : _next,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildBody(bool isDark, ThemeProvider themeProvider) {
-    if (_isLoading) {
-      return _buildLoadingState(isDark);
-    }
-    if (_error != null) {
-      return _buildErrorWidget(isDark);
-    }
-    if (_recommendation == null) {
-      return const Center(
-        child: Text('Введите город для получения рекомендаций'),
-      );
-    }
+  Widget _buildPage({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Widget child,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return CustomScrollView(
-      physics:
-      const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SurfaceCard(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                _buildHeader(isDark, themeProvider),
-                const SizedBox(height: 16),
-                _buildSearchPanel(isDark),
-                const SizedBox(height: 24),
-                FadeTransition(
-                  opacity: _fadeAnimation,
+                _GradientIconBox(icon: icon),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildWeatherCard(isDark),
-                      const SizedBox(height: 32),
-                      _buildOutfitSection(isDark),
-                      const SizedBox(height: 32),
-                      _buildRatingPanel(isDark),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          height: 1.1,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.3,
+                          color: theme.textTheme.bodyMedium?.color
+                              ?.withOpacity(isDark ? 0.9 : 0.85),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
+          const SizedBox(height: 14),
 
-  Widget _buildHeader(bool isDark, ThemeProvider themeProvider) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.only(top: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildHeaderButton(
-            icon: Icons.person_outline,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            },
-            isDark: isDark,
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: isDark
-                        ? AppTheme.primaryGradientDark
-                        : AppTheme.primaryGradientLight,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.checkroom,
-                      color: Colors.white, size: 28),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'OutfitStyle',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          _buildHeaderButton(
-            icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-            onTap: () => themeProvider.toggleTheme(),
-            isDark: isDark,
-            iconColor: isDark ? Colors.amber : theme.primaryColor,
+          _SurfaceCard(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+            child: child,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    required bool isDark,
-    Color? iconColor,
-  }) {
-    final theme = Theme.of(context);
-    final color = theme.primaryColor;
-    return Material(
-      color: color.withOpacity(0.1),
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Icon(
-            icon,
-            color: iconColor ?? color,
-            size: 24,
-          ),
-        ),
-      ),
-    );
-  }
+  // --- STEPS CONTENT ---
 
-  Widget _buildSearchPanel(bool isDark) {
+  Widget _stylesStep() {
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: isDark
-            ? Border.all(color: theme.primaryColor.withOpacity(0.3))
-            : null,
-        boxShadow: isDark
-            ? null
-            : [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _cityController,
-              enabled: !_isLocationLoading,
-              style: TextStyle(
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              decoration: InputDecoration(
-                hintText: _isLocationLoading
-                    ? 'Определяем ваше местоположение...'
-                    : 'Введите город (например: Moscow)',
-                hintStyle: TextStyle(
-                  color:
-                  theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  fontSize: 14,
-                ),
-                prefixIcon: _isLocationLoading
-                    ? const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-                    : Icon(Icons.location_city,
-                    color: theme.primaryColor),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
-              ),
-              onSubmitted: (_) => _loadData(),
-            ),
-          ),
-          if (!_isLocationLoading)
-            Container(
-              margin: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                gradient: AppTheme.primaryGradientLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.search, color: Colors.white),
-                onPressed: _loadData,
-                tooltip: 'Найти',
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWeatherCard(bool isDark) {
-    final theme = Theme.of(context);
-    if (_recommendation == null) return const SizedBox.shrink();
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: isDark
-            ? Border.all(color: theme.primaryColor.withOpacity(0.3))
-            : null,
-        boxShadow: isDark
-            ? null
-            : [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 3),
-          )
-        ],
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.location_on, color: theme.primaryColor, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                _recommendation!.location,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: theme.textTheme.bodyLarge?.color,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '${_recommendation!.temperature.round()}°C',
-            style: TextStyle(
-              fontSize: 64,
-              fontWeight: FontWeight.bold,
-              color: theme.textTheme.bodyLarge?.color,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _recommendation!.weather,
-            style: TextStyle(
-              fontSize: 18,
-              color: theme.textTheme.bodyMedium?.color,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? theme.scaffoldBackgroundColor
-                  : const Color(0xFFF8F9FA),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildWeatherDetail(
-                    Icons.water_drop,
-                    'Влажность',
-                    '${_recommendation!.humidity}%',
-                    isDark),
-                Container(
-                  width: 1,
-                  height: 50,
-                  color: isDark ? const Color(0xFF666666) : Colors.grey[300],
-                ),
-                _buildWeatherDetail(
-                  Icons.air,
-                  'Ветер',
-                  '${_recommendation!.windSpeed.toStringAsFixed(1)} м/с',
-                  isDark,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E88E5).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              _recommendation!.message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWeatherDetail(
-      IconData icon, String label, String value, bool isDark) {
-    final theme = Theme.of(context);
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: theme.primaryColor, size: 28),
-        const SizedBox(height: 6),
         Text(
-          label,
+          'Предпочитаемые (2-3)',
           style: TextStyle(
-            fontSize: 12,
-            color: theme.textTheme.bodyMedium?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             color: theme.textTheme.bodyLarge?.color,
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildOutfitSection(bool isDark) {
-    if (_recommendation == null || _recommendation!.items.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    final outfitRecommendations = OutfitRecommendations.fromItems(
-      _recommendation!.items,
-      _recommendation!.temperature,
-      _recommendation!.weather,
-    );
-    return Column(
-      children: [
-        TopOutfitCard(
-          outfit: outfitRecommendations.topChoice,
-          isDark: isDark,
-          onSelect: (_) => _onOutfitSelected(outfitRecommendations.topChoice),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: kStyles
+              .map((s) => _buildChip(s, _preferredStyles, _avoidStyles))
+              .toList(),
         ),
-        const SizedBox(height: 32),
-        AlternativeOutfits(
-          alternatives: outfitRecommendations.alternatives,
-          isDark: isDark,
-          onSelect: _onOutfitSelected,
+        const SizedBox(height: 20),
+        Text(
+          'Избегать',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: theme.textTheme.bodyLarge?.color,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: kStyles
+              .map((s) => _buildAvoidChip(s, _avoidStyles, _preferredStyles))
+              .toList(),
         ),
       ],
     );
   }
 
-  void _onOutfitSelected(OutfitSet outfit) {
-    final themeProvider = context.read<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
+  Widget _colorsStep() {
     final theme = Theme.of(context);
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.85,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Любимые',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: theme.textTheme.bodyLarge?.color,
+          ),
         ),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
+        const SizedBox(height: 12),
+        _ColorGrid(
+          selected: _colorPrefs,
+          onToggle: (c) {
+            setState(() {
+              if (_colorPrefs.contains(c)) {
+                if (_colorPrefs.length > 1) _colorPrefs.remove(c);
+              } else {
+                _colorPrefs.add(c);
+                _avoidColors.remove(c);
+              }
+            });
+          },
         ),
-        child: Column(
+        const SizedBox(height: 20),
+        Text(
+          'Избегать',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: theme.textTheme.bodyLarge?.color,
+          ),
+        ),
+        const SizedBox(height: 12),
+        _ColorGrid(
+          selected: _avoidColors,
+          onToggle: (c) {
+            setState(() {
+              if (_avoidColors.contains(c)) {
+                _avoidColors.remove(c);
+              } else {
+                _avoidColors.add(c);
+                _colorPrefs.remove(c);
+                if (_colorPrefs.isEmpty) _colorPrefs.add('black');
+              }
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _tempStep() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    Color valueColor() {
+      if (_tempSens <= -2) return AppTheme.secondary;
+      if (_tempSens == -1) return AppTheme.primary;
+      if (_tempSens == 0) return theme.primaryColor;
+      if (_tempSens == 1) return AppTheme.warning;
+      return AppTheme.danger;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Чувствительность',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: theme.textTheme.bodyLarge?.color,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
           children: [
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.textTheme.bodyMedium?.color
-                    ?.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      gradient: isDark
-                          ? AppTheme.primaryGradientDark
-                          : AppTheme.primaryGradientLight,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.checkroom, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Детали комплекта',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: theme.textTheme.bodyLarge?.color,
-                          ),
-                        ),
-                        Text(
-                          'Уверенность: ${(outfit.confidence * 100).toInt()}%',
-                          style: TextStyle(
-                            color: theme.textTheme.bodyMedium?.color,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: _SurfaceCard(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(14),
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? AppTheme.backgroundDark
-                            : const Color(0xFFF8F9FA),
+                        gradient: isDark
+                            ? AppTheme.primaryGradientDark
+                            : AppTheme.primaryGradientLight,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: theme.primaryColor.withOpacity(0.2),
-                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.primaryColor.withOpacity(0.22),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
+                      child: const Icon(Icons.thermostat, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: Text(
-                        outfit.reason,
+                        '$_tempSens  (-2: Мёрзну … +2: Жарко)',
                         style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: theme.textTheme.bodyLarge?.color,
+                          fontSize: 14,
+                          height: 1.25,
+                          color: theme.textTheme.bodyMedium?.color,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
                     Text(
-                      'Состав комплекта:',
+                      '$_tempSens',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: theme.textTheme.bodyLarge?.color,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: valueColor(),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    ...outfit.items.map((item) => _buildOutfitItem(item, theme)),
                   ],
                 ),
               ),
             ),
           ],
         ),
+        const SizedBox(height: 14),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: theme.primaryColor,
+            inactiveTrackColor: theme.primaryColor.withOpacity(0.25),
+            thumbColor: theme.primaryColor,
+            overlayColor: theme.primaryColor.withOpacity(0.18),
+            trackHeight: 4,
+          ),
+          child: Slider(
+            value: _tempSens.toDouble(),
+            min: -2,
+            max: 2,
+            divisions: 4,
+            onChanged: (v) => setState(() => _tempSens = v.round()),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _locationStep() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: () async {
+        final res = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CityPickerScreen()),
+        );
+        if (res is CityPickerResult) setState(() => _location = res);
+      },
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: isDark ? AppTheme.backgroundDark : theme.scaffoldBackgroundColor,
+          border: Border.all(
+            color: theme.primaryColor.withOpacity(isDark ? 0.28 : 0.16),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.search, color: theme.primaryColor),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _location?.displayName ?? 'Нажмите, чтобы выбрать город',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: _location == null
+                      ? theme.textTheme.bodyMedium?.color
+                      : theme.textTheme.bodyLarge?.color,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.9),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildOutfitItem(ClothingItem item, ThemeData theme) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color:
-          theme.textTheme.bodyMedium?.color?.withOpacity(0.1) ??
-              Colors.grey,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              item.iconEmoji,
-              style: const TextStyle(fontSize: 20),
+  Widget _notificationsStep() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color:
+                isDark ? AppTheme.backgroundDark : theme.scaffoldBackgroundColor,
+            border: Border.all(
+              color: theme.primaryColor.withOpacity(isDark ? 0.25 : 0.14),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-                Text(
-                  ItemTranslator.translateAnyField(item.category, 'category'),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: theme.textTheme.bodyMedium?.color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (item.mlScore != null)
-            Text(
-              '${(item.mlScore! * 100).toInt()}%',
+          child: SwitchListTile(
+            title: Text(
+              'Включить уведомления',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: theme.primaryColor,
+                fontWeight: FontWeight.w700,
+                color: theme.textTheme.bodyLarge?.color,
               ),
             ),
+            subtitle: Text(
+              'Короткое напоминание утром',
+              style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+            ),
+            value: _notificationsEnabled,
+            activeColor: theme.primaryColor,
+            onChanged: (v) => setState(() => _notificationsEnabled = v),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color:
+                isDark ? AppTheme.backgroundDark : theme.scaffoldBackgroundColor,
+            border: Border.all(
+              color: theme.primaryColor.withOpacity(isDark ? 0.20 : 0.12),
+            ),
+          ),
+          child: TextField(
+            controller: _reminderTime,
+            keyboardType: TextInputType.datetime,
+            style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            decoration: InputDecoration(
+              labelText: 'Время (HH:MM)',
+              labelStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
+              hintText: '08:00',
+              hintStyle:
+                  TextStyle(color: theme.textTheme.bodyMedium?.color),
+              border: InputBorder.none,
+              prefixIcon: Icon(Icons.schedule, color: theme.primaryColor),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChip(String key, Set<String> selected, Set<String> anti) {
+    final theme = Theme.of(context);
+    final isSelected = selected.contains(key);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return FilterChip(
+      label: Text(translateStyle(key)),
+      selected: isSelected,
+      onSelected: (v) => setState(() {
+        if (v) {
+          selected.add(key);
+          anti.remove(key);
+        } else if (selected.length > 1) {
+          selected.remove(key);
+        }
+      }),
+      backgroundColor: isDark
+          ? const Color(0xFF141A2E)
+          : theme.cardColor.withOpacity(0.7),
+      selectedColor: theme.primaryColor.withOpacity(isDark ? 0.26 : 0.18),
+      checkmarkColor: theme.primaryColor,
+      side: BorderSide(
+        color: isSelected
+            ? theme.primaryColor.withOpacity(0.65)
+            : theme.textTheme.bodyMedium?.color?.withOpacity(isDark ? 0.22 : 0.18) ??
+                Colors.grey,
+      ),
+      labelStyle: TextStyle(
+        fontWeight: FontWeight.w600,
+        color: isSelected
+            ? theme.textTheme.bodyLarge?.color
+            : theme.textTheme.bodyMedium?.color,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    );
+  }
+
+  Widget _buildAvoidChip(String key, Set<String> selected, Set<String> anti) {
+    final theme = Theme.of(context);
+    final isSelected = selected.contains(key);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return FilterChip(
+      label: Text(translateStyle(key)),
+      selected: isSelected,
+      onSelected: (v) => setState(() {
+        if (v) {
+          selected.add(key);
+          anti.remove(key);
+          if (anti.isEmpty) anti.add('casual');
+        } else {
+          selected.remove(key);
+        }
+      }),
+      backgroundColor: isDark
+          ? const Color(0xFF17131A)
+          : theme.cardColor.withOpacity(0.7),
+      selectedColor: AppTheme.danger.withOpacity(isDark ? 0.22 : 0.14),
+      checkmarkColor: AppTheme.danger,
+      side: BorderSide(
+        color: isSelected
+            ? AppTheme.danger.withOpacity(0.65)
+            : theme.textTheme.bodyMedium?.color?.withOpacity(isDark ? 0.22 : 0.18) ??
+                Colors.grey,
+      ),
+      labelStyle: TextStyle(
+        fontWeight: FontWeight.w700,
+        color: isSelected
+            ? theme.textTheme.bodyLarge?.color
+            : theme.textTheme.bodyMedium?.color,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  final int step;
+  final int total;
+  final VoidCallback? onBack;
+
+  const _Header({
+    required this.step,
+    required this.total,
+    required this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final progress = (step + 1) / total;
+
+    return _SurfaceCard(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: Material(
+                  color: theme.primaryColor.withOpacity(isDark ? 0.12 : 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: onBack,
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: onBack == null
+                          ? theme.textTheme.bodyMedium?.color?.withOpacity(0.35)
+                          : theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      'Шаг ${step + 1} из $total',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: theme.textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 6,
+                        backgroundColor: theme.textTheme.bodyMedium?.color
+                            ?.withOpacity(isDark ? 0.18 : 0.12),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(theme.primaryColor),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(total, (i) {
+                        final active = i <= step;
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: active ? 16 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(999),
+                            color: active
+                                ? theme.primaryColor
+                                : theme.textTheme.bodyMedium?.color
+                                    ?.withOpacity(isDark ? 0.22 : 0.18),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 44),
+            ],
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildRatingPanel(bool isDark) {
+class _SurfaceCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  const _SurfaceCard({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final borderColor = theme.primaryColor.withOpacity(isDark ? 0.18 : 0.10);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            gradient: isDark ? AppTheme.cardGradientDark : AppTheme.cardGradient,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: borderColor),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.35 : 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _GradientIconBox extends StatelessWidget {
+  final IconData icon;
+
+  const _GradientIconBox({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        gradient: isDark ? AppTheme.primaryGradientDark : AppTheme.primaryGradient,
         borderRadius: BorderRadius.circular(16),
-        border: isDark
-            ? Border.all(color: theme.primaryColor.withOpacity(0.3))
-            : null,
-        boxShadow: isDark
-            ? null
-            : [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 3),
+            color: theme.primaryColor.withOpacity(isDark ? 0.28 : 0.20),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           )
         ],
       ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          Text(
-            'Оцените рекомендацию',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: theme.textTheme.bodyLarge?.color,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedRating = index + 1;
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Icon(
-                    index < _selectedRating ? Icons.star : Icons.star_border,
-                    size: 40,
-                    color: index < _selectedRating
-                        ? const Color(0xFFffc107)
-                        : const Color(0xFF9E9E9E),
-                  ),
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Ваша оценка помогает улучшить AI!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.textTheme.bodyMedium?.color,
-            ),
-          ),
-          if (_selectedRating > 0) ...[
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _submitRating,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E88E5),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Отправить оценку',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
+      child: Icon(icon, color: Colors.white, size: 26),
     );
   }
+}
 
-  Widget _buildLoadingState(bool isDark) {
+class _PrimaryGradientButton extends StatelessWidget {
+  final String text;
+  final bool isLoading;
+  final VoidCallback? onPressed;
+
+  const _PrimaryGradientButton({
+    required this.text,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Подбираем идеальный образ...',
-            style: TextStyle(
-              fontSize: 16,
-              color: theme.textTheme.bodyMedium?.color,
-            ),
-          ),
-        ],
-      ),
+    final isEnabled = onPressed != null;
+
+    final gradient = isEnabled ? AppTheme.primaryGradientDark : const LinearGradient(
+      colors: [Color(0xFF2A2F45), Color(0xFF2A2F45)],
     );
-  }
 
-  Widget _buildErrorWidget(bool isDark) {
-    final theme = Theme.of(context);
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppTheme.danger.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.wifi_off_rounded,
-                  size: 64, color: AppTheme.danger),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              _error ?? 'Ошибка подключения',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (_errorDetails != null) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: isDark
-                      ? Border.all(
-                    color: AppTheme.danger.withOpacity(0.3),
-                  )
-                      : null,
-                ),
-                child: Text(
-                  _errorDetails!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: theme.textTheme.bodyMedium?.color,
-                    height: 1.5,
-                  ),
-                ),
+    return SizedBox(
+      height: 56,
+      width: double.infinity,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: theme.primaryColor.withOpacity(isEnabled ? 0.25 : 0.10),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
             ],
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _loadData,
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Попробовать снова'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
+          ),
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(18),
+            child: Center(
+              child: isLoading
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      text,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
             ),
-            const SizedBox(height: 16),
-            TextButton.icon(
-              onPressed: () => Navigator.pushNamed(context, '/profile'),
-              icon: Icon(Icons.settings_rounded,
-                  color: theme.textTheme.bodyMedium?.color),
-              label: Text(
-                'Проверить настройки',
-                style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _ErrorBanner extends StatelessWidget {
+  final String text;
+  const _ErrorBanner({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.danger.withOpacity(isDark ? 0.16 : 0.10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.danger.withOpacity(0.45)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppTheme.danger),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: theme.textTheme.bodyLarge?.color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Обновлённый _ColorGrid под тёмный дизайн
+class _ColorGrid extends StatelessWidget {
+  final Set<String> selected;
+  final void Function(String colorKey) onToggle;
+
+  const _ColorGrid({
+    required this.selected,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: kColors.map((c) {
+        final isSel = selected.contains(c);
+        final sw = kColorSwatches[c] ?? Colors.grey;
+
+        final ringColor = isSel
+            ? theme.primaryColor
+            : theme.textTheme.bodyMedium?.color?.withOpacity(isDark ? 0.22 : 0.18) ??
+                Colors.grey;
+
+        return GestureDetector(
+          onTap: () => onToggle(c),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: sw,
+              shape: BoxShape.circle,
+              border: Border.all(color: ringColor, width: isSel ? 3 : 1),
+              boxShadow: [
+                if (isSel)
+                  BoxShadow(
+                    color: theme.primaryColor.withOpacity(0.35),
+                    blurRadius: 14,
+                    spreadRadius: 1,
+                  ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.35 : 0.10),
+                  blurRadius: 10,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: isSel
+                ? Icon(
+                    Icons.check,
+                    color: c == 'white' || c == 'yellow'
+                        ? Colors.black
+                        : Colors.white,
+                  )
+                : null,
+          ),
+        );
+      }).toList(),
     );
   }
 }

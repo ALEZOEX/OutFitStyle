@@ -47,5 +47,9 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Нужно для автоматического определения города.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Нужно для автоматического определения города.</string>
 	</dict>
 </plist>

@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_localizations:
+    sdk: flutter
   flutter_secure_storage: ^9.2.4
   google_sign_in: ^6.1.5
   # HTTP
@@ -52,11 +54,11 @@ flutter:
     - assets/icons/app/Icon-512.png
 
 flutter_native_splash:
-  color: "#FFFFFF"  # Цвет фона сплэш-экрана
+  color: "#F0F2F5"  # Нейтральный цвет фона сплэш-экрана (как в регистрации и входе)
   image: "assets/icons/app/Icon-512.png"  # Основная иконка (512x512)
   android_12:  # Для Android 12+
     image: "assets/icons/app/Icon-512.png"
-    icon_background_color: "#FFFFFF"
+    icon_background_color: "#F0F2F5"
   ios: true  # Включить для iOS
   web: true  # Включить для Web
 

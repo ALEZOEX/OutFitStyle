@@ -98,10 +98,10 @@ class AppConfig {
       // Android
       if (_useRealDevice) {
         // Реальное Android устройство
-        return 'http://$_localNetworkIp:8080';
+        return 'http://$_localNetworkIp/api/v1';
       } else {
         // Android эмулятор
-        return 'http://10.0.2.2:8080/api/v1';
+        return 'http://10.0.2.2/api/v1';
       }
     } else if (Platform.isIOS) {
       // iOS

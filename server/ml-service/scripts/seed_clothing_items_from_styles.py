@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'port': os.getenv('DB_PORT', '5432'),
-    'user': os.getenv('DB_USER', 'Admin'),
+    'user': os.getenv('DB_USER', 'postgres'),
     'password': os.getenv('DB_PASSWORD', 'password'),
     'dbname': os.getenv('DB_NAME', 'outfitstyle'),
 }

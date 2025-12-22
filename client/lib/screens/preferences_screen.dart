@@ -141,7 +141,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             spacing: 8,
             runSpacing: 8,
             children: kStyles.map((s) => FilterChip(
-              label: Text(kStyleTitlesRu[s] ?? s),
+              label: Text(translateStyle(s)),
               selected: _preferredStyles.contains(s),
               onSelected: (v) {
                 setState(() {
@@ -165,7 +165,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             spacing: 8,
             runSpacing: 8,
             children: kStyles.map((s) => FilterChip(
-              label: Text(kStyleTitlesRu[s] ?? s),
+              label: Text(translateStyle(s)),
               selected: _avoidStyles.contains(s),
               onSelected: (v) {
                 setState(() {
