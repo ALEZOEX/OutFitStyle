@@ -1,57 +1,63 @@
-class ClothingItemLite {
-  final String id;
+class WardrobeItem {
   final String name;
   final String category;
-  final String subcategory;
-  final String? iconEmoji;
+  final String? subcategory;
   final String style;
-  final String source;
+  final String? iconEmoji;
 
-  ClothingItemLite({
-    required this.id,
+  const WardrobeItem({
     required this.name,
     required this.category,
-    required this.subcategory,
-    required this.style,
-    required this.source,
+    this.subcategory,
+    this.style = '',
     this.iconEmoji,
   });
 
-  factory ClothingItemLite.fromJson(Map<String, dynamic> json) {
-    return ClothingItemLite(
-      id: json['id'] as String,
-      name: (json['name'] ?? '') as String,
-      category: (json['category'] ?? '') as String,
-      subcategory: (json['subcategory'] ?? '') as String,
-      style: (json['style'] ?? '') as String,
-      source: (json['source'] ?? '') as String,
-      iconEmoji: json['icon_emoji'] as String?,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'category': category,
+        'subcategory': subcategory,
+        'style': style,
+        'icon_emoji': iconEmoji,
+      };
+
+  factory WardrobeItem.fromJson(Map<String, dynamic> json) => WardrobeItem(
+        name: json['name'] as String,
+        category: json['category'] as String,
+        subcategory: json['subcategory'] as String?,
+        style: json['style'] as String? ?? '',
+        iconEmoji: json['icon_emoji'] as String?,
+      );
 }
 
-class WardrobeItem {
+class WardrobeItemResponse {
   final String id;
+  final WardrobeItem item;
   final bool isFavorite;
   final bool isArchived;
   final int wearCount;
-  final ClothingItemLite item;
 
-  WardrobeItem({
+  const WardrobeItemResponse({
     required this.id,
-    required this.isFavorite,
-    required this.isArchived,
-    required this.wearCount,
     required this.item,
+    this.isFavorite = false,
+    this.isArchived = false,
+    this.wearCount = 0,
   });
 
-  factory WardrobeItem.fromJson(Map<String, dynamic> json) {
-    return WardrobeItem(
-      id: json['id'] as String,
-      isFavorite: (json['is_favorite'] ?? false) as bool,
-      isArchived: (json['is_archived'] ?? false) as bool,
-      wearCount: (json['wear_count'] ?? 0) as int,
-      item: ClothingItemLite.fromJson(json['item'] as Map<String, dynamic>),
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'item': item.toJson(),
+        'is_favorite': isFavorite,
+        'is_archived': isArchived,
+        'wear_count': wearCount,
+      };
+
+  factory WardrobeItemResponse.fromJson(Map<String, dynamic> json) => WardrobeItemResponse(
+        id: json['id'] as String,
+        item: WardrobeItem.fromJson(json['item'] as Map<String, dynamic>),
+        isFavorite: json['is_favorite'] as bool? ?? false,
+        isArchived: json['is_archived'] as bool? ?? false,
+        wearCount: json['wear_count'] as int? ?? 0,
+      );
 }

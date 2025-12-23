@@ -3,8 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  connectivity_plus
   flutter_secure_storage_windows
   geolocator_windows
+  share_plus
+  sqlite3_flutter_libs
   url_launcher_windows
 )
 

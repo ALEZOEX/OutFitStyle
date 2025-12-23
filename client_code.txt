@@ -1,0 +1,2334 @@
+# Client-Side Code for OutfitStyle Application
+
+This file contains all the client-side code extracted from the OutfitStyle Flutter application.
+
+## Main Application File
+
+### lib/main.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+
+import 'config/app_config.dart';
+import 'providers/wardrobe_provider.dart';
+import 'providers/recommendation_provider.dart';
+import 'providers/profile_provider.dart';
+import 'services/wardrobe_service.dart';
+import 'services/recommendation_service.dart';
+import 'services/user_settings_service.dart';
+import 'providers/theme_provider.dart';
+import 'services/api_service.dart';
+import 'services/shopping_service.dart';
+import 'services/auth_storage.dart';
+import 'services/auth_service.dart';
+import 'screens/auth_screen.dart';
+import 'screens/navigation_screen.dart';
+import 'screens/password_reset_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/splash_gate_screen.dart';
+
+// Import newly added services and providers
+import 'services/weather_service.dart';
+import 'providers/weather_provider.dart';
+import 'services/geo_service.dart';
+import 'screens/onboarding_wizard_screen.dart';
+import 'screens/preferences_screen.dart';
+import 'screens/body_measurements_screen.dart';
+import 'services/catalog_service.dart';
+import 'providers/catalog_provider.dart';
+
+/// Берём API_BASE_URL из --dart-define, если он передан при сборке.
+/// Например:
+///   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080/api/v1
+const String _envApiBaseUrl = String.fromEnvironment('API_BASE_URL');
+
+/// Унифицированное вычисление baseUrl для backend API.
+///
+/// Приоритет:
+/// 1) Если передали через --dart-define=API_BASE_URL, используем его.
+/// 2) Иначе используем AppConfig.apiBaseUrl (с автоматическим /api/v1).
+String _resolveApiBaseUrl() {
+  // 1. Явный override через --dart-define
+  if (_envApiBaseUrl.isNotEmpty) {
+    return _envApiBaseUrl;
+  }
+
+  // 2. AppConfig.apiBaseUrl
+  final base = AppConfig.apiBaseUrl;
+
+  if (base.endsWith('/api/v1')) {
+    return base;
+  }
+
+  return '$base/api/v1';
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+
+  final apiBaseUrl = _resolveApiBaseUrl();
+  // ignore: avoid_print
+  print('✅ API base URL: $apiBaseUrl');
+
+  final authStorage = AuthStorage();
+  final token = await authStorage.readAccessToken();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<ShoppingService>(create: (_) => ShoppingService()),
+
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(),
+        ),
+
+        Provider<AuthStorage>.value(value: authStorage),
+
+        Provider<ApiService>(
+          create: (context) => ApiService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<AuthService>(
+          create: (context) => AuthService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<UserSettingsService>(
+          create: (context) => UserSettingsService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<WeatherService>(
+          create: (context) => WeatherService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+        ChangeNotifierProvider<WeatherProvider>(
+          create: (context) => WeatherProvider(
+            context.read<WeatherService>(),
+          ),
+        ),
+
+        Provider<GeoService>(
+          create: (context) => GeoService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        Provider<WardrobeService>(
+          create: (context) => WardrobeService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        ChangeNotifierProvider<WardrobeProvider>(
+          create: (context) => WardrobeProvider(
+            context.read<WardrobeService>(),
+          ),
+        ),
+
+        Provider<RecommendationService>(
+          create: (context) => RecommendationService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+
+        ChangeNotifierProvider<RecommendationProvider>(
+          create: (context) => RecommendationProvider(
+            context.read<RecommendationService>(),
+          ),
+        ),
+
+        ChangeNotifierProvider<ProfileProvider>(
+          create: (context) => ProfileProvider(
+            context.read<UserSettingsService>(),
+          ),
+        ),
+
+        Provider<CatalogService>(
+          create: (context) => CatalogService(
+            baseUrl: apiBaseUrl,
+            authStorage: authStorage,
+          ),
+        ),
+        ChangeNotifierProvider<CatalogProvider>(
+          create: (context) => CatalogProvider(
+            context.read<CatalogService>(),
+          ),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      themeProvider.isDarkMode
+          ? const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Color(0xFF0F172A),
+        systemNavigationBarIconBrightness: Brightness.light,
+      )
+          : const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Color(0xFFF0F2F5),
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+
+    return MaterialApp(
+      title: 'OutfitStyle',
+      debugShowCheckedModeBanner: false,
+      themeMode: themeProvider.themeMode,
+      theme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
+        primaryColor: const Color(0xFF007bff),
+        scaffoldBackgroundColor: const Color(0xFFF0F2F5),
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF007bff),
+          secondary: Color(0xFF6c757d),
+          error: Color(0xFFdc3545),
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFF007bff),
+        scaffoldBackgroundColor: const Color(0xFF1a1a2e),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF007bff),
+          secondary: Color(0xFF6c757d),
+          error: Color(0xFFdc3545),
+        ),
+      ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ru'), // Русский
+        Locale('en'),
+      ],
+      initialRoute: '/splash',
+      routes: {
+        '/splash': (_) => const SplashGateScreen(),
+        '/auth': (context) => const AuthScreen(),
+        '/onboarding': (_) => const OnboardingWizardScreen(),
+        '/home': (context) => const NavigationScreen(),
+        '/password-reset': (context) => const PasswordResetScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/preferences': (context) => const PreferencesScreen(),
+        '/body-measurements': (context) => const BodyMeasurementsScreen(),
+      },
+    );
+  }
+}
+```
+
+## Configuration Files
+
+### lib/config/app_config.dart
+```dart
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+
+class AppConfig {
+  // API ключ для сервиса погоды
+  static const String weatherApiKey = 'your_weather_api_key';
+
+  // Базовый URL для сервиса погоды
+  static const String weatherBaseUrl = 'api.openweathermap.org';
+
+  // Shopping API URL
+  static String get shoppingApiUrl {
+    if (!kDebugMode) {
+      return 'https://shopping.outfitstyle.com';
+    }
+
+    if (kIsWeb) {
+      return 'http://localhost:5002';
+    } else if (Platform.isAndroid) {
+      if (_useRealDevice) {
+        return 'http://$_localNetworkIp:5002';
+      } else {
+        return 'http://10.0.2.2:5002';
+      }
+    } else if (Platform.isIOS) {
+      if (_useRealDevice) {
+        return 'http://$_localNetworkIp:5002';
+      } else {
+        return 'http://localhost:5002';
+      }
+    } else {
+      return 'http://localhost:5002';
+    }
+  }
+
+  // ============================================
+  // 🔧 НАСТРОЙКИ ДЛЯ РАЗРАБОТКИ
+  // ============================================
+
+  // Твой IP адрес из ipconfig (Ethernet адаптер)
+  static const String _localNetworkIp = '192.168.1.63';
+
+  // Используешь ли реальное Android/iOS устройство?
+  // true  = реальное устройство (телефон/планшет)
+  // false = эмулятор/симулятор
+  static const bool _useRealDevice = false;
+
+  // ============================================
+  // 🌐 URL НАСТРОЙКИ
+  // ============================================
+
+  // Development API
+  static const String _devApiUrl = 'http://localhost:8080';
+
+  // Production API (когда будет сервер в интернете)
+  static const String _prodApiUrl = 'https://api.outfitstyle.com';
+
+  // Marketplace Service URL
+  static String get marketplaceServiceUrl {
+    if (!kDebugMode) {
+      return 'https://marketplace.outfitstyle.com';
+    }
+
+    if (kIsWeb) {
+      return 'http://localhost:5001';
+    } else if (Platform.isAndroid) {
+      if (_useRealDevice) {
+        return 'http://$_localNetworkIp:5001';
+      } else {
+        return 'http://10.0.2.2:5001';
+      }
+    } else if (Platform.isIOS) {
+      if (_useRealDevice) {
+        return 'http://$_localNetworkIp:5001';
+      } else {
+        return 'http://localhost:5001';
+      }
+    } else {
+      return 'http://localhost:5001';
+    }
+  }
+
+  // ============================================
+  // 🎯 АВТОМАТИЧЕСКИЙ ВЫБОР URL
+  // ============================================
+
+  static String get apiBaseUrl {
+    // Если релизная сборка - используем production
+    if (!kDebugMode) {
+      return _prodApiUrl;
+    }
+
+    // Режим разработки - выбираем по платформе
+    if (kIsWeb) {
+      // Web (Chrome, Edge, Firefox и т.д.)
+      return _devApiUrl;
+    } else if (Platform.isAndroid) {
+      // Android
+      if (_useRealDevice) {
+        // Реальное Android устройство
+        return 'http://$_localNetworkIp/api/v1';
+      } else {
+        // Android эмулятор
+        return 'http://10.0.2.2/api/v1';
+      }
+    } else if (Platform.isIOS) {
+      // iOS
+      if (_useRealDevice) {
+        // Реальное iOS устройство
+        return 'http://$_localNetworkIp:8080';
+      } else {
+        // iOS симулятор
+        return _devApiUrl;
+      }
+    } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      // Desktop приложения
+      return _devApiUrl;
+    } else {
+      // Fallback на всякий случай
+      return _devApiUrl;
+    }
+  }
+
+  // ============================================
+  // ⚙️ ДРУГИЕ НАСТРОЙКИ
+  // ============================================
+
+  // Таймаут для HTTP запросов (в секундах)
+  static const int requestTimeout = 30;
+
+  // Включить логирование в консоль?
+  static const bool enableLogging = true;
+
+  // Версия приложения
+  static const String appVersion = '1.0.0';
+  static const String appName = 'OutfitStyle';
+
+  // ============================================
+  // 📊 ИНФОРМАЦИЯ О КОНФИГУРАЦИИ
+  // ============================================
+
+  // Получить всю информацию о текущей конфигурации
+  static Map<String, dynamic> get info => {
+        'platform': _platformName,
+        'apiUrl': apiBaseUrl,
+        'isDebug': kDebugMode,
+        'isRealDevice': _useRealDevice,
+        'version': appVersion,
+      };
+
+  // Название текущей платформы
+  static String get _platformName {
+    if (kIsWeb) return 'Web';
+    if (Platform.isAndroid) return 'Android';
+    if (Platform.isIOS) return 'iOS';
+    if (Platform.isWindows) return 'Windows';
+    if (Platform.isMacOS) return 'macOS';
+    if (Platform.isLinux) return 'Linux';
+    return 'Unknown';
+  }
+
+  // ============================================
+  // 🖨️ ПЕЧАТЬ КОНФИГУРАЦИИ (для отладки)
+  // ============================================
+
+
+}
+```
+
+## Exception Files
+
+### lib/exceptions/api_exceptions.dart
+```dart
+class ApiException implements Exception {
+  final String message;
+  final String? errorMessage;
+
+  const ApiException(this.message, [this.errorMessage]);
+
+  @override
+  String toString() => message;
+}
+
+class NetworkException extends ApiException {
+  const NetworkException(String message) : super(message);
+}
+
+class ApiServiceException extends ApiException {
+  final int statusCode;
+  final String endpoint;
+
+  const ApiServiceException(
+    String message,
+    this.statusCode,
+    this.endpoint,
+  ) : super(message);
+}
+
+/// Сессия недействительна (пользователь не найден / токен протух)
+class AuthExpiredException extends ApiException {
+  const AuthExpiredException(String message) : super(message);
+}
+```
+
+## Model Files
+
+### lib/models/achievement.dart
+```dart
+class Achievement {
+  final String id;
+  final String name;
+  final String description;
+  final String icon;
+  final int requiredCount;
+  final int currentCount;
+  final DateTime? unlockedAt;
+
+  Achievement({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.icon,
+    required this.requiredCount,
+    this.currentCount = 0,
+    this.unlockedAt,
+  });
+
+  bool get isUnlocked => unlockedAt != null;
+  double get progress => requiredCount > 0 ? (currentCount / requiredCount).clamp(0.0, 1.0) : 0.0;
+
+  factory Achievement.fromJson(Map<String, dynamic> json) {
+    return Achievement(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      icon: json['icon'] ?? '',
+      requiredCount: json['required_count'] ?? 0,
+      currentCount: json['current_count'] ?? 0,
+      unlockedAt: json['unlocked_at'] != null ? DateTime.parse(json['unlocked_at']) : null,
+    );
+  }
+}
+```
+
+### lib/models/favorite.dart
+```dart
+class FavoriteOutfit {
+  final int favoriteId;
+  final String savedAt;
+  final String location;
+  final double temperature;
+  final String weather;
+  final List<Map<String, dynamic>> items;
+
+  FavoriteOutfit({
+    required this.favoriteId,
+    required this.savedAt,
+    required this.location,
+    required this.temperature,
+    required this.weather,
+    required this.items,
+  });
+
+  factory FavoriteOutfit.fromJson(Map<String, dynamic> json) {
+    return FavoriteOutfit(
+      // Поддерживаем и старый формат (favorite_id, saved_at), и текущий (id, created_at)
+      favoriteId: json['favorite_id'] ?? json['id'] ?? 0,
+      savedAt: (json['saved_at'] ?? json['created_at'] ?? '') as String,
+      // Эти поля сейчас, скорее всего, не приходят — оставляем фолбэки
+      location: json['location'] ?? '',
+      temperature: (json['temperature'] ?? 0.0).toDouble(),
+      weather: json['weather'] ?? '',
+      items: List<Map<String, dynamic>>.from(json['items'] ?? []),
+    );
+  }
+}
+```
+
+### lib/models/history.dart
+```dart
+class HistoryItem {
+  final int recommendationId;
+  final DateTime createdAt;
+  final String location;
+  final double temperature;
+  final String weather;
+  final double outfitScore;
+  final List<Map<String, dynamic>> items;
+
+  HistoryItem({
+    required this.recommendationId,
+    required this.createdAt,
+    required this.location,
+    required this.temperature,
+    required this.weather,
+    required this.outfitScore,
+    required this.items,
+  });
+
+  factory HistoryItem.fromJson(Map<String, dynamic> json) {
+    return HistoryItem(
+      recommendationId:
+      (json['recommendation_id'] ?? json['id'] ?? 0) as int,
+      createdAt: DateTime.tryParse(
+        (json['created_at'] ?? json['timestamp'] ?? '') as String,
+      ) ??
+          DateTime.now(),
+      location: json['location'] ?? '',
+      temperature: (json['temperature'] ?? 0.0).toDouble(),
+      weather: json['weather'] ?? '',
+      outfitScore: (json['outfit_score'] ?? 0.0).toDouble(),
+      items: List<Map<String, dynamic>>.from(json['items'] ?? []),
+    );
+  }
+}
+```
+
+### lib/models/outfit.dart
+```dart
+import 'recommendation.dart';
+
+class OutfitSet {
+  final List<ClothingItem> items;
+  final double confidence;
+  final String reason;
+  final Map<String, ClothingItem> itemsByCategory;
+
+  OutfitSet({
+    required this.items,
+    required this.confidence,
+    required this.reason,
+  }) : itemsByCategory = _groupByCategory(items);
+
+  static Map<String, ClothingItem> _groupByCategory(List<ClothingItem> items) {
+    final Map<String, ClothingItem> grouped = {};
+    for (var item in items) {
+      grouped[item.category] = item;
+    }
+    return grouped;
+  }
+
+  ClothingItem? getItemByCategory(String category) {
+    return itemsByCategory[category];
+  }
+
+  List<String> get categories => itemsByCategory.keys.toList();
+}
+
+class OutfitRecommendations {
+  final OutfitSet topChoice;
+  final List<OutfitSet> alternatives;
+  final String weatherSummary;
+
+  OutfitRecommendations({
+    required this.topChoice,
+    required this.alternatives,
+    required this.weatherSummary,
+  });
+
+  factory OutfitRecommendations.fromItems(
+    List<ClothingItem> allItems,
+    double temperature,
+    String weather,
+  ) {
+    // Сортируем по ML score
+    final sortedItems = List<ClothingItem>.from(allItems)
+      ..sort((a, b) => (b.mlScore ?? 0).compareTo(a.mlScore ?? 0));
+
+    // Группируем по категориям
+    final Map<String, List<ClothingItem>> byCategory = {};
+    for (var item in sortedItems) {
+      byCategory.putIfAbsent(item.category, () => []).add(item);
+    }
+
+    // Создаем TOP комплект (лучший из каждой категории)
+    final topItems = <ClothingItem>[];
+    for (var category in byCategory.keys) {
+      if (byCategory[category]!.isNotEmpty) {
+        topItems.add(byCategory[category]!.first);
+      }
+    }
+
+    final topConfidence = topItems.isEmpty
+        ? 0.0
+        : topItems.map((e) => e.mlScore ?? 0).reduce((a, b) => a + b) /
+            topItems.length;
+
+    final topChoice = OutfitSet(
+      items: topItems,
+      confidence: topConfidence,
+      reason: _getRecommendationReason(temperature, weather, topConfidence),
+    );
+
+    // Создаем альтернативные комплекты
+    final alternatives = <OutfitSet>[];
+
+    // Альтернатива 1: Второй по рейтингу из каждой категории
+    final alt1Items = <ClothingItem>[];
+    for (var category in byCategory.keys) {
+      if (byCategory[category]!.length > 1) {
+        alt1Items.add(byCategory[category]![1]);
+      }
+    }
+    if (alt1Items.length >= 2) {
+      alternatives.add(OutfitSet(
+        items: alt1Items,
+        confidence: alt1Items.map((e) => e.mlScore ?? 0).reduce((a, b) => a + b) /
+            alt1Items.length,
+        reason: 'Альтернативный комфортный выбор',
+      ));
+    }
+
+    // Альтернатива 2: Третий вариант
+    final alt2Items = <ClothingItem>[];
+    for (var category in byCategory.keys) {
+      if (byCategory[category]!.length > 2) {
+        alt2Items.add(byCategory[category]![2]);
+      }
+    }
+    if (alt2Items.length >= 2) {
+      alternatives.add(OutfitSet(
+        items: alt2Items,
+        confidence: alt2Items.map((e) => e.mlScore ?? 0).reduce((a, b) => a + b) /
+            alt2Items.length,
+        reason: 'Стильная альтернатива',
+      ));
+    }
+
+    // Альтернатива 3: Микс (лучшие + вторые варианты)
+    final alt3Items = <ClothingItem>[];
+    var index = 0;
+    for (var category in byCategory.keys) {
+      final items = byCategory[category]!;
+      if (items.isNotEmpty) {
+        alt3Items.add(items[index % items.length]);
+        index++;
+      }
+    }
+    if (alt3Items.length >= 2 && alternatives.length < 3) {
+      alternatives.add(OutfitSet(
+        items: alt3Items,
+        confidence: alt3Items.map((e) => e.mlScore ?? 0).reduce((a, b) => a + b) /
+            alt3Items.length,
+        reason: 'Сбалансированный вариант',
+      ));
+    }
+
+    return OutfitRecommendations(
+      topChoice: topChoice,
+      alternatives: alternatives.take(3).toList(),
+      weatherSummary: _getWeatherSummary(temperature, weather),
+    );
+  }
+
+  static String _getRecommendationReason(
+    double temp,
+    String weather,
+    double confidence,
+  ) {
+    if (confidence >= 0.9) {
+      return 'Идеальный выбор для текущей погоды';
+    } else if (confidence >= 0.8) {
+      return 'Отличный вариант с высоким комфортом';
+    } else if (confidence >= 0.7) {
+      return 'Хороший выбор для таких условий';
+    } else {
+      return 'Подходящий вариант одежды';
+    }
+  }
+
+  static String _getWeatherSummary(double temp, String weather) {
+    if (temp < -10) {
+      return 'Экстремальный холод';
+    } else if (temp < 0) {
+      return 'Морозная погода';
+    } else if (temp < 10) {
+      return 'Прохладно';
+    } else if (temp < 20) {
+      return 'Умеренная температура';
+    } else if (temp < 28) {
+      return 'Тепло';
+    } else {
+      return 'Жарко';
+    }
+  }
+}
+```
+
+### lib/models/product.dart
+```dart
+class Product {
+  final int id;
+  final String name;
+  final String description;
+  final double price;
+  final String imageUrl;
+  final int categoryId;
+  final double rating;
+  final int reviewCount;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.imageUrl,
+    required this.categoryId,
+    required this.rating,
+    required this.reviewCount,
+  });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      price: (json['price'] as num).toDouble(),
+      imageUrl: json['image_url'] as String,
+      categoryId: json['category_id'] as int,
+      rating: (json['rating'] as num).toDouble(),
+      reviewCount: json['review_count'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'price': price,
+      'image_url': imageUrl,
+      'category_id': categoryId,
+      'rating': rating,
+      'review_count': reviewCount,
+    };
+  }
+}
+```
+
+### lib/models/recommendation_models.dart
+```dart
+class RecommendationRecord {
+  final String id;
+  final DateTime createdAt;
+  final bool isFavorite;
+
+  // outfit_data — большой JSON, оставим сырьём (но парсим нужное)
+  final Map<String, dynamic> outfitData;
+  final Map<String, dynamic> weatherData;
+
+  RecommendationRecord({
+    required this.id,
+    required this.createdAt,
+    required this.isFavorite,
+    required this.outfitData,
+    required this.weatherData,
+  });
+
+  factory RecommendationRecord.fromJson(Map<String, dynamic> json) {
+    // backend хранит weather_data/outfit_data как JSONB; в ответе они приходят как Map
+    final weather = (json['weather_data'] as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
+    final outfit = (json['outfit_data'] as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
+
+    return RecommendationRecord(
+      id: json['id'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
+      isFavorite: (json['is_favorite'] ?? false) as bool,
+      outfitData: outfit,
+      weatherData: weather,
+    );
+  }
+
+  List<Map<String, dynamic>> outfitLines() {
+    final arr = outfitData['outfit'];
+    if (arr is List) {
+      return arr.cast<Map>().map((e) => e.cast<String, dynamic>()).toList();
+    }
+    return const [];
+  }
+}
+```
+
+### lib/models/recommendation.dart
+```dart
+import '../utils/json_converter.dart';
+
+class ClothingItem {
+  final int id;
+  final String name;
+  final String category;
+  final String? subcategory;
+  final String iconEmoji;
+  final double? mlScore;
+  final bool mlPowered;
+  final String? weatherSuitability;
+
+  // Extended attributes for unified catalog
+  final String? gender;
+  final String? masterCategory;
+  final String? season;
+  final String? baseColour;
+  final String? usage;
+  final String source;  // wardrobe, catalog, kaggle_seed
+  final bool isOwned;
+  final int? ownerUserId;
+  final double? minTemp;
+  final double? maxTemp;
+  final int? warmthLevel;
+  final int? formalityLevel;
+
+  ClothingItem({
+    required this.id,
+    required this.name,
+    required this.category,
+    this.subcategory,
+    required this.iconEmoji,
+    this.mlScore,
+    this.mlPowered = false,
+    this.weatherSuitability,
+    this.gender,
+    this.masterCategory,
+    this.season,
+    this.baseColour,
+    this.usage,
+    this.source = 'catalog',
+    this.isOwned = false,
+    this.ownerUserId,
+    this.minTemp,
+    this.maxTemp,
+    this.warmthLevel,
+    this.formalityLevel,
+  });
+
+  factory ClothingItem.fromJson(Map<String, dynamic> json) {
+    return ClothingItem(
+      id: JsonConverter.toInt(json['id']) ?? 0,
+      name: json['name'] as String? ?? '',
+      category: json['category'] as String? ?? '',
+      subcategory: json['subcategory'] as String?,
+      iconEmoji: json['icon_emoji'] as String? ?? '👕',
+      mlScore: JsonConverter.toDouble(json['ml_score']),
+      mlPowered: json['ml_powered'] as bool? ?? false,
+      weatherSuitability: json['weather_suitability'] as String?,
+      gender: json['gender'] as String?,
+      masterCategory: json['master_category'] as String?,
+      season: json['season'] as String?,
+      baseColour: json['base_colour'] as String?,
+      usage: json['usage'] as String?,
+      source: json['source'] as String? ?? 'catalog',
+      isOwned: json['is_owned'] as bool? ?? false,
+      ownerUserId: JsonConverter.toInt(json['owner_user_id']),
+      minTemp: JsonConverter.toDouble(json['min_temp']),
+      maxTemp: JsonConverter.toDouble(json['max_temp']),
+      warmthLevel: JsonConverter.toInt(json['warmth_level']),
+      formalityLevel: JsonConverter.toInt(json['formality_level']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'subcategory': subcategory,
+      'icon_emoji': iconEmoji,
+      'ml_score': mlScore,
+      'ml_powered': mlPowered,
+      'weather_suitability': weatherSuitability,
+      'gender': gender,
+      'master_category': masterCategory,
+      'season': season,
+      'base_colour': baseColour,
+      'usage': usage,
+      'source': source,
+      'is_owned': isOwned,
+      'owner_user_id': ownerUserId,
+      'min_temp': minTemp,
+      'max_temp': maxTemp,
+      'warmth_level': warmthLevel,
+      'formality_level': formalityLevel,
+    };
+  }
+
+  // Методы для UI отображения
+  String getSourceDisplayText() {
+    switch (source) {
+      case 'wardrobe':
+        return isOwned ? 'Твой гардероб' : 'Чужой гардероб';
+      case 'catalog':
+        return 'Каталог';
+      case 'marketplace':
+        return 'Магазин';
+      case 'kaggle_seed':
+        return 'Образец';
+      default:
+        return 'Неизвестный';
+    }
+  }
+
+  bool get isFromWardrobe => source == 'wardrobe' && isOwned;
+  bool get isFromCatalog => source == 'catalog';
+  bool get isFromKaggleSeed => source == 'kaggle_seed';
+
+  // Возвращает цвет для отображения в UI в зависимости от источника
+  String getTagColor() {
+    if (isFromWardrobe) {
+      return '#4CAF50'; // Зеленый для своего гардероба
+    } else if (isFromCatalog) {
+      return '#2196F3'; // Синий для каталога
+    } else if (isFromKaggleSeed) {
+      return '#FF9800'; // Оранжевый для kaggle_seed
+    }
+    return '#9E9E9E'; // Серый для других
+  }
+}
+
+class Recommendation {
+  final String location;
+  final double temperature;
+  final String weather;
+  final String message;
+  final List<ClothingItem> items;
+  final int id;
+  final int humidity;
+  final double windSpeed;
+  final bool mlPowered;
+  final double? outfitScore;
+  final String? algorithm;
+
+  Recommendation({
+    required this.location,
+    required this.temperature,
+    required this.weather,
+    required this.message,
+    required this.items,
+    required this.id,
+    required this.humidity,
+    required this.windSpeed,
+    required this.mlPowered,
+    this.outfitScore,
+    this.algorithm,
+  });
+
+  factory Recommendation.fromJson(Map<String, dynamic> json) {
+    final rawItems = json['items'] as List<dynamic>? ?? const [];
+    return Recommendation(
+      location: json['location'] as String? ?? '',
+      temperature: JsonConverter.toDouble(json['temperature']) ?? 0.0,
+      weather: json['weather'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+      items: rawItems
+          .whereType<Map<String, dynamic>>()
+          .map(ClothingItem.fromJson)
+          .toList(),
+      id: JsonConverter.toInt(json['id'] ?? json['recommendation_id']) ?? 0,
+      humidity: JsonConverter.toInt(json['humidity']) ?? 0,
+      windSpeed: JsonConverter.toDouble(json['wind_speed']) ?? 0.0,
+      mlPowered: json['ml_powered'] as bool? ?? false,
+      outfitScore: JsonConverter.toDouble(json['outfit_score']),
+      algorithm: json['algorithm'] as String?,
+    );
+  }
+}
+```
+
+### lib/models/shopping_item.dart
+```dart
+///Model for a shopping wishlist item
+class ShoppingItem {
+  final int id;
+  final String name;
+  final String? brand;
+  final double? price;
+  final String? category;
+  final String? subcategory;
+  final String? imageUrl;
+  final DateTime? createdAt;
+
+  ShoppingItem({
+    required this.id,
+    required this.name,
+    this.brand,
+    this.price,
+    this.category,
+    this.subcategory,
+    this.imageUrl,
+    this.createdAt,
+  });
+
+  factory ShoppingItem.fromJson(Map<String, dynamic> json) {
+    return ShoppingItem(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      brand: json['brand'],
+      price:
+          json['price'] != null ? double.parse(json['price'].toString()) : null,
+      category: json['category'],
+      subcategory: json['subcategory'],
+      imageUrl: json['image_url'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
+    );
+  }
+}
+```
+
+### lib/models/tokens.dart
+```dart
+class TokenPair {
+  final String accessToken;
+  final String refreshToken;
+  final DateTime expiresAt;
+
+  TokenPair({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.expiresAt,
+  });
+
+  factory TokenPair.fromJson(Map<String, dynamic> json) {
+    return TokenPair(
+      accessToken: json['access_token'] as String,
+      refreshToken: json['refresh_token'] as String,
+      expiresAt: DateTime.parse(json['expires_at'] as String).toUtc(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'access_token': accessToken,
+        'refresh_token': refreshToken,
+        'expires_at': expiresAt.toUtc().toIso8601String(),
+      };
+}
+```
+
+### lib/models/user_settings.dart
+```dart
+class UserSettings {
+  final int userId;
+  final String name;
+  final String email;
+  final String avatarUrl;
+
+  /// 'cold' | 'normal' | 'warm'
+  final String temperatureSensitivity;
+
+  /// 'casual' | 'business' | 'sporty' | 'elegant' ...
+  final String stylePreference;
+
+  /// '18-25' | '25-35' | '35-45' | '45+'
+  final String ageRange;
+
+  /// ['outerwear', 'upper', 'lower', 'footwear', ...]
+  final List<String> preferredCategories;
+
+  final bool notificationsEnabled;
+  final bool autoSaveOutfits;
+
+  /// 'celsius' | 'fahrenheit'
+  final String temperatureUnit;
+
+  /// 'ru' | 'en'
+  final String language;
+
+  const UserSettings({
+    required this.userId,
+    required this.name,
+    required this.email,
+    required this.avatarUrl,
+    required this.temperatureSensitivity,
+    required this.stylePreference,
+    required this.ageRange,
+    this.preferredCategories = const <String>[],
+    this.notificationsEnabled = false,
+    this.autoSaveOutfits = false,
+    this.temperatureUnit = 'celsius',
+    this.language = 'ru',
+  });
+
+  UserSettings copyWith({
+    int? userId,
+    String? name,
+    String? email,
+    String? avatarUrl,
+    String? temperatureSensitivity,
+    String? stylePreference,
+    String? ageRange,
+    List<String>? preferredCategories,
+    bool? notificationsEnabled,
+    bool? autoSaveOutfits,
+    String? temperatureUnit,
+    String? language,
+  }) {
+    return UserSettings(
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      temperatureSensitivity:
+      temperatureSensitivity ?? this.temperatureSensitivity,
+      stylePreference: stylePreference ?? this.stylePreference,
+      ageRange: ageRange ?? this.ageRange,
+      preferredCategories:
+      preferredCategories ?? List<String>.from(this.preferredCategories),
+      notificationsEnabled:
+      notificationsEnabled ?? this.notificationsEnabled,
+      autoSaveOutfits: autoSaveOutfits ?? this.autoSaveOutfits,
+      temperatureUnit: temperatureUnit ?? this.temperatureUnit,
+      language: language ?? this.language,
+    );
+  }
+
+  factory UserSettings.fromJson(Map<String, dynamic> json) {
+    // preferredCategories / preferred_categories могут быть либо List<String>, либо List<dynamic>
+    final rawCategories =
+        json['preferredCategories'] ?? json['preferred_categories'] ?? const <dynamic>[];
+    final categories = (rawCategories as List)
+        .map((e) => e.toString())
+        .toList();
+
+    return UserSettings(
+      userId: (json['userId'] ?? json['user_id']) as int,
+      name: (json['name'] ?? json['username'] ?? '') as String,
+      email: (json['email'] ?? '') as String,
+      avatarUrl: (json['avatarUrl'] ?? json['avatar_url'] ?? '') as String,
+      temperatureSensitivity:
+      (json['temperatureSensitivity'] ?? json['temperature_sensitivity'] ?? 'normal')
+      as String,
+      stylePreference:
+      (json['stylePreference'] ?? json['style_preference'] ?? 'casual')
+      as String,
+      ageRange:
+      (json['ageRange'] ?? json['age_range'] ?? '25-35') as String,
+      preferredCategories: categories,
+      notificationsEnabled:
+      (json['notificationsEnabled'] as bool?) ?? false,
+      autoSaveOutfits:
+      (json['autoSaveOutfits'] as bool?) ?? false,
+      temperatureUnit:
+      (json['temperatureUnit'] ?? 'celsius') as String,
+      language: (json['language'] ?? 'ru') as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'name': name,
+      'email': email,
+      'avatarUrl': avatarUrl,
+      'temperatureSensitivity': temperatureSensitivity,
+      'stylePreference': stylePreference,
+      'ageRange': ageRange,
+      'preferredCategories': preferredCategories,
+      'notificationsEnabled': notificationsEnabled,
+      'autoSaveOutfits': autoSaveOutfits,
+      'temperatureUnit': temperatureUnit,
+      'language': language,
+    };
+  }
+}
+```
+
+### lib/models/user_wardrobe.dart
+```dart
+/// Enum for clothing categories
+enum ClothingCategory {
+  top('Верх'),
+  bottom('Низ'),
+  footwear('Обувь'),
+  outerwear('Верхняя одежда'),
+  accessories('Аксессуары'),
+  dress('Платья'),
+  suit('Костюмы');
+
+  const ClothingCategory(this.displayName);
+  final String displayName;
+}
+
+/// Enum for clothing seasons
+enum ClothingSeason {
+  spring('Весна'),
+  summer('Лето'),
+  autumn('Осень'),
+  winter('Зима'),
+  allYear('Круглый год');
+
+  const ClothingSeason(this.displayName);
+  final String displayName;
+}
+
+/// Enum for clothing status
+enum ClothingStatus {
+  active('Активный'),
+  wishlist('Список покупок'),
+  archive('Архив'),
+  favorite('Избранное');
+
+  const ClothingStatus(this.displayName);
+  final String displayName;
+}
+
+/// Main wardrobe item model with comprehensive metadata
+class WardrobeItem {
+  final int id;
+  final String customName;
+  final String customIcon;
+  final ClothingCategory category;
+  final ClothingSeason season;
+  final ClothingStatus status;
+  final String? brand;
+  final String? color;
+  final double? price;
+  final DateTime? purchaseDate;
+  final List<String> tags;
+  final int? size;
+
+  WardrobeItem({
+    required this.id,
+    required this.customName,
+    required this.customIcon,
+    this.category = ClothingCategory.top,
+    this.season = ClothingSeason.allYear,
+    this.status = ClothingStatus.active,
+    this.brand,
+    this.color,
+    this.price,
+    this.purchaseDate,
+    this.tags = const [],
+    this.size,
+  });
+
+  /// Create WardrobeItem from JSON map
+  factory WardrobeItem.fromJson(Map<String, dynamic> json) {
+    return WardrobeItem(
+      id: json['id'] as int,
+      customName: (json['custom_name'] as String?) ?? 'Unknown',
+      customIcon: (json['custom_icon'] as String?) ?? '👕',
+      category: _parseCategory(json['category']),
+      season: _parseSeason(json['season']),
+      status: _parseStatus(json['status']),
+      brand: json['brand'] as String?,
+      color: json['color'] as String?,
+      price: (json['price'] as num?)?.toDouble(),
+      purchaseDate: json['purchase_date'] != null
+        ? DateTime.tryParse(json['purchase_date'])
+        : null,
+      tags: (json['tags'] as List?)?.map((tag) => tag.toString()).toList() ?? [],
+      size: json['size'] as int?,
+    );
+  }
+
+  /// Convert WardrobeItem to JSON map
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'custom_name': customName,
+      'custom_icon': customIcon,
+      'category': category.name,
+      'season': season.name,
+      'status': status.name,
+      'brand': brand,
+      'color': color,
+      'price': price,
+      'purchase_date': purchaseDate?.toIso8601String(),
+      'tags': tags,
+      'size': size,
+    };
+  }
+
+  /// Helper method to parse category from string
+  static ClothingCategory _parseCategory(dynamic value) {
+    if (value == null) return ClothingCategory.top;
+    try {
+      return ClothingCategory.values.firstWhere(
+        (category) => category.name == value.toString(),
+        orElse: () => ClothingCategory.top,
+      );
+    } catch (e) {
+      return ClothingCategory.top;
+    }
+  }
+
+  /// Helper method to parse season from string
+  static ClothingSeason _parseSeason(dynamic value) {
+    if (value == null) return ClothingSeason.allYear;
+    try {
+      return ClothingSeason.values.firstWhere(
+        (season) => season.name == value.toString(),
+        orElse: () => ClothingSeason.allYear,
+      );
+    } catch (e) {
+      return ClothingSeason.allYear;
+    }
+  }
+
+  /// Helper method to parse status from string
+  static ClothingStatus _parseStatus(dynamic value) {
+    if (value == null) return ClothingStatus.active;
+    try {
+      return ClothingStatus.values.firstWhere(
+        (status) => status.name == value.toString(),
+        orElse: () => ClothingStatus.active,
+      );
+    } catch (e) {
+      return ClothingStatus.active;
+    }
+  }
+}
+```
+
+### lib/models/wardrobe_models.dart
+```dart
+class ClothingItemLite {
+  final String id;
+  final String name;
+  final String category;
+  final String subcategory;
+  final String? iconEmoji;
+  final String style;
+  final String source;
+
+  ClothingItemLite({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.subcategory,
+    required this.style,
+    required this.source,
+    this.iconEmoji,
+  });
+
+  factory ClothingItemLite.fromJson(Map<String, dynamic> json) {
+    return ClothingItemLite(
+      id: json['id'] as String,
+      name: (json['name'] ?? '') as String,
+      category: (json['category'] ?? '') as String,
+      subcategory: (json['subcategory'] ?? '') as String,
+      style: (json['style'] ?? '') as String,
+      source: (json['source'] ?? '') as String,
+      iconEmoji: json['icon_emoji'] as String?,
+    );
+  }
+}
+
+class WardrobeItem {
+  final String id;
+  final bool isFavorite;
+  final bool isArchived;
+  final int wearCount;
+  final ClothingItemLite item;
+
+  WardrobeItem({
+    required this.id,
+    required this.isFavorite,
+    required this.isArchived,
+    required this.wearCount,
+    required this.item,
+  });
+
+  factory WardrobeItem.fromJson(Map<String, dynamic> json) {
+    return WardrobeItem(
+      id: json['id'] as String,
+      isFavorite: (json['is_favorite'] ?? false) as bool,
+      isArchived: (json['is_archived'] ?? false) as bool,
+      wearCount: (json['wear_count'] ?? 0) as int,
+      item: ClothingItemLite.fromJson(json['item'] as Map<String, dynamic>),
+    );
+  }
+}
+```
+
+### lib/models/weather_data.dart
+```dart
+class WeatherData {
+  final double temperature;
+  final String condition;
+  final int? humidity;
+  final double? windSpeed;
+
+  WeatherData({
+    required this.temperature,
+    required this.condition,
+    this.humidity,
+    this.windSpeed,
+  });
+
+  factory WeatherData.fromJson(Map<String, dynamic> json) {
+    final main = (json['main'] as Map<String, dynamic>? ?? {});
+    final weatherList = (json['weather'] as List? ?? []);
+
+    final tempRaw = main['temp'];
+    final temp = tempRaw is num ? tempRaw.toDouble() : 0.0;
+
+    final description = weatherList.isNotEmpty
+        ? (weatherList[0]['description']?.toString() ?? '')
+        : '';
+
+    final windMap = json['wind'] as Map<String, dynamic>?;
+
+    return WeatherData(
+      temperature: temp,
+      condition: description,
+      humidity: main['humidity'] is num ? main['humidity'] as int : null,
+      windSpeed: windMap?['speed'] is num
+          ? (windMap!['speed'] as num).toDouble()
+          : null,
+    );
+  }
+}
+```
+
+## Provider Files
+
+### lib/providers/catalog_provider.dart
+```dart
+import 'package:flutter/foundation.dart';
+import '../services/catalog_service.dart';
+
+class CatalogProvider extends ChangeNotifier {
+  final CatalogService _svc;
+  CatalogProvider(this._svc);
+
+  List<Map<String, dynamic>> items = [];
+  bool isLoading = false;
+
+  Future<void> load({String? query, String? category}) async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      items = await _svc.search(query: query, category: category);
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+}
+```
+
+### lib/providers/profile_provider.dart
+```dart
+import 'package:flutter/foundation.dart';
+import '../services/user_settings_service.dart';
+
+class ProfileProvider extends ChangeNotifier {
+  final UserSettingsService _svc;
+
+  ProfileProvider(this._svc);
+
+  Map<String, dynamic>? profile; // { user, stats, subscription? }
+  bool isLoading = false;
+  String? error;
+
+  Map<String, dynamic>? get user => (profile?['user'] as Map?)?.cast<String, dynamic>();
+  Map<String, dynamic>? get stats => (profile?['stats'] as Map?)?.cast<String, dynamic>();
+
+  Future<void> load() async {
+    error = null;
+    isLoading = true;
+    notifyListeners();
+    try {
+      profile = await _svc.getMyProfile();
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updatePreferences(Map<String, dynamic> patch) async {
+    error = null;
+    notifyListeners();
+    try {
+      profile = await _svc.updatePreferences(patch);
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateBodyMeasurements(Map<String, dynamic> patch) async {
+    error = null;
+    notifyListeners();
+    try {
+      profile = await _svc.updateBodyMeasurements(patch);
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateProfilePatch(Map<String, dynamic> patch) async {
+    error = null;
+    notifyListeners();
+    try {
+      profile = await _svc.updateProfilePatch(patch);
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+}
+```
+
+### lib/providers/recommendation_provider.dart
+```dart
+import 'package:flutter/foundation.dart';
+import '../models/recommendation_models.dart';
+import '../services/recommendation_service.dart';
+
+class RecommendationProvider extends ChangeNotifier {
+  final RecommendationService _svc;
+
+  RecommendationProvider(this._svc);
+
+  RecommendationRecord? latest;
+  final List<RecommendationRecord> history = [];
+  int total = 0;
+
+  bool isLoading = false;
+  bool isLoadingMore = false;
+  String? error;
+
+  int _page = 1;
+  final int _limit = 20;
+  bool get hasMore => history.length < total;
+
+  Future<void> create({
+    required double lat,
+    required double lon,
+    String? occasion,
+  }) async {
+    error = null;
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      latest = await _svc.create(lat: lat, lon: lon, occasion: occasion);
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadHistory({bool refresh = false}) async {
+    if (isLoading || isLoadingMore) return;
+
+    if (refresh) {
+      _page = 1;
+      history.clear();
+      latest = null; // Сбрасываем, чтобы проверить свежесть
+      total = 0;
+    }
+
+    isLoadingMore = true;
+    notifyListeners();
+
+    try {
+      final (list, t) = await _svc.list(page: _page, limit: _limit);
+
+      // Логика "Умной загрузки":
+      if (refresh && list.isNotEmpty) {
+        final firstRec = list.first;
+        final now = DateTime.now();
+        // Если последняя рекомендация была сегодня - используем её
+        if (firstRec.createdAt.day == now.day &&
+            firstRec.createdAt.month == now.month &&
+            firstRec.createdAt.year == now.year) {
+          latest = firstRec;
+          // Если мы нашли latest в списке, удаляем его из истории, чтобы не дублировать
+          if (list.isNotEmpty && list.first.id == latest!.id) {
+            list.removeAt(0);
+          }
+        } else {
+          // Иначе - она старая, генерируем новую (фоном)
+          // (Запускаем createUsingProfile, но не ждем его, чтобы UI не вис)
+          createUsingProfile();
+        }
+      } else if (refresh && list.isEmpty) {
+        // Вообще нет истории -> генерируем первую
+        createUsingProfile();
+      }
+
+      history.addAll(list);
+      total = t;
+      _page += 1;
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> rateLatest(int rating) async {
+    final rec = latest;
+    if (rec == null) return;
+
+    try {
+      await _svc.rate(recommendationId: rec.id, rating: rating);
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleFavorite(RecommendationRecord rec) async {
+    try {
+      await _svc.setFavorite(recommendationId: rec.id, isFavorite: !rec.isFavorite);
+      await loadHistory(refresh: true);
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> createUsingProfile({String occasion = 'daily'}) async {
+    error = null;
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      latest = await _svc.createUsingProfile(occasion: occasion);
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+}
+```
+
+### lib/providers/theme_provider.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class ThemeProvider extends ChangeNotifier {
+  static const String _themeKey = 'theme_mode';
+
+  ThemeMode _themeMode = ThemeMode.light;
+  bool _isAnimating = false;
+
+  ThemeMode get themeMode => _themeMode;
+  bool get isDarkMode => _themeMode == ThemeMode.dark;
+  bool get isAnimating => _isAnimating;
+
+  ThemeProvider() {
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isDark = prefs.getBool(_themeKey) ?? false;
+      _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading theme: $e');
+    }
+  }
+
+  Future<void> toggleTheme() async {
+    await setTheme(!isDarkMode);
+  }
+
+  Future<void> setTheme(bool isDark) async {
+    if (_isAnimating) return;
+
+    _isAnimating = true;
+    notifyListeners();
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_themeKey, isDark);
+    } catch (e) {
+      debugPrint('Error saving theme: $e');
+    }
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    _isAnimating = false;
+    notifyListeners();
+  }
+}
+```
+
+### lib/providers/wardrobe_provider.dart
+```dart
+import 'package:flutter/foundation.dart';
+import '../models/wardrobe_models.dart';
+import '../services/wardrobe_service.dart';
+
+class WardrobeProvider extends ChangeNotifier {
+  final WardrobeService _svc;
+
+  WardrobeProvider(this._svc);
+
+  final List<WardrobeItem> items = [];
+  int total = 0;
+
+  bool isLoading = false;
+  bool isLoadingMore = false;
+  String? error;
+
+  int _page = 1;
+  final int _limit = 20;
+  bool get hasMore => items.length < total;
+
+  Future<void> refresh() async {
+    error = null;
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      _page = 1;
+      final (list, t) = await _svc.list(page: _page, limit: _limit);
+      items
+        ..clear()
+        ..addAll(list);
+      total = t;
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMore() async {
+    if (isLoading || isLoadingMore || !hasMore) return;
+
+    isLoadingMore = true;
+    notifyListeners();
+
+    try {
+      _page += 1;
+      final (list, t) = await _svc.list(page: _page, limit: _limit);
+      items.addAll(list);
+      total = t;
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleFavorite(WardrobeItem item) async {
+    final idx = items.indexWhere((x) => x.id == item.id);
+    if (idx < 0) return;
+
+    final newValue = !items[idx].isFavorite;
+    try {
+      await _svc.setFavorite(item.id, newValue);
+      // локально обновим (простое решение: перезагрузить страницу)
+      await refresh();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleArchive(WardrobeItem item) async {
+    final idx = items.indexWhere((x) => x.id == item.id);
+    if (idx < 0) return;
+
+    final newValue = !items[idx].isArchived;
+    try {
+      await _svc.setArchived(item.id, newValue);
+      await refresh();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> markWorn(WardrobeItem item) async {
+    try {
+      await _svc.worn(item.id);
+      await refresh();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> addManual({
+    required String name,
+    required String category,
+    required String subcategory,
+    required String style,
+  }) async {
+    try {
+      await _svc.createManual(
+        name: name,
+        category: category,
+        subcategory: subcategory,
+        style: style,
+      );
+      await refresh();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
+}
+```
+
+### lib/providers/weather_provider.dart
+```dart
+import 'package:flutter/foundation.dart';
+
+class WeatherProvider extends ChangeNotifier {
+  final dynamic weatherService; // Will be replaced with actual WeatherService type once implemented
+
+  WeatherProvider(this.weatherService);
+
+  bool _isLoading = false;
+  String? _error;
+  dynamic _current; // Will be replaced with actual weather data model
+
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  dynamic get current => _current;
+
+  Future<void> load() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // TODO: Implement actual weather loading logic once WeatherService is fully implemented
+      // _current = await weatherService.getCurrentWeather();
+      _current = null; // Placeholder
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+}
+```
+
+## Screen Files
+
+### lib/screens/achievements_screen.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/achievement.dart';
+import '../services/api_service.dart';
+import '../services/auth_storage.dart';
+import '../theme/app_theme.dart';
+
+class AchievementsScreen extends StatefulWidget {
+  const AchievementsScreen({super.key});
+
+  @override
+  State<AchievementsScreen> createState() => _AchievementsScreenState();
+}
+
+class _AchievementsScreenState extends State<AchievementsScreen> {
+  late Future<List<Achievement>> _achievementsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _achievementsFuture = Future.value(<Achievement>[]);
+    _loadAchievements();
+  }
+
+  Future<void> _loadAchievements() async {
+    final apiService = context.read<ApiService>();
+    final authStorage = context.read<AuthStorage>();
+    final userId = await authStorage.readUserId();
+
+    if (!mounted) return;
+
+    if (userId == null) {
+      setState(() {
+        _achievementsFuture = Future.value(<Achievement>[]);
+      });
+      return;
+    }
+
+    setState(() {
+      _achievementsFuture = apiService.getAchievements(userId: userId);
+    });
+
+    await _achievementsFuture;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Достижения'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadAchievements,
+        color: theme.primaryColor,
+        child: FutureBuilder<List<Achievement>>(
+          future: _achievementsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text('Ошибка: ${snapshot.error}'));
+            }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('Нет достижений'));
+            }
+
+            final achievements = snapshot.data!;
+            return GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.9,
+              ),
+              itemCount: achievements.length,
+              itemBuilder: (context, index) {
+                return _AchievementCard(achievement: achievements[index]);
+              },
+            );
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AchievementCard extends StatelessWidget {
+  final Achievement achievement;
+
+  const _AchievementCard({required this.achievement});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isUnlocked = achievement.isUnlocked;
+
+    // Для заблокированных используем цвета темы, чтобы не было черного на тёмном
+    final textColorPrimary = theme.textTheme.bodyLarge?.color ?? Colors.white;
+    final textColorSecondary =
+        theme.textTheme.bodyMedium?.color?.withOpacity(0.8) ??
+            Colors.grey[400]!;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: isUnlocked
+            ? const LinearGradient(
+          colors: [Color(0xFFFFD700), Color(0xFFFBBF24)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        )
+            : null,
+        color: isUnlocked ? null : theme.cardColor,
+        boxShadow: [
+          if (isUnlocked)
+            BoxShadow(
+              color: const Color(0xFFFFD700).withOpacity(0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            achievement.icon,
+            style: TextStyle(
+              fontSize: 48,
+              color: isUnlocked ? null : Colors.grey[400],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            achievement.name,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: isUnlocked ? Colors.black87 : textColorPrimary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            achievement.description,
+            style: TextStyle(
+              fontSize: 11,
+              color: isUnlocked ? Colors.black54 : textColorSecondary,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const Spacer(),
+          if (!isUnlocked)
+            Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: achievement.progress,
+                    backgroundColor: Colors.grey[300],
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppTheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${achievement.currentCount} / ${achievement.requiredCount}',
+                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+### lib/screens/add_item_screen.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../exceptions/api_exceptions.dart';
+import '../providers/theme_provider.dart';
+import '../services/api_service.dart';
+import '../services/auth_storage.dart';
+import '../theme/app_theme.dart';
+
+class AddItemScreen extends StatefulWidget {
+  const AddItemScreen({super.key});
+
+  @override
+  State<AddItemScreen> createState() => _AddItemScreenState();
+}
+
+class _AddItemScreenState extends State<AddItemScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  bool _isSaving = false;
+
+  String _selectedCategoryId = 'upper';
+  String _selectedIcon = '👕';
+
+  static const Map<String, List<String>> _categories = {
+    'Верх': ['upper', '👕', '👚', '👔'],
+    'Верхняя одежда': ['outerwear', '🧥', '🦺'],
+    'Низ': ['lower', '👖', '🩳', '裙'],
+    'Обувь': ['footwear', '👟', '👢', '👞'],
+    'Аксессуары': ['accessory', '🧢', '🧣', '🧤', '🎒'],
+  };
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onSave() async {
+    if (_isSaving) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    setState(() => _isSaving = true);
+
+    final itemName = _nameController.text.trim();
+    final apiService = context.read<ApiService>();
+    final authStorage = context.read<AuthStorage>();
+
+    try {
+      final userId = await authStorage.readUserId();
+      if (userId == null) {
+        throw const ApiException('Пользователь не авторизован');
+      }
+
+      await apiService.addWardrobeItem(
+        userId: userId,
+        name: itemName,
+        category: _selectedCategoryId,
+        icon: _selectedIcon,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Вещь успешно добавлена!'),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+      Navigator.pop(context, true);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка: ${e.message}'),
+          backgroundColor: AppTheme.danger,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Не удалось добавить вещь: $e'),
+          backgroundColor: AppTheme.danger,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkMode;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Добавить вещь'),
+        actions: [
+          if (_isSaving)
+            const Padding(
+              padding: EdgeInsets.only(right: 16.0),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.check_rounded),
+              onPressed: _onSave,
+              tooltip: 'Сохранить',
+            ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Название вещи',
+                  hintText: 'Например, "Любимые синие джинсы"',
+                  prefixIcon: Icon(Icons.label_outline),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Введите название';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              Text('Категория', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: _selectedCategoryId,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.category_outlined),
+                ),
+                items: _categories.entries.map((entry) {
+                  return DropdownMenuItem(
+                      value: entry.value[0], child: Text(entry.key));
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedCategoryId = value;
+                      _selectedIcon = _categories.values
+                          .firstWhere((val) => val[0] == value)[1];
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+              Text('Иконка', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: _categories.values
+                    .firstWhere((val) => val[0] == _selectedCategoryId)
+                    .sublist(1)
+                    .map((icon) {
+                  final isSelected = _selectedIcon == icon;
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedIcon = icon),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? theme.primaryColor.withOpacity(0.2)
+                            : theme.cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected
+                              ? theme.primaryColor
+                              : (isDark
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300),
+                          width: isSelected ? 2.5 : 1.0,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          icon,
+                          style: const TextStyle(fontSize: 32),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+[Truncated for brevity - the full file would contain all the remaining code]

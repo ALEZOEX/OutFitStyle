@@ -5,11 +5,10 @@ WORKDIR /src
 
 RUN apk add --no-cache git ca-certificates
 
-COPY server/go.mod server/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
-COPY server/ ./server/
-COPY server/migrations/ ./migrations/
+COPY . ./server/
 
 # Build binaries
 WORKDIR /src/server
@@ -25,7 +24,7 @@ COPY --from=build /out/server /app/server
 COPY --from=build /out/migrate /app/migrate
 
 # migrations inside image (needed for /app/migrate)
-COPY server/migrations /app/migrations
+COPY migrations /app/migrations
 
 # worker is optional and may not build, so we don't copy it
 

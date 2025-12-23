@@ -1,88 +1,102 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 import '../models/wardrobe_models.dart';
-import 'api_service.dart';
 import 'auth_storage.dart';
 
 class WardrobeService {
-  final ApiService _api;
+  final String baseUrl;
+  final AuthStorage authStorage;
 
-  WardrobeService({
-    required String baseUrl,
-    required AuthStorage authStorage,
-  }) : _api = ApiService(baseUrl: baseUrl, authStorage: authStorage);
+  WardrobeService({required this.baseUrl, required this.authStorage});
 
-  Future<(List<WardrobeItem>, int total)> list({
-    int page = 1,
-    int limit = 20,
-    String? category,
-    String? style,
-    String? season,
-    bool? isFavorite,
-    bool? isArchived,
-    String? search,
-    String? sort,
-    String? order,
-  }) async {
-    final q = <String, String>{
-      'page': '$page',
-      'limit': '$limit',
-      if (category != null) 'category': category,
-      if (style != null) 'style': style,
-      if (season != null) 'season': season,
-      if (isFavorite != null) 'is_favorite': isFavorite.toString(),
-      if (isArchived != null) 'is_archived': isArchived.toString(),
-      if (search != null && search.isNotEmpty) 'search': search,
-      if (sort != null && sort.isNotEmpty) 'sort': sort,
-      if (order != null && order.isNotEmpty) 'order': order,
-    };
+  String get _apiUrl => baseUrl; // baseUrl уже содержит /api/v1
 
-    final data = await _api.getJson('/wardrobe', query: q) as Map<String, dynamic>;
-    final itemsJson = (data['items'] as List).cast<Map>().map((e) => e.cast<String, dynamic>()).toList();
-    final items = itemsJson.map(WardrobeItem.fromJson).toList();
+  Future<List<WardrobeItemResponse>> fetchAll() async {
+    final token = await authStorage.getToken();
+    final response = await http.get(
+      Uri.parse('$_apiUrl/wardrobe'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
 
-    final pagination = (data['pagination'] as Map?)?.cast<String, dynamic>() ?? {};
-    final total = (pagination['total'] ?? items.length) as int;
-
-    return (items, total);
+    if (response.statusCode == 200) {
+      final List<dynamic> json = jsonDecode(response.body);
+      return json.map((e) => WardrobeItemResponse.fromJson(e as Map<String, dynamic>)).toList();
+    } else {
+      throw Exception('Failed to load wardrobe: ${response.statusCode}');
+    }
   }
 
-  Future<WardrobeItem> createManual({
-    required String name,
-    required String category,
-    required String subcategory,
-    required String style,
-    String? baseColour,
-    String? customName,
-    String? notes,
-    List<String>? tags,
-  }) async {
-    final data = await _api.postJson('/wardrobe', body: {
-      'name': name,
-      'category': category,
-      'subcategory': subcategory,
-      'style': style,
-      if (baseColour != null) 'base_colour': baseColour,
-      if (customName != null) 'custom_name': customName,
-      if (notes != null) 'notes': notes,
-      if (tags != null) 'tags': tags,
-    }) as Map<String, dynamic>;
+  Future<void> setFavorite(String id, bool favorite) async {
+    final token = await authStorage.getToken();
+    final response = await http.patch(
+      Uri.parse('$_apiUrl/wardrobe/$id/favorite'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'favorite': favorite}),
+    );
 
-    final wi = (data['wardrobe_item'] as Map).cast<String, dynamic>();
-    return WardrobeItem.fromJson(wi);
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update favorite: ${response.statusCode}');
+    }
   }
 
-  Future<void> setFavorite(String wardrobeId, bool isFavorite) async {
-    await _api.postJson('/wardrobe/$wardrobeId/favorite', body: {'is_favorite': isFavorite});
+  Future<void> setArchived(String id, bool archived) async {
+    final token = await authStorage.getToken();
+    final response = await http.patch(
+      Uri.parse('$_apiUrl/wardrobe/$id/archived'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'archived': archived}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update archived: ${response.statusCode}');
+    }
   }
 
-  Future<void> setArchived(String wardrobeId, bool isArchived) async {
-    await _api.postJson('/wardrobe/$wardrobeId/archive', body: {'is_archived': isArchived});
+  Future<void> worn(String id) async {
+    final token = await authStorage.getToken();
+    final response = await http.post(
+      Uri.parse('$_apiUrl/wardrobe/$id/worn'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update worn count: ${response.statusCode}');
+    }
   }
 
-  Future<void> worn(String wardrobeId) async {
-    await _api.postJson('/wardrobe/$wardrobeId/worn');
-  }
+  Future<(List<WardrobeItemResponse>, int)> list({required int page, required int limit}) async {
+    final token = await authStorage.getToken();
+    final response = await http.get(
+      Uri.parse('$_apiUrl/wardrobe?page=$page&limit=$limit'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
 
-  Future<void> delete(String wardrobeId) async {
-    await _api.deleteJson('/wardrobe/$wardrobeId');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      final List<dynamic> listJson = json['items'] as List;
+      final List<WardrobeItemResponse> items = listJson
+          .map((e) => WardrobeItemResponse.fromJson(e as Map<String, dynamic>))
+          .toList();
+      final int total = json['total'] as int;
+      return (items, total);
+    } else {
+      throw Exception('Failed to list wardrobe items: ${response.statusCode}');
+    }
   }
 }
