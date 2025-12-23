@@ -138,7 +138,6 @@ RETURNING id, created_at, updated_at
 }
 
 func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) error {
-	// Обновляем только безопасный набор полей (без пароля — он через отдельный flow).
 	q := `
 UPDATE users
 SET
@@ -147,8 +146,8 @@ avatar_url = $2,
 gender = $3,
 birth_date = $4,
 default_location = $5,
-default_latitude = $6,
-default_longitude = $7,
+default_latitude = $6,   -- ВАЖНО: сохраняем lat
+default_longitude = $7,  -- ВАЖНО: сохраняем lon
 timezone = $8,
 locale = $9,
 preferences = COALESCE($10, preferences),
@@ -162,8 +161,8 @@ WHERE id = $12
 		user.Gender,
 		user.BirthDate,
 		user.DefaultLocation,
-		user.DefaultLatitude,
-		user.DefaultLongitude,
+		user.DefaultLatitude,  // <--
+		user.DefaultLongitude, // <--
 		user.Timezone,
 		user.Locale,
 		nullableJSON(user.Preferences),

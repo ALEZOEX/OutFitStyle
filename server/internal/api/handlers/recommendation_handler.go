@@ -54,7 +54,9 @@ func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	rec, err := h.svc.Create(r.Context(), userID, req)
 	if err != nil {
-		resp.Error(w, http.StatusBadRequest, err)
+		// ДОБАВИЛ ЛОГ:
+		h.log.Error("Failed to create recommendation", zap.Error(err))
+		resp.Error(w, http.StatusInternalServerError, err) // Возвращаем текст ошибки клиенту (для отладки)
 		return
 	}
 

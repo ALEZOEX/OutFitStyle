@@ -46,6 +46,8 @@ services:
   api:
     build:
       context: ../server
+    env_file:
+      - ../.env
     environment:
       ENVIRONMENT: development
 
@@ -60,7 +62,8 @@ services:
       JWT_ACCESS_TOKEN_TTL: 15m
       JWT_REFRESH_TOKEN_TTL: 720h
 
-      OPENWEATHER_API_KEY: "${OPENWEATHER_API_KEY:-}"
+      # Use dummy key if not set in .env for dev purposes
+      OPENWEATHER_API_KEY: "${WEATHER_API_KEY:-dummy_weather_key_for_dev}"
       OPENWEATHER_CACHE_TTL: 10m
       OPENWEATHER_BASE_URL: "https://api.openweathermap.org/data/2.5"
 
