@@ -844,6 +844,10 @@ func (s *RecommendationService) rankLiteOrFallback(
 
 	start := time.Now()
 	mlResp, err := s.ml.Rank(ctx, mlReq)
+	if err != nil {
+		// ЛОГ ОШИБКИ ML:
+		s.logger.Warn("ML rank failed, using fallback", zap.Error(err))
+	}
 	if err == nil {
 		modelVersion = mlResp.ModelVersion
 		processingMs = mlResp.ProcessingTimeMs

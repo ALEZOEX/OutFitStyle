@@ -31,6 +31,10 @@ seed:
 test:
 	cd server && go test ./...
 
+.PHONY: import-catalog
+import-catalog:
+	cd server && go run ./cmd/import_catalog/main.go -file ../basic_catalog.ndjson -dsn "$(DATABASE_URL)"
+
 .PHONY: test-integration
 test-integration:
 	cd server && go test -tags=integration ./...
