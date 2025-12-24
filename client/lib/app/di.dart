@@ -16,8 +16,7 @@ import '../data/repositories/recommendation_repository.dart';
 import '../data/sync/sync_worker.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/profile_repository.dart';
-import 'onboarding/onboarding_storage.dart';
-import 'session/session_controller.dart';
+import 'onboarding/onboarding_providers.dart';
 
 final apiConfigProvider = Provider((ref) => Env.apiConfig());
 
@@ -26,19 +25,21 @@ final authStorageProvider = Provider<AuthStorage>((ref) => AuthStorage());
 final apiClientProvider = Provider<ApiClient>((ref) {
   final cfg = ref.watch(apiConfigProvider);
   final storage = ref.watch(authStorageProvider);
-  return ApiClient(config: cfg, storage: storage, enableLogging: false);
+  return ApiClient(config: cfg, storage: storage);
 });
 
 final wardrobeServiceProvider = Provider<WardrobeService>((ref) {
   final cfg = ref.watch(apiConfigProvider);
   final auth = ref.watch(authStorageProvider);
-  return WardrobeService(baseUrl: cfg.apiBase.toString(), authStorage: auth);
+  // Передаём baseUrl без /api/v1 - сервис сам добавит
+  return WardrobeService(baseUrl: cfg.apiBase, authStorage: auth);
 });
 
 final recommendationServiceProvider = Provider<RecommendationService>((ref) {
   final cfg = ref.watch(apiConfigProvider);
   final auth = ref.watch(authStorageProvider);
-  return RecommendationService(baseUrl: cfg.apiBase.toString(), authStorage: auth);
+  // Передаём baseUrl без /api/v1 - сервис сам добавит
+  return RecommendationService(baseUrl: cfg.apiBase, authStorage: auth);
 });
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -79,42 +80,49 @@ final syncWorkerProvider = Provider<SyncWorker>((ref) {
   );
 });
 
-final wardrobeRemoteDsProvider = Provider<WardrobeRemoteDataSource>((ref) {
-  return WardrobeRemoteDataSource(ref.watch(wardrobeServiceProvider));
-});
-
-final recommendationRemoteDsProvider = Provider<RecommendationRemoteDataSource>((ref) {
-  return RecommendationRemoteDataSource(ref.watch(recommendationServiceProvider));
-});
-
-final wardrobeRepositoryProvider = Provider<WardrobeRepository>((ref) {
-  return WardrobeRepository(
-    db: ref.watch(appDatabaseProvider),
-    remote: ref.watch(wardrobeRemoteDsProvider),
-  );
-});
-
-final recommendationRepositoryProvider = Provider<RecommendationRepository>((ref) {
-  return RecommendationRepository(
-    db: ref.watch(appDatabaseProvider),
-    remote: ref.watch(recommendationRemoteDsProvider),
-  );
-});
-
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(
-    ref.watch(apiClientProvider),
+    ref.watch(apiConfigProvider),
     ref.watch(authStorageProvider),
   );
 });
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
-  return ProfileRepository(ref.watch(apiClientProvider));
+  return ProfileRepository(
+    ref.watch(apiConfigProvider),
+    ref.watch(authStorageProvider),
+  );
 });
-
-final onboardingStorageProvider = Provider<OnboardingStorage>((ref) => OnboardingStorage());
 
 final outboxPendingCountProvider = StreamProvider<int>((ref) {
   final db = ref.watch(appDatabaseProvider);
   return db.syncOutboxDao.watchPendingCount();
 });
+
+enum SessionStatus { unknown, authed, guest }
+
+final sessionProvider = NotifierProvider<SessionController, SessionStatus>(SessionController.new);
+
+class SessionController extends Notifier<SessionStatus> {
+  @override
+  SessionStatus build() {
+    _load();
+    return SessionStatus.unknown;
+  }
+
+  Future<void> _load() async {
+    final repo = ref.read(authRepositoryProvider);
+    state = (await repo.isAuthed()) ? SessionStatus.authed : SessionStatus.guest;
+  }
+
+  Future<void> refreshSession() async {
+    final repo = ref.read(authRepositoryProvider);
+    state = (await repo.isAuthed()) ? SessionStatus.authed : SessionStatus.guest;
+  }
+
+  Future<void> logout() async {
+    final repo = ref.read(authRepositoryProvider);
+    await repo.logout();
+    state = SessionStatus.guest;
+  }
+}

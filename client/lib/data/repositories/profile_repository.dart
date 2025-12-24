@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../../config/app_config.dart';
+import '../../app/api/api_config.dart';
 import '../../services/auth_storage.dart';
 
 class ProfileRepository {

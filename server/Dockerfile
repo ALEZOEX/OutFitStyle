@@ -8,6 +8,7 @@ RUN apk add --no-cache git ca-certificates
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Копируем исходники
 COPY . ./server/
 
 # Build binaries
@@ -23,8 +24,8 @@ RUN apk add --no-cache ca-certificates
 COPY --from=build /out/server /app/server
 COPY --from=build /out/migrate /app/migrate
 
-# migrations inside image (needed for /app/migrate)
-COPY migrations /app/migrations
+# Copy migrations from the build stage
+COPY --from=build /src/server/migrations /app/migrations
 
 # worker is optional and may not build, so we don't copy it
 

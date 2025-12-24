@@ -1,35 +1,51 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../models/token_pair.dart';
 
 class AuthStorage {
-  static const _tokenKey = 'auth_token';
-  static const _userKey = 'user_data';
+  static const _kAccessToken = 'access_token';
+  static const _kRefreshToken = 'refresh_token';
+  static const _kExpiresAt = 'expires_at';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  Future<void> saveToken(String token) async {
-    await _storage.write(key: _tokenKey, value: token);
+  Future<void> writeTokenPair(TokenPair pair) async {
+    await _storage.write(key: _kAccessToken, value: pair.accessToken);
+    await _storage.write(key: _kRefreshToken, value: pair.refreshToken);
+    await _storage.write(key: _kExpiresAt, value: pair.expiresAt.toIso8601String());
   }
 
-  Future<String?> getToken() async {
-    return await _storage.read(key: _tokenKey);
+  Future<String?> readAccessToken() async {
+    return await _storage.read(key: _kAccessToken);
   }
 
-  Future<void> saveUser(Map<String, dynamic> user) async {
-    await _storage.write(key: _userKey, value: jsonEncode(user));
+  Future<String?> readRefreshToken() async {
+    return await _storage.read(key: _kRefreshToken);
   }
 
-  Future<Map<String, dynamic>?> getUser() async {
-    final userData = await _storage.read(key: _userKey);
-    if (userData != null) {
-      return jsonDecode(userData) as Map<String, dynamic>;
+  Future<TokenPair?> readTokenPair() async {
+    final access = await _storage.read(key: _kAccessToken);
+    final refresh = await _storage.read(key: _kRefreshToken);
+    final expiresAtStr = await _storage.read(key: _kExpiresAt);
+
+    if (access == null || refresh == null) return null;
+
+    final expiresAt = expiresAtStr != null ? DateTime.tryParse(expiresAtStr) : null;
+    if (expiresAt != null && DateTime.now().isAfter(expiresAt)) {
+      // Токен истёк, очищаем сессию
+      await clearSession();
+      return null;
     }
-    return null;
+
+    return TokenPair(
+      accessToken: access,
+      refreshToken: refresh,
+      expiresAt: expiresAt ?? DateTime.now().add(const Duration(hours: 24)), // заглушка
+    );
   }
 
-  Future<void> clear() async {
-    await _storage.delete(key: _tokenKey);
-    await _storage.delete(key: _userKey);
+  Future<void> clearSession() async {
+    await _storage.delete(key: _kAccessToken);
+    await _storage.delete(key: _kRefreshToken);
+    await _storage.delete(key: _kExpiresAt);
   }
 }

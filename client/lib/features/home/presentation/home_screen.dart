@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/skeleton.dart';
+import '../../../ui/atoms/outfit_app_bar.dart';
 import 'home_controller.dart';
 import 'widgets/weather_card.dart';
 import 'widgets/outfit_of_day_card.dart';
@@ -30,8 +31,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final err = ref.watch(homeControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('OutfitStyle'),
+      appBar: OutfitAppBar(
+        title: 'Домой',
         actions: [
           IconButton(
             onPressed: () {
