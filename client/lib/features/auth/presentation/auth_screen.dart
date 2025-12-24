@@ -1,9 +1,7 @@
-// lib/features/auth/presentation/auth_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di.dart';
-import '../../../app/session/session_controller.dart';
 import '../../../ui/atoms/haptics.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -13,86 +11,90 @@ class AuthScreen extends ConsumerStatefulWidget {
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProviderStateMixin {
-  late final TabController _tabs = TabController(length: 2, vsync: this);
+class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStateMixin {
+  late final TabController _tabController = TabController(length: 2, vsync: this);
 
   final _loginEmail = TextEditingController();
-  final _loginPass = TextEditingController();
+  final _loginPassword = TextEditingController();
 
-  final _regName = TextEditingController();
-  final _regEmail = TextEditingController();
-  final _regPass = TextEditingController();
+  final _registerName = TextEditingController();
+  final _registerEmail = TextEditingController();
+  final _registerPassword = TextEditingController();
 
-  bool _busy = false;
+  bool _loggingIn = false;
+  bool _registering = false;
   String? _error;
 
   @override
   void dispose() {
-    _tabs.dispose();
+    _tabController.dispose();
     _loginEmail.dispose();
-    _loginPass.dispose();
-    _regName.dispose();
-    _regEmail.dispose();
-    _regPass.dispose();
+    _loginPassword.dispose();
+    _registerName.dispose();
+    _registerEmail.dispose();
+    _registerPassword.dispose();
     super.dispose();
   }
 
-  Future<void> _doLogin() async {
-    if (_busy) return;
-    setState(() { _busy = true; _error = null; });
+  Future<void> _login() async {
+    if (_loggingIn) return;
+    setState(() { _loggingIn = true; _error = null; });
 
     try {
-      await ref.read(authRepositoryProvider).login(
+      final repo = ref.read(authRepositoryProvider);
+      await repo.login(
         email: _loginEmail.text.trim(),
-        password: _loginPass.text,
+        password: _loginPassword.text,
       );
       Haptics.success();
-      await ref.read(sessionProvider.notifier).refreshSession();
+      ref.read(sessionProvider.notifier).refreshSession();
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() => _loggingIn = false);
     }
   }
 
-  Future<void> _doRegister() async {
-    if (_busy) return;
-    setState(() { _busy = true; _error = null; });
+  Future<void> _register() async {
+    if (_registering) return;
+    setState(() { _registering = true; _error = null; });
 
     try {
-      await ref.read(authRepositoryProvider).register(
-        name: _regName.text.trim(),
-        email: _regEmail.text.trim(),
-        password: _regPass.text,
+      final repo = ref.read(authRepositoryProvider);
+      await repo.register(
+        name: _registerName.text.trim(),
+        email: _registerEmail.text.trim(),
+        password: _registerPassword.text,
       );
       Haptics.success();
-      await ref.read(sessionProvider.notifier).refreshSession();
+      ref.read(sessionProvider.notifier).refreshSession();
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() => _registering = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Вход'),
-        bottom: TabBar(
-          controller: _tabs,
-          tabs: const [
-            Tab(text: 'Войти'),
-            Tab(text: 'Регистрация'),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Вход'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Войти'),
+              Tab(text: 'Регистрация'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildLogin(),
+            _buildRegister(),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabs,
-        children: [
-          _buildLogin(),
-          _buildRegister(),
-        ],
       ),
     );
   }
@@ -108,25 +110,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             labelText: 'Email',
             prefixIcon: Icon(Icons.email_rounded),
           ),
+          keyboardType: TextInputType.emailAddress,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         TextField(
-          controller: _loginPass,
-          obscureText: true,
+          controller: _loginPassword,
           decoration: const InputDecoration(
             labelText: 'Пароль',
             prefixIcon: Icon(Icons.lock_rounded),
           ),
+          obscureText: true,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         FilledButton(
-          onPressed: _busy ? null : _doLogin,
+          onPressed: _loggingIn ? null : _login,
           style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
-          child: _busy
-              ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+          child: _loggingIn
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : const Text('Войти', style: TextStyle(fontWeight: FontWeight.w800)),
         ),
       ],
@@ -139,38 +142,39 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
       children: [
         if (_error != null) _ErrorBox(_error!),
         TextField(
-          controller: _regName,
+          controller: _registerName,
           decoration: const InputDecoration(
             labelText: 'Имя',
             prefixIcon: Icon(Icons.person_rounded),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         TextField(
-          controller: _regEmail,
+          controller: _registerEmail,
           decoration: const InputDecoration(
             labelText: 'Email',
             prefixIcon: Icon(Icons.email_rounded),
           ),
+          keyboardType: TextInputType.emailAddress,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         TextField(
-          controller: _regPass,
-          obscureText: true,
+          controller: _registerPassword,
           decoration: const InputDecoration(
             labelText: 'Пароль',
             prefixIcon: Icon(Icons.lock_rounded),
           ),
+          obscureText: true,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         FilledButton(
-          onPressed: _busy ? null : _doRegister,
+          onPressed: _registering ? null : _register,
           style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
-          child: _busy
-              ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+          child: _registering
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : const Text('Создать аккаунт', style: TextStyle(fontWeight: FontWeight.w800)),
         ),
       ],

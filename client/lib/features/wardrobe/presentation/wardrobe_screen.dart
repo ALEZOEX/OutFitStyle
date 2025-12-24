@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../ui/atoms/skeleton.dart';
 import '../../../ui/atoms/haptics.dart';
+import '../../../ui/atoms/outfit_app_bar.dart';
 import 'wardrobe_controller.dart';
 import 'widgets/wardrobe_grid_item.dart';
 
@@ -32,8 +33,8 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
     final controller = ref.read(wardrobeControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Гардероб'),
+      appBar: OutfitAppBar(
+        title: 'Шкаф',
         actions: [
           IconButton(
             onPressed: () async {

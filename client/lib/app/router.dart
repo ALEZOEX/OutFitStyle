@@ -9,9 +9,11 @@ import '../features/profile/presentation/profile_screen.dart';
 import '../features/outfit_details/presentation/outfit_details_screen.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/onboarding/presentation/onboarding_wizard_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
+import '../features/achievements/presentation/achievements_screen.dart';
 import 'widgets/tab_swipe_container.dart';
-import 'session/session_controller.dart';
-import 'onboarding/onboarding_provider.dart';
+import 'di.dart';
+import 'onboarding/onboarding_providers.dart';
 
 final _homeNavKey = GlobalKey<NavigatorState>(debugLabel: 'homeNav');
 final _wardrobeNavKey = GlobalKey<NavigatorState>(debugLabel: 'wardrobeNav');
@@ -76,7 +78,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
+              GoRoute(
+                path: '/profile',
+                builder: (_, __) => const ProfileScreen(),
+                routes: [
+                  GoRoute(path: 'settings', builder: (_, __) => const SettingsScreen()),
+                  GoRoute(path: 'achievements', builder: (_, __) => const AchievementsScreen()),
+                ],
+              ),
             ],
           ),
         ],

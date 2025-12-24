@@ -1,29 +1,31 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import '../../config/app_config.dart';
 import 'api/api_config.dart';
 
 class Env {
-  /// Передавай так:
-  /// flutter run --dart-define=API_HOST=http://10.0.2.2:8080
   static const String _envApiHost = String.fromEnvironment('API_HOST');
 
   static ApiConfig apiConfig() {
-    final raw = _envApiHost.isNotEmpty ? _envApiHost : AppConfig.apiHost;
+    var raw = _envApiHost.isNotEmpty ? _envApiHost : AppConfig.apiHost;
 
-    final parsed = Uri.parse(raw);
+    // Нормализуем хост для платформы
+    raw = ApiConfig.normalizeHostForPlatform(raw);
 
-    // Подстрахуемся, если кто-то сунул /api/v1 в API_HOST:
-    final sanitized = parsed.path.endsWith('/api/v1')
-        ? parsed.replace(path: parsed.path.substring(0, parsed.path.length - '/api/v1'.length))
-        : parsed.replace(path: ''); // host должен быть без path
+    // Убираем /api/v1 из хоста, если есть (пусть добавляется в путях)
+    if (raw.endsWith('/api/v1')) {
+      raw = raw.substring(0, raw.length - '/api/v1'.length);
+    }
+    if (raw.endsWith('/api')) {
+      raw = raw.substring(0, raw.length - '/api'.length);
+    }
 
-    final host = normalizeHostForPlatform(sanitized);
     if (kDebugMode) {
       // ignore: avoid_print
-      print('✅ API host: $host');
-      // ignore: avoid_print
-      print('✅ API base: ${ApiConfig(host: host).apiBase}');
+      print('✅ API host: $raw');
     }
-    return ApiConfig(host: host);
+    return ApiConfig(apiBase: raw);
   }
 }
