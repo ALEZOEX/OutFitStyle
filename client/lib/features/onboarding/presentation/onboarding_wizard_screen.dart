@@ -1,8 +1,8 @@
-// lib/features/onboarding/presentation/onboarding_wizard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di.dart';
+import '../../../app/onboarding/onboarding_providers.dart';
 import '../../../ui/atoms/haptics.dart';
 
 class OnboardingWizardScreen extends ConsumerStatefulWidget {

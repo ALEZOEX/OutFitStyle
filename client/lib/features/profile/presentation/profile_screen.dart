@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/di.dart';
-import '../../app/session/session_controller.dart';
-import '../../app/onboarding/onboarding_provider.dart';
+import '../../../app/di.dart';
+import '../../../app/onboarding/onboarding_providers.dart';
+import '../../../ui/atoms/outfit_app_bar.dart';
 
 final meProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   return ref.read(profileRepositoryProvider).getMe();
@@ -17,8 +17,8 @@ class ProfileScreen extends ConsumerWidget {
     final me = ref.watch(meProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Профиль'),
+      appBar: OutfitAppBar(
+        title: 'Профиль',
         actions: [
           IconButton(
             tooltip: 'Выйти',

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../../config/app_config.dart';
-import '../../models/tokens.dart';
+import '../../app/api/api_config.dart';
+import '../../models/token_pair.dart';
 import '../../services/auth_storage.dart';
 
 class AuthRepository {
@@ -21,7 +21,7 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final pair = TokenPair.fromJson(data);
+        final pair = _parseTokenPair(data);
         await _storage.writeTokenPair(pair);
       } else {
         throw Exception('Login failed: ${response.statusCode}');
@@ -41,13 +41,24 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final pair = TokenPair.fromJson(data);
+        final pair = _parseTokenPair(data);
         await _storage.writeTokenPair(pair);
       } else {
         throw Exception('Registration failed: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Registration error: $e');
+    }
+  }
+
+  // Вспомогательная функция для обработки токенов с возможной оберткой
+  TokenPair _parseTokenPair(Map<String, dynamic> data) {
+    if (data.containsKey('tokens')) {
+      // Если обертка 'tokens' существует, используем её
+      return TokenPair.fromJson(data['tokens']);
+    } else {
+      // Иначе используем сам объект
+      return TokenPair.fromJson(data);
     }
   }
 

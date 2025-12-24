@@ -2,39 +2,21 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiConfig {
-  final Uri host;          // http://10.0.2.2:8080 (без /api/v1)
-  final String apiPrefix;  // /api/v1
+  final String apiBase;
 
   const ApiConfig({
-    required this.host,
-    this.apiPrefix = '/api/v1',
+    required this.apiBase,
   });
 
-  Uri get apiBase => host.replace(path: apiPrefix);
+  /// Нормализует хост для платформы (особенно важно для Android эмулятора)
+  static String normalizeHostForPlatform(String rawHost) {
+    if (kIsWeb) return rawHost;
 
-  /// Собирает endpoint без двойных слешей и без дублирования apiPrefix.
-  Uri endpoint(List<String> pathSegments, {Map<String, dynamic>? query}) {
-    final baseSegs = <String>[
-      ...apiBase.pathSegments.where((s) => s.isNotEmpty),
-      ...pathSegments.where((s) => s.isNotEmpty),
-    ];
+    // Для Android эмулятора: localhost -> 10.0.2.2
+    if (Platform.isAndroid && (rawHost.contains('localhost') || rawHost.contains('127.0.0.1'))) {
+      return rawHost.replaceAll('localhost', '10.0.2.2').replaceAll('127.0.0.1', '10.0.2.2');
+    }
 
-    return apiBase.replace(
-      pathSegments: baseSegs,
-      queryParameters: query?.map((k, v) => MapEntry(k, v.toString())),
-    );
+    return rawHost;
   }
-}
-
-/// Единственное место, где решаем "localhost vs emulator".
-Uri normalizeHostForPlatform(Uri uri) {
-  // Web: localhost корректен
-  if (kIsWeb) return uri;
-
-  // Android emulator: localhost -> 10.0.2.2 (если ты реально хочешь достучаться до хоста)
-  if (Platform.isAndroid && (uri.host == 'localhost' || uri.host == '127.0.0.1')) {
-    return uri.replace(host: '10.0.2.2');
-  }
-
-  return uri;
 }
