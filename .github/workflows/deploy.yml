@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Deploy to production server
-      uses: appleboy/ssh-action@v0.1.5
+      uses: appleboy/ssh-action@v1.2.4
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
