@@ -3,7 +3,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 
 class ImageStore {
-  static Future<String?> ensureLocalCopy(String url) async {
+  static Future<String?> ensureLocalCopy(String url, [http.Client? client]) async {
+    final httpClient = client ?? http.Client();
     try {
       final directory = await getApplicationDocumentsDirectory();
       final fileName = _getFileNameFromUrl(url);
@@ -16,7 +17,7 @@ class ImageStore {
       }
 
       // Download and save the image
-      final response = await http.get(Uri.parse(url));
+      final response = await httpClient.get(Uri.parse(url));
       if (response.statusCode == 200) {
         await file.writeAsBytes(response.bodyBytes, flush: true);
         return localPath;
@@ -24,6 +25,8 @@ class ImageStore {
     } catch (e) {
       // Log error or handle as needed
       print('Error downloading image: $e');
+    } finally {
+      httpClient.close();
     }
     return null;
   }

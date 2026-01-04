@@ -3,33 +3,33 @@ import 'package:http/http.dart' as http;
 
 import '../models/wardrobe_models.dart';
 import '../services/auth_storage.dart';
+import 'http_client.dart';
+import '../app/api/api_config.dart';
 
 class WardrobeService {
-  final String baseUrl;
+  final ApiConfig apiConfig;
   final AuthStorage authStorage;
+  final http.Client httpClient;
 
-  WardrobeService({required this.baseUrl, required this.authStorage});
+  WardrobeService({required this.apiConfig, required this.authStorage, http.Client? httpClient})
+      : httpClient = httpClient ?? http.Client();
 
   String get _apiUrl {
     // Убедимся, что baseUrl заканчивается на /api/v1
-    if (!baseUrl.endsWith('/api/v1')) {
-      if (baseUrl.endsWith('/')) {
-        return baseUrl + 'api/v1';
+    if (!apiConfig.apiBase.endsWith('/api/v1')) {
+      if (apiConfig.apiBase.endsWith('/')) {
+        return apiConfig.apiBase + 'api/v1';
       } else {
-        return baseUrl + '/api/v1';
+        return apiConfig.apiBase + '/api/v1';
       }
     }
-    return baseUrl;
+    return apiConfig.apiBase;
   }
 
   Future<(List<WardrobeItemResponse>, int)> list({required int page, required int limit}) async {
-    final token = await authStorage.readAccessToken();
-    final response = await http.get(
+    final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
+    final response = await client.get(
       Uri.parse('$_apiUrl/wardrobe?page=$page&limit=$limit'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
 
     if (response.statusCode == 200) {
@@ -49,13 +49,9 @@ class WardrobeService {
   }
 
   Future<List<WardrobeItemResponse>> fetchAll() async {
-    final token = await authStorage.readAccessToken();
-    final response = await http.get(
+    final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
+    final response = await client.get(
       Uri.parse('$_apiUrl/wardrobe'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
 
     if (response.statusCode == 200) {
@@ -67,14 +63,9 @@ class WardrobeService {
   }
 
   Future<void> setFavorite(String id, bool favorite) async {
-    final token = await authStorage.readAccessToken();
-    final response = await http.patch(
+    final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
+    final response = await client.patch(
       Uri.parse('$_apiUrl/wardrobe/$id/favorite'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      // Изменяем ключ с 'value' на 'is_favorite'
       body: jsonEncode({'is_favorite': favorite}),
     );
 
@@ -84,14 +75,9 @@ class WardrobeService {
   }
 
   Future<void> setArchived(String id, bool archived) async {
-    final token = await authStorage.readAccessToken();
-    final response = await http.patch(
+    final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
+    final response = await client.patch(
       Uri.parse('$_apiUrl/wardrobe/$id/archived'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      // Изменяем ключ с 'value' на 'is_archived'
       body: jsonEncode({'is_archived': archived}),
     );
 
@@ -101,13 +87,9 @@ class WardrobeService {
   }
 
   Future<void> worn(String id) async {
-    final token = await authStorage.readAccessToken();
-    final response = await http.post(
+    final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
+    final response = await client.post(
       Uri.parse('$_apiUrl/wardrobe/$id/worn'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
 
     if (response.statusCode != 200) {

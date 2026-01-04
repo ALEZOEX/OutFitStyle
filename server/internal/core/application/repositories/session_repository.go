@@ -36,6 +36,14 @@ type CreateSessionParams struct {
 	ExpiresAt time.Time
 }
 
+type UpdateDeviceInfoParams struct {
+	DeviceID   *string
+	DeviceName *string
+	DeviceType *string
+	IPAddress  *string
+	UserAgent  *string
+}
+
 type SessionRepository interface {
 	Create(ctx context.Context, p CreateSessionParams) (domain.ID, error)
 
@@ -49,4 +57,6 @@ type SessionRepository interface {
 	RevokeAllForUser(ctx context.Context, userID domain.ID) error
 	RevokeForUser(ctx context.Context, userID domain.ID, sessionID domain.ID) error
 	ListByUser(ctx context.Context, userID domain.ID) ([]Session, error)
+
+	UpdateDeviceInfo(ctx context.Context, sessionID domain.ID, p UpdateDeviceInfoParams) error
 }

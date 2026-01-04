@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -28,6 +29,7 @@ func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/refresh", h.Refresh).Methods(http.MethodPost)
 	r.HandleFunc("/logout", h.Logout).Methods(http.MethodPost) // требует AuthMiddleware
 	r.HandleFunc("/google", h.GoogleSignIn).Methods(http.MethodPost)
+	r.HandleFunc("/validate", h.ValidateToken).Methods(http.MethodPost)
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -168,4 +170,41 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Success(w, out)
+}
+
+func (h *AuthHandler) ValidateToken(w http.ResponseWriter, r *http.Request) {
+	// Extract token from header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
+		return
+	}
+
+	// Remove "Bearer " prefix if present
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == authHeader {
+		tokenString = strings.TrimPrefix(authHeader, "Token ")
+		if tokenString == authHeader {
+			resp.Error(w, http.StatusUnauthorized, errors.New("invalid authorization header format"))
+			return
+		}
+	}
+
+	// Validate token and get user info
+	user, err := h.auth.ValidateTokenForSilentLogin(r.Context(), tokenString)
+	if err != nil {
+		resp.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	// Return minimal user info for validation
+	resp.Success(w, map[string]any{
+		"valid": true,
+		"user": map[string]any{
+			"id":          user.ID,
+			"display_name": user.DisplayName,
+			"email":       user.Email,
+			"avatar_url":  user.AvatarURL,
+		},
+	})
 }

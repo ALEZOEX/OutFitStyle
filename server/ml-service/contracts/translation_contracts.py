@@ -48,6 +48,7 @@ class RankedItem(BaseModel):
 
 
 class MLRankResponse(BaseModel):
+    model_config = {"protected_namespaces": ()}
     """Response from ML ranking service"""
     ranked: List[RankedItem] = Field(..., description="List of ranked items")
     model_version: str = Field(..., description="Version of the model used")

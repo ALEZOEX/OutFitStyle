@@ -4,6 +4,7 @@ from enum import Enum
 
 
 class TZCandidateFeatures(BaseModel):
+    model_config = {"protected_namespaces": ()}
     warmth_level: int = Field(ge=1, le=10)
     min_temp: int
     max_temp: int
@@ -73,6 +74,7 @@ class TZRankedItem(BaseModel):
 
 
 class TZRankResponse(BaseModel):
+    model_config = {"protected_namespaces": ()}
     request_id: str
     rankings: Dict[str, List[TZRankedItem]]
     outfit_score: float
