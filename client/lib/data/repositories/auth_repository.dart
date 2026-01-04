@@ -4,16 +4,19 @@ import 'package:http/http.dart' as http;
 import '../../app/api/api_config.dart';
 import '../../models/token_pair.dart';
 import '../../services/auth_storage.dart';
+import '../../services/auth_service.dart';
 
 class AuthRepository {
   final ApiConfig _config;
   final AuthStorage _storage;
+  final http.Client _httpClient;
 
-  AuthRepository(this._config, this._storage);
+  AuthRepository(this._config, this._storage, [http.Client? httpClient])
+      : _httpClient = httpClient ?? http.Client();
 
   Future<void> login({required String email, required String password}) async {
     try {
-      final response = await http.post(
+      final response = await _httpClient.post(
         Uri.parse('${_config.apiBase}/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
@@ -33,7 +36,7 @@ class AuthRepository {
 
   Future<void> register({required String name, required String email, required String password}) async {
     try {
-      final response = await http.post(
+      final response = await _httpClient.post(
         Uri.parse('${_config.apiBase}/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'name': name, 'email': email, 'password': password}),
@@ -62,7 +65,15 @@ class AuthRepository {
     }
   }
 
-  Future<void> logout() => _storage.clearSession();
+  Future<void> loginWithGoogle() async {
+    final authService = AuthService(apiBase: _config.apiBase, authStorage: _storage, httpClient: _httpClient);
+    await authService.loginWithGoogle();
+  }
+
+  Future<void> logout({bool allDevices = false}) async {
+    final authService = AuthService(apiBase: _config.apiBase, authStorage: _storage, httpClient: _httpClient);
+    await authService.logout(allDevices: allDevices);
+  }
 
   Future<bool> isAuthed() async {
     final token = await _storage.readAccessToken();

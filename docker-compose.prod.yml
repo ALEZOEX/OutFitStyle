@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -53,18 +51,46 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - RUN_IN_DOCKER=1
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - ENVIRONMENT=production
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-password}
       - DB_NAME=${DB_NAME:-outfitstyle}
-      - ML_SERVICE_URL=http://ml-service:5000
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-outfitstyle}?sslmode=disable
+      - DATABASE_MAX_CONNECTIONS=100
+      - DATABASE_MAX_IDLE_CONNECTIONS=10
       - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET:-very-long-secret-key-change-in-production}
-      - YANDEX_TRANSLATE_API_KEY=${YANDEX_TRANSLATE_API_KEY:-aje36hbuc3e2ntrh5e21}
-      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - REDIS_PASSWORD=
+      - JWT_SECRET=${JWT_SECRET:-V2hhdCB3ZSBnb3QgaGVyZSwgYSBkYW5nZXJvdXMgbW9udGggb2YgY29kZQo6}
+      - JWT_ACCESS_TOKEN_TTL=15m
+      - JWT_REFRESH_TOKEN_TTL=720h
+      - CORS_ALLOWED_ORIGINS=*
+      - RATE_LIMIT_PER_MINUTE=100
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com}
+      - ML_SERVICE_URL=http://ml-service:5000
+      - ML_SERVICE_TIMEOUT=30s
+      - WEATHER_API_KEY=${WEATHER_API_KEY:-8e9f1a366923ec63437f21570c89fa17}
+      - OPENWEATHER_CACHE_TTL=10m
+      - OPENWEATHER_BASE_URL=https://api.openweathermap.org/data/2.5
+      - WEATHER_PROVIDER=openweather
+      - OPENMETEO_BASE_URL=https://api.open-meteo.com
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=${SMTP_USER:-OutFitStyle.official.app@gmail.com}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-bkvf huqi umeb zipd}
+      - FROM_EMAIL=noreply@outfitstyle.com
+      - SENTRY_DSN=
+      - ADMIN_API_KEY=dev-admin-key
+      - FEATURE_PARTNER_CATALOG=true
+      - FEATURE_AB_TESTING=true
+      - FEATURE_ACHIEVEMENTS=true
+      - FEATURE_TRIPS=false
+      - API_KEY_PEPPER=dev-pepper
       - LOG_LEVEL=info
-      - ENVIRONMENT=production
     depends_on:
       postgres:
         condition: service_healthy

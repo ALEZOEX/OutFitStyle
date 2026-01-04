@@ -70,6 +70,7 @@ class RankedItem(BaseModel):
 
 
 class MLRankResponse(BaseModel):
+    model_config = {"protected_namespaces": ()}
     ranked: List[RankedItem]
     model_version: str
     processing_time_ms: float

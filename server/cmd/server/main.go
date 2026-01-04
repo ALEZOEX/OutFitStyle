@@ -367,6 +367,7 @@ func setupRouter(
 
 	router.Use(
 		middleware.RecoveryMiddleware(logger),
+		middleware.SecurityHeadersMiddleware(),
 		middleware.CORSMiddleware(cfg.Security.CORSAllowedOrigins),
 		middleware.LoggerMiddleware(logger),
 		middleware.RateLimitMiddleware(limiter, cfg.Security.RateLimitPerMinute, time.Minute),

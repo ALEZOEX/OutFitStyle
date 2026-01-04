@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
@@ -17,7 +18,26 @@ from model.enhanced_predictor import EnhancedPredictor
 from model.features_with_priorities import build_feature_frame
 
 
-app = FastAPI(title="OutfitStyle ML Ranking Service", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    global predictor
+    model_path = os.getenv("MODEL_PATH", "models/model.pkl")  # укажите путь к модели
+    try:
+        predictor = EnhancedPredictor(model_path)
+        logging.info(f"ML model loaded successfully from {model_path}")
+    except Exception as e:
+        logging.error(f"Failed to load ML model: {e}")
+        raise
+    yield
+    # Shutdown (если нужно что-то освобождать)
+
+
+app = FastAPI(
+    title="OutfitStyle ML Ranking Service",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -47,16 +67,6 @@ YANDEX_FOLDER_ID = os.getenv("YANDEX_FOLDER_ID")
 # Thread pool for translation requests
 translation_executor = ThreadPoolExecutor(max_workers=10)
 
-@app.on_event("startup")
-def startup_event():
-    global predictor
-    model_path = os.getenv("MODEL_PATH", "models/model.pkl")  # укажите путь к модели
-    try:
-        predictor = EnhancedPredictor(model_path)
-        logger.info(f"ML model loaded successfully from {model_path}")
-    except Exception as e:
-        logger.error(f"Failed to load ML model: {e}")
-        raise
 
 
 @app.get("/health")

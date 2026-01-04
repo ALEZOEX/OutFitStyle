@@ -3,33 +3,33 @@ import 'package:http/http.dart' as http;
 
 import '../models/recommendation_models.dart';
 import '../services/auth_storage.dart';
+import 'http_client.dart';
+import '../app/api/api_config.dart';
 
 class RecommendationService {
-  final String baseUrl;
+  final ApiConfig apiConfig;
   final AuthStorage authStorage;
+  final http.Client httpClient;
 
-  RecommendationService({required this.baseUrl, required this.authStorage});
+  RecommendationService({required this.apiConfig, required this.authStorage, http.Client? httpClient})
+      : httpClient = httpClient ?? http.Client();
 
   String get _apiUrl {
     // Убедимся, что baseUrl заканчивается на /api/v1
-    if (!baseUrl.endsWith('/api/v1')) {
-      if (baseUrl.endsWith('/')) {
-        return baseUrl + 'api/v1';
+    if (!apiConfig.apiBase.endsWith('/api/v1')) {
+      if (apiConfig.apiBase.endsWith('/')) {
+        return apiConfig.apiBase + 'api/v1';
       } else {
-        return baseUrl + '/api/v1';
+        return apiConfig.apiBase + '/api/v1';
       }
     }
-    return baseUrl;
+    return apiConfig.apiBase;
   }
 
   Future<RecommendationRecord> createUsingProfile({required String occasion}) async {
-    final token = await authStorage.readAccessToken();
-    final response = await http.post(
+    final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
+    final response = await client.post(
       Uri.parse('$_apiUrl/recommendations'), // Убрано /generate
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
       body: jsonEncode({'occasion': occasion}),
     );
 
@@ -48,13 +48,9 @@ class RecommendationService {
   }
 
   Future<(List<RecommendationRecord>, int total)> list({required int page, required int limit}) async {
-    final token = await authStorage.readAccessToken();
-    final response = await http.get(
+    final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
+    final response = await client.get(
       Uri.parse('$_apiUrl/recommendations?page=$page&limit=$limit'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
     );
 
     if (response.statusCode == 200) {
@@ -73,14 +69,9 @@ class RecommendationService {
   }
 
   Future<void> setFavorite({required String recommendationId, required bool isFavorite}) async {
-    final token = await authStorage.readAccessToken();
-    final response = await http.patch(
+    final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
+    final response = await client.patch(
       Uri.parse('$_apiUrl/recommendations/$recommendationId/favorite'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      // Изменяем ключ с 'value' на 'is_favorite'
       body: jsonEncode({'is_favorite': isFavorite}),
     );
 

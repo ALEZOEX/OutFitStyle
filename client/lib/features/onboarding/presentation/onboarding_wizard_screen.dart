@@ -17,7 +17,7 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
 
   // Preferences
   String _tempSensitivity = 'normal'; // cold|normal|warm
-  String _stylePref = 'casual'; // casual|business|sporty|elegant
+  List<String> _selectedStyles = ['casual']; // List of selected styles
   final Set<String> _prefCats = {'outerwear', 'top', 'bottom', 'footwear'};
   bool _enableNotifs = true;
 
@@ -40,7 +40,7 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
       // Save preferences
       await repo.updatePreferences({
         'temperature_sensitivity': _tempSensitivity,
-        'style_preference': _stylePref,
+        'preferred_styles': _selectedStyles, // Array of selected styles
         'preferred_categories': _prefCats.toList(),
         'notifications_enabled': _enableNotifs,
       });
@@ -70,11 +70,11 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
     final steps = [
       _PreferencesStep(
         tempSensitivity: _tempSensitivity,
-        stylePreference: _stylePref,
+        selectedStyles: _selectedStyles,
         preferredCategories: _prefCats,
         notificationsEnabled: _enableNotifs,
         onTempSensitivityChanged: (v) => setState(() => _tempSensitivity = v),
-        onStylePreferenceChanged: (v) => setState(() => _stylePref = v),
+        onStylesChanged: (styles) => setState(() => _selectedStyles = styles),
         onCategoryToggled: (cat) => setState(() {
           if (_prefCats.contains(cat)) {
             _prefCats.remove(cat);
@@ -148,22 +148,22 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
 
 class _PreferencesStep extends StatelessWidget {
   final String tempSensitivity;
-  final String stylePreference;
+  final List<String> selectedStyles; // Changed to List
   final Set<String> preferredCategories;
   final bool notificationsEnabled;
 
   final ValueChanged<String> onTempSensitivityChanged;
-  final ValueChanged<String> onStylePreferenceChanged;
+  final ValueChanged<List<String>> onStylesChanged; // Changed to List
   final ValueChanged<String> onCategoryToggled;
   final ValueChanged<bool> onNotificationsChanged;
 
   const _PreferencesStep({
     required this.tempSensitivity,
-    required this.stylePreference,
+    required this.selectedStyles,
     required this.preferredCategories,
     required this.notificationsEnabled,
     required this.onTempSensitivityChanged,
-    required this.onStylePreferenceChanged,
+    required this.onStylesChanged,
     required this.onCategoryToggled,
     required this.onNotificationsChanged,
   });
@@ -197,30 +197,54 @@ class _PreferencesStep extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        const Text('Предпочитаемый стиль', style: TextStyle(fontWeight: FontWeight.w900)),
+        const Text('Предпочитаемые стили', style: TextStyle(fontWeight: FontWeight.w900)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           children: [
             FilterChip(
               label: const Text('Повседневный'),
-              selected: stylePreference == 'casual',
-              onSelected: (_) => onStylePreferenceChanged('casual'),
+              selected: selectedStyles.contains('casual'),
+              onSelected: (isSelected) {
+                if (isSelected) {
+                  onStylesChanged([...selectedStyles, 'casual']);
+                } else {
+                  onStylesChanged(selectedStyles.where((s) => s != 'casual').toList());
+                }
+              },
             ),
             FilterChip(
               label: const Text('Офисный'),
-              selected: stylePreference == 'business',
-              onSelected: (_) => onStylePreferenceChanged('business'),
+              selected: selectedStyles.contains('business'),
+              onSelected: (isSelected) {
+                if (isSelected) {
+                  onStylesChanged([...selectedStyles, 'business']);
+                } else {
+                  onStylesChanged(selectedStyles.where((s) => s != 'business').toList());
+                }
+              },
             ),
             FilterChip(
               label: const Text('Спорт'),
-              selected: stylePreference == 'sporty',
-              onSelected: (_) => onStylePreferenceChanged('sporty'),
+              selected: selectedStyles.contains('sporty'),
+              onSelected: (isSelected) {
+                if (isSelected) {
+                  onStylesChanged([...selectedStyles, 'sporty']);
+                } else {
+                  onStylesChanged(selectedStyles.where((s) => s != 'sporty').toList());
+                }
+              },
             ),
             FilterChip(
               label: const Text('Элегантный'),
-              selected: stylePreference == 'elegant',
-              onSelected: (_) => onStylePreferenceChanged('elegant'),
+              selected: selectedStyles.contains('elegant'),
+              onSelected: (isSelected) {
+                if (isSelected) {
+                  onStylesChanged([...selectedStyles, 'elegant']);
+                } else {
+                  onStylesChanged(selectedStyles.where((s) => s != 'elegant').toList());
+                }
+              },
             ),
           ],
         ),

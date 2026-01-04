@@ -9,14 +9,8 @@ if ! curl -s http://localhost:5000/health | grep -q '"status": "healthy"'; then
 fi
 
 # Check if the model is loaded
-if ! curl -s http://localhost:5000/health | grep -q '"model_status": "loaded"'; then
+if ! curl -s http://localhost:5000/health | grep -q '"model_loaded": true'; then
     echo "Model is not loaded"
-    exit 1
-fi
-
-# Check if database is connected
-if ! curl -s http://localhost:5000/health | grep -q '"database": "connected"'; then
-    echo "Database connection failed"
     exit 1
 fi
 
