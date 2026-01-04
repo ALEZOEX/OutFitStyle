@@ -150,3 +150,42 @@ server/ml-service/models/
 *.a
 *.obj
 *.lib
+
+# Временные и лишние файлы
+*.tmp
+*.temp
+*.log
+*.bak
+*.backup
+*.old
+
+# Текстовые файлы с кодом в одном файле
+*_code.txt
+*_code.md
+*_report.md
+*_guide.md
+*_instructions.md
+*_readiness.md
+*_todo.md
+*_profile.md
+*_migrations.md
+*_field.go
+*_cleanup.ps1
+*_config.txt
+
+# Временные файлы разработки
+TODO*
+todo*
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Скрипты очистки
+cleanup.*
+
+# Дополнительные отчеты
+*_REPORT.md
+*_REPORT.txt
+*_REPORT.doc
+*_REPORT.docx
