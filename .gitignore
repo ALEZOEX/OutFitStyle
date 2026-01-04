@@ -106,3 +106,47 @@ Thumbs.db
 .env.development
 .env.test
 .env.production
+
+# Большие файлы, не подходящие для Git
+full_server_code*.txt
+*.apks
+*.apk
+*.aab
+*.so
+*.pdb
+*.dill
+*.cache
+*.track.dill
+kernel_blob.bin
+app.dill
+libflutter.so
+flutter*.dll
+
+# ML Models and datasets
+*.pkl
+*.h5
+*.pt
+*.onnx
+*.joblib
+*.pickle
+data/
+datasets/
+models/
+server/ml-service/models/
+
+# Архивы
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Двоичные файлы
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.a
+*.obj
+*.lib
