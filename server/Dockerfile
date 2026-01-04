@@ -1,15 +1,15 @@
 # syntax=docker/dockerfile:1
 
 FROM golang:1.24-alpine AS build
-WORKDIR /src
+WORKDIR /src/server
 
 RUN apk add --no-cache git ca-certificates
 
-COPY go.mod go.sum ./
+COPY server/go.mod server/go.sum ./
 RUN go mod download
 
 # Копируем исходники
-COPY . ./server/
+COPY server/ ./
 
 # Build binaries
 WORKDIR /src/server

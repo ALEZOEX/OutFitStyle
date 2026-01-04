@@ -88,6 +88,27 @@ Authorization: Bearer <access_token>
 }
 ```
 
+#### POST /auth/validate
+Проверка валидности токена (для silent login)
+
+**Заголовки:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Ответ:**
+```json
+{
+  "valid": true,
+  "user": {
+    "id": "user_id",
+    "display_name": "User Name",
+    "email": "user@example.com",
+    "avatar_url": "https://example.com/avatar.jpg"
+  }
+}
+```
+
 ### Рекомендации
 
 #### GET /recommendations

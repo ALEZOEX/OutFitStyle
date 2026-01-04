@@ -26,7 +26,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final onboardingDone = ref.watch(onboardingDoneProvider);
 
   return GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/auth', // Изменили начальный маршрут на аутентификацию
     redirect: (context, state) {
       final loc = state.matchedLocation;
 
@@ -34,7 +34,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final goingOnboarding = loc.startsWith('/onboarding');
 
       // пока не знаем — не редиректим
-      if (session == SessionStatus.unknown || onboardingDone.isLoading) return null;
+      if (session == SessionStatus.unknown || onboardingDone.isLoading) {
+        // Если состояние неизвестно, направляем на аутентификацию
+        if (!goingAuth) return '/auth';
+        return null;
+      }
 
       final isAuthed = session == SessionStatus.authed;
       final done = onboardingDone.value ?? false;

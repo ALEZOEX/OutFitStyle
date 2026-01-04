@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -155,6 +156,43 @@ func (r *SessionRepository) RevokeForUser(ctx context.Context, userID domain.ID,
 		return repositories.ErrNotFound
 	}
 	return nil
+}
+
+func (r *SessionRepository) UpdateDeviceInfo(ctx context.Context, sessionID domain.ID, p repositories.UpdateDeviceInfoParams) error {
+	query := `UPDATE user_sessions SET updated_at = NOW()`
+	args := []interface{}{sessionID}
+	argIndex := 2
+
+	if p.DeviceID != nil {
+		query += fmt.Sprintf(", device_id = $%d", argIndex)
+		args = append(args, *p.DeviceID)
+		argIndex++
+	}
+	if p.DeviceName != nil {
+		query += fmt.Sprintf(", device_name = $%d", argIndex)
+		args = append(args, *p.DeviceName)
+		argIndex++
+	}
+	if p.DeviceType != nil {
+		query += fmt.Sprintf(", device_type = $%d", argIndex)
+		args = append(args, *p.DeviceType)
+		argIndex++
+	}
+	if p.IPAddress != nil {
+		query += fmt.Sprintf(", ip_address = $%d", argIndex)
+		args = append(args, *p.IPAddress)
+		argIndex++
+	}
+	if p.UserAgent != nil {
+		query += fmt.Sprintf(", user_agent = $%d", argIndex)
+		args = append(args, *p.UserAgent)
+		argIndex++
+	}
+
+	query += " WHERE id = $1"
+
+	_, err := r.db.Pool().Exec(ctx, query, args...)
+	return err
 }
 
 func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([]repositories.Session, error) {

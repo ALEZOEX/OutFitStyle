@@ -15,11 +15,13 @@ class AuthStorage {
   }
 
   Future<String?> readAccessToken() async {
-    return await _storage.read(key: _kAccessToken);
+    final tokenPair = await readTokenPair();
+    return tokenPair?.accessToken;
   }
 
   Future<String?> readRefreshToken() async {
-    return await _storage.read(key: _kRefreshToken);
+    final tokenPair = await readTokenPair();
+    return tokenPair?.refreshToken;
   }
 
   Future<TokenPair?> readTokenPair() async {
@@ -30,10 +32,13 @@ class AuthStorage {
     if (access == null || refresh == null) return null;
 
     final expiresAt = expiresAtStr != null ? DateTime.tryParse(expiresAtStr) : null;
+
+    // Проверяем, истек ли токен, но НЕ очищаем сессию сразу
+    // Это позволит использовать токен до его фактической проверки на сервере
     if (expiresAt != null && DateTime.now().isAfter(expiresAt)) {
-      // Токен истёк, очищаем сессию
-      await clearSession();
-      return null;
+      // Токен истёк, но не очищаем сессию - пусть сервер решит, нужна ли очистка
+      // await clearSession();
+      // return null;
     }
 
     return TokenPair(
@@ -47,5 +52,10 @@ class AuthStorage {
     await _storage.delete(key: _kAccessToken);
     await _storage.delete(key: _kRefreshToken);
     await _storage.delete(key: _kExpiresAt);
+  }
+
+  Future<DateTime?> readExpiresAt() async {
+    final tokenPair = await readTokenPair();
+    return tokenPair?.expiresAt;
   }
 }

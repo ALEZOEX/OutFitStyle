@@ -210,14 +210,37 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 		}
 		resultUser = newUser
 	} else {
-		// Пользователь есть. Можно обновить аватарку или OAuth поля, если нужно.
-		// Для MVP просто логиним.
-		resultUser = u
+		// 4. Пользователь существует
+		// Проверяем, если у пользователя уже есть OAuth-провайдер (Google), просто логиним
+		if u.OAuthProvider != nil && *u.OAuthProvider == "google" {
+			resultUser = u
+		} else {
+			// 5. Пользователь существует с email-паролем, нужно "склеить" аккаунты
+			// Обновляем профиль данными из Google
+			provider := "google"
+			updatedUser := &domain.User{
+				ID:            u.ID,
+				Email:         u.Email,
+				PasswordHash:  u.PasswordHash, // Сохраняем старый пароль, если есть
+				DisplayName:   &gUser.FirstName,
+				AvatarURL:     &gUser.Picture,
+				IsActive:      u.IsActive,
+				IsVerified:    true, // Google проверил email
+				OAuthProvider: &provider, // Устанавливаем OAuth-провайдер
+				OAuthID:       nil,
+				Locale:        u.Locale,
+				Timezone:      u.Timezone,
+			}
+
+			// Обновляем пользователя в базе
+			if err := s.userRepo.UpdateUser(ctx, updatedUser); err != nil {
+				return nil, err
+			}
+			resultUser = updatedUser
+		}
 	}
 
-	// 4. Генерируем сессию и токены (ИСПРАВЛЕНИЕ ТВОЕЙ ОШИБКИ)
-	// Используем тот же хелпер, что и в Login/Register.
-	// Он сам разберется с GenerateAccessToken(3 аргумента) и SessionRepo.Create.
+	// 6. Генерируем сессию и токены
 	pair, err := s.createSessionAndTokens(ctx, resultUser.ID, device)
 	if err != nil {
 		return nil, err
@@ -251,6 +274,68 @@ func (s *AuthService) ValidateAccessToken(ctx context.Context, accessToken strin
 	_ = s.sessionRepo.Touch(ctx, sessionID)
 
 	return userID, sessionID, nil
+}
+
+func (s *AuthService) ValidateTokenForSilentLogin(ctx context.Context, accessToken string) (*domain.User, error) {
+	userID, sessionID, err := s.ValidateAccessToken(ctx, accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.userRepo.GetUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, ErrUnauthorized
+	}
+
+	// Update session last used time
+	_ = s.sessionRepo.Touch(ctx, sessionID)
+
+	return user, nil
+}
+
+func (s *AuthService) SilentLogin(ctx context.Context, accessToken string, device DeviceInfo) (*LoginResult, error) {
+	// Validate the existing access token
+	userID, sessionID, err := s.ValidateAccessToken(ctx, accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get user info
+	user, err := s.userRepo.GetUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, ErrUnauthorized
+	}
+
+	// Update session with new device info if provided
+	if device.DeviceID != nil || device.DeviceName != nil || device.DeviceType != nil || device.IPAddress != nil || device.UserAgent != nil {
+		err = s.sessionRepo.UpdateDeviceInfo(ctx, sessionID, repositories.UpdateDeviceInfoParams{
+			DeviceID:   device.DeviceID,
+			DeviceName: device.DeviceName,
+			DeviceType: device.DeviceType,
+			IPAddress:  device.IPAddress,
+			UserAgent:  device.UserAgent,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Generate new token pair for continued session
+	newPair, err := s.createSessionAndTokens(ctx, userID, device)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResult{
+		User:   user,
+		Tokens: newPair,
+	}, nil
 }
 
 func (s *AuthService) createSessionAndTokens(ctx context.Context, userID domain.ID, device DeviceInfo) (domain.TokenPair, error) {

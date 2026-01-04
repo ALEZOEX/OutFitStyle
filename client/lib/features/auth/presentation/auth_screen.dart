@@ -23,6 +23,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
 
   bool _loggingIn = false;
   bool _registering = false;
+  bool _loggingInWithGoogle = false;
   String? _error;
 
   @override
@@ -72,6 +73,22 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _registering = false);
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    if (_loggingInWithGoogle) return;
+    setState(() { _loggingInWithGoogle = true; _error = null; });
+
+    try {
+      final repo = ref.read(authRepositoryProvider);
+      await repo.loginWithGoogle();
+      Haptics.success();
+      ref.read(sessionProvider.notifier).refreshSession();
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _loggingInWithGoogle = false);
     }
   }
 
@@ -131,6 +148,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
           child: _loggingIn
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : const Text('Войти', style: TextStyle(fontWeight: FontWeight.w800)),
+        ),
+        const SizedBox(height: 16),
+        // Разделитель
+        const Row(children: [
+          Expanded(child: Divider()),
+          Padding(padding: EdgeInsets.all(8), child: Text("ИЛИ")),
+          Expanded(child: Divider())
+        ]),
+        const SizedBox(height: 16),
+        // Кнопка Google
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            icon: Icon(Icons.g_mobiledata, color: Colors.red), // Используем встроенную иконку Google
+            label: const Text('Войти через Google'),
+            onPressed: _loggingInWithGoogle ? null : _loginWithGoogle,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
         ),
       ],
     );

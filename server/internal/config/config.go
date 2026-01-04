@@ -138,7 +138,16 @@ type AppConfig struct {
 	APIKeys     APIKeysConfig
 }
 
+
 func Load() (*AppConfig, error) {
+// Проверяем системное время на аномалии
+currentTime := time.Now()
+if currentTime.Year() > 2025 {
+log.Printf("Warning: System date is set to a future date (%s), this may cause issues with SSL certificates, JWT tokens, and caching", currentTime.Format("2006-01-02"))
+} else if currentTime.Year() < 2020 {
+log.Printf("Warning: System date is set to a past date (%s), this may cause issues with SSL certificates, JWT tokens, and caching", currentTime.Format("2006-01-02"))
+}
+
 // .env грузим только локально
 if os.Getenv("RUN_IN_DOCKER") == "" {
 if err := godotenv.Load(); err != nil {
@@ -168,7 +177,7 @@ Security: SecurityConfig{
 JWTSecret:          getEnvFirst([]string{"JWT_SECRET"}, ""),
 AccessTokenTTL:     getEnvDurationFirst([]string{"JWT_ACCESS_TOKEN_TTL"}, 15*time.Minute),
 RefreshTokenTTL:    getEnvDurationFirst([]string{"JWT_REFRESH_TOKEN_TTL"}, 720*time.Hour),
-CORSAllowedOrigins: splitCSV(getEnvFirst([]string{"CORS_ALLOWED_ORIGINS"}, "*")),
+CORSAllowedOrigins: splitCSV(getEnvFirst([]string{"CORS_ALLOWED_ORIGINS", "CORS_ALLOWED_ORIGIN"}, "")),
 RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", getEnvInt("RATE_LIMIT", 100, 1, 100000), 1, 100000),
 GoogleClientID:     getEnvFirst([]string{"GOOGLE_CLIENT_ID"}, ""),
 },

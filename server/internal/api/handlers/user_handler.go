@@ -60,6 +60,8 @@ func (h *UserHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/preferences", h.GetPreferences).Methods(http.MethodGet)
 	r.HandleFunc("/preferences", h.UpdatePreferences).Methods(http.MethodPut)
 
+	r.HandleFunc("/body", h.UpdateBodyMeasurements).Methods(http.MethodPut)
+
 	r.HandleFunc("/avatar", h.UploadAvatar).Methods(http.MethodPost)
 
 	r.HandleFunc("/export", h.Export).Methods(http.MethodGet)
