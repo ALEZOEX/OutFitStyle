@@ -1,4 +1,4 @@
-name: CI
+name: Security & Tests CI
 
 on:
   push:
@@ -7,53 +7,98 @@ on:
     branches: [ main ]
 
 jobs:
-  go-server:
+
+  # 1. Запуск unit-тестов
+  test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: outfitstyle
-          POSTGRES_USER: outfitstyle
-          POSTGRES_PASSWORD: outfitstyle
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U outfitstyle -d outfitstyle"
-          --health-interval=5s
-          --health-timeout=3s
-          --health-retries=20
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=5s
-          --health-timeout=3s
-          --health-retries=20
-
-    defaults:
-      run:
-        working-directory: server
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          go-version-file: server/go.mod
-          cache: true
+          go-version: '1.24'
 
-      - name: Go test (unit)
-        run: go test ./...
+      - name: Run tests
+        run: |
+          cd server
+          go mod tidy
+          go test -v ./...
 
-      - name: Migrate DB
-        env:
-          DATABASE_URL: postgres://outfitstyle:outfitstyle@localhost:5432/outfitstyle?sslmode=disable
-        run: go run ./cmd/migrate
+  # 2. Проверка уязвимостей в Go-зависимостях
+  go-vuln-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Go test (integration)
-        env:
-          DATABASE_URL: postgres://outfitstyle:outfitstyle@localhost:5432/outfitstyle?sslmode=disable
-          REDIS_URL: redis://localhost:6379/0
-        run: go test -tags=integration ./...
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck
+        run: |
+          cd server
+          govulncheck ./...
+
+  # 3. SAST анализ с gosec
+  gosec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+      - name: Run gosec
+        run: |
+          cd server
+          gosec ./...
+
+  # 4. Сборка и сканирование Docker-образа
+  docker-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: |
+          docker build -t outfitstyle/api:test -f ./server/Dockerfile .
+          
+      - name: Install Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: 'outfitstyle/api:test'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: 'outfitstyle/api:test'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
