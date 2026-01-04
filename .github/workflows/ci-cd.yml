@@ -54,7 +54,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push server
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       with:
         context: ./server
         file: ./server/Dockerfile.prod
@@ -62,7 +62,7 @@ jobs:
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/outfitstyle-server:latest
 
     - name: Build and push ml-service
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       with:
         context: ./server/ml-service
         file: ./server/ml-service/Dockerfile.prod
@@ -70,7 +70,7 @@ jobs:
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/outfitstyle-ml:latest
 
     - name: Build and push marketplace-service
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v6
       with:
         context: ./server/marketplace-service
         file: ./server/marketplace-service/Dockerfile.prod
