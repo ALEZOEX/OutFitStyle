@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -282,8 +283,19 @@ func (h *UserHandler) UpdatePreferences(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var prefs domain.UserPreferences
-	if err := json.NewDecoder(r.Body).Decode(&prefs); err != nil {
-		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields() // Это поможет выявить неправильные поля
+
+	if err := decoder.Decode(&prefs); err != nil {
+		if _, ok := err.(*json.SyntaxError); ok {
+			resp.Error(w, http.StatusBadRequest, errors.New("invalid JSON syntax"))
+			return
+		}
+		if _, ok := err.(*json.UnmarshalTypeError); ok {
+			resp.Error(w, http.StatusBadRequest, errors.New("invalid field type in JSON"))
+			return
+		}
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid body: %v", err))
 		return
 	}
 
