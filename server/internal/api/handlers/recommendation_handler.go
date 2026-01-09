@@ -41,6 +41,7 @@ func (h *RecommendationHandler) RegisterRoutes(r *mux.Router) {
 func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
+		h.log.Info("Auth required for recommendation creation")
 		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
 		return
 	}
@@ -48,18 +49,20 @@ func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var req domain.RecommendationCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.Error("Failed to decode recommendation request", zap.Error(err))
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
 		return
 	}
 
+	h.log.Info("Creating recommendation", zap.Any("request", req))
 	rec, err := h.svc.Create(r.Context(), userID, req)
 	if err != nil {
-		// ДОБАВИЛ ЛОГ:
 		h.log.Error("Failed to create recommendation", zap.Error(err))
-		resp.Error(w, http.StatusInternalServerError, err) // Возвращаем текст ошибки клиенту (для отладки)
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to create recommendation"))
 		return
 	}
 
+	h.log.Info("Successfully created recommendation", zap.String("id", rec.ID.String()))
 	resp.Success(w, map[string]any{
 		"recommendation": rec,
 		// remaining_today добавим позже вместе с подписками/лимитами

@@ -189,3 +189,5 @@ cleanup.*
 *_REPORT.txt
 *_REPORT.doc
 *_REPORT.docx
+.qwen/
+gha-creds-*.json

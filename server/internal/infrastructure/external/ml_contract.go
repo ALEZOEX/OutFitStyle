@@ -34,6 +34,7 @@ type TZMLUserPreferences struct {
 	AvoidStyles            []string `json:"avoid_styles"`
 	ColorPreferences       []string `json:"color_preferences"`
 	AvoidColors            []string `json:"avoid_colors"`
+	PreferredCategories    []string `json:"preferred_categories"`
 	TemperatureSensitivity int      `json:"temperature_sensitivity"`
 }
 

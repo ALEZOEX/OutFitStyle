@@ -772,6 +772,7 @@ func (s *RecommendationService) rankLiteOrFallback(
 			AvoidStyles:            prefs.AvoidStyles,
 			ColorPreferences:       prefs.ColorPreferences,
 			AvoidColors:            prefs.AvoidColors,
+			PreferredCategories:    prefs.PreferredCategories,
 			TemperatureSensitivity: derefInt(prefs.TemperatureSensitivity, 0),
 		},
 		UserHistory: external.TZMLUserHistory{
@@ -1011,6 +1012,13 @@ func derefInt(p *int, def int) int {
 	return *p
 }
 
+func derefString(p *string, def string) string {
+	if p == nil {
+		return def
+	};
+	return *p
+}
+
 // List/Get/Rate/Favorite — оставляем как в вашем текущем сервисе (из Модуля 19).
 func (s *RecommendationService) List(ctx context.Context, userID domain.ID, q domain.RecommendationListQuery) ([]domain.RecommendationRecord, int, error) {
 	return s.recRepo.ListByUser(ctx, userID, q)
@@ -1037,3 +1045,4 @@ func (s *RecommendationService) SetFavorite(ctx context.Context, userID domain.I
 func (s *RecommendationService) Favorites(ctx context.Context, userID domain.ID, limit int) ([]domain.RecommendationRecord, error) {
 	return s.recRepo.ListFavorites(ctx, userID, limit)
 }
+

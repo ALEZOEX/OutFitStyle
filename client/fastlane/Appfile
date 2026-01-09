@@ -1,0 +1,3 @@
+app_identifier("com.outfitstyle.app")
+apple_id("your@apple.id")
+team_id("YOURTEAMID")

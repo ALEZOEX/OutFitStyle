@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/mitchellh/mapstructure"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/middleware"
@@ -57,6 +60,9 @@ func NewUserHandler(
 func (h *UserHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/profile", h.GetMyProfile).Methods(http.MethodGet)
 	r.HandleFunc("/profile", h.UpdateMyProfile).Methods(http.MethodPut)
+
+	// /me is an alias for current user's profile
+	r.HandleFunc("/me", h.GetMyProfile).Methods(http.MethodGet)
 
 	r.HandleFunc("/preferences", h.GetPreferences).Methods(http.MethodGet)
 	r.HandleFunc("/preferences", h.UpdatePreferences).Methods(http.MethodPut)
@@ -282,22 +288,46 @@ func (h *UserHandler) UpdatePreferences(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var prefs domain.UserPreferences
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields() // Это поможет выявить неправильные поля
-
-	if err := decoder.Decode(&prefs); err != nil {
-		if _, ok := err.(*json.SyntaxError); ok {
-			resp.Error(w, http.StatusBadRequest, errors.New("invalid JSON syntax"))
-			return
-		}
-		if _, ok := err.(*json.UnmarshalTypeError); ok {
-			resp.Error(w, http.StatusBadRequest, errors.New("invalid field type in JSON"))
-			return
-		}
-		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid body: %v", err))
+	// Читаем тело запроса
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("failed to read request body: %v", err))
 		return
 	}
+
+	// Декодируем в map для гибкой обработки
+	var rawPrefs map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &rawPrefs); err != nil {
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid JSON: %v", err))
+		h.logger.Error("invalid JSON in preferences", zap.String("body", string(bodyBytes)), zap.Error(err))
+		return
+	}
+
+	// Создаем структуру для маппинга
+	var prefs domain.UserPreferences
+
+	// Используем mapstructure для маппинга с игнорированием неизвестных полей
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result:           &prefs,
+		TagName:          "json",
+		WeaklyTypedInput: true, // Позволяет преобразование типов
+		ErrorUnused:      false, // Не ошибка при неизвестных полях
+	})
+
+	if err != nil {
+		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to create decoder: %v", err))
+		h.logger.Error("failed to create mapstructure decoder", zap.Error(err))
+		return
+	}
+
+	if err := decoder.Decode(rawPrefs); err != nil {
+		h.logger.Error("failed to decode preferences", zap.Error(err), zap.Any("raw_prefs", rawPrefs))
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid preferences format: %v", err))
+		return
+	}
+
+	// Возвращаем тело для последующей обработки
+	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	out, err := h.userService.UpdatePreferences(r.Context(), userID, prefs)
 	if err != nil {
