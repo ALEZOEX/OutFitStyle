@@ -14,7 +14,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 
 	// Database
-	github.com/jackc/pgx/v5 v5.7.6 // PostgreSQL driver
+	github.com/jackc/pgx/v5 v5.8.0 // PostgreSQL driver
 
 	// Configuration
 	github.com/joho/godotenv v1.5.1
