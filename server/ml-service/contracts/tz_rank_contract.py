@@ -47,6 +47,7 @@ class TZUserPreferences(BaseModel):
     avoid_styles: List[str] = []
     color_preferences: List[str] = []
     avoid_colors: List[str] = []
+    preferred_categories: List[str] = []
     temperature_sensitivity: int = 0
 
 

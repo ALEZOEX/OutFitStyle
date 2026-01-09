@@ -1,71 +1,135 @@
 # Contributing to OutfitStyle
 
-Thank you for your interest in contributing to OutfitStyle! We welcome contributions from the community.
+Thank you for your interest in contributing to OutfitStyle! We welcome contributions from everyone.
+
+## 📋 Table of Contents
+
+- [Getting Started](#getting-started)
+- [Development Workflow](#development-workflow)
+- [Code Style](#code-style)
+- [Testing](#testing)
+- [Pull Requests](#pull-requests)
+- [Issue Guidelines](#issue-guidelines)
+
+## Getting Started
+
+1. Fork the repository
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/outfitstyle.git`
+3. Create a new branch: `git checkout -b feature/your-feature-name`
+4. Follow the [Quick Start](README.md#quick-start) instructions to set up your development environment
+
+## Development Workflow
+
+### Backend (Go)
+
+1. Make sure you have Go 1.21+ installed
+2. Run tests: `go test ./...`
+3. Format code: `go fmt ./...`
+4. Run linter: `golangci-lint run`
+
+### Frontend (Flutter)
+
+1. Make sure you have Flutter SDK installed
+2. Run tests: `flutter test`
+3. Format code: `flutter format .`
+4. Analyze code: `flutter analyze`
+
+### ML Service (Python)
+
+1. Make sure you have Python 3.11+ installed
+2. Run tests: `python -m pytest tests/`
+3. Format code: `black .`
+4. Run linter: `ruff check .`
+
+## Code Style
+
+### Go
+- Follow [Effective Go](https://golang.org/doc/effective_go.html)
+- Use `gofmt` for formatting
+- Write clear, documented code
+- Add tests for new functionality
+
+### Flutter/Dart
+- Follow [Effective Dart](https://dart.dev/guides/language/effective-dart)
+- Use `flutter format` for formatting
+- Follow Riverpod best practices
+- Write widget tests for UI components
+
+### Python
+- Follow [PEP 8](https://pep8.org/)
+- Use `black` for formatting
+- Use `mypy` for type checking
+- Write docstrings for functions
+
+## Testing
+
+### Backend Tests
+- Write unit tests for business logic
+- Write integration tests for database operations
+- Aim for >70% test coverage
+- Use table-driven tests where appropriate
+
+### Frontend Tests
+- Write unit tests for providers/state notifiers
+- Write widget tests for UI components
+- Write integration tests for critical user flows
+- Use golden tests for UI regression
+
+### ML Service Tests
+- Write unit tests for ML algorithms
+- Write integration tests for API endpoints
+- Test edge cases and error conditions
+- Test performance with realistic datasets
+
+## Pull Requests
+
+1. Create a descriptive title and detailed description
+2. Link to any related issues
+3. Include screenshots for UI changes
+4. Make sure all tests pass
+5. Request review from maintainers
+6. Address feedback promptly
+
+### PR Template
+
+```markdown
+## Summary
+Brief description of changes
+
+## Changes
+- Change 1
+- Change 2
+- Change 3
+
+## Testing
+- [ ] Tests pass locally
+- [ ] New functionality tested
+- [ ] Existing functionality still works
+- [ ] UI changes tested on multiple devices
+
+## Related Issues
+Fixes #issue-number
+```
+
+## Issue Guidelines
+
+### Good Issues Include:
+- Clear, descriptive title
+- Detailed description of the problem
+- Steps to reproduce (for bugs)
+- Expected vs actual behavior
+- Screenshots if applicable
+- Environment information (OS, browser, version)
+
+### Before Submitting:
+- Search existing issues
+- Check if the issue is reproducible
+- Consider if you can fix it yourself
 
 ## Code of Conduct
 
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions.
 
-## How to Contribute
+## Questions?
 
-### Reporting Bugs
-
-- Ensure the bug was not already reported by searching on GitHub under [Issues](https://github.com/your-username/outfitstyle/issues).
-- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/your-username/outfitstyle/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
-
-### Suggesting Enhancements
-
-- Open a new issue with a clear title and detailed description of the suggested enhancement.
-- Provide examples of how the enhancement would be used.
-- Explain why this enhancement would be useful to most OutfitStyle users.
-
-### Pull Requests
-
-1. Fork the repository
-2. Create a new branch for your feature or bug fix
-3. Make your changes
-4. Add or update tests as necessary
-5. Ensure all tests pass
-6. Update documentation if needed
-7. Submit a pull request
-
-### Development Setup
-
-1. Clone your fork of the repository
-2. Install dependencies for each service:
-   - For Go service: `cd server && go mod tidy`
-   - For ML service: `cd server/ml-service && pip install -r requirements.txt`
-3. Set up environment variables using the `.env.example` files
-4. Run tests to ensure everything works: `make test`
-
-### Code Style
-
-- Follow the existing code style in the project
-- Write clear, concise commit messages
-- Add comments to explain complex code
-- Write unit tests for new functionality
-
-### Commit Messages
-
-- Use the present tense ("Add feature" not "Added feature")
-- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
-- Limit the first line to 72 characters or less
-- Reference issues and pull requests liberally after the first line
-
-## Architecture Overview
-
-OutfitStyle uses a microservices architecture:
-
-1. **Go API Server** - Main backend service handling REST API requests
-2. **ML Service** - Python-based machine learning service for outfit recommendations
-3. **Marketplace Service** - Service for integrating with clothing marketplaces
-4. **Flutter Client** - Mobile and web client
-
-## Getting Help
-
-If you need help, you can:
-
-- Open an issue with the "question" label
-- Contact the maintainers directly
-
-Thank you for contributing!
+Feel free to reach out to the maintainers or ask questions in the issue tracker.

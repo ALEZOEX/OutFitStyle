@@ -28,7 +28,9 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
   void initState() {
     super.initState();
     _burst = LikeBurstController();
+    // Вызываем bootstrap асинхронно, чтобы не блокировать инициализацию
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Run bootstrap without awaiting to not block initialization
       ref.read(generatorControllerProvider.notifier).bootstrap();
     });
   }

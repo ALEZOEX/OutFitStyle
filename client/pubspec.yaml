@@ -57,6 +57,12 @@ dependencies:
   crypto: ^3.0.3
   uuid: ^4.5.1
   connectivity_plus: ^6.1.0
+  firebase_core: ^2.24.2
+  firebase_crashlytics: ^3.4.8
+  firebase_analytics: ^10.7.4
+  firebase_remote_config: ^4.3.9
+  firebase_messaging: ^14.7.10
+  flutter_local_notifications: ^17.2.2
 
 dev_dependencies:
   flutter_test:

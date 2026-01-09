@@ -1,163 +1,197 @@
-# Профессиональная архитектура OutfitStyle
+# OutfitStyle Architecture
 
-## Обзор
+## Overview
 
-OutfitStyle реализует продвинутую архитектуру с единой моделью вещей и системой Retrieval + Ranking для подбора рекомендаций. 
+OutfitStyle follows a microservices architecture with clean architecture principles. The system consists of three main services that communicate via REST APIs and share data through a PostgreSQL database.
 
-## Продовый подход: единая модель вещей → Retrieval → Ranking
+## System Architecture
 
-### Цели архитектуры
-- Единый каталог вещей в Postgres с различными источниками:
-  - Реальные вещи гардероба пользователя
-  - Вещи из интернет-каталога/парсинга
-  - "Образцовые" Kaggle-вещи
-- Приоритеты источников:
-  - Личный гардероб (если по погоде подходит)
-  - Реальные новые вещи (catalog/marketplace)
-  - Kaggle seed как "учебный магазин"
-- Retrieval (подбор кандидатов): быстрый SQL/правила по погоде, полу, стилю, сезону и источнику
-- Ranking (ML-модель): ранжирует и комбинирует уже малое число кандидатов (до 500–1000, а не 44k)
-- Никаких таймаутов/404 от ML, никакого "ручного затыкания дыр"
-
-## Структура БД
-
-### clothing_items
-Расширенная таблица с атрибутами:
-- `gender`, `master_category`, `subcategory`, `season`, `base_colour`, `usage`
-- `source` ('wardrobe', 'catalog', 'kaggle_seed', ...)
-- `is_owned`, `owner_user_id`
-- `min_temp`, `max_temp`, `warmth_level`, `formality_level`
-
-### wardrobe_items
-Связь между пользователями и их личными вещами:
-- `user_id`, `clothing_item_id`
-- Это позволяет быстро получать пользовательские вещи
-
-## ML-ранжирование: приоритет источников
-
-### В фичах модели
-- One-hot/label-encoding для `source` (wardrobe, catalog, kaggle_seed)
-- Бинарный признак `is_owned`
-- При финальном скоринге:
-  - +α к score, если `is_owned = True` и вещь подходит по погоде (личные вещи)
-  - Немного меньший приоритет для catalog по сравнению с wardrobe
-  - Kaggle_seed — базовая линия (0)
-
-## Go-бэкенд: упрощённый ML-клиент
-
-- ML-сервис теперь всегда работает через `clothing_items`, никаких CSV/404/таймаутов на 40 секунд
-- Убраны почти все костыли в `RecommendationService.GetRecommendations`
-- Теперь все рекомендации сохраняются в БД, так как все вещи из базы данных
-- При `source='kaggle_seed'` в ответе ML-сервиса — рекомендации не сохраняются в БД (как и сейчас)
-- Когда Kaggle-вещи будут в `clothing_items` с нормальными ID и FK — проверки можно убирать
-
-## Flutter: нормальное разделение источников
-
-### Модель ClothingItem
-Обновлена для парсинга всех новых полей:
-```dart
-class ClothingItem {
-  final int id;
-  final String name;
-  final String category;
-  final String? subcategory;
-  final String source;   // 'wardrobe', 'catalog', 'kaggle_seed'
-  final bool isOwned;
-  final double? minTemp;
-  final double? maxTemp;
-  final int? warmthLevel;
-  final int? formalityLevel;
-  // ...
-}
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Flutter App   │    │    Go API       │    │  Python ML      │
+│                 │    │                 │    │  Service        │
+│  Presentation   │◄──►│  Business Logic │◄──►│                 │
+│  Layer          │    │  Layer          │    │  ML Models      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                       ┌─────────────────┐
+                       │  PostgreSQL     │
+                       │  Database       │
+                       └─────────────────┘
 ```
 
-### Визуальное разделение в UI
-- "Что из твоего гардероба" (isOwned == true) — отмечено специальной иконкой
-- "Что стоит докупить" (isOwned == false и source != 'kaggle_seed') — с пометкой
-- "Образцовые варианты" (source == 'kaggle_seed') — отображаются как идея
+## Service Architecture
 
-### Пустой список
-Если `items.isEmpty` → показываем "Нет подходящих вещей, добавь одежду в гардероб" вместо стека ошибок.
+### Go Backend Service
 
-## Преимущества подхода
+**Purpose**: Main API gateway, authentication, business logic, and data orchestration.
 
-1. **Профессиональный**: 
-   - Единая схема
-   - Чёткое разделение Retrieval/Ranking
-   - Предсказуемые таймауты
-   - Приоритеты источников
+**Components**:
+- **API Layer**: HTTP handlers and middleware
+- **Service Layer**: Business logic and cross-service coordination
+- **Repository Layer**: Database interactions
+- **Infrastructure Layer**: External service integrations
 
-2. **Гибкий**:
-   - Можно добавлять реальные вещи, парсеры
-   - Менять веса без ломки архитектуры
+**Technologies**:
+- Go 1.21+
+- PostgreSQL
+- JWT for authentication
+- Prometheus for metrics
+- Zap for logging
 
-3. **Учитывает сценарии**:
-   - Бедный/непосезонный гардероб
-   - Комбинирование Wardrobe + Catalog + Kaggle
-   - Сохранение разнообразия и "крутости" рекомендаций за счёт десятков тысяч seed-вещей
+### Python ML Service
 
-## ЭТАП 4: ML-ранжирование с учетом источников
+**Purpose**: Machine learning-powered outfit recommendations and predictions.
 
-### Обновления в ML-модели
+**Components**:
+- **API Layer**: FastAPI endpoints
+- **Service Layer**: ML model orchestration
+- **Model Layer**: scikit-learn models and algorithms
+- **Data Layer**: Feature engineering and preprocessing
 
-В `EnhancedOutfitPredictor` и `features.py` добавлены новые признаки:
-- `is_wardrobe` - one-hot признак для вещей из гардероба
-- `is_catalog` - one-hot признак для вещей из каталога
-- `is_kaggle_seed` - one-hot признак для образцовых вещей
-- `is_owned` - бинарный признак принадлежности пользователю
+**Technologies**:
+- Python 3.11+
+- FastAPI
+- scikit-learn
+- pandas
+- numpy
 
-### Приоритеты в ранжировании
+### Flutter Frontend
 
-В финальном скоринге реализована следующая логика:
-- Вещи из гардероба (wardrobe) получают +α к score при подходящих погодных условиях
-- Вещи из каталога (catalog) имеют средний приоритет
-- Образцовые вещи (kaggle_seed) служат базовой линией (0)
+**Purpose**: User interface and client-side data management.
 
-## ЭТАП 5: Go-бэкенд с упрощенным ML-клиентом
+**Components**:
+- **Presentation Layer**: UI widgets and screens
+- **Domain Layer**: Business logic and use cases
+- **Data Layer**: API clients and local storage
+- **Core Layer**: Utilities and shared functionality
 
-### Упрощения в ML-сервисе
+**Technologies**:
+- Flutter
+- Riverpod (state management)
+- Drift (local SQLite)
+- Firebase (analytics, crashlytics)
 
-- ML-сервис теперь всегда работает через `clothing_items` в БД
-- Убраны все проблемы с CSV/404/таймаутами
-- Прекращено использование `load_internal_dataset_items()`
-- Возвращено поле `source` для правильной идентификации источника вещей
+## Data Flow
 
-### Улучшения в RecommendationService
+### Recommendation Generation
 
-- Убраны почти все костыли из `GetRecommendations`
-- При наличии `source='kaggle_seed'` в ответе ML-сервиса - рекомендации не сохраняются в БД
-- Когда Kaggle-вещи находятся в `clothing_items` с нормальными ID и FK - проверки можно убирать
+1. User requests recommendations via Flutter app
+2. Flutter app calls Go API `/api/v1/recommendations`
+3. Go API retrieves user's wardrobe and preferences from database
+4. Go API fetches current weather data from external API
+5. Go API sends request to Python ML service with user data
+6. Python ML service processes data through ML models
+7. Python ML service returns ranked recommendations
+8. Go API saves recommendations to database
+9. Go API returns recommendations to Flutter app
+10. Flutter app displays recommendations to user
 
-## ЭТАП 6: Flutter с улучшенной обработкой источников
+### User Interaction
 
-### Обновленная модель ClothingItem
+1. User swipes on recommendation (like/dislike)
+2. Flutter app sends feedback to Go API
+3. Go API stores feedback in database
+4. Go API updates ML service with feedback (for model improvement)
+5. Feedback is used to improve future recommendations
 
-Теперь модель `ClothingItem` в Dart корректно обрабатывает поля:
-- `source` - источник ('wardrobe', 'catalog', 'kaggle_seed')
-- `is_owned` - принадлежит ли пользователю
+## Security
 
-### Визуальное разделение источников
+### Authentication
+- OAuth 2.0 with Google Sign-In
+- JWT tokens for session management
+- Refresh token rotation
+- Secure token storage
 
-В интерфейсе реализовано визуальное разделение:
-- "Что есть в гардеробе" (isOwned == true) - зеленая метка
-- "Что можно докупить" (isOwned == false и source != 'kaggle_seed') - синяя метка
-- "Образцовые варианты" (source == 'kaggle_seed') - оранжевая метка
+### Authorization
+- Role-based access control
+- API key authentication for service-to-service communication
+- Rate limiting per user/IP
 
-### Обработка пустых списков
+### Data Protection
+- HTTPS encryption in transit
+- Database encryption at rest
+- Input validation and sanitization
+- SQL injection prevention
 
-При отсутствии вещей:
-- Показывается понятное сообщение "нет вещей, добавь одежду в гардероб"
-- Нет пустых списов или ошибок отображения
-- Сохраняется стабильность интерфейса
+## Scalability
 
-## Результаты
+### Horizontal Scaling
+- Stateless services (can be scaled independently)
+- Load balancing with NGINX
+- Database connection pooling
+- Caching with Redis
 
-Такой подход создает:
+### Vertical Scaling
+- Resource limits and requests in Kubernetes
+- Auto-scaling based on CPU/memory usage
+- Database indexing and query optimization
 
-- **Профессиональную архитектуру** с единым каталогом и четким разделением Retrieval/Ranking
-- **Гибкую систему**, позволяющую легко добавлять новые источники данных
-- **Учет ваших сценариев** использования:
-  - Пустой/не по сезону гардероб → комплект формируется из каталога/Kaggle
-  - Богатый гардероб → приоритет своим вещам
-  - Комбинация источников → гармоничное сочетание разных подходов
-  - Сохранение разности и "крутости" рекомендаций за счет тысяч образцовых вещей
+## Monitoring and Observability
+
+### Metrics
+- Request rate, error rate, and latency (RED metrics)
+- Business metrics (recommendations generated, accepted)
+- System metrics (CPU, memory, disk usage)
+
+### Logging
+- Structured JSON logging
+- Correlation IDs for request tracing
+- Log levels (debug, info, warn, error, fatal)
+
+### Tracing
+- Distributed tracing with OpenTelemetry
+- Request flow visualization
+- Performance bottleneck identification
+
+## Deployment
+
+### Environments
+- **Development**: Local Docker Compose
+- **Staging**: Separate deployment for testing
+- **Production**: Production-grade deployment
+
+### CI/CD
+- GitHub Actions for automated testing
+- Automated Docker image building
+- Blue-green deployment strategy
+- Rollback capabilities
+
+## Technology Decisions
+
+### Why Go for Backend?
+- High performance and concurrency
+- Strong standard library
+- Excellent for microservices
+- Good ecosystem for web services
+
+### Why Python for ML?
+- Rich ML ecosystem (scikit-learn, pandas, numpy)
+- Easy model prototyping and experimentation
+- Strong community support
+- Good integration with data science tools
+
+### Why Flutter for Frontend?
+- Single codebase for iOS and Android
+- Fast development cycle
+- Good performance
+- Rich widget library
+
+## Future Considerations
+
+### Potential Improvements
+- GraphQL for more flexible API queries
+- gRPC for service-to-service communication
+- Event-driven architecture for real-time updates
+- Container orchestration with Kubernetes
+- Advanced caching strategies
+- A/B testing framework (implemented)
+- Feature flag management (implemented)
+- Push notifications (implemented)
+- Offline synchronization enhancements (implemented)
+- Advanced ML model personalization
+- Computer vision for wardrobe item recognition
+- Wearable device integration
+- Voice assistant integration
+- Social features and outfit sharing
