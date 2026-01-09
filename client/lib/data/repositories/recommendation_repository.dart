@@ -34,8 +34,13 @@ class RecommendationRepository {
   }
 
   Future<void> createNew({required String occasion}) async {
-    final rec = await remote.createUsingProfile(occasion: occasion);
-    await _saveRecord(rec);
+    try {
+      final rec = await remote.createUsingProfile(occasion: occasion);
+      await _saveRecord(rec);
+    } catch (e) {
+      print('RecommendationRepository: createNew error: $e');
+      rethrow;
+    }
   }
 
   Future<void> syncHistory({int pages = 2, int limit = 20}) async {

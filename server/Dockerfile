@@ -1,36 +1,41 @@
-# syntax=docker/dockerfile:1
+FROM golang:1.21-alpine AS builder
 
-FROM golang:1.24-alpine AS build
-WORKDIR /src/server
+# Установить зависимости
+RUN apk add --no-cache git ca-certificates gcc musl-dev
 
-RUN apk add --no-cache git ca-certificates
+WORKDIR /app
 
+# Копировать go.mod и go.sum для кэширования зависимостей
 COPY server/go.mod server/go.sum ./
 RUN go mod download
 
-# Копируем исходники
+# Копировать исходный код
 COPY server/ ./
 
-# Build binaries
-WORKDIR /src/server
-RUN CGO_ENABLED=0 GOOS=linux go build -o /out/server ./cmd/server
-RUN CGO_ENABLED=0 GOOS=linux go build -o /out/migrate ./cmd/migrate || true
-RUN CGO_ENABLED=0 GOOS=linux go build -o /out/worker ./cmd/worker || true
+# Собрать бинарник
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main cmd/server/main.go
 
-FROM alpine:3.20
-WORKDIR /app
-RUN apk add --no-cache ca-certificates
+# Второй этап - минимальный образ
+FROM alpine:latest
 
-COPY --from=build /out/server /app/server
-COPY --from=build /out/migrate /app/migrate
+# Установить ca-certificates для HTTPS
+RUN apk --no-cache add ca-certificates
 
-# Copy migrations from the build stage
-COPY --from=build /src/server/migrations /app/migrations
+WORKDIR /root/
 
-# worker is optional and may not build, so we don't copy it
+# Копировать бинарник из builder
+COPY --from=builder /app/main .
 
-ENV MIGRATIONS_DIR=/app/migrations
+# Создать непривилегированный пользователь
+RUN addgroup -g 65532 nonroot && \
+    adduser -D -u 65532 -G nonroot nonroot
+
+USER nonroot
+
+# Проверка здоровья
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
+
 EXPOSE 8080
 
-# default: run api (compose overrides for worker)
-CMD ["/bin/sh", "-c", "/app/migrate && /app/server"]
+CMD ["./main"]

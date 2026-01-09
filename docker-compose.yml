@@ -30,14 +30,14 @@ services:
       context: .
       dockerfile: ./Dockerfile.ml-service
     ports:
-      - "5000:5000"
+      - "5000:8000"
     environment:
       - MODEL_PATH=/app/models/model.pkl
       - LOG_LEVEL=info
     depends_on:
       - postgres
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -88,7 +88,7 @@ services:
       - CORS_ALLOWED_ORIGINS=*
       - RATE_LIMIT_PER_MINUTE=100
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com}
-      - ML_SERVICE_URL=http://ml-service:5000
+      - ML_SERVICE_URL=http://ml-service:8000
       - ML_SERVICE_TIMEOUT=30s
       - WEATHER_API_KEY=${WEATHER_API_KEY:-8e9f1a366923ec63437f21570c89fa17}
       - OPENWEATHER_CACHE_TTL=10m

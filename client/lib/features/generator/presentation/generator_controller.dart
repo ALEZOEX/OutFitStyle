@@ -68,8 +68,12 @@ final generatorDeckProvider = Provider.autoDispose<List<RecommendationRow>>((ref
   final dismissed = ref.watch(generatorControllerProvider.select((s) => s.dismissed));
 
   return hist.maybeWhen(
-    data: (list) => list.where((r) => !dismissed.contains(r.id)).take(3).toList(),
-    orElse: () => const <RecommendationRow>[],
+    data: (list) {
+      return list.where((r) => !dismissed.contains(r.id)).take(3).toList();
+    },
+    orElse: () {
+      return const <RecommendationRow>[];
+    },
   );
 });
 
@@ -82,11 +86,29 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
   Future<void> bootstrap() async {
     // Подтягиваем историю (в БД), UI сразу покажет кэш.
     // Локальное покажется сразу, сеть — best effort.
-    try { await _repo.syncHistory(pages: 1, limit: 20); } catch (_) {}
+    print('GeneratorController: bootstrap started');
+
+    // Запускаем синхронизацию в фоне, чтобы не блокировать UI
+    _repo.syncHistory(pages: 1, limit: 20).then((_) {
+      print('GeneratorController: syncHistory completed');
+    }).catchError((e) {
+      print('GeneratorController: syncHistory error: $e');
+    });
+
     // Если после синка колода пустая — создаём одну карточку.
-    final current = ref.read(generatorCurrentCardProvider);
+    // Избегаем циклической зависимости, используя напрямую историю и состояние
+    final hist = await _repo.watchHistory(limit: 20).first;
+    print('GeneratorController: history loaded, count: ${hist.length}');
+    final dismissed = state.dismissed;
+    print('GeneratorController: dismissed count: ${dismissed.length}');
+    final current = hist.firstWhereOrNull((r) => !dismissed.contains(r.id));
+    print('GeneratorController: current card: ${current?.id}');
+
     if (current == null) {
+      print('GeneratorController: no current card, calling generate()');
       await generate();
+    } else {
+      print('GeneratorController: current card exists, skipping generate');
     }
   }
 
@@ -103,8 +125,8 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
     } catch (e) {
       // Не показываем ошибку пользователю, т.к. у нас есть локальные данные
       // Вместо этого просто логируем (в реальном приложении - в систему логирования)
-      // ignore: avoid_print
       print('Network error during generate: $e');
+      state = state.copyWith(error: 'Ошибка при создании рекомендации: $e');
     } finally {
       state = state.copyWith(isGenerating: false);
     }
@@ -116,7 +138,6 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
     } catch (e) {
       // Не показываем ошибку пользователю, т.к. UI уже обновился оптимистично
       // Ошибка будет обработана через outbox
-      // ignore: avoid_print
       print('Network error during like: $e');
     } finally {
       dismiss(r.id);
@@ -141,8 +162,12 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
 
   void _maybeTopUp() {
     // если карточек больше не осталось — пробуем создать новую (тихо)
-    final current = ref.read(generatorCurrentCardProvider);
-    if (current == null && !state.isGenerating) {
+    // Вместо использования generatorCurrentCardProvider, просто проверяем,
+    // есть ли в истории что-то, что не было отклонено
+    // Мы не можем напрямую получить историю здесь, так как это создаст новую зависимость
+    // Поэтому используем простую эвристику: если отклонено много элементов,
+    // возможно, стоит пополнить колоду
+    if (state.dismissed.length > 15 && !state.isGenerating) { // условие для предотвращения цикла
       // не await: UI не должен "виснуть"
       generate();
     }

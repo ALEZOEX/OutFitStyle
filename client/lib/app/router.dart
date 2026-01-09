@@ -87,7 +87,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (_, __) => const ProfileScreen(),
                 routes: [
                   GoRoute(path: 'settings', builder: (_, __) => const SettingsScreen()),
-                  GoRoute(path: 'achievements', builder: (_, __) => const AchievementsScreen()),
                 ],
               ),
             ],

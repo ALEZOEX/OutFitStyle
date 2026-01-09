@@ -5,6 +5,7 @@ type UserPreferences struct {
 	AvoidStyles            []string `json:"avoid_styles,omitempty"`
 	ColorPreferences       []string `json:"color_preferences,omitempty"`
 	AvoidColors            []string `json:"avoid_colors,omitempty"`
+	PreferredCategories    []string `json:"preferred_categories,omitempty"`
 	FormalityDefault       *int     `json:"formality_default,omitempty"`
 	TemperatureSensitivity *int     `json:"temperature_sensitivity,omitempty"`
 	NotificationsEnabled   *bool    `json:"notifications_enabled,omitempty"`

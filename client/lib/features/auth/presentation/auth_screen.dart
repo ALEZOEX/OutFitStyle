@@ -12,8 +12,6 @@ class AuthScreen extends ConsumerStatefulWidget {
 }
 
 class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStateMixin {
-  late final TabController _tabController = TabController(length: 2, vsync: this);
-
   final _loginEmail = TextEditingController();
   final _loginPassword = TextEditingController();
 
@@ -92,26 +90,33 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
     }
   }
 
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Вход'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Войти'),
-              Tab(text: 'Регистрация'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildLogin(),
-            _buildRegister(),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Вход'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Войти'),
+            Tab(text: 'Регистрация'),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildLogin(),
+          _buildRegister(),
+        ],
       ),
     );
   }

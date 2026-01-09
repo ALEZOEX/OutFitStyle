@@ -5,8 +5,13 @@ class RecommendationRemoteDataSource {
   final RecommendationService _svc;
   RecommendationRemoteDataSource(this._svc);
 
-  Future<RecommendationRecord> createUsingProfile({required String occasion}) {
-    return _svc.createUsingProfile(occasion: occasion);
+  Future<RecommendationRecord> createUsingProfile({required String occasion}) async {
+    try {
+      return await _svc.createUsingProfile(occasion: occasion);
+    } catch (e) {
+      print('RecommendationRemoteDataSource: createUsingProfile error: $e');
+      rethrow;
+    }
   }
 
   Future<(List<RecommendationRecord>, int total)> list({required int page, required int limit}) {
