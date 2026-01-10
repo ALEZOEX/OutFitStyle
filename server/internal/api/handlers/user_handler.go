@@ -1,4 +1,4 @@
-package handlers
+/шpackage handlers
 
 import (
 	"bytes"
