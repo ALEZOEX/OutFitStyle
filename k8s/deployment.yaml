@@ -5,6 +5,10 @@ metadata:
   namespace: outfitstyle
   labels:
     app: api
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
 spec:
   replicas: 2
   selector:
