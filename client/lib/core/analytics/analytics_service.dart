@@ -38,10 +38,12 @@ class AnalyticsService {
   static Future<void> logShare({
     required String contentType,
     required String itemId,
+    required String method,
   }) async {
     await _analytics.logShare(
       contentType: contentType,
       itemId: itemId,
+      method: method,
     );
   }
 
@@ -54,12 +56,14 @@ class AnalyticsService {
   }
 
   static Future<void> setCurrentScreen({
-    required String screenName,
+    String? screenName,
     String? screenClassOverride,
   }) async {
-    await _analytics.setCurrentScreen(
-      screenName: screenName,
-      screenClassOverride: screenClassOverride,
-    );
+    if (screenName != null) {
+      await _analytics.logScreenView(
+        screenName: screenName,
+        screenClass: screenClassOverride,
+      );
+    }
   }
 }
