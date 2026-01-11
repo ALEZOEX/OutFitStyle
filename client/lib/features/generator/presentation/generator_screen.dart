@@ -8,7 +8,6 @@ import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/skeleton.dart';
 import '../../../ui/atoms/like_burst.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
-import '../../outfit_details/presentation/outfit_details_screen.dart';
 import 'generator_controller.dart';
 import 'widgets/tinder_swipe_card.dart';
 import 'widgets/tinder_deck.dart';

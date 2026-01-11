@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../app/di.dart';
 import '../../../data/local/app_database.dart';
 import '../../../ui/atoms/haptics.dart';
-import '../../../ui/atoms/share_image.dart';
 import '../../../domain/outfit/outfit_builder.dart';
 import '../../wardrobe/presentation/wardrobe_controller.dart';
 import 'widgets/category_swipe_replacer.dart';

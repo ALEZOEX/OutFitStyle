@@ -28,8 +28,6 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
   bool _busy = false;
   String? _error;
 
-  final List<String> _categories = ['outerwear', 'top', 'bottom', 'footwear', 'accessories'];
-
   Future<void> _finishOnboarding() async {
     if (_busy) return;
     setState(() { _busy = true; _error = null; });
