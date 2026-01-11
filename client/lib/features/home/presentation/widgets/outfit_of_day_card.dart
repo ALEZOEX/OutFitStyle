@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../data/local/app_database.dart';
-import '../../../../domain/entities/alt_pick.dart';
 import 'outfit_collage_interactive.dart';
 
-import '../../../wardrobe/presentation/widgets/alternative_picker_sheet.dart';
 
 class OutfitOfDayCard extends StatelessWidget {
   final RecommendationRow recommendation;

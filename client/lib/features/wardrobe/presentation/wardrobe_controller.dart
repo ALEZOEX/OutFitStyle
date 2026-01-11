@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di.dart';
 import '../../../data/local/app_database.dart';
-import '../../../data/repositories/wardrobe_repository.dart';
 import '../../../domain/states/async_state.dart' as app_state;
 
 final wardrobeControllerProvider =
