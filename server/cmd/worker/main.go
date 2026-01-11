@@ -52,7 +52,7 @@ func main() {
 
 	var apns *external.APNSClient
 	{
-		c, err := external.NewAPNSClient(cfg.Push.APNSKeyFile, cfg.Push.APNSKeyID, cfg.Push.APNSTeamID, cfg.Push.APNBundleID, cfg.Push.APNSEnvironment)
+		c, err := external.NewAPNSClient(cfg.Push.APNSKeyFile, cfg.Push.APNSKeyID, cfg.Push.APNSTeamID, cfg.Push.APNSBundleID, cfg.Push.APNSEnvironment)
 		if err != nil {
 			logger.Warn("APNs disabled", zap.Error(err))
 		} else {

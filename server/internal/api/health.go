@@ -2,9 +2,13 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"outfitstyle/server/internal/core/application/services"
+	"outfitstyle/server/internal/infrastructure/delivery/http"
 )
 
 type HealthChecker struct {
