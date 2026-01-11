@@ -8,16 +8,20 @@ class SyncManager {
   SyncManager._internal();
 
   final Connectivity _connectivity = Connectivity();
-  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
-  
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+
   bool _isOnline = false;
   Timer? _syncTimer;
 
   Future<void> initialize() async {
     await _updateConnectivityStatus();
-    
+
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-      _updateConnectivityStatus,
+      (List<ConnectivityResult> result) {
+        if (result.isNotEmpty) {
+          _updateConnectivityStatus(result.first);
+        }
+      },
     );
     
     // Start periodic sync when online
@@ -26,11 +30,16 @@ class SyncManager {
 
   Future<void> _updateConnectivityStatus([ConnectivityResult? result]) async {
     if (result == null) {
-      result = await _connectivity.checkConnectivity();
+      final connectivityResult = await _connectivity.checkConnectivity();
+      if (connectivityResult.isNotEmpty) {
+        result = connectivityResult.first;
+      } else {
+        result = ConnectivityResult.none;
+      }
     }
-    
+
     _isOnline = result != ConnectivityResult.none;
-    
+
     if (_isOnline) {
       // Sync immediately when connection restored
       await _performSync();
