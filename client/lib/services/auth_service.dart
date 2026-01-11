@@ -82,14 +82,10 @@ class AuthService {
       throw Exception('Токен недействителен');
     }
 
-    // Токен действителен, возвращаем его
-    final data = jsonDecode(response.body);
-    final user = data['user'];
-    
     // Возвращаем текущий токен, так как он уже валидный
     final refreshToken = await authStorage.readRefreshToken();
     final expiresAt = await authStorage.readExpiresAt();
-    
+
     return TokenPair(
       accessToken: token,
       refreshToken: refreshToken ?? '',
