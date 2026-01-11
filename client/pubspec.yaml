@@ -44,6 +44,7 @@ dependencies:
   intl: ^0.20.2
   shared_preferences: ^2.2.2
   collection: ^1.18.0
+  equatable: ^2.0.5
 
   # Location
   geolocator: ^14.0.2
@@ -74,13 +75,13 @@ dev_dependencies:
   build_runner: ^2.4.13
   retrofit_generator: ^9.1.2
   json_serializable: ^6.9.2
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true
   
   assets:
     - assets/icons/
-    - assets/images/
     - assets/icons/app/favicon.png
     - assets/icons/app/Icon-192.png
     - assets/icons/app/Icon-512.png
