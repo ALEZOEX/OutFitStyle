@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di.dart';
 import '../../../data/local/app_database.dart';
-import '../../../data/repositories/recommendation_repository.dart';
 
 final homeTodayRecProvider = StreamProvider.autoDispose<RecommendationRow?>((ref) {
   final repo = ref.watch(recommendationRepositoryProvider);
