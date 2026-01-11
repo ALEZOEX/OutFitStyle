@@ -2,90 +2,117 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:outfitstyle/features/wardrobe/data/repositories/wardrobe_repository.dart';
-import 'package:outfitstyle/features/wardrobe/domain/models/wardrobe_item.dart';
-import 'package:outfitstyle/features/wardrobe/presentation/providers/wardrobe_provider.dart';
+import 'package:outfitstyle_client/app/di.dart';
+import 'package:outfitstyle_client/data/local/app_database.dart';
+import 'package:outfitstyle_client/data/repositories/wardrobe_repository.dart';
+import 'package:outfitstyle_client/domain/states/async_state.dart' as app_state;
+import 'package:outfitstyle_client/features/wardrobe/presentation/wardrobe_controller.dart';
 
 class MockWardrobeRepository extends Mock implements WardrobeRepository {}
-class MockWardrobeItem extends Mock implements WardrobeItem {}
+
+class FakeWardrobeEntry extends Fake implements WardrobeEntry {}
 
 void main() {
-  group('WardrobeProvider', () {
-    late ProviderContainer container;
-    late MockWardrobeRepository mockRepository;
+  late ProviderContainer container;
+  late MockWardrobeRepository repo;
 
-    setUp(() {
-      mockRepository = MockWardrobeRepository();
-      container = ProviderContainer(
-        overrides: [
-          wardrobeRepositoryProvider.overrideWithValue(mockRepository),
-        ],
-      );
-    });
+  setUpAll(() {
+    registerFallbackValue(FakeWardrobeEntry());
+  });
 
-    tearDown(() {
-      container.dispose();
-    });
+  setUp(() {
+    repo = MockWardrobeRepository();
 
-    test('initial state is loading', () {
-      final state = container.read(wardrobeProvider);
-      expect(state.status, equals(WardrobeStatus.loading));
-    });
+    when(() => repo.watchWardrobe(includeArchived: any(named: 'includeArchived')))
+        .thenAnswer((_) => const Stream.empty());
 
-    test('loads wardrobe items successfully', () async {
-      final testItems = [
-        MockWardrobeItem(),
-        MockWardrobeItem(),
-      ];
-      when(() => mockRepository.getWardrobe()).thenAnswer((_) async => testItems);
+    container = ProviderContainer(
+      overrides: [
+        wardrobeRepositoryProvider.overrideWithValue(repo),
+      ],
+    );
+  });
 
-      final stateFuture = container.read(wardrobeProvider.future);
-      final state = await stateFuture;
+  tearDown(() {
+    container.dispose();
+  });
 
-      expect(state.status, equals(WardrobeStatus.loaded));
-      expect(state.items, equals(testItems));
-    });
+  test('wardrobeControllerProvider: initial state is loading', () {
+    final state = container.read(wardrobeControllerProvider);
+    expect(state, isA<app_state.AsyncLoading<List<WardrobeEntry>>>());
+  });
 
-    test('handles error when loading fails', () async {
-      when(() => mockRepository.getWardrobe()).thenThrow(Exception('Network error'));
+  test('wardrobeStreamProvider: emits items from repository', () async {
+    final items = [_entry('1'), _entry('2')];
 
-      final stateFuture = container.read(wardrobeProvider.future);
-      final state = await stateFuture;
+    when(() => repo.watchWardrobe(includeArchived: false)).thenAnswer((_) => Stream.value(items));
 
-      expect(state.status, equals(WardrobeStatus.error));
-      expect(state.errorMessage, contains('Network error'));
-    });
+    final result = await container.read(wardrobeStreamProvider.future);
+    expect(result, items);
 
-    test('adds item to wardrobe', () async {
-      final newItem = MockWardrobeItem();
-      when(() => newItem.id).thenReturn('new-item');
-      when(() => mockRepository.getWardrobe()).thenAnswer((_) async => []);
-      when(() => mockRepository.addItem(any())).thenAnswer((_) async {});
+    verify(() => repo.watchWardrobe(includeArchived: false)).called(1);
+  });
 
-      // First, load empty wardrobe
-      await container.read(wardrobeProvider.future);
+  test('wardrobeStreamProvider: propagates error from stream', () async {
+    when(() => repo.watchWardrobe(includeArchived: false))
+        .thenAnswer((_) => Stream.error(Exception('Network error')));
 
-      // Add new item
-      await container.read(wardrobeProvider.notifier).addItem(newItem);
+    await expectLater(
+      container.read(wardrobeStreamProvider.future),
+      throwsA(isA<Exception>()),
+    );
+  });
 
-      // Verify item was added
-      verify(() => mockRepository.addItem(newItem)).called(1);
-    });
+  test('toggleFavorite delegates to repository', () async {
+    final e = _entry('1');
+    when(() => repo.toggleFavorite(any())).thenAnswer((_) async {});
 
-    test('removes item from wardrobe', () async {
-      final existingItem = MockWardrobeItem();
-      when(() => existingItem.id).thenReturn('existing-item');
-      when(() => mockRepository.getWardrobe()).thenAnswer((_) async => [existingItem]);
-      when(() => mockRepository.removeItem('existing-item')).thenAnswer((_) async {});
+    await container.read(wardrobeControllerProvider.notifier).toggleFavorite(e);
 
-      // Load wardrobe with existing item
-      await container.read(wardrobeProvider.future);
+    verify(() => repo.toggleFavorite(e)).called(1);
+  });
 
-      // Remove item
-      await container.read(wardrobeProvider.notifier).removeItem('existing-item');
+  test('toggleArchived delegates to repository', () async {
+    final e = _entry('1');
+    when(() => repo.toggleArchived(any())).thenAnswer((_) async {});
 
-      // Verify item was removed
-      verify(() => mockRepository.removeItem('existing-item')).called(1);
-    });
+    await container.read(wardrobeControllerProvider.notifier).toggleArchived(e);
+
+    verify(() => repo.toggleArchived(e)).called(1);
+  });
+
+  test('markWorn delegates to repository', () async {
+    final e = _entry('1');
+    when(() => repo.markWorn(any())).thenAnswer((_) async {});
+
+    await container.read(wardrobeControllerProvider.notifier).markWorn(e);
+
+    verify(() => repo.markWorn(e)).called(1);
+  });
+
+  test('prefetchImages calls repo.prefetchMissingImages(limit: 40)', () async {
+    when(() => repo.prefetchMissingImages(limit: any(named: 'limit'))).thenAnswer((_) async {});
+
+    await container.read(wardrobeControllerProvider.notifier).prefetchImages();
+
+    verify(() => repo.prefetchMissingImages(limit: 40)).called(1);
   });
 }
+
+WardrobeEntry _entry(String id) => WardrobeEntry(
+      id: id,
+      name: 'Item $id',
+      category: 'tops',
+      subcategory: 'shirts',
+      style: '',
+      iconEmoji: '👕',
+      isFavorite: false,
+      isArchived: false,
+      wearCount: 0,
+      updatedAt: DateTime(2024, 1, 1),
+      dirty: false,
+      lastSyncedAt: null,
+      imageUrl: null,
+      localImagePath: null,
+      blurHash: null,
+    );
