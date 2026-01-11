@@ -32,7 +32,6 @@ class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {
         themeIcon = Icons.light_mode_rounded;
         break;
       case ThemeMode.system:
-      default:
         themeIcon = Icons.auto_mode_rounded;
         break;
     }
