@@ -1,24 +1,45 @@
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 
+import '../app/platform_flags.dart'
+    if (dart.library.io) '../app/platform_flags_io.dart'
+    if (dart.library.html) '../app/platform_flags_web.dart';
+
 class AppConfig {
+  static const String _prodHost = 'https://api.outfitstyle.com';
+  static const int _port = 80;
+
+  // Можно переопределять без правок кода:
+  // flutter run --dart-define=API_HOST=http://192.168.1.100:80
+  static const String _hostOverride = String.fromEnvironment('API_HOST');
+
+  // Для реального устройства:
+  // flutter run --dart-define=LOCAL_IP=192.168.1.100 --dart-define=USE_LOCAL_IP=true
+  static const String _localIp = String.fromEnvironment(
+    'LOCAL_IP',
+    defaultValue: '192.168.1.100',
+  );
+  static const bool _useLocalIp = bool.fromEnvironment(
+    'USE_LOCAL_IP',
+    defaultValue: false,
+  );
+
   static String get apiHost {
-    if (!kDebugMode) return 'https://api.outfitstyle.com'; // prod URL without /api/v1
+    if (_hostOverride.isNotEmpty) return _hostOverride;
 
-    if (kIsWeb) return 'http://localhost:80'; // Changed from 8080 to 80
+    if (!kDebugMode) return _prodHost;
 
-    if (Platform.isAndroid) {
-      // For emulator, use 10.0.2.2; for real device, use your local network IP
-      const _useRealDevice = false; // Change this based on your setup
-      const _localNetworkIp = '192.168.1.100'; // Replace with your actual IP
-      return _useRealDevice ? 'http://$_localNetworkIp:80' : 'http://10.0.2.2:80'; // Changed from 8080 to 80
-    } else if (Platform.isIOS) {
-      // For iOS simulator, you might need to use your local network IP
-      const _useRealDevice = false;
-      const _localNetworkIp = '192.168.1.100'; // Replace with your actual IP
-      return _useRealDevice ? 'http://$_localNetworkIp:80' : 'http://localhost:80'; // Changed from 8080 to 80
+    if (kIsWeb) return 'http://localhost:$_port';
+
+    if (isAndroid) {
+      final host = _useLocalIp ? _localIp : '10.0.2.2'; // эмулятор Android
+      return 'http://$host:$_port';
     }
 
-    return 'http://localhost:80'; // Changed from 8080 to 80
+    if (isIOS) {
+      final host = _useLocalIp ? _localIp : 'localhost'; // симулятор iOS
+      return 'http://$host:$_port';
+    }
+
+    return 'http://localhost:$_port';
   }
 }

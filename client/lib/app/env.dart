@@ -1,6 +1,4 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../config/app_config.dart';
 import 'api/api_config.dart';

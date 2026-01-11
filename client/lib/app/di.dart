@@ -2,7 +2,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-import '../config/app_config.dart';
 import '../services/auth_service.dart';
 import '../services/auth_storage.dart';
 import '../services/wardrobe_service.dart';
@@ -18,7 +17,6 @@ import '../data/repositories/recommendation_repository.dart';
 import '../data/sync/sync_worker.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/profile_repository.dart';
-import 'onboarding/onboarding_providers.dart';
 
 final apiConfigProvider = Provider((ref) => Env.apiConfig());
 
