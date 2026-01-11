@@ -10,15 +10,9 @@ import '../features/outfit_details/presentation/outfit_details_screen.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/onboarding/presentation/onboarding_wizard_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
-import '../features/achievements/presentation/achievements_screen.dart';
-import 'widgets/tab_swipe_container.dart';
 import 'di.dart';
 import 'onboarding/onboarding_providers.dart';
 
-final _homeNavKey = GlobalKey<NavigatorState>(debugLabel: 'homeNav');
-final _wardrobeNavKey = GlobalKey<NavigatorState>(debugLabel: 'wardrobeNav');
-final _generatorNavKey = GlobalKey<NavigatorState>(debugLabel: 'generatorNav');
-final _profileNavKey = GlobalKey<NavigatorState>(debugLabel: 'profileNav');
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final session = ref.watch(sessionProvider);
