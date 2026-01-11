@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:outfitstyle/features/wardrobe/presentation/widgets/wardrobe_item_card.dart';
-import 'package:outfitstyle/features/wardrobe/domain/models/wardrobe_item.dart';
+import 'package:outfitstyle_client/features/wardrobe/presentation/widgets/wardrobe_item_card.dart';
+import 'package:outfitstyle_client/features/wardrobe/domain/models/wardrobe_item.dart';
 
 class MockWardrobeItem extends Mock implements WardrobeItem {}
 
