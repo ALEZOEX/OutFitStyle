@@ -72,8 +72,8 @@ func AuditMiddleware(repo repositories.AuditRepository, logger *zap.Logger) mux.
 			// Если newJSON не задан — оставляем метаданные как раньше
 			if len(newJSON) == 0 {
 				newJSON, _ = json.Marshal(map[string]interface{}{
-					"path":      r.URL.Path,
-					"status":    arw.status,
+					"path":        r.URL.Path,
+					"status":      arw.status,
 					"duration_ms": time.Since(start).Milliseconds(),
 				})
 			}
@@ -98,9 +98,9 @@ func AuditMiddleware(repo repositories.AuditRepository, logger *zap.Logger) mux.
 			if err := repo.Create(r.Context(), repositories.AuditCreate{
 				UserID: uid,
 
-				Action: action,
+				Action:       action,
 				ResourceType: resTypePtr,
-				ResourceID: resIDPtr,
+				ResourceID:   resIDPtr,
 
 				OldValue: oldJSON,
 				NewValue: newJSON,
@@ -108,7 +108,7 @@ func AuditMiddleware(repo repositories.AuditRepository, logger *zap.Logger) mux.
 				IPAddress: ip,
 				UserAgent: uaPtr,
 
-				Success: success,
+				Success:      success,
 				ErrorMessage: errMsg,
 			}); err != nil {
 				logger.Debug("audit insert failed", zap.Error(err))

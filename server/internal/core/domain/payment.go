@@ -16,23 +16,23 @@ type PaymentInit struct {
 // Payment represents a payment record
 type Payment struct {
 	ID                int64      `json:"id"`
-	UserID           int64      `json:"user_id"`
-	SubscriptionID   *int64     `json:"subscription_id,omitempty"`
-	Amount           float64    `json:"amount"`
-	Currency         string     `json:"currency"`
-	Status           string     `json:"status"` // pending, completed, failed, refunded
-	PaymentProvider  string     `json:"payment_provider"`
-	ExternalPaymentID string    `json:"external_payment_id"`
-	ReceiptURL       *string    `json:"receipt_url,omitempty"`
-	ErrorMessage     *string    `json:"error_message,omitempty"`
-	PaidAt           *time.Time `json:"paid_at,omitempty"`
-	CreatedAt        time.Time  `json:"created_at"`
-	UpdatedAt        time.Time  `json:"updated_at"`
+	UserID            int64      `json:"user_id"`
+	SubscriptionID    *int64     `json:"subscription_id,omitempty"`
+	Amount            float64    `json:"amount"`
+	Currency          string     `json:"currency"`
+	Status            string     `json:"status"` // pending, completed, failed, refunded
+	PaymentProvider   string     `json:"payment_provider"`
+	ExternalPaymentID string     `json:"external_payment_id"`
+	ReceiptURL        *string    `json:"receipt_url,omitempty"`
+	ErrorMessage      *string    `json:"error_message,omitempty"`
+	PaidAt            *time.Time `json:"paid_at,omitempty"`
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
 
 	// Additional fields that might be needed
-	PaymentMethod   *string    `json:"payment_method,omitempty"`
-	Description     *string    `json:"description,omitempty"`
-	CompletedAt     *time.Time `json:"completed_at,omitempty"`
+	PaymentMethod *string    `json:"payment_method,omitempty"`
+	Description   *string    `json:"description,omitempty"`
+	CompletedAt   *time.Time `json:"completed_at,omitempty"`
 }
 
 // PaymentGateway defines the interface for payment providers

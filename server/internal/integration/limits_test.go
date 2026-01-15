@@ -13,13 +13,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	goerrors "errors"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/core/application/services"
-	"outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
+	"outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 )
 
 func TestLimits_FreeRecommendationsPerDay(t *testing.T) {

@@ -12,8 +12,9 @@ RUN go mod download
 # Копировать исходный код
 COPY server/ ./
 
-# Собрать бинарник
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main cmd/server/main.go
+# Собрать бинарники
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate cmd/migrate/main.go
 
 # Второй этап - минимальный образ
 FROM alpine:latest
@@ -21,10 +22,11 @@ FROM alpine:latest
 # Установить ca-certificates для HTTPS
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+WORKDIR /app/
 
-# Копировать бинарник из builder
-COPY --from=builder /app/main .
+# Копировать бинарники из builder
+COPY --from=builder /app/server /app/server
+COPY --from=builder /app/migrate /app/migrate
 
 # Создать непривилегированный пользователь
 RUN addgroup -g 65532 nonroot && \
@@ -38,4 +40,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 EXPOSE 8080
 
-CMD ["./main"]
+# Команда будет указана в docker-compose.yml

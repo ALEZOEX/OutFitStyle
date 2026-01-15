@@ -126,26 +126,26 @@ LIMIT $` + itoa(argN) + ` OFFSET $` + itoa(argN+1)
 		var ci domain.ClothingItem
 
 		if err := rows.Scan(
-&wi.ID, &wi.UserID, &wi.ClothingItemID,
-&wi.CustomName, &wi.Notes, &wi.Tags,
-&wi.PurchaseDate, &wi.PurchasePrice, &wi.PurchaseCurrency,
-&wi.WearCount, &wi.LastWornAt,
-&wi.IsFavorite, &wi.IsArchived, &wi.Condition,
-&wi.CreatedAt, &wi.UpdatedAt,
+			&wi.ID, &wi.UserID, &wi.ClothingItemID,
+			&wi.CustomName, &wi.Notes, &wi.Tags,
+			&wi.PurchaseDate, &wi.PurchasePrice, &wi.PurchaseCurrency,
+			&wi.WearCount, &wi.LastWornAt,
+			&wi.IsFavorite, &wi.IsArchived, &wi.Condition,
+			&wi.CreatedAt, &wi.UpdatedAt,
 
-&ci.ID, &ci.Name, &ci.Description,
-&ci.Category, &ci.Subcategory,
-&ci.MinTemp, &ci.MaxTemp, &ci.WarmthLevel,
-&ci.RainOK, &ci.SnowOK, &ci.WindOK,
-&ci.Style, &ci.FormalityLevel,
-&ci.BaseColour, &ci.Pattern, &ci.Fit,
-&ci.Gender, &ci.Season,
-&ci.Usage, &ci.Materials,
-&ci.Brand,
-&ci.ImageURL, &ci.ThumbnailURL, &ci.IconEmoji,
-&ci.Source, &ci.OwnerID, &ci.IsOwned,
-&ci.IsActive, &ci.CreatedAt, &ci.UpdatedAt,
-); err != nil {
+			&ci.ID, &ci.Name, &ci.Description,
+			&ci.Category, &ci.Subcategory,
+			&ci.MinTemp, &ci.MaxTemp, &ci.WarmthLevel,
+			&ci.RainOK, &ci.SnowOK, &ci.WindOK,
+			&ci.Style, &ci.FormalityLevel,
+			&ci.BaseColour, &ci.Pattern, &ci.Fit,
+			&ci.Gender, &ci.Season,
+			&ci.Usage, &ci.Materials,
+			&ci.Brand,
+			&ci.ImageURL, &ci.ThumbnailURL, &ci.IconEmoji,
+			&ci.Source, &ci.OwnerID, &ci.IsOwned,
+			&ci.IsActive, &ci.CreatedAt, &ci.UpdatedAt,
+		); err != nil {
 			return nil, 0, errors.Wrap(err, "scan wardrobe row")
 		}
 
@@ -330,4 +330,3 @@ SELECT EXISTS(SELECT 1 FROM user_wardrobe WHERE user_id = $1 AND clothing_item_i
 `, userID, clothingItemID).Scan(&exists)
 	return exists, errors.Wrap(err, "is in wardrobe")
 }
-

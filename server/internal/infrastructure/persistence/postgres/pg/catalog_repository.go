@@ -15,14 +15,22 @@ import (
 
 type CatalogRepository struct{ db *dbpkg.DB }
 
-func NewCatalogRepository(db *dbpkg.DB) repositories.CatalogRepository { return &CatalogRepository{db: db} }
+func NewCatalogRepository(db *dbpkg.DB) repositories.CatalogRepository {
+	return &CatalogRepository{db: db}
+}
 
 func (r *CatalogRepository) Search(ctx context.Context, p repositories.CatalogSearchParams) ([]domain.ClothingItem, int, error) {
 	limit := p.Limit
-	if limit <= 0 { limit = 20 }
-	if limit > 100 { limit = 100 }
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
 	page := p.Page
-	if page <= 0 { page = 1 }
+	if page <= 0 {
+		page = 1
+	}
 	offset := (page - 1) * limit
 
 	where := []string{
@@ -96,7 +104,9 @@ LIMIT %d OFFSET %d
 `, joinPartner, strings.Join(where, " AND "), limit, offset)
 
 	rows, err := r.db.Pool().Query(ctx, q, args...)
-	if err != nil { return nil, 0, errors.Wrap(err, "catalog search") }
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "catalog search")
+	}
 	defer rows.Close()
 
 	var out []domain.ClothingItem
@@ -126,42 +136,46 @@ LIMIT %d OFFSET %d
 func (r *CatalogRepository) Categories(ctx context.Context) (any, error) {
 	// Берём из subcategory_specs + группируем по category (минимально).
 	rows, err := r.db.Pool().Query(ctx, `SELECT category, subcategory FROM subcategory_specs ORDER BY category, subcategory`)
-	if err != nil { return nil, errors.Wrap(err, "categories") }
+	if err != nil {
+		return nil, errors.Wrap(err, "categories")
+	}
 	defer rows.Close()
 
 	type cat struct {
-		Code string `json:"code"`
-		Name string `json:"name"`
-		Icon string `json:"icon"`
+		Code          string   `json:"code"`
+		Name          string   `json:"name"`
+		Icon          string   `json:"icon"`
 		Subcategories []string `json:"subcategories"`
 	}
 	m := map[string]*cat{}
 
 	icon := map[string]string{
 		"outerwear": "🧥",
-		"upper": "👕",
-		"lower": "👖",
-		"footwear": "👟",
+		"upper":     "👕",
+		"lower":     "👖",
+		"footwear":  "👟",
 		"accessory": "🎒",
 	}
 	name := map[string]string{
 		"outerwear": "Верхняя одежда",
-		"upper": "Верх",
-		"lower": "Низ",
-		"footwear": "Обувь",
+		"upper":     "Верх",
+		"lower":     "Низ",
+		"footwear":  "Обувь",
 		"accessory": "Аксессуары",
 	}
 
 	for rows.Next() {
 		var c, s string
-		if err := rows.Scan(&c, &s); err != nil { return nil, errors.Wrap(err, "scan categories") }
+		if err := rows.Scan(&c, &s); err != nil {
+			return nil, errors.Wrap(err, "scan categories")
+		}
 		if m[c] == nil {
 			m[c] = &cat{Code: c, Name: name[c], Icon: icon[c], Subcategories: []string{}}
 		}
 		m[c].Subcategories = append(m[c].Subcategories, s)
 	}
 	out := []cat{}
-	for _, k := range []string{"outerwear","upper","lower","footwear","accessory"} {
+	for _, k := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {
 		if m[k] != nil {
 			out = append(out, *m[k])
 		}
@@ -203,14 +217,18 @@ WHERE id=$1
 		&it.Source, &it.OwnerID, &it.IsOwned,
 		&it.IsActive, &it.CreatedAt, &it.UpdatedAt,
 	); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) { return nil, nil }
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, errors.Wrap(err, "get catalog item")
 	}
 	return &it, nil
 }
 
 func (r *CatalogRepository) Similar(ctx context.Context, id domain.ID, limit int) ([]domain.ClothingItem, error) {
-	if limit <= 0 { limit = 10 }
+	if limit <= 0 {
+		limit = 10
+	}
 	item, err := r.GetItem(ctx, id)
 	if err != nil || item == nil {
 		return nil, err
@@ -239,7 +257,9 @@ WHERE id <> $1
 ORDER BY created_at DESC
 LIMIT $4
 `, id, item.Category, item.Subcategory, limit)
-	if err != nil { return nil, errors.Wrap(err, "similar") }
+	if err != nil {
+		return nil, errors.Wrap(err, "similar")
+	}
 	defer rows.Close()
 
 	var out []domain.ClothingItem
@@ -271,7 +291,9 @@ func (r *CatalogRepository) Click(ctx context.Context, userID *domain.ID, itemID
 	var partnerURL *string
 	err := r.db.Pool().QueryRow(ctx, `SELECT partner_url FROM clothing_items WHERE id=$1`, itemID).Scan(&partnerURL)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) { return "", repositories.ErrNotFound }
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", repositories.ErrNotFound
+		}
 		return "", errors.Wrap(err, "get partner_url")
 	}
 	if partnerURL == nil || *partnerURL == "" {

@@ -24,8 +24,8 @@ func NewFileService(storage *external.S3Storage, files repositories.UploadedFile
 }
 
 type UploadResult struct {
-	URL  string    `json:"url"`
-	Path string    `json:"path"`
+	URL    string    `json:"url"`
+	Path   string    `json:"path"`
 	FileID domain.ID `json:"file_id"`
 }
 

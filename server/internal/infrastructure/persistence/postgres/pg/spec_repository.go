@@ -30,7 +30,7 @@ func NewSubcategorySpecRepository(db *dbpkg.DB, logger *zap.Logger) clothing.Sub
 func (r *SubcategorySpecRepositoryImpl) ListAll(ctx context.Context) ([]domain.SubcategorySpec, error) {
 	query, args, err := squirrel.Select(
 		"category",
-		"subcategory", 
+		"subcategory",
 		"warmth_min",
 		"temp_min_reco",
 		"temp_max_reco",
@@ -81,7 +81,7 @@ func (r *SubcategorySpecRepositoryImpl) Get(ctx context.Context, category, subca
 
 	query, args, err := squirrel.Select(
 		"category",
-		"subcategory", 
+		"subcategory",
 		"warmth_min",
 		"temp_min_reco",
 		"temp_max_reco",

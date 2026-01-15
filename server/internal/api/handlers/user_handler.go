@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,14 +28,14 @@ type UserHandler struct {
 }
 
 type SessionInfo struct {
-	ID          domain.ID `json:"id"`
-	DeviceName  *string   `json:"device_name,omitempty"`
-	DeviceType  *string   `json:"device_type,omitempty"`
-	IPAddress   *string   `json:"ip_address,omitempty"`
-	LastUsedAt  string    `json:"last_used_at"`
-	IsCurrent   bool      `json:"is_current"`
-	IsActive    bool      `json:"is_active"`
-	ExpiresAt   string    `json:"expires_at"`
+	ID         domain.ID `json:"id"`
+	DeviceName *string   `json:"device_name,omitempty"`
+	DeviceType *string   `json:"device_type,omitempty"`
+	IPAddress  *string   `json:"ip_address,omitempty"`
+	LastUsedAt string    `json:"last_used_at"`
+	IsCurrent  bool      `json:"is_current"`
+	IsActive   bool      `json:"is_active"`
+	ExpiresAt  string    `json:"expires_at"`
 }
 
 func NewUserHandler(
@@ -118,6 +117,30 @@ func (h *UserHandler) UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error("update profile failed", zap.Error(err))
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to update profile"))
+		return
+	}
+	resp.Success(w, out)
+}
+
+func (h *UserHandler) UpdateBodyMeasurements(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
+		return
+	}
+
+	var body domain.BodyMeasurements
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	out, err := h.userService.UpdateBodyMeasurements(r.Context(), userID, body)
+	if err != nil {
+		h.logger.Error("update body measurements failed", zap.Error(err))
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to update body measurements"))
 		return
 	}
 	resp.Success(w, out)
@@ -310,7 +333,7 @@ func (h *UserHandler) UpdatePreferences(w http.ResponseWriter, r *http.Request) 
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		Result:           &prefs,
 		TagName:          "json",
-		WeaklyTypedInput: true, // Позволяет преобразование типов
+		WeaklyTypedInput: true,  // Позволяет преобразование типов
 		ErrorUnused:      false, // Не ошибка при неизвестных полях
 	})
 
@@ -321,42 +344,19 @@ func (h *UserHandler) UpdatePreferences(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := decoder.Decode(rawPrefs); err != nil {
-		h.logger.Error("failed to decode preferences", zap.Error(err), zap.Any("raw_prefs", rawPrefs))
-		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid preferences format: %v", err))
+		resp.Error(w, http.StatusBadRequest, fmt.Errorf("failed to decode preferences: %v", err))
+		h.logger.Error("failed to decode preferences", zap.Any("raw_prefs", rawPrefs), zap.Error(err))
 		return
 	}
 
-	// Возвращаем тело для последующей обработки
-	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-
+	// Обновляем предпочтения пользователя
 	out, err := h.userService.UpdatePreferences(r.Context(), userID, prefs)
 	if err != nil {
-		resp.Error(w, http.StatusInternalServerError, errors.New("failed to update preferences"))
+		resp.Error(w, http.StatusInternalServerError, fmt.Errorf("failed to update preferences: %v", err))
+		h.logger.Error("failed to update user preferences", zap.Error(err))
 		return
 	}
-	resp.Success(w, out)
+
+	// Возвращаем обновленные предпочтения
+	resp.Success(w, map[string]any{"preferences": out.User.Preferences})
 }
-
-func (h *UserHandler) UpdateBodyMeasurements(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
-	userID, ok := middleware.GetUserIDFromContext(r.Context())
-	if !ok {
-		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
-		return
-	}
-
-	var bm domain.BodyMeasurements
-	if err := json.NewDecoder(r.Body).Decode(&bm); err != nil {
-		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
-		return
-	}
-
-	out, err := h.userService.UpdateBodyMeasurements(r.Context(), userID, bm)
-	if err != nil {
-		resp.Error(w, http.StatusInternalServerError, errors.New("failed to update body measurements"))
-		return
-	}
-	resp.Success(w, out)
-}
-

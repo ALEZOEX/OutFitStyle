@@ -6,22 +6,22 @@ import (
 )
 
 type Notification struct {
-	ID     ID              `json:"id"`
-	UserID ID              `json:"user_id"`
+	ID     ID `json:"id"`
+	UserID ID `json:"user_id"`
 
-	Type  string          `json:"type"`
-	Title string          `json:"title"`
-	Body  *string         `json:"body,omitempty"`
+	Type  string  `json:"type"`
+	Title string  `json:"title"`
+	Body  *string `json:"body,omitempty"`
 
-	ImageURL *string      `json:"image_url,omitempty"`
+	ImageURL *string `json:"image_url,omitempty"`
 
-	Data json.RawMessage  `json:"data,omitempty"`
+	Data json.RawMessage `json:"data,omitempty"`
 
-	ActionType *string        `json:"action_type,omitempty"`
+	ActionType *string         `json:"action_type,omitempty"`
 	ActionData json.RawMessage `json:"action_data,omitempty"`
 
-	IsRead   bool       `json:"is_read"`
-	ReadAt   *time.Time `json:"read_at,omitempty"`
+	IsRead bool       `json:"is_read"`
+	ReadAt *time.Time `json:"read_at,omitempty"`
 
 	PushSent   bool       `json:"push_sent"`
 	PushSentAt *time.Time `json:"push_sent_at,omitempty"`
@@ -32,11 +32,11 @@ type Notification struct {
 }
 
 type PushToken struct {
-	ID       ID        `json:"id"`
-	UserID   ID        `json:"user_id"`
-	Token    string    `json:"token"`
-	Platform string    `json:"platform"` // ios|android|web
-	DeviceID *string   `json:"device_id,omitempty"`
+	ID       ID      `json:"id"`
+	UserID   ID      `json:"user_id"`
+	Token    string  `json:"token"`
+	Platform string  `json:"platform"` // ios|android|web
+	DeviceID *string `json:"device_id,omitempty"`
 
 	IsActive   bool      `json:"is_active"`
 	LastUsedAt time.Time `json:"last_used_at"`

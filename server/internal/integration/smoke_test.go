@@ -57,8 +57,8 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 				},
 				"main": map[string]any{
 					"temp":       10.0,
-					"feels_like":  8.0,
-					"humidity":    60,
+					"feels_like": 8.0,
+					"humidity":   60,
 				},
 				"wind": map[string]any{
 					"speed": 3.0,
@@ -116,13 +116,13 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 		}
 
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"request_id":          req["request_id"],
-			"rankings":            rankings,
-			"outfit_score":        0.75,
-			"style_coherence":     0.6,
-			"color_harmony":       0.6,
-			"model_version":       "stub",
-			"processing_time_ms":  5,
+			"request_id":         req["request_id"],
+			"rankings":           rankings,
+			"outfit_score":       0.75,
+			"style_coherence":    0.6,
+			"color_harmony":      0.6,
+			"model_version":      "stub",
+			"processing_time_ms": 5,
 		})
 	}))
 	defer mlSrv.Close()

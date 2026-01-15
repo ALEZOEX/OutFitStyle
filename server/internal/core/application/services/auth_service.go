@@ -27,8 +27,8 @@ type AuthService struct {
 }
 
 type RegisterResult struct {
-	User   *domain.User      `json:"user"`
-	Tokens domain.TokenPair  `json:"tokens"`
+	User   *domain.User     `json:"user"`
+	Tokens domain.TokenPair `json:"tokens"`
 }
 
 type LoginResult struct {
@@ -225,7 +225,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 				DisplayName:   &gUser.FirstName,
 				AvatarURL:     &gUser.Picture,
 				IsActive:      u.IsActive,
-				IsVerified:    true, // Google проверил email
+				IsVerified:    true,      // Google проверил email
 				OAuthProvider: &provider, // Устанавливаем OAuth-провайдер
 				OAuthID:       nil,
 				Locale:        u.Locale,

@@ -66,4 +66,3 @@ VALUES ($1,$2,$3,$4,$5,$6)
 `, experimentID, userID, variant, eventName, eventValue, nullJSON(eventData))
 	return errors.Wrap(err, "record event")
 }
-

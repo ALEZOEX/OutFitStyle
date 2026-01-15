@@ -11,12 +11,11 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	goerrors "errors"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/middleware"
-	"outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
+	"outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 )
 
 func TestAuditMiddleware_InsertsRow(t *testing.T) {

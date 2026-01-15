@@ -10,7 +10,7 @@ import (
 
 // GetRecommendationsInput represents the input for the GetRecommendations use case.
 type GetRecommendationsInput struct {
-	UserID int    `json:"user_id"`
+	UserID string `json:"user_id"`
 	City   string `json:"city"`
 }
 
@@ -41,7 +41,7 @@ type WeatherService interface {
 type MLService interface {
 	// В твоём ML клиенте сейчас:
 	// GetRecommendations(ctx context.Context, userID int, weather domain.WeatherData) (*domain.RecommendationResponse, error)
-	GetRecommendations(ctx context.Context, userID int, weather domain.WeatherData) (*domain.RecommendationResponse, error)
+	GetRecommendations(ctx context.Context, userID domain.ID, weather domain.WeatherData) (*domain.RecommendationResponse, error)
 }
 
 // NewGetRecommendationsUseCase creates a new GetRecommendationsUseCase.
@@ -75,8 +75,14 @@ func (uc *getRecommendationsUseCase) Execute(
 		return nil, fmt.Errorf("failed to get weather data: %w", err)
 	}
 
+	// Parse user ID
+	userID, err := domain.ParseID(input.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID: %w", err)
+	}
+
 	// Get user profile (опционально)
-	userProfile, err := uc.userRepo.GetUserProfile(ctx, input.UserID)
+	userProfile, err := uc.userRepo.GetUserProfile(ctx, userID)
 	if err != nil {
 		// Логика: продолжаем без профиля, но в реальной системе тут можно логировать
 		userProfile = nil
@@ -85,7 +91,7 @@ func (uc *getRecommendationsUseCase) Execute(
 	_ = userProfile // пока профиль не используется, чтобы не было "declared and not used"
 
 	// Get ML recommendations
-	mlRecommendation, err := uc.mlService.GetRecommendations(ctx, input.UserID, *weather)
+	mlRecommendation, err := uc.mlService.GetRecommendations(ctx, userID, *weather)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ML recommendations: %w", err)
 	}

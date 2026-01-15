@@ -1,14 +1,14 @@
 package repositories
 
 import (
-"context"
+	"context"
 
-"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/core/domain"
 )
 
 type PushTokenRepository interface {
-Upsert(ctx context.Context, userID domain.ID, token string, platform string, deviceID *string) error
-Deactivate(ctx context.Context, userID domain.ID, token string) error
+	Upsert(ctx context.Context, userID domain.ID, token string, platform string, deviceID *string) error
+	Deactivate(ctx context.Context, userID domain.ID, token string) error
 
-ListActiveByUser(ctx context.Context, userID domain.ID) ([]domain.PushToken, error)
+	ListActiveByUser(ctx context.Context, userID domain.ID) ([]domain.PushToken, error)
 }

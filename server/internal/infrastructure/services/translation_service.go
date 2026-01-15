@@ -21,10 +21,10 @@ type TranslationService struct {
 
 // TranslationRequest represents a request to Yandex Translate API
 type TranslationRequest struct {
-	FolderID    string   `json:"folderId"`
-	TargetLang  string   `json:"targetLanguageCode"`
-	Texts       []string `json:"texts"`
-	SourceLang  string   `json:"sourceLanguageCode"`
+	FolderID   string   `json:"folderId"`
+	TargetLang string   `json:"targetLanguageCode"`
+	Texts      []string `json:"texts"`
+	SourceLang string   `json:"sourceLanguageCode"`
 }
 
 // TranslationResponse represents a response from Yandex Translate API

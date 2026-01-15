@@ -83,20 +83,20 @@ func init() {
 func HTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		
+
 		// Wrap response writer to capture status code
 		wrapped := &responseWriter{ResponseWriter: w, statusCode: 200}
-		
+
 		next.ServeHTTP(wrapped, r)
-		
+
 		duration := time.Since(start).Seconds()
-		
+
 		requestCount.WithLabelValues(
 			r.Method,
 			r.URL.Path,
 			strconv.Itoa(wrapped.statusCode),
 		).Inc()
-		
+
 		requestDuration.WithLabelValues(
 			r.Method,
 			r.URL.Path,

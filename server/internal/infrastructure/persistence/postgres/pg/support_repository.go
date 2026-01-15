@@ -203,4 +203,3 @@ func generateTicketNumber() (string, error) {
 	}
 	return fmt.Sprintf("OS-%s-%04d", now, x.Int64()), nil
 }
-

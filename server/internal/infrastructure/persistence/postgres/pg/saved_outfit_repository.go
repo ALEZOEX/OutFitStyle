@@ -14,7 +14,9 @@ import (
 
 type SavedOutfitRepository struct{ db *dbpkg.DB }
 
-func NewSavedOutfitRepository(db *dbpkg.DB) repositories.SavedOutfitRepository { return &SavedOutfitRepository{db: db} }
+func NewSavedOutfitRepository(db *dbpkg.DB) repositories.SavedOutfitRepository {
+	return &SavedOutfitRepository{db: db}
+}
 
 func (r *SavedOutfitRepository) List(ctx context.Context, userID domain.ID) ([]domain.SavedOutfit, error) {
 	rows, err := r.db.Pool().Query(ctx, `
@@ -23,7 +25,9 @@ FROM saved_outfits
 WHERE user_id = $1
 ORDER BY created_at DESC
 `, userID)
-	if err != nil { return nil, errors.Wrap(err, "list saved_outfits") }
+	if err != nil {
+		return nil, errors.Wrap(err, "list saved_outfits")
+	}
 	defer rows.Close()
 
 	var out []domain.SavedOutfit
@@ -53,7 +57,9 @@ RETURNING id, user_id, name, description, items, occasions, seasons, min_temp, m
 `, userID, req.Name, req.Description, itemsJSON, req.Occasions, req.Seasons).Scan(
 		&s.ID, &s.UserID, &s.Name, &s.Description, &items, &s.Occasions, &s.Seasons, &s.MinTemp, &s.MaxTemp, &s.ThumbnailURL, &s.IsFavorite, &s.TimesWorn, &s.LastWornAt, &s.CreatedAt,
 	)
-	if err != nil { return nil, errors.Wrap(err, "create saved_outfit") }
+	if err != nil {
+		return nil, errors.Wrap(err, "create saved_outfit")
+	}
 	var obj any
 	_ = json.Unmarshal(items, &obj)
 	s.Items = obj
@@ -71,7 +77,9 @@ WHERE id=$1 AND user_id=$2
 		&s.ID, &s.UserID, &s.Name, &s.Description, &items, &s.Occasions, &s.Seasons, &s.MinTemp, &s.MaxTemp, &s.ThumbnailURL, &s.IsFavorite, &s.TimesWorn, &s.LastWornAt, &s.CreatedAt,
 	)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) { return nil, nil }
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, errors.Wrap(err, "get saved_outfit")
 	}
 	var obj any
@@ -97,14 +105,20 @@ seasons = COALESCE($5, seasons),
 is_favorite = COALESCE($6, is_favorite)
 WHERE id=$7 AND user_id=$8
 `, req.Name, req.Description, itemsJSON, req.Occasions, req.Seasons, req.IsFavorite, id, userID)
-	if err != nil { return nil, errors.Wrap(err, "update saved_outfit") }
+	if err != nil {
+		return nil, errors.Wrap(err, "update saved_outfit")
+	}
 	return r.Get(ctx, userID, id)
 }
 
 func (r *SavedOutfitRepository) Delete(ctx context.Context, userID domain.ID, id domain.ID) error {
 	cmd, err := r.db.Pool().Exec(ctx, `DELETE FROM saved_outfits WHERE id=$1 AND user_id=$2`, id, userID)
-	if err != nil { return errors.Wrap(err, "delete saved_outfit") }
-	if cmd.RowsAffected() == 0 { return repositories.ErrNotFound }
+	if err != nil {
+		return errors.Wrap(err, "delete saved_outfit")
+	}
+	if cmd.RowsAffected() == 0 {
+		return repositories.ErrNotFound
+	}
 	return nil
 }
 
@@ -114,6 +128,8 @@ UPDATE saved_outfits
 SET times_worn = times_worn + 1, last_worn_at = NOW()
 WHERE id=$1 AND user_id=$2
 `, id, userID)
-	if err != nil { return nil, errors.Wrap(err, "mark worn") }
+	if err != nil {
+		return nil, errors.Wrap(err, "mark worn")
+	}
 	return r.Get(ctx, userID, id)
 }

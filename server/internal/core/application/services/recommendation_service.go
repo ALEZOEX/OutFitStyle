@@ -18,10 +18,10 @@ import (
 )
 
 type RecommendationService struct {
-	recRepo           repositories.RecommendationRepository
-	clothingRepo      repositories.ClothingRepository
-	userRepo          repositories.UserRepository
-	personalization   repositories.PersonalizationRepository
+	recRepo         repositories.RecommendationRepository
+	clothingRepo    repositories.ClothingRepository
+	userRepo        repositories.UserRepository
+	personalization repositories.PersonalizationRepository
 
 	weather *external.WeatherService
 	ml      *external.MLClient
@@ -189,7 +189,7 @@ func (s *RecommendationService) Regenerate(
 		return nil, err
 	}
 
-	quickChosen := map[string]domain.ID{}    // category -> clothing_item_id
+	quickChosen := map[string]domain.ID{} // category -> clothing_item_id
 	needRerank := false
 
 	includePartners := false
@@ -258,11 +258,17 @@ func (s *RecommendationService) Regenerate(
 			}
 			candByID[c.ID] = c
 		}
-		for _, c := range wardrobeLite { add(c) }
-		for _, c := range catalogLite { add(c) }
+		for _, c := range wardrobeLite {
+			add(c)
+		}
+		for _, c := range catalogLite {
+			add(c)
+		}
 
 		candidates := make([]domain.CandidateLite, 0, len(candByID))
-		for _, c := range candByID { candidates = append(candidates, c) }
+		for _, c := range candByID {
+			candidates = append(candidates, c)
+		}
 
 		style := ""
 		if preferStyle != nil {
@@ -341,7 +347,9 @@ func (s *RecommendationService) persistRegeneratedQuick(
 		return nil, err
 	}
 	fullByID := map[domain.ID]domain.ClothingItem{}
-	for _, it := range fullItems { fullByID[it.ID] = it }
+	for _, it := range fullItems {
+		fullByID[it.ID] = it
+	}
 
 	outfitItems := []map[string]any{}
 	itemCreates := []repositories.RecommendationItemCreate{}
@@ -362,19 +370,19 @@ func (s *RecommendationService) persistRegeneratedQuick(
 		// score неизвестен (т.к. не rerank). Ставим 0.5 как нейтральный.
 		score := 0.5
 		outfitItems = append(outfitItems, map[string]any{
-			"category": cat,
-			"item": it,
-			"score": score,
+			"category":         cat,
+			"item":             it,
+			"score":            score,
 			"is_from_wardrobe": (it.Source == "user"),
-			"alternatives": []any{},
+			"alternatives":     []any{},
 		})
 
 		itemCreates = append(itemCreates, repositories.RecommendationItemCreate{
-			ClothingItemID: it.ID,
-			Category: cat,
-			Score: &score,
-			Source: it.Source,
-			IsFromWardrobe: (it.Source == "user"),
+			ClothingItemID:   it.ID,
+			Category:         cat,
+			Score:            &score,
+			Source:           it.Source,
+			IsFromWardrobe:   (it.Source == "user"),
 			AlternativesJSON: nil,
 		})
 
@@ -383,12 +391,14 @@ func (s *RecommendationService) persistRegeneratedQuick(
 	}
 
 	outfitScore := 0.0
-	if n > 0 { outfitScore = total / float64(n) }
+	if n > 0 {
+		outfitScore = total / float64(n)
+	}
 
 	tips := regenTips(oldRec, len(finalChosen))
 	outfitJSON, _ := json.Marshal(map[string]any{
 		"outfit": outfitItems,
-		"tips": tips,
+		"tips":   tips,
 	})
 
 	modelVersion := "regen-quick"
@@ -397,25 +407,25 @@ func (s *RecommendationService) persistRegeneratedQuick(
 	colorH := 0.5
 
 	rec := &domain.RecommendationRecord{
-		UserID: userID,
-		Location: oldRec.Location,
-		Latitude: oldRec.Latitude,
+		UserID:    userID,
+		Location:  oldRec.Location,
+		Latitude:  oldRec.Latitude,
 		Longitude: oldRec.Longitude,
 
-		Occasion: oldRec.Occasion,
-		RequestedStyle: oldRec.RequestedStyle,
+		Occasion:           oldRec.Occasion,
+		RequestedStyle:     oldRec.RequestedStyle,
 		RequestedFormality: oldRec.RequestedFormality,
 
 		WeatherData: weatherJSON,
-		OutfitData: outfitJSON,
+		OutfitData:  outfitJSON,
 
-		TotalScore: &outfitScore,
+		TotalScore:     &outfitScore,
 		StyleCoherence: &styleC,
-		ColorHarmony: &colorH,
+		ColorHarmony:   &colorH,
 
-		ModelVersion: &modelVersion,
+		ModelVersion:     &modelVersion,
 		ProcessingTimeMs: &processingMs,
-		ABTestVariant: oldRec.ABTestVariant,
+		ABTestVariant:    oldRec.ABTestVariant,
 
 		IsFavorite: false,
 	}
@@ -454,7 +464,9 @@ func (s *RecommendationService) persistRegenerated(
 		return nil, err
 	}
 	fullByID := map[domain.ID]domain.ClothingItem{}
-	for _, it := range fullItems { fullByID[it.ID] = it }
+	for _, it := range fullItems {
+		fullByID[it.ID] = it
+	}
 
 	// wardrobe set for is_from_wardrobe (по wardrobeLite)
 	wardrobeSet := map[domain.ID]bool{}
@@ -496,8 +508,8 @@ func (s *RecommendationService) persistRegenerated(
 				continue
 			}
 			alts = append(alts, map[string]any{
-				"id": rr.ID.String(),
-				"score": rr.Score,
+				"id":         rr.ID.String(),
+				"score":      rr.Score,
 				"confidence": rr.Confidence,
 			})
 			if len(alts) >= 3 {
@@ -508,21 +520,21 @@ func (s *RecommendationService) persistRegenerated(
 
 		isFromWardrobe := wardrobeSet[chID]
 		outfitItems = append(outfitItems, map[string]any{
-			"category": cat,
-			"item": it,
-			"score": score,
-			"confidence": conf,
+			"category":         cat,
+			"item":             it,
+			"score":            score,
+			"confidence":       conf,
 			"is_from_wardrobe": isFromWardrobe,
-			"alternatives": alts,
+			"alternatives":     alts,
 		})
 
 		scr := score
 		itemCreates = append(itemCreates, repositories.RecommendationItemCreate{
-			ClothingItemID: it.ID,
-			Category: cat,
-			Score: &scr,
-			Source: it.Source,
-			IsFromWardrobe: isFromWardrobe,
+			ClothingItemID:   it.ID,
+			Category:         cat,
+			Score:            &scr,
+			Source:           it.Source,
+			IsFromWardrobe:   isFromWardrobe,
 			AlternativesJSON: altsJSON,
 		})
 
@@ -531,34 +543,36 @@ func (s *RecommendationService) persistRegenerated(
 	}
 
 	outfitScore := 0.0
-	if n > 0 { outfitScore = total / float64(n) }
+	if n > 0 {
+		outfitScore = total / float64(n)
+	}
 
 	tips := regenTips(oldRec, len(finalChosen))
 	outfitJSON, _ := json.Marshal(map[string]any{
 		"outfit": outfitItems,
-		"tips": tips,
+		"tips":   tips,
 	})
 
 	rec := &domain.RecommendationRecord{
-		UserID: userID,
-		Location: oldRec.Location,
-		Latitude: oldRec.Latitude,
+		UserID:    userID,
+		Location:  oldRec.Location,
+		Latitude:  oldRec.Latitude,
 		Longitude: oldRec.Longitude,
 
-		Occasion: oldRec.Occasion,
-		RequestedStyle: oldRec.RequestedStyle,
+		Occasion:           oldRec.Occasion,
+		RequestedStyle:     oldRec.RequestedStyle,
 		RequestedFormality: oldRec.RequestedFormality,
 
 		WeatherData: weatherJSON,
-		OutfitData: outfitJSON,
+		OutfitData:  outfitJSON,
 
-		TotalScore: &outfitScore,
+		TotalScore:     &outfitScore,
 		StyleCoherence: &styleC,
-		ColorHarmony: &colorH,
+		ColorHarmony:   &colorH,
 
-		ModelVersion: &modelVersion,
+		ModelVersion:     &modelVersion,
 		ProcessingTimeMs: &processingMs,
-		ABTestVariant: oldRec.ABTestVariant,
+		ABTestVariant:    oldRec.ABTestVariant,
 
 		IsFavorite: false,
 	}
@@ -609,7 +623,9 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 		return nil, nil, errors.Wrap(err, "load chosen items")
 	}
 	fullByID := map[domain.ID]domain.ClothingItem{}
-	for _, it := range fullItems { fullByID[it.ID] = it }
+	for _, it := range fullItems {
+		fullByID[it.ID] = it
+	}
 
 	wardrobeSet := map[domain.ID]bool{}
 	for _, w := range wardrobeLite {
@@ -638,8 +654,8 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 		alts := make([]map[string]any, 0, 3)
 		for i := 1; i < len(list) && len(alts) < 3; i++ {
 			alts = append(alts, map[string]any{
-				"id": list[i].ID.String(),
-				"score": list[i].Score,
+				"id":         list[i].ID.String(),
+				"score":      list[i].Score,
 				"confidence": list[i].Confidence,
 			})
 		}
@@ -647,21 +663,21 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 
 		isFromWardrobe := wardrobeSet[chID]
 		outfitItems = append(outfitItems, map[string]any{
-			"category": cat,
-			"item": it,
-			"score": score,
-			"confidence": conf,
+			"category":         cat,
+			"item":             it,
+			"score":            score,
+			"confidence":       conf,
 			"is_from_wardrobe": isFromWardrobe,
-			"alternatives": alts,
+			"alternatives":     alts,
 		})
 
 		scr := score
 		itemCreates = append(itemCreates, repositories.RecommendationItemCreate{
-			ClothingItemID: it.ID,
-			Category: cat,
-			Score: &scr,
-			Source: it.Source,
-			IsFromWardrobe: isFromWardrobe,
+			ClothingItemID:   it.ID,
+			Category:         cat,
+			Score:            &scr,
+			Source:           it.Source,
+			IsFromWardrobe:   isFromWardrobe,
 			AlternativesJSON: altsJSON,
 		})
 
@@ -670,7 +686,9 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 	}
 
 	outfitScore := 0.0
-	if n > 0 { outfitScore = total / float64(n) }
+	if n > 0 {
+		outfitScore = total / float64(n)
+	}
 
 	// tips: cold start если wardrobe пустой
 	tips := []string{}
@@ -683,7 +701,7 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 
 	outfitJSON, _ := json.Marshal(map[string]any{
 		"outfit": outfitItems,
-		"tips": tips,
+		"tips":   tips,
 	})
 
 	rec := &domain.RecommendationRecord{
@@ -693,18 +711,18 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 		Latitude:  lat,
 		Longitude: lon,
 
-		Occasion: req.Occasion,
-		RequestedStyle: req.Style,
+		Occasion:           req.Occasion,
+		RequestedStyle:     req.Style,
 		RequestedFormality: req.Formality,
 
 		WeatherData: weatherJSON,
-		OutfitData: outfitJSON,
+		OutfitData:  outfitJSON,
 
-		TotalScore: &outfitScore,
+		TotalScore:     &outfitScore,
 		StyleCoherence: &styleC,
-		ColorHarmony: &colorH,
+		ColorHarmony:   &colorH,
 
-		ModelVersion: &modelVersion,
+		ModelVersion:     &modelVersion,
 		ProcessingTimeMs: &processingMs,
 
 		IsFavorite: false,
@@ -1008,14 +1026,14 @@ func valStr(p *string, def string) string {
 func derefInt(p *int, def int) int {
 	if p == nil {
 		return def
-	};
+	}
 	return *p
 }
 
 func derefString(p *string, def string) string {
 	if p == nil {
 		return def
-	};
+	}
 	return *p
 }
 
@@ -1045,4 +1063,3 @@ func (s *RecommendationService) SetFavorite(ctx context.Context, userID domain.I
 func (s *RecommendationService) Favorites(ctx context.Context, userID domain.ID, limit int) ([]domain.RecommendationRecord, error) {
 	return s.recRepo.ListFavorites(ctx, userID, limit)
 }
-

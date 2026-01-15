@@ -6,18 +6,18 @@ import (
 )
 
 type CatalogSearchParams struct {
-	Q *string
-	Category *string
+	Q           *string
+	Category    *string
 	Subcategory *string
-	Style *string
-	Color *string
+	Style       *string
+	Color       *string
 
 	MinPrice *float64
 	MaxPrice *float64
 
 	Partner *string // partners.code
 
-	Page int
+	Page  int
 	Limit int
 }
 

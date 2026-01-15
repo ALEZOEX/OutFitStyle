@@ -6,9 +6,13 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
-type SavedOutfitService struct{ repo repositories.SavedOutfitRepository }
+type SavedOutfitService struct {
+	repo repositories.SavedOutfitRepository
+}
 
-func NewSavedOutfitService(r repositories.SavedOutfitRepository) *SavedOutfitService { return &SavedOutfitService{repo: r} }
+func NewSavedOutfitService(r repositories.SavedOutfitRepository) *SavedOutfitService {
+	return &SavedOutfitService{repo: r}
+}
 
 func (s *SavedOutfitService) List(ctx context.Context, userID domain.ID) ([]domain.SavedOutfit, error) {
 	return s.repo.List(ctx, userID)

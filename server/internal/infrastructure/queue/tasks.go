@@ -1,5 +1,5 @@
 package queue
 
 const (
-TaskSendNotification = "push:send_notification"
+	TaskSendNotification = "push:send_notification"
 )

@@ -21,7 +21,7 @@ func NewCatalogService(r repositories.CatalogRepository, cache *redis.Client) *C
 	return &CatalogService{
 		repo:  r,
 		cache: cache,
-		ttl:  24 * time.Hour,
+		ttl:   24 * time.Hour,
 	}
 }
 

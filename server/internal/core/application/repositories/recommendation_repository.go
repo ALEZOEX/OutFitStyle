@@ -25,6 +25,7 @@ type RecommendationItemRow struct {
 
 type RecommendationRepository interface {
 	Create(ctx context.Context, rec *domain.RecommendationRecord, items []RecommendationItemCreate) (domain.ID, error)
+	CreateRecommendation(ctx context.Context, rec *domain.RecommendationResponse) (*domain.RecommendationResponse, error)
 	GetByID(ctx context.Context, id domain.ID) (*domain.RecommendationRecord, error)
 
 	ListByUser(ctx context.Context, userID domain.ID, q domain.RecommendationListQuery) (items []domain.RecommendationRecord, total int, err error)

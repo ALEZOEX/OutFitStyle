@@ -23,7 +23,9 @@ FROM trips
 WHERE user_id = $1
 ORDER BY start_date DESC
 `, userID)
-	if err != nil { return nil, errors.Wrap(err, "list trips") }
+	if err != nil {
+		return nil, errors.Wrap(err, "list trips")
+	}
 	defer rows.Close()
 
 	var out []domain.Trip
@@ -52,7 +54,9 @@ RETURNING id, user_id, name, destination, destination_lat, destination_lon, star
 `, userID, req.Name, req.Destination, req.DestinationLat, req.DestinationLon, req.StartDate, req.EndDate, req.Occasions).Scan(
 		&t.ID, &t.UserID, &t.Name, &t.Destination, &t.DestinationLat, &t.DestinationLon, &t.StartDate, &t.EndDate, &t.Occasions, new([]byte), &t.Status, &t.CreatedAt,
 	)
-	if err != nil { return nil, errors.Wrap(err, "create trip") }
+	if err != nil {
+		return nil, errors.Wrap(err, "create trip")
+	}
 	return &t, nil
 }
 
@@ -67,7 +71,9 @@ WHERE id = $1 AND user_id = $2
 		&t.ID, &t.UserID, &t.Name, &t.Destination, &t.DestinationLat, &t.DestinationLon, &t.StartDate, &t.EndDate, &t.Occasions, &packing, &t.Status, &t.CreatedAt,
 	)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) { return nil, nil }
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, errors.Wrap(err, "get trip")
 	}
 	if len(packing) > 0 {
@@ -92,13 +98,19 @@ occasions = COALESCE($7, occasions),
 status = COALESCE($8, status)
 WHERE id = $9 AND user_id = $10
 `, req.Name, req.Destination, req.DestinationLat, req.DestinationLon, req.StartDate, req.EndDate, req.Occasions, req.Status, id, userID)
-	if err != nil { return nil, errors.Wrap(err, "update trip") }
+	if err != nil {
+		return nil, errors.Wrap(err, "update trip")
+	}
 	return r.Get(ctx, userID, id)
 }
 
 func (r *TripRepository) Delete(ctx context.Context, userID domain.ID, id domain.ID) error {
 	cmd, err := r.db.Pool().Exec(ctx, `DELETE FROM trips WHERE id=$1 AND user_id=$2`, id, userID)
-	if err != nil { return errors.Wrap(err, "delete trip") }
-	if cmd.RowsAffected() == 0 { return repositories.ErrNotFound }
+	if err != nil {
+		return errors.Wrap(err, "delete trip")
+	}
+	if cmd.RowsAffected() == 0 {
+		return repositories.ErrNotFound
+	}
 	return nil
 }

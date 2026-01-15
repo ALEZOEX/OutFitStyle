@@ -49,19 +49,19 @@ func (s *SubscriptionService) GetCurrent(ctx context.Context, userID domain.ID) 
 			stylesLimit := 2
 			familyAccounts := 1
 			plan = domain.SubscriptionPlan{
-				Code: "free",
-				Name: "Free (Fallback)",
+				Code:                  "free",
+				Name:                  "Free (Fallback)",
 				RecommendationsPerDay: &limit,
-				WardrobeItemsLimit: &wardrobeLimit,
-				HistoryDays: &historyLimit,
-				StylesLimit: &stylesLimit,
-				FamilyAccounts: familyAccounts,
-				PriceMonthly: 0,
-				PriceYearly: 0,
-				Currency: "USD",
-				Features: []byte(`["basic_recommendations", "weather_alerts", "style_tracking"]`),
-				IsActive: true,
-				SortOrder: 0,
+				WardrobeItemsLimit:    &wardrobeLimit,
+				HistoryDays:           &historyLimit,
+				StylesLimit:           &stylesLimit,
+				FamilyAccounts:        familyAccounts,
+				PriceMonthly:          0,
+				PriceYearly:           0,
+				Currency:              "USD",
+				Features:              []byte(`["basic_recommendations", "weather_alerts", "style_tracking"]`),
+				IsActive:              true,
+				SortOrder:             0,
 			}
 		} else {
 			plan = *freePlan

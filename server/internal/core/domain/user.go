@@ -12,9 +12,9 @@ type User struct {
 	Email        string `json:"email"`
 	PasswordHash string `json:"-"`
 
-	DisplayName *string `json:"display_name,omitempty"`
-	AvatarURL   *string `json:"avatar_url,omitempty"`
-	Gender      *string `json:"gender,omitempty"`
+	DisplayName *string    `json:"display_name,omitempty"`
+	AvatarURL   *string    `json:"avatar_url,omitempty"`
+	Gender      *string    `json:"gender,omitempty"`
 	BirthDate   *time.Time `json:"birth_date,omitempty"`
 
 	DefaultLocation  *string  `json:"default_location,omitempty"`
@@ -50,8 +50,8 @@ type UserRegistration struct {
 
 // Запрос логина (минимум)
 type UserLogin struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email      string  `json:"email"`
+	Password   string  `json:"password"`
 	DeviceID   *string `json:"device_id,omitempty"`
 	DeviceName *string `json:"device_name,omitempty"`
 }
