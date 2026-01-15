@@ -4,23 +4,23 @@ import "time"
 
 // WardrobeItem — запись user_wardrobe + вложенная clothing_item.
 type WardrobeItem struct {
-	ID           ID `json:"id"`
-	UserID       ID `json:"user_id"`
+	ID             ID `json:"id"`
+	UserID         ID `json:"user_id"`
 	ClothingItemID ID `json:"clothing_item_id"`
 
 	CustomName *string  `json:"custom_name,omitempty"`
 	Notes      *string  `json:"notes,omitempty"`
 	Tags       []string `json:"tags,omitempty"`
 
-	PurchaseDate    *time.Time `json:"purchase_date,omitempty"`
-	PurchasePrice   *float64   `json:"purchase_price,omitempty"`
-	PurchaseCurrency *string   `json:"purchase_currency,omitempty"`
+	PurchaseDate     *time.Time `json:"purchase_date,omitempty"`
+	PurchasePrice    *float64   `json:"purchase_price,omitempty"`
+	PurchaseCurrency *string    `json:"purchase_currency,omitempty"`
 
 	WearCount  int        `json:"wear_count"`
 	LastWornAt *time.Time `json:"last_worn_at,omitempty"`
 
-	IsFavorite bool `json:"is_favorite"`
-	IsArchived bool `json:"is_archived"`
+	IsFavorite bool   `json:"is_favorite"`
+	IsArchived bool   `json:"is_archived"`
 	Condition  string `json:"condition"`
 
 	CreatedAt time.Time `json:"created_at"`

@@ -12,20 +12,20 @@ type SupportTicket struct {
 	Priority string `json:"priority"`
 	Status   string `json:"status"`
 
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
 	ResolvedAt *time.Time `json:"resolved_at,omitempty"`
 }
 
 type SupportMessage struct {
-	ID        ID      `json:"id"`
-	TicketID  ID      `json:"ticket_id"`
-	SenderType string `json:"sender_type"`
-	SenderID  *ID     `json:"sender_id,omitempty"`
-	Message   string  `json:"message"`
-	Attachments any   `json:"attachments,omitempty"`
-	IsInternal bool   `json:"is_internal"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          ID        `json:"id"`
+	TicketID    ID        `json:"ticket_id"`
+	SenderType  string    `json:"sender_type"`
+	SenderID    *ID       `json:"sender_id,omitempty"`
+	Message     string    `json:"message"`
+	Attachments any       `json:"attachments,omitempty"`
+	IsInternal  bool      `json:"is_internal"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type CreateTicketRequest struct {

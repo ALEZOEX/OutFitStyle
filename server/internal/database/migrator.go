@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -13,7 +14,13 @@ type Migrator struct {
 }
 
 func NewMigrator(databaseURL string) (*Migrator, error) {
-	driver, err := postgres.WithInstance(nil, &postgres.Config{})
+	// Создаем подключение к базе данных
+	db, err := sql.Open("postgres", databaseURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create postgres driver: %w", err)
 	}
@@ -53,7 +60,11 @@ func (m *Migrator) Drop() error {
 }
 
 func (m *Migrator) Close() error {
-	return m.m.Close()
+	srcErr, dbErr := m.m.Close()
+	if srcErr != nil {
+		return srcErr
+	}
+	return dbErr
 }
 
 func (m *Migrator) Version() (uint, bool, error) {

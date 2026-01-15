@@ -21,7 +21,11 @@ func NewStripeGateway(webhookSecret string) *StripeGateway {
 func (g *StripeGateway) InitPayment(ctx context.Context, amount float64, currency string, description string, metadata map[string]any) (domain.PaymentInit, error) {
 	// MVP: инициирование Stripe PaymentIntent через API не делаем в этом модуля в (чтобы не раздувать).
 	// Возвращаем ошибку, если кто-то попытается реально подписаться через Stripe без отдельного модуля.
-	_ = ctx; _ = amount; _ = currency; _ = description; _ = metadata
+	_ = ctx
+	_ = amount
+	_ = currency
+	_ = description
+	_ = metadata
 	return domain.PaymentInit{}, errors.New("stripe init not implemented in this module")
 }
 

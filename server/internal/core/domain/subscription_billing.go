@@ -1,8 +1,8 @@
 package domain
 
 type SubscribeRequest struct {
-	PlanCode    string `json:"plan_code"`
-	BillingCycle string `json:"billing_cycle"` // monthly|yearly
+	PlanCode        string `json:"plan_code"`
+	BillingCycle    string `json:"billing_cycle"`    // monthly|yearly
 	PaymentProvider string `json:"payment_provider"` // dummy, stripe, yookassa
 
 	PaymentMethodID *string `json:"payment_method_id,omitempty"`

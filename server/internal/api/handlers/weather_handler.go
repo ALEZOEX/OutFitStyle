@@ -15,9 +15,9 @@ import (
 )
 
 type WeatherHandler struct {
-	svc *external.WeatherService
+	svc      *external.WeatherService
 	userRepo repositories.UserRepository
-	log *zap.Logger
+	log      *zap.Logger
 }
 
 func NewWeatherHandler(svc *external.WeatherService, userRepo repositories.UserRepository, log *zap.Logger) *WeatherHandler {

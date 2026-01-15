@@ -49,9 +49,9 @@ func (h *AchievementHandler) My(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Success(w, map[string]any{
-		"unlocked":      unlocked,
-		"in_progress":   inProgress,
-		"total_points":  totalPoints,
-		"rank":          rank,
+		"unlocked":     unlocked,
+		"in_progress":  inProgress,
+		"total_points": totalPoints,
+		"rank":         rank,
 	})
 }

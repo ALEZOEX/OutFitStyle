@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"os"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -19,7 +18,7 @@ var globalLogger *zap.Logger
 
 func Init(env string) error {
 	var config zap.Config
-	
+
 	if env == "production" {
 		config = zap.NewProductionConfig()
 		config.EncoderConfig.TimeKey = "timestamp"
@@ -30,11 +29,11 @@ func Init(env string) error {
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
 	}
-	
+
 	// Add caller information
 	config.EncoderConfig.CallerKey = "caller"
 	config.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
-	
+
 	var err error
 	globalLogger, err = config.Build(
 		zap.AddCallerSkip(1),
@@ -43,21 +42,21 @@ func Init(env string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 func WithContext(ctx context.Context) *zap.Logger {
 	logger := globalLogger
-	
+
 	if requestID, ok := ctx.Value(RequestIDKey).(string); ok {
 		logger = logger.With(zap.String("request_id", requestID))
 	}
-	
+
 	if userID, ok := ctx.Value(UserIDKey).(string); ok {
 		logger = logger.With(zap.String("user_id", userID))
 	}
-	
+
 	return logger
 }
 

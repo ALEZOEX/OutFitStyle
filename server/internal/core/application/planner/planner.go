@@ -30,10 +30,10 @@ func NewOutfitPlanner(specRepo clothing.SubcategorySpecRepository) *OutfitPlanne
 }
 
 type OutfitPlan struct {
-	Temperature     float64                           `json:"temperature"`
-	WeatherCondition string                           `json:"weather_condition"`
-	UserPreferences map[string]interface{}           `json:"user_preferences"`
-	Plan           map[string][]domain.SubcategorySpec `json:"plan"`
+	Temperature      float64                             `json:"temperature"`
+	WeatherCondition string                              `json:"weather_condition"`
+	UserPreferences  map[string]interface{}              `json:"user_preferences"`
+	Plan             map[string][]domain.SubcategorySpec `json:"plan"`
 }
 
 func (p *OutfitPlanner) GeneratePlan(ctx context.Context, temperature float64, weatherCondition string, userPreferences map[string]interface{}) (*OutfitPlan, error) {
@@ -43,7 +43,7 @@ func (p *OutfitPlanner) GeneratePlan(ctx context.Context, temperature float64, w
 	}
 
 	plan := make(map[string][]domain.SubcategorySpec)
-	
+
 	for _, spec := range specs {
 		// Check if temperature is within recommended range
 		if float64(spec.TempMinReco) <= temperature && float64(spec.TempMaxReco) >= temperature {
@@ -54,7 +54,7 @@ func (p *OutfitPlanner) GeneratePlan(ctx context.Context, temperature float64, w
 			}
 		}
 	}
-	
+
 	// Sort each category's subcategories by warmth level (descending) for cold weather preference
 	for category := range plan {
 		categorySpecs := plan[category]
@@ -76,7 +76,7 @@ func (p *OutfitPlanner) GeneratePlan(ctx context.Context, temperature float64, w
 		Temperature:      temperature,
 		WeatherCondition: weatherCondition,
 		UserPreferences:  userPreferences,
-		Plan:            plan,
+		Plan:             plan,
 	}, nil
 }
 

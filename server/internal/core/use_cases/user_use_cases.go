@@ -15,8 +15,8 @@ type GetUserProfileUseCase struct {
 // Execute retrieves a user's profile
 func (uc *GetUserProfileUseCase) Execute(
 	ctx context.Context,
-	userID int,
-) (*domain.UserProfile, error) {
+	userID domain.ID,
+) (*domain.User, error) {
 	return uc.UserRepository.GetUserProfile(ctx, userID)
 }
 
@@ -28,9 +28,10 @@ type UpdateUserProfileUseCase struct {
 // Execute updates a user's profile
 func (uc *UpdateUserProfileUseCase) Execute(
 	ctx context.Context,
-	profile *domain.UserProfile,
-) error {
-	return uc.UserRepository.UpdateUserProfile(ctx, profile)
+	userID domain.ID,
+	patch domain.UserProfileUpdate,
+) (*domain.User, error) {
+	return uc.UserRepository.UpdateUserProfile(ctx, userID, patch)
 }
 
 // RateRecommendationUseCase handles rating a recommendation
@@ -41,7 +42,8 @@ type RateRecommendationUseCase struct {
 // Execute saves a user's rating for a recommendation
 func (uc *RateRecommendationUseCase) Execute(
 	ctx context.Context,
-	userID, recommendationID, rating int,
+	userID, recommendationID domain.ID,
+	rating int,
 	feedback string,
 ) error {
 	return uc.UserRepository.RateRecommendation(ctx, userID, recommendationID, rating, feedback)

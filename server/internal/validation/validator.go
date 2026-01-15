@@ -82,50 +82,50 @@ func ValidateUser(v *Validator, name, email, password string) {
 func ValidateWardrobeItem(v *Validator, name, category, color string, warmthLevel int) {
 	v.Check(name != "", "name", "must be provided")
 	v.Check(len(name) <= 200, "name", "must not be more than 200 characters long")
-	
+
 	v.Check(category != "", "category", "must be provided")
 	validCategories := []string{"top", "bottom", "shoes", "outerwear", "accessory", "dress", "suit"}
 	v.Check(v.In(category, validCategories...), "category", "must be a valid category")
-	
+
 	v.Check(color != "", "color", "must be provided")
 	v.Check(len(color) <= 50, "color", "must not be more than 50 characters long")
-	
+
 	v.Check(warmthLevel >= 0 && warmthLevel <= 5, "warmth_level", "must be between 0 and 5")
 }
 
 func ValidateJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	const maxBytes = 1_048_576 // 1MB
-	
+
 	r.Body = http.MaxBytesReader(w, r.Body, maxBytes)
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
-	
+
 	err := dec.Decode(dst)
 	if err != nil {
 		var syntaxError *json.SyntaxError
 		var unmarshalTypeError *json.UnmarshalTypeError
-		
+
 		switch {
 		case errors.As(err, &syntaxError):
 			return fmt.Errorf("body contains badly-formed JSON (at character %d)", syntaxError.Offset)
-			
+
 		case errors.As(err, &unmarshalTypeError):
-			if unmarshalTypeError.Field != nil {
+			if unmarshalTypeError.Field != "" {
 				return fmt.Errorf("body contains incorrect JSON type for field %q", unmarshalTypeError.Field)
 			}
 			return fmt.Errorf("body contains incorrect JSON type (at character %d)", unmarshalTypeError.Offset)
-			
+
 		case strings.HasPrefix(err.Error(), "json: unknown field "):
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
 			return fmt.Errorf("body contains unknown field %s", fieldName)
-			
+
 		case err.Error() == "http: request body too large":
 			return fmt.Errorf("body must not be larger than 1MB")
-			
+
 		default:
 			return err
 		}
 	}
-	
+
 	return nil
 }

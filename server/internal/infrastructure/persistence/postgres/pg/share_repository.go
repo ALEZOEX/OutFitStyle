@@ -112,10 +112,10 @@ WHERE id = $1
 	_ = json.Unmarshal(weather, &weatherObj)
 
 	return map[string]any{
-		"type": "recommendation",
+		"type":              "recommendation",
 		"recommendation_id": recommendationID.String(),
-		"weather": weatherObj,
-		"outfit": outfitObj,
+		"weather":           weatherObj,
+		"outfit":            outfitObj,
 	}, nil
 }
 
@@ -139,11 +139,11 @@ WHERE id = $1
 	_ = json.Unmarshal(items, &itemsObj)
 
 	return map[string]any{
-		"type": "saved_outfit",
+		"type":            "saved_outfit",
 		"saved_outfit_id": savedOutfitID.String(),
-		"name": name,
-		"description": desc,
-		"items": itemsObj,
+		"name":            name,
+		"description":     desc,
+		"items":           itemsObj,
 	}, nil
 }
 

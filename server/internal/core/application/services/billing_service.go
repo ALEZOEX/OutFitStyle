@@ -13,11 +13,10 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
-
 type BillingService struct {
-	subRepo   repositories.SubscriptionRepository
+	subRepo     repositories.SubscriptionRepository
 	billingRepo repositories.BillingRepository
-	promoRepo repositories.PromoRepository
+	promoRepo   repositories.PromoRepository
 
 	gateways map[string]domain.PaymentGateway
 }
@@ -87,9 +86,9 @@ func (s *BillingService) Subscribe(ctx context.Context, userID domain.ID, req do
 	}
 
 	init, err := gw.InitPayment(ctx, amount, currency, "OutfitStyle subscription", map[string]any{
-		"user_id": strconv.FormatInt(userIDInt, 10),
+		"user_id":         strconv.FormatInt(userIDInt, 10),
 		"subscription_id": strconv.FormatInt(subID, 10),
-		"plan_code": plan.Code,
+		"plan_code":       plan.Code,
 	})
 	if err != nil {
 		return nil, err
@@ -99,31 +98,31 @@ func (s *BillingService) Subscribe(ctx context.Context, userID domain.ID, req do
 	paymentProvider := init.Provider
 
 	_, err = s.billingRepo.CreatePayment(ctx, repositories.CreatePaymentParams{
-		UserID:         userIDInt,
-		SubscriptionID: &subID,
-		Amount:         amount,
-		Currency:       currency,
-		Status:         "pending",
-		PaymentProvider: paymentProvider,
+		UserID:            userIDInt,
+		SubscriptionID:    &subID,
+		Amount:            amount,
+		Currency:          currency,
+		Status:            "pending",
+		PaymentProvider:   paymentProvider,
 		ExternalPaymentID: &extID,
-		PaymentMethod: req.PaymentMethodID,
-		Description: ptr("Subscription " + plan.Code),
+		PaymentMethod:     req.PaymentMethodID,
+		Description:       ptr("Subscription " + plan.Code),
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	respSub := domain.UserSubscription{
-		ID: &subID,
-		UserID: userIDInt,
-		Plan: *plan,
+		ID:           &subID,
+		UserID:       userIDInt,
+		Plan:         *plan,
 		BillingCycle: &req.BillingCycle,
-		Status: ptr("active"),
+		Status:       ptr("active"),
 	}
 
 	return &domain.SubscribeResponse{
 		Subscription: respSub,
-		PaymentURL: init.PaymentURL,
+		PaymentURL:   init.PaymentURL,
 		ClientSecret: init.ClientSecret,
 	}, nil
 }
@@ -151,11 +150,11 @@ func (s *BillingService) Promo(ctx context.Context, code string) (map[string]any
 	}
 
 	return map[string]any{
-		"code": p.Code,
-		"discount_type": p.DiscountType,
-		"discount_value": p.DiscountValue,
+		"code":             p.Code,
+		"discount_type":    p.DiscountType,
+		"discount_value":   p.DiscountValue,
 		"applicable_plans": p.ApplicablePlans,
-		"valid_until": p.ValidUntil,
+		"valid_until":      p.ValidUntil,
 	}, nil
 }
 
@@ -165,8 +164,12 @@ func (s *BillingService) ListPayments(ctx context.Context, userID domain.ID, pag
 	if err != nil {
 		return nil, domain.Pagination{}, err
 	}
-	if page <= 0 { page = 1 }
-	if limit <= 0 { limit = 20 }
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 20
+	}
 	return items, domain.Pagination{Page: page, Limit: limit, Total: total}, nil
 }
 

@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	goerrors "errors"
 
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/core/domain"

@@ -5,32 +5,32 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"strings"
 	"outfitstyle/server/internal/contracts"
 	"outfitstyle/server/internal/core/application/planner"
-	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/core/application/repositories"
+	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/core/repo/clothing"
 	mlclient "outfitstyle/server/internal/infrastructure/clients"
-	"outfitstyle/server/internal/infrastructure/services"
+	translation "outfitstyle/server/internal/infrastructure/services"
+	"strings"
 	"time"
 )
 
 type ClothingItemService struct {
-	clothingRepo repositories.ClothingItemRepository
-	specRepo     clothing.SubcategorySpecRepository
-	mlClient     *mlclient.Client
-	outfitPlanner *planner.OutfitPlanner
+	clothingRepo       repositories.ClothingItemRepository
+	specRepo           clothing.SubcategorySpecRepository
+	mlClient           *mlclient.Client
+	outfitPlanner      *planner.OutfitPlanner
 	translationService translation.ServiceInterface
 }
 
 func NewClothingItemService(clothingRepo repositories.ClothingItemRepository, specRepo clothing.SubcategorySpecRepository, mlClient *mlclient.Client, translationService translation.ServiceInterface) *ClothingItemService {
 	return &ClothingItemService{
-		clothingRepo: clothingRepo,
-		specRepo:     specRepo,
-		mlClient:     mlClient,
+		clothingRepo:       clothingRepo,
+		specRepo:           specRepo,
+		mlClient:           mlClient,
 		translationService: translationService,
-		outfitPlanner: planner.NewOutfitPlanner(specRepo),
+		outfitPlanner:      planner.NewOutfitPlanner(specRepo),
 	}
 }
 
@@ -165,12 +165,12 @@ func (s *ClothingItemService) CreateClothingItem(ctx context.Context, item domai
 	if err := s.validateClothingItem(item); err != nil {
 		return fmt.Errorf("validation error: %w", err)
 	}
-	
+
 	// Set default values if not provided
 	if item.CreatedAt.IsZero() {
 		item.CreatedAt = time.Now()
 	}
-	
+
 	return s.clothingRepo.BulkInsert(ctx, []domain.ClothingItem{item})
 }
 
@@ -355,7 +355,7 @@ func (s *ClothingItemService) RankCandidatesByML(ctx context.Context, contextDat
 	type scoredItem struct {
 		item  domain.ClothingItem
 		score float64
-		index int  // to maintain stable sort
+		index int // to maintain stable sort
 	}
 
 	scoredItems := make([]scoredItem, len(candidates))
@@ -408,48 +408,48 @@ func (s *ClothingItemService) domainToMLItem(item domain.ClothingItem) contracts
 	tempID := domain.IDToInt64(item.ID) // Using a hash-based conversion to int64
 
 	return contracts.MLItem{
-		ID:             tempID,
-		Name:           item.Name,
-		Category:       item.Category,
-		Subcategory:    item.Subcategory,
-		Gender:         item.Gender,
-		Style:          item.Style,
-		Usage:          strings.Join(item.Usage, ", "),  // Convert []string to string
-		Season:         item.Season,
-		BaseColour:     func() string {
+		ID:          tempID,
+		Name:        item.Name,
+		Category:    item.Category,
+		Subcategory: item.Subcategory,
+		Gender:      item.Gender,
+		Style:       item.Style,
+		Usage:       strings.Join(item.Usage, ", "), // Convert []string to string
+		Season:      item.Season,
+		BaseColour: func() string {
 			if item.BaseColour != nil {
 				return *item.BaseColour
 			}
 			return ""
 		}(),
-		Formality:      func() int16 {
+		Formality: func() int16 {
 			if item.FormalityLevel != nil {
 				return *item.FormalityLevel
 			}
 			return 0
 		}(),
-		Warmth:         func() int16 {
+		Warmth: func() int16 {
 			if item.WarmthLevel != nil {
 				return *item.WarmthLevel
 			}
 			return 0
 		}(),
-		MinTemp:        func() int16 {
+		MinTemp: func() int16 {
 			if item.MinTemp != nil {
 				return *item.MinTemp
 			}
 			return 0
 		}(),
-		MaxTemp:        func() int16 {
+		MaxTemp: func() int16 {
 			if item.MaxTemp != nil {
 				return *item.MaxTemp
 			}
 			return 0
 		}(),
-		Materials:      item.Materials,
-		Fit:            item.Fit,
-		Pattern:        item.Pattern,
-		IconEmoji:      func() string {
+		Materials: item.Materials,
+		Fit:       item.Fit,
+		Pattern:   item.Pattern,
+		IconEmoji: func() string {
 			if item.IconEmoji != nil {
 				return *item.IconEmoji
 			}

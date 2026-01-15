@@ -43,11 +43,15 @@ func (h *AdminHandler) Users(w http.ResponseWriter, r *http.Request) {
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to list users"))
 		return
 	}
-	if page <= 0 { page = 1 }
-	if limit <= 0 { limit = 50 }
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 50
+	}
 
 	resp.Success(w, map[string]any{
-		"users": items,
+		"users":      items,
 		"pagination": domain.Pagination{Page: page, Limit: limit, Total: total},
 	})
 }
@@ -62,11 +66,15 @@ func (h *AdminHandler) Audit(w http.ResponseWriter, r *http.Request) {
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to list audit logs"))
 		return
 	}
-	if page <= 0 { page = 1 }
-	if limit <= 0 { limit = 50 }
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 50
+	}
 
 	resp.Success(w, map[string]any{
-		"audit": items,
+		"audit":      items,
 		"pagination": domain.Pagination{Page: page, Limit: limit, Total: total},
 	})
 }

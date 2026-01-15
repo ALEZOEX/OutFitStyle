@@ -125,10 +125,16 @@ SELECT
 
 func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain.ID, q domain.RecommendationListQuery) ([]domain.RecommendationRecord, int, error) {
 	limit := q.Limit
-	if limit <= 0 { limit = 20 }
-	if limit > 100 { limit = 100 }
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
 	page := q.Page
-	if page <= 0 { page = 1 }
+	if page <= 0 {
+		page = 1
+	}
 	offset := (page - 1) * limit
 
 	where := []string{"user_id = $1"}
@@ -195,16 +201,16 @@ LIMIT $` + itoa(argN) + ` OFFSET $` + itoa(argN+1)
 	for rows.Next() {
 		var rec domain.RecommendationRecord
 		if err := rows.Scan(
-&rec.ID, &rec.UserID,
-&rec.Location, &rec.Latitude, &rec.Longitude,
-&rec.Occasion, &rec.RequestedStyle, &rec.RequestedFormality,
-&rec.WeatherData, &rec.OutfitData,
-&rec.TotalScore, &rec.StyleCoherence, &rec.ColorHarmony, &rec.WeatherMatch,
-&rec.ModelVersion, &rec.ProcessingTimeMs, &rec.ABTestVariant,
-&rec.UserRating, &rec.UserFeedback, &rec.ThermalFeedback, &rec.RatedAt,
-&rec.IsFavorite,
-&rec.CreatedAt,
-); err != nil {
+			&rec.ID, &rec.UserID,
+			&rec.Location, &rec.Latitude, &rec.Longitude,
+			&rec.Occasion, &rec.RequestedStyle, &rec.RequestedFormality,
+			&rec.WeatherData, &rec.OutfitData,
+			&rec.TotalScore, &rec.StyleCoherence, &rec.ColorHarmony, &rec.WeatherMatch,
+			&rec.ModelVersion, &rec.ProcessingTimeMs, &rec.ABTestVariant,
+			&rec.UserRating, &rec.UserFeedback, &rec.ThermalFeedback, &rec.RatedAt,
+			&rec.IsFavorite,
+			&rec.CreatedAt,
+		); err != nil {
 			return nil, 0, errors.Wrap(err, "scan recommendation")
 		}
 		out = append(out, rec)
@@ -215,7 +221,6 @@ LIMIT $` + itoa(argN) + ` OFFSET $` + itoa(argN+1)
 
 	return out, total, nil
 }
-
 
 func (r *RecommendationRepository) GetItemRows(ctx context.Context, recommendationID domain.ID) ([]repositories.RecommendationItemRow, error) {
 	rows, err := r.db.Pool().Query(ctx, `
@@ -396,3 +401,8 @@ LIMIT $2
 	return out, rows.Err()
 }
 
+func (r *RecommendationRepository) CreateRecommendation(ctx context.Context, rec *domain.RecommendationResponse) (*domain.RecommendationResponse, error) {
+	// Заглушка для метода CreateRecommendation
+	// В реальности здесь должна быть реализация сохранения рекомендации в базу данных
+	return rec, nil
+}

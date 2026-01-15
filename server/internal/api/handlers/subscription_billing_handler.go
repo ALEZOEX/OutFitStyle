@@ -138,8 +138,8 @@ func (h *SubscriptionBillingHandler) Payments(w http.ResponseWriter, r *http.Req
 	}
 
 	resp.Success(w, map[string]any{
-		"payments":    items,
-		"pagination":  pagination,
+		"payments":   items,
+		"pagination": pagination,
 	})
 }
 

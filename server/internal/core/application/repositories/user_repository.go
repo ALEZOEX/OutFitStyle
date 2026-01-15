@@ -31,4 +31,5 @@ type UserRepository interface {
 	GetUserTimezone(ctx context.Context, userID domain.ID) (tz string, err error)
 
 	DeleteUser(ctx context.Context, userID domain.ID) error
+	RateRecommendation(ctx context.Context, userID, recommendationID domain.ID, rating int, feedback string) error
 }

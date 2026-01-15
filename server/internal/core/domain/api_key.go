@@ -5,8 +5,8 @@ import "time"
 type APIKey struct {
 	ID ID `json:"id"`
 
-	KeyPrefix string `json:"key_prefix"`
-	Name      *string `json:"name,omitempty"`
+	KeyPrefix   string  `json:"key_prefix"`
+	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
 
 	Permissions    []string `json:"permissions,omitempty"`
@@ -24,9 +24,9 @@ type APIKey struct {
 }
 
 type APIKeyCreateRequest struct {
-	Name        *string  `json:"name,omitempty"`
-	Description *string  `json:"description,omitempty"`
-	Permissions []string `json:"permissions,omitempty"`
+	Name           *string  `json:"name,omitempty"`
+	Description    *string  `json:"description,omitempty"`
+	Permissions    []string `json:"permissions,omitempty"`
 	AllowedOrigins []string `json:"allowed_origins,omitempty"`
 
 	RateLimitPerMinute *int `json:"rate_limit_per_minute,omitempty"`
@@ -34,8 +34,8 @@ type APIKeyCreateRequest struct {
 }
 
 type APIKeyCreateResponse struct {
-	APIKey APIKey  `json:"api_key"`
-	Token  string  `json:"token"` // показываем только 1 раз
+	APIKey APIKey `json:"api_key"`
+	Token  string `json:"token"` // показываем только 1 раз
 }
 
 type APIKeyListResponse struct {

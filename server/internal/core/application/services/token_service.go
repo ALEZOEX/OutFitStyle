@@ -14,9 +14,9 @@ import (
 )
 
 type TokenService struct {
-	secret          []byte
-	accessTTL       time.Duration
-	refreshTTL      time.Duration
+	secret     []byte
+	accessTTL  time.Duration
+	refreshTTL time.Duration
 }
 
 type AccessClaims struct {

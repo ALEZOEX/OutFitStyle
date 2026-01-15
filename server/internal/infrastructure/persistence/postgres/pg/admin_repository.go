@@ -41,9 +41,15 @@ func (r *AdminRepository) Stats(ctx context.Context) (repositories.AdminStats, e
 }
 
 func (r *AdminRepository) ListUsers(ctx context.Context, page, limit int) ([]repositories.AdminUserRow, int, error) {
-	if limit <= 0 { limit = 50 }
-	if limit > 200 { limit = 200 }
-	if page <= 0 { page = 1 }
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > 200 {
+		limit = 200
+	}
+	if page <= 0 {
+		page = 1
+	}
 	offset := (page - 1) * limit
 
 	var total int
@@ -74,9 +80,15 @@ LIMIT $1 OFFSET $2
 }
 
 func (r *AdminRepository) ListAudit(ctx context.Context, page, limit int) ([]repositories.AuditRow, int, error) {
-	if limit <= 0 { limit = 50 }
-	if limit > 200 { limit = 200 }
-	if page <= 0 { page = 1 }
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > 200 {
+		limit = 200
+	}
+	if page <= 0 {
+		page = 1
+	}
 	offset := (page - 1) * limit
 
 	var total int

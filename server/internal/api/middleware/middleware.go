@@ -80,7 +80,6 @@ func LoggerMiddleware(logger *zap.Logger) mux.MiddlewareFunc {
 	}
 }
 
-
 // RateLimiter структура для ограничения частоты запросов
 type RateLimiter struct {
 	redis      *redis.Client
@@ -162,7 +161,6 @@ func RateLimitMiddleware(limiter *RateLimiter, limit int, window time.Duration) 
 		})
 	}
 }
-
 
 // rateIdentifier возвращает ключ для rate limiting
 func rateIdentifier(r *http.Request) (key string, identifierType string, identifierValue string) {

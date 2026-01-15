@@ -6,90 +6,85 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
-
-	"outfitstyle/server/internal/core/application/services"
-	"outfitstyle/server/internal/infrastructure/delivery/http"
 )
 
-type HealthChecker struct {
-	db      *sql.DB
-	mlClient *service.MLClient
+// минимальный контракт, чтобы не тащить конкретную реализацию ML клиента
+type MLHealthClient interface {
+	HealthCheck(ctx context.Context) bool
 }
 
-func NewHealthChecker(db *sql.DB, mlClient *service.MLClient) *HealthChecker {
-	return &HealthChecker{
-		db:      db,
-		mlClient: mlClient,
-	}
+type HealthChecker struct {
+	db       *sql.DB
+	mlClient MLHealthClient
+}
+
+func NewHealthChecker(db *sql.DB, mlClient MLHealthClient) *HealthChecker {
+	return &HealthChecker{db: db, mlClient: mlClient}
 }
 
 type HealthStatus struct {
-	Status      string                 `json:"status"`
-	Version     string                 `json:"version"`
-	Timestamp   time.Time              `json:"timestamp"`
-	Checks      map[string]CheckResult `json:"checks"`
+	Status    string                 `json:"status"`
+	Version   string                 `json:"version"`
+	Timestamp time.Time              `json:"timestamp"`
+	Checks    map[string]CheckResult `json:"checks"`
 }
 
 type CheckResult struct {
-	Status  string    `json:"status"`
-	Error   string    `json:"error,omitempty"`
-	Latency string    `json:"latency,omitempty"`
+	Status  string `json:"status"`
+	Error   string `json:"error,omitempty"`
+	Latency string `json:"latency,omitempty"`
+}
+
+type Server struct {
+	db       *sql.DB
+	mlClient MLHealthClient
 }
 
 func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
-	checks := make(map[string]CheckResult)
-	
-	// Database check
-	dbCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-	
-	dbStart := time.Now()
-	err := h.db.PingContext(dbCtx)
-	dbLatency := time.Since(dbStart)
-	
-	if err != nil {
-		checks["database"] = CheckResult{
-			Status: "unhealthy",
-			Error:  err.Error(),
-		}
-	} else {
-		checks["database"] = CheckResult{
-			Status:  "healthy",
-			Latency: dbLatency.String(),
+	checks := map[string]CheckResult{}
+
+	// DB
+	{
+		dbCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		start := time.Now()
+		err := h.db.PingContext(dbCtx)
+		lat := time.Since(start)
+
+		if err != nil {
+			checks["database"] = CheckResult{Status: "unhealthy", Error: err.Error()}
+		} else {
+			checks["database"] = CheckResult{Status: "healthy", Latency: lat.String()}
 		}
 	}
-	
-	// ML service check
-	mlCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-	
-	mlStart := time.Now()
-	mlHealthy := h.mlClient.HealthCheck(mlCtx)
-	mlLatency := time.Since(mlStart)
-	
-	if !mlHealthy {
-		checks["ml_service"] = CheckResult{
-			Status: "unhealthy",
-			Error:  "ML service not responding",
-		}
-	} else {
-		checks["ml_service"] = CheckResult{
-			Status:  "healthy",
-			Latency: mlLatency.String(),
+
+	// ML
+	{
+		mlCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		start := time.Now()
+		ok := h.mlClient != nil && h.mlClient.HealthCheck(mlCtx)
+		lat := time.Since(start)
+
+		if !ok {
+			checks["ml_service"] = CheckResult{Status: "unhealthy", Error: "ML service not responding"}
+		} else {
+			checks["ml_service"] = CheckResult{Status: "healthy", Latency: lat.String()}
 		}
 	}
-	
-	// Overall status
-	overallStatus := "healthy"
-	for _, check := range checks {
-		if check.Status == "unhealthy" {
-			overallStatus = "unhealthy"
+
+	overall := "healthy"
+	for _, c := range checks {
+		if c.Status == "unhealthy" {
+			overall = "unhealthy"
 			break
 		}
 	}
-	
+
 	return HealthStatus{
-		Status:    overallStatus,
+		Status:    overall,
 		Version:   "1.0.0",
 		Timestamp: time.Now(),
 		Checks:    checks,
@@ -97,31 +92,23 @@ func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
 }
 
 func (s *Server) healthCheck(w http.ResponseWriter, r *http.Request) {
-	healthChecker := NewHealthChecker(s.db, s.mlClient)
-	status := healthChecker.Check(r.Context())
-	
+	status := NewHealthChecker(s.db, s.mlClient).Check(r.Context())
+
 	w.Header().Set("Content-Type", "application/json")
-	
 	if status.Status == "unhealthy" {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
-	
-	json.NewEncoder(w).Encode(status)
+	_ = json.NewEncoder(w).Encode(status)
 }
 
-// Добавить новый endpoint для readiness probe
 func (s *Server) readyCheck(w http.ResponseWriter, r *http.Request) {
-	// Проверяем только критичные зависимости
-	healthChecker := NewHealthChecker(s.db, s.mlClient)
-	status := healthChecker.Check(r.Context())
-	
+	status := NewHealthChecker(s.db, s.mlClient).Check(r.Context())
+
 	w.Header().Set("Content-Type", "application/json")
-	
 	if status.Status == "unhealthy" {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
-	
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]any{
 		"status": status.Status,
 		"ready":  status.Status == "healthy",
 	})

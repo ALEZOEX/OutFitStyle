@@ -27,7 +27,7 @@ func GetUserIDFromContext(ctx context.Context) (ID, bool) {
 	return id, ok
 }
 
-// Context utilities for session ID 
+// Context utilities for session ID
 func WithSessionID(ctx context.Context, sessionID ID) context.Context {
 	return context.WithValue(ctx, sessionIDKey, sessionID)
 }

@@ -18,8 +18,8 @@ type CandidateLite struct {
 	WindOK      bool `json:"wind_ok"`
 
 	// стиль
-	Style          string `json:"style"`
-	FormalityLevel *int   `json:"formality_level,omitempty"`
+	Style          string  `json:"style"`
+	FormalityLevel *int    `json:"formality_level,omitempty"`
 	BaseColour     *string `json:"base_colour,omitempty"`
 	Pattern        string  `json:"pattern"`
 

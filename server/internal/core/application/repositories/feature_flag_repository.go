@@ -7,14 +7,14 @@ import (
 )
 
 type FeatureFlag struct {
-	ID domain.ID
-	Key string
-	Name string
+	ID          domain.ID
+	Key         string
+	Name        string
 	Description *string
 
-	Enabled bool
+	Enabled      bool
 	DefaultValue []byte
-	Rules []byte
+	Rules        []byte
 }
 
 type FeatureFlagRepository interface {

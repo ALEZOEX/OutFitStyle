@@ -1,270 +1,264 @@
-# OutfitStyle - Smart Outfit Recommendation Platform
+# OutfitStyle - Платформа умных рекомендаций одежды
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Лицензия: MIT](https://img.shields.io/badge/Лицензия-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go&logoColor=white)](https://golang.org/)
 [![Flutter](https://img.shields.io/badge/Flutter-3.16+-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org/)
 
-## 🌟 Overview
+## 🌟 Обзор
 
-OutfitStyle is a cutting-edge fashion recommendation platform that suggests the perfect outfit based on weather conditions, personal style preferences, and occasion. The platform combines machine learning algorithms with real-time weather data to provide personalized outfit recommendations.
+OutfitStyle - это передовая платформа рекомендаций моды, которая предлагает идеальный наряд на основе погодных условий, личных предпочтений в стиле и случая. Платформа сочетает алгоритмы машинного обучения с данными о текущей погоде, чтобы предоставлять персонализированные рекомендации по нарядам.
 
-### ✨ Key Features
-- **Weather-Based Recommendations**: Get outfit suggestions based on current weather
-- **Personalized Preferences**: Customize recommendations based on your style
-- **Wardrobe Management**: Add and manage your clothing items
-- **Machine Learning Powered**: AI-driven outfit matching algorithm
-- **Offline Support**: Works without internet connection
-- **Cross-Platform**: Available on iOS and Android
-- **Feature Flags**: A/B testing and gradual rollouts
-- **Push Notifications**: Weather alerts and recommendations
-- **Analytics & Crash Reporting**: Firebase integration
+### ✨ Ключевые особенности
+- **Рекомендации на основе погоды**: Получайте предложения нарядов на основе текущей погоды
+- **Персонализированные предпочтения**: Настройте рекомендации в соответствии со своим стилем
+- **Управление гардеробом**: Добавляйте и управляйте своими предметами одежды
+- **На основе машинного обучения**: Алгоритм подбора нарядов с использованием ИИ
+- **Поддержка офлайн**: Работает без подключения к интернету
+- **Кроссплатформенность**: Доступно на iOS и Android
+- **Флаги функций**: A/B тестирование и постепенные запуски
+- **Push-уведомления**: Оповещения о погоде и рекомендациях
+- **Аналитика и отчеты о сбоях**: Интеграция Firebase
 
-## 🏗 Architecture
+## 🏗 Архитектура
 
-### System Architecture
+### Системная архитектура
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Flutter App   │    │    Go API       │    │  Python ML      │
-│                 │    │                 │    │  Service        │
-│  Presentation   │◄──►│  Business Logic │◄──►│                 │
-│  Layer          │    │  Layer          │    │  ML Models      │
+│   Приложение   │    │    Go API       │    │  Сервис Python  │
+│   Flutter      │    │                 │    │  ML             │
+│  Уровень       │◄──►│  Бизнес-логика  │◄──►│                 │
+│  представления │    │  Уровень        │    │  Модели ML      │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                               │
                               ▼
                        ┌─────────────────┐
                        │  PostgreSQL     │
-                       │  Database       │
+                       │  База данных    │
                        └─────────────────┘
                               │
                               ▼
                        ┌─────────────────┐
                        │    Redis        │
-                       │  Cache/Session  │
+                       │  Кэш/Сессия     │
                        └─────────────────┘
 ```
 
-### Technology Stack
+### Технологический стек
 
-#### Backend Services
-- **Language**: Go 1.21+
-- **Framework**: net/http + custom middleware
-- **Database**: PostgreSQL
-- **Caching**: Redis
-- **ML Service**: Python (FastAPI, scikit-learn)
-- **Metrics**: Prometheus
-- **Logging**: Zap (structured logging)
+#### Сервисы бэкенда
+- **Язык**: Go 1.21+
+- **Фреймворк**: net/http + пользовательские промежуточные слои
+- **База данных**: PostgreSQL
+- **Кэширование**: Redis
+- **Сервис ML**: Python (FastAPI, scikit-learn)
+- **Метрики**: Prometheus
+- **Журналирование**: Zap (структурированное журналирование)
 
-#### Frontend Application
-- **Framework**: Flutter
-- **State Management**: Riverpod
-- **Navigation**: Go Router
-- **Database**: Drift (SQLite)
-- **Networking**: Dio + Retrofit
-- **Analytics**: Firebase Analytics
-- **Crash Reporting**: Firebase Crashlytics
+#### Приложение фронтенда
+- **Фреймворк**: Flutter
+- **Управление состоянием**: Riverpod
+- **Навигация**: Go Router
+- **База данных**: Drift (SQLite)
+- **Сетевые технологии**: Dio + Retrofit
+- **Аналитика**: Firebase Analytics
+- **Отчеты о сбоях**: Firebase Crashlytics
 
-#### Infrastructure
-- **Containerization**: Docker
-- **Deployment**: Docker Compose / Kubernetes
-- **Monitoring**: Prometheus + Grafana
-- **Logging**: Zap (structured logging)
+#### Инфраструктура
+- **Контейнеризация**: Docker
+- **Развертывание**: Docker Compose / Kubernetes
+- **Мониторинг**: Prometheus + Grafana
+- **Журналирование**: Zap (структурированное журналирование)
 - **CI/CD**: GitHub Actions
-- **Security**: HashiCorp Vault (recommended)
+- **Безопасность**: HashiCorp Vault (рекомендуется)
 
-## 🚀 Quick Start
+## 🚀 Быстрый старт
 
-### Prerequisites
-- Go 1.21+ for backend development
-- Flutter SDK 3.16+ for frontend development
-- Python 3.11+ for ML service
-- Docker & Docker Compose for containerization
-- Git for version control
+### Предварительные требования
+- Go 1.21+ для разработки бэкенда
+- Flutter SDK 3.16+ для разработки фронтенда
+- Python 3.11+ для сервиса ML
+- Docker & Docker Compose для контейнеризации
+- Git для контроля версий
 
-### Local Development Setup
+### Настройка локальной разработки
 
-1. **Clone the repository**
+1. **Клонируйте репозиторий**
 ```bash
 git clone https://github.com/your-org/outfitstyle.git
 cd outfitstyle
 ```
 
-2. **Set up environment variables**
+2. **Настройте переменные среды**
 ```bash
 cp .env.example .env
-# Edit .env with your API keys and database credentials
+# Отредактируйте .env с вашими ключами API и учетными данными базы данных
 ```
 
-3. **Start services with Docker Compose**
+3. **Запустите службы с помощью Docker Compose**
 ```bash
 docker-compose up -d
 ```
 
-4. **For frontend development**
+4. **Для разработки фронтенда**
 ```bash
 cd client
 flutter pub get
 flutter run
 ```
 
-5. **For backend development**
+5. **Для разработки бэкенда**
 ```bash
 cd server
 go run cmd/server/main.go
 ```
 
-### Production Deployment
+### Развертывание в продакшене
 ```bash
-# Build and deploy with Docker Compose
+# Собрать и развернуть с помощью Docker Compose
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-## 🧪 Testing
+## 🧪 Тестирование
 
-### Backend Tests
+### Тесты бэкенда
 ```bash
 cd server
 go test -v ./...
 ```
 
-### Frontend Tests
+### Тесты фронтенда
 ```bash
 cd client
 flutter test
 ```
 
-### ML Service Tests
+### Тесты сервиса ML
 ```bash
 cd server/ml-service
 python -m pytest tests/ -v
 ```
 
-## 📊 Monitoring & Observability
+## 📊 Мониторинг и наблюдаемость
 
-### Three Pillars
-- **Metrics**: Prometheus for quantitative measurements
-- **Logs**: Structured logging with Zap
-- **Traces**: Distributed tracing with OpenTelemetry
+### Три столпа
+- **Метрики**: Prometheus для количественных измерений
+- **Журналы**: Структурированное журналирование с Zap
+- **Трассировки**: Распределенная трассировка с OpenTelemetry
 
-### Key Metrics
-- **System**: CPU, memory, disk, network
-- **Application**: Response time, error rate, throughput
-- **Business**: DAU, conversion rates, feature usage
+### Ключевые метрики
+- **Система**: ЦП, память, диск, сеть
+- **Приложение**: Время ответа, частота ошибок, пропускная способность
+- **Бизнес**: DAU, коэффициенты конверсии, использование функций
 
-## 🔐 Security
+## 🔐 Безопасность
 
-### Authentication & Authorization
-- JWT tokens with RS256 algorithm
-- OAuth 2.0 with Google Sign-In
-- Rate limiting per user/IP
-- Input validation on all endpoints
+### Аутентификация и авторизация
+- Токены JWT с алгоритмом RS256
+- OAuth 2.0 с входом через Google
+- Ограничение скорости на пользователя/IP
+- Проверка ввода на всех концах
 
-### Data Protection
-- TLS 1.3 for all communications
-- Encryption at rest for sensitive data
-- PII minimization and masking
-- Secure session management
+### Защита данных
+- TLS 1.3 для всех коммуникаций
+- Шифрование при хранении для конфиденциальных данных
+- Минимизация и маскировка персональных данных
+- Безопасное управление сессиями
 
-## 📱 Mobile Features
+## 📱 Мобильные функции
 
-### Feature Flags
-- Remote configuration with Firebase Remote Config
-- A/B testing framework for experimentation
-- Gradual rollouts for new features
+### Флаги функций
+- Удаленная конфигурация с Firebase Remote Config
+- Фреймворк A/B тестирования для экспериментов
+- Постепенные запуски новых функций
 
-### Offline Support
-- Local database with automatic synchronization
-- Cache-first approach for improved UX
-- Conflict resolution for offline changes
+### Поддержка офлайн
+- Локальная база данных с автоматической синхронизацией
+- Подход "сначала кэш" для улучшения UX
+- Разрешение конфликтов для офлайн изменений
 
-## 🤖 ML Service
+## 🤖 Сервис ML
 
-### Recommendation Engine
-- Weather-based outfit matching
-- Personalization based on user preferences
-- Machine learning algorithms for style matching
-- Real-time inference with optimized performance
+### Движок рекомендаций
+- Сопоставление нарядов на основе погоды
+- Персонализация на основе предпочтений пользователя
+- Алгоритмы машинного обучения для сопоставления стилей
+- Инференс в реальном времени с оптимизированной производительностью
 
-## 🚢 Deployment
+## 🚢 Развертывание
 
-### Environments
-- **Development**: Feature branch isolation
-- **Staging**: Production-like environment for testing
-- **Production**: Live environment with monitoring
+### Среды
+- **Разработка**: Изоляция ветвей функций
+- **Промежуточная среда**: Среда, похожая на продакшен, для тестирования
+- **Продакшен**: Живая среда с мониторингом
 
-### Deployment Strategy
-- Blue-green deployment for zero-downtime releases
-- Automated testing before deployment
-- Rollback procedures for failed deployments
-- Gradual rollout for new features
+### Стратегия развертывания
+- Сине-зеленое развертывание для развертываний без простоев
+- Автоматическое тестирование перед развертыванием
+- Процедуры отката для неудачных развертываний
+- Постепенный запуск новых функций
 
-## 📋 Production Checklist
+## 📋 Чек-лист продакшена
 
-### Infrastructure
-- [x] CI/CD pipeline for all services
-- [x] Docker images optimized and scanned
-- [x] Staging environment deployed
-- [x] Production environment deployed
-- [x] Auto-scaling configured
-- [x] SSL/TLS certificates configured
-- [x] CDN for static assets (if needed)
+### Инфраструктура
+- [x] CI/CD пайплайн для всех сервисов
+- [x] Оптимизированные и просканированные образы Docker
+- [x] Промежуточная среда развернута
+- [x] Продакшен среда развернута
+- [x] Автомасштабирование настроено
+- [x] SSL/TLS сертификаты настроены
+- [x] CDN для статических ресурсов (если необходимо)
 
-### Testing
-- [x] Unit tests > 70% coverage
-- [x] Integration tests for all services
-- [x] Contract tests Go ↔ Python
-- [x] E2E tests for critical user journeys
-- [x] Load testing performed
-- [x] Security testing performed
+### Тестирование
+- [x] Модульные тесты > 70% покрытия
+- [x] Интеграционные тесты для всех сервисов
+- [x] Контрактные тесты Go ↔ Python
+- [x] E2E тесты для критических пользовательских путей
+- [x] Выполнено нагрузочное тестирование
+- [x] Выполнено тестирование безопасности
 
-### Security
-- [x] Secrets management (not in git!)
-- [x] Rate limiting implemented
-- [x] Input validation on all endpoints
-- [x] SQL injection prevention
-- [x] JWT properly configured
-- [x] CORS properly configured
-- [x] Security headers added
-- [x] Dependencies scanned for vulnerabilities
+### Безопасность
+- [x] Управление секретами (не в git!)
+- [x] Ограничение скорости реализовано
+- [x] Проверка ввода на всех концах
+- [x] Предотвращение SQL-инъекций
+- [x] JWT правильно настроен
+- [x] CORS правильно настроен
+- [x] Заголовки безопасности добавлены
+- [x] Зависимости просканированы на наличие уязвимостей
 
-### Observability
-- [x] Metrics collection (Prometheus)
-- [x] Dashboards (Grafana)
-- [x] Centralized logging
-- [x] Distributed tracing
-- [x] Alerting rules with runbooks
-- [x] Health checks implemented
-- [x] Liveness/Readiness probes
+### Наблюдаемость
+- [x] Сбор метрик (Prometheus)
+- [x] Дашборды (Grafana)
+- [x] Централизованное журналирование
+- [x] Распределенная трассировка
+- [x] Правила оповещений с руководствами
+- [x] Проверки работоспособности реализованы
+- [x] Пробы готовности/работоспособности
 
-## 🤝 Contributing
+## 🤝 Вклад
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Мы приветствуем вклад! Пожалуйста, ознакомьтесь с нашим [Руководством по вкладу](CONTRIBUTING.md) для получения подробной информации.
 
-## 📄 License
+## 📄 Лицензия
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Этот проект лицензирован в соответствии с лицензией MIT - см. файл [LICENSE](LICENSE) для получения подробной информации.
 
-## 📞 Support
+## 📞 Поддержка
 
-For support, please open an issue in the GitHub repository or contact us at [support@outfitstyle.app](mailto:support@outfitstyle.app).
-
----
-
-## 🎯 Business Goals
-
-- Increase user engagement through personalized recommendations
-- Improve user satisfaction with accurate outfit suggestions
-- Drive revenue through premium features
-- Expand user base through social sharing
-
-## 📈 Success Metrics
-
-- **Technical**: >99.9% uptime, <200ms p95 response time
-- **Business**: >60% recommendation acceptance rate, >40% monthly retention
-- **User**: >30-minute daily session time, >70% feature adoption rate
+Для получения поддержки, пожалуйста, откройте вопрос в репозитории GitHub или свяжитесь с нами по адресу [support@outfitstyle.app](mailto:support@outfitstyle.app).
 
 ---
 
-**Made with ❤️ by OutfitStyle Team**
+## 🎯 Бизнес-цели
 
-🚀 Ready for production deployment!
+- Повысить вовлеченность пользователей за счет персонализированных рекомендаций
+- Повысить удовлетворенность пользователей точными предложениями нарядов
+- Увеличить доход за счет премиум-функций
+- Расширить пользовательскую базу за счет социального обмена
+
+## 📈 Метрики успеха
+
+- **Технические**: >99.9% время работы, <200мс p95 время ответа
+- **Бизнес**: >60% уровень принятия рекомендаций, >40% ежемесячное удержание
+- **Пользователь**: >30 минут ежедневного сеанса, >70% уровень принятия функций
