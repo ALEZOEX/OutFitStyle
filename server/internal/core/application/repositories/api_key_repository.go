@@ -8,22 +8,22 @@ import (
 )
 
 type APIKeyRecord struct {
-	ID domain.ID
+	ID     domain.ID
 	UserID domain.ID
 
 	KeyPrefix string
 	KeyHash   string
 
-	Name *string
+	Name        *string
 	Description *string
 
-	Permissions []string
+	Permissions    []string
 	AllowedOrigins []string
 
 	RateLimitPerMinute int
 	RateLimitPerDay    int
 
-	IsActive bool
+	IsActive   bool
 	LastUsedAt *time.Time
 	ExpiresAt  *time.Time
 

@@ -18,9 +18,9 @@ type PromoCode struct {
 	ApplicablePlans []domain.ID
 	MinBillingCycle *string
 
-	MaxUses         *int
-	UsesCount       int
-	MaxUsesPerUser  int
+	MaxUses        *int
+	UsesCount      int
+	MaxUsesPerUser int
 
 	ValidFrom  time.Time
 	ValidUntil *time.Time

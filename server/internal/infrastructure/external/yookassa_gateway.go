@@ -20,7 +20,11 @@ func NewYooKassaGateway(webhookSecret string) *YooKassaGateway {
 }
 
 func (g *YooKassaGateway) InitPayment(ctx context.Context, amount float64, currency string, description string, metadata map[string]any) (domain.PaymentInit, error) {
-	_ = ctx; _ = amount; _ = currency; _ = description; _ = metadata
+	_ = ctx
+	_ = amount
+	_ = currency
+	_ = description
+	_ = metadata
 	return domain.PaymentInit{}, errors.New("yookassa init not implemented in this module")
 }
 

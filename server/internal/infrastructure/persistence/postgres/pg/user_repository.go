@@ -52,14 +52,14 @@ WHERE ` + field + ` = $1
 
 	var u domain.User
 	var (
-		id uuid.UUID
+		id                                              uuid.UUID
 		displayName, avatarURL, gender, defaultLocation *string
-		birthDate *time.Time
-		defLat, defLon *float64
-		verifiedAt *time.Time
-		oauthProvider, oauthID *string
-		lastLoginAt *time.Time
-		bodyMeasurements, preferences []byte
+		birthDate                                       *time.Time
+		defLat, defLon                                  *float64
+		verifiedAt                                      *time.Time
+		oauthProvider, oauthID                          *string
+		lastLoginAt                                     *time.Time
+		bodyMeasurements, preferences                   []byte
 	)
 
 	err := row.Scan(
@@ -406,4 +406,10 @@ func nullableJSON(b []byte) any {
 		return nil
 	}
 	return b
+}
+
+func (r *UserRepository) RateRecommendation(ctx context.Context, userID, recommendationID domain.ID, rating int, feedback string) error {
+	// Заглушка для метода RateRecommendation
+	// В реальности здесь должна быть реализация сохранения оценки рекомендации в базу данных
+	return nil
 }

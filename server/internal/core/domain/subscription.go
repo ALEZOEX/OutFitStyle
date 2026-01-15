@@ -36,16 +36,16 @@ type UserSubscription struct {
 
 	Plan SubscriptionPlan `json:"plan"`
 
-	BillingCycle        *string    `json:"billing_cycle,omitempty"` // monthly/yearly
-	StartedAt           *time.Time `json:"started_at,omitempty"`
-	CurrentPeriodStart  *time.Time `json:"current_period_start,omitempty"`
-	CurrentPeriodEnd    *time.Time `json:"current_period_end,omitempty"`
-	CancelledAt         *time.Time `json:"cancelled_at,omitempty"`
-	Status              *string    `json:"status,omitempty"` // active/trialing/...
-	AutoRenew           *bool      `json:"auto_renew,omitempty"`
-	PaymentProvider     *string    `json:"payment_provider,omitempty"`
-	ExternalSubscriptionID *string `json:"external_subscription_id,omitempty"`
-	TrialEnd            *time.Time `json:"trial_end,omitempty"`
+	BillingCycle           *string    `json:"billing_cycle,omitempty"` // monthly/yearly
+	StartedAt              *time.Time `json:"started_at,omitempty"`
+	CurrentPeriodStart     *time.Time `json:"current_period_start,omitempty"`
+	CurrentPeriodEnd       *time.Time `json:"current_period_end,omitempty"`
+	CancelledAt            *time.Time `json:"cancelled_at,omitempty"`
+	Status                 *string    `json:"status,omitempty"` // active/trialing/...
+	AutoRenew              *bool      `json:"auto_renew,omitempty"`
+	PaymentProvider        *string    `json:"payment_provider,omitempty"`
+	ExternalSubscriptionID *string    `json:"external_subscription_id,omitempty"`
+	TrialEnd               *time.Time `json:"trial_end,omitempty"`
 
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`

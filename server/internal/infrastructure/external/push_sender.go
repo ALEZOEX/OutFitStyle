@@ -1,15 +1,15 @@
 package external
 
 import (
-"context"
+	"context"
 )
 
 type PushMessage struct {
-Title string
-Body  string
-Data  map[string]string
+	Title string
+	Body  string
+	Data  map[string]string
 }
 
 type PushSender interface {
-Send(ctx context.Context, token string, msg PushMessage) error
+	Send(ctx context.Context, token string, msg PushMessage) error
 }

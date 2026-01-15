@@ -16,10 +16,10 @@ type AuditCreate struct {
 	OldValue []byte
 	NewValue []byte
 
-	IPAddress  *string
-	UserAgent  *string
+	IPAddress *string
+	UserAgent *string
 
-	Success     bool
+	Success      bool
 	ErrorMessage *string
 }
 

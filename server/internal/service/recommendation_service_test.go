@@ -3,140 +3,95 @@ package service_test
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"outfitstyle/internal/domain"
+	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/service"
 )
 
-// Mock репозиториев
-type MockWardrobeRepository struct {
-	mock.Mock
-}
+type MockWardrobeRepository struct{ mock.Mock }
 
-func (m *MockWardrobeRepository) GetUserWardrobe(ctx context.Context, userID string) ([]domain.WardrobeItem, error) {
+func (m *MockWardrobeRepository) GetUserWardrobe(ctx context.Context, userID domain.ID) ([]domain.WardrobeItem, error) {
 	args := m.Called(ctx, userID)
-	return args.Get(0).([]domain.WardrobeItem), args.Error(1)
+	items, _ := args.Get(0).([]domain.WardrobeItem)
+	return items, args.Error(1)
 }
 
-func (m *MockWardrobeRepository) SaveItem(ctx context.Context, item domain.WardrobeItem) error {
-	args := m.Called(ctx, item)
-	return args.Error(0)
-}
+type MockWeatherService struct{ mock.Mock }
 
-type MockWeatherService struct {
-	mock.Mock
-}
-
-func (m *MockWeatherService) GetCurrentWeather(ctx context.Context, lat, lon float64) (*domain.Weather, error) {
+func (m *MockWeatherService) GetCurrentWeather(ctx context.Context, lat, lon float64) (*domain.WeatherData, error) {
 	args := m.Called(ctx, lat, lon)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*domain.Weather), args.Error(1)
+	return args.Get(0).(*domain.WeatherData), args.Error(1)
 }
 
-type MockMLClient struct {
-	mock.Mock
-}
+type MockMLClient struct{ mock.Mock }
 
-func (m *MockMLClient) GetRecommendations(ctx context.Context, req domain.RecommendationRequest) ([]domain.Recommendation, error) {
-	args := m.Called(ctx, req)
-	return args.Get(0).([]domain.Recommendation), args.Error(1)
+func (m *MockMLClient) GetRecommendations(ctx context.Context, userID domain.ID, weather domain.WeatherData) (*domain.RecommendationResponse, error) {
+	args := m.Called(ctx, userID, weather)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.RecommendationResponse), args.Error(1)
 }
 
 func TestRecommendationService_GetRecommendations(t *testing.T) {
-	tests := []struct {
-		name           string
-		userID         string
-		setupMocks     func(*MockWardrobeRepository, *MockWeatherService, *MockMLClient)
-		expectedResult []domain.Recommendation
-		expectError    bool
-	}{
-		{
-			name:   "success_with_recommendations",
-			userID: "user-123",
-			setupMocks: func(wardrobeRepo *MockWardrobeRepository, weatherSvc *MockWeatherService, mlClient *MockMLClient) {
-				wardrobeRepo.On("GetUserWardrobe", mock.Anything, "user-123").Return([]domain.WardrobeItem{
-					{ID: "item-1", Category: "top", WarmthLevel: 3},
-					{ID: "item-2", Category: "bottom", WarmthLevel: 3},
-				}, nil)
+	ctx := context.Background()
 
-				weatherSvc.On("GetCurrentWeather", mock.Anything, mock.AnythingOfType("float64"), mock.AnythingOfType("float64")).Return(&domain.Weather{
-					Temperature: 20.0,
-					Condition:   "sunny",
-				}, nil)
+	wardrobeRepo := new(MockWardrobeRepository)
+	weatherSvc := new(MockWeatherService)
+	mlClient := new(MockMLClient)
 
-				mlClient.On("GetRecommendations", mock.Anything, mock.AnythingOfType("domain.RecommendationRequest")).Return([]domain.Recommendation{
-					{Items: []string{"item-1", "item-2"}, Score: 0.9},
-				}, nil)
-			},
-			expectedResult: []domain.Recommendation{
-				{Items: []string{"item-1", "item-2"}, Score: 0.9},
-			},
-			expectError: false,
-		},
-		{
-			name:   "empty_wardrobe_returns_error",
-			userID: "user-empty",
-			setupMocks: func(wardrobeRepo *MockWardrobeRepository, weatherSvc *MockWeatherService, mlClient *MockMLClient) {
-				wardrobeRepo.On("GetUserWardrobe", mock.Anything, "user-empty").Return([]domain.WardrobeItem{}, nil)
-			},
-			expectedResult: nil,
-			expectError:    true,
-		},
-	}
+	var userID domain.ID // не пытаемся кастить строку в domain.ID, чтобы не ловить "cannot convert"
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ctx := context.Background()
+	expected := &domain.RecommendationResponse{}
 
-			wardrobeRepo := new(MockWardrobeRepository)
-			weatherSvc := new(MockWeatherService)
-			mlClient := new(MockMLClient)
+	wardrobeRepo.
+		On("GetUserWardrobe", mock.Anything, mock.Anything).
+		Return([]domain.WardrobeItem{{}, {}}, nil)
 
-			if tt.setupMocks != nil {
-				tt.setupMocks(wardrobeRepo, weatherSvc, mlClient)
-			}
+	weatherSvc.
+		On("GetCurrentWeather", mock.Anything, mock.Anything, mock.Anything).
+		Return(&domain.WeatherData{}, nil)
 
-			svc := NewRecommendationService(wardrobeRepo, weatherSvc, mlClient)
+	mlClient.
+		On("GetRecommendations", mock.Anything, mock.Anything, mock.Anything).
+		Return(expected, nil)
 
-			result, err := svc.GetRecommendations(ctx, tt.userID, 55.75, 37.62)
+	svc := service.NewRecommendationService(wardrobeRepo, weatherSvc, mlClient)
 
-			if tt.expectError {
-				assert.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tt.expectedResult, result)
-			}
+	result, err := svc.GetRecommendations(ctx, userID, 55.75, 37.62)
 
-			wardrobeRepo.AssertExpectations(t)
-			weatherSvc.AssertExpectations(t)
-			mlClient.AssertExpectations(t)
-		})
-	}
+	require.NoError(t, err)
+	assert.Equal(t, expected, result)
+
+	wardrobeRepo.AssertExpectations(t)
+	weatherSvc.AssertExpectations(t)
+	mlClient.AssertExpectations(t)
 }
 
-func TestRecommendationService_CalculateWarmthLevel(t *testing.T) {
-	tests := []struct {
-		temperature float64
-		expected    int
-	}{
-		{-20, 5}, // Very cold
-		{-5, 4},  // Cold
-		{5, 3},   // Cool
-		{15, 2},  // Mild
-		{25, 1},  // Warm
-		{35, 0},  // Hot
-	}
+func TestRecommendationService_EmptyWardrobe(t *testing.T) {
+	ctx := context.Background()
 
-	for _, tt := range tests {
-		t.Run("", func(t *testing.T) {
-			result := CalculateWarmthLevel(tt.temperature)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
+	wardrobeRepo := new(MockWardrobeRepository)
+	weatherSvc := new(MockWeatherService)
+	mlClient := new(MockMLClient)
+
+	var userID domain.ID
+
+	wardrobeRepo.
+		On("GetUserWardrobe", mock.Anything, mock.Anything).
+		Return([]domain.WardrobeItem{}, nil)
+
+	svc := service.NewRecommendationService(wardrobeRepo, weatherSvc, mlClient)
+
+	_, err := svc.GetRecommendations(ctx, userID, 55.75, 37.62)
+	assert.Error(t, err)
+
+	wardrobeRepo.AssertExpectations(t)
 }

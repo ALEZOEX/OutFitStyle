@@ -44,7 +44,7 @@ type omForecastResp struct {
 		Max  []float64 `json:"temperature_2m_max"`
 	} `json:"daily"`
 	Hourly struct {
-		Time []string `json:"time"`
+		Time []string  `json:"time"`
 		Temp []float64 `json:"temperature_2m"`
 		Pop  []int     `json:"precipitation_probability"`
 	} `json:"hourly"`
@@ -120,10 +120,14 @@ func (p *OpenMeteoProvider) Forecast(ctx context.Context, lat, lon float64, days
 	for i := range payload.Daily.Time {
 		minT := 0.0
 		maxT := 0.0
-		if i < len(payload.Daily.Min) { minT = payload.Daily.Min[i] }
-		if i < len(payload.Daily.Max) { maxT = payload.Daily.Max[i] }
+		if i < len(payload.Daily.Min) {
+			minT = payload.Daily.Min[i]
+		}
+		if i < len(payload.Daily.Max) {
+			maxT = payload.Daily.Max[i]
+		}
 		daily = append(daily, map[string]any{
-			"date": payload.Daily.Time[i],
+			"date":     payload.Daily.Time[i],
 			"temp_min": minT,
 			"temp_max": maxT,
 		})
@@ -131,14 +135,20 @@ func (p *OpenMeteoProvider) Forecast(ctx context.Context, lat, lon float64, days
 
 	hourly := make([]any, 0, min(len(payload.Hourly.Time), 48))
 	for i := range payload.Hourly.Time {
-		if i >= 48 { break }
+		if i >= 48 {
+			break
+		}
 		temp := 0.0
 		pop := 0
-		if i < len(payload.Hourly.Temp) { temp = payload.Hourly.Temp[i] }
-		if i < len(payload.Hourly.Pop) { pop = payload.Hourly.Pop[i] }
+		if i < len(payload.Hourly.Temp) {
+			temp = payload.Hourly.Temp[i]
+		}
+		if i < len(payload.Hourly.Pop) {
+			pop = payload.Hourly.Pop[i]
+		}
 		hourly = append(hourly, map[string]any{
-			"time": payload.Hourly.Time[i],
-			"temp": temp,
+			"time":                      payload.Hourly.Time[i],
+			"temp":                      temp,
 			"precipitation_probability": pop,
 		})
 	}
@@ -165,4 +175,9 @@ func openMeteoMainFromCode(code int) string {
 	}
 }
 
-func min(a, b int) int { if a < b { return a }; return b }
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}

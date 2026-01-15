@@ -9,12 +9,12 @@ import (
 type SharedOutfitRecord struct {
 	ID domain.ID
 
-	UserID domain.ID
+	UserID       domain.ID
 	ShowUserName bool
-	IsPublic bool
+	IsPublic     bool
 
 	RecommendationID *domain.ID
-	SavedOutfitID *domain.ID
+	SavedOutfitID    *domain.ID
 
 	ShareCode string
 }

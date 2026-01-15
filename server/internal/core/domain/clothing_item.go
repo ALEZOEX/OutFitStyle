@@ -3,9 +3,9 @@ package domain
 import "time"
 
 type ClothingItem struct {
-	ID          ID        `json:"id"`
-	Name        string    `json:"name"`
-	Description *string   `json:"description,omitempty"`
+	ID          ID      `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
 
 	Category    string `json:"category"`
 	Subcategory string `json:"subcategory"`
@@ -45,13 +45,13 @@ type ClothingItem struct {
 	UpdatedAt time.Time `json:"updated_at"`
 
 	// Translated fields (not stored in DB, populated when needed)
-	TranslatedName       string `json:"translated_name,omitempty"`
-	TranslatedCategory   string `json:"translated_category,omitempty"`
+	TranslatedName        string `json:"translated_name,omitempty"`
+	TranslatedCategory    string `json:"translated_category,omitempty"`
 	TranslatedSubcategory string `json:"translated_subcategory,omitempty"`
-	TranslatedStyle      string `json:"translated_style,omitempty"`
-	TranslatedUsage      string `json:"translated_usage,omitempty"`
-	TranslatedSeason     string `json:"translated_season,omitempty"`
-	TranslatedBaseColour string `json:"translated_base_colour,omitempty"`
-	TranslatedFit        string `json:"translated_fit,omitempty"`
-	TranslatedPattern    string `json:"translated_pattern,omitempty"`
+	TranslatedStyle       string `json:"translated_style,omitempty"`
+	TranslatedUsage       string `json:"translated_usage,omitempty"`
+	TranslatedSeason      string `json:"translated_season,omitempty"`
+	TranslatedBaseColour  string `json:"translated_base_colour,omitempty"`
+	TranslatedFit         string `json:"translated_fit,omitempty"`
+	TranslatedPattern     string `json:"translated_pattern,omitempty"`
 }

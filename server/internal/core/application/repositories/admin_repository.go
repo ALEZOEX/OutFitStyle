@@ -28,25 +28,25 @@ type AdminUserRow struct {
 }
 
 type AuditRow struct {
-	ID          domain.ID  `json:"id"`
-	UserID      *domain.ID `json:"user_id,omitempty"`
-	Action      string     `json:"action"`
-	ResourceType *string   `json:"resource_type,omitempty"`
-	ResourceID  *domain.ID `json:"resource_id,omitempty"`
-	IP          *string    `json:"ip_address,omitempty"`
-	Success     bool       `json:"success"`
-	ErrorMessage *string   `json:"error_message,omitempty"`
-	CreatedAt   time.Time  `json:"created_at"`
+	ID           domain.ID  `json:"id"`
+	UserID       *domain.ID `json:"user_id,omitempty"`
+	Action       string     `json:"action"`
+	ResourceType *string    `json:"resource_type,omitempty"`
+	ResourceID   *domain.ID `json:"resource_id,omitempty"`
+	IP           *string    `json:"ip_address,omitempty"`
+	Success      bool       `json:"success"`
+	ErrorMessage *string    `json:"error_message,omitempty"`
+	CreatedAt    time.Time  `json:"created_at"`
 }
 
 type CreatePromoRequest struct {
-	Code          string   `json:"code"`
-	DiscountType  string   `json:"discount_type"` // percent|fixed|trial_days
-	DiscountValue float64  `json:"discount_value"`
+	Code            string      `json:"code"`
+	DiscountType    string      `json:"discount_type"` // percent|fixed|trial_days
+	DiscountValue   float64     `json:"discount_value"`
 	ApplicablePlans []domain.ID `json:"applicable_plans,omitempty"`
-	MaxUses       *int     `json:"max_uses,omitempty"`
-	ValidUntil    *time.Time `json:"valid_until,omitempty"`
-	IsActive      *bool    `json:"is_active,omitempty"`
+	MaxUses         *int        `json:"max_uses,omitempty"`
+	ValidUntil      *time.Time  `json:"valid_until,omitempty"`
+	IsActive        *bool       `json:"is_active,omitempty"`
 }
 
 type AdminRepository interface {

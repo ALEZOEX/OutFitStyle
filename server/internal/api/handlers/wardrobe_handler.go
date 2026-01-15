@@ -73,10 +73,18 @@ func (h *WardrobeHandler) List(w http.ResponseWriter, r *http.Request) {
 		Order: domain.SortOrder(qp.Get("order")),
 	}
 
-	if v := qp.Get("category"); v != "" { q.Category = &v }
-	if v := qp.Get("style"); v != "" { q.Style = &v }
-	if v := qp.Get("season"); v != "" { q.Season = &v }
-	if v := qp.Get("search"); v != "" { q.Search = &v }
+	if v := qp.Get("category"); v != "" {
+		q.Category = &v
+	}
+	if v := qp.Get("style"); v != "" {
+		q.Style = &v
+	}
+	if v := qp.Get("season"); v != "" {
+		q.Season = &v
+	}
+	if v := qp.Get("search"); v != "" {
+		q.Search = &v
+	}
 
 	if v := qp.Get("is_favorite"); v != "" {
 		b := (v == "true" || v == "1")
@@ -103,7 +111,6 @@ func (h *WardrobeHandler) List(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 }
-
 
 func (h *WardrobeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
@@ -194,7 +201,7 @@ func (h *WardrobeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// после успешного update
-	if env := middleware.AuditFromContext(r.Context()); env != nil && item != nil {
+	if env := middleware.AuditFromContext(r.Context()); env != nil {
 		b, _ := json.Marshal(item)
 		env.NewJSON = b
 	}
@@ -297,11 +304,3 @@ func (h *WardrobeHandler) Worn(w http.ResponseWriter, r *http.Request) {
 	}
 	resp.Success(w, map[string]any{"wear_count": item.WearCount, "last_worn_at": item.LastWornAt})
 }
-
-func atoi(s string, def int) int {
-	if s == "" { return def }
-	n, err := strconv.Atoi(s)
-	if err != nil || n <= 0 { return def }
-	return n
-}
-

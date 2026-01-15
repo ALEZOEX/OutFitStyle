@@ -12,13 +12,12 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/redis/go-redis/v9"
-	goerrors "errors"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/infrastructure/cache"
-	"outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
+	"outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 )
 
 func TestRateLimitViolations_Inserted(t *testing.T) {

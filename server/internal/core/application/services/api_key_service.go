@@ -34,18 +34,18 @@ func (s *APIKeyService) Create(ctx context.Context, userID domain.ID, req domain
 	}
 
 	rec := repositories.APIKeyRecord{
-		UserID: userID,
+		UserID:    userID,
 		KeyPrefix: prefix,
-		KeyHash: s.hash(token),
+		KeyHash:   s.hash(token),
 
-		Name: req.Name,
-		Description: req.Description,
-		Permissions: req.Permissions,
-		AllowedOrigins: req.AllowedOrigins,
+		Name:               req.Name,
+		Description:        req.Description,
+		Permissions:        req.Permissions,
+		AllowedOrigins:     req.AllowedOrigins,
 		RateLimitPerMinute: coalesceInt(req.RateLimitPerMinute, 60),
-		RateLimitPerDay: coalesceInt(req.RateLimitPerDay, 10000),
-		IsActive: true,
-		ExpiresAt: nil,
+		RateLimitPerDay:    coalesceInt(req.RateLimitPerDay, 10000),
+		IsActive:           true,
+		ExpiresAt:          nil,
 	}
 	id, err := s.repo.Create(ctx, rec)
 	if err != nil {
@@ -53,16 +53,16 @@ func (s *APIKeyService) Create(ctx context.Context, userID domain.ID, req domain
 	}
 
 	out := domain.APIKey{
-		ID: id,
-		KeyPrefix: prefix,
-		Name: req.Name,
-		Description: req.Description,
-		Permissions: req.Permissions,
-		AllowedOrigins: req.AllowedOrigins,
+		ID:                 id,
+		KeyPrefix:          prefix,
+		Name:               req.Name,
+		Description:        req.Description,
+		Permissions:        req.Permissions,
+		AllowedOrigins:     req.AllowedOrigins,
 		RateLimitPerMinute: rec.RateLimitPerMinute,
-		RateLimitPerDay: rec.RateLimitPerDay,
-		IsActive: true,
-		CreatedAt: time.Now(),
+		RateLimitPerDay:    rec.RateLimitPerDay,
+		IsActive:           true,
+		CreatedAt:          time.Now(),
 	}
 
 	return &domain.APIKeyCreateResponse{APIKey: out, Token: token}, nil
@@ -76,18 +76,18 @@ func (s *APIKeyService) List(ctx context.Context, userID domain.ID) ([]domain.AP
 	out := make([]domain.APIKey, 0, len(recs))
 	for _, r := range recs {
 		out = append(out, domain.APIKey{
-			ID: r.ID,
-			KeyPrefix: r.KeyPrefix,
-			Name: r.Name,
-			Description: r.Description,
-			Permissions: r.Permissions,
-			AllowedOrigins: r.AllowedOrigins,
+			ID:                 r.ID,
+			KeyPrefix:          r.KeyPrefix,
+			Name:               r.Name,
+			Description:        r.Description,
+			Permissions:        r.Permissions,
+			AllowedOrigins:     r.AllowedOrigins,
 			RateLimitPerMinute: r.RateLimitPerMinute,
-			RateLimitPerDay: r.RateLimitPerDay,
-			IsActive: r.IsActive,
-			LastUsedAt: r.LastUsedAt,
-			ExpiresAt: r.ExpiresAt,
-			CreatedAt: r.CreatedAt,
+			RateLimitPerDay:    r.RateLimitPerDay,
+			IsActive:           r.IsActive,
+			LastUsedAt:         r.LastUsedAt,
+			ExpiresAt:          r.ExpiresAt,
+			CreatedAt:          r.CreatedAt,
 		})
 	}
 	return out, nil
@@ -98,14 +98,14 @@ func (s *APIKeyService) Delete(ctx context.Context, userID domain.ID, apiKeyID d
 }
 
 type APIKeyAuthResult struct {
-	UserID  domain.ID
+	UserID   domain.ID
 	APIKeyID domain.ID
 
 	RateLimitPerMinute int
 	RateLimitPerDay    int
 
-	Permissions     []string
-	AllowedOrigins  []string
+	Permissions    []string
+	AllowedOrigins []string
 }
 
 func (s *APIKeyService) Authenticate(ctx context.Context, token string) (*APIKeyAuthResult, error) {
@@ -128,7 +128,7 @@ func (s *APIKeyService) Authenticate(ctx context.Context, token string) (*APIKey
 	_ = s.repo.TouchLastUsed(ctx, rec.ID)
 
 	return &APIKeyAuthResult{
-		UserID:  rec.UserID,
+		UserID:   rec.UserID,
 		APIKeyID: rec.ID,
 
 		RateLimitPerMinute: rec.RateLimitPerMinute,

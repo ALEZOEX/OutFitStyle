@@ -201,10 +201,45 @@ func (h *AuthHandler) ValidateToken(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{
 		"valid": true,
 		"user": map[string]any{
-			"id":          user.ID,
+			"id":           user.ID,
 			"display_name": user.DisplayName,
-			"email":       user.Email,
-			"avatar_url":  user.AvatarURL,
+			"email":        user.Email,
+			"avatar_url":   user.AvatarURL,
 		},
 	})
+}
+
+func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Заглушка для VerifyCode
+	resp.Error(w, http.StatusNotImplemented, errors.New("VerifyCode not implemented"))
+}
+
+func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Заглушка для RefreshToken
+	resp.Error(w, http.StatusNotImplemented, errors.New("RefreshToken not implemented"))
+}
+
+func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Заглушка для ForgotPassword
+	resp.Error(w, http.StatusNotImplemented, errors.New("ForgotPassword not implemented"))
+}
+
+func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Заглушка для ResetPassword
+	resp.Error(w, http.StatusNotImplemented, errors.New("ResetPassword not implemented"))
+}
+
+func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Заглушка для GoogleLogin
+	resp.Error(w, http.StatusNotImplemented, errors.New("GoogleLogin not implemented"))
 }

@@ -41,7 +41,7 @@ func AuthMiddleware(authService *services.AuthService, apiKeyService *services.A
 				ctx = WithAPIKeyID(ctx, res.APIKeyID)
 
 				ctx = WithAPIKeyMeta(ctx, APIKeyMeta{
-					APIKeyID: res.APIKeyID,
+					APIKeyID:           res.APIKeyID,
 					RateLimitPerMinute: res.RateLimitPerMinute,
 					RateLimitPerDay:    res.RateLimitPerDay,
 					Permissions:        res.Permissions,

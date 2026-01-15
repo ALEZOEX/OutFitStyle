@@ -19,8 +19,8 @@ type RecommendationRateRequest struct {
 }
 
 type RecommendationRegenerateRequest struct {
-	ExcludeItems []ID     `json:"exclude_items,omitempty"`
-	PreferStyle  *string  `json:"prefer_style,omitempty"`
+	ExcludeItems []ID    `json:"exclude_items,omitempty"`
+	PreferStyle  *string `json:"prefer_style,omitempty"`
 }
 
 type FavoriteRequest struct {

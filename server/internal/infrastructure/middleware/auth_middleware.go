@@ -123,7 +123,6 @@ func (m *AuthMiddleware) validateToken(tokenString string) (jwt.MapClaims, error
 	return claims, nil
 }
 
-
 // RequireAuth wraps a handler to require authentication
 func (m *AuthMiddleware) RequireAuth(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -67,11 +67,15 @@ func (h *SupportHandler) ListTickets(w http.ResponseWriter, r *http.Request) {
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to list tickets"))
 		return
 	}
-	if page <= 0 { page = 1 }
-	if limit <= 0 { limit = 20 }
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 20
+	}
 
 	resp.Success(w, map[string]any{
-		"tickets": items,
+		"tickets":    items,
 		"pagination": domain.Pagination{Page: page, Limit: limit, Total: total},
 	})
 }

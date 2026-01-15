@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	DefaultTimeout    = 800 * time.Millisecond
-	MaxCandidates     = 250
+	DefaultTimeout               = 800 * time.Millisecond
+	MaxCandidates                = 250
 	CircuitBreakerErrorThreshold = 20
-	CircuitBreakerTimeout       = 30 * time.Second
-	TimeBudgetThreshold         = 400 * time.Millisecond  // Если уже потрачено > этого времени, не дергаем ML
+	CircuitBreakerTimeout        = 30 * time.Second
+	TimeBudgetThreshold          = 400 * time.Millisecond // Если уже потрачено > этого времени, не дергаем ML
 )
 
 // State represents the state of the circuit breaker
@@ -85,9 +85,9 @@ func (cb *CircuitBreaker) Call(fn func() error) error {
 
 // Client represents a client for the ML ranking service
 type Client struct {
-	baseURL         string
-	httpClient      *http.Client
-	circuitBreaker  *CircuitBreaker
+	baseURL        string
+	httpClient     *http.Client
+	circuitBreaker *CircuitBreaker
 }
 
 // NewClient creates a new ML ranking client

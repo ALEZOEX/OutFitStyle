@@ -8,19 +8,19 @@ import (
 )
 
 type Experiment struct {
-	ID domain.ID
-	Name string
-	Status string // draft/running/stopped etc
-	VariantsJSON []byte
+	ID             domain.ID
+	Name           string
+	Status         string // draft/running/stopped etc
+	VariantsJSON   []byte
 	UserPercentage int
-	CreatedAt time.Time
+	CreatedAt      time.Time
 }
 
 type ExperimentAssignment struct {
 	ExperimentID domain.ID
-	UserID domain.ID
-	Variant string
-	AssignedAt time.Time
+	UserID       domain.ID
+	Variant      string
+	AssignedAt   time.Time
 }
 
 type ExperimentRepository interface {

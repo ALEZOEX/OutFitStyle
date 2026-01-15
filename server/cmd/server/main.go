@@ -26,14 +26,14 @@ import (
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
-	"outfitstyle/server/internal/infrastructure/cache"
 	_ "outfitstyle/server/internal/docs"
+	"outfitstyle/server/internal/infrastructure/cache"
+	ext "outfitstyle/server/internal/infrastructure/external"
+	"outfitstyle/server/internal/infrastructure/observability"
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
 	pg "outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
-	ext "outfitstyle/server/internal/infrastructure/external"
-	"outfitstyle/server/internal/pkg/health"
 	"outfitstyle/server/internal/infrastructure/queue"
-	"outfitstyle/server/internal/infrastructure/observability"
+	"outfitstyle/server/internal/pkg/health"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -57,9 +57,9 @@ func main() {
 	}
 
 	_ = observability.InitSentry(observability.SentryConfig{
-		DSN: cfg.Sentry.DSN,
+		DSN:         cfg.Sentry.DSN,
 		Environment: cfg.Server.Environment,
-		Release: "outfitstyle-api@dev",
+		Release:     "outfitstyle-api@dev",
 	})
 	defer observability.Flush(2 * time.Second)
 
@@ -98,7 +98,6 @@ func main() {
 	// ---------- Обновленный ML-сервис с новым контрактом ----------
 	mlClient := ext.NewMLClient(cfg.MLService.BaseURL, cfg.MLService.Timeout)
 
-
 	// ---------- Репозитории ----------
 	userRepo := pg.NewUserRepository(db, logger)
 	sessionRepo := pg.NewSessionRepository(db, logger)
@@ -115,7 +114,6 @@ func main() {
 	achievementRepo := pg.NewAchievementRepository(db, logger)
 	achEngineRepo := pg.NewAchievementEngineRepository(db)
 	// auditRepo := pg.NewAuditRepository(db) // объявлен позже, когда используется
-
 
 	// ---------- Services ----------
 	// Пока не создаем ML клиент, передаем nil для него
@@ -176,8 +174,8 @@ func main() {
 
 	// ---------- Payment gateways ----------
 	gateways := map[string]domain.PaymentGateway{
-		"dummy":   ext.NewDummyGateway(),
-		"stripe":  ext.NewStripeGateway(cfg.Payments.StripeWebhookSecret),
+		"dummy":    ext.NewDummyGateway(),
+		"stripe":   ext.NewStripeGateway(cfg.Payments.StripeWebhookSecret),
 		"yookassa": ext.NewYooKassaGateway(cfg.Payments.YooKassaSecretKey),
 	}
 
@@ -383,7 +381,7 @@ func setupRouter(
 	// /api/v1/subscription/plans (public)
 	subscriptionPublic := api.PathPrefix("/subscription").Subrouter()
 	subHandler.RegisterPublic(subscriptionPublic)
-	billingHandler.RegisterWebhook(subscriptionPublic)         // webhook/{provider}
+	billingHandler.RegisterWebhook(subscriptionPublic) // webhook/{provider}
 
 	// /api/v1/auth/*
 	auth := api.PathPrefix("/auth").Subrouter()
@@ -410,7 +408,7 @@ func setupRouter(
 	// /api/v1/subscription/current (protected)
 	subscriptionProtected := protected.PathPrefix("/subscription").Subrouter()
 	subHandler.RegisterProtected(subscriptionProtected)
-	billingHandler.RegisterProtected(subscriptionProtected)    // subscribe/cancel/reactivate/promo/payments
+	billingHandler.RegisterProtected(subscriptionProtected) // subscribe/cancel/reactivate/promo/payments
 
 	// /api/v1/auth/logout должен быть protected
 	authProtected := protected.PathPrefix("/auth").Subrouter()
