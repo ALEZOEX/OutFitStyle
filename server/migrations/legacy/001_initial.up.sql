@@ -1,14 +1,14 @@
--- 001_initial.up.sql (TZ-aligned foundation)
+-- 001_initial.up.sql (основа с поддержкой часовых поясов)
 -- PostgreSQL 15+
 
 -- =========================
--- EXTENSIONS
+-- РАСШИРЕНИЯ
 -- =========================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- =========================
--- ENUMS (idempotent)
+-- ПЕРЕЧИСЛЕНИЯ (идемпотентные)
 -- =========================
 DO $$ BEGIN
     CREATE TYPE subscription_status AS ENUM ('active', 'cancelled', 'expired', 'past_due', 'trialing');
@@ -27,7 +27,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =========================
--- USERS & AUTH
+-- ПОЛЬЗОВАТЕЛИ И АВТОРИЗАЦИЯ
 -- =========================
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS user_consents (
 );
 
 -- =========================
--- SUBSCRIPTIONS & PAYMENTS
+-- ПОДПИСКИ И ПЛАТЕЖИ
 -- =========================
 CREATE TABLE IF NOT EXISTS subscription_plans (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Insert default plans (idempotent by code)
+-- Вставка планов по умолчанию (идемпотентно по коду)
 INSERT INTO subscription_plans (code, name, price_monthly, price_yearly,
     recommendations_per_day, wardrobe_items_limit, history_days, styles_limit, features)
 VALUES
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS promo_code_uses (
 );
 
 -- =========================
--- CLOTHING + WARDROBE
+-- ОДЕЖДА И ГАРДЕРОБ
 -- =========================
 CREATE TABLE IF NOT EXISTS clothing_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -391,7 +391,7 @@ CREATE TABLE IF NOT EXISTS subcategory_specs (
 );
 
 -- =========================
--- RECOMMENDATIONS
+-- РЕКОМЕНДАЦИИ
 -- =========================
 CREATE TABLE IF NOT EXISTS recommendations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -464,7 +464,7 @@ CREATE TABLE IF NOT EXISTS user_item_ratings (
 );
 
 -- =========================
--- ACHIEVEMENTS
+-- ДОСТИЖЕНИЯ
 -- =========================
 CREATE TABLE IF NOT EXISTS achievements (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -515,7 +515,7 @@ CREATE TABLE IF NOT EXISTS user_achievements (
 );
 
 -- =========================
--- NOTIFICATIONS
+-- УВЕДОМЛЕНИЯ
 -- =========================
 CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -560,7 +560,7 @@ CREATE TABLE IF NOT EXISTS push_tokens (
 );
 
 -- =========================
--- PARTNERS & AFFILIATE
+-- ПАРТНЕРЫ И ПАРТНЕРСКИЕ ПРОГРАММЫ
 -- =========================
 CREATE TABLE IF NOT EXISTS partners (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -602,7 +602,7 @@ CREATE TABLE IF NOT EXISTS affiliate_clicks (
 );
 
 -- =========================
--- AUDIT & SECURITY
+-- АУДИТ И БЕЗОПАСНОСТЬ
 -- =========================
 CREATE TABLE IF NOT EXISTS audit_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -650,7 +650,7 @@ CREATE TABLE IF NOT EXISTS blocked_entities (
 );
 
 -- =========================
--- A/B TESTING
+-- A/B ТЕСТИРОВАНИЕ
 -- =========================
 CREATE TABLE IF NOT EXISTS experiments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -695,7 +695,7 @@ CREATE TABLE IF NOT EXISTS experiment_events (
 );
 
 -- =========================
--- FEATURE FLAGS
+-- ФЛАГИ ФУНКЦИЙ
 -- =========================
 CREATE TABLE IF NOT EXISTS feature_flags (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -715,7 +715,7 @@ CREATE TABLE IF NOT EXISTS feature_flags (
 );
 
 -- =========================
--- CACHE TABLES
+-- ТАБЛИЦЫ КЭША
 -- =========================
 CREATE TABLE IF NOT EXISTS translation_cache (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -748,7 +748,7 @@ CREATE TABLE IF NOT EXISTS weather_cache (
 );
 
 -- =========================
--- UPLOADED FILES
+-- ЗАГРУЖЕННЫЕ ФАЙЛЫ
 -- =========================
 CREATE TABLE IF NOT EXISTS uploaded_files (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -769,7 +769,7 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
 );
 
 -- =========================
--- TRIGGERS
+-- ТРИГГЕРЫ
 -- =========================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$

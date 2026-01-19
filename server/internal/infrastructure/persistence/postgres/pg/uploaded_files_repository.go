@@ -2,31 +2,38 @@ package pg
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
-	dbpkg "outfitstyle/server/internal/infrastructure/persistence/postgres"
 )
 
 type UploadedFilesRepository struct {
-	db *dbpkg.DB
+	db *pgxpool.Pool
 }
 
-func NewUploadedFilesRepository(db *dbpkg.DB) repositories.UploadedFilesRepository {
+func NewUploadedFilesRepository(db *pgxpool.Pool) *UploadedFilesRepository {
 	return &UploadedFilesRepository{db: db}
 }
 
-func (r *UploadedFilesRepository) Create(ctx context.Context, userID *domain.ID, bucket, path, filename, mimeType string, sizeBytes int64) (domain.ID, error) {
-	var id domain.ID
-	err := r.db.Pool().QueryRow(ctx, `
-INSERT INTO uploaded_files (user_id, bucket, path, filename, mime_type, size_bytes, status)
-VALUES ($1,$2,$3,$4,$5,$6,'active')
-RETURNING id
-`, userID, bucket, path, filename, mimeType, sizeBytes).Scan(&id)
-	if err != nil {
-		return domain.ID{}, errors.Wrap(err, "insert uploaded_file")
-	}
-	return id, nil
+func (r *UploadedFilesRepository) Create(ctx context.Context, file *domain.UploadedFile) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *UploadedFilesRepository) GetByID(ctx context.Context, fileID domain.ID) (*domain.UploadedFile, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *UploadedFilesRepository) GetByUser(ctx context.Context, userID domain.ID) ([]domain.UploadedFile, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *UploadedFilesRepository) UpdateStatus(ctx context.Context, fileID domain.ID, status domain.UploadStatus) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
 }

@@ -1,7 +1,6 @@
--- Migration: Add is_verified field to users table for OAuth integration
+-- 000003_users_verified.up.sql
 
--- Add the is_verified column to the users table
-ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE;
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT FALSE;
 
--- Optionally, add an index for efficient queries on verification status
-CREATE INDEX IF NOT EXISTS idx_users_verified ON users(is_verified);
+CREATE INDEX IF NOT EXISTS idx_users_is_verified ON users(is_verified);

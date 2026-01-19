@@ -1,8 +1,8 @@
 -- 002_support_share_saved_outfits.up.sql
--- Adds: saved_outfits, shared_outfits, support_tickets/messages, app_feedback
+-- Добавляет: сохраненные образы, общие образы, тикеты/сообщения поддержки, отзывы о приложении
 
 -- =========================
--- SAVED OUTFITS
+-- СОХРАНЕННЫЕ ОБРАЗЫ
 -- =========================
 CREATE TABLE IF NOT EXISTS saved_outfits (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS saved_outfits (
 CREATE INDEX IF NOT EXISTS idx_saved_outfits_user ON saved_outfits(user_id);
 
 -- =========================
--- SHARED OUTFITS
+-- ОБЩИЕ ОБРАЗЫ
 -- =========================
 CREATE TABLE IF NOT EXISTS shared_outfits (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -60,7 +60,7 @@ CREATE INDEX IF NOT EXISTS idx_shared_outfits_user ON shared_outfits(user_id);
 CREATE INDEX IF NOT EXISTS idx_shared_outfits_code ON shared_outfits(share_code);
 
 -- =========================
--- SUPPORT
+-- ПОДДЕРЖКА
 -- =========================
 CREATE TABLE IF NOT EXISTS support_tickets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS support_messages (
 
 CREATE INDEX IF NOT EXISTS idx_support_messages_ticket ON support_messages(ticket_id);
 
--- updated_at trigger for support_tickets
+-- триггер updated_at для support_tickets
 DO $$ BEGIN
     CREATE TRIGGER update_support_tickets_updated_at
     BEFORE UPDATE ON support_tickets
@@ -112,7 +112,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =========================
--- APP FEEDBACK
+-- ОТЗЫВЫ О ПРИЛОЖЕНИИ
 -- =========================
 CREATE TABLE IF NOT EXISTS app_feedback (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

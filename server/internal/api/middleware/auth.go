@@ -36,7 +36,10 @@ func AuthMiddleware(authService *services.AuthService, apiKeyService *services.A
 					resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
 					return
 				}
-				ctx := WithUserID(r.Context(), res.UserID)
+
+				// ВАЖНО: это партнёр/клиент интеграции, НЕ user
+				ctx := WithClientID(r.Context(), res.ClientID)
+
 				// session_id нет, но кладём api_key_id
 				ctx = WithAPIKeyID(ctx, res.APIKeyID)
 
@@ -45,7 +48,6 @@ func AuthMiddleware(authService *services.AuthService, apiKeyService *services.A
 					RateLimitPerMinute: res.RateLimitPerMinute,
 					RateLimitPerDay:    res.RateLimitPerDay,
 					Permissions:        res.Permissions,
-					AllowedOrigins:     res.AllowedOrigins,
 				})
 
 				next.ServeHTTP(w, r.WithContext(ctx))
