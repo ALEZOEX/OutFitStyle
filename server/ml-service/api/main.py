@@ -19,13 +19,13 @@ from model.features_with_priorities import build_feature_frame
 from model.internal_schema import InternalRequest, InternalItem, InternalContext, InternalWeatherData, InternalUserProfile
 
 
-def adapt_ml_request_to_internal(ml_request: MLRankRequest) -> InternalRequest:
+def adapt_ml_request_to_internal(external_request: MLRankRequest) -> InternalRequest:
     """
     Адаптер: преобразует MLRankRequest во внутреннюю схему InternalRequest
     """
     # Преобразование кандидатов
     internal_candidates = []
-    for item in ml_request.candidates:
+    for item in external_request.candidates:
         # Преобразование полей warmth->warmth_level и formality->formality_level
         internal_item = InternalItem(
             id=item.id,
@@ -55,21 +55,21 @@ def adapt_ml_request_to_internal(ml_request: MLRankRequest) -> InternalRequest:
     # Преобразование контекста
     internal_context = InternalContext(
         weather=InternalWeatherData(
-            temperature=ml_request.context.weather.temperature,
-            feels_like=ml_request.context.weather.feels_like,
-            humidity=ml_request.context.weather.humidity,
-            wind_speed=ml_request.context.weather.wind_speed,
-            weather=ml_request.context.weather.weather,
+            temperature=external_request.context.weather.temperature,
+            feels_like=external_request.context.weather.feels_like,
+            humidity=external_request.context.weather.humidity,
+            wind_speed=external_request.context.weather.wind_speed,
+            weather=external_request.context.weather.weather,
         ),
         user_profile=InternalUserProfile(
-            age_range=ml_request.context.user_profile.age_range,
-            style_preference=ml_request.context.user_profile.style_preference,
-            temperature_sensitivity=ml_request.context.user_profile.temperature_sensitivity,
-            formality_preference=ml_request.context.user_profile.formality_preference,
-            gender=ml_request.context.user_profile.gender,
+            age_range=external_request.context.user_profile.age_range,
+            style_preference=external_request.context.user_profile.style_preference,
+            temperature_sensitivity=external_request.context.user_profile.temperature_sensitivity,
+            formality_preference=external_request.context.user_profile.formality_preference,
+            gender=external_request.context.user_profile.gender,
         ),
-        preferences=ml_request.context.preferences,
-        location=ml_request.context.location
+        preferences=external_request.context.preferences,
+        location=external_request.context.location
     )
 
     return InternalRequest(
