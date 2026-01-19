@@ -61,7 +61,7 @@ class MLContext(BaseModel):
 
 class MLRankRequest(BaseModel):
     context: MLContext
-    candidates: List[MLItem] = Field(max_items=250)
+    candidates: List[MLItem] = Field(max_length=250)
 
 
 class RankedItem(BaseModel):
