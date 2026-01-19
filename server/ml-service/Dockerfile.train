@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the training scripts
 COPY scripts /app/scripts
 COPY model /app/model
+COPY train_styles_only.py /app/train_styles_only.py
 COPY data /app/data
 COPY models /app/models
 
@@ -32,4 +33,4 @@ RUN chown -R mluser:mluser /app
 USER mluser
 
 # Command to run the training script
-CMD ["python", "scripts/train_comprehensive.py"]
+CMD ["python", "train_styles_only.py"]
