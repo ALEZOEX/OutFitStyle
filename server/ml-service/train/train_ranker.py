@@ -16,10 +16,10 @@ from typing import Dict, Any, Tuple
 import argparse
 
 
-def load_and_prepare_real_data(data_path: str = 'data/raw/styles.csv') -> pd.DataFrame:
+def load_and_prepare_real_data(data_path: str = 'data/raw/training_data.csv') -> pd.DataFrame:
     """
-    Загрузка и подготовка реальных данных из styles.csv для обучения модели.
-    Создает DataFrame с теми же признаками, что и в synthetic_data, но на основе реальных данных.
+    Загрузка и подготовка реальных данных из training_data.csv для обучения модели.
+    training_data.csv уже содержит все необходимые признаки и целевую переменную.
     """
     # Загрузка данных
     df = pd.read_csv(data_path, on_bad_lines='skip')
@@ -27,67 +27,20 @@ def load_and_prepare_real_data(data_path: str = 'data/raw/styles.csv') -> pd.Dat
     # Проверим, какие колонки доступны
     print(f"Доступные колонки в датасете: {list(df.columns)}")
 
-    # Теперь создадим правильную структуру признаков, эквивалентную synthetic_data
-    df_final = pd.DataFrame()
+    # Если датасет содержит правильные признаки (из сгенерированного training_data.csv)
+    # оставляем его как есть, только убедимся, что целевая переменная 'is_recommended'
+    # переименована в 'target' для совместимости
+    if 'is_recommended' in df.columns:
+        df = df.rename(columns={'is_recommended': 'target'})
 
-    # Основные категориальные признаки
-    if 'masterCategory' in df.columns:
-        df_final['category'] = df['masterCategory']
-    else:
-        df_final['category'] = 'unknown'
-
-    if 'subCategory' in df.columns:
-        df_final['subcategory'] = df['subCategory']
-    else:
-        df_final['subcategory'] = 'unknown'
-
-    # Определяем формальность на основе 'usage' или 'masterCategory'
-    if 'usage' in df.columns:
-        formal_usages = ['formal', 'work', 'business', 'job interview']
-        df_final['formality_level'] = df['usage'].apply(
-            lambda x: 5 if any(f in str(x).lower() for f in formal_usages) else
-                      1 if 'casual' in str(x).lower() else 3
-        )
-    else:
-        df_final['formality_level'] = 3  # по умолчанию
-
-    # Определяем теплоту на основе 'season'
-    if 'season' in df.columns:
-        warmth_map = {'Winter': 9, 'Fall': 7, 'Spring': 4, 'Summer': 2}
-        df_final['warmth_level'] = df['season'].map(warmth_map).fillna(5)
-    else:
-        df_final['warmth_level'] = 5  # по умолчанию
-
-    # Температурное соответствие (произвольное значение, так как у нас нет погодной информации)
-    df_final['temperature_match'] = np.random.uniform(-5, 5, len(df))  # случайные значения
-
-    # Приоритет источника (предположим, что все вещи из одного источника)
-    df_final['source_priority'] = np.random.randint(1, 3, len(df))  # случайные значения 1-2
-
-    # Принадлежность пользователю (пока все не принадлежат)
-    df_final['is_owned'] = 0
-
-    # Количество материалов (произвольное значение)
-    df_final['material_count'] = np.random.randint(1, 4, len(df))
-
-    # Совпадение сезона (предположим, что большинство вещей соответствуют сезону)
-    df_final['season_match'] = 1
-
-    # Совпадение стиля (произвольное значение)
-    df_final['style_match'] = np.random.uniform(0.4, 0.9, len(df))
-
-    # Создаем целевую переменную
-    if 'rating' in df.columns and 'ratingCount' in df.columns:
-        # Вещь считается подходящей, если рейтинг высокий и много голосов
-        df_final['target'] = ((df['rating'] > 3.5) & (df['ratingCount'] > 10)).astype(int)
-    else:
-        # В противном случае - случайный таргет
-        df_final['target'] = np.random.choice([0, 1], size=len(df), p=[0.3, 0.7])
+    # Убедимся, что целевая переменная существует
+    if 'target' not in df.columns:
+        raise ValueError("Dataset must contain 'target' column (or 'is_recommended' which gets renamed to 'target')")
 
     # Проверим, есть ли пропущенные значения
-    df_final = df_final.dropna()
+    df = df.dropna()
 
-    return df_final
+    return df
 
 
 def prepare_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray, list]:
@@ -99,8 +52,13 @@ def prepare_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray, list]:
         y: массив целевых значений
         categorical_features_indices: индексы категориальных признаков
     """
-    # Определяем категориальные колонки
-    categorical_columns = ['category', 'subcategory']
+    # Определяем категориальные колонки на основе датасета training_data.csv
+    categorical_columns = [
+        'weather_condition', 'season', 'age_range', 'style_preference',
+        'temperature_sensitivity', 'formality_preference', 'category',
+        'item_style', 'gender'
+    ]
+
     # Проверяем, какие из этих колонок существуют в датасете
     existing_categorical = [col for col in categorical_columns if col in df.columns]
 
@@ -130,14 +88,15 @@ def train_ranking_model(X: pd.DataFrame, y: np.ndarray, categorical_features_ind
     # Для CatBoost не нужна нормализация признаков
     # Обучение модели CatBoost
     model = CatBoostClassifier(
-        iterations=100,
-        learning_rate=0.1,
-        depth=5,
+        iterations=1000,  # увеличиваем количество итераций для лучшего обучения
+        learning_rate=0.05,  # снижаем скорость обучения
+        depth=6,  # увеличиваем глубину
         loss_function='Logloss',  # для бинарной классификации
         eval_metric='Accuracy',
         cat_features=categorical_features_indices,  # указываем индексы категориальных признаков
         random_seed=42,
-        verbose=100  # выводить информацию о процессе обучения каждые 100 итераций
+        verbose=100,  # выводить информацию о процессе обучения каждые 100 итераций
+        early_stopping_rounds=50  # добавляем раннюю остановку
     )
 
     # Обучаем модель
@@ -150,6 +109,7 @@ def train_ranking_model(X: pd.DataFrame, y: np.ndarray, categorical_features_ind
 
     # Предсказания для оценки
     y_pred = model.predict(X_test)
+    y_pred_proba = model.predict_proba(X_test)  # получаем вероятности для лучшей интерпретации
 
     # Метрики
     accuracy = accuracy_score(y_test, y_pred)
@@ -163,7 +123,10 @@ def train_ranking_model(X: pd.DataFrame, y: np.ndarray, categorical_features_ind
         'feature_columns': X.columns.tolist(),
         'categorical_features_indices': categorical_features_indices,
         'accuracy': accuracy,
-        'classification_report': report
+        'classification_report': report,
+        'y_test': y_test,
+        'y_pred': y_pred,
+        'y_pred_proba': y_pred_proba
     }
 
 
@@ -223,7 +186,7 @@ def save_artifacts(model_artifacts: Dict[str, Any], output_dir: str):
 
 def main():
     parser = argparse.ArgumentParser(description='Train ML ranking model with artifact saving')
-    parser.add_argument('--data-path', default='data/raw/styles.csv', help='Path to training data CSV file')
+    parser.add_argument('--data-path', default='data/raw/training_data.csv', help='Path to training data CSV file')
     parser.add_argument('--output-dir', default='artifacts', help='Directory to save model artifacts')
 
     args = parser.parse_args()
