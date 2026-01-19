@@ -6,7 +6,7 @@ toolchain go1.24.6
 
 require (
 	// Security
-	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	// Core web framework
 	github.com/gorilla/mux v1.8.1
