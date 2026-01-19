@@ -16,13 +16,73 @@ from contracts.tz_rank_contract import TZRankRequest, TZRankResponse, TZRankedIt
 from contracts.translation_contracts import TranslationRequest, TranslationResponse, BatchTranslationRequest, BatchTranslationResponse
 from model.enhanced_predictor import EnhancedPredictor
 from model.features_with_priorities import build_feature_frame
+from model.internal_schema import InternalRequest, InternalItem, InternalContext, InternalWeatherData, InternalUserProfile
+
+
+def adapt_ml_request_to_internal(ml_request: MLRankRequest) -> InternalRequest:
+    """
+    Адаптер: преобразует MLRankRequest во внутреннюю схему InternalRequest
+    """
+    # Преобразование кандидатов
+    internal_candidates = []
+    for item in ml_request.candidates:
+        # Преобразование полей warmth->warmth_level и formality->formality_level
+        internal_item = InternalItem(
+            id=item.id,
+            name=item.name,
+            category=item.category,
+            subcategory=item.subcategory,
+            gender=item.gender,
+            style=item.style,
+            usage=item.usage,
+            season=item.season,
+            base_colour=item.base_colour,
+            formality_level=item.formality,  # Преобразование
+            warmth_level=item.warmth,       # Преобразование
+            min_temp=item.min_temp,
+            max_temp=item.max_temp,
+            materials=item.materials,
+            fit=item.fit,
+            pattern=item.pattern,
+            icon_emoji=item.icon_emoji,
+            source=item.source,
+            is_owned=item.is_owned,
+            created_at=item.created_at,
+            source_priority=item.source_priority
+        )
+        internal_candidates.append(internal_item)
+
+    # Преобразование контекста
+    internal_context = InternalContext(
+        weather=InternalWeatherData(
+            temperature=ml_request.context.weather.temperature,
+            feels_like=ml_request.context.weather.feels_like,
+            humidity=ml_request.context.weather.humidity,
+            wind_speed=ml_request.context.weather.wind_speed,
+            weather=ml_request.context.weather.weather,
+        ),
+        user_profile=InternalUserProfile(
+            age_range=ml_request.context.user_profile.age_range,
+            style_preference=ml_request.context.user_profile.style_preference,
+            temperature_sensitivity=ml_request.context.user_profile.temperature_sensitivity,
+            formality_preference=ml_request.context.user_profile.formality_preference,
+            gender=ml_request.context.user_profile.gender,
+        ),
+        preferences=ml_request.context.preferences,
+        location=ml_request.context.location
+    )
+
+    return InternalRequest(
+        context=internal_context,
+        candidates=internal_candidates
+    )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     global predictor
-    model_path = os.getenv("MODEL_PATH", "models/model.pkl")  # укажите путь к модели
+    model_path = os.getenv("MODEL_PATH", "models/model.pkl")  # путь к модели для загрузки
     try:
         predictor = EnhancedPredictor(model_path)
         logging.info(f"ML model loaded successfully from {model_path}")
@@ -85,15 +145,15 @@ async def readiness_check():
 async def rank_candidates(request: MLRankRequest) -> MLRankResponse:
     """
     Rank clothing candidates based on context and ML model.
-    
+
     Args:
         request: MLRankRequest containing context and candidates to rank
-        
+
     Returns:
         MLRankResponse with ranked candidates and model version
     """
     start_time = time.time()
-    
+
     try:
         if len(request.candidates) == 0:
             return MLRankResponse(
@@ -101,58 +161,61 @@ async def rank_candidates(request: MLRankRequest) -> MLRankResponse:
                 model_version=predictor.get_model_version() if predictor else "unknown",
                 processing_time_ms=0.0
             )
-        
+
         if len(request.candidates) > 250:
             raise HTTPException(
-                status_code=422, 
+                status_code=422,
                 detail=f"Too many candidates: {len(request.candidates)}, maximum allowed: 250"
             )
-        
+
         # Проверка, что модель загружена
         if predictor is None:
             raise HTTPException(status_code=503, detail="ML model not available")
-        
+
+        # Адаптер: преобразование внешнего запроса во внутреннюю схему
+        internal_request = adapt_ml_request_to_internal(request)
+
         # Подготовка признаков для модели
         feature_df = build_feature_frame(
             weather_data={
-                "temperature": request.context.weather.temperature,
-                "feels_like": request.context.weather.feels_like,
-                "humidity": request.context.weather.humidity,
-                "wind_speed": request.context.weather.wind_speed,
-                "weather": request.context.weather.weather,
+                "temperature": internal_request.context.weather.temperature,
+                "feels_like": internal_request.context.weather.feels_like,
+                "humidity": internal_request.context.weather.humidity,
+                "wind_speed": internal_request.context.weather.wind_speed,
+                "weather": internal_request.context.weather.weather,
             },
             user_profile={
-                "age_range": request.context.user_profile.age_range,
-                "style_preference": request.context.user_profile.style_preference,
-                "temperature_sensitivity": request.context.user_profile.temperature_sensitivity,
-                "formality_preference": request.context.user_profile.formality_preference,
-                "gender": request.context.user_profile.gender,
+                "age_range": internal_request.context.user_profile.age_range,
+                "style_preference": internal_request.context.user_profile.style_preference,
+                "temperature_sensitivity": internal_request.context.user_profile.temperature_sensitivity,
+                "formality_preference": internal_request.context.user_profile.formality_preference,
+                "gender": internal_request.context.user_profile.gender,
             },
-            items=[item.dict() for item in request.candidates]
+            items=[item.dict() for item in internal_request.candidates]
         )
-        
+
         # Получение предсказаний от модели
         scores = predictor.predict(feature_df)
-        
-        # Сопоставление оценок с кандидатами
+
+        # Сопоставление оценок с кандидатами (используем оригинальные id из внешнего запроса)
         ranked_items = []
         for i, score in enumerate(scores):
             ranked_items.append(RankedItem(
                 id=request.candidates[i].id,
                 score=float(score)
             ))
-        
+
         # Сортировка по оценке (от максимальной к минимальной)
         ranked_items.sort(key=lambda x: x.score, reverse=True)
-        
+
         processing_time = (time.time() - start_time) * 1000  # в миллисекундах
-        
+
         return MLRankResponse(
             ranked=ranked_items,
             model_version=predictor.get_model_version(),
             processing_time_ms=processing_time
         )
-    
+
     except ValidationError as ve:
         logger.error(f"Validation error: {ve}")
         raise HTTPException(status_code=422, detail=f"Validation error: {str(ve)}")
