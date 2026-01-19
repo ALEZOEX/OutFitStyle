@@ -28,6 +28,9 @@ WORKDIR /app/
 COPY --from=builder /app/server /app/server
 COPY --from=builder /app/migrate /app/migrate
 
+# Копировать файлы миграций
+COPY server/migrations/ /app/migrations/
+
 # Создать непривилегированный пользователь
 RUN addgroup -g 65532 nonroot && \
     adduser -D -u 65532 -G nonroot nonroot

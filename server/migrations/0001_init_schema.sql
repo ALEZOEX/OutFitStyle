@@ -1,78 +1,18 @@
--- Migration: Initialize OutfitStyle schema with Planner → Retrieval → Ranking architecture
--- This migration is idempotent and can be run multiple times
+-- 000001_init.up.sql
+-- Базовая схема OutfitStyle (UUID everywhere). Для golang-migrate.
 
--- Create schema migrations table for tracking applied migrations
-CREATE TABLE IF NOT EXISTS schema_migrations (
-    version VARCHAR(20) PRIMARY KEY,
-    applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Create enum types with exception handling to make migration idempotent
-DO $$ 
+-- updated_at helper
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS trigger AS $$
 BEGIN
-    CREATE TYPE source_type AS ENUM ('synthetic', 'user', 'partner', 'manual');
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-DO $$ 
-BEGIN
-    CREATE TYPE gender_type AS ENUM ('unisex');
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
-DO $$ 
-BEGIN
-    CREATE TYPE style_type AS ENUM ('casual', 'sport', 'street', 'classic', 'business', 'smart_casual', 'outdoor');
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
-DO $$ 
-BEGIN
-    CREATE TYPE usage_type AS ENUM ('daily', 'work', 'formal', 'sport', 'outdoor', 'travel', 'party');
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
-DO $$ 
-BEGIN
-    CREATE TYPE season_type AS ENUM ('winter', 'spring', 'summer', 'autumn', 'all');
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
-DO $$ 
-BEGIN
-    CREATE TYPE colour_type AS ENUM ('black', 'white', 'gray', 'navy', 'beige', 'brown', 'green', 'blue', 'red', 'pink', 'yellow', 'orange', 'purple');
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
-DO $$ 
-BEGIN
-    CREATE TYPE fit_type AS ENUM ('slim', 'regular', 'relaxed', 'oversized');
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
-DO $$ 
-BEGIN
-    CREATE TYPE pattern_type AS ENUM ('solid', 'striped', 'checked', 'printed', 'camo');
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
--- Create subcategory_specs table (dictionary + planner norms)
+-- subcategory specs
 CREATE TABLE IF NOT EXISTS subcategory_specs (
   category        TEXT NOT NULL,
   subcategory     TEXT NOT NULL,
@@ -91,56 +31,81 @@ CREATE TABLE IF NOT EXISTS subcategory_specs (
     CHECK (category IN ('outerwear','upper','lower','footwear','accessory'))
 );
 
--- Create users table
+-- users
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255),
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    date_of_birth DATE,
-    gender VARCHAR(20),
-    location VARCHAR(100),
-    preferences JSONB,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  username TEXT UNIQUE,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT,
+
+  first_name TEXT,
+  last_name TEXT,
+  date_of_birth DATE,
+  gender TEXT,
+  location TEXT,
+
+  preferences JSONB NOT NULL DEFAULT '{}'::jsonb,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Create clothing_items table (catalog)
+DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
+CREATE TRIGGER trg_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- clothing_items (каталог/вещи)
 CREATE TABLE IF NOT EXISTS clothing_items (
-  id               BIGINT PRIMARY KEY,
-  name             TEXT NOT NULL,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-  category         TEXT NOT NULL,
-  subcategory      TEXT NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
 
-  gender           TEXT NOT NULL DEFAULT 'unisex' CHECK (gender IN ('unisex')),
+  category    TEXT NOT NULL,
+  subcategory TEXT NOT NULL,
 
-  style            TEXT NOT NULL CHECK (style IN ('casual','sport','street','classic','business','smart_casual','outdoor')),
-  usage            TEXT NOT NULL CHECK (usage IN ('daily','work','formal','sport','outdoor','travel','party')),
-  season           TEXT NOT NULL CHECK (season IN ('winter','spring','summer','autumn','all')),
-  base_colour      TEXT NOT NULL CHECK (base_colour IN ('black','white','gray','navy','beige','brown','green','blue','red','pink','yellow','orange','purple')),
+  gender TEXT NOT NULL DEFAULT 'unisex' CHECK (gender IN ('unisex')),
 
-  formality_level  SMALLINT NOT NULL CHECK (formality_level BETWEEN 1 AND 5),
-  warmth_level     SMALLINT NOT NULL CHECK (warmth_level BETWEEN 1 AND 10),
+  style  TEXT NOT NULL CHECK (style IN ('casual','sport','street','classic','business','smart_casual','outdoor')),
+  usage  TEXT NOT NULL CHECK (usage IN ('daily','work','formal','sport','outdoor','travel','party')),
+  season TEXT NOT NULL CHECK (season IN ('winter','spring','summer','autumn','all')),
 
-  min_temp         SMALLINT NOT NULL,
-  max_temp         SMALLINT NOT NULL,
-  CONSTRAINT clothing_items_temp_check CHECK (min_temp <= max_temp),
+  base_colour TEXT CHECK (base_colour IN ('black','white','gray','navy','beige','brown','green','blue','red','pink','yellow','orange','purple')),
 
-  materials        TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  formality_level SMALLINT CHECK (formality_level BETWEEN 1 AND 5),
+  warmth_level    SMALLINT CHECK (warmth_level BETWEEN 1 AND 10),
 
-  fit              TEXT NOT NULL CHECK (fit IN ('slim','regular','relaxed','oversized')),
-  pattern          TEXT NOT NULL CHECK (pattern IN ('solid','striped','checked','printed','camo')),
+  min_temp SMALLINT,
+  max_temp SMALLINT,
+  CONSTRAINT clothing_items_temp_check CHECK (min_temp IS NULL OR max_temp IS NULL OR min_temp <= max_temp),
 
-  icon_emoji       TEXT NOT NULL,
-  source           TEXT NOT NULL DEFAULT 'synthetic',
-  is_owned         BOOLEAN NOT NULL DEFAULT FALSE,
+  rain_ok BOOLEAN NOT NULL DEFAULT TRUE,
+  snow_ok BOOLEAN NOT NULL DEFAULT TRUE,
+  wind_ok BOOLEAN NOT NULL DEFAULT TRUE,
 
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  materials TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
 
-  CONSTRAINT clothing_items_source_check CHECK (source IN ('synthetic','user','partner','manual')),
+  fit     TEXT CHECK (fit IN ('slim','regular','relaxed','oversized')),
+  pattern TEXT CHECK (pattern IN ('solid','striped','checked','printed','camo')),
+
+  brand TEXT,
+
+  image_url TEXT,
+  thumbnail_url TEXT,
+  icon_emoji TEXT,
+
+  source TEXT NOT NULL DEFAULT 'synthetic'
+    CHECK (source IN ('synthetic','user','partner','manual')),
+
+  owner_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  is_owned BOOLEAN NOT NULL DEFAULT FALSE,
+
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   CONSTRAINT clothing_items_subcategory_fk
     FOREIGN KEY (category, subcategory)
@@ -149,194 +114,136 @@ CREATE TABLE IF NOT EXISTS clothing_items (
     ON DELETE RESTRICT
 );
 
--- Create wardrobe_items table (user's personal items)
+DROP TRIGGER IF EXISTS trg_clothing_items_updated_at ON clothing_items;
+CREATE TRIGGER trg_clothing_items_updated_at
+BEFORE UPDATE ON clothing_items
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- wardrobe_items (личные вещи пользователя)
 CREATE TABLE IF NOT EXISTS wardrobe_items (
-  id               BIGINT PRIMARY KEY,
-  user_id          BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  clothing_item_id BIGINT NOT NULL REFERENCES clothing_items(id) ON DELETE CASCADE,
-  quantity         INTEGER DEFAULT 1,
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  clothing_item_id UUID NOT NULL REFERENCES clothing_items(id) ON DELETE CASCADE,
+
+  custom_name TEXT,
+  notes TEXT,
+  tags TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+
+  purchase_date DATE,
+  purchase_price NUMERIC(12,2),
+  purchase_currency TEXT,
+
+  wear_count INT NOT NULL DEFAULT 0,
+  last_worn_at TIMESTAMPTZ,
+
+  is_favorite BOOLEAN NOT NULL DEFAULT FALSE,
+  is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+  condition TEXT NOT NULL DEFAULT 'good',
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  UNIQUE(user_id, clothing_item_id)
 );
 
--- Create weather data table
+DROP TRIGGER IF EXISTS trg_wardrobe_items_updated_at ON wardrobe_items;
+CREATE TRIGGER trg_wardrobe_items_updated_at
+BEFORE UPDATE ON wardrobe_items
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- weather_data
 CREATE TABLE IF NOT EXISTS weather_data (
-    id SERIAL PRIMARY KEY,
-    location VARCHAR(100) NOT NULL,
-    temperature DECIMAL(5, 2) NOT NULL,
-    feels_like DECIMAL(5, 2),
-    weather_condition VARCHAR(50),
-    humidity INTEGER,
-    wind_speed DECIMAL(5, 2),
-    timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  location TEXT NOT NULL,
+
+  temperature DOUBLE PRECISION NOT NULL,
+  feels_like DOUBLE PRECISION,
+  weather_condition TEXT,
+  humidity INT,
+  wind_speed DOUBLE PRECISION,
+
+  observed_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Create recommendations table
+-- recommendations (снимок рекомендации)
 CREATE TABLE IF NOT EXISTS recommendations (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    weather_id INTEGER REFERENCES weather_data(id) ON DELETE SET NULL,
-    outfit_score DECIMAL(5, 4),
-    algorithm_used VARCHAR(50),
-    ml_powered BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  weather_id UUID REFERENCES weather_data(id) ON DELETE SET NULL,
+
+  outfit_score NUMERIC(6,4),
+  algorithm_used TEXT,
+  ml_powered BOOLEAN NOT NULL DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Create recommendation items table (junction table)
+-- recommendation_items (элементы рекомендации)
 CREATE TABLE IF NOT EXISTS recommendation_items (
-    id SERIAL PRIMARY KEY,
-    recommendation_id INTEGER REFERENCES recommendations(id) ON DELETE CASCADE,
-    clothing_item_id INTEGER REFERENCES clothing_items(id) ON DELETE CASCADE,
-    name TEXT, -- Added for storing item name
-    category TEXT, -- Added for storing category
-    icon_emoji TEXT, -- Added for storing emoji icon
-    ml_score DECIMAL(5, 4), -- Added for ML score
-    confidence DECIMAL(5, 4), -- Added for confidence
-    position INTEGER, -- Added for position
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(recommendation_id, clothing_item_id)
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  recommendation_id UUID NOT NULL REFERENCES recommendations(id) ON DELETE CASCADE,
+  clothing_item_id UUID NOT NULL REFERENCES clothing_items(id) ON DELETE CASCADE,
+
+  name TEXT,
+  category TEXT,
+  icon_emoji TEXT,
+
+  ml_score NUMERIC(6,4),
+  confidence NUMERIC(6,4),
+  position INT,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  UNIQUE(recommendation_id, clothing_item_id)
 );
 
--- Create user favorites table
+-- favorites / achievements / ratings
 CREATE TABLE IF NOT EXISTS user_favorites (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    recommendation_id INTEGER REFERENCES recommendations(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, recommendation_id)
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  recommendation_id UUID NOT NULL REFERENCES recommendations(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, recommendation_id)
 );
 
--- Create achievements table
 CREATE TABLE IF NOT EXISTS achievements (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL,
-    description TEXT,
-    icon VARCHAR(10),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT UNIQUE NOT NULL,
+  description TEXT,
+  icon TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Create user achievements table
 CREATE TABLE IF NOT EXISTS user_achievements (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    achievement_id INTEGER REFERENCES achievements(id) ON DELETE CASCADE,
-    unlocked_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, achievement_id)
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  achievement_id UUID NOT NULL REFERENCES achievements(id) ON DELETE CASCADE,
+  unlocked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, achievement_id)
 );
 
--- Create user ratings table
 CREATE TABLE IF NOT EXISTS user_ratings (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    recommendation_id INTEGER REFERENCES recommendations(id) ON DELETE CASCADE,
-    rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-    feedback TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, recommendation_id)
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  recommendation_id UUID NOT NULL REFERENCES recommendations(id) ON DELETE CASCADE,
+  rating INT CHECK (rating BETWEEN 1 AND 5),
+  feedback TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, recommendation_id)
 );
 
--- Create indexes for efficient retrieval
-CREATE INDEX IF NOT EXISTS clothing_items_cat_subcat_idx ON clothing_items (category, subcategory);
-CREATE INDEX IF NOT EXISTS clothing_items_cat_warmth_idx ON clothing_items (category, warmth_level);
-CREATE INDEX IF NOT EXISTS clothing_items_cat_style_idx ON clothing_items (category, style);
-CREATE INDEX IF NOT EXISTS clothing_items_temp_idx ON clothing_items (min_temp, max_temp);
-CREATE INDEX IF NOT EXISTS wardrobe_items_user_idx ON wardrobe_items (user_id);
-CREATE INDEX IF NOT EXISTS wardrobe_items_clothing_item_idx ON wardrobe_items (clothing_item_id);
-
--- Create indexes for performance
+-- indexes
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_clothing_items_category ON clothing_items(category);
-CREATE INDEX IF NOT EXISTS idx_clothing_items_subcategory ON clothing_items(subcategory);
-CREATE INDEX IF NOT EXISTS idx_recommendations_user_id ON recommendations(user_id);
-CREATE INDEX IF NOT EXISTS idx_recommendations_created_at ON recommendations(created_at);
-CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id ON user_achievements(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_ratings_user_id ON user_ratings(user_id);
-CREATE INDEX IF NOT EXISTS idx_weather_data_location_timestamp ON weather_data(location, timestamp);
 
--- Add updated_at trigger function
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
+CREATE INDEX IF NOT EXISTS idx_clothing_items_cat_subcat ON clothing_items(category, subcategory);
+CREATE INDEX IF NOT EXISTS idx_clothing_items_cat_warmth ON clothing_items(category, warmth_level);
+CREATE INDEX IF NOT EXISTS idx_clothing_items_temp ON clothing_items(min_temp, max_temp);
 
--- Create triggers for updated_at columns
-DO $$
-BEGIN
-    CREATE TRIGGER update_users_updated_at 
-    BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
+CREATE INDEX IF NOT EXISTS idx_wardrobe_items_user ON wardrobe_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_wardrobe_items_item ON wardrobe_items(clothing_item_id);
 
-DO $$
-BEGIN
-    CREATE TRIGGER update_clothing_items_updated_at 
-    BEFORE UPDATE ON clothing_items
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
-DO $$
-BEGIN
-    CREATE TRIGGER update_wardrobe_items_updated_at 
-    BEFORE UPDATE ON wardrobe_items
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-EXCEPTION
-    WHEN duplicate_object THEN
-        NULL;
-END $$;
-
--- Insert default subcategory specs (25 subcategories with norms)
-INSERT INTO subcategory_specs
-(category, subcategory, warmth_min, temp_min_reco, temp_max_reco, rain_ok, snow_ok, wind_ok)
-VALUES
--- outerwear (5)
-('outerwear','parka',      8, -25,   5, TRUE, TRUE, TRUE),
-('outerwear','puffer',     9, -30,   2, TRUE, TRUE, TRUE),
-('outerwear','coat',       6, -10,  10, TRUE, TRUE, TRUE),
-('outerwear','softshell',  4,  -5,  15, TRUE, TRUE, TRUE),
-('outerwear','raincoat',   3,  -5,  15, TRUE, TRUE, FALSE),
-
--- upper (6)
-('upper','tshirt',         1,  15,  30, TRUE, TRUE, FALSE),
-('upper','longsleeve',     2,  10,  22, TRUE, TRUE, FALSE),
-('upper','shirt',          2,  10,  25, TRUE, TRUE, FALSE),
-('upper','hoodie',         4,   0,  15, TRUE, TRUE, TRUE),
-('upper','sweater',        5,  -5,  12, TRUE, TRUE, TRUE),
-('upper','thermal_top',    7, -25,   5, TRUE, TRUE, TRUE),
-
--- lower (5)
-('lower','shorts',         1,  18,  35, TRUE, TRUE, FALSE),
-('lower','jeans',          3,   5,  20, TRUE, TRUE, TRUE),
-('lower','pants',          3,   0,  22, TRUE, TRUE, TRUE),
-('lower','thermal_pants',  7, -25,   5, TRUE, TRUE, TRUE),
-('lower','skirt',          2,  10,  25, TRUE, TRUE, FALSE),
-
--- footwear (5)
-('footwear','sandals',     1,  15,  35, TRUE, FALSE, FALSE),
-('footwear','sneakers',    2,   5,  25, TRUE, TRUE, TRUE),
-('footwear','boots',       5,  -5,  15, TRUE, TRUE, TRUE),
-('footwear','winter_boots',8, -30,   5, TRUE, TRUE, TRUE),
-('footwear','loafers',     2,  10,  25, TRUE, FALSE, FALSE),
-
--- accessory (5)
-('accessory','hat',        3, -10,  10, TRUE, TRUE, TRUE),
-('accessory','scarf',      4, -20,   5, TRUE, TRUE, TRUE),
-('accessory','gloves',     4, -20,   5, TRUE, TRUE, TRUE),
-('accessory','umbrella',   1,   0,  25, TRUE, FALSE, FALSE),
-('accessory','bag',        1, -35,  35, TRUE, TRUE, TRUE)
-ON CONFLICT (category, subcategory) DO UPDATE SET
-  warmth_min    = EXCLUDED.warmth_min,
-  temp_min_reco = EXCLUDED.temp_min_reco,
-  temp_max_reco = EXCLUDED.temp_max_reco,
-  rain_ok       = EXCLUDED.rain_ok,
-  snow_ok       = EXCLUDED.snow_ok,
-  wind_ok       = EXCLUDED.wind_ok;
+CREATE INDEX IF NOT EXISTS idx_recommendations_user_created_at ON recommendations(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_weather_location_time ON weather_data(location, observed_at DESC);

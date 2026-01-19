@@ -1,7 +1,7 @@
 -- 005_indexes_perf.up.sql
--- Performance indexes for wardrobe/recommendations/catalog search
+-- Индексы производительности для поиска по гардеробу/рекомендациям/каталогу
 
--- Recommendations filtering
+-- Фильтрация рекомендаций
 CREATE INDEX IF NOT EXISTS idx_recs_user_created_at
   ON recommendations(user_id, created_at DESC);
 
@@ -14,14 +14,14 @@ CREATE INDEX IF NOT EXISTS idx_recs_user_occasion
 CREATE INDEX IF NOT EXISTS idx_recs_user_rating
   ON recommendations(user_id, user_rating);
 
--- Wardrobe filtering
+-- Фильтрация гардероба
 CREATE INDEX IF NOT EXISTS idx_wardrobe_user_updated_at
   ON user_wardrobe(user_id, updated_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_wardrobe_user_flags
   ON user_wardrobe(user_id, is_favorite, is_archived);
 
--- Trigram search (needs pg_trgm extension; already in 001)
+-- Поиск по триграммам (требуется расширение pg_trgm; уже в 001)
 CREATE INDEX IF NOT EXISTS idx_clothing_name_trgm
   ON clothing_items USING gin (name gin_trgm_ops);
 
@@ -31,7 +31,7 @@ CREATE INDEX IF NOT EXISTS idx_clothing_subcategory_trgm
 CREATE INDEX IF NOT EXISTS idx_wardrobe_custom_name_trgm
   ON user_wardrobe USING gin (custom_name gin_trgm_ops);
 
--- Catalog filters
+-- Фильтры каталога
 CREATE INDEX IF NOT EXISTS idx_clothing_catalog_filters
   ON clothing_items (category, style, base_colour);
 

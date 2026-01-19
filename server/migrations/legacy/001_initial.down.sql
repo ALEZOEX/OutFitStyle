@@ -1,5 +1,5 @@
 -- 001_initial.down.sql
--- Drop in rough reverse dependency order (CASCADE where OK)
+-- Удаление в обратном порядке зависимостей (CASCADE где возможно)
 
 DROP FUNCTION IF EXISTS cleanup_expired_data();
 DROP FUNCTION IF EXISTS update_recommendation_stats();

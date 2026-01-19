@@ -1,5 +1,5 @@
 -- 004_seed_catalog.up.sql
--- Seeds subcategory_specs + a few catalog clothing_items (synthetic) and one partner sample.
+-- Заполняет subcategory_specs + несколько каталогов clothing_items (синтетических) и один образец партнера.
 
 -- =========================
 -- subcategory_specs
@@ -38,7 +38,7 @@ ON CONFLICT (subcategory) DO UPDATE SET
   icon_emoji = EXCLUDED.icon_emoji;
 
 -- =========================
--- partners (one demo)
+-- partners (один демо)
 -- =========================
 INSERT INTO partners (id, name, code, affiliate_url_template, is_active)
 VALUES (
@@ -51,8 +51,8 @@ VALUES (
 ON CONFLICT (code) DO NOTHING;
 
 -- =========================
--- clothing_items (synthetic catalog)
--- Use fixed UUIDs for idempotency
+-- clothing_items (синтетический каталог)
+-- Использовать фиксированные UUID для идемпотентности
 -- =========================
 INSERT INTO clothing_items (
   id, name, description,

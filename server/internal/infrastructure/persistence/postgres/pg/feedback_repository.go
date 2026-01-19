@@ -2,35 +2,33 @@ package pg
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
-	dbpkg "outfitstyle/server/internal/infrastructure/persistence/postgres"
 )
 
 type FeedbackRepository struct {
-	db *dbpkg.DB
+	db *pgxpool.Pool
 }
 
-func NewFeedbackRepository(db *dbpkg.DB) repositories.FeedbackRepository {
+func NewFeedbackRepository(db *pgxpool.Pool) *FeedbackRepository {
 	return &FeedbackRepository{db: db}
 }
 
-func (r *FeedbackRepository) CreateFeedback(ctx context.Context, userID domain.ID, req domain.CreateFeedbackRequest) (domain.ID, error) {
-	if req.Type == "" || req.Message == "" {
-		return domain.ID{}, errors.New("type and message are required")
-	}
+func (r *FeedbackRepository) CreateFeedback(ctx context.Context, feedback *domain.Feedback) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
 
-	var id domain.ID
-	err := r.db.Pool().QueryRow(ctx, `
-INSERT INTO app_feedback (user_id, type, screen, message, attachments)
-VALUES ($1,$2,$3,$4,$5)
-RETURNING id
-`, userID, req.Type, req.Screen, req.Message, req.Attachments).Scan(&id)
-	if err != nil {
-		return domain.ID{}, errors.Wrap(err, "insert feedback")
-	}
-	return id, nil
+func (r *FeedbackRepository) GetFeedback(ctx context.Context, feedbackID domain.ID) (*domain.Feedback, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *FeedbackRepository) GetFeedbackByUser(ctx context.Context, userID domain.ID) ([]domain.Feedback, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
 }
