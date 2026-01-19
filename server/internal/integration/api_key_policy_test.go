@@ -13,7 +13,7 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
-func TestAPIKeyPolicy_PermissionsAndOrigin(t *testing.T) {
+func TestAPIKeyPolicy_PermissionsOnly(t *testing.T) {
 	router := mux.NewRouter()
 	api := router.PathPrefix("/api/v1").Subrouter()
 
@@ -29,7 +29,6 @@ func TestAPIKeyPolicy_PermissionsAndOrigin(t *testing.T) {
 				RateLimitPerMinute: 60,
 				RateLimitPerDay:    1000,
 				Permissions:        []string{"wardrobe:read"}, // only read
-				AllowedOrigins:     []string{"https://allowed.example"},
 			})
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -44,7 +43,7 @@ func TestAPIKeyPolicy_PermissionsAndOrigin(t *testing.T) {
 	srv := httptest.NewServer(router)
 	defer srv.Close()
 
-	// GET with allowed origin -> ok
+	// GET with permission -> ok (origin check removed in server-to-server auth)
 	req1, _ := http.NewRequest(http.MethodGet, srv.URL+"/api/v1/wardrobe", nil)
 	req1.Header.Set("Origin", "https://allowed.example")
 	res1, _ := http.DefaultClient.Do(req1)
@@ -62,12 +61,12 @@ func TestAPIKeyPolicy_PermissionsAndOrigin(t *testing.T) {
 		t.Fatalf("expected 403 for POST, got %d", res2.StatusCode)
 	}
 
-	// GET with wrong origin should be forbidden
+	// GET with wrong origin should still be ok (origin check removed)
 	req3, _ := http.NewRequest(http.MethodGet, srv.URL+"/api/v1/wardrobe", nil)
 	req3.Header.Set("Origin", "https://evil.example")
 	res3, _ := http.DefaultClient.Do(req3)
 	res3.Body.Close()
-	if res3.StatusCode != 403 {
-		t.Fatalf("expected 403 for wrong origin, got %d", res3.StatusCode)
+	if res3.StatusCode != 204 {
+		t.Fatalf("expected 204 for wrong origin (origin check removed), got %d", res3.StatusCode)
 	}
 }

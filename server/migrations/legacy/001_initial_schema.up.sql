@@ -1,4 +1,4 @@
--- Create users table
+-- Создание таблицы пользователей
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create user_preferences table
+-- Создание таблицы пользовательских предпочтений
 CREATE TABLE user_preferences (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -23,7 +23,7 @@ CREATE TABLE user_preferences (
     UNIQUE(user_id)
 );
 
--- Create wardrobe_items table
+-- Создание таблицы вещей в гардеробе
 CREATE TABLE wardrobe_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -38,11 +38,11 @@ CREATE TABLE wardrobe_items (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create recommendations table
+-- Создание таблицы рекомендаций
 CREATE TABLE recommendations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    items JSONB NOT NULL, -- Array of wardrobe item IDs
+    items JSONB NOT NULL, -- Массив идентификаторов вещей из гардероба
     score DECIMAL(3,2) NOT NULL,
     reason TEXT,
     occasion VARCHAR(50),
@@ -50,7 +50,7 @@ CREATE TABLE recommendations (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create recommendation_feedback table
+-- Создание таблицы обратной связи по рекомендациям
 CREATE TABLE recommendation_feedback (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -61,7 +61,7 @@ CREATE TABLE recommendation_feedback (
     UNIQUE(user_id, recommendation_id)
 );
 
--- Create indexes
+-- Создание индексов
 CREATE INDEX idx_wardrobe_items_user_id ON wardrobe_items(user_id);
 CREATE INDEX idx_wardrobe_items_category ON wardrobe_items(category);
 CREATE INDEX idx_recommendations_user_id ON recommendations(user_id);
@@ -69,7 +69,7 @@ CREATE INDEX idx_recommendations_created_at ON recommendations(created_at DESC);
 CREATE INDEX idx_recommendation_feedback_user_id ON recommendation_feedback(user_id);
 CREATE INDEX idx_users_google_id ON users(google_id);
 
--- Create updated_at trigger function
+-- Создание функции триггера для обновления времени
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -78,7 +78,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers
+-- Создание триггеров
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 

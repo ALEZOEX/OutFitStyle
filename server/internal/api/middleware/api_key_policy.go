@@ -26,15 +26,6 @@ func APIKeyPolicyMiddleware() mux.MiddlewareFunc {
 				return
 			}
 
-			// 1) Allowed origins (только если Origin присутствует и allowed_origins задан)
-			if len(meta.AllowedOrigins) > 0 {
-				origin := r.Header.Get("Origin")
-				if origin != "" && !originAllowed(origin, meta.AllowedOrigins) {
-					resp.Error(w, http.StatusForbidden, errors.New("origin is not allowed for this api key"))
-					return
-				}
-			}
-
 			// 2) Permissions (если список пуст — считаем "all allowed")
 			if len(meta.Permissions) > 0 {
 				required := RequiredPermission(r)
