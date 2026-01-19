@@ -1,12 +1,13 @@
 """
 Скрипт для тренировки ML-модели ранжирования с сохранением артефактов.
+Теперь использует CatBoost для лучшей обработки категориальных признаков.
 """
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import accuracy_score, classification_report
+from catboost import CatBoostClassifier
 import pickle
 import json
 import os
@@ -89,57 +90,78 @@ def load_and_prepare_real_data(data_path: str = 'data/raw/styles.csv') -> pd.Dat
     return df_final
 
 
-def prepare_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray]:
+def prepare_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray, list]:
     """
     Подготовка признаков для модели.
+
+    Returns:
+        X: DataFrame с признаками
+        y: массив целевых значений
+        categorical_features_indices: индексы категориальных признаков
     """
-    # One-hot кодирование категориальных признаков
-    df_encoded = pd.get_dummies(df, columns=['category', 'subcategory'], prefix=['cat', 'sub'])
-    
+    # Определяем категориальные колонки
+    categorical_columns = ['category', 'subcategory']
+    # Проверяем, какие из этих колонок существуют в датасете
+    existing_categorical = [col for col in categorical_columns if col in df.columns]
+
     # Выделение признаков и целевой переменной
-    feature_columns = [col for col in df_encoded.columns if col != 'target']
-    X = df_encoded[feature_columns]
-    y = df_encoded['target'].values
-    
-    return X, y
+    feature_columns = [col for col in df.columns if col != 'target']
+    X = df[feature_columns].copy()
+    y = df['target'].values
+
+    # Получаем индексы категориальных признаков
+    categorical_features_indices = [i for i, col in enumerate(feature_columns) if col in existing_categorical]
+
+    return X, y, categorical_features_indices
 
 
-def train_ranking_model(X: pd.DataFrame, y: np.ndarray) -> Dict[str, Any]:
+def train_ranking_model(X: pd.DataFrame, y: np.ndarray, categorical_features_indices: list) -> Dict[str, Any]:
     """
-    Тренировка модели ранжирования.
+    Тренировка модели ранжирования с использованием CatBoost.
+
+    Args:
+        X: DataFrame с признаками
+        y: массив целевых значений
+        categorical_features_indices: индексы категориальных признаков
     """
     # Разделение данных
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Нормализация признаков
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    
-    # Обучение модели (Gradient Boosting как в оригинальном проекте)
-    model = GradientBoostingClassifier(
-        n_estimators=100,
+
+    # Для CatBoost не нужна нормализация признаков
+    # Обучение модели CatBoost
+    model = CatBoostClassifier(
+        iterations=100,
         learning_rate=0.1,
-        max_depth=5,
-        random_state=42
+        depth=5,
+        loss_function='Logloss',  # для бинарной классификации
+        eval_metric='Accuracy',
+        cat_features=categorical_features_indices,  # указываем индексы категориальных признаков
+        random_seed=42,
+        verbose=100  # выводить информацию о процессе обучения каждые 100 итераций
     )
-    
-    model.fit(X_train_scaled, y_train)
-    
+
+    # Обучаем модель
+    model.fit(
+        X_train,
+        y_train,
+        eval_set=(X_test, y_test),
+        early_stopping_rounds=10
+    )
+
     # Предсказания для оценки
-    y_pred = model.predict(X_test_scaled)
-    
+    y_pred = model.predict(X_test)
+
     # Метрики
     accuracy = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred, output_dict=True)
-    
+
     print(f"Точность модели: {accuracy:.3f}")
     print(f"Отчет по классификации: {json.dumps(report, indent=2)}")
-    
+
     return {
         'model': model,
-        'scaler': scaler,
         'feature_columns': X.columns.tolist(),
+        'categorical_features_indices': categorical_features_indices,
         'accuracy': accuracy,
         'classification_report': report
     }
@@ -150,40 +172,53 @@ def save_artifacts(model_artifacts: Dict[str, Any], output_dir: str):
     Сохранение артефактов модели.
     """
     os.makedirs(output_dir, exist_ok=True)
-    
+
     # Версия модели (на основе времени)
     version = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    # Сохранение модели
-    model_path = os.path.join(output_dir, f"model_v{version}.pkl")
-    with open(model_path, 'wb') as f:
+
+    # Путь для сохранения модели CatBoost
+    cbm_model_path = os.path.join(output_dir, f"model_v{version}.cbm")
+
+    # Сохраняем модель CatBoost в формате .cbm
+    model_artifacts['model'].save_model(cbm_model_path)
+
+    # Сохраняем метаданные в pickle файле
+    pickle_metadata_path = os.path.join(output_dir, f"model_v{version}_metadata.pkl")
+    with open(pickle_metadata_path, 'wb') as f:
         pickle.dump({
-            'model': model_artifacts['model'],
-            'scaler': model_artifacts['scaler'],
-            'feature_columns': model_artifacts['feature_columns'],
+            'format': 'catboost_cbm',  # указываем формат
             'version': version,
-            'created_at': datetime.now().isoformat()
+            'created_at': datetime.now().isoformat(),
+            'feature_columns': model_artifacts['feature_columns'],
+            'categorical_features': model_artifacts.get('categorical_features_indices', []),
+            'cbm_path': os.path.basename(cbm_model_path),  # сохраняем относительный путь к .cbm файлу
+            'model_type': 'CatBoostClassifier',
+            'accuracy': model_artifacts['accuracy'],
+            'classification_report': model_artifacts['classification_report']
         }, f)
-    
-    # Сохранение метаданных
+
+    # Также сохраняем метаданные в JSON для удобства просмотра
     metadata = {
         'version': version,
         'created_at': datetime.now().isoformat(),
         'accuracy': model_artifacts['accuracy'],
         'classification_report': model_artifacts['classification_report'],
         'feature_columns': model_artifacts['feature_columns'],
-        'model_type': 'GradientBoostingClassifier'
+        'categorical_features_indices': model_artifacts.get('categorical_features_indices', []),
+        'cbm_model_path': cbm_model_path,
+        'model_type': 'CatBoostClassifier'
     }
-    
+
     metadata_path = os.path.join(output_dir, 'metadata.json')
     with open(metadata_path, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
-    
+
     print(f"Артефакты сохранены в {output_dir}")
-    print(f"Модель: {model_path}")
-    print(f"Метаданные: {metadata_path}")
-    
-    return model_path, metadata_path
+    print(f"CatBoost модель: {cbm_model_path}")
+    print(f"Pickle метаданные: {pickle_metadata_path}")
+    print(f"JSON метаданные: {metadata_path}")
+
+    return cbm_model_path, metadata_path
 
 
 def main():
@@ -198,10 +233,10 @@ def main():
 
     print(f"Загружено {len(df)} записей из реального датасета")
     print("Подготовка признаков...")
-    X, y = prepare_features(df)
+    X, y, categorical_features_indices = prepare_features(df)
 
     print("Тренировка модели...")
-    artifacts = train_ranking_model(X, y)
+    artifacts = train_ranking_model(X, y, categorical_features_indices)
 
     print("Сохранение артефактов...")
     save_artifacts(artifacts, args.output_dir)
