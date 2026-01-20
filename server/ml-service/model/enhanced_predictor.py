@@ -1,58 +1,81 @@
 import os
-import json
 import pickle
 import logging
-from catboost import CatBoostClassifier, CatBoostRanker
+from typing import List, Optional
+
+import pandas as pd
+from catboost import CatBoostClassifier, CatBoostRanker, Pool
 
 logger = logging.getLogger(__name__)
 
+
 class EnhancedPredictor:
-    def __init__(self, model_path: str):
-        self.model_path = model_path
+    """
+    Predictor that loads CatBoost model via manifest models/model.pkl
+    and model binary models/model.cbm.
+    """
+
+    def __init__(self, manifest_path: str):
+        self.manifest_path = manifest_path
         self.model = None
-        self.model_version = "unknown"
-        self.cat_features = None
-        self._load_model()
+        self.model_kind: str = "classifier"  # classifier | ranker
+        self.model_version: str = "unknown"
+        self.cat_features: Optional[List[str]] = None
+        self.feature_columns: Optional[List[str]] = None  # список колонок для выравнивания
+        self._load()
 
-    def _load_model(self):
-        with open(self.model_path, "rb") as f:
-            obj = pickle.load(f)
+    def _load(self):
+        with open(self.manifest_path, "rb") as f:
+            manifest = pickle.load(f)
 
-        if isinstance(obj, dict) and obj.get("format") == "catboost_cbm":
-            self.model_version = obj.get("version", "unknown")
-            self.cat_features = obj.get("cat_features")
+        if not isinstance(manifest, dict) or manifest.get("format") != "catboost_cbm":
+            raise ValueError("model.pkl must be a dict with format=catboost_cbm")
 
-            cbm_rel = obj["cbm_path"]
-            cbm_path = os.path.join(os.path.dirname(self.model_path), cbm_rel)
+        self.model_kind = manifest.get("model_kind", "classifier")
+        self.model_version = manifest.get("version", "unknown")
+        self.cat_features = manifest.get("cat_features")
+        self.feature_columns = manifest.get("feature_columns")  # загружаем список колонок
 
-            model_type = obj.get("model_type", "classifier")
-            if model_type == "ranker":
-                self.model = CatBoostRanker()
-            else:
-                self.model = CatBoostClassifier()
+        cbm_rel = manifest.get("cbm_path", "model.cbm")
+        cbm_path = os.path.join(os.path.dirname(self.manifest_path), cbm_rel)
 
-            self.model.load_model(cbm_path)
-            logger.info(f"Loaded CatBoost model from {cbm_path}")
-            return
+        if self.model_kind == "ranker":
+            self.model = CatBoostRanker()
+        else:
+            self.model = CatBoostClassifier()
 
-        if isinstance(obj, dict) and "model" in obj:
-            self.model = obj["model"]
-            self.model_version = obj.get("version", "legacy")
-            return
-
-        self.model = obj
-        self.model_version = "legacy"
+        self.model.load_model(cbm_path)
+        logger.info("Loaded CatBoost %s model from %s", self.model_kind, cbm_path)
 
     def get_model_version(self) -> str:
         return self.model_version or "unknown"
 
-    def predict(self, feature_df):
-        if self.model is None or feature_df is None or len(feature_df) == 0:
+    def predict(self, feature_df: pd.DataFrame) -> List[float]:
+        if feature_df is None or len(feature_df) == 0:
             return []
 
-        if hasattr(self.model, "predict_proba"):
-            proba = self.model.predict_proba(feature_df)
-            return [float(p[1]) for p in proba]
+        # Выравнивание фичей по сохраненному списку колонок
+        if self.feature_columns:
+            # Добавляем отсутствующие колонки с пустыми значениями
+            for col in self.feature_columns:
+                if col not in feature_df.columns:
+                    # Для категориальных признаков используем пустую строку, для числовых - 0
+                    default_value = "" if self.cat_features and col in self.cat_features else 0
+                    feature_df[col] = default_value
 
-        preds = self.model.predict(feature_df)
+            # Удаляем лишние колонки
+            feature_df = feature_df[[col for col in self.feature_columns if col in feature_df.columns]]
+
+            # Устанавливаем правильный порядок колонок
+            feature_df = feature_df[self.feature_columns]
+
+        data = feature_df
+        if self.cat_features:
+            data = Pool(feature_df, cat_features=self.cat_features)
+
+        if self.model_kind == "classifier":
+            proba = self.model.predict_proba(data)[:, 1]
+            return [float(x) for x in proba]
+
+        preds = self.model.predict(data)
         return [float(x) for x in preds]
