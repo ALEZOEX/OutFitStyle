@@ -11,6 +11,11 @@ import requests
 import hashlib
 from concurrent.futures import ThreadPoolExecutor
 
+from contracts.outfit_contract import OutfitsResponse, Outfit, OutfitItem
+from model.adapters import normalize_item
+from model.features_v2 import build_feature_frame_v2
+from model.outfit_generator import generate_outfits
+
 from contracts.rank_contract import MLRankRequest, MLRankResponse, RankedItem
 from contracts.tz_rank_contract import TZRankRequest, TZRankResponse, TZRankedItem
 from contracts.translation_contracts import TranslationRequest, TranslationResponse, BatchTranslationRequest, BatchTranslationResponse
@@ -175,23 +180,25 @@ async def rank_candidates(request: MLRankRequest) -> MLRankResponse:
         # Адаптер: преобразование внешнего запроса во внутреннюю схему
         internal_request = adapt_ml_request_to_internal(request)
 
-        # Подготовка признаков для модели
-        feature_df = build_feature_frame(
+        # Подготовка признаков для модели (v2)
+        items = [normalize_item(item.dict()) for item in request.candidates]
+
+        feature_df = build_feature_frame_v2(
             weather_data={
-                "temperature": internal_request.context.weather.temperature,
-                "feels_like": internal_request.context.weather.feels_like,
-                "humidity": internal_request.context.weather.humidity,
-                "wind_speed": internal_request.context.weather.wind_speed,
-                "weather": internal_request.context.weather.weather,
+                "temperature": request.context.weather.temperature,
+                "feels_like": request.context.weather.feels_like,
+                "humidity": request.context.weather.humidity,
+                "wind_speed": request.context.weather.wind_speed,
+                "weather": request.context.weather.weather,
             },
             user_profile={
-                "age_range": internal_request.context.user_profile.age_range,
-                "style_preference": internal_request.context.user_profile.style_preference,
-                "temperature_sensitivity": internal_request.context.user_profile.temperature_sensitivity,
-                "formality_preference": internal_request.context.user_profile.formality_preference,
-                "gender": internal_request.context.user_profile.gender,
+                "age_range": request.context.user_profile.age_range,
+                "style_preference": request.context.user_profile.style_preference,
+                "temperature_sensitivity": request.context.user_profile.temperature_sensitivity,
+                "formality_preference": request.context.user_profile.formality_preference,
+                "gender": request.context.user_profile.gender,
             },
-            items=[item.dict() for item in internal_request.candidates]
+            items=items
         )
 
         # Получение предсказаний от модели
@@ -276,7 +283,7 @@ async def rank_candidates_v1(request: TZRankRequest) -> TZRankResponse:
             "source_priority": c.source_priority,
         })
 
-    feature_df = build_feature_frame(
+    feature_df = build_feature_frame_v2(
         weather_data={
             "temperature": request.context.temperature,
             "feels_like": request.context.feels_like,
@@ -328,6 +335,87 @@ async def rank_candidates_v1(request: TZRankRequest) -> TZRankResponse:
         model_version=predictor.get_model_version(),
         processing_time_ms=processing_time,
     )
+
+
+@app.post("/api/outfits", response_model=OutfitsResponse)
+async def outfits(request: MLRankRequest) -> OutfitsResponse:
+    start = time.time()
+
+    try:
+        if predictor is None:
+            raise HTTPException(status_code=503, detail="ML model not available")
+
+        if len(request.candidates) == 0:
+            return OutfitsResponse(
+                outfits=[],
+                model_version=predictor.get_model_version(),
+                processing_time_ms=0.0
+            )
+
+        if len(request.candidates) > 250:
+            raise HTTPException(status_code=422, detail="Too many candidates, max 250")
+
+        items = [normalize_item(item.dict()) for item in request.candidates]
+
+        feature_df = build_feature_frame_v2(
+            weather_data={
+                "temperature": request.context.weather.temperature,
+                "feels_like": request.context.weather.feels_like,
+                "humidity": request.context.weather.humidity,
+                "wind_speed": request.context.weather.wind_speed,
+                "weather": request.context.weather.weather,
+            },
+            user_profile={
+                "age_range": request.context.user_profile.age_range,
+                "style_preference": request.context.user_profile.style_preference,
+                "temperature_sensitivity": request.context.user_profile.temperature_sensitivity,
+                "formality_preference": request.context.user_profile.formality_preference,
+                "gender": request.context.user_profile.gender,
+            },
+            items=items
+        )
+
+        scores = predictor.predict(feature_df)
+        scores_by_id = {items[i]["id"]: float(scores[i]) for i in range(len(items))}
+
+        temperature = float(request.context.weather.temperature)
+        user_style = str(request.context.user_profile.style_preference).lower()
+
+        outfits_list = generate_outfits(
+            candidates=items,
+            scores_by_id=scores_by_id,
+            temperature=temperature,
+            user_style=user_style,
+            k=5,
+            topn_per_category=20,
+            beam_size=60,
+        )
+
+        resp = []
+        for o in outfits_list:
+            resp_items = {cat: OutfitItem(id=it["id"], score=float(scores_by_id.get(it["id"], 0.0)))
+                          for cat, it in o.items.items()}
+            resp.append(Outfit(
+                outfit_score=float(o.outfit_score),
+                breakdown=o.breakdown,
+                items=resp_items
+            ))
+
+        ms = (time.time() - start) * 1000
+        return OutfitsResponse(
+            outfits=resp,
+            model_version=predictor.get_model_version(),
+            processing_time_ms=ms
+        )
+
+    except Exception as e:
+        ms = (time.time() - start) * 1000
+        return OutfitsResponse(
+            outfits=[],
+            model_version=predictor.get_model_version() if predictor else "unknown",
+            processing_time_ms=ms,
+            error=str(e)
+        )
 
 
 @app.get("/metrics")
