@@ -1,8 +1,9 @@
+import uuid
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import time
 import logging
 import os
@@ -22,6 +23,8 @@ from contracts.translation_contracts import TranslationRequest, TranslationRespo
 from model.enhanced_predictor import EnhancedPredictor
 from model.features_with_priorities import build_feature_frame
 from model.internal_schema import InternalRequest, InternalItem, InternalContext, InternalWeatherData, InternalUserProfile
+from contracts.event_contract import ActionEvent, ActionEventResponse
+from model.event_logger import log_rank_impression, log_outfits_impression, log_action
 
 
 def adapt_ml_request_to_internal(external_request: MLRankRequest) -> InternalRequest:
@@ -147,7 +150,7 @@ async def readiness_check():
 
 
 @app.post("/api/rank", response_model=MLRankResponse)
-async def rank_candidates(request: MLRankRequest) -> MLRankResponse:
+async def rank_candidates(request: MLRankRequest, http_request: Request, response: Response) -> MLRankResponse:
     """
     Rank clothing candidates based on context and ML model.
 
@@ -158,6 +161,11 @@ async def rank_candidates(request: MLRankRequest) -> MLRankResponse:
         MLRankResponse with ranked candidates and model version
     """
     start_time = time.time()
+
+    # Генерация/получение request_id
+    request_id = http_request.headers.get("X-Request-Id") or str(uuid.uuid4())
+    response.headers["X-Request-Id"] = request_id
+    user_id = http_request.headers.get("X-User-Id", "anonymous")  # если у вас есть такой заголовок
 
     try:
         if len(request.candidates) == 0:
@@ -217,6 +225,48 @@ async def rank_candidates(request: MLRankRequest) -> MLRankResponse:
 
         processing_time = (time.time() - start_time) * 1000  # в миллисекундах
 
+        # Логирование импрессии
+        context_for_log = {
+            "weather": {
+                "temperature": request.context.weather.temperature,
+                "feels_like": request.context.weather.feels_like,
+                "humidity": request.context.weather.humidity,
+                "wind_speed": request.context.weather.wind_speed,
+                "weather": request.context.weather.weather,
+            },
+            "user_profile": {
+                "age_range": request.context.user_profile.age_range,
+                "style_preference": request.context.user_profile.style_preference,
+                "temperature_sensitivity": request.context.user_profile.temperature_sensitivity,
+                "formality_preference": request.context.user_profile.formality_preference,
+                "gender": request.context.user_profile.gender,
+            }
+        }
+
+        candidates_for_log = [{
+            "id": c.id,
+            "category": c.category,
+            "subcategory": c.subcategory,
+            "source": str(c.source),
+            "source_priority": c.source_priority,
+        } for c in request.candidates]
+
+        ranked_for_log = [{
+            "id": ri.id,
+            "score": ri.score,
+            "position": idx
+        } for idx, ri in enumerate(ranked_items, start=1)]
+
+        log_rank_impression(
+            request_id=request_id,
+            user_id=user_id,
+            api="api/rank",
+            model_version=predictor.get_model_version(),
+            context=context_for_log,
+            candidates=candidates_for_log,
+            ranked=ranked_for_log,
+        )
+
         return MLRankResponse(
             ranked=ranked_items,
             model_version=predictor.get_model_version(),
@@ -238,8 +288,13 @@ async def rank_candidates(request: MLRankRequest) -> MLRankResponse:
 
 
 @app.post("/api/v1/rank", response_model=TZRankResponse)
-async def rank_candidates_v1(request: TZRankRequest) -> TZRankResponse:
+async def rank_candidates_v1(request: TZRankRequest, http_request: Request, response: Response) -> TZRankResponse:
     start_time = time.time()
+
+    # Генерация/получение request_id
+    request_id = request.request_id
+    response.headers["X-Request-Id"] = request_id
+    user_id = getattr(request, 'user_id', None) or http_request.headers.get("X-User-Id", "anonymous")
 
     if predictor is None:
         raise HTTPException(status_code=503, detail="ML model not available")
@@ -326,6 +381,45 @@ async def rank_candidates_v1(request: TZRankRequest) -> TZRankResponse:
 
     processing_time = int((time.time() - start_time) * 1000)
 
+    # Логирование импрессии
+    context_for_log = {
+        "temperature": request.context.temperature,
+        "feels_like": request.context.feels_like,
+        "humidity": request.context.humidity,
+        "wind_speed": request.context.wind_speed,
+        "weather_code": request.context.weather_code,
+        "occasion": getattr(request.context, 'occasion', None),
+        "formality": getattr(request.context, 'formality', None),
+    }
+
+    candidates_for_log = [{
+        "id": c.id,
+        "category": c.category,
+        "subcategory": c.subcategory,
+        "source": c.source,
+        "source_priority": c.source_priority,
+    } for c in request.candidates]
+
+    flat_ranked = []
+    for cat, items_list in rankings.items():
+        for pos, it in enumerate(items_list, start=1):
+            flat_ranked.append({
+                "id": it.id,
+                "score": it.score,
+                "position": pos,
+                "category": cat
+            })
+
+    log_rank_impression(
+        request_id=request_id,
+        user_id=user_id,
+        api="api/v1/rank",
+        model_version=predictor.get_model_version(),
+        context=context_for_log,
+        candidates=candidates_for_log,
+        ranked=flat_ranked,
+    )
+
     return TZRankResponse(
         request_id=request.request_id,
         rankings=rankings,
@@ -338,8 +432,13 @@ async def rank_candidates_v1(request: TZRankRequest) -> TZRankResponse:
 
 
 @app.post("/api/outfits", response_model=OutfitsResponse)
-async def outfits(request: MLRankRequest) -> OutfitsResponse:
+async def outfits(request: MLRankRequest, http_request: Request, response: Response) -> OutfitsResponse:
     start = time.time()
+
+    # Генерация/получение request_id
+    request_id = http_request.headers.get("X-Request-Id") or str(uuid.uuid4())
+    response.headers["X-Request-Id"] = request_id
+    user_id = http_request.headers.get("X-User-Id", "anonymous")
 
     try:
         if predictor is None:
@@ -401,6 +500,43 @@ async def outfits(request: MLRankRequest) -> OutfitsResponse:
                 items=resp_items
             ))
 
+        # Логирование импрессии outfits
+        context_for_log = {
+            "weather": {
+                "temperature": request.context.weather.temperature,
+                "feels_like": request.context.weather.feels_like,
+                "humidity": request.context.weather.humidity,
+                "wind_speed": request.context.weather.wind_speed,
+                "weather": request.context.weather.weather,
+            },
+            "user_profile": {
+                "style_preference": request.context.user_profile.style_preference,
+                "formality_preference": request.context.user_profile.formality_preference,
+            }
+        }
+
+        # outfit_id можно сделать детерминированным: "upper=1|lower=2|footwear=3"
+        outfits_for_log = []
+        for pos, o in enumerate(resp, start=1):
+            items_map = {cat: str(item.id) for cat, item in o.items.items()}
+            outfit_id = "|".join([f"{k}={items_map[k]}" for k in sorted(items_map.keys())])
+            outfits_for_log.append({
+                "outfit_id": outfit_id,
+                "outfit_score": o.outfit_score,
+                "position": pos,
+                "items": items_map,
+                "breakdown": o.breakdown,
+            })
+
+        log_outfits_impression(
+            request_id=request_id,
+            user_id=user_id,
+            api="api/outfits",
+            model_version=predictor.get_model_version(),
+            context=context_for_log,
+            outfits=outfits_for_log,
+        )
+
         ms = (time.time() - start) * 1000
         return OutfitsResponse(
             outfits=resp,
@@ -416,6 +552,20 @@ async def outfits(request: MLRankRequest) -> OutfitsResponse:
             processing_time_ms=ms,
             error=str(e)
         )
+
+
+@app.post("/api/action", response_model=ActionEventResponse)
+async def action_event(ev: ActionEvent) -> ActionEventResponse:
+    # сюда должен стучаться backend, когда пользователь кликнул/выбрал вещь или outfit
+    log_action(
+        request_id=ev.request_id,
+        user_id=ev.user_id,
+        action_type=ev.action_type,
+        entity_type=ev.entity_type,
+        entity_id=ev.entity_id,
+        meta=ev.meta,
+    )
+    return ActionEventResponse(ok=True)
 
 
 @app.get("/metrics")
