@@ -23,8 +23,18 @@ type RecommendationItemRow struct {
 	AlternativesJSON []byte
 }
 
+type RecommendationSession struct {
+	ID             domain.ID
+	UserID         domain.ID
+	ContextHash    *string
+	ModelVersion   *string
+	WeatherData    []byte
+	UserPreferences []byte
+}
+
 type RecommendationRepository interface {
 	Create(ctx context.Context, rec *domain.RecommendationRecord, items []RecommendationItemCreate) (domain.ID, error)
+	CreateWithSession(ctx context.Context, session *RecommendationSession, rec *domain.RecommendationRecord, items []RecommendationItemCreate) (domain.ID, error)
 	CreateRecommendation(ctx context.Context, rec *domain.RecommendationResponse) (*domain.RecommendationResponse, error)
 	GetByID(ctx context.Context, id domain.ID) (*domain.RecommendationRecord, error)
 
@@ -35,4 +45,6 @@ type RecommendationRepository interface {
 	SetRating(ctx context.Context, userID, recommendationID domain.ID, rating int, thermalFeedback *string, feedback *string) (changedToPerfect bool, err error)
 	SetFavorite(ctx context.Context, userID, recommendationID domain.ID, isFavorite bool) error
 	ListFavorites(ctx context.Context, userID domain.ID, limit int) ([]domain.RecommendationRecord, error)
+
+	CreateSession(ctx context.Context, session *RecommendationSession) (domain.ID, error)
 }
