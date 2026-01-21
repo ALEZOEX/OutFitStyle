@@ -63,6 +63,9 @@ func main() {
 
 	pushMux := &external.PushMux{FCM: fcm, APNS: apns}
 
+	// Создаем MLClient
+	mlClient := external.NewMLClient(cfg.MLService.BaseURL, cfg.MLService.Timeout)
+
 	redisOpt, err := queue.ParseRedisURLToAsynqOpt(cfg.Queue.RedisURL)
 	if err != nil {
 		logger.Fatal("parse redis url failed", zap.Error(err))
@@ -72,6 +75,7 @@ func main() {
 		Concurrency: 10,
 		Queues: map[string]int{
 			"push": 10,
+			"ml":   5,
 		},
 		ShutdownTimeout: 20 * time.Second,
 	})
@@ -81,6 +85,7 @@ func main() {
 		NotifRepo: notifRepo,
 		TokenRepo: tokenRepo,
 		Push:      pushMux,
+		ML:        mlClient,
 	})
 
 	logger.Info("worker started")
