@@ -135,9 +135,18 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 		return nil, err
 	}
 
-	_, err = s.recRepo.Create(ctx, rec, itemsCreate)
+	// Создаем сессию для логирования в ML сервисе
+	session := &repositories.RecommendationSession{
+		UserID:         userID,
+		ContextHash:    nil, // Можно вычислить хэш от контекста
+		ModelVersion:   &modelVersion,
+		WeatherData:    weatherJSON,
+		UserPreferences: nil, // Можно сериализовать предпочтения пользователя
+	}
+
+	_, err = s.recRepo.CreateWithSession(ctx, session, rec, itemsCreate)
 	if err != nil {
-		return nil, errors.Wrap(err, "save recommendation")
+		return nil, errors.Wrap(err, "save recommendation with session")
 	}
 
 	return rec, nil
@@ -861,6 +870,25 @@ func (s *RecommendationService) rankLiteOrFallback(
 		mlReq.Candidates = append(mlReq.Candidates, candidate)
 	}
 
+	// Создаем сессию для логирования в ML сервисе
+	session := &repositories.RecommendationSession{
+		UserID:         userID,
+		ContextHash:    nil, // Можно вычислить хэш от контекста
+		ModelVersion:   nil, // Будет заполнено из ответа ML
+		WeatherData:    nil, // Может быть заполнено позже
+		UserPreferences: nil, // Можно сериализовать предпочтения пользователя
+	}
+
+	sessionID, err := s.recRepo.CreateSession(ctx, session)
+	if err != nil {
+		s.logger.Error("Failed to create recommendation session", zap.Error(err))
+		// Продолжаем без сессии
+		sessionID = domain.NewID() // Используем временный ID
+	}
+
+	// Используем ID сессии как request_id для ML сервиса
+	mlReq.RequestID = sessionID.String()
+
 	start := time.Now()
 	mlResp, err := s.ml.Rank(ctx, mlReq)
 	if err != nil {
@@ -1055,11 +1083,87 @@ func (s *RecommendationService) Rate(ctx context.Context, userID domain.ID, id d
 	if rating < 1 || rating > 5 {
 		return false, errors.New("rating must be 1..5")
 	}
-	return s.recRepo.SetRating(ctx, userID, id, rating, thermal, feedback)
+
+	changed, err := s.recRepo.SetRating(ctx, userID, id, rating, thermal, feedback)
+	if err != nil {
+		return changed, err
+	}
+
+	// Отправляем действие в ML сервис для обучения Ranker
+	meta := map[string]interface{}{
+		"rating":   rating,
+		"thermal":  thermal,
+		"feedback": feedback,
+	}
+
+	// Здесь мы используем ID рекомендации как request_id (в реальности нужно использовать session_id)
+	// Но для простоты используем ID рекомендации
+	go func() {
+		// Создаем фоновый контекст с таймаутом
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		_ = s.SendUserAction(ctx, userID, id.String(), "rate", id.String(), "recommendation", meta)
+	}()
+
+	return changed, err
 }
 func (s *RecommendationService) SetFavorite(ctx context.Context, userID domain.ID, id domain.ID, fav bool) error {
-	return s.recRepo.SetFavorite(ctx, userID, id, fav)
+	err := s.recRepo.SetFavorite(ctx, userID, id, fav)
+	if err != nil {
+		return err
+	}
+
+	// Отправляем действие в ML сервис для обучения Ranker
+	meta := map[string]interface{}{
+		"favorite": fav,
+	}
+
+	// Здесь мы используем ID рекомендации как request_id (в реальности нужно использовать session_id)
+	go func() {
+		// Создаем фоновый контекст с таймаутом
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		_ = s.SendUserAction(ctx, userID, id.String(), "favorite", id.String(), "recommendation", meta)
+	}()
+
+	return nil
 }
 func (s *RecommendationService) Favorites(ctx context.Context, userID domain.ID, limit int) ([]domain.RecommendationRecord, error) {
 	return s.recRepo.ListFavorites(ctx, userID, limit)
+}
+
+// SendUserAction отправляет действие пользователя в ML сервис для обучения Ranker
+func (s *RecommendationService) SendUserAction(ctx context.Context, userID domain.ID, requestID string, actionType string, entityID string, entityType string, meta map[string]interface{}) error {
+	if s.ml == nil {
+		s.logger.Warn("ML client is not configured, skipping action logging")
+		return nil
+	}
+
+	actionReq := external.ActionRequest{
+		RequestID:  requestID,
+		UserID:     userID.String(),
+		ActionType: actionType,
+		EntityID:   entityID,
+		EntityType: entityType,
+		Meta:       meta,
+	}
+
+	_, err := s.ml.SendAction(ctx, actionReq)
+	if err != nil {
+		s.logger.Error("Failed to send user action to ML service",
+			zap.Error(err),
+			zap.String("request_id", requestID),
+			zap.String("user_id", userID.String()),
+			zap.String("action_type", actionType))
+		return err
+	}
+
+	s.logger.Info("User action sent to ML service",
+		zap.String("request_id", requestID),
+		zap.String("user_id", userID.String()),
+		zap.String("action_type", actionType))
+
+	return nil
 }
