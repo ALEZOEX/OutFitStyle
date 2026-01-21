@@ -3,6 +3,7 @@ package queue
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
@@ -10,6 +11,7 @@ import (
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/infrastructure/external"
+	"outfitstyle/server/internal/infrastructure/queue/tasks"
 )
 
 type WorkerDeps struct {
@@ -19,11 +21,13 @@ type WorkerDeps struct {
 	TokenRepo repositories.PushTokenRepository
 
 	Push *external.PushMux
+	ML   *external.MLClient
 }
 
 func NewMux(deps WorkerDeps) *asynq.ServeMux {
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(TaskSendNotification, deps.handleSendNotification)
+	mux.HandleFunc(tasks.TypeMLAction, deps.handleMLAction)
 	return mux
 }
 
