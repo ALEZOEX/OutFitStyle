@@ -9,15 +9,20 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"regexp"
+	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type mig struct {
-	Version string
-	Path    string
-	SQL     []byte
+	ID   string
+	Seq  int
+	Path string
+	SQL  []byte
 }
+
+var reSeq = regexp.MustCompile(`^(\d+)`)
 
 func main() {
 	dsn := os.Getenv("DATABASE_URL")
@@ -46,6 +51,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	// advisory lock
+	_, err = pool.Exec(ctx, `SELECT pg_advisory_lock(123456789)`)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "acquire advisory lock:", err)
+		os.Exit(1)
+	}
+	defer func() {
+		pool.Exec(context.Background(), `SELECT pg_advisory_unlock(123456789)`)
+	}()
+
 	migs, err := loadMigrations(migrationsDir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "load migrations:", err)
@@ -59,14 +74,14 @@ func main() {
 	}
 
 	for _, m := range migs {
-		if applied[m.Version] {
+		if applied[m.ID] {
 			continue
 		}
 		if err := applyOne(ctx, pool, m); err != nil {
-			fmt.Fprintln(os.Stderr, "apply migration", m.Version, ":", err)
+			fmt.Fprintln(os.Stderr, "apply migration", m.ID, ":", err)
 			os.Exit(1)
 		}
-		fmt.Println("applied", m.Version)
+		fmt.Println("applied", m.ID)
 	}
 
 	fmt.Println("migrations ok")
@@ -91,11 +106,11 @@ func loadApplied(ctx context.Context, pool *pgxpool.Pool) (map[string]bool, erro
 
 	out := map[string]bool{}
 	for rows.Next() {
-		var v string
-		if err := rows.Scan(&v); err != nil {
+		var id string
+		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
-		out[v] = true
+		out[id] = true
 	}
 	return out, rows.Err()
 }
@@ -117,23 +132,38 @@ func loadMigrations(dir string) ([]mig, error) {
 			return err
 		}
 
-		// version = prefix before first _
-		v := name
-		if i := strings.IndexByte(name, '_'); i > 0 {
-			v = name[:i]
-		} else {
-			v = strings.TrimSuffix(name, ".up.sql")
+		base := strings.TrimSuffix(name, ".up.sql") // например "000001_init"
+		seq := 0
+		if m := reSeq.FindStringSubmatch(base); len(m) == 2 {
+			seq, _ = strconv.Atoi(m[1])
 		}
 
-		files = append(files, mig{Version: v, Path: p, SQL: b})
+		files = append(files, mig{
+			ID:   base,
+			Seq:  seq,
+			Path: p,
+			SQL:  b,
+		})
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
+	// проверка на дубликаты ID (важно)
+	seen := map[string]bool{}
+	for _, m := range files {
+		if seen[m.ID] {
+			return nil, fmt.Errorf("duplicate migration id: %s", m.ID)
+		}
+		seen[m.ID] = true
+	}
+
 	sort.Slice(files, func(i, j int) bool {
-		return files[i].Path < files[j].Path
+		if files[i].Seq != files[j].Seq {
+			return files[i].Seq < files[j].Seq
+		}
+		return files[i].ID < files[j].ID
 	})
 	return files, nil
 }
@@ -149,7 +179,7 @@ func applyOne(ctx context.Context, pool *pgxpool.Pool, m mig) error {
 		return fmt.Errorf("sql exec: %w", err)
 	}
 
-	if _, err := tx.Exec(ctx, `INSERT INTO schema_migrations(version) VALUES ($1)`, m.Version); err != nil {
+	if _, err := tx.Exec(ctx, `INSERT INTO schema_migrations(version) VALUES ($1)`, m.ID); err != nil {
 		return fmt.Errorf("insert schema_migrations: %w", err)
 	}
 
