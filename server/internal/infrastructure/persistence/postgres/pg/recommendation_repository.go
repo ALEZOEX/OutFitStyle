@@ -99,16 +99,18 @@ func (r *RecommendationRepository) createWithSessionInternal(ctx context.Context
 	}
 
 	// Insert recommendation items
-	for _, item := range items {
+	for i, item := range items {
 		var score *float64
 		if item.Score != nil {
 			score = item.Score
 		}
 
+		rank := i + 1 // Устанавливаем ранг на основе порядка в массиве
+
 		_, err = tx.Exec(ctx, `
 			INSERT INTO recommendation_items (
 				id, recommendation_id, clothing_item_id, category, source, is_from_wardrobe, alternatives_json, session_id, score, rank
-			) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, 0)
+			) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9)
 			ON CONFLICT (recommendation_id, clothing_item_id)
 			DO UPDATE SET
 				category = EXCLUDED.category,
@@ -116,9 +118,10 @@ func (r *RecommendationRepository) createWithSessionInternal(ctx context.Context
 				is_from_wardrobe = EXCLUDED.is_from_wardrobe,
 				alternatives_json = EXCLUDED.alternatives_json,
 				session_id = EXCLUDED.session_id,
-				score = EXCLUDED.score
+				score = EXCLUDED.score,
+				rank = EXCLUDED.rank
 		`,
-			recID, item.ClothingItemID, item.Category, item.Source, item.IsFromWardrobe, item.AlternativesJSON, sessionID, score)
+			recID, item.ClothingItemID, item.Category, item.Source, item.IsFromWardrobe, item.AlternativesJSON, sessionID, score, rank)
 		if err != nil {
 			return domain.NilID, fmt.Errorf("failed to insert recommendation item: %w", err)
 		}

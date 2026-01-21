@@ -38,6 +38,17 @@ func (h *RecommendationHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/{id}/regenerate", h.Regenerate).Methods(http.MethodPost)
 }
 
+// @Summary Create recommendation
+// @Description Creates a new recommendation based on user preferences and weather
+// @Tags recommendations
+// @Accept json
+// @Produce json
+// @Param request body domain.RecommendationCreateRequest true "Recommendation request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/recommendations [post]
 func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
