@@ -1,5 +1,7 @@
 //go:build integration
 
+// Пакет integration_test содержит интеграционные тесты для приложения
+// Эти тесты проверяют работу системы в целом, включая взаимодействие с базой данных
 package integration_test
 
 import (
@@ -28,6 +30,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// TestSmoke_AuthWardrobeRecommendation выполняет сквозной тест аутентификации, создания гардероба и получения рекомендаций
+// Тест проверяет полный цикл работы приложения: регистрация пользователя, добавление вещей в гардероб, получение рекомендаций
 func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
@@ -36,7 +40,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 
 	logger := zap.NewNop()
 
-	// Apply migrations (idempotent)
+	// Применяем миграции (идемпотентная операция)
 	if err := applyMigrations(t, dsn, filepath.Join(".", "migrations")); err != nil {
 		t.Fatalf("apply migrations: %v", err)
 	}
@@ -47,7 +51,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	}
 	defer db.Close()
 
-	// Stub OpenWeather
+	// Создаем заглушку OpenWeather API для тестирования
 	weatherSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/weather") {
 			_ = json.NewEncoder(w).Encode(map[string]any{
@@ -77,7 +81,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	}))
 	defer weatherSrv.Close()
 
-	// Stub ML rank
+	// Создаем заглушку ML сервиса для тестирования
 	mlSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/api/v1/rank" {
 			http.NotFound(w, r)
@@ -104,7 +108,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 				rankings[cat] = []any{}
 				continue
 			}
-			// pick first
+			// выбираем первый элемент
 			rankings[cat] = []any{
 				map[string]any{
 					"id":         ids[0],
@@ -254,6 +258,8 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	doJSON(t, srv.URL+"/api/v1/recommendations/"+recID+"/rate", access, map[string]any{"rating": 5})
 }
 
+// doJSON отправляет JSON-запрос на указанный URL с токеном доступа
+// Используется для тестирования API-эндпоинтов, требующих авторизации
 func doJSON(t *testing.T, url string, accessToken string, body any) map[string]any {
 	t.Helper()
 	b, _ := json.Marshal(body)
@@ -275,6 +281,8 @@ func doJSON(t *testing.T, url string, accessToken string, body any) map[string]a
 	return out
 }
 
+// doGET отправляет GET-запрос на указанный URL с токеном доступа
+// Используется для тестирования GET-эндпоинтов, требующих авторизации
 func doGET(t *testing.T, url string, accessToken string) map[string]any {
 	t.Helper()
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
@@ -294,13 +302,15 @@ func doGET(t *testing.T, url string, accessToken string) map[string]any {
 	return out
 }
 
+// applyMigrations применяет миграции к базе данных
+// Используется для подготовки тестовой базы данных перед запуском интеграционных тестов
 func applyMigrations(t *testing.T, dsn, dir string) error {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	pool, err := dbpg.NewPGXPool(ctx, dsn) // см. helper below
+	pool, err := dbpg.NewPGXPool(ctx, dsn) // см. helper ниже
 	if err != nil {
 		return err
 	}

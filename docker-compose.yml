@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-outfitstyle}
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -82,26 +82,26 @@ services:
       - DATABASE_MAX_IDLE_CONNECTIONS=10
       - REDIS_URL=redis://redis:6379
       - REDIS_PASSWORD=
-      - JWT_SECRET=${JWT_SECRET:-V2hhdCB3ZSBnb3QgaGVyZSwgYSBkYW5nZXJvdXMgbW9udGggb2YgY29kZQo6}
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_ACCESS_TOKEN_TTL=15m
       - JWT_REFRESH_TOKEN_TTL=720h
       - CORS_ALLOWED_ORIGINS=*
       - RATE_LIMIT_PER_MINUTE=100
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - ML_SERVICE_URL=http://ml-service:8000
       - ML_SERVICE_TIMEOUT=30s
-      - WEATHER_API_KEY=${WEATHER_API_KEY:-8e9f1a366923ec63437f21570c89fa17}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
       - OPENWEATHER_CACHE_TTL=10m
       - OPENWEATHER_BASE_URL=https://api.openweathermap.org/data/2.5
       - WEATHER_PROVIDER=openweather
       - OPENMETEO_BASE_URL=https://api.open-meteo.com
       - SMTP_HOST=smtp.gmail.com
       - SMTP_PORT=587
-      - SMTP_USER=${SMTP_USER:-OutFitStyle.official.app@gmail.com}
-      - SMTP_PASSWORD=${SMTP_PASSWORD:-bkvf huqi umeb zipd}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
       - FROM_EMAIL=noreply@outfitstyle.com
       - SENTRY_DSN=
-      - ADMIN_API_KEY=dev-admin-key
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
       - FEATURE_PARTNER_CATALOG=true
       - FEATURE_AB_TESTING=true
       - FEATURE_ACHIEVEMENTS=true

@@ -1,3 +1,5 @@
+// Пакет http предоставляет вспомогательные функции для работы с HTTP-ответами
+// Содержит функции для формирования стандартных ответов и ошибок
 package http
 
 import (
@@ -8,7 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// CORSMiddleware настраивает CORS заголовки
+// CORSMiddleware настраивает CORS заголовки для обеспечения безопасности
+// Позволяет контролировать, какие домены могут обращаться к API
 func CORSMiddleware(allowedOrigins []string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +39,8 @@ func CORSMiddleware(allowedOrigins []string) mux.MiddlewareFunc {
 	}
 }
 
-// LoggerMiddleware логирует все запросы
+// LoggerMiddleware логирует все HTTP-запросы для мониторинга и отладки
+// Записывает метод, путь, продолжительность и статус ответа
 func LoggerMiddleware(logger *zap.Logger) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -57,11 +61,13 @@ func LoggerMiddleware(logger *zap.Logger) mux.MiddlewareFunc {
 }
 
 // responseWriter обертка вокруг http.ResponseWriter для захвата статус-кода
+// Используется в логирующем middleware для записи статуса ответа
 type responseWriter struct {
 	http.ResponseWriter
 	statusCode int
 }
 
+// WriteHeader переопределяет метод WriteHeader для захвата статус-кода
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.statusCode = code
 	rw.ResponseWriter.WriteHeader(code)

@@ -44,7 +44,7 @@ RUN mkdir -p /app/api/models && \
     fi
 
 # Expose port
-EXPOSE 5000
+EXPOSE 8000
 
 # Add the app directory to PYTHONPATH so that contracts module can be found
 ENV PYTHONPATH=/app:$PYTHONPATH
