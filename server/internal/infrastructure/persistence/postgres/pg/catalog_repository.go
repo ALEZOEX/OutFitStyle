@@ -42,3 +42,28 @@ func (r *CatalogRepository) DeleteItem(ctx context.Context, itemID domain.ID) er
 	// TODO: Implement
 	return fmt.Errorf("not implemented")
 }
+
+func (r *CatalogRepository) Search(ctx context.Context, p repositories.CatalogSearchParams) (items []domain.ClothingItem, total int, err error) {
+	// TODO: Implement
+	return nil, 0, fmt.Errorf("not implemented")
+}
+
+func (r *CatalogRepository) Categories(ctx context.Context) (any, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *CatalogRepository) GetItem(ctx context.Context, id domain.ID) (*domain.ClothingItem, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *CatalogRepository) Similar(ctx context.Context, id domain.ID, limit int) ([]domain.ClothingItem, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *CatalogRepository) Click(ctx context.Context, userID *domain.ID, itemID domain.ID) (string, error) {
+	// TODO: Implement
+	return "", fmt.Errorf("not implemented")
+}

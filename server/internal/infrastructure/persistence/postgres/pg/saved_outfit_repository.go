@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -28,17 +27,32 @@ func (r *SavedOutfitRepository) GetByID(ctx context.Context, outfitID domain.ID)
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (r *SavedOutfitRepository) Create(ctx context.Context, outfit *domain.SavedOutfit) error {
+func (r *SavedOutfitRepository) List(ctx context.Context, userID domain.ID) ([]domain.SavedOutfit, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SavedOutfitRepository) Create(ctx context.Context, userID domain.ID, req domain.SavedOutfitCreateRequest) (*domain.SavedOutfit, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SavedOutfitRepository) Get(ctx context.Context, userID domain.ID, id domain.ID) (*domain.SavedOutfit, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SavedOutfitRepository) Update(ctx context.Context, userID domain.ID, id domain.ID, req domain.SavedOutfitUpdateRequest) (*domain.SavedOutfit, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SavedOutfitRepository) Delete(ctx context.Context, userID domain.ID, id domain.ID) error {
 	// TODO: Implement
 	return fmt.Errorf("not implemented")
 }
 
-func (r *SavedOutfitRepository) Update(ctx context.Context, outfit *domain.SavedOutfit) error {
+func (r *SavedOutfitRepository) MarkWorn(ctx context.Context, userID domain.ID, id domain.ID) (*domain.SavedOutfit, error) {
 	// TODO: Implement
-	return fmt.Errorf("not implemented")
-}
-
-func (r *SavedOutfitRepository) Delete(ctx context.Context, outfitID domain.ID) error {
-	// TODO: Implement
-	return fmt.Errorf("not implemented")
+	return nil, fmt.Errorf("not implemented")
 }

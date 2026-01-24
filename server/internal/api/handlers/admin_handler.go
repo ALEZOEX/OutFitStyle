@@ -43,12 +43,6 @@ func (h *AdminHandler) Users(w http.ResponseWriter, r *http.Request) {
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to list users"))
 		return
 	}
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 50
-	}
 
 	resp.Success(w, map[string]any{
 		"users":      items,
@@ -66,12 +60,6 @@ func (h *AdminHandler) Audit(w http.ResponseWriter, r *http.Request) {
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to list audit logs"))
 		return
 	}
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 50
-	}
 
 	resp.Success(w, map[string]any{
 		"audit":      items,
@@ -88,7 +76,14 @@ func (h *AdminHandler) CreatePromo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.svc.CreatePromo(r.Context(), nil, req)
+	// Получаем ID администратора из контекста
+	adminID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		resp.Error(w, http.StatusUnauthorized, errors.New("admin authentication required"))
+		return
+	}
+
+	id, err := h.svc.CreatePromo(r.Context(), &adminID, req)
 	if err != nil {
 		resp.Error(w, http.StatusBadRequest, err)
 		return

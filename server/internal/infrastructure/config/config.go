@@ -52,7 +52,7 @@ type WeatherAPIConfig struct {
 }
 
 type MLServiceConfig struct {
-	BaseURL string `env:"ML_SERVICE_URL" default:"http://localhost:5000"`
+	BaseURL string `env:"ML_SERVICE_URL" default:"http://ml-service:8000"`
 	Timeout int    `env:"ML_SERVICE_TIMEOUT" default:"30"` // seconds
 }
 

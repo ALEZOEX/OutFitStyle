@@ -17,19 +17,21 @@ import (
 	"outfitstyle/server/internal/infrastructure/external"
 )
 
+// RecommendationService сервис для рекомендаций одежды
 type RecommendationService struct {
-	recRepo         repositories.RecommendationRepository
-	clothingRepo    repositories.ClothingRepository
-	userRepo        repositories.UserRepository
-	personalization repositories.PersonalizationRepository
+	recRepo         repositories.RecommendationRepository      // Репозиторий рекомендаций
+	clothingRepo    repositories.ClothingRepository           // Репозиторий одежды
+	userRepo        repositories.UserRepository               // Репозиторий пользователей
+	personalization repositories.PersonalizationRepository    // Репозиторий персонализации
 
-	weather *external.WeatherService
-	ml      *external.MLClient
+	weather *external.WeatherService  // Сервис погоды
+	ml      *external.MLClient       // ML-клиент
 
-	fallback *FallbackRanker
-	logger   *zap.Logger
+	fallback *FallbackRanker  // Резервный ранжировщик
+	logger   *zap.Logger      // Логгер
 }
 
+// NewRecommendationService создает новый экземпляр сервиса рекомендаций
 func NewRecommendationService(
 	recRepo repositories.RecommendationRepository,
 	clothingRepo repositories.ClothingRepository,
@@ -51,18 +53,21 @@ func NewRecommendationService(
 	}
 }
 
+// rankedLite структура для ранжированного элемента
 type rankedLite struct {
-	ID         domain.ID
-	Score      float64
-	Confidence float64
+	ID         domain.ID  // Идентификатор
+	Score      float64    // Оценка
+	Confidence float64    // Уверенность
 }
 
+// altItem структура альтернативного элемента
 type altItem struct {
-	ID         string  `json:"id"`
-	Score      float64 `json:"score"`
-	Confidence float64 `json:"confidence"`
+	ID         string  `json:"id"`      // Идентификатор
+	Score      float64 `json:"score"`   // Оценка
+	Confidence float64 `json:"confidence"` // Уверенность
 }
 
+// Create создает новую рекомендацию
 func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, req domain.RecommendationCreateRequest) (*domain.RecommendationRecord, error) {
 	lat := req.Latitude
 	lon := req.Longitude
@@ -70,19 +75,19 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 	if lat == nil || lon == nil {
 		dLat, dLon, err := s.userRepo.GetDefaultCoords(ctx, userID)
 		if err != nil {
-			return nil, errors.Wrap(err, "load user default coords")
+			return nil, errors.Wrap(err, "загрузка координат пользователя по умолчанию")
 		}
 		lat = dLat
 		lon = dLon
 	}
 
 	if lat == nil || lon == nil {
-		return nil, errors.New("latitude/longitude are required (set location in profile)")
+		return nil, errors.New("широта/долгота обязательны (установите местоположение в профиле)")
 	}
 
 	ws, _, err := s.weather.GetCurrent(ctx, *lat, *lon)
 	if err != nil {
-		return nil, errors.Wrap(err, "get weather")
+		return nil, errors.Wrap(err, "получение погоды")
 	}
 	weatherJSON, _ := json.Marshal(ws)
 
@@ -91,7 +96,7 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 	wardrobeLite, _ := s.clothingRepo.ListWardrobeCandidatesLite(ctx, userID, 140)
 	catalogLite, _ := s.clothingRepo.ListCatalogCandidatesLite(ctx, includePartners, 140)
 
-	// dedup and cap to 250
+	// удаление дубликатов и ограничение до 250
 	candByID := make(map[domain.ID]domain.CandidateLite, 250)
 	add := func(c domain.CandidateLite) {
 		if len(candByID) >= 250 {
@@ -146,7 +151,7 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 
 	_, err = s.recRepo.CreateWithSession(ctx, session, rec, itemsCreate)
 	if err != nil {
-		return nil, errors.Wrap(err, "save recommendation with session")
+		return nil, errors.Wrap(err, "сохранение рекомендации с сессией")
 	}
 
 	return rec, nil
@@ -171,7 +176,7 @@ func (s *RecommendationService) Regenerate(
 		return nil, repositories.ErrNotFound
 	}
 
-	// weather snapshot: используем старый (консистентность), иначе fallback на запрос погоды
+	// снимок погоды: используем старый (консистентность), иначе fallback на запрос погоды
 	var ws domain.WeatherSnapshot
 	if len(oldRec.WeatherData) > 0 {
 		_ = json.Unmarshal(oldRec.WeatherData, &ws)
@@ -296,7 +301,7 @@ func (s *RecommendationService) Regenerate(
 		}
 
 		modelVersion, processingMs, styleC, colorH, rankings = s.rankLiteOrFallback(ctx, userID, ws, occasion, style, formality, candidates, excluded)
-		// quickChosen мы можем “заблокировать” то, что удалось заменить ранее (оставим как есть)
+		// quickChosen мы можем "заблокировать" то, что удалось заменить ранее (оставим как есть)
 		for cat, id := range quickChosen {
 			// ничего, если id не в рейтинге — мы подгрузим item напрямую
 			_ = cat
@@ -322,8 +327,8 @@ func (s *RecommendationService) Regenerate(
 		return s.persistRegenerated(ctx, userID, oldRec, weatherJSON, modelVersion, processingMs, styleC, colorH, rankings, finalChosen, excluded, wardrobeLite)
 	}
 
-	// Если quickChosen полностью достаточно — сохраним “быструю” regen без rerank:
-	// для alternatives пересчитаем их “как есть”: возьмём старые alternatives, выкинем exclude и выбранный.
+	// Если quickChosen полностью достаточно — сохраним "быструю" regen без rerank:
+	// для alternatives пересчитаем их "как есть": возьмём старые alternatives, выкинем exclude и выбранный.
 	finalChosen := map[string]domain.ID{}
 	for _, cat := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {
 		if id, ok := quickChosen[cat]; ok && !excluded[id] {
@@ -334,6 +339,7 @@ func (s *RecommendationService) Regenerate(
 	return s.persistRegeneratedQuick(ctx, userID, oldRec, weatherJSON, finalChosen, excluded)
 }
 
+// persistRegeneratedQuick сохраняет быструю регенерацию рекомендации
 func (s *RecommendationService) persistRegeneratedQuick(
 	ctx context.Context,
 	userID domain.ID,
@@ -343,7 +349,7 @@ func (s *RecommendationService) persistRegeneratedQuick(
 	excluded map[domain.ID]bool,
 ) (*domain.RecommendationRecord, error) {
 
-	// load full items only for chosen
+	// загружаем полные элементы только для выбранных
 	chosenIDs := make([]domain.ID, 0, len(finalChosen))
 	for _, cat := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {
 		if id, ok := finalChosen[cat]; ok {
@@ -446,6 +452,7 @@ func (s *RecommendationService) persistRegeneratedQuick(
 	return rec, nil
 }
 
+// persistRegenerated сохраняет регенерированную рекомендацию
 func (s *RecommendationService) persistRegenerated(
 	ctx context.Context,
 	userID domain.ID,
@@ -461,7 +468,7 @@ func (s *RecommendationService) persistRegenerated(
 	wardrobeLite []domain.CandidateLite,
 ) (*domain.RecommendationRecord, error) {
 
-	// fetch full items only for chosen
+	// загружаем полные элементы только для выбранных
 	chosenIDs := make([]domain.ID, 0, len(finalChosen))
 	for _, cat := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {
 		if id, ok := finalChosen[cat]; ok && !excluded[id] {
@@ -477,7 +484,7 @@ func (s *RecommendationService) persistRegenerated(
 		fullByID[it.ID] = it
 	}
 
-	// wardrobe set for is_from_wardrobe (по wardrobeLite)
+	// множество гардероба для is_from_wardrobe (по wardrobeLite)
 	wardrobeSet := map[domain.ID]bool{}
 	for _, w := range wardrobeLite {
 		wardrobeSet[w.ID] = true
@@ -610,7 +617,7 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 	lon *float64,
 ) (*domain.RecommendationRecord, []repositories.RecommendationItemCreate, error) {
 
-	// chosen per category
+	// выбранные по категории
 	finalChosen := map[string]domain.ID{}
 	for _, cat := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {
 		list := rankings[cat]
@@ -620,7 +627,7 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 		finalChosen[cat] = list[0].ID
 	}
 
-	// fetch full items only for chosen
+	// загружаем полные элементы только для выбранных
 	chosenIDs := make([]domain.ID, 0, len(finalChosen))
 	for _, cat := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {
 		if id, ok := finalChosen[cat]; ok {
@@ -629,7 +636,7 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 	}
 	fullItems, err := s.clothingRepo.GetByIDs(ctx, chosenIDs)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "load chosen items")
+		return nil, nil, errors.Wrap(err, "загрузка выбранных элементов")
 	}
 	fullByID := map[domain.ID]domain.ClothingItem{}
 	for _, it := range fullItems {
@@ -699,7 +706,7 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 		outfitScore = total / float64(n)
 	}
 
-	// tips: cold start если wardrobe пустой
+	// советы: холодный старт если гардероб пустой
 	tips := []string{}
 	if len(wardrobeLite) == 0 {
 		tips = append(tips, "Добавьте 5–10 вещей в гардероб — так рекомендации станут точнее.")
@@ -737,11 +744,12 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 		IsFavorite: false,
 	}
 
-	_ = candByID // kept for possible future use
+	_ = candByID // сохранено для возможного будущего использования
 
 	return rec, itemCreates, nil
 }
 
+// regenTips возвращает советы для регенерации
 func regenTips(oldRec *domain.RecommendationRecord, chosenCount int) []string {
 	tips := []string{}
 	if chosenCount < 4 {
@@ -774,7 +782,7 @@ func (s *RecommendationService) rankLiteOrFallback(
 	high, low, _ := s.personalization.GetRatedItems(ctx, userID, 4, 2, 50)
 	styleDist, _ := s.personalization.GetStyleDistribution(ctx, userID, 200)
 
-	// Получаем timezone пользователя и определяем время суток
+	// Получаем часовой пояс пользователя и определяем время суток
 	tz, _ := s.userRepo.GetUserTimezone(ctx, userID)
 	timeOfDay := TimeOfDayInTZ(time.Now(), tz)
 
@@ -881,7 +889,7 @@ func (s *RecommendationService) rankLiteOrFallback(
 
 	sessionID, err := s.recRepo.CreateSession(ctx, session)
 	if err != nil {
-		s.logger.Error("Failed to create recommendation session", zap.Error(err))
+		s.logger.Error("Не удалось создать сессию рекомендации", zap.Error(err))
 		// Продолжаем без сессии
 		sessionID = domain.NewID() // Используем временный ID
 	}
@@ -893,7 +901,7 @@ func (s *RecommendationService) rankLiteOrFallback(
 	mlResp, err := s.ml.Rank(ctx, mlReq)
 	if err != nil {
 		// ЛОГ ОШИБКИ ML:
-		s.logger.Warn("ML rank failed, using fallback", zap.Error(err))
+		s.logger.Warn("ML ранжирование не удалось, используем резервный вариант", zap.Error(err))
 	}
 	if err == nil {
 		modelVersion = mlResp.ModelVersion
@@ -914,7 +922,7 @@ func (s *RecommendationService) rankLiteOrFallback(
 		return
 	}
 
-	s.logger.Warn("ML rank failed, using fallback", zap.Error(err))
+	s.logger.Warn("ML ранжирование не удалось, используем резервный вариант", zap.Error(err))
 	processingMs = int(time.Since(start).Milliseconds())
 
 	byCat := map[string][]rankedLite{}
@@ -942,6 +950,7 @@ func (s *RecommendationService) rankLiteOrFallback(
 	return
 }
 
+// preferredStyleList возвращает список предпочтительных стилей
 func preferredStyleList(style string) []string {
 	style = strings.TrimSpace(style)
 	if style == "" {
@@ -950,6 +959,7 @@ func preferredStyleList(style string) []string {
 	return []string{style}
 }
 
+// fallbackScoreLite вычисляет резервную оценку
 func fallbackScoreLite(w domain.WeatherSnapshot, requestedStyle string, c domain.CandidateLite) float64 {
 	score := 0.0
 	score += tempMatchScoreLite(w.Temperature, c) * 0.55
@@ -999,6 +1009,7 @@ func fallbackScoreLite(w domain.WeatherSnapshot, requestedStyle string, c domain
 	return score
 }
 
+// tempMatchScoreLite вычисляет оценку соответствия температуре
 func tempMatchScoreLite(temp float64, c domain.CandidateLite) float64 {
 	if c.MinTemp != nil && c.MaxTemp != nil && *c.MinTemp <= *c.MaxTemp {
 		minT := float64(*c.MinTemp)
@@ -1028,6 +1039,7 @@ func tempMatchScoreLite(temp float64, c domain.CandidateLite) float64 {
 	return v
 }
 
+// recommendationServiceDesiredWarmth вычисляет желаемый уровень тепла
 func recommendationServiceDesiredWarmth(temp float64) float64 {
 	if temp <= -20 {
 		return 10
@@ -1038,12 +1050,15 @@ func recommendationServiceDesiredWarmth(temp float64) float64 {
 	return 10 - ((temp+20)/50.0)*9
 }
 
+// valInt возвращает значение или значение по умолчанию
 func valInt(p *int, def int) int {
 	if p == nil {
 		return def
 	}
 	return *p
 }
+
+// valStr возвращает значение или значение по умолчанию
 func valStr(p *string, def string) string {
 	if p == nil {
 		return def
@@ -1051,6 +1066,7 @@ func valStr(p *string, def string) string {
 	return *p
 }
 
+// derefInt разыменовывает указатель или возвращает значение по умолчанию
 func derefInt(p *int, def int) int {
 	if p == nil {
 		return def
@@ -1058,6 +1074,7 @@ func derefInt(p *int, def int) int {
 	return *p
 }
 
+// derefString разыменовывает указатель или возвращает значение по умолчанию
 func derefString(p *string, def string) string {
 	if p == nil {
 		return def
@@ -1066,9 +1083,12 @@ func derefString(p *string, def string) string {
 }
 
 // List/Get/Rate/Favorite — оставляем как в вашем текущем сервисе (из Модуля 19).
+// List возвращает список рекомендаций пользователя
 func (s *RecommendationService) List(ctx context.Context, userID domain.ID, q domain.RecommendationListQuery) ([]domain.RecommendationRecord, int, error) {
 	return s.recRepo.ListByUser(ctx, userID, q)
 }
+
+// Get возвращает рекомендацию по идентификатору
 func (s *RecommendationService) Get(ctx context.Context, userID domain.ID, id domain.ID) (*domain.RecommendationRecord, error) {
 	rec, err := s.recRepo.GetByID(ctx, id)
 	if err != nil {
@@ -1079,9 +1099,11 @@ func (s *RecommendationService) Get(ctx context.Context, userID domain.ID, id do
 	}
 	return rec, nil
 }
+
+// Rate оценивает рекомендацию
 func (s *RecommendationService) Rate(ctx context.Context, userID domain.ID, id domain.ID, rating int, thermal *string, feedback *string) (bool, error) {
 	if rating < 1 || rating > 5 {
-		return false, errors.New("rating must be 1..5")
+		return false, errors.New("оценка должна быть от 1 до 5")
 	}
 
 	changed, err := s.recRepo.SetRating(ctx, userID, id, rating, thermal, feedback)
@@ -1108,6 +1130,8 @@ func (s *RecommendationService) Rate(ctx context.Context, userID domain.ID, id d
 
 	return changed, err
 }
+
+// SetFavorite устанавливает/снимает статус избранного для рекомендации
 func (s *RecommendationService) SetFavorite(ctx context.Context, userID domain.ID, id domain.ID, fav bool) error {
 	err := s.recRepo.SetFavorite(ctx, userID, id, fav)
 	if err != nil {
@@ -1130,6 +1154,8 @@ func (s *RecommendationService) SetFavorite(ctx context.Context, userID domain.I
 
 	return nil
 }
+
+// Favorites возвращает избранные рекомендации пользователя
 func (s *RecommendationService) Favorites(ctx context.Context, userID domain.ID, limit int) ([]domain.RecommendationRecord, error) {
 	return s.recRepo.ListFavorites(ctx, userID, limit)
 }
@@ -1137,7 +1163,7 @@ func (s *RecommendationService) Favorites(ctx context.Context, userID domain.ID,
 // SendUserAction отправляет действие пользователя в ML сервис для обучения Ranker
 func (s *RecommendationService) SendUserAction(ctx context.Context, userID domain.ID, requestID string, actionType string, entityID string, entityType string, meta map[string]interface{}) error {
 	if s.ml == nil {
-		s.logger.Warn("ML client is not configured, skipping action logging")
+		s.logger.Warn("ML клиент не настроен, пропускаем логирование действий")
 		return nil
 	}
 
@@ -1152,7 +1178,7 @@ func (s *RecommendationService) SendUserAction(ctx context.Context, userID domai
 
 	_, err := s.ml.SendAction(ctx, actionReq)
 	if err != nil {
-		s.logger.Error("Failed to send user action to ML service",
+		s.logger.Error("Не удалось отправить действие пользователя в ML сервис",
 			zap.Error(err),
 			zap.String("request_id", requestID),
 			zap.String("user_id", userID.String()),
@@ -1160,7 +1186,7 @@ func (s *RecommendationService) SendUserAction(ctx context.Context, userID domai
 		return err
 	}
 
-	s.logger.Info("User action sent to ML service",
+	s.logger.Info("Действие пользователя отправлено в ML сервис",
 		zap.String("request_id", requestID),
 		zap.String("user_id", userID.String()),
 		zap.String("action_type", actionType))

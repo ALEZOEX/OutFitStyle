@@ -133,7 +133,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 			Environment: "test",
 		},
 		Security: config.SecurityConfig{
-			JWTSecret:          "test-secret-test-secret-test-secret-test-secret",
+			JWTSecret:          "test-jwt-secret-change-in-production-123456",
 			AccessTokenTTL:     15 * time.Minute,
 			RefreshTokenTTL:    24 * time.Hour,
 			CORSAllowedOrigins: []string{"*"},

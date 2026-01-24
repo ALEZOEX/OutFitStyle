@@ -7,7 +7,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -38,4 +37,14 @@ func (r *AchievementRepository) GrantToUser(ctx context.Context, userID domain.I
 func (r *AchievementRepository) GetUserProgress(ctx context.Context, userID domain.ID, achievementCode string) (*domain.AchievementProgress, error) {
 	// TODO: Implement
 	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *AchievementRepository) ListAll(ctx context.Context) ([]domain.Achievement, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *AchievementRepository) ListMy(ctx context.Context, userID domain.ID) (unlocked []domain.Achievement, inProgress []domain.Achievement, totalPoints int, err error) {
+	// TODO: Implement
+	return nil, nil, 0, fmt.Errorf("not implemented")
 }

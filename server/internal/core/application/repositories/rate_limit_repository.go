@@ -5,18 +5,21 @@ import (
 	"time"
 )
 
+// RateLimitViolation структура нарушения лимита запросов
 type RateLimitViolation struct {
-	Identifier     string
-	IdentifierType string // user|ip|apikey
-	Endpoint       string // route template or path
+	Identifier     string  // Идентификатор (ID пользователя, IP-адрес, API-ключ)
+	IdentifierType string  // Тип идентификатора (user|ip|apikey)
+	Endpoint       string  // Конечная точка (шаблон маршрута или путь)
 
-	LimitType    string // global_per_minute|apikey_per_day|...
-	LimitValue   int
-	CurrentValue int
+	LimitType    string  // Тип лимита (global_per_minute|apikey_per_day|...)
+	LimitValue   int     // Значение лимита
+	CurrentValue int     // Текущее значение (превышающее лимит)
 
-	CreatedAt time.Time
+	CreatedAt time.Time  // Дата создания записи
 }
 
+// RateLimitViolationRepository интерфейс репозитория нарушений лимита запросов
 type RateLimitViolationRepository interface {
+	// Record записывает факт нарушения лимита запросов
 	Record(ctx context.Context, v RateLimitViolation) error
 }

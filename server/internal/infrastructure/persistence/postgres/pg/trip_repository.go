@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -28,17 +27,27 @@ func (r *TripRepository) GetByID(ctx context.Context, tripID domain.ID) (*domain
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (r *TripRepository) Create(ctx context.Context, trip *domain.Trip) error {
+func (r *TripRepository) List(ctx context.Context, userID domain.ID) ([]domain.Trip, error) {
 	// TODO: Implement
-	return fmt.Errorf("not implemented")
+	return nil, fmt.Errorf("not implemented")
 }
 
-func (r *TripRepository) Update(ctx context.Context, trip *domain.Trip) error {
+func (r *TripRepository) Create(ctx context.Context, userID domain.ID, req domain.TripCreateRequest) (*domain.Trip, error) {
 	// TODO: Implement
-	return fmt.Errorf("not implemented")
+	return nil, fmt.Errorf("not implemented")
 }
 
-func (r *TripRepository) Delete(ctx context.Context, tripID domain.ID) error {
+func (r *TripRepository) Get(ctx context.Context, userID domain.ID, id domain.ID) (*domain.Trip, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *TripRepository) Update(ctx context.Context, userID domain.ID, id domain.ID, req domain.TripUpdateRequest) (*domain.Trip, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *TripRepository) Delete(ctx context.Context, userID domain.ID, id domain.ID) error {
 	// TODO: Implement
 	return fmt.Errorf("not implemented")
 }

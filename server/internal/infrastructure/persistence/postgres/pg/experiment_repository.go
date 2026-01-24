@@ -42,3 +42,23 @@ func (r *ExperimentRepository) AssignUserToVariant(ctx context.Context, userID d
 	// TODO: Implement
 	return fmt.Errorf("not implemented")
 }
+
+func (r *ExperimentRepository) GetRunningByName(ctx context.Context, name string) (*repositories.Experiment, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *ExperimentRepository) GetAssignment(ctx context.Context, experimentID domain.ID, userID domain.ID) (*repositories.ExperimentAssignment, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *ExperimentRepository) CreateAssignment(ctx context.Context, experimentID domain.ID, userID domain.ID, variant string) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *ExperimentRepository) RecordEvent(ctx context.Context, experimentID domain.ID, userID domain.ID, variant string, eventName string, eventValue *float64, eventData []byte) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}

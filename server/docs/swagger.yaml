@@ -1,0 +1,779 @@
+basePath: /api/v1
+definitions:
+  internal_api_handlers.deleteAccountBody:
+    properties:
+      feedback:
+        type: string
+      password:
+        type: string
+      reason:
+        type: string
+    type: object
+  internal_api_handlers.googleSignInRequest:
+    properties:
+      id_token:
+        type: string
+    type: object
+  internal_api_handlers.logoutRequest:
+    properties:
+      all_devices:
+        type: boolean
+    type: object
+  internal_api_handlers.refreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  internal_pkg_health.CheckResult:
+    properties:
+      error:
+        type: string
+      latency:
+        type: string
+      status:
+        type: string
+    type: object
+  internal_pkg_health.HealthStatus:
+    properties:
+      checks:
+        additionalProperties:
+          $ref: '#/definitions/internal_pkg_health.CheckResult'
+        type: object
+      status:
+        type: string
+      timestamp:
+        type: string
+      version:
+        type: string
+    type: object
+  outfitstyle_server_internal_core_domain.BodyMeasurements:
+    properties:
+      height:
+        type: integer
+      sizes:
+        properties:
+          bottom:
+            type: string
+          shoes:
+            type: string
+          size_system:
+            description: EU/US/UK/RU
+            type: string
+          top:
+            type: string
+        type: object
+      weight:
+        type: integer
+    type: object
+  outfitstyle_server_internal_core_domain.RecommendationCreateRequest:
+    properties:
+      formality:
+        type: integer
+      include_partner_items:
+        type: boolean
+      latitude:
+        type: number
+      location:
+        type: string
+      longitude:
+        type: number
+      occasion:
+        type: string
+      style:
+        type: string
+    type: object
+  outfitstyle_server_internal_core_domain.UserLogin:
+    properties:
+      device_id:
+        type: string
+      device_name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  outfitstyle_server_internal_core_domain.UserPreferences:
+    properties:
+      avoid_colors:
+        items:
+          type: string
+        type: array
+      avoid_styles:
+        items:
+          type: string
+        type: array
+      color_preferences:
+        items:
+          type: string
+        type: array
+      formality_default:
+        type: integer
+      morning_reminder_time:
+        description: '"08:00"'
+        type: string
+      notifications_enabled:
+        type: boolean
+      preferred_categories:
+        items:
+          type: string
+        type: array
+      preferred_styles:
+        items:
+          type: string
+        type: array
+      temperature_sensitivity:
+        type: integer
+      weekly_digest:
+        type: boolean
+    type: object
+  outfitstyle_server_internal_core_domain.UserProfileUpdate:
+    properties:
+      avatar_url:
+        type: string
+      birth_date:
+        description: ISO date YYYY-MM-DD (упростим в handler)
+        type: string
+      default_latitude:
+        type: number
+      default_location:
+        type: string
+      default_longitude:
+        type: number
+      display_name:
+        type: string
+      gender:
+        type: string
+      locale:
+        type: string
+      timezone:
+        type: string
+    type: object
+  outfitstyle_server_internal_core_domain.UserRegistration:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      locale:
+        type: string
+      password:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: OutfitStyle API
+  version: "1.0"
+paths:
+  /api/v1/recommendations:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new recommendation based on user preferences and weather
+      parameters:
+      - description: Recommendation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/outfitstyle_server_internal_core_domain.RecommendationCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create recommendation
+      tags:
+      - recommendations
+  /auth/google:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user using Google OAuth ID token
+      parameters:
+      - description: Google authentication data
+        in: body
+        name: google_auth
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.googleSignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Sign in with Google
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: User login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/outfitstyle_server_internal_core_domain.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout the authenticated user, optionally from all devices
+      parameters:
+      - description: Logout options
+        in: body
+        name: logout_data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.logoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Logout user
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh the access token using a refresh token
+      parameters:
+      - description: Refresh token request
+        in: body
+        name: refresh_request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.refreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user account with email and password
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/outfitstyle_server_internal_core_domain.UserRegistration'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /auth/validate:
+    post:
+      consumes:
+      - application/json
+      description: Validate the provided authentication token and return user information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Validate authentication token
+      tags:
+      - auth
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает состояние сервиса и его зависимостей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_pkg_health.HealthStatus'
+      summary: Проверка состояния сервиса
+      tags:
+      - health
+  /user/account:
+    delete:
+      consumes:
+      - application/json
+      description: Permanently delete the authenticated user's account
+      parameters:
+      - description: Deletion data including password
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.deleteAccountBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user account
+      tags:
+      - users
+  /user/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a new avatar image for the authenticated user
+      parameters:
+      - description: Avatar image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload user avatar
+      tags:
+      - users
+  /user/body:
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's body measurements
+      parameters:
+      - description: Body measurement data
+        in: body
+        name: body_measurement
+        required: true
+        schema:
+          $ref: '#/definitions/outfitstyle_server_internal_core_domain.BodyMeasurements'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update user's body measurements
+      tags:
+      - users
+  /user/export:
+    get:
+      description: Export the authenticated user's data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Export user data
+      tags:
+      - users
+  /user/preferences:
+    get:
+      description: Retrieve the authenticated user's preferences
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user preferences
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's preferences
+      parameters:
+      - description: Updated preferences
+        in: body
+        name: preferences
+        required: true
+        schema:
+          $ref: '#/definitions/outfitstyle_server_internal_core_domain.UserPreferences'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update user preferences
+      tags:
+      - users
+  /user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the authenticated user's profile information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get current user's profile
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's profile information
+      parameters:
+      - description: Profile update data
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/outfitstyle_server_internal_core_domain.UserProfileUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update current user's profile
+      tags:
+      - users
+  /user/sessions:
+    get:
+      description: Retrieve all active sessions for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user sessions
+      tags:
+      - users
+  /user/sessions/{session_id}:
+    delete:
+      description: Revoke a specific session for the authenticated user
+      parameters:
+      - description: Session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user session
+      tags:
+      - users
+swagger: "2.0"

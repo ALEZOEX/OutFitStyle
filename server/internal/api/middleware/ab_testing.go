@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"outfitstyle/server/internal/core/application/services"
+	"outfitstyle/server/internal/core/domain"
 )
 
 func ABTestingMiddleware(experiments *services.ExperimentService, experimentName string, enabled bool) mux.MiddlewareFunc {
@@ -15,14 +16,14 @@ func ABTestingMiddleware(experiments *services.ExperimentService, experimentName
 				next.ServeHTTP(w, r)
 				return
 			}
-			userID, ok := GetUserIDFromContext(r.Context())
+			userID, ok := domain.GetUserIDFromContext(r.Context())
 			if !ok {
 				next.ServeHTTP(w, r)
 				return
 			}
 			variant, _, _ := experiments.Assign(r.Context(), experimentName, userID)
 			if variant != "" {
-				ctx := WithABVariant(r.Context(), variant)
+				ctx := domain.WithABVariant(r.Context(), variant)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}

@@ -18,7 +18,7 @@ func NewPromoRepository(db *pgxpool.Pool) *PromoRepository {
 	return &PromoRepository{db: db}
 }
 
-func (r *PromoRepository) GetByCode(ctx context.Context, code string) (*domain.PromoCode, error) {
+func (r *PromoRepository) GetByCode(ctx context.Context, code string) (*repositories.PromoCode, error) {
 	// TODO: Implement
 	return nil, fmt.Errorf("not implemented")
 }
