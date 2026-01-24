@@ -108,4 +108,20 @@ func (c *MLClient) SendAction(ctx context.Context, req ActionRequest) (ActionRes
 	}
 	return out, nil
 }
-"" 
+
+func (c *MLClient) HealthCheck(ctx context.Context) bool {
+	u := fmt.Sprintf("%s/health", c.baseURL)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return false
+	}
+
+	res, err := c.http.Do(httpReq)
+	if err != nil {
+		return false
+	}
+	defer res.Body.Close()
+
+	// Проверяем, что статус успешный (2xx)
+	return res.StatusCode >= 200 && res.StatusCode < 300
+} 

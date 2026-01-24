@@ -180,7 +180,7 @@ func Load() (*AppConfig, error) {
 			GoogleClientID:     getEnvFirst([]string{"GOOGLE_CLIENT_ID"}, ""),
 		},
 		MLService: MLServiceConfig{
-			BaseURL: getEnvFirst([]string{"ML_SERVICE_URL"}, "http://localhost:8000"),
+			BaseURL: getEnvFirst([]string{"ML_SERVICE_URL"}, "http://ml-service:8000"),
 			Timeout: getEnvDurationFirst([]string{"ML_SERVICE_TIMEOUT"}, 30*time.Second),
 		},
 		OpenWeather: OpenWeatherConfig{

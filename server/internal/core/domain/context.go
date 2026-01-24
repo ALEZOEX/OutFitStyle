@@ -55,7 +55,7 @@ func GetAPIKeyIDFromContext(ctx context.Context) (ID, bool) {
 	return id, ok
 }
 
-// Context utilities for A/B testing variant
+// Context utilities for AB testing variant
 func WithABVariant(ctx context.Context, variant string) context.Context {
 	return context.WithValue(ctx, abVariantKey, variant)
 }
@@ -65,8 +65,8 @@ func GetABVariantFromContext(ctx context.Context) (string, bool) {
 	if v == nil {
 		return "", false
 	}
-	s, ok := v.(string)
-	return s, ok
+	variant, ok := v.(string)
+	return variant, ok
 }
 
 // Audit envelope for tracking changes

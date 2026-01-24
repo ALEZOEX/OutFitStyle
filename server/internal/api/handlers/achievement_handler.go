@@ -42,16 +42,16 @@ func (h *AchievementHandler) My(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	unlocked, inProgress, totalPoints, rank, err := h.svc.My(r.Context(), userID)
+	result, err := h.svc.My(r.Context(), userID)
 	if err != nil {
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to load achievements"))
 		return
 	}
 
 	resp.Success(w, map[string]any{
-		"unlocked":     unlocked,
-		"in_progress":  inProgress,
-		"total_points": totalPoints,
-		"rank":         rank,
+		"unlocked":     result.Unlocked,
+		"in_progress":  result.InProgress,
+		"total_points": result.TotalPoints,
+		"rank":         result.Rank,
 	})
 }

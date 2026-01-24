@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -18,11 +17,6 @@ func NewFeedbackRepository(db *pgxpool.Pool) *FeedbackRepository {
 	return &FeedbackRepository{db: db}
 }
 
-func (r *FeedbackRepository) CreateFeedback(ctx context.Context, feedback *domain.Feedback) error {
-	// TODO: Implement
-	return fmt.Errorf("not implemented")
-}
-
 func (r *FeedbackRepository) GetFeedback(ctx context.Context, feedbackID domain.ID) (*domain.Feedback, error) {
 	// TODO: Implement
 	return nil, fmt.Errorf("not implemented")
@@ -31,4 +25,9 @@ func (r *FeedbackRepository) GetFeedback(ctx context.Context, feedbackID domain.
 func (r *FeedbackRepository) GetFeedbackByUser(ctx context.Context, userID domain.ID) ([]domain.Feedback, error) {
 	// TODO: Implement
 	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *FeedbackRepository) CreateFeedback(ctx context.Context, userID domain.ID, req domain.CreateFeedbackRequest) (domain.ID, error) {
+	// TODO: Implement
+	return domain.NilID, fmt.Errorf("not implemented")
 }

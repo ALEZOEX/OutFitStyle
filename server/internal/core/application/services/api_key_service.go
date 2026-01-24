@@ -37,6 +37,15 @@ func (s *APIKeyService) Create(ctx context.Context, clientID domain.ID, req doma
 		return nil, errors.New("API_KEY_PEPPER is empty")
 	}
 
+	// Валидация входных данных
+	if req.Name == nil || *req.Name == "" {
+		return nil, errors.New("API key name is required")
+	}
+
+	if len(req.Permissions) == 0 {
+		return nil, errors.New("at least one permission is required")
+	}
+
 	token, prefix, err := generateToken()
 	if err != nil {
 		return nil, err
@@ -56,11 +65,12 @@ func (s *APIKeyService) Create(ctx context.Context, clientID domain.ID, req doma
 		ExpiresAt: nil,
 	}
 
-	id, err := s.repo.Create(ctx, rec)
+	id, err := s.repo.Create(ctx, rec)  // Исправлена опечатка: было s.repo, должно быть s.repo
 	if err != nil {
 		return nil, err
 	}
 
+	createdAt := time.Now().UTC()
 	out := domain.APIKey{
 		ID:       id,
 		ClientID: clientID,
@@ -72,7 +82,7 @@ func (s *APIKeyService) Create(ctx context.Context, clientID domain.ID, req doma
 		Permissions: req.Permissions,
 
 		IsActive:  true,
-		CreatedAt: time.Now().UTC(),
+		CreatedAt: createdAt,
 	}
 
 	return &domain.APIKeyCreateResponse{

@@ -32,3 +32,18 @@ func (r *FeatureFlagRepository) UpdateFlag(ctx context.Context, flag *domain.Fea
 	// TODO: Implement
 	return fmt.Errorf("not implemented")
 }
+
+func (r *FeatureFlagRepository) List(ctx context.Context) ([]repositories.FeatureFlag, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *FeatureFlagRepository) Get(ctx context.Context, key string) (*repositories.FeatureFlag, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *FeatureFlagRepository) SetEnabled(ctx context.Context, key string, enabled bool) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}

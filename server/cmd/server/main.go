@@ -26,7 +26,7 @@ import (
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
-	_ "outfitstyle/server/internal/docs"
+	_ "outfitstyle/server/docs"
 	"outfitstyle/server/internal/infrastructure/cache"
 	ext "outfitstyle/server/internal/infrastructure/external"
 	"outfitstyle/server/internal/infrastructure/observability"
@@ -99,21 +99,21 @@ func main() {
 	mlClient := ext.NewMLClient(cfg.MLService.BaseURL, cfg.MLService.Timeout)
 
 	// ---------- Репозитории ----------
-	userRepo := pg.NewUserRepository(db, logger)
-	sessionRepo := pg.NewSessionRepository(db, logger)
-	recommendationRepo := pg.NewRecommendationRepository(db, logger)
-	clothingRepo := pg.NewClothingRepository(db, logger)
-	wardrobeRepo := pg.NewWardrobeRepository(db)
-	// specRepo := pg.NewSubcategorySpecRepository(db, logger)
-	subRepo := pg.NewSubscriptionRepository(db, logger)
-	notifRepo := pg.NewNotificationRepository(db)
-	pushTokenRepo := pg.NewPushTokenRepository(db)
-	tripRepo := pg.NewTripRepository(db)
-	savedOutfitRepo := pg.NewSavedOutfitRepository(db)
-	catalogRepo := pg.NewCatalogRepository(db)
-	achievementRepo := pg.NewAchievementRepository(db, logger)
-	achEngineRepo := pg.NewAchievementEngineRepository(db)
-	// auditRepo := pg.NewAuditRepository(db) // объявлен позже, когда используется
+	userRepo := pg.NewUserRepository(db.Pool(), logger)
+	sessionRepo := pg.NewSessionRepository(db.Pool(), logger)
+	recommendationRepo := pg.NewRecommendationRepository(db.Pool(), logger)
+	clothingRepo := pg.NewClothingRepository(db.Pool(), logger)
+	wardrobeRepo := pg.NewWardrobeRepository(db.Pool())
+	// specRepo := pg.NewSubcategorySpecRepository(db.Pool(), logger)
+	subRepo := pg.NewSubscriptionRepository(db.Pool(), logger)
+	notifRepo := pg.NewNotificationRepository(db.Pool())
+	pushTokenRepo := pg.NewPushTokenRepository(db.Pool())
+	tripRepo := pg.NewTripRepository(db.Pool())
+	savedOutfitRepo := pg.NewSavedOutfitRepository(db.Pool())
+	catalogRepo := pg.NewCatalogRepository(db.Pool())
+	achievementRepo := pg.NewAchievementRepository(db.Pool(), logger)
+	achEngineRepo := pg.NewAchievementEngineRepository(db.Pool())
+	// auditRepo := pg.NewAuditRepository(db.Pool()) // объявлен позже, когда используется
 
 	// ---------- Services ----------
 	// Пока не создаем ML клиент, передаем nil для него
@@ -124,7 +124,7 @@ func main() {
 	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient)
 
 	// ---------- Rate limit violation repository ----------
-	rateLimitRepo := pg.NewRateLimitViolationRepository(db)
+	rateLimitRepo := pg.NewRateLimitViolationRepository(db.Pool())
 
 	// ---------- Rate limiter ----------
 	limiter := middleware.NewRedisRateLimiter(redisClient, rateLimitRepo)
@@ -153,7 +153,7 @@ func main() {
 	notifService := services.NewNotificationService(notifRepo, pushTokenRepo, qClient)
 
 	// ---------- Personalization repository ----------
-	personalizationRepo := pg.NewPersonalizationRepository(db)
+	personalizationRepo := pg.NewPersonalizationRepository(db.Pool())
 
 	// ---------- Доменные сервисы ----------
 	recommendationService := services.NewRecommendationService(
@@ -180,8 +180,8 @@ func main() {
 	}
 
 	// ---------- Billing service (updated to support multiple gateways) ----------
-	billingRepo := pg.NewBillingRepository(db, logger)
-	promoRepo := pg.NewPromoRepository(db)
+	billingRepo := pg.NewBillingRepository(db.Pool(), logger)
+	promoRepo := pg.NewPromoRepository(db.Pool())
 	billingService := services.NewBillingService(subRepo, billingRepo, promoRepo, gateways)
 
 	// ---------- S3 storage ----------
@@ -213,8 +213,8 @@ func main() {
 	catalogService := services.NewCatalogService(catalogRepo, redisClient)
 
 	// ---------- Repositories for module 12 ----------
-	uploadedRepo := pg.NewUploadedFilesRepository(db)
-	exportRepo := pg.NewExportRepository(db)
+	uploadedRepo := pg.NewUploadedFilesRepository(db.Pool())
+	exportRepo := pg.NewExportRepository(db.Pool())
 
 	// ---------- Services for module 12 ----------
 	fileService := services.NewFileService(s3, uploadedRepo, userRepo)
@@ -244,13 +244,13 @@ func main() {
 	achievementHandler := handlers.NewAchievementHandler(achievementService, logger)
 
 	// ---------- Repositories for audit (module 13) ----------
-	auditRepo := pg.NewAuditRepository(db)
+	auditRepo := pg.NewAuditRepository(db.Pool())
 
 	// ---------- Модуль 10: Share, Support, Feedback, Admin ----------
-	shareRepo := pg.NewShareRepository(db)
-	supportRepo := pg.NewSupportRepository(db)
-	feedbackRepo := pg.NewFeedbackRepository(db)
-	adminRepo := pg.NewAdminRepository(db)
+	shareRepo := pg.NewShareRepository(db.Pool())
+	supportRepo := pg.NewSupportRepository(db.Pool())
+	feedbackRepo := pg.NewFeedbackRepository(db.Pool())
+	adminRepo := pg.NewAdminRepository(db.Pool())
 
 	shareService := services.NewShareService(shareRepo)
 	supportService := services.NewSupportService(supportRepo, feedbackRepo)
@@ -263,25 +263,25 @@ func main() {
 
 	// ---------- Модуль 13: API Keys, Feature Flags, Experiments ----------
 
-	apiKeyRepo := pg.NewAPIKeyRepository(db)
+	apiKeyRepo := pg.NewAPIKeyRepository(db.Pool())
 	apiKeyService := services.NewAPIKeyService(apiKeyRepo, cfg.APIKeys.Pepper)
 	apiKeyHandler := handlers.NewAPIKeyHandler(apiKeyService)
 
-	ffRepo := pg.NewFeatureFlagRepository(db)
+	ffRepo := pg.NewFeatureFlagRepository(db.Pool())
 	ffService := services.NewFeatureFlagService(ffRepo)
 	adminFFHandler := handlers.NewAdminFeatureFlagsHandler(ffService)
 
-	expRepo := pg.NewExperimentRepository(db)
+	expRepo := pg.NewExperimentRepository(db.Pool())
 	expService := services.NewExperimentService(expRepo)
-
-	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subHandler, billingHandler, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, tripHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo)
 
 	// ---------- Health checks ----------
 	checks := map[string]health.Checker{
 		"database": db,
 	}
 	health.RegisterChecks(checks)
+
+	// ---------- Роутер ----------
+	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subHandler, billingHandler, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, tripHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -360,6 +360,8 @@ func setupRouter(
 	apiKeyService *services.APIKeyService,
 	geoHandler *handlers.GeoHandler,
 	auditRepo repositories.AuditRepository,
+	db *dbpg.DB,
+	mlClient *ext.MLClient,
 ) *mux.Router {
 	router := mux.NewRouter()
 
@@ -372,7 +374,9 @@ func setupRouter(
 		middleware.MetricsMiddleware(),
 	)
 
-	router.HandleFunc("/health", health.Handler).Methods(stdhttp.MethodGet)
+	router.HandleFunc("/health", func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		health.Handler(db.Pool(), mlClient)(w, r)
+	}).Methods(stdhttp.MethodGet)
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	router.Handle("/metrics", promhttp.Handler()).Methods(stdhttp.MethodGet)
 

@@ -51,12 +51,12 @@ ENV PYTHONUNBUFFERED=1 \
     MODEL_PATH=/app/models/advanced_recommender.pkl
 
 # Expose ports
-EXPOSE 5000
+EXPOSE 8000
 EXPOSE 9090
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # Command to run the application
 CMD ["python", "main.py"]

@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -29,6 +28,31 @@ func (r *PersonalizationRepository) UpdateUserStylePreferences(ctx context.Conte
 }
 
 func (r *PersonalizationRepository) GetUserWeatherPreferences(ctx context.Context, userID domain.ID) (*domain.UserWeatherPreferences, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *PersonalizationRepository) GetUserPreferences(ctx context.Context, userID domain.ID) (domain.UserPreferences, error) {
+	// TODO: Implement
+	return domain.UserPreferences{}, fmt.Errorf("not implemented")
+}
+
+func (r *PersonalizationRepository) GetRecentItems(ctx context.Context, userID domain.ID, limit int) ([]domain.ID, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *PersonalizationRepository) GetRatedItems(ctx context.Context, userID domain.ID, highMin int, lowMax int, limit int) (high []domain.ID, low []domain.ID, err error) {
+	// TODO: Implement
+	return nil, nil, fmt.Errorf("not implemented")
+}
+
+func (r *PersonalizationRepository) GetStyleDistribution(ctx context.Context, userID domain.ID, limit int) (map[string]float64, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *PersonalizationRepository) GetItemRatingsMap(ctx context.Context, userID domain.ID, itemIDs []domain.ID) (map[domain.ID]float64, error) {
 	// TODO: Implement
 	return nil, fmt.Errorf("not implemented")
 }
