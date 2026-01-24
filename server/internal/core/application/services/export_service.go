@@ -5,6 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
+	"path"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,49 +17,95 @@ import (
 	"outfitstyle/server/internal/infrastructure/external"
 )
 
+// ErrStorageNotConfigured ошибка, когда хранилище не настроено
+var ErrStorageNotConfigured = errors.New("storage not configured")
+
+// Константы для экспорта данных
+const (
+	contentTypeJSON     = "application/json" // Тип контента для JSON-файлов
+	presignTTLSeconds   = 3600               // Время жизни подписанного URL (1 час)
+	exportTimeKeyLayout = "20060102T150405Z" // Формат времени для ключа экспорта
+)
+
+// ExportService сервис для экспорта пользовательских данных
 type ExportService struct {
-	exportRepo repositories.ExportRepository
-	filesRepo  repositories.UploadedFilesRepository
-	storage    *external.S3Storage
+	exportRepo repositories.ExportRepository        // Репозиторий для экспорта данных
+	filesRepo  repositories.UploadedFilesRepository // Репозиторий для работы с загруженными файлами
+	storage    *external.S3Storage                 // Хранилище для сохранения файлов
 }
 
-func NewExportService(er repositories.ExportRepository, fr repositories.UploadedFilesRepository, storage *external.S3Storage) *ExportService {
-	return &ExportService{exportRepo: er, filesRepo: fr, storage: storage}
+// NewExportService создает новый экземпляр сервиса экспорта данных
+func NewExportService(
+	er repositories.ExportRepository,
+	fr repositories.UploadedFilesRepository,
+	storage *external.S3Storage,
+) *ExportService {
+	return &ExportService{
+		exportRepo: er,
+		filesRepo:  fr,
+		storage:    storage,
+	}
 }
 
+// ExportResponse структура ответа на запрос экспорта данных
 type ExportResponse struct {
-	DownloadURL string    `json:"download_url"`
-	ExpiresAt   time.Time `json:"expires_at"`
+	DownloadURL string    `json:"download_url"` // URL для скачивания экспортированных данных
+	ExpiresAt   time.Time `json:"expires_at"`   // Время истечения срока действия URL
 }
 
+// ExportUserData экспортирует данные пользователя в JSON-файл и сохраняет в хранилище
+// Возвращает URL для скачивания и время истечения срока действия
 func (s *ExportService) ExportUserData(ctx context.Context, userID domain.ID) (*ExportResponse, error) {
+	// Проверяем, что хранилище настроено
 	if s.storage == nil {
-		return nil, errors.New("storage not configured")
+		return nil, ErrStorageNotConfigured
 	}
 
+	// Проверяем, что ID пользователя не является нулевым
+	if userID == domain.NilID {
+		return nil, fmt.Errorf("invalid user ID: %v", userID)
+	}
+
+	// Получаем данные пользователя для экспорта
 	payload, err := s.exportRepo.BuildUserExport(ctx, userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build user export: %w", err)
 	}
 
+	// Маршалим данные в JSON с отступами
 	b, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("marshal export data: %w", err)
 	}
 
-	objectPath := external.JoinObjectPath("exports", userID.String(), time.Now().UTC().Format("20060102T150405Z")+"-"+uuid.NewString()+".json")
+	// Генерируем уникальное имя файла
+	now := time.Now().UTC()
+	objectName := fmt.Sprintf("%s-%s.json", now.Format(exportTimeKeyLayout), uuid.NewString())
+	objectPath := external.JoinObjectPath("exports", userID.String(), objectName)
 
-	if err := s.storage.Put(ctx, objectPath, bytes.NewReader(b), int64(len(b)), "application/json"); err != nil {
-		return nil, err
+	// Сохраняем файл в хранилище
+	size := int64(len(b))
+	if err := s.storage.Put(ctx, objectPath, bytes.NewReader(b), size, contentTypeJSON); err != nil {
+		return nil, fmt.Errorf("store export data: %w", err)
 	}
 
-	uid := userID
-	_, _ = s.filesRepo.Create(ctx, &uid, s.storage.Bucket(), objectPath, "export.json", "application/json", int64(len(b)))
+	// Извлекаем имя файла из пути объекта
+	filename := path.Base(objectPath)
 
-	url, expiresAt, err := s.storage.PresignGet(ctx, objectPath, 0)
+	// Создаем запись о файле в базе данных
+	if _, err := s.filesRepo.Create(ctx, &userID, s.storage.Bucket(), objectPath, filename, contentTypeJSON, size); err != nil {
+		// Логируем ошибку, но не прерываем операцию экспорта
+		log.Printf("export: failed to create file record (user=%s, key=%s): %v", userID.String(), objectPath, err)
+	}
+
+	// Генерируем подписанный URL для скачивания
+	url, expiresAt, err := s.storage.PresignGet(ctx, objectPath, presignTTLSeconds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("generate presigned url: %w", err)
 	}
 
-	return &ExportResponse{DownloadURL: url, ExpiresAt: expiresAt}, nil
+	return &ExportResponse{
+		DownloadURL: url,
+		ExpiresAt:   expiresAt,
+	}, nil
 }
