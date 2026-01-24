@@ -35,8 +35,8 @@ func main() {
 	defer db.Close()
 
 	// repos
-	notifRepo := pg.NewNotificationRepository(db)
-	tokenRepo := pg.NewPushTokenRepository(db)
+	notifRepo := pg.NewNotificationRepository(db.Pool())
+	tokenRepo := pg.NewPushTokenRepository(db.Pool())
 
 	// push clients (optional)
 	var fcm *external.FCMClient

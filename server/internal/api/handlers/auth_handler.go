@@ -32,6 +32,16 @@ func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/validate", h.ValidateToken).Methods(http.MethodPost)
 }
 
+// @Summary Register a new user
+// @Description Register a new user account with email and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body domain.UserRegistration true "User registration data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -55,6 +65,14 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, services.ErrInvalidCredentials) {
 			status = http.StatusBadRequest
 		}
+
+		// Check if this is a validation error
+		if validationErr, ok := err.(*services.ValidationError); ok {
+			status = http.StatusBadRequest
+			resp.ValidationError(w, validationErr.Errors)
+			return
+		}
+
 		resp.Error(w, status, err)
 		return
 	}
@@ -62,6 +80,15 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
+// @Summary Login user
+// @Description Authenticate user with email and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param credentials body domain.UserLogin true "User login credentials"
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -94,6 +121,15 @@ type refreshRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+// @Summary Refresh access token
+// @Description Refresh the access token using a refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param refresh_request body refreshRequest true "Refresh token request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Router /auth/refresh [post]
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -116,6 +152,17 @@ type logoutRequest struct {
 	AllDevices bool `json:"all_devices,omitempty"`
 }
 
+// @Summary Logout user
+// @Description Logout the authenticated user, optionally from all devices
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param logout_data body logoutRequest true "Logout options"
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /auth/logout [post]
 // Logout требует AuthMiddleware, user_id/session_id берём из context
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -146,6 +193,15 @@ type googleSignInRequest struct {
 	IDToken string `json:"id_token"`
 }
 
+// @Summary Sign in with Google
+// @Description Authenticate user using Google OAuth ID token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param google_auth body googleSignInRequest true "Google authentication data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Router /auth/google [post]
 func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -172,6 +228,15 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
+// @Summary Validate authentication token
+// @Description Validate the provided authentication token and return user information
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /auth/validate [post]
 func (h *AuthHandler) ValidateToken(w http.ResponseWriter, r *http.Request) {
 	// Extract token from header
 	authHeader := r.Header.Get("Authorization")

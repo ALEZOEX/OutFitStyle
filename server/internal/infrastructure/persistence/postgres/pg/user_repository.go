@@ -7,7 +7,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -78,4 +77,19 @@ func (r *UserRepository) UpdateBodyMeasurements(ctx context.Context, userID doma
 func (r *UserRepository) GetDefaultCoords(ctx context.Context, userID domain.ID) (lat *float64, lon *float64, err error) {
 	// TODO: Implement
 	return nil, nil, fmt.Errorf("not implemented")
+}
+
+func (r *UserRepository) DeleteUser(ctx context.Context, userID domain.ID) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *UserRepository) RateRecommendation(ctx context.Context, userID, recommendationID domain.ID, rating int, feedback string) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *UserRepository) GetUserTimezone(ctx context.Context, userID domain.ID) (string, error) {
+	// TODO: Implement
+	return "", fmt.Errorf("not implemented")
 }

@@ -38,6 +38,12 @@ type SessionInfo struct {
 	ExpiresAt  string    `json:"expires_at"`
 }
 
+type DeleteAccountBody struct {
+	Password string  `json:"password"`
+	Reason   *string `json:"reason,omitempty"`
+	Feedback *string `json:"feedback,omitempty"`
+}
+
 func NewUserHandler(
 	userService *services.UserService,
 	fileSvc *services.FileService,
@@ -78,6 +84,17 @@ func (h *UserHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/account", h.DeleteAccount).Methods(http.MethodDelete)
 }
 
+// @Summary Get current user's profile
+// @Description Retrieve the authenticated user's profile information
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/profile [get]
 func (h *UserHandler) GetMyProfile(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -98,6 +115,18 @@ func (h *UserHandler) GetMyProfile(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
+// @Summary Update current user's profile
+// @Description Update the authenticated user's profile information
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param profile body domain.UserProfileUpdate true "Profile update data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/profile [put]
 func (h *UserHandler) UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -122,6 +151,18 @@ func (h *UserHandler) UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
+// @Summary Update user's body measurements
+// @Description Update the authenticated user's body measurements
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param body_measurement body domain.BodyMeasurements true "Body measurement data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/body [put]
 func (h *UserHandler) UpdateBodyMeasurements(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -146,6 +187,18 @@ func (h *UserHandler) UpdateBodyMeasurements(w http.ResponseWriter, r *http.Requ
 	resp.Success(w, out)
 }
 
+// @Summary Upload user avatar
+// @Description Upload a new avatar image for the authenticated user
+// @Tags users
+// @Accept mpfd
+// @Produce json
+// @Param file formData file true "Avatar image file"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/avatar [post]
 func (h *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -182,6 +235,15 @@ func (h *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{"avatar_url": res.URL})
 }
 
+// @Summary Export user data
+// @Description Export the authenticated user's data
+// @Tags users
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/export [get]
 func (h *UserHandler) Export(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -199,6 +261,15 @@ func (h *UserHandler) Export(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
+// @Summary Get user sessions
+// @Description Retrieve all active sessions for the authenticated user
+// @Tags users
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/sessions [get]
 func (h *UserHandler) Sessions(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -230,6 +301,17 @@ func (h *UserHandler) Sessions(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{"sessions": out})
 }
 
+// @Summary Delete a user session
+// @Description Revoke a specific session for the authenticated user
+// @Tags users
+// @Produce json
+// @Param session_id path string true "Session ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/sessions/{session_id} [delete]
 func (h *UserHandler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -252,12 +334,15 @@ func (h *UserHandler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{"success": true})
 }
 
-type deleteAccountBody struct {
-	Password string  `json:"password"`
-	Reason   *string `json:"reason,omitempty"`
-	Feedback *string `json:"feedback,omitempty"`
-}
-
+// @Summary Get user preferences
+// @Description Retrieve the authenticated user's preferences
+// @Tags users
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/preferences [get]
 func (h *UserHandler) GetPreferences(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -280,6 +365,18 @@ func (h *UserHandler) GetPreferences(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{"preferences": out.User.Preferences})
 }
 
+// @Summary Delete user account
+// @Description Permanently delete the authenticated user's account
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param data body DeleteAccountBody true "Deletion data including password"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/account [delete]
 func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -288,7 +385,7 @@ func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var body deleteAccountBody
+	var body DeleteAccountBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
 		return
@@ -302,6 +399,18 @@ func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{"success": true})
 }
 
+// @Summary Update user preferences
+// @Description Update the authenticated user's preferences
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param preferences body domain.UserPreferences true "Updated preferences"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /user/preferences [put]
 func (h *UserHandler) UpdatePreferences(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 

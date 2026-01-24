@@ -6,23 +6,26 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
+// AuditCreate структура для создания записи аудита
 type AuditCreate struct {
-	UserID *domain.ID
+	UserID *domain.ID  // Идентификатор пользователя (если применимо)
 
-	Action       string
-	ResourceType *string
-	ResourceID   *domain.ID
+	Action       string     // Выполненное действие
+	ResourceType *string    // Тип ресурса (если применимо)
+	ResourceID   *domain.ID // Идентификатор ресурса (если применимо)
 
-	OldValue []byte
-	NewValue []byte
+	OldValue []byte  // Старое значение (в сериализованном виде)
+	NewValue []byte  // Новое значение (в сериализованном виде)
 
-	IPAddress *string
-	UserAgent *string
+	IPAddress *string // IP-адрес пользователя
+	UserAgent *string // User-Agent пользователя
 
-	Success      bool
-	ErrorMessage *string
+	Success      bool      // Успешно ли выполнено действие
+	ErrorMessage *string   // Сообщение об ошибке (если было)
 }
 
+// AuditRepository интерфейс репозитория аудита
 type AuditRepository interface {
+	// Create создает новую запись аудита
 	Create(ctx context.Context, a AuditCreate) error
 }

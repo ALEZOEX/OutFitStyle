@@ -12,31 +12,36 @@ import (
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/infrastructure/external"
+	"outfitstyle/server/internal/validation"
 )
 
 var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUnauthorized       = errors.New("unauthorized")
+	ErrInvalidCredentials = errors.New("недействительные учетные данные")
+	ErrUnauthorized       = errors.New("не авторизован")
 )
 
+// AuthService сервис аутентификации и авторизации пользователей
 type AuthService struct {
-	userRepo    repositories.UserRepository
-	sessionRepo repositories.SessionRepository
-	tokenSvc    *TokenService
-	google      *external.GoogleAuthClient
+	userRepo    repositories.UserRepository      // Репозиторий пользователей
+	sessionRepo repositories.SessionRepository  // Репозиторий сессий
+	tokenSvc    *TokenService                   // Сервис токенов
+	google      *external.GoogleAuthClient      // Клиент Google аутентификации
 }
 
+// RegisterResult результат регистрации пользователя
 type RegisterResult struct {
-	User   *domain.User     `json:"user"`
-	Tokens domain.TokenPair `json:"tokens"`
+	User   *domain.User     `json:"user"`      // Пользователь
+	Tokens domain.TokenPair `json:"tokens"`    // Пара токенов (access и refresh)
 }
 
+// LoginResult результат входа пользователя
 type LoginResult struct {
-	User   *domain.User     `json:"user"`
-	Tokens domain.TokenPair `json:"tokens"`
-	// subscription добавим позже (модуль subscriptions)
+	User   *domain.User     `json:"user"`      // Пользователь
+	Tokens domain.TokenPair `json:"tokens"`    // Пара токенов (access и refresh)
+	// subscription добавим позже (модуль подписок)
 }
 
+// NewAuthService создает новый экземпляр сервиса аутентификации
 func NewAuthService(
 	userRepo repositories.UserRepository,
 	sessionRepo repositories.SessionRepository,
@@ -51,19 +56,26 @@ func NewAuthService(
 	}
 }
 
+// DeviceInfo информация об устройстве пользователя
 type DeviceInfo struct {
-	DeviceID   *string
-	DeviceName *string
-	DeviceType *string
-	IPAddress  *string
-	UserAgent  *string
+	DeviceID   *string  // Идентификатор устройства
+	DeviceName *string  // Название устройства
+	DeviceType *string  // Тип устройства
+	IPAddress  *string  // IP-адрес
+	UserAgent  *string  // User-Agent
 }
 
+// Register регистрирует нового пользователя
 func (s *AuthService) Register(ctx context.Context, input domain.UserRegistration, device DeviceInfo) (*RegisterResult, error) {
-	email := strings.TrimSpace(strings.ToLower(input.Email))
-	if email == "" || input.Password == "" {
-		return nil, ErrInvalidCredentials
+	// Валидируем входные данные
+	v := validation.NewValidator()
+	validation.ValidateUserRegistration(v, input)
+
+	if !v.Valid() {
+		return nil, NewValidationError(v.Errors)
 	}
+
+	email := strings.TrimSpace(strings.ToLower(input.Email))
 
 	existing, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
@@ -103,6 +115,7 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 	return &RegisterResult{User: u, Tokens: pair}, nil
 }
 
+// Login выполняет вход пользователя
 func (s *AuthService) Login(ctx context.Context, input domain.UserLogin, device DeviceInfo) (*LoginResult, error) {
 	email := strings.TrimSpace(strings.ToLower(input.Email))
 	if email == "" || input.Password == "" {
@@ -126,6 +139,7 @@ func (s *AuthService) Login(ctx context.Context, input domain.UserLogin, device 
 	return &LoginResult{User: u, Tokens: pair}, nil
 }
 
+// Refresh обновляет токены доступа
 func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.TokenPair, error) {
 	if refreshToken == "" {
 		return domain.TokenPair{}, ErrUnauthorized
@@ -140,7 +154,7 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 		return domain.TokenPair{}, ErrUnauthorized
 	}
 
-	// rotate refresh
+	// обновляем refresh-токен
 	newRefresh, err := s.tokenSvc.GenerateRefreshToken()
 	if err != nil {
 		return domain.TokenPair{}, err
@@ -164,6 +178,7 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 	}, nil
 }
 
+// GoogleSignIn выполняет вход через Google
 func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device DeviceInfo) (*LoginResult, error) {
 	// 1. Валидируем токен через Google
 	gUser, err := s.google.Verify(ctx, idToken)
@@ -172,7 +187,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 	}
 
 	if !gUser.EmailVerified {
-		return nil, errors.New("google email not verified")
+		return nil, errors.New("email в Google не подтвержден")
 	}
 
 	// 2. Ищем пользователя в БД
@@ -249,6 +264,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 	return &LoginResult{User: resultUser, Tokens: pair}, nil
 }
 
+// Logout выполняет выход пользователя
 func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool) error {
 	if allDevices {
 		return s.sessionRepo.RevokeAllForUser(ctx, userID)
@@ -256,7 +272,7 @@ func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, a
 	return s.sessionRepo.Revoke(ctx, sessionID)
 }
 
-// ValidateAccessToken: JWT + проверка, что session active (logout invalidates access immediately)
+// ValidateAccessToken: JWT + проверка, что сессия активна (logout сразу инвалидирует access-токен)
 func (s *AuthService) ValidateAccessToken(ctx context.Context, accessToken string) (domain.ID, domain.ID, error) {
 	userID, sessionID, err := s.tokenSvc.ValidateAccessToken(accessToken)
 	if err != nil {
@@ -276,6 +292,7 @@ func (s *AuthService) ValidateAccessToken(ctx context.Context, accessToken strin
 	return userID, sessionID, nil
 }
 
+// ValidateTokenForSilentLogin проверяет токен для тихого входа
 func (s *AuthService) ValidateTokenForSilentLogin(ctx context.Context, accessToken string) (*domain.User, error) {
 	userID, sessionID, err := s.ValidateAccessToken(ctx, accessToken)
 	if err != nil {
@@ -290,20 +307,21 @@ func (s *AuthService) ValidateTokenForSilentLogin(ctx context.Context, accessTok
 		return nil, ErrUnauthorized
 	}
 
-	// Update session last used time
+	// Обновляем время последнего использования сессии
 	_ = s.sessionRepo.Touch(ctx, sessionID)
 
 	return user, nil
 }
 
+// SilentLogin выполняет тихий вход пользователя
 func (s *AuthService) SilentLogin(ctx context.Context, accessToken string, device DeviceInfo) (*LoginResult, error) {
-	// Validate the existing access token
+	// Проверяем существующий access-токен
 	userID, sessionID, err := s.ValidateAccessToken(ctx, accessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get user info
+	// Получаем информацию о пользователе
 	user, err := s.userRepo.GetUser(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -312,7 +330,7 @@ func (s *AuthService) SilentLogin(ctx context.Context, accessToken string, devic
 		return nil, ErrUnauthorized
 	}
 
-	// Update session with new device info if provided
+	// Обновляем информацию об устройстве в сессии, если предоставлена
 	if device.DeviceID != nil || device.DeviceName != nil || device.DeviceType != nil || device.IPAddress != nil || device.UserAgent != nil {
 		err = s.sessionRepo.UpdateDeviceInfo(ctx, sessionID, repositories.UpdateDeviceInfoParams{
 			DeviceID:   device.DeviceID,
@@ -326,18 +344,33 @@ func (s *AuthService) SilentLogin(ctx context.Context, accessToken string, devic
 		}
 	}
 
-	// Generate new token pair for continued session
-	newPair, err := s.createSessionAndTokens(ctx, userID, device)
+	// Обновляем время последнего использования сессии
+	_ = s.sessionRepo.Touch(ctx, sessionID)
+
+	// Генерируем новую пару токенов для продолжения сессии
+	access, exp, err := s.tokenSvc.GenerateAccessToken(userID, sessionID)
 	if err != nil {
 		return nil, err
 	}
 
+	// Обновляем время последнего использования сессии
+	_ = s.sessionRepo.Touch(ctx, sessionID)
+
+	// Возвращаем новую пару токенов (access токен обновляется, refresh остается тем же)
+	// Refresh-токен не возвращаем при silent login, т.к. он уже есть у клиента
+	pair := domain.TokenPair{
+		AccessToken:  access,
+		RefreshToken: "", // Refresh-токен не обновляется при silent login
+		ExpiresAt:    exp,
+	}
+
 	return &LoginResult{
 		User:   user,
-		Tokens: newPair,
+		Tokens: pair,
 	}, nil
 }
 
+// createSessionAndTokens создает сессию и пару токенов
 func (s *AuthService) createSessionAndTokens(ctx context.Context, userID domain.ID, device DeviceInfo) (domain.TokenPair, error) {
 	refresh, err := s.tokenSvc.GenerateRefreshToken()
 	if err != nil {
@@ -373,6 +406,7 @@ func (s *AuthService) createSessionAndTokens(ctx context.Context, userID domain.
 }
 
 // helpers
+// ExtractIP извлекает IP-адрес из remoteAddr
 func ExtractIP(remoteAddr string) *string {
 	if remoteAddr == "" {
 		return nil
