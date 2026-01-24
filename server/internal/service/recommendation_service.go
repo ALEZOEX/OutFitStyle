@@ -1,3 +1,5 @@
+// Пакет service содержит бизнес-логику приложения
+// Реализует сервисы, которые координируют взаимодействие между различными компонентами системы
 package service
 
 import (
@@ -7,26 +9,33 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
+// WardrobeRepository интерфейс для работы с репозиторием гардероба
 type WardrobeRepository interface {
 	GetUserWardrobe(ctx context.Context, userID domain.ID) ([]domain.WardrobeItem, error)
 }
 
+// WeatherService интерфейс для получения информации о погоде
+// У тебя в usecase уже фигурирует WeatherData, а domain.Weather у тебя отсутствует.
 type WeatherService interface {
-	// У тебя в usecase уже фигурирует WeatherData, а domain.Weather у тебя отсутствует.
 	GetCurrentWeather(ctx context.Context, lat, lon float64) (*domain.WeatherData, error)
 }
 
+// MLClient интерфейс для взаимодействия с ML-сервисом
+// Делай контракт максимально простой: userID + weather.
 type MLClient interface {
-	// Делай контракт максимально простой: userID + weather.
 	GetRecommendations(ctx context.Context, userID domain.ID, weather domain.WeatherData) (*domain.RecommendationResponse, error)
 }
 
+// RecommendationService структура сервиса рекомендаций
+// Объединяет логику получения гардероба пользователя, погоды и ML-рекомендаций
 type RecommendationService struct {
-	wardrobeRepo WardrobeRepository
-	weatherSvc   WeatherService
-	mlClient     MLClient
+	wardrobeRepo WardrobeRepository // Репозиторий для работы с гардеробом пользователя
+	weatherSvc   WeatherService     // Сервис для получения информации о погоде
+	mlClient     MLClient           // Клиент для взаимодействия с ML-сервисом
 }
 
+// NewRecommendationService создает новый экземпляр сервиса рекомендаций
+// Принимает зависимости, необходимые для работы сервиса
 func NewRecommendationService(wardrobeRepo WardrobeRepository, weatherSvc WeatherService, mlClient MLClient) *RecommendationService {
 	return &RecommendationService{
 		wardrobeRepo: wardrobeRepo,
@@ -35,6 +44,8 @@ func NewRecommendationService(wardrobeRepo WardrobeRepository, weatherSvc Weathe
 	}
 }
 
+// GetRecommendations возвращает рекомендации одежды для пользователя на основе погоды
+// Получает гардероб пользователя, текущую погоду и запрашивает рекомендации у ML-сервиса
 func (s *RecommendationService) GetRecommendations(ctx context.Context, userID domain.ID, lat, lon float64) (*domain.RecommendationResponse, error) {
 	items, err := s.wardrobeRepo.GetUserWardrobe(ctx, userID)
 	if err != nil {
@@ -55,6 +66,8 @@ func (s *RecommendationService) GetRecommendations(ctx context.Context, userID d
 	return s.mlClient.GetRecommendations(ctx, userID, *w)
 }
 
+// CalculateWarmthLevel вычисляет уровень теплоты на основе температуры
+// Возвращает значение от 0 до 5, где 5 - самый холодный уровень
 func CalculateWarmthLevel(temperature float64) int {
 	if temperature < -10 {
 		return 5

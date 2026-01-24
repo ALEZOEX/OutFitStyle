@@ -1,3 +1,5 @@
+// Пакет telemetry предоставляет функциональность сбора метрик для мониторинга приложения
+// Использует Prometheus для экспорта метрик различных типов
 package telemetry
 
 import (
@@ -10,7 +12,7 @@ import (
 )
 
 var (
-	// HTTP request metrics
+	// HTTP request metrics - метрики HTTP-запросов
 	requestCount = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "http_requests_total",
@@ -28,7 +30,7 @@ var (
 		[]string{"method", "endpoint", "status"},
 	)
 
-	// Business metrics
+	// Business metrics - бизнес-метрики приложения
 	recommendationsGenerated = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "recommendations_generated_total",
@@ -51,7 +53,7 @@ var (
 		},
 	)
 
-	// ML service metrics
+	// ML service metrics - метрики ML-сервиса
 	mlInferenceDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "ml_inference_duration_seconds",
@@ -69,6 +71,7 @@ var (
 	)
 )
 
+// init регистрирует все метрики в Prometheus
 func init() {
 	prometheus.MustRegister(requestCount)
 	prometheus.MustRegister(requestDuration)
@@ -79,12 +82,13 @@ func init() {
 	prometheus.MustRegister(weatherAPICalls)
 }
 
-// HTTPMiddleware returns a middleware that instruments HTTP requests
+// HTTPMiddleware возвращает middleware, который собирает метрики HTTP-запросов
+// Измеряет длительность запросов и количество запросов с разбивкой по методам, эндпоинтам и статусам
 func HTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		// Wrap response writer to capture status code
+		// Оборачиваем ResponseWriter для захвата кода статуса
 		wrapped := &responseWriter{ResponseWriter: w, statusCode: 200}
 
 		next.ServeHTTP(wrapped, r)
@@ -105,39 +109,47 @@ func HTTPMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// responseWriter wraps http.ResponseWriter to capture status code
+// responseWriter оборачивает http.ResponseWriter для захвата кода статуса
+// Используется в HTTP-мидлваре для сбора метрик
 type responseWriter struct {
 	http.ResponseWriter
 	statusCode int
 }
 
+// WriteHeader переопределяет метод WriteHeader для захвата кода статуса
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.statusCode = code
 	rw.ResponseWriter.WriteHeader(code)
 }
 
-// Business metric functions
+// Business metric functions - функции для записи бизнес-метрик
+// RecordRecommendationGenerated записывает метрику сгенерированной рекомендации
 func RecordRecommendationGenerated(occasion, weatherCondition string) {
 	recommendationsGenerated.WithLabelValues(occasion, weatherCondition).Inc()
 }
 
+// RecordRecommendationAccepted записывает метрику принятой пользователем рекомендации
 func RecordRecommendationAccepted() {
 	recommendationsAccepted.Inc()
 }
 
+// RecordRecommendationRejected записывает метрику отклоненной пользователем рекомендации
 func RecordRecommendationRejected() {
 	recommendationsRejected.Inc()
 }
 
+// RecordMLInferenceDuration записывает метрику длительности вывода ML-модели
 func RecordMLInferenceDuration(duration time.Duration, modelVersion string) {
 	mlInferenceDuration.WithLabelValues(modelVersion).Observe(duration.Seconds())
 }
 
+// RecordWeatherAPICall записывает метрику вызова API погоды
 func RecordWeatherAPICall() {
 	weatherAPICalls.Inc()
 }
 
-// MetricsHandler returns the Prometheus metrics endpoint
+// MetricsHandler возвращает обработчик эндпоинта метрик Prometheus
+// Предоставляет данные для сбора метрик системой мониторинга
 func MetricsHandler() http.Handler {
 	return promhttp.Handler()
 }

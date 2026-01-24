@@ -1,3 +1,5 @@
+// Пакет routes содержит функции регистрации маршрутов для различных API-эндпоинтов
+// Обеспечивает централизованную настройку маршрутов приложения
 package routes
 
 import (
@@ -6,7 +8,8 @@ import (
 	"outfitstyle/server/internal/api/handlers"
 )
 
-// RegisterAuthRoutes registers authentication-related routes
+// RegisterAuthRoutes регистрирует маршруты, связанные с аутентификацией
+// Устанавливает обработчики для эндпоинтов регистрации, входа и управления сессией
 func RegisterAuthRoutes(router *mux.Router, authHandler *handlers.AuthHandler) {
 	auth := router.PathPrefix("/api/auth").Subrouter()
 

@@ -1,3 +1,5 @@
+// Пакет routes содержит функции регистрации маршрутов для различных API-эндпоинтов
+// Обеспечивает централизованную настройку маршрутов приложения
 package routes
 
 import (
@@ -6,7 +8,8 @@ import (
 	"outfitstyle/server/internal/api/handlers"
 )
 
-// RegisterClothingItemRoutes registers clothing item-related routes
+// RegisterClothingItemRoutes регистрирует маршруты, связанные с элементами одежды
+// Устанавливает обработчики для эндпоинтов управления вещами и гардеробом пользователя
 func RegisterClothingItemRoutes(router *mux.Router, handler *handlers.ClothingItemHandler) {
 	// Подмаршрут для вещей
 	clothing := router.PathPrefix("/api/v1/clothing-items").Subrouter()

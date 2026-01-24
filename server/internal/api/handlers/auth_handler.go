@@ -1,3 +1,5 @@
+// Пакет handlers содержит HTTP-обработчики для различных API-эндпоинтов
+// Реализует маршрутизацию и обработку HTTP-запросов
 package handlers
 
 import (
@@ -14,14 +16,19 @@ import (
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
+// AuthHandler структура обработчика аутентификации
+// Содержит зависимости для обработки запросов, связанных с аутентификацией
 type AuthHandler struct {
-	auth *services.AuthService
+	auth *services.AuthService // Сервис аутентификации для выполнения бизнес-логики
 }
 
+// NewAuthHandler создает новый экземпляр обработчика аутентификации
 func NewAuthHandler(auth *services.AuthService) *AuthHandler {
 	return &AuthHandler{auth: auth}
 }
 
+// RegisterRoutes регистрирует маршруты для обработчика аутентификации
+// Устанавливает обработчики для различных эндпоинтов аутентификации
 func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	// r предполагается уже с PathPrefix("/auth")
 	r.HandleFunc("/register", h.Register).Methods(http.MethodPost)
@@ -32,16 +39,8 @@ func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/validate", h.ValidateToken).Methods(http.MethodPost)
 }
 
-// @Summary Register a new user
-// @Description Register a new user account with email and password
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param user body domain.UserRegistration true "User registration data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /auth/register [post]
+// Register обрабатывает запрос на регистрацию нового пользователя
+// Принимает данные регистрации и создает новый аккаунт пользователя
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -66,7 +65,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			status = http.StatusBadRequest
 		}
 
-		// Check if this is a validation error
+		// Проверяем, является ли это ошибкой валидации
 		if validationErr, ok := err.(*services.ValidationError); ok {
 			status = http.StatusBadRequest
 			resp.ValidationError(w, validationErr.Errors)
@@ -80,15 +79,8 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
-// @Summary Login user
-// @Description Authenticate user with email and password
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param credentials body domain.UserLogin true "User login credentials"
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]string
-// @Router /auth/login [post]
+// Login обрабатывает запрос на аутентификацию пользователя
+// Проверяет учетные данные и возвращает токены доступа
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -117,19 +109,13 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
+// refreshRequest структура для запроса обновления токена
 type refreshRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-// @Summary Refresh access token
-// @Description Refresh the access token using a refresh token
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param refresh_request body refreshRequest true "Refresh token request"
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]string
-// @Router /auth/refresh [post]
+// Refresh обрабатывает запрос на обновление токена доступа
+// Использует рефреш-токен для получения новой пары токенов
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -148,22 +134,13 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{"tokens": pair})
 }
 
+// logoutRequest структура для запроса выхода из системы
 type logoutRequest struct {
 	AllDevices bool `json:"all_devices,omitempty"`
 }
 
-// @Summary Logout user
-// @Description Logout the authenticated user, optionally from all devices
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param logout_data body logoutRequest true "Logout options"
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /auth/logout [post]
-// Logout требует AuthMiddleware, user_id/session_id берём из context
+// Logout обрабатывает запрос на выход из системы
+// Может производить выход со всех устройств пользователя
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -189,19 +166,13 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{"success": true})
 }
 
+// googleSignInRequest структура для запроса входа через Google
 type googleSignInRequest struct {
 	IDToken string `json:"id_token"`
 }
 
-// @Summary Sign in with Google
-// @Description Authenticate user using Google OAuth ID token
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param google_auth body googleSignInRequest true "Google authentication data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]string
-// @Router /auth/google [post]
+// GoogleSignIn обрабатывает запрос на аутентификацию через Google
+// Использует ID-токен Google для аутентификации пользователя
 func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -228,24 +199,17 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
-// @Summary Validate authentication token
-// @Description Validate the provided authentication token and return user information
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /auth/validate [post]
+// ValidateToken обрабатывает запрос на проверку токена аутентификации
+// Проверяет действительность токена и возвращает информацию о пользователе
 func (h *AuthHandler) ValidateToken(w http.ResponseWriter, r *http.Request) {
-	// Extract token from header
+	// Извлекаем токен из заголовка
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
 		return
 	}
 
-	// Remove "Bearer " prefix if present
+	// Удаляем префикс "Bearer ", если он присутствует
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	if tokenString == authHeader {
 		tokenString = strings.TrimPrefix(authHeader, "Token ")
@@ -255,14 +219,14 @@ func (h *AuthHandler) ValidateToken(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Validate token and get user info
+	// Проверяем токен и получаем информацию о пользователе
 	user, err := h.auth.ValidateTokenForSilentLogin(r.Context(), tokenString)
 	if err != nil {
 		resp.Error(w, http.StatusUnauthorized, err)
 		return
 	}
 
-	// Return minimal user info for validation
+	// Возвращаем минимальную информацию о пользователе для проверки
 	resp.Success(w, map[string]any{
 		"valid": true,
 		"user": map[string]any{
@@ -274,6 +238,8 @@ func (h *AuthHandler) ValidateToken(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// VerifyCode обрабатывает запрос на проверку кода аутентификации
+// Заглушка для функции, которая может быть реализована позже
 func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -281,6 +247,8 @@ func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 	resp.Error(w, http.StatusNotImplemented, errors.New("VerifyCode not implemented"))
 }
 
+// RefreshToken обрабатывает запрос на обновление токена
+// Заглушка для функции, которая может быть реализована позже
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -288,6 +256,8 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	resp.Error(w, http.StatusNotImplemented, errors.New("RefreshToken not implemented"))
 }
 
+// ForgotPassword обрабатывает запрос на восстановление забытого пароля
+// Заглушка для функции, которая может быть реализована позже
 func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -295,6 +265,8 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	resp.Error(w, http.StatusNotImplemented, errors.New("ForgotPassword not implemented"))
 }
 
+// ResetPassword обрабатывает запрос на сброс пароля
+// Заглушка для функции, которая может быть реализована позже
 func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -302,6 +274,8 @@ func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	resp.Error(w, http.StatusNotImplemented, errors.New("ResetPassword not implemented"))
 }
 
+// GoogleLogin обрабатывает запрос на вход через Google
+// Заглушка для функции, которая может быть реализована позже
 func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
