@@ -10,6 +10,7 @@ import '../features/outfit_details/presentation/outfit_details_screen.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/onboarding/presentation/onboarding_wizard_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/admin/presentation/admin_dashboard_screen.dart';
 import 'di.dart';
 import 'onboarding/onboarding_providers.dart';
 
@@ -90,6 +91,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/outfit/:id',
         builder: (_, state) => OutfitDetailsScreen(outfitId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (_, __) => const AdminDashboardScreen(),
       ),
     ],
   );

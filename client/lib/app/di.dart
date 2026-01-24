@@ -17,6 +17,7 @@ import '../data/repositories/recommendation_repository.dart';
 import '../data/sync/sync_worker.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/profile_repository.dart';
+import '../services/admin_service.dart';
 
 final apiConfigProvider = Provider((ref) => Env.apiConfig());
 
@@ -26,6 +27,12 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   final cfg = ref.watch(apiConfigProvider);
   final storage = ref.watch(authStorageProvider);
   return ApiClient(config: cfg, storage: storage);
+});
+
+final adminServiceProvider = Provider<AdminService>((ref) {
+  final cfg = ref.watch(apiConfigProvider);
+  final auth = ref.watch(authStorageProvider);
+  return AdminService(cfg, auth, http.Client());
 });
 
 final wardrobeServiceProvider = Provider<WardrobeService>((ref) {

@@ -7,11 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/persistence/postgres"
 	"outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 )
+
+// Alias для совместимости
+type DB = postgres.DB
 
 // Эти тесты требуют запущенной базы данных
 func TestAuthService_Integration(t *testing.T) {
@@ -21,13 +24,13 @@ func TestAuthService_Integration(t *testing.T) {
 	}
 
 	// Подключение к тестовой базе данных
-	db, err := pg.ConnectTestDB()
+	db, err := ConnectTestDB()
 	require.NoError(t, err)
 	defer db.Close()
 
 	// Создание реальных репозиториев
-	userRepo := pg.NewUserRepository(db.Pool())
-	sessionRepo := pg.NewSessionRepository(db.Pool())
+	userRepo := pg.NewUserRepository(db.Pool(), nil)
+	sessionRepo := pg.NewSessionRepository(db.Pool(), nil)
 
 	// Создание сервиса с реальными зависимостями
 	authService := services.NewAuthService(userRepo, sessionRepo, nil, nil)
@@ -101,7 +104,7 @@ func TestAuthService_Integration(t *testing.T) {
 
 // Вспомогательная функция для подключения к тестовой базе данных
 // В реальном проекте эта функция будет в отдельном файле helpers.go
-func ConnectTestDB() (*pg.DB, error) {
+func ConnectTestDB() (*DB, error) {
 	// Здесь будет реализация подключения к тестовой базе данных
 	// В настоящем проекте использовать конфигурацию из тестового окружения
 	return nil, nil

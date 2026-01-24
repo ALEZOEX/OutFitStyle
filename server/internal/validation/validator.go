@@ -1,3 +1,5 @@
+// Пакет validation предоставляет функции для валидации данных в приложении
+// Содержит универсальные валидаторы и специфические функции для проверки различных типов данных
 package validation
 
 import (
@@ -11,34 +13,45 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
+// Validator структура для хранения ошибок валидации
 type Validator struct {
-	Errors map[string]string
+	Errors map[string]string // Карта ошибок валидации с ключом поля и сообщением об ошибке
 }
 
+// NewValidator создает новый экземпляр валидатора
+// Инициализирует пустую карту ошибок
 func NewValidator() *Validator {
 	return &Validator{Errors: make(map[string]string)}
 }
 
+// Valid проверяет, есть ли ошибки валидации
+// Возвращает true, если ошибок нет, иначе false
 func (v *Validator) Valid() bool {
 	return len(v.Errors) == 0
 }
 
+// AddError добавляет ошибку валидации для указанного ключа
+// Не перезаписывает существующую ошибку для того же ключа
 func (v *Validator) AddError(key, message string) {
 	if _, exists := v.Errors[key]; !exists {
 		v.Errors[key] = message
 	}
 }
 
+// Check добавляет ошибку, если условие ложно
+// Используется для проверки различных условий валидации
 func (v *Validator) Check(ok bool, key, message string) {
 	if !ok {
 		v.AddError(key, message)
 	}
 }
 
+// Matches проверяет, соответствует ли строка регулярному выражению
 func (v *Validator) Matches(value string, rx *regexp.Regexp) bool {
 	return rx.MatchString(value)
 }
 
+// In проверяет, содержится ли значение в списке допустимых значений
 func (v *Validator) In(value string, checklist ...string) bool {
 	for i := range checklist {
 		if value == checklist[i] {
@@ -48,6 +61,7 @@ func (v *Validator) In(value string, checklist ...string) bool {
 	return false
 }
 
+// Unique проверяет, являются ли все значения в срезе уникальными
 func (v *Validator) Unique(values []string) bool {
 	uniqueValues := make(map[string]bool)
 	for _, value := range values {
@@ -59,20 +73,23 @@ func (v *Validator) Unique(values []string) bool {
 	return true
 }
 
-// EmailRX is a regular expression for validating email addresses.
+// EmailRX регулярное выражение для валидации email-адресов
 var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
+// ValidateEmail проверяет корректность email-адреса
 func ValidateEmail(v *Validator, email string) {
 	v.Check(email != "", "email", "must be provided")
 	v.Check(EmailRX.MatchString(email), "email", "must be a valid email address")
 }
 
+// ValidatePasswordPlaintext проверяет требования к паролю
 func ValidatePasswordPlaintext(v *Validator, password string) {
 	v.Check(password != "", "password", "must be provided")
 	v.Check(len(password) >= 8, "password", "must be at least 8 characters long")
 	v.Check(len(password) <= 72, "password", "must not be more than 72 characters long")
 }
 
+// ValidateUser проверяет поля пользователя
 func ValidateUser(v *Validator, name, email, password string) {
 	v.Check(name != "", "name", "must be provided")
 	v.Check(len(name) <= 500, "name", "must not be more than 500 bytes long")
@@ -81,6 +98,7 @@ func ValidateUser(v *Validator, name, email, password string) {
 	ValidatePasswordPlaintext(v, password)
 }
 
+// ValidateWardrobeItem проверяет поля элемента гардероба
 func ValidateWardrobeItem(v *Validator, name, category, color string, warmthLevel int) {
 	v.Check(name != "", "name", "must be provided")
 	v.Check(len(name) <= 200, "name", "must not be more than 200 characters long")
@@ -95,6 +113,8 @@ func ValidateWardrobeItem(v *Validator, name, category, color string, warmthLeve
 	v.Check(warmthLevel >= 0 && warmthLevel <= 5, "warmth_level", "must be between 0 and 5")
 }
 
+// ValidateJSONBody декодирует JSON-тело запроса в указанный объект
+// Проверяет корректность JSON-формата и ограничивает размер тела запроса
 func ValidateJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	const maxBytes = 1_048_576 // 1MB
 
@@ -132,6 +152,7 @@ func ValidateJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) e
 	return nil
 }
 
+// ValidateUserRegistration проверяет данные регистрации пользователя
 func ValidateUserRegistration(v *Validator, reg domain.UserRegistration) {
 	ValidateEmail(v, reg.Email)
 	ValidatePasswordPlaintext(v, reg.Password)
@@ -141,14 +162,15 @@ func ValidateUserRegistration(v *Validator, reg domain.UserRegistration) {
 	}
 
 	if reg.Locale != nil && *reg.Locale != "" {
-		// Basic locale validation - should be in format like "en", "en_US", etc.
+		// Базовая валидация локали - должна быть в формате "en", "en_US" и т.д.
 		v.Check(len(*reg.Locale) >= 2, "locale", "must be at least 2 characters long")
 		v.Check(len(*reg.Locale) <= 10, "locale", "must be more than 10 characters long")
 	}
 }
 
+// ValidateClothingItem проверяет поля элемента одежды
 func ValidateClothingItem(v *Validator, item domain.ClothingItem) {
-	// Validate required fields
+	// Проверка обязательных полей
 	v.Check(item.Name != "", "name", "must be provided")
 	v.Check(len(item.Name) <= 200, "name", "must not be more than 200 characters long")
 
@@ -158,22 +180,22 @@ func ValidateClothingItem(v *Validator, item domain.ClothingItem) {
 	v.Check(item.Subcategory != "", "subcategory", "must be provided")
 	v.Check(len(item.Subcategory) <= 100, "subcategory", "must not be more than 100 characters long")
 
-	// Validate temperature range
+	// Проверка диапазона температур
 	if item.MinTemp != nil && item.MaxTemp != nil {
 		v.Check(*item.MinTemp <= *item.MaxTemp, "temperature_range", "min_temp cannot be greater than max_temp")
 	}
 
-	// Validate warmth level
+	// Проверка уровня теплоты
 	if item.WarmthLevel != nil {
 		v.Check(*item.WarmthLevel >= 1 && *item.WarmthLevel <= 10, "warmth_level", "must be between 1 and 10")
 	}
 
-	// Validate formality level
+	// Проверка уровня формальности
 	if item.FormalityLevel != nil {
 		v.Check(*item.FormalityLevel >= 1 && *item.FormalityLevel <= 5, "formality_level", "must be between 1 and 5")
 	}
 
-	// Validate optional fields
+	// Проверка необязательных полей
 	if item.Description != nil {
 		v.Check(len(*item.Description) <= 1000, "description", "must not be more than 1000 characters long")
 	}

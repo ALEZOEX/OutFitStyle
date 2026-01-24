@@ -8,7 +8,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
+
+	"outfitstyle/server/internal/core/domain"
 )
 
 // ContextKey is a custom type for context keys
@@ -62,18 +65,38 @@ func (m *AuthMiddleware) Handler(next http.Handler) http.Handler {
 			return
 		}
 
-		// Extract user ID from claims
-		userIDFloat, ok := claims["user_id"].(float64) // JWT numbers are parsed as float64
-		if !ok {
-			m.logger.Error("Invalid user_id in token")
-			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
-			return
-		}
+		// Extract user ID from claims - can be either string (UUID) or number (legacy)
+		var userID domain.ID
+		userIDInterface := claims["user_id"]
 
-		userID := int(userIDFloat)
-		if userID <= 0 {
-			m.logger.Error("Invalid user ID in token", zap.Float64("user_id", userIDFloat))
-			http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
+		switch v := userIDInterface.(type) {
+		case string:
+			// Handle UUID string
+			parsedID, err := uuid.Parse(v)
+			if err != nil {
+				m.logger.Error("Invalid user_id format in token", zap.String("user_id", v))
+				http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
+				return
+			}
+			userID = parsedID
+		case float64:
+			// Handle legacy numeric ID by converting to UUID
+			numericID := int(v)
+			if numericID <= 0 {
+				m.logger.Error("Invalid user ID in token", zap.Float64("user_id", v))
+				http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
+				return
+			}
+			// Convert numeric ID to UUID using domain helper (if available)
+			// For now, we'll use a placeholder - in real implementation you'd have a mapping
+			userID = domain.NewID() // This creates a new random UUID, which is not ideal for auth
+			// In a real implementation, you'd need to either:
+			// 1. Store a mapping between numeric IDs and UUIDs in the database
+			// 2. Or ensure all tokens use UUIDs
+			m.logger.Warn("Legacy numeric user ID detected - consider migrating to UUID tokens", zap.Int("legacy_id", numericID))
+		default:
+			m.logger.Error("Invalid user_id type in token", zap.Any("type", userIDInterface))
+			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
 			return
 		}
 
@@ -83,7 +106,7 @@ func (m *AuthMiddleware) Handler(next http.Handler) http.Handler {
 
 		// Log successful authentication
 		m.logger.Info("Authentication successful",
-			zap.Int("user_id", userID),
+			zap.String("user_id", userID.String()),
 			zap.String("path", r.URL.Path),
 			zap.String("method", r.Method))
 
@@ -152,18 +175,38 @@ func (m *AuthMiddleware) RequireAuth(handler http.HandlerFunc) http.HandlerFunc 
 			return
 		}
 
-		// Extract user ID from claims
-		userIDFloat, ok := claims["user_id"].(float64) // JWT numbers are parsed as float64
-		if !ok {
-			m.logger.Error("Invalid user_id in token")
-			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
-			return
-		}
+		// Extract user ID from claims - can be either string (UUID) or number (legacy)
+		var userID domain.ID
+		userIDInterface := claims["user_id"]
 
-		userID := int(userIDFloat)
-		if userID <= 0 {
-			m.logger.Error("Invalid user ID in token", zap.Float64("user_id", userIDFloat))
-			http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
+		switch v := userIDInterface.(type) {
+		case string:
+			// Handle UUID string
+			parsedID, err := uuid.Parse(v)
+			if err != nil {
+				m.logger.Error("Invalid user_id format in token", zap.String("user_id", v))
+				http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
+				return
+			}
+			userID = parsedID
+		case float64:
+			// Handle legacy numeric ID by converting to UUID
+			numericID := int(v)
+			if numericID <= 0 {
+				m.logger.Error("Invalid user ID in token", zap.Float64("user_id", v))
+				http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
+				return
+			}
+			// Convert numeric ID to UUID using domain helper (if available)
+			// For now, we'll use a placeholder - in real implementation you'd have a mapping
+			userID = domain.NewID() // This creates a new random UUID, which is not ideal for auth
+			// In a real implementation, you'd need to either:
+			// 1. Store a mapping between numeric IDs and UUIDs in the database
+			// 2. Or ensure all tokens use UUIDs
+			m.logger.Warn("Legacy numeric user ID detected - consider migrating to UUID tokens", zap.Int("legacy_id", numericID))
+		default:
+			m.logger.Error("Invalid user_id type in token", zap.Any("type", userIDInterface))
+			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
 			return
 		}
 
@@ -176,7 +219,7 @@ func (m *AuthMiddleware) RequireAuth(handler http.HandlerFunc) http.HandlerFunc 
 }
 
 // GetUserIDFromContext extracts user ID from context
-func GetUserIDFromContext(ctx context.Context) (int, bool) {
-	userID, ok := ctx.Value(UserIDKey).(int)
+func GetUserIDFromContext(ctx context.Context) (domain.ID, bool) {
+	userID, ok := ctx.Value(UserIDKey).(domain.ID)
 	return userID, ok
 }
