@@ -1,3 +1,5 @@
+// Пакет health предоставляет функциональность проверки работоспособности сервиса
+// Реализует проверки состояния базы данных и внешних зависимостей
 package health
 
 import (
@@ -9,41 +11,50 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// минимальный контракт, чтобы не тащить конкретную реализацию ML клиента
+// MLHealthClient минимальный контракт, чтобы не тащить конкретную реализацию ML клиента
+// Позволяет проверять доступность ML-сервиса без жесткой зависимости
 type MLHealthClient interface {
 	HealthCheck(ctx context.Context) bool
 }
 
+// Checker интерфейс для проверки работоспособности компонентов системы
 type Checker interface {
 	HealthCheck() error
 }
 
+// HealthStatus структура, представляющая общее состояние сервиса
 type HealthStatus struct {
-	Status    string                 `json:"status"`
-	Version   string                 `json:"version"`
-	Timestamp time.Time              `json:"timestamp"`
-	Checks    map[string]CheckResult `json:"checks"`
+	Status    string                 `json:"status"`              // Общий статус сервиса (healthy/unhealthy)
+	Version   string                 `json:"version"`             // Версия сервиса
+	Timestamp time.Time              `json:"timestamp"`           // Время проверки
+	Checks    map[string]CheckResult `json:"checks"`              // Результаты проверок отдельных компонентов
 }
 
+// CheckResult структура, представляющая результат проверки отдельного компонента
 type CheckResult struct {
-	Status  string `json:"status"`
-	Error   string `json:"error,omitempty"`
-	Latency string `json:"latency,omitempty"`
+	Status  string `json:"status"`              // Статус проверки (healthy/unhealthy)
+	Error   string `json:"error,omitempty"`     // Сообщение об ошибке, если проверка не прошла
+	Latency string `json:"latency,omitempty"`   // Время выполнения проверки
 }
 
+// HealthChecker структура для выполнения проверок работоспособности
 type HealthChecker struct {
-	db       *pgxpool.Pool
-	mlClient MLHealthClient
+	db       *pgxpool.Pool    // Подключение к базе данных PostgreSQL
+	mlClient MLHealthClient   // Клиент для проверки ML-сервиса
 }
 
+// NewHealthChecker создает новый экземпляр HealthChecker
+// Принимает подключение к базе данных и клиент ML-сервиса
 func NewHealthChecker(db *pgxpool.Pool, mlClient MLHealthClient) *HealthChecker {
 	return &HealthChecker{db: db, mlClient: mlClient}
 }
 
+// Check выполняет проверки работоспособности всех зарегистрированных компонентов
+// Возвращает общий статус сервиса и результаты проверок каждого компонента
 func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
 	checks := map[string]CheckResult{}
 
-	// DB
+	// Проверка базы данных
 	{
 		dbCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
@@ -59,7 +70,7 @@ func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
 		}
 	}
 
-	// ML
+	// Проверка ML-сервиса
 	{
 		mlCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
@@ -75,6 +86,7 @@ func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
 		}
 	}
 
+	// Определение общего статуса
 	overall := "healthy"
 	for _, c := range checks {
 		if c.Status == "unhealthy" {
@@ -91,14 +103,8 @@ func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
 	}
 }
 
-// Handler godoc
-// @Summary      Проверка состояния сервиса
-// @Description  Возвращает состояние сервиса и его зависимостей
-// @Tags         health
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  HealthStatus
-// @Router       /health [get]
+// Handler возвращает HTTP-обработчик для проверки состояния сервиса
+// Возвращает JSON с информацией о состоянии сервиса и его зависимостей
 func Handler(db *pgxpool.Pool, mlClient MLHealthClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		status := NewHealthChecker(db, mlClient).Check(r.Context())
@@ -111,7 +117,8 @@ func Handler(db *pgxpool.Pool, mlClient MLHealthClient) http.HandlerFunc {
 	}
 }
 
-// ReadyHandler проверяет готовность сервиса
+// ReadyHandler возвращает HTTP-обработчик для проверки готовности сервиса
+// Используется для проверки готовности к приему трафика (например, в Kubernetes)
 func ReadyHandler(db *pgxpool.Pool, mlClient MLHealthClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		status := NewHealthChecker(db, mlClient).Check(r.Context())
@@ -128,6 +135,7 @@ func ReadyHandler(db *pgxpool.Pool, mlClient MLHealthClient) http.HandlerFunc {
 }
 
 // RegisterChecks регистрирует проверки для использования в других частях приложения
+// Позволяет расширить функциональность проверки работоспособности
 func RegisterChecks(checks map[string]Checker) {
 	// В реальной реализации здесь будет регистрация проверок
 	// Пока что просто заглушка

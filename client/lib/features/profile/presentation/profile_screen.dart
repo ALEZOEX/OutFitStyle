@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
 import '../../../app/onboarding/onboarding_providers.dart';
@@ -9,12 +10,23 @@ final meProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async 
   return ref.read(profileRepositoryProvider).getMe();
 });
 
+final isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
+  try {
+    final adminService = ref.read(adminServiceProvider);
+    return await adminService.isAdmin();
+  } catch (e) {
+    // Если возникла ошибка при проверке, считаем, что пользователь не администратор
+    return false;
+  }
+});
+
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(meProvider);
+    final isAdmin = ref.watch(isAdminProvider);
 
     return Scaffold(
       appBar: OutfitAppBar(
@@ -50,6 +62,24 @@ class ProfileScreen extends ConsumerWidget {
                 leading: const CircleAvatar(child: Icon(Icons.person_rounded)),
               ),
               const SizedBox(height: 14),
+
+              // Кнопка административного интерфейса, если пользователь администратор
+              isAdmin.when(
+                loading: () => Container(),
+                error: (e, _) => Container(),
+                data: (isAdminUser) => isAdminUser ?
+                  ListTile(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    tileColor: Theme.of(context).colorScheme.surface,
+                    leading: const Icon(Icons.admin_panel_settings_rounded),
+                    title: const Text('Админ-панель'),
+                    onTap: () {
+                      context.push('/admin');
+                    },
+                  ) : Container(),
+              ),
+
+              const SizedBox(height: 10),
 
               // Здесь уже можно подключить achievements_screen и настройки
               ListTile(

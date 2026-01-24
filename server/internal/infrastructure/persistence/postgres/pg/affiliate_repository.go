@@ -314,7 +314,7 @@ func (r *PartnerRepository) GetByID(ctx context.Context, id domain.ID) (*domain.
 
 // Create создает нового партнера
 func (r *PartnerRepository) Create(ctx context.Context, partner *domain.AffiliateProgram) error {
-	if partner.ID == "" {
+	if partner.ID == domain.NilID {
 		partner.ID = domain.NewID()
 	}
 

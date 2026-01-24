@@ -11,6 +11,7 @@ import (
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/middleware"
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
