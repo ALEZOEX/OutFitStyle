@@ -3,7 +3,6 @@ package queue
 import (
 	"context"
 	"encoding/json"
-	"time"
 
 	"github.com/hibiken/asynq"
 	"github.com/pkg/errors"
@@ -105,6 +104,11 @@ func (d WorkerDeps) handleSendNotification(ctx context.Context, t *asynq.Task) e
 	}
 
 	_ = d.NotifRepo.MarkPushResult(ctx, n.ID, true, nil)
+	return nil
+}
+
+func (d WorkerDeps) handleMLAction(ctx context.Context, t *asynq.Task) error {
+	// TODO: Implement ML action handler
 	return nil
 }
 

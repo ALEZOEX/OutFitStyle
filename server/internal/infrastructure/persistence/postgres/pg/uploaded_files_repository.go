@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -18,9 +17,9 @@ func NewUploadedFilesRepository(db *pgxpool.Pool) *UploadedFilesRepository {
 	return &UploadedFilesRepository{db: db}
 }
 
-func (r *UploadedFilesRepository) Create(ctx context.Context, file *domain.UploadedFile) error {
+func (r *UploadedFilesRepository) Create(ctx context.Context, userID *domain.ID, bucket, path, filename, mimeType string, sizeBytes int64) (domain.ID, error) {
 	// TODO: Implement
-	return fmt.Errorf("not implemented")
+	return domain.NilID, fmt.Errorf("not implemented")
 }
 
 func (r *UploadedFilesRepository) GetByID(ctx context.Context, fileID domain.ID) (*domain.UploadedFile, error) {

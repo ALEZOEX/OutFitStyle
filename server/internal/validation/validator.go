@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	"outfitstyle/server/internal/core/domain"
 )
 
 type Validator struct {
@@ -128,4 +130,71 @@ func ValidateJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) e
 	}
 
 	return nil
+}
+
+func ValidateUserRegistration(v *Validator, reg domain.UserRegistration) {
+	ValidateEmail(v, reg.Email)
+	ValidatePasswordPlaintext(v, reg.Password)
+
+	if reg.DisplayName != nil {
+		v.Check(len(*reg.DisplayName) <= 500, "display_name", "must not be more than 500 bytes long")
+	}
+
+	if reg.Locale != nil && *reg.Locale != "" {
+		// Basic locale validation - should be in format like "en", "en_US", etc.
+		v.Check(len(*reg.Locale) >= 2, "locale", "must be at least 2 characters long")
+		v.Check(len(*reg.Locale) <= 10, "locale", "must be more than 10 characters long")
+	}
+}
+
+func ValidateClothingItem(v *Validator, item domain.ClothingItem) {
+	// Validate required fields
+	v.Check(item.Name != "", "name", "must be provided")
+	v.Check(len(item.Name) <= 200, "name", "must not be more than 200 characters long")
+
+	v.Check(item.Category != "", "category", "must be provided")
+	v.Check(len(item.Category) <= 100, "category", "must not be more than 100 characters long")
+
+	v.Check(item.Subcategory != "", "subcategory", "must be provided")
+	v.Check(len(item.Subcategory) <= 100, "subcategory", "must not be more than 100 characters long")
+
+	// Validate temperature range
+	if item.MinTemp != nil && item.MaxTemp != nil {
+		v.Check(*item.MinTemp <= *item.MaxTemp, "temperature_range", "min_temp cannot be greater than max_temp")
+	}
+
+	// Validate warmth level
+	if item.WarmthLevel != nil {
+		v.Check(*item.WarmthLevel >= 1 && *item.WarmthLevel <= 10, "warmth_level", "must be between 1 and 10")
+	}
+
+	// Validate formality level
+	if item.FormalityLevel != nil {
+		v.Check(*item.FormalityLevel >= 1 && *item.FormalityLevel <= 5, "formality_level", "must be between 1 and 5")
+	}
+
+	// Validate optional fields
+	if item.Description != nil {
+		v.Check(len(*item.Description) <= 1000, "description", "must not be more than 1000 characters long")
+	}
+
+	if item.BaseColour != nil {
+		v.Check(len(*item.BaseColour) <= 50, "base_colour", "must not be more than 50 characters long")
+	}
+
+	if item.Brand != nil {
+		v.Check(len(*item.Brand) <= 100, "brand", "must not be more than 100 characters long")
+	}
+
+	if item.ImageURL != nil {
+		v.Check(len(*item.ImageURL) <= 500, "image_url", "must not be more than 500 characters long")
+	}
+
+	if item.ThumbnailURL != nil {
+		v.Check(len(*item.ThumbnailURL) <= 500, "thumbnail_url", "must not be more than 500 characters long")
+	}
+
+	if item.IconEmoji != nil {
+		v.Check(len(*item.IconEmoji) <= 10, "icon_emoji", "must not be more than 10 characters long")
+	}
 }

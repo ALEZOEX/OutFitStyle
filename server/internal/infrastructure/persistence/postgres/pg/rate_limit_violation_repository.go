@@ -29,7 +29,13 @@ func (r *RateLimitViolationRepository) GetViolationsCount(ctx context.Context, k
 	return 0, fmt.Errorf("not implemented")
 }
 
+func (r *RateLimitViolationRepository) Record(ctx context.Context, v repositories.RateLimitViolation) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
 func (r *RateLimitViolationRepository) CleanupOldViolations(ctx context.Context, before time.Time) error {
 	// TODO: Implement
+	var _ domain.ID // Используем тип для устранения ошибки неиспользуемого импорта
 	return fmt.Errorf("not implemented")
 }

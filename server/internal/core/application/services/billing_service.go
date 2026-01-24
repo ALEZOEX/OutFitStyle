@@ -13,6 +13,23 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
+const (
+	// BillingCycleMonthly представляет месячный цикл оплаты
+	BillingCycleMonthly = "monthly"
+
+	// BillingCycleYearly представляет годовой цикл оплаты
+	BillingCycleYearly = "yearly"
+
+	// CurrencyRUB представляет валюту Российский рубль
+	CurrencyRUB = "RUB"
+
+	// StatusPending представляет статус ожидания платежа
+	StatusPending = "pending"
+
+	// StatusActive представляет активный статус подписки
+	StatusActive = "active"
+)
+
 type BillingService struct {
 	subRepo     repositories.SubscriptionRepository
 	billingRepo repositories.BillingRepository
@@ -30,7 +47,7 @@ func (s *BillingService) Subscribe(ctx context.Context, userID domain.ID, req do
 	if planCode == "" {
 		return nil, errors.New("plan_code is required")
 	}
-	if req.BillingCycle != "monthly" && req.BillingCycle != "yearly" {
+	if req.BillingCycle != BillingCycleMonthly && req.BillingCycle != BillingCycleYearly {
 		return nil, errors.New("billing_cycle must be monthly or yearly")
 	}
 
@@ -43,20 +60,20 @@ func (s *BillingService) Subscribe(ctx context.Context, userID domain.ID, req do
 	}
 
 	amount := plan.PriceMonthly
-	if req.BillingCycle == "yearly" {
+	if req.BillingCycle == BillingCycleYearly {
 		amount = plan.PriceYearly
 	}
 	currency := plan.Currency
 	if currency == "" {
-		currency = "RUB"
+		currency = CurrencyRUB
 	}
 
 	periodEnd := time.Now().AddDate(0, 1, 0)
-	if req.BillingCycle == "yearly" {
+	if req.BillingCycle == BillingCycleYearly {
 		periodEnd = time.Now().AddDate(1, 0, 0)
 	}
 
-	// promo (MVP: только проверка валидности; реальный дисконт применим позже)
+	// Проверка промо-кода (MVP: только проверка валидности; реальный дисконт применим позже)
 	if req.PromoCode != nil && strings.TrimSpace(*req.PromoCode) != "" {
 		promo, err := s.promoRepo.GetByCode(ctx, *req.PromoCode)
 		if err != nil {
@@ -65,21 +82,21 @@ func (s *BillingService) Subscribe(ctx context.Context, userID domain.ID, req do
 		if promo == nil || !promo.IsActive {
 			return nil, errors.New("invalid promo code")
 		}
-		// срок
+		// Проверка срока действия
 		if promo.ValidUntil != nil && time.Now().After(*promo.ValidUntil) {
 			return nil, errors.New("promo code expired")
 		}
-		// здесь можно применить discount_type/discount_value, но лучше отдельным модулем
+		// Здесь можно применить discount_type/discount_value, но лучше отдельным модулем
 	}
 
-	// создаём подписку
+	// Создаём подписку
 	userIDInt := domain.IDToInt64(userID)
 	subID, err := s.billingRepo.CreateUserSubscription(ctx, userIDInt, plan.ID, req.BillingCycle, periodEnd, "gateway")
 	if err != nil {
 		return nil, err
 	}
 
-	// создаём платёж у провайдера
+	// Создаём платёж у провайдера
 	gw, ok := s.gateways[req.PaymentProvider]
 	if !ok {
 		return nil, errors.New("payment provider not found: " + req.PaymentProvider)
@@ -102,7 +119,7 @@ func (s *BillingService) Subscribe(ctx context.Context, userID domain.ID, req do
 		SubscriptionID:    &subID,
 		Amount:            amount,
 		Currency:          currency,
-		Status:            "pending",
+		Status:            StatusPending,
 		PaymentProvider:   paymentProvider,
 		ExternalPaymentID: &extID,
 		PaymentMethod:     req.PaymentMethodID,
@@ -117,7 +134,7 @@ func (s *BillingService) Subscribe(ctx context.Context, userID domain.ID, req do
 		UserID:       userIDInt,
 		Plan:         *plan,
 		BillingCycle: &req.BillingCycle,
-		Status:       ptr("active"),
+		Status:       ptr(StatusActive),
 	}
 
 	return &domain.SubscribeResponse{

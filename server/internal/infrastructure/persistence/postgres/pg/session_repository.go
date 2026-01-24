@@ -3,6 +3,7 @@ package pg
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -21,6 +22,11 @@ func NewSessionRepository(db *pgxpool.Pool, logger interface{}) *SessionReposito
 func (r *SessionRepository) CreateSession(ctx context.Context, session *domain.Session) error {
 	// TODO: Implement
 	return fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) GetByID(ctx context.Context, sessionID domain.ID) (*repositories.Session, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (r *SessionRepository) GetSession(ctx context.Context, id domain.ID) (*domain.Session, error) {
@@ -44,6 +50,51 @@ func (r *SessionRepository) DeleteSession(ctx context.Context, id domain.ID) err
 }
 
 func (r *SessionRepository) DeleteSessionsByUser(ctx context.Context, userID domain.ID) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) Create(ctx context.Context, p repositories.CreateSessionParams) (domain.ID, error) {
+	// TODO: Implement
+	return domain.NilID, fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) GetByRefreshHash(ctx context.Context, refreshHash string) (*repositories.Session, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) RotateRefresh(ctx context.Context, sessionID domain.ID, newRefreshHash string, newExpiresAt time.Time) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) Touch(ctx context.Context, sessionID domain.ID) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) Revoke(ctx context.Context, sessionID domain.ID) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) RevokeAllForUser(ctx context.Context, userID domain.ID) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) RevokeForUser(ctx context.Context, userID, sessionID domain.ID) error {
+	// TODO: Implement
+	return fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([]repositories.Session, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SessionRepository) UpdateDeviceInfo(ctx context.Context, sessionID domain.ID, p repositories.UpdateDeviceInfoParams) error {
 	// TODO: Implement
 	return fmt.Errorf("not implemented")
 }

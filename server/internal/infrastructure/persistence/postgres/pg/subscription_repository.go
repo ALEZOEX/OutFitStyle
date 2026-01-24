@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -46,4 +45,29 @@ func (r *SubscriptionRepository) GetPlan(ctx context.Context, planID domain.ID) 
 func (r *SubscriptionRepository) GetPlans(ctx context.Context) ([]domain.SubscriptionPlan, error) {
 	// TODO: Implement
 	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SubscriptionRepository) ListPlans(ctx context.Context) ([]domain.SubscriptionPlan, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SubscriptionRepository) GetActiveSubscription(ctx context.Context, userID int64) (*domain.UserSubscription, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SubscriptionRepository) GetPlanByCode(ctx context.Context, code string) (*domain.SubscriptionPlan, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *SubscriptionRepository) CountRecommendationsToday(ctx context.Context, userID int64) (int, error) {
+	// TODO: Implement
+	return 0, fmt.Errorf("not implemented")
+}
+
+func (r *SubscriptionRepository) CountWardrobeItems(ctx context.Context, userID int64) (int, error) {
+	// TODO: Implement
+	return 0, fmt.Errorf("not implemented")
 }

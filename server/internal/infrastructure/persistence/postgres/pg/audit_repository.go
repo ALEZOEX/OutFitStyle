@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/core/application/repositories"
-	"outfitstyle/server/internal/core/domain"
 )
 
 type AuditRepository struct {

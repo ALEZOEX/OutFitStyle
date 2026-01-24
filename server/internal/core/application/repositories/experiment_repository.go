@@ -7,26 +7,35 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
+// Experiment структура эксперимента (A/B тестирование)
 type Experiment struct {
-	ID             domain.ID
-	Name           string
-	Status         string // draft/running/stopped etc
-	VariantsJSON   []byte
-	UserPercentage int
-	CreatedAt      time.Time
+	ID             domain.ID  // Уникальный идентификатор эксперимента
+	Name           string     // Название эксперимента
+	Status         string     // Статус: draft/running/stopped и т.д.
+	VariantsJSON   []byte     // Варианты эксперимента в формате JSON
+	UserPercentage int        // Процент пользователей, участвующих в эксперименте
+	CreatedAt      time.Time  // Дата создания
 }
 
+// ExperimentAssignment структура присвоения эксперимента пользователю
 type ExperimentAssignment struct {
-	ExperimentID domain.ID
-	UserID       domain.ID
-	Variant      string
-	AssignedAt   time.Time
+	ExperimentID domain.ID  // Идентификатор эксперимента
+	UserID       domain.ID  // Идентификатор пользователя
+	Variant      string     // Назначенный вариант (например, A или B)
+	AssignedAt   time.Time  // Дата назначения
 }
 
+// ExperimentRepository интерфейс репозитория экспериментов
 type ExperimentRepository interface {
+	// GetRunningByName возвращает запущенный эксперимент по названию
 	GetRunningByName(ctx context.Context, name string) (*Experiment, error)
+
+	// GetAssignment возвращает назначение эксперимента пользователю
 	GetAssignment(ctx context.Context, experimentID domain.ID, userID domain.ID) (*ExperimentAssignment, error)
+
+	// CreateAssignment создает новое назначение эксперимента пользователю
 	CreateAssignment(ctx context.Context, experimentID domain.ID, userID domain.ID, variant string) error
 
+	// RecordEvent записывает событие эксперимента (для анализа результатов)
 	RecordEvent(ctx context.Context, experimentID domain.ID, userID domain.ID, variant string, eventName string, eventValue *float64, eventData []byte) error
 }

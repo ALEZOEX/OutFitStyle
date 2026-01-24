@@ -9,6 +9,8 @@ func NewID() ID { return uuid.New() }
 
 func ParseID(s string) (ID, error) { return uuid.Parse(s) }
 
+var NilID = uuid.Nil
+
 // IDToInt64 converts a domain.ID (UUID) to int64 by taking the first 8 bytes and interpreting them as int64.
 // Note: This conversion is not 1:1 due to size difference (UUID=128bit vs int64=64bit) and can cause collisions.
 // This should be used with caution, typically for temporary ID mapping scenarios.

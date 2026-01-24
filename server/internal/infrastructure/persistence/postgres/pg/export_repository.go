@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
 
@@ -34,6 +33,11 @@ func (r *ExportRepository) UpdateStatus(ctx context.Context, jobID domain.ID, st
 }
 
 func (r *ExportRepository) GetUserExports(ctx context.Context, userID domain.ID) ([]domain.ExportJob, error) {
+	// TODO: Implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (r *ExportRepository) BuildUserExport(ctx context.Context, userID domain.ID) (any, error) {
 	// TODO: Implement
 	return nil, fmt.Errorf("not implemented")
 }
