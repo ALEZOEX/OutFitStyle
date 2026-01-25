@@ -1,62 +1,62 @@
-# Mobile Development for OutfitStyle
+# Мобильная разработка для OutfitStyle
 
-## Overview
+## Обзор
 
-This document describes the mobile development setup and deployment process for the OutfitStyle app.
+Этот документ описывает настройку мобильной разработки и процесс развертывания для приложения OutfitStyle.
 
-## Tech Stack
+## Технологический стек
 
 ### Flutter
-- **Framework**: Flutter 3.16.0+
-- **State Management**: Riverpod
-- **Navigation**: Go Router
-- **Database**: Drift (SQLite)
-- **Networking**: Dio + Retrofit
+- **Фреймворк**: Flutter 3.16.0+
+- **Управление состоянием**: Riverpod
+- **Навигация**: Go Router
+- **База данных**: Drift (SQLite)
+- **Сетевое взаимодействие**: Dio + Retrofit
 
-### Platforms
+### Платформы
 - **iOS**: 14.0+
-- **Android**: API level 21+
+- **Android**: API уровень 21+
 
-## Architecture
+## Архитектура
 
-### Layered Architecture
+### Многоуровневая архитектура
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                           MOBILE APP                                │
+│                           МОБИЛЬНОЕ ПРИЛОЖЕНИЕ                      │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐   │
-│  │   PRESENTATION  │  │     DOMAIN      │  │      DATA       │   │
+│  │   ПРЕЗЕНТАЦИЯ   │  │     ДОМЕН      │  │      ДАННЫЕ     │   │
 │  │                 │  │                 │  │                 │   │
-│  │  UI Components  │  │ Use Cases &     │  │ Remote & Local  │   │
-│  │  Screens,       │  │ Business Logic  │  │ Data Sources    │   │
-│  │  Widgets        │  │                 │  │                 │   │
+│  │  Компоненты UI  │  │  Use Cases &    │  │ Удаленные и     │   │
+│  │  Экраны,        │  │ Бизнес-логика   │  │ локальные       │   │
+│  │  Виджеты        │  │                 │  │ источники данных│   │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘   │
 │         │                       │                       │           │
 │         └───────────────────────┼───────────────────────┘           │
 │                                 │                                   │
 │                    ┌─────────────────┐                              │
-│                    │     CORE        │                              │
+│                    │     ЯДРО        │                              │
 │                    │                 │                              │
-│                    │ Utilities,      │                              │
-│                    │ Error Handling, │                              │
-│                    │ Analytics, etc  │                              │
+│                    │ Утилиты,        │                              │
+│                    │ Обработка ошибок,│                              │
+│                    │ Аналитика и т.д.│                              │
 │                    └─────────────────┘                              │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Feature Flags
+## Флаги функций
 
 ### Firebase Remote Config
-- Dynamic feature toggling without app updates
-- A/B testing capabilities
-- Gradual rollouts and experiments
+- Динамическое переключение функций без обновления приложения
+- Возможности A/B тестирования
+- Постепенные развертывания и эксперименты
 
-### Implementation
+### Реализация
 ```dart
 class FeatureFlagService {
-  // Feature flag methods
+  // Методы флага функций
   bool get isNewRecommendationAlgorithmEnabled => getBool('new_recommendation_algorithm');
   bool get isOutfitPreviewEnabled => getBool('show_outfit_preview');
   bool get isSocialSharingEnabled => getBool('enable_social_sharing');
@@ -65,128 +65,128 @@ class FeatureFlagService {
 }
 ```
 
-## Analytics & Crash Reporting
+## Аналитика и отчеты о сбоях
 
 ### Firebase Analytics
-- User behavior tracking
-- Screen view tracking
-- Custom event logging
-- Conversion tracking
+- Отслеживание поведения пользователей
+- Отслеживание просмотров экрана
+- Логирование пользовательских событий
+- Отслеживание конверсий
 
 ### Firebase Crashlytics
-- Automatic crash reporting
-- Non-fatal exception logging
-- User identifier tracking
-- Custom key/value pairs
+- Автоматические отчеты о сбоях
+- Логирование неразрушительных исключений
+- Отслеживание идентификаторов пользователей
+- Пользовательские пары ключ/значение
 
-## Push Notifications
+## Push-уведомления
 
 ### Firebase Messaging
-- Daily outfit recommendations
-- Weather alerts
-- Re-engagement campaigns
-- Social sharing notifications
+- Ежедневные рекомендации по нарядам
+- Предупреждения о погоде
+- Кампании по повторному вовлечению
+- Уведомления о социальном обмене
 
-### Implementation
+### Реализация
 ```dart
 class NotificationService {
-  // Handle foreground messages
+  // Обработка сообщений в переднем плане
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     _showLocalNotification(message);
   });
 
-  // Handle background messages
+  // Обработка фоновых сообщений
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     _handleNotificationTap(message);
   });
 }
 ```
 
-## Offline Support
+## Поддержка работы без подключения
 
-### Local Database (Drift)
-- SQLite-based local storage
-- Automatic synchronization
-- Conflict resolution
-- Offline-first approach
+### Локальная база данных (Drift)
+- Локальное хранилище на основе SQLite
+- Автоматическая синхронизация
+- Разрешение конфликтов
+- Подход "сначала автономно"
 
-### Sync Manager
-- Connectivity monitoring
-- Automatic sync when online
-- Periodic background sync
-- Manual sync option
+### Менеджер синхронизации
+- Мониторинг подключения
+- Автоматическая синхронизация при подключении
+- Периодическая фоновая синхронизация
+- Возможность ручной синхронизации
 
-## Performance Optimization
+## Оптимизация производительности
 
-### Image Loading
-- Cached network images
-- Blurhash placeholders
-- Lazy loading
-- Compression
+### Загрузка изображений
+- Кэшированные сетевые изображения
+- Заглушки Blurhash
+- Ленивая загрузка
+- Сжатие
 
-### Memory Management
-- Proper widget disposal
-- Image caching
-- Database query optimization
-- Efficient state management
+### Управление памятью
+- Правильная очистка виджетов
+- Кэширование изображений
+- Оптимизация запросов к базе данных
+- Эффективное управление состоянием
 
-## Testing Strategy
+## Стратегия тестирования
 
-### Unit Tests
-- Business logic testing
-- Utility functions
-- Data models
-- Use cases
+### Модульные тесты
+- Тестирование бизнес-логики
+- Функции утилит
+- Модели данных
+- Варианты использования
 
-### Widget Tests
-- UI component testing
-- Widget interactions
-- State changes
-- Visual regression
+### Тесты виджетов
+- Тестирование компонентов UI
+- Взаимодействие с виджетами
+- Изменения состояния
+- Визуальная регрессия
 
-### Integration Tests
-- End-to-end workflows
-- API integration
-- Database operations
-- Real device testing
+### Интеграционные тесты
+- Сквозные рабочие процессы
+- Интеграция с API
+- Операции с базой данных
+- Тестирование на реальных устройствах
 
-## Deployment Process
+## Процесс развертывания
 
-### iOS Deployment
+### Развертывание для iOS
 
-#### Prerequisites
-- Apple Developer Account ($99/year)
-- App ID and Provisioning Profiles
-- App Store Connect setup
-- Icons (1024x1024 base)
-- Screenshots for all devices
-- Privacy Policy URL
-- Support URL
+#### Предварительные требования
+- Учетная запись разработчика Apple ($99/год)
+- App ID и профили подготовки
+- Настройка App Store Connect
+- Иконки (база 1024x1024)
+- Скриншоты для всех устройств
+- URL политики конфиденциальности
+- URL поддержки
 
-#### Fastlane Automation
+#### Автоматизация с помощью Fastlane
 ```ruby
 platform :ios do
-  desc "Push a new beta build to TestFlight"
+  desc "Загрузить новую бета-сборку в TestFlight"
   lane :beta do
     setup_ci if ENV['CI']
-    
-    # Match certificates
+
+    # Сопоставление сертификатов
     match(type: "appstore", readonly: true)
-    
-    # Increment build number
+
+    # Увеличение номера сборки
     increment_build_number(
       build_number: ENV["BUILD_NUMBER"] || latest_testflight_build_number + 1
     )
-    
-    # Build
+
+    # Сборка
     build_app(
       workspace: "ios/Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
       output_directory: "./build",
     )
-    
-    # Upload to TestFlight
+
+    # Загрузка в TestFlight
     upload_to_testflight(
       skip_waiting_for_build_processing: true
     )
@@ -194,25 +194,25 @@ platform :ios do
 end
 ```
 
-### Android Deployment
+### Развертывание для Android
 
-#### Prerequisites
-- Google Play Developer Account ($25 one-time)
-- Signing key (upload key + app signing)
-- Store listing setup
-- Screenshots and feature graphic
-- Privacy Policy URL
-- Data safety form
+#### Предварительные требования
+- Учетная запись разработчика Google Play ($25 однократно)
+- Ключ подписи (ключ загрузки + подпись приложения)
+- Настройка листинга в магазине
+- Скриншоты и фирменная графика
+- URL политики конфиденциальности
+- Форма безопасности данных
 
-#### Fastlane Automation
+#### Автоматизация с помощью Fastlane
 ```ruby
 platform :android do
-  desc "Upload a new build to Google Play Console"
+  desc "Загрузить новую сборку в Google Play Console"
   lane :beta do
-    # Build
+    # Сборка
     gradle(task: "bundle", build_type: "Release")
-    
-    # Upload to Internal Testing
+
+    # Загрузка во внутреннее тестирование
     upload_to_play_store(
       track: 'internal',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
@@ -224,50 +224,50 @@ platform :android do
 end
 ```
 
-## App Store Optimization
+## Оптимизация для магазина приложений
 
 ### App Store (iOS)
-- Keyword optimization
-- Compelling screenshots
-- Engaging preview videos
-- Localization for different markets
-- Regular updates and ratings monitoring
+- Оптимизация ключевых слов
+- Убедительные скриншоты
+- Увлекательные превью видео
+- Локализация для разных рынков
+- Регулярные обновления и мониторинг рейтингов
 
 ### Google Play (Android)
-- Title and description optimization
-- Feature graphics and screenshots
-- Video previews
-- Translation for different languages
-- Reviews and ratings management
+- Оптимизация названия и описания
+- Фирменная графика и скриншоты
+- Превью видео
+- Перевод на разные языки
+- Управление отзывами и рейтингами
 
-## Security Considerations
+## Соображения безопасности
 
-### Data Protection
-- Secure storage for sensitive data
-- Encryption in transit and at rest
-- Secure API communication
-- Biometric authentication
+### Защита данных
+- Безопасное хранение конфиденциальных данных
+- Шифрование при передаче и в состоянии покоя
+- Безопасное сетевое взаимодействие с API
+- Биометрическая аутентификация
 
-### Privacy Compliance
-- GDPR compliance
-- CCPA compliance
-- Data minimization
-- Transparency in data usage
-- User consent management
+### Соответствие требованиям конфиденциальности
+- Соответствие GDPR
+- Соответствие CCPA
+- Минимизация данных
+- Прозрачность в использовании данных
+- Управление согласиями пользователей
 
-## Performance Monitoring
+## Мониторинг производительности
 
-### Mobile-Specific Metrics
-- App startup time
-- Screen transition time
-- Memory usage
-- Battery consumption
-- Network usage
-- Crash rate
+### Метрики, специфичные для мобильных устройств
+- Время запуска приложения
+- Время перехода между экранами
+- Использование памяти
+- Потребление батареи
+- Использование сети
+- Коэффициент сбоев
 
-### User Experience Metrics
-- Daily/Monthly active users
-- Session duration
-- Screen flow analysis
-- Feature adoption rate
-- User retention
+### Метрики пользовательского опыта
+- Ежедневные/ежемесячные активные пользователи
+- Продолжительность сессии
+- Анализ потока экранов
+- Темпы внедрения функций
+- Удержание пользователей

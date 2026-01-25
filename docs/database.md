@@ -1,14 +1,14 @@
-# Database Management for OutfitStyle
+# Управление базой данных для OutfitStyle
 
-## Overview
+## Обзор
 
-This document describes the database management and optimization strategies for the OutfitStyle platform.
+Этот документ описывает стратегии управления и оптимизации базы данных для платформы OutfitStyle.
 
-## Database Schema
+## Схема базы данных
 
-### Core Tables
+### Основные таблицы
 
-#### Users Table
+#### Таблица пользователей
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -20,7 +20,7 @@ CREATE TABLE users (
 );
 ```
 
-#### User Preferences Table
+#### Таблица пользовательских предпочтений
 ```sql
 CREATE TABLE user_preferences (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -37,7 +37,7 @@ CREATE TABLE user_preferences (
 );
 ```
 
-#### Wardrobe Items Table
+#### Таблица вещей в гардеробе
 ```sql
 CREATE TABLE wardrobe_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -54,12 +54,12 @@ CREATE TABLE wardrobe_items (
 );
 ```
 
-#### Recommendations Table
+#### Таблица рекомендаций
 ```sql
 CREATE TABLE recommendations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    items JSONB NOT NULL, -- Array of wardrobe item IDs
+    items JSONB NOT NULL, -- Массив ID вещей из гардероба
     score DECIMAL(3,2) NOT NULL,
     reason TEXT,
     occasion VARCHAR(50),
@@ -68,7 +68,7 @@ CREATE TABLE recommendations (
 );
 ```
 
-#### Recommendation Feedback Table
+#### Таблица обратной связи по рекомендациям
 ```sql
 CREATE TABLE recommendation_feedback (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -81,171 +81,171 @@ CREATE TABLE recommendation_feedback (
 );
 ```
 
-## Migration Strategy
+## Стратегия миграций
 
-### Migration Rules
+### Правила миграции
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      MIGRATION RULES                                │
+│                      ПРАВИЛА МИГРАЦИЙ                              │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  1. Each migration — separate file with timestamp                 │
+│  1. Каждая миграция — отдельный файл с меткой времени             │
 │     └── 20240115_120000_add_user_preferences.sql                   │
 │                                                                     │
-│  2. Migrations are idempotent (can be applied repeatedly)          │
+│  2. Миграции идемпотентны (могут применяться многократно)          │
 │     └── CREATE TABLE IF NOT EXISTS                                 │
 │                                                                     │
-│  3. Always have down migration (rollback)                          │
+│  3. Всегда есть обратная миграция (откат)                          │
 │                                                                     │
-│  4. Never delete/modify applied migrations                         │
-│     └── Only new migrations for changes                            │
+│  4. Никогда не удалять/изменять примененные миграции               │
+│     └── Только новые миграции для изменений                        │
 │                                                                     │
-│  5. Test migrations on copy of production data                    │
+│  5. Тестировать миграции на копии продакшн-данных                 │
 │                                                                     │
-│  6. Backward compatible changes:                                   │
-│     ├── Adding nullable columns — OK                               │
-│     ├── Removing columns — stop using first                        │
-│     └── Renaming — via alias, then removal                         │
+│  6. Обратно совместимые изменения:                                 │
+│     ├── Добавление nullable колонок — OK                           │
+│     ├── Удаление колонок — сначала перестать использовать          │
+│     └── Переименование — через псевдоним, затем удаление           │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Migration Tools
+### Инструменты миграции
 - **Go**: `golang-migrate`, `goose`, `atlas`
-- **Automatic execution**: On app startup (optional)
-- **Lock mechanism**: Only one instance applies migrations
+- **Автоматическое выполнение**: При запуске приложения (опционально)
+- **Механизм блокировки**: Только один экземпляр применяет миграции
 
-## Backup Strategy
+## Стратегия резервного копирования
 
-### 3-2-1 Rule
-- **3** copies of data
-- **2** different types of storage
-- **1** offsite (different region/cloud)
+### Правило 3-2-1
+- **3** копии данных
+- **2** разных типа хранения
+- **1** вне сайта (другой регион/облако)
 
-### Schedule
+### Расписание
 ```
-├── Full backup: daily at 3:00 UTC
-├── Incremental: every 6 hours
-├── Transaction logs: continuously (Point-in-Time Recovery)
-└── Retention:
-    ├── Daily: 7 days
-    ├── Weekly: 4 weeks
-    └── Monthly: 12 months
-```
-
-### Automation
-```
-1. pg_dump with compression → S3/GCS
-2. Encryption of backup (GPG or cloud KMS)
-3. Integrity check after upload
-4. Alert if backup fails
-5. Regular restoration testing (monthly)
+├── Полное резервное копирование: ежедневно в 3:00 UTC
+├── Инкрементальное: каждые 6 часов
+├── Журналы транзакций: постоянно (Восстановление на момент времени)
+└── Хранение:
+    ├── Ежедневно: 7 дней
+    ├── Еженедельно: 4 недели
+    └── Ежемесячно: 12 месяцев
 ```
 
-## Performance Optimization
+### Автоматизация
+```
+1. pg_dump с сжатием → S3/GCS
+2. Шифрование резервной копии (GPG или облачный KMS)
+3. Проверка целостности после загрузки
+4. Оповещение при сбое резервного копирования
+5. Регулярное тестирование восстановления (ежемесячно)
+```
 
-### Indexes
+## Оптимизация производительности
+
+### Индексы
 ```sql
--- Frequent queries by user_id
+-- Частые запросы по user_id
 CREATE INDEX idx_wardrobe_items_user_id ON wardrobe_items(user_id);
 CREATE INDEX idx_recommendations_user_id ON recommendations(user_id);
 
--- Sorting by date
+-- Сортировка по дате
 CREATE INDEX idx_recommendations_created_at ON recommendations(user_id, created_at DESC);
 
--- Filtering by category
+-- Фильтрация по категории
 CREATE INDEX idx_wardrobe_items_category ON wardrobe_items(user_id, category);
 
--- Full-text search (if needed)
+-- Полнотекстовый поиск (при необходимости)
 CREATE INDEX idx_wardrobe_items_search ON wardrobe_items USING gin(to_tsvector('english', name));
 ```
 
-### Connection Pooling
-- **PgBouncer**: In front of PostgreSQL
-- **Mode**: Transaction pooling
-- **Max connections**: CPU cores * 2-4
-- **Go**: Configure `MaxOpenConns`, `MaxIdleConns`, `ConnMaxLifetime`
+### Пул соединений
+- **PgBouncer**: Перед PostgreSQL
+- **Режим**: Пул транзакций
+- **Макс. соединений**: Ядра CPU * 2-4
+- **Go**: Настройка `MaxOpenConns`, `MaxIdleConns`, `ConnMaxLifetime`
 
-### Query Optimization
+### Оптимизация запросов
 ```
-Checklist for each query:
-□ EXPLAIN ANALYZE shows Index Scan (not Seq Scan)
-□ No N+1 problems (use JOIN or batch loading)
-□ LIMIT on all list queries
-□ Pagination via cursor, not OFFSET
-□ Heavy queries in background jobs, not API handlers
+Чек-лист для каждого запроса:
+□ EXPLAIN ANALYZE показывает Index Scan (не Seq Scan)
+□ Нет проблем N+1 (использовать JOIN или пакетную загрузку)
+□ LIMIT для всех запросов списка
+□ Пагинация через курсор, не OFFSET
+□ Тяжелые запросы в фоновых задачах, не в обработчиках API
 ```
 
-## Monitoring & Maintenance
+## Мониторинг и обслуживание
 
-### Key Metrics
-- **Connections**: Current vs max connections
-- **Locks**: Blocking queries
-- **Replication lag**: If using replicas
-- **Disk space**: Available storage
-- **Slow queries**: Queries > 100ms
+### Ключевые метрики
+- **Соединения**: Текущие vs максимальные соединения
+- **Блокировки**: Блокирующие запросы
+- **Задержка репликации**: При использовании реплик
+- **Дисковое пространство**: Доступное хранилище
+- **Медленные запросы**: Запросы > 100мс
 
-### Maintenance Tasks
-- **Index optimization**: Monthly review
-- **Vacuum and analyze**: Regular maintenance
-- **Statistics updates**: For query planner
-- **Dead tuple cleanup**: Prevent bloat
+### Задачи обслуживания
+- **Оптимизация индексов**: Ежемесячный обзор
+- **Vacuum и analyze**: Регулярное обслуживание
+- **Обновление статистики**: Для планировщика запросов
+- **Очистка мертвых кортежей**: Предотвращение разбухания
 
-### Alerting
-- **Disk space**: < 20% free
-- **Connection exhaustion**: > 90% of max
-- **Slow queries**: > 1s consistently
-- **Replication lag**: > 30s (if applicable)
+### Оповещения
+- **Дисковое пространство**: < 20% свободно
+- **Истощение соединений**: > 90% от максимума
+- **Медленные запросы**: > 1с последовательно
+- **Задержка репликации**: > 30с (при наличии)
 
-## Security
+## Безопасность
 
-### Access Control
-- **Role-based access**: Different permissions for different services
-- **Least privilege**: Minimal required permissions
-- **Network security**: Restrict access to database subnet only
-- **Encryption**: SSL/TLS for connections
+### Контроль доступа
+- **Доступ на основе ролей**: Разные разрешения для разных сервисов
+- **Минимальные привилегии**: Минимально необходимые разрешения
+- **Сетевая безопасность**: Ограничить доступ только к подсети базы данных
+- **Шифрование**: SSL/TLS для соединений
 
-### Data Protection
-- **Encryption at rest**: Transparent data encryption
-- **Column-level encryption**: For sensitive data
-- **Audit logging**: Track all database access
-- **PII protection**: Masking and anonymization
+### Защита данных
+- **Шифрование при хранении**: Прозрачное шифрование данных
+- **Шифрование на уровне колонок**: Для конфиденциальных данных
+- **Журнал аудита**: Отслеживание всего доступа к базе данных
+- **Защита PII**: Маскировка и анонимизация
 
-## Scaling Strategies
+## Стратегии масштабирования
 
-### Vertical Scaling
-- **CPU/Memory**: Increase instance size
-- **Storage**: Faster disks (SSD)
-- **Network**: Higher bandwidth
+### Вертикальное масштабирование
+- **CPU/Память**: Увеличение размера инстанса
+- **Хранилище**: Более быстрые диски (SSD)
+- **Сеть**: Более высокая пропускная способность
 
-### Horizontal Scaling
-- **Read replicas**: Offload read queries
-- **Partitioning**: Split large tables
-- **Sharding**: Distribute data across instances
-- **Caching**: Reduce database load
+### Горизонтальное масштабирование
+- **Чтение реплик**: Выгрузка запросов на чтение
+- **Разбиение**: Разделение больших таблиц
+- **Шардинг**: Распределение данных по инстансам
+- **Кэширование**: Снижение нагрузки на базу данных
 
-## Disaster Recovery
+## Восстановление после сбоев
 
-### Recovery Time Objective (RTO)
-- **Target**: < 4 hours for full recovery
-- **Process**: Automated restore from backups
-- **Testing**: Quarterly disaster recovery drills
+### Целевое время восстановления (RTO)
+- **Цель**: < 4 часа для полного восстановления
+- **Процесс**: Автоматическое восстановление из резервных копий
+- **Тестирование**: Ежеквартальные учения по восстановлению после сбоев
 
-### Recovery Point Objective (RPO)
-- **Target**: < 1 hour of data loss
-- **Strategy**: Continuous backup and WAL shipping
-- **Verification**: Regular backup integrity checks
+### Целевая точка восстановления (RPO)
+- **Цель**: < 1 час потерь данных
+- **Стратегия**: Постоянное резервное копирование и отправка WAL
+- **Проверка**: Регулярные проверки целостности резервных копий
 
-## Best Practices
+## Лучшие практики
 
-### Development
-- **Local development**: Use Docker for consistent environment
-- **Seed data**: For development and testing
-- **Migration testing**: On copy of production data
-- **Performance testing**: Before applying to production
+### Разработка
+- **Локальная разработка**: Использовать Docker для согласованной среды
+- **Тестовые данные**: Для разработки и тестирования
+- **Тестирование миграций**: На копии продакшн-данных
+- **Тестирование производительности**: Перед применением в продакшн
 
-### Production
-- **Monitoring**: 24/7 database health monitoring
-- **Alerting**: Immediate notification of issues
-- **Documentation**: All schema changes documented
-- **Rollback plans**: For every migration
+### Продакшн
+- **Мониторинг**: Круглосуточный мониторинг здоровья базы данных
+- **Оповещения**: Немедленное уведомление о проблемах
+- **Документация**: Все изменения схемы задокументированы
+- **Планы отката**: Для каждой миграции

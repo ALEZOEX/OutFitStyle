@@ -1,32 +1,32 @@
-# Monitoring and Observability for OutfitStyle
+# Мониторинг и наблюдаемость для OutfitStyle
 
-## Overview
+## Обзор
 
-This document describes the monitoring and observability setup for the OutfitStyle platform.
+Этот документ описывает настройку мониторинга и наблюдаемости для платформы OutfitStyle.
 
-## Three Pillars of Observability
+## Три столпа наблюдаемости
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     OBSERVABILITY PILLARS                           │
+│                     СТОЛПЫ НАБЛЮДАЕМОСТИ                            │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐             │
-│  │   METRICS   │    │    LOGS     │    │   TRACES    │             │
+│  │   МЕТРИКИ   │    │    ЛОГИ     │    │   ТРЕЙСИНГ  │             │
 │  ├─────────────┤    ├─────────────┤    ├─────────────┤             │
 │  │ Prometheus  │    │ Loki / ELK  │    │   Jaeger    │             │
 │  │ + Grafana   │    │             │    │   Tempo     │             │
 │  ├─────────────┤    ├─────────────┤    ├─────────────┤             │
-│  │ WHAT:       │    │ WHAT:       │    │ WHAT:       │             │
-│  │ - RPS       │    │ - Errors    │    │ - Latency   │             │
-│  │ - Latency   │    │ - Events    │    │ - Flow      │             │
-│  │ - Errors %  │    │ - Debug     │    │ - Deps      │             │
+│  │ ЧТО:        │    │ ЧТО:        │    │ ЧТО:        │             │
+│  │ - RPS       │    │ - Ошибки    │    │ - Задержка  │             │
+│  │ - Задержка  │    │ - События   │    │ - Поток     │             │
+│  │ - % ошибок  │    │ - Отладка   │    │ - Зависим.  │             │
 │  └─────────────┘    └─────────────┘    └─────────────┘             │
 │         │                  │                  │                     │
 │         └──────────────────┼──────────────────┘                     │
 │                            ▼                                        │
 │                    ┌─────────────┐                                  │
-│                    │  ALERTING   │                                  │
+│                    │  ОПОВЕЩЕНИЯ  │                                  │
 │                    │ PagerDuty / │                                  │
 │                    │ Telegram    │                                  │
 │                    └─────────────┘                                  │
@@ -34,61 +34,61 @@ This document describes the monitoring and observability setup for the OutfitSty
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Metrics Collection
+## Сбор метрик
 
-### RED Metrics (for each service):
-- **R**ate — number of requests per second
-- **E**rrors — percentage of errors
-- **D**uration — time to process requests (p50, p90, p99)
+### RED-метрики (для каждого сервиса):
+- **R**ate — количество запросов в секунду
+- **E**rrors — процент ошибок
+- **D**uration — время обработки запросов (p50, p90, p99)
 
-### USE Metrics (for infrastructure):
-- **U**tilization — CPU, Memory, Disk usage
-- **S**aturation — queues, pending connections
-- **E**rrors — system errors
+### USE-метрики (для инфраструктуры):
+- **U**tilization — использование CPU, памяти, диска
+- **S**aturation — очереди, ожидающие соединения
+- **E**rrors — системные ошибки
 
-### Business Metrics:
+### Бизнес-метрики:
 ```
-OutfitStyle specific:
-├── recommendations_generated_total — number of recommendations generated
-├── recommendations_accepted_total — number of swipes right
-├── recommendations_rejected_total — number of swipes left
-├── wardrobe_items_added_total — items added
+Специфичные для OutfitStyle:
+├── recommendations_generated_total — количество сгенерированных рекомендаций
+├── recommendations_accepted_total — количество свайпов вправо
+├── recommendations_rejected_total — количество свайпов влево
+├── wardrobe_items_added_total — добавленные вещи
 ├── active_users_daily — DAU
-├── ml_inference_duration_seconds — ML model execution time
-└── weather_api_calls_total — external API calls
+├── ml_inference_duration_seconds — время выполнения ML-модели
+└── weather_api_calls_total — внешние вызовы API
 ```
 
-## Logging Strategy
+## Стратегия логирования
 
-### Log Levels:
+### Уровни логов:
 ```
-ERROR — Error requiring attention
- ├── Failed to save to database
- ├── External API returned 500
- └── Authentication failed (for security audit)
+ERROR — Ошибка, требующая внимания
+ ├── Не удалось сохранить в базу данных
+ ├── Внешнее API вернуло 500
+ └── Аутентификация не удалась (для аудита безопасности)
 
-WARN — Potential problems
- ├── Slow query (>1s)
- ├── Retry attempt
- └── Deprecated API usage
+WARN — Потенциальные проблемы
+ ├── Медленный запрос (>1с)
+ ├── Попытка повтора
+ └── Использование устаревшего API
 
-INFO — Significant events
- ├── Request completed (with latency)
- ├── User signed in
- └── Background job finished
+INFO — Значимые события
+ ├── Запрос завершен (с задержкой)
+ ├── Пользователь вошел
+ └── Фоновая задача завершена
 
-DEBUG — Details for debugging (dev/staging only)
- ├── SQL queries
- ├── Request/response bodies
- └── Cache hits/misses
+DEBUG — Детали для отладки (только dev/staging)
+ ├── SQL-запросы
+ ├── Тела запросов/ответов
+ └── Попадания/промахи кэша
 ```
 
-### Structured Logging (JSON):
+### Структурированное логирование (JSON):
 ```json
 {
   "timestamp": "2024-01-15T10:30:00Z",
   "level": "INFO",
-  "message": "Request completed",
+  "message": "Запрос завершен",
   "request_id": "abc-123",
   "user_id": "user-456",
   "method": "POST",
@@ -99,103 +99,103 @@ DEBUG — Details for debugging (dev/staging only)
 }
 ```
 
-## Distributed Tracing
+## Распределенный трейсинг
 
-### Purpose:
-Request flows: Flutter → Nginx → Go API → Python ML → PostgreSQL
-Need to understand where bottlenecks occur.
+### Назначение:
+Потоки запросов: Flutter → Nginx → Go API → Python ML → PostgreSQL
+Нужно понимать, где возникают узкие места.
 
-### How it works:
-1. Each request gets a unique Trace ID
-2. Each span (operation) has a Span ID
-3. Spans are linked via parent-child relationships
-4. Context is passed between services via headers
+### Как это работает:
+1. Каждый запрос получает уникальный Trace ID
+2. Каждый span (операция) имеет Span ID
+3. Spans связаны через родительско-дочерние отношения
+4. Контекст передается между сервисами через заголовки
 
-### What to trace:
+### Что трейсить:
 ```
-Required:
-├── HTTP handlers (automatically via middleware)
-├── Database queries
-├── External API calls
-├── Message queue operations
-└── ML inference
+Обязательно:
+├── HTTP-обработчики (автоматически через middleware)
+├── Запросы к базе данных
+├── Внешние вызовы API
+├── Операции с очередью сообщений
+└── ML-вывод
 
-Optional:
-├── Cache operations
-├── File I/O
-└── CPU-intensive computations
-```
-
-## Alerting Rules
-
-### Critical (PagerDuty/phone call):
-```
-├── Service unavailable > 1 min
-├── Error rate > 10% for 5 min
-├── Latency p99 > 5s for 5 min
-├── Database connection pool exhausted
-└── Disk usage > 90%
+Опционально:
+├── Операции с кэшем
+├── Файловый ввод-вывод
+└── Вычисления, требующие CPU
 ```
 
-### Important (Telegram/email):
-```
-├── Error rate > 5% for 15 min
-├── Latency p99 > 2s for 15 min
-├── Memory usage > 80%
-├── Certificate expires in < 7 days
-└── Failed deployments
-```
+## Правила оповещений
 
-### Informational (dashboard only):
+### Критические (PagerDuty/звонок):
 ```
-├── Daily active users dropped > 20%
-├── Recommendation acceptance rate dropped
-└── Background jobs taking longer than usual
+├── Сервис недоступен > 1 мин
+├── Процент ошибок > 10% в течение 5 мин
+├── Задержка p99 > 5с в течение 5 мин
+├── Пул соединений с базой данных исчерпан
+└── Использование диска > 90%
 ```
 
-## Dashboards
+### Важные (Telegram/электронная почта):
+```
+├── Процент ошибок > 5% в течение 15 мин
+├── Задержка p99 > 2с в течение 15 мин
+├── Использование памяти > 80%
+├── Сертификат истекает через < 7 дней
+└── Неудачные развертывания
+```
 
-### Required dashboards:
-1. **Overview** — health of entire system on one screen
-2. **API Performance** — RPS, latency, errors by endpoints
-3. **Infrastructure** — CPU, memory, disk, network
-4. **Business Metrics** — DAU, recommendations, conversions
-5. **ML Service** — inference time, model accuracy metrics
+### Информационные (только на панель мониторинга):
+```
+├── Ежедневные активные пользователи упали > 20%
+├── Процент принятия рекомендаций снизился
+└── Фоновые задачи занимают больше обычного времени
+```
 
-## Monitoring Setup
+## Панели мониторинга
 
-### Prometheus Configuration:
-- Scrapes metrics from all services every 15s
-- Stores metrics for 15 days
-- Configured via prometheus.yml
-- Alerts defined in rules.yml
+### Обязательные панели:
+1. **Обзор** — здоровье всей системы на одном экране
+2. **Производительность API** — RPS, задержка, ошибки по эндпоинтам
+3. **Инфраструктура** — CPU, память, диск, сеть
+4. **Бизнес-метрики** — DAU, рекомендации, конверсии
+5. **ML-сервис** — время вывода, метрики точности модели
 
-### Grafana Configuration:
-- Multiple dashboards for different purposes
-- Alerting rules linked to notification channels
-- User access controls for different roles
-- Dashboard sharing and collaboration
+## Настройка мониторинга
 
-### Log Aggregation:
-- Loki for structured logs
-- Centralized storage and querying
-- Log retention policies
-- Integration with alerting
+### Конфигурация Prometheus:
+- Сбор метрик со всех сервисов каждые 15с
+- Хранение метрик в течение 15 дней
+- Настроено через prometheus.yml
+- Оповещения определены в rules.yml
 
-## Health Checks
+### Конфигурация Grafana:
+- Несколько панелей для разных целей
+- Правила оповещений, связанные с каналами уведомлений
+- Контроль доступа для разных ролей
+- Совместное использование и работа с панелями
+
+### Агрегация логов:
+- Loki для структурированных логов
+- Централизованное хранение и запросы
+- Политики хранения логов
+- Интеграция с оповещениями
+
+## Проверки работоспособности
 
 ### Liveness Probe:
-- Checks if process is alive
-- If failure — pod is restarted
-- Endpoint: `GET /health` → 200 OK
+- Проверяет, жив ли процесс
+- При сбое — pod перезапускается
+- Эндпоинт: `GET /health` → 200 OK
 
 ### Readiness Probe:
-- Checks if ready to serve traffic
-- If failure — removed from load balancer
-- Checks: DB connection, ML model loaded
+- Проверяет, готов ли к обслуживанию трафика
+- При сбое — удаляется из балансировщика нагрузки
+- Проверки: соединение с БД, загрузка ML-модели
 
 ```go
-// /ready endpoint
+// эндпоинт /ready
 {
   "status": "ready",
   "checks": {
@@ -206,17 +206,46 @@ Optional:
 }
 ```
 
-## Performance Monitoring
+## Мониторинг производительности
 
-### Baseline Metrics:
-- API response time: p95 < 200ms, p99 < 500ms
-- Error rate: < 1% for all endpoints
-- Availability: > 99.9%
-- Database connections: < 80% of max connections
-- Disk usage: < 80% on all systems
+### Базовые метрики:
+- Время ответа API: p95 < 200мс, p99 < 500мс
+- Процент ошибок: < 1% для всех эндпоинтов
+- Доступность: > 99.9%
+- Соединения с базой данных: < 80% от максимального количества соединений
+- Использование диска: < 80% на всех системах
 
-### Performance Testing:
-- Load testing with realistic user scenarios
-- Stress testing to identify breaking points
-- Soak testing for long-term stability
-- Spike testing for sudden traffic increases
+### Тестирование производительности:
+- Тестирование нагрузки с реалистичными сценариями пользователей
+- Стресс-тестирование для выявления точек отказа
+- Тестирование на длительность для обеспечения стабильности
+- Тестирование всплесков для внезапного увеличения трафика
+
+## Мониторинг Service Mesh (Istio)
+
+### Service Mesh метрики
+- Request Volume: количество запросов между сервисами
+- Request Success Rate: процент успешных запросов в Service Mesh
+- Request Duration: время отклика запросов через Istio
+- TCP Connections: количество TCP-соединений между сервисами
+- Circuit Breaker: статус размыкателей цепи
+
+### Визуализация топологии
+- Kiali: визуализация топологии сервисов
+- Распределенная трассировка запросов через Jaeger
+- Мониторинг политик безопасности
+
+## Мониторинг Event-driven архитектуры
+
+### Kafka метрики
+- Topic Lag: задержка в обработке сообщений
+- Partition Offset: смещение сообщений в партициях
+- Consumer Group Lag: задержка в группах потребителей
+- Throughput: пропускная способность сообщений
+- Error Rate: ошибки при обработке событий
+
+### Event Processing метрики
+- Events Published: количество опубликованных событий
+- Events Consumed: количество потребленных событий
+- Processing Time: время обработки событий
+- Failed Events: количество неудачно обработанных событий

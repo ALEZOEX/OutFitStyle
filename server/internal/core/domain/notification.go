@@ -38,9 +38,9 @@ type PushToken struct {
 	Platform string  `json:"platform"` // ios|android|web
 	DeviceID *string `json:"device_id,omitempty"`
 
-	IsActive   bool      `json:"is_active"`
-	LastUsedAt time.Time `json:"last_used_at"`
-	CreatedAt  time.Time `json:"created_at"`
+	IsActive   bool       `json:"is_active"`
+	LastUsedAt *time.Time `json:"last_used_at,omitempty"`
+	CreatedAt  time.Time  `json:"created_at"`
 }
 
 type RegisterPushTokenRequest struct {

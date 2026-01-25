@@ -288,4 +288,3 @@ func (h *RecommendationHandler) Regenerate(w http.ResponseWriter, r *http.Reques
 
 	resp.Success(w, map[string]any{"recommendation": rec})
 }
-

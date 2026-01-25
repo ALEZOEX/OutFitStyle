@@ -1,0 +1,51 @@
+apiVersion: Networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: internal-services
+  namespace: outfitstyle
+spec:
+  hosts:
+  - api-service.outfitstyle.svc.cluster.local
+  - ml-service.outfitstyle.svc.cluster.local
+  ports:
+  - number: 80
+    name: http-api
+    protocol: HTTP
+  - number: 80
+    name: http-ml
+    protocol: HTTP
+  location: MESH_INTERNAL
+  resolution: DNS
+---
+apiVersion: Networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: internal-routing
+  namespace: outfitstyle
+spec:
+  hosts:
+  - ml-service.outfitstyle.svc.cluster.local
+  http:
+  - match:
+    - sourceLabels:
+        app: api
+    route:
+    - destination:
+        host: ml-service.outfitstyle.svc.cluster.local
+        port:
+          number: 80
+      weight: 100
+---
+apiVersion: Networking.istio.io/v1alpha3
+kind: Sidecar
+metadata:
+  name: outfitstyle-sidecar
+  namespace: outfitstyle
+spec:
+  workloadSelector:
+    labels:
+      app: api
+  egress:
+  - hosts:
+    - "./*"
+    - "istiod.istio-system.svc.cluster.local"

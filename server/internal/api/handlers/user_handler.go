@@ -1,3 +1,5 @@
+// Пакет handlers содержит HTTP-обработчики для различных API-эндпоинтов
+// Реализует маршрутизацию и обработку HTTP-запросов
 package handlers
 
 import (
@@ -18,32 +20,37 @@ import (
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
+// UserHandler структура обработчика пользовательских запросов
+// Содержит зависимости для обработки запросов, связанных с профилем пользователя
 type UserHandler struct {
-	userService    *services.UserService
-	fileService    *services.FileService
-	exportService  *services.ExportService
-	accountService *services.AccountService
-	sessionRepo    repositories.SessionRepository
-	logger         *zap.Logger
+	userService    *services.UserService          // Сервис для работы с пользовательскими данными
+	fileService    *services.FileService          // Сервис для работы с файлами
+	exportService  *services.ExportService        // Сервис для экспорта данных
+	accountService *services.AccountService       // Сервис для управления аккаунтом
+	sessionRepo    repositories.SessionRepository // Репозиторий сессий для работы с сессиями пользователя
+	logger         *zap.Logger                    // Логгер для записи событий
 }
 
+// SessionInfo структура информации о сессии пользователя
 type SessionInfo struct {
-	ID         domain.ID `json:"id"`
-	DeviceName *string   `json:"device_name,omitempty"`
-	DeviceType *string   `json:"device_type,omitempty"`
-	IPAddress  *string   `json:"ip_address,omitempty"`
-	LastUsedAt string    `json:"last_used_at"`
-	IsCurrent  bool      `json:"is_current"`
-	IsActive   bool      `json:"is_active"`
-	ExpiresAt  string    `json:"expires_at"`
+	ID         domain.ID `json:"id"`                    // Идентификатор сессии
+	DeviceName *string   `json:"device_name,omitempty"` // Название устройства
+	DeviceType *string   `json:"device_type,omitempty"` // Тип устройства
+	IPAddress  *string   `json:"ip_address,omitempty"`  // IP-адрес
+	LastUsedAt string    `json:"last_used_at"`          // Время последнего использования
+	IsCurrent  bool      `json:"is_current"`            // Признак текущей сессии
+	IsActive   bool      `json:"is_active"`             // Признак активности сессии
+	ExpiresAt  string    `json:"expires_at"`            // Время истечения срока действия
 }
 
+// DeleteAccountBody структура тела запроса для удаления аккаунта
 type DeleteAccountBody struct {
-	Password string  `json:"password"`
-	Reason   *string `json:"reason,omitempty"`
-	Feedback *string `json:"feedback,omitempty"`
+	Password string  `json:"password"`           // Пароль пользователя для подтверждения
+	Reason   *string `json:"reason,omitempty"`   // Причина удаления аккаунта
+	Feedback *string `json:"feedback,omitempty"` // Обратная связь от пользователя
 }
 
+// NewUserHandler создает новый экземпляр обработчика пользовательских запросов
 func NewUserHandler(
 	userService *services.UserService,
 	fileSvc *services.FileService,
@@ -62,6 +69,7 @@ func NewUserHandler(
 	}
 }
 
+// RegisterRoutes регистрирует маршруты для обработчика пользовательских запросов
 func (h *UserHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/profile", h.GetMyProfile).Methods(http.MethodGet)
 	r.HandleFunc("/profile", h.UpdateMyProfile).Methods(http.MethodPut)
@@ -84,17 +92,8 @@ func (h *UserHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/account", h.DeleteAccount).Methods(http.MethodDelete)
 }
 
-// @Summary Get current user's profile
-// @Description Retrieve the authenticated user's profile information
-// @Tags users
-// @Accept json
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /user/profile [get]
+// GetMyProfile обрабатывает запрос на получение профиля текущего пользователя
+// Возвращает информацию о профиле аутентифицированного пользователя
 func (h *UserHandler) GetMyProfile(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -115,18 +114,8 @@ func (h *UserHandler) GetMyProfile(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, out)
 }
 
-// @Summary Update current user's profile
-// @Description Update the authenticated user's profile information
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param profile body domain.UserProfileUpdate true "Profile update data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /user/profile [put]
+// UpdateMyProfile обрабатывает запрос на обновление профиля текущего пользователя
+// Обновляет информацию о профиле аутентифицированного пользователя
 func (h *UserHandler) UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -365,18 +354,8 @@ func (h *UserHandler) GetPreferences(w http.ResponseWriter, r *http.Request) {
 	resp.Success(w, map[string]any{"preferences": out.User.Preferences})
 }
 
-// @Summary Delete user account
-// @Description Permanently delete the authenticated user's account
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param data body DeleteAccountBody true "Deletion data including password"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /user/account [delete]
+// DeleteAccount обрабатывает запрос на удаление пользовательского аккаунта
+// Безвозвратно удаляет аккаунт аутентифицированного пользователя
 func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {

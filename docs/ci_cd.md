@@ -1,14 +1,14 @@
-# CI/CD Pipeline for OutfitStyle
+# CI/CD Pipeline для OutfitStyle
 
-## Overview
+## Обзор
 
-The OutfitStyle project uses GitHub Actions for continuous integration and deployment across all services.
+Проект OutfitStyle использует GitHub Actions для непрерывной интеграции и развертывания во всех сервисах.
 
-## Pipeline Structure
+## Структура конвейера
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         CI/CD STAGES                                │
+│                         СТАДИИ CI/CD                                │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌───────┐ │
@@ -23,128 +23,128 @@ The OutfitStyle project uses GitHub Actions for continuous integration and deplo
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Service Pipelines
+## Конвейеры сервисов
 
 ### Go Backend Pipeline
 
-#### Linting
-- Uses `golangci-lint` (meta-linter with 50+ checks)
-- Includes: `errcheck`, `gosec`, `govet`, `staticcheck`, `unused`
-- Configured in `.golangci.yml`
+#### Линтинг
+- Использует `golangci-lint` (мета-линтер с 50+ проверками)
+- Включает: `errcheck`, `gosec`, `govet`, `staticcheck`, `unused`
+- Настроено в `.golangci.yml`
 
-#### Testing
-- Runs with `-race` (race detector) and `-cover` (coverage)
-- PostgreSQL in Docker for integration tests
-- Uses build tags to separate unit/integration tests
-- Minimum 70% coverage for business logic
+#### Тестирование
+- Запускается с `-race` (детектор гонок) и `-cover` (покрытие)
+- PostgreSQL в Docker для интеграционных тестов
+- Использует теги сборки для разделения юнит/интеграционных тестов
+- Минимум 70% покрытия для бизнес-логики
 
-#### Building
-- Builds with `CGO_ENABLED=0` for static linking
-- Adds version and commit hash via `-ldflags`
-- Uses multi-stage Docker build for minimal image
+#### Сборка
+- Собирается с `CGO_ENABLED=0` для статической линковки
+- Добавляет версию и хэш коммита через `-ldflags`
+- Использует многоступенчатую сборку Docker для минимального образа
 
-#### Security Scanning
-- `gosec` for code vulnerability scanning
-- `trivy` for Docker image CVE scanning
-- `govulncheck` for dependency vulnerability checking
+#### Сканирование безопасности
+- `gosec` для сканирования уязвимостей в коде
+- `trivy` для сканирования CVE в Docker-образах
+- `govulncheck` для проверки уязвимостей зависимостей
 
 ### Python ML Service Pipeline
 
-#### Linting & Typing
-- `ruff` for fast linting (replaces flake8, isort, etc.)
-- `mypy` for static type checking
-- `black` for code formatting
-- Configured in `pyproject.toml`
+#### Линтинг и типизация
+- `ruff` для быстрого линтинга (заменяет flake8, isort и т.д.)
+- `mypy` для статической проверки типов
+- `black` для форматирования кода
+- Настроено в `pyproject.toml`
 
-#### Testing
-- `pytest` with plugins: `pytest-asyncio`, `pytest-cov`, `pytest-mock`
-- Fixtures for ML model test data
-- Performance tests for ML inference
+#### Тестирование
+- `pytest` с плагинами: `pytest-asyncio`, `pytest-cov`, `pytest-mock`
+- Фикстуры для тестовых данных ML-моделей
+- Тесты производительности для ML-вывода
 
-#### Dependencies
-- Uses `pip-compile` or `poetry` for lock files
-- Separates `requirements.txt` and `requirements-dev.txt`
-- Scans dependencies with `safety` or `pip-audit`
+#### Зависимости
+- Использует `pip-compile` или `poetry` для lock-файлов
+- Разделяет `requirements.txt` и `requirements-dev.txt`
+- Сканирует зависимости с помощью `safety` или `pip-audit`
 
 ### Flutter Pipeline
 
-#### Code Analysis
-- `flutter analyze` with `--fatal-infos` (any warning = error)
-- Configured in `analysis_options.yaml`
-- Includes: `avoid_print`, `prefer_const_constructors`, etc.
+#### Анализ кода
+- `flutter analyze` с `--fatal-infos` (любое предупреждение = ошибка)
+- Настроено в `analysis_options.yaml`
+- Включает: `avoid_print`, `prefer_const_constructors` и т.д.
 
-#### Testing
-- Unit tests for providers/controllers
-- Widget tests for UI components
-- Integration tests for full scenarios
-- Golden tests for visual regression
+#### Тестирование
+- Модульные тесты для провайдеров/контроллеров
+- Виджет-тесты для компонентов UI
+- Интеграционные тесты для полных сценариев
+- Golden-тесты для регрессии визуала
 
-#### Building
-- Different flavors: dev, staging, production
-- Different bundle IDs per environment
-- Signing through GitHub Secrets
+#### Сборка
+- Разные варианты: dev, staging, production
+- Разные bundle ID для каждой среды
+- Подписание через GitHub Secrets
 
-## Git Flow Strategy
+## Стратегия Git Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      GIT FLOW STRATEGY                              │
+│                      СТРАТЕГИЯ GIT FLOW                             │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  Feature Branch    →    PR to develop    →    Tests + Review        │
+│  Feature Branch    →    PR в develop    →    Тесты + Ревью          │
 │        ↓                                                            │
-│  develop           →    Nightly builds   →    Auto-deploy Staging   │
+│  develop           →    Ночные сборки   →    Авто-развертывание     │
 │        ↓                                                            │
-│  release/x.x.x     →    RC testing       →    Manual QA             │
+│  release/x.x.x     →    RC тестирование →    Ручной QA             │
 │        ↓                                                            │
-│  main              →    Tag + Release    →    Auto-deploy Prod      │
+│  main              →    Тег + Релиз     →    Авто-развертывание     │
 │                                                                     │
 ├─────────────────────────────────────────────────────────────────────┤
-│  TRIGGERS:                                                          │
-│  • PR opened/updated → Run all tests                                │
-│  • Push to develop → Build + Deploy Staging                         │
-│  • Push to main → Build + Deploy Production                         │
-│  • Tag v*.*.* → Create GitHub Release + Store Upload                │
+│  ТРИГГЕРЫ:                                                          │
+│  • PR открыт/обновлен → Запустить все тесты                         │
+│  • Push в develop → Собрать + Развернуть в Staging                  │
+│  • Push в main → Собрать + Развернуть в Production                  │
+│  • Тег v*.*.* → Создать GitHub Release + Загрузить в Store          │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Deployment Strategy
+## Стратегия развертывания
 
-### Environments
-- **Development**: Feature branches, auto-deploy on push
-- **Staging**: Develop branch, nightly builds
-- **Production**: Main branch, manual approval required
+### Среды
+- **Development**: Feature-ветки, авто-развертывание при пуше
+- **Staging**: Ветка develop, ночные сборки
+- **Production**: Ветка main, требуется ручное одобрение
 
-### Deployment Types
-- **Blue-Green**: Full environment swap for zero downtime
-- **Canary**: Gradual rollout to subset of users
-- **Rolling**: Gradual replacement of instances
+### Типы развертывания
+- **Blue-Green**: Полная замена среды без простоя
+- **Canary**: Поэтапное развертывание для подмножества пользователей
+- **Rolling**: Поэтапная замена инстансов
 
-## Security in CI/CD
+## Безопасность в CI/CD
 
-### Secrets Management
-- GitHub Secrets for all sensitive data
-- Encrypted environment variables
-- No hardcoded credentials in code
-- Regular rotation of deployment tokens
+### Управление секретами
+- GitHub Secrets для всех чувствительных данных
+- Зашифрованные переменные окружения
+- Никаких захардкоженных учетных данных в коде
+- Регулярная ротация токенов развертывания
 
-### Security Scanning
-- Static code analysis on every PR
-- Dependency vulnerability scanning
-- Container image security scanning
-- Infrastructure as code validation
+### Сканирование безопасности
+- Статический анализ кода при каждом PR
+- Сканирование уязвимостей зависимостей
+- Сканирование безопасности образов контейнеров
+- Проверка инфраструктуры как кода
 
-## Monitoring & Alerting
+## Мониторинг и оповещения
 
-### Pipeline Monitoring
-- GitHub Actions workflow status
-- Build time tracking
-- Deployment success/failure rates
-- Test coverage trends
+### Мониторинг конвейера
+- Статус рабочего процесса GitHub Actions
+- Отслеживание времени сборки
+- Уровень успеха/провала развертываний
+- Тренды покрытия тестами
 
-### Alerting
-- Failed builds/deployments
-- Significant performance regressions
-- Security scan failures
-- Test coverage drops below threshold
+### Оповещения
+- Неудачные сборки/развертывания
+- Значительные регрессии производительности
+- Ошибки сканирования безопасности
+- Падение покрытия тестами ниже порога

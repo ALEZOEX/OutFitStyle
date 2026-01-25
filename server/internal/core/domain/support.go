@@ -45,4 +45,6 @@ type CreateFeedbackRequest struct {
 	Message     string   `json:"message"`
 	Screen      *string  `json:"screen,omitempty"`
 	Attachments []string `json:"attachments,omitempty"`
+	Metadata    *string  `json:"metadata,omitempty"` // Дополнительные метаданные
+	Rating      *int     `json:"rating,omitempty"`   // Оценка (от 1 до 5)
 }

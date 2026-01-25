@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	DefaultPage = 1
+	DefaultPage  = 1
 	DefaultLimit = 50
-	MaxLimit = 1000
+	MaxLimit     = 1000
 )
 
 var (
-	ErrInvalidPromoCode = errors.New("promo code is required")
-	ErrInvalidDiscountType = errors.New("discount type is required")
+	ErrInvalidPromoCode     = errors.New("promo code is required")
+	ErrInvalidDiscountType  = errors.New("discount type is required")
 	ErrInvalidDiscountValue = errors.New("discount value must be greater than 0")
 )
 

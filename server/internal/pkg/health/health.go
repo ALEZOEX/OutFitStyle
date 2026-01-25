@@ -24,23 +24,23 @@ type Checker interface {
 
 // HealthStatus структура, представляющая общее состояние сервиса
 type HealthStatus struct {
-	Status    string                 `json:"status"`              // Общий статус сервиса (healthy/unhealthy)
-	Version   string                 `json:"version"`             // Версия сервиса
-	Timestamp time.Time              `json:"timestamp"`           // Время проверки
-	Checks    map[string]CheckResult `json:"checks"`              // Результаты проверок отдельных компонентов
+	Status    string                 `json:"status"`    // Общий статус сервиса (healthy/unhealthy)
+	Version   string                 `json:"version"`   // Версия сервиса
+	Timestamp time.Time              `json:"timestamp"` // Время проверки
+	Checks    map[string]CheckResult `json:"checks"`    // Результаты проверок отдельных компонентов
 }
 
 // CheckResult структура, представляющая результат проверки отдельного компонента
 type CheckResult struct {
-	Status  string `json:"status"`              // Статус проверки (healthy/unhealthy)
-	Error   string `json:"error,omitempty"`     // Сообщение об ошибке, если проверка не прошла
-	Latency string `json:"latency,omitempty"`   // Время выполнения проверки
+	Status  string `json:"status"`            // Статус проверки (healthy/unhealthy)
+	Error   string `json:"error,omitempty"`   // Сообщение об ошибке, если проверка не прошла
+	Latency string `json:"latency,omitempty"` // Время выполнения проверки
 }
 
 // HealthChecker структура для выполнения проверок работоспособности
 type HealthChecker struct {
-	db       *pgxpool.Pool    // Подключение к базе данных PostgreSQL
-	mlClient MLHealthClient   // Клиент для проверки ML-сервиса
+	db       *pgxpool.Pool  // Подключение к базе данных PostgreSQL
+	mlClient MLHealthClient // Клиент для проверки ML-сервиса
 }
 
 // NewHealthChecker создает новый экземпляр HealthChecker

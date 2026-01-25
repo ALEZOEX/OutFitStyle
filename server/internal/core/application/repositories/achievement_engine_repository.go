@@ -10,9 +10,13 @@ import (
 type AchievementDef struct {
 	ID             domain.ID // Уникальный идентификатор достижения
 	Code           string    // Код достижения (уникальный идентификатор в виде строки)
+	Name           string    // Название достижения
+	Description    string    // Описание достижения
+	IconEmoji      string    // Эмодзи для отображения
+	Points         int       // Количество баллов за достижение
 	ConditionType  string    // Тип условия (например, "items_added", "outfits_created")
 	ConditionValue int       // Значение условия (например, 10 для "добавить 10 вещей")
-	Points         int       // Количество баллов за достижение
+	Conditions     string    // Условия получения достижения (в виде строки JSON)
 }
 
 // AchievementEngineRepository интерфейс репозитория движка достижений

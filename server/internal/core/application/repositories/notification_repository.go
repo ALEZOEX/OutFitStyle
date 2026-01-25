@@ -8,15 +8,17 @@ import (
 
 // CreateNotificationParams параметры для создания уведомления
 type CreateNotificationParams struct {
-	UserID domain.ID   // Идентификатор пользователя
-	Type   string      // Тип уведомления
-	Title  string      // Заголовок
-	Body   *string     // Текст (опционально)
+	UserID domain.ID // Идентификатор пользователя
+	Type   string    // Тип уведомления
+	Title  string    // Заголовок
+	Body   *string   // Текст (опционально)
 
-	ImageURL *string   // URL изображения (опционально)
+	ImageURL *string // URL изображения (опционально)
 
+	Data           *string // Дополнительные данные (в формате JSON)
 	DataJSON       []byte  // Дополнительные данные (в формате JSON)
 	ActionType     *string // Тип действия (опционально)
+	ActionData     *string // Данные действия (в формате JSON)
 	ActionDataJSON []byte  // Данные действия (в формате JSON)
 
 	ExpiresAt *string // Время истечения (опционально, формат ISO); можно расширить позже

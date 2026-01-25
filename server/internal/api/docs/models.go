@@ -34,8 +34,8 @@ type SwaggerUser struct {
 	BodyMeasurements interface{} `json:"body_measurements,omitempty"`
 	Preferences      interface{} `json:"preferences,omitempty"`
 
-	IsActive   bool `json:"is_active"`
-	IsVerified bool `json:"is_verified"`
+	IsActive   bool    `json:"is_active"`
+	IsVerified bool    `json:"is_verified"`
 	VerifiedAt *string `json:"verified_at,omitempty"` // Преобразованный из time.Time
 
 	OAuthProvider *string `json:"oauth_provider,omitempty"`

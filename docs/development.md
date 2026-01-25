@@ -1,237 +1,237 @@
-# Development Guidelines for OutfitStyle
+# Руководство по разработке для OutfitStyle
 
-## Overview
+## Обзор
 
-This document outlines the development guidelines and best practices for the OutfitStyle platform.
+Этот документ описывает руководящие принципы разработки и лучшие практики для платформы OutfitStyle.
 
-## Code Standards
+## Стандарты кодирования
 
 ### Go
-- **Style**: Follow Effective Go guidelines
-- **Formatting**: Use `gofmt` for consistent formatting
-- **Naming**: Use clear, descriptive names
-- **Documentation**: Document exported functions/types
+- **Стиль**: Следовать рекомендациям Effective Go
+- **Форматирование**: Использовать `gofmt` для согласованного форматирования
+- **Именование**: Использовать ясные, описательные имена
+- **Документация**: Документировать экспортируемые функции/типы
 
 ### Python
-- **Style**: Follow PEP 8 guidelines
-- **Formatting**: Use `black` for consistent formatting
-- **Type hints**: Use type hints for better readability
-- **Documentation**: Use docstrings for functions
+- **Стиль**: Следовать рекомендациям PEP 8
+- **Форматирование**: Использовать `black` для согласованного форматирования
+- **Подсказки типов**: Использовать подсказки типов для лучшей читаемости
+- **Документация**: Использовать docstrings для функций
 
 ### Flutter/Dart
-- **Style**: Follow Effective Dart guidelines
-- **Formatting**: Use `flutter format` for consistent formatting
-- **Naming**: Use camelCase for variables/functions
-- **Documentation**: Document public APIs
+- **Стиль**: Следовать рекомендациям Effective Dart
+- **Форматирование**: Использовать `flutter format` для согласованного форматирования
+- **Именование**: Использовать camelCase для переменных/функций
+- **Документация**: Документировать публичные API
 
-## Architecture Patterns
+## Паттерны архитектуры
 
-### Clean Architecture
+### Чистая архитектура
 ```
 ┌─────────────────┐
-│   Presentation  │ ← UI, Controllers, Widgets
+│   Presentation  │ ← UI, контроллеры, виджеты
 ├─────────────────┤
-│     Domain      │ ← Business Logic, Entities
+│     Domain      │ ← Бизнес-логика, сущности
 ├─────────────────┤
-│      Data       │ ← Repositories, Data Sources
+│      Data       │ ← Репозитории, источники данных
 └─────────────────┘
 ```
 
-### Backend Architecture
-- **Handlers**: HTTP request/response handling
-- **Services**: Business logic and orchestration
-- **Repositories**: Data access layer
-- **Infrastructure**: External service integrations
+### Бэкенд-архитектура
+- **Обработчики**: Обработка HTTP-запросов/ответов
+- **Сервисы**: Бизнес-логика и оркестрация
+- **Репозитории**: Слой доступа к данным
+- **Инфраструктура**: Интеграции внешних сервисов
 
-### Frontend Architecture
-- **Presentation**: UI components and screens
-- **Domain**: Business logic and use cases
-- **Data**: API clients and local storage
-- **Core**: Utilities and shared functionality
+### Фронтенд-архитектура
+- **Presentation**: Компоненты UI и экраны
+- **Domain**: Бизнес-логика и варианты использования
+- **Data**: Клиенты API и локальное хранилище
+- **Core**: Утилиты и общая функциональность
 
-## Error Handling
+## Обработка ошибок
 
 ### Go
-- **Error wrapping**: Use `fmt.Errorf` with `%w` for wrapping
-- **Context**: Pass context for tracing and cancellation
-- **Logging**: Log errors with structured logging
-- **Recovery**: Handle panics gracefully
+- **Обертывание ошибок**: Использовать `fmt.Errorf` с `%w` для обертывания
+- **Контекст**: Передавать контекст для трассировки и отмены
+- **Логирование**: Логировать ошибки с структурированным логированием
+- **Восстановление**: Элегантно обрабатывать паники
 
 ### Python
-- **Exceptions**: Create custom exceptions for domain errors
-- **Logging**: Use structured logging with context
-- **Graceful degradation**: Handle errors without crashing
-- **Retry mechanisms**: Implement exponential backoff
+- **Исключения**: Создавать пользовательские исключения для доменных ошибок
+- **Логирование**: Использовать структурированное логирование с контекстом
+- **Плавное понижение качества**: Обрабатывать ошибки без падения
+- **Механизмы повтора**: Реализовать экспоненциальное затухание
 
 ### Flutter
-- **Error boundaries**: Handle UI errors gracefully
-- **State management**: Represent errors in state
-- **User feedback**: Show meaningful error messages
-- **Analytics**: Log errors for monitoring
+- **Границы ошибок**: Элегантно обрабатывать ошибки UI
+- **Управление состоянием**: Представлять ошибки в состоянии
+- **Обратная связь с пользователем**: Показывать осмысленные сообщения об ошибках
+- **Аналитика**: Логировать ошибки для мониторинга
 
-## Testing
+## Тестирование
 
-### Test Pyramid
-- **Unit tests**: 70% of tests, fast and reliable
-- **Integration tests**: 20% of tests, test components together
-- **E2E tests**: 10% of tests, critical user journeys
+### Пирамида тестирования
+- **Модульные тесты**: 70% тестов, быстрые и надежные
+- **Интеграционные тесты**: 20% тестов, тестирование компонентов вместе
+- **E2E тесты**: 10% тестов, критические пользовательские пути
 
-### Test Organization
-- **Arrange-Act-Assert**: Clear test structure
-- **Descriptive names**: Tests should read like specifications
-- **Isolation**: Tests should not depend on each other
-- **Speed**: Tests should run quickly
+### Организация тестирования
+- **Arrange-Act-Assert**: Четкая структура теста
+- **Описательные имена**: Тесты должны читаться как спецификации
+- **Изоляция**: Тесты не должны зависеть друг от друга
+- **Скорость**: Тесты должны выполняться быстро
 
-## Performance
+## Производительность
 
-### Backend Performance
-- **Database queries**: Optimize with proper indexing
-- **Caching**: Use Redis for frequently accessed data
-- **Concurrency**: Use goroutines for I/O operations
-- **Memory management**: Avoid memory leaks
+### Производительность бэкенда
+- **Запросы к базе данных**: Оптимизировать с правильной индексацией
+- **Кэширование**: Использовать Redis для часто запрашиваемых данных
+- **Конкурентность**: Использовать горутины для операций ввода-вывода
+- **Управление памятью**: Избегать утечек памяти
 
-### Frontend Performance
-- **Image optimization**: Compress and cache images
-- **Lazy loading**: Load components when needed
-- **State management**: Optimize state updates
-- **Memory usage**: Dispose of resources properly
+### Производительность фронтенда
+- **Оптимизация изображений**: Сжимать и кэшировать изображения
+- **Ленивая загрузка**: Загружать компоненты по мере необходимости
+- **Управление состоянием**: Оптимизировать обновления состояния
+- **Использование памяти**: Правильно утилизировать ресурсы
 
-## Security
+## Безопасность
 
-### Input Validation
-- **Server-side**: Always validate on the server
-- **Sanitization**: Sanitize user inputs
-- **Whitelist**: Use whitelisting over blacklisting
-- **Encoding**: Encode outputs appropriately
+### Валидация ввода
+- **Сторона сервера**: Всегда валидировать на сервере
+- **Санитизация**: Санитизировать пользовательские вводы
+- **Белый список**: Использовать белый список вместо черного
+- **Кодирование**: Соответственно кодировать выводы
 
-### Authentication
-- **JWT**: Use secure JWT implementation
-- **Sessions**: Implement secure session management
-- **OAuth**: Follow OAuth 2.0 best practices
-- **Rate limiting**: Prevent brute force attacks
+### Аутентификация
+- **JWT**: Использовать безопасную реализацию JWT
+- **Сессии**: Реализовать безопасное управление сессиями
+- **OAuth**: Следовать лучшим практикам OAuth 2.0
+- **Ограничение частоты**: Предотвращать атаки методом грубой силы
 
-## Documentation
+## Документация
 
-### Code Documentation
-- **Comments**: Explain why, not what
-- **Function docs**: Document parameters and return values
-- **Complex logic**: Document complex algorithms
-- **API endpoints**: Document all API endpoints
+### Документация кода
+- **Комментарии**: Объяснять почему, а не что
+- **Документация функций**: Документировать параметры и возвращаемые значения
+- **Сложная логика**: Документировать сложные алгоритмы
+- **Конечные точки API**: Документировать все конечные точки API
 
-### Architecture Documentation
-- **Diagrams**: Keep architecture diagrams updated
-- **Decisions**: Document architecture decisions (ADRs)
-- **Changes**: Document significant changes
-- **Onboarding**: Maintain onboarding documentation
+### Документация архитектуры
+- **Диаграммы**: Поддерживать обновленные диаграммы архитектуры
+- **Решения**: Документировать архитектурные решения (ADR)
+- **Изменения**: Документировать значительные изменения
+- **Ознакомление**: Поддерживать документацию для ознакомления
 
-## Version Control
+## Контроль версий
 
-### Git Workflow
-- **Branching**: Use feature branches for development
-- **Commits**: Write clear, descriptive commit messages
-- **Pull requests**: Use PRs for code review
-- **Merging**: Use squash and merge for clean history
+### Рабочий процесс Git
+- **Ветвление**: Использовать feature-ветки для разработки
+- **Коммиты**: Писать ясные, описательные сообщения коммитов
+- **Pull-запросы**: Использовать PR для код-ревью
+- **Слияние**: Использовать squash и merge для чистой истории
 
-### Commit Messages
-- **Format**: Use conventional commits format
-- **Types**: feat, fix, docs, style, refactor, test, chore
-- **Scope**: Optional scope in parentheses
-- **Description**: Clear, imperative description
+### Сообщения коммитов
+- **Формат**: Использовать формат conventional commits
+- **Типы**: feat, fix, docs, style, refactor, test, chore
+- **Область**: Необязательная область в скобках
+- **Описание**: Ясное, повелительное описание
 
-## Code Review
+## Код-ревью
 
-### Review Process
-- **Checklist**: Use a standard review checklist
-- **Focus**: Focus on logic, security, and performance
-- **Constructive**: Provide constructive feedback
-- **Timeliness**: Review PRs promptly
+### Процесс ревью
+- **Чек-лист**: Использовать стандартный чек-лист ревью
+- **Фокус**: Сосредоточиться на логике, безопасности и производительности
+- **Конструктивность**: Предоставлять конструктивную обратную связь
+- **Своевременность**: Проводить ревью PR своевременно
 
-### Review Checklist
-- **Functionality**: Does the code work as intended?
-- **Security**: Are there any security issues?
-- **Performance**: Are there any performance issues?
-- **Maintainability**: Is the code easy to maintain?
+### Чек-лист ревью
+- **Функциональность**: Работает ли код как задумано?
+- **Безопасность**: Есть ли какие-либо проблемы безопасности?
+- **Производительность**: Есть ли какие-либо проблемы производительности?
+- **Сопровождаемость**: Легко ли поддерживать код?
 
-## Deployment
+## Развертывание
 
-### CI/CD Pipeline
-- **Testing**: Run all tests before deployment
-- **Security scanning**: Scan for vulnerabilities
-- **Automated**: Automate deployment process
-- **Rollback**: Have rollback procedures ready
+### CI/CD конвейер
+- **Тестирование**: Запускать все тесты перед развертыванием
+- **Сканирование безопасности**: Сканировать на уязвимости
+- **Автоматизация**: Автоматизировать процесс развертывания
+- **Откат**: Иметь готовые процедуры отката
 
-### Environment Management
-- **Isolation**: Keep environments isolated
-- **Consistency**: Maintain environment consistency
-- **Configuration**: Manage configuration separately
-- **Monitoring**: Monitor deployments closely
+### Управление окружением
+- **Изоляция**: Держать окружения изолированными
+- **Согласованность**: Поддерживать согласованность окружений
+- **Конфигурация**: Управлять конфигурацией отдельно
+- **Мониторинг**: Тщательно мониторить развертывания
 
-## Monitoring and Observability
+## Мониторинг и наблюдаемость
 
-### Logging
-- **Structured**: Use structured logging
-- **Context**: Include relevant context in logs
-- **Levels**: Use appropriate log levels
-- **Privacy**: Don't log sensitive information
+### Логирование
+- **Структурированное**: Использовать структурированное логирование
+- **Контекст**: Включать релевантный контекст в логи
+- **Уровни**: Использовать соответствующие уровни логов
+- **Конфиденциальность**: Не логировать конфиденциальную информацию
 
-### Metrics
-- **Business**: Track business metrics
-- **Technical**: Track technical metrics
-- **Alerting**: Set up appropriate alerts
-- **Dashboards**: Create informative dashboards
+### Метрики
+- **Бизнес**: Отслеживать бизнес-метрики
+- **Технические**: Отслеживать технические метрики
+- **Оповещения**: Настроить соответствующие оповещения
+- **Панели мониторинга**: Создавать информативные панели мониторинга
 
-## Collaboration
+## Сотрудничество
 
-### Communication
-- **Channels**: Use appropriate communication channels
-- **Meetings**: Keep meetings focused and productive
-- **Documentation**: Keep documentation updated
-- **Knowledge sharing**: Share knowledge regularly
+### Коммуникация
+- **Каналы**: Использовать соответствующие каналы коммуникации
+- **Встречи**: Держать встречи сфокусированными и продуктивными
+- **Документация**: Поддерживать обновленную документацию
+- **Обмен знаниями**: Регулярно делиться знаниями
 
-### Knowledge Management
-- **Wiki**: Maintain a project wiki
-- **Runbooks**: Create operational runbooks
-- **FAQs**: Maintain frequently asked questions
-- **Lessons learned**: Document lessons learned
+### Управление знаниями
+- **Вики**: Поддерживать вики проекта
+- **Руководства**: Создавать операционные руководства
+- **ЧАВО**: Поддерживать часто задаваемые вопросы
+- **Уроки**: Документировать уроки, извлеченные из опыта
 
-## Quality Assurance
+## Обеспечение качества
 
-### Code Quality
-- **Linting**: Use linters to enforce standards
-- **Formatting**: Use formatters for consistency
-- **Complexity**: Keep code complexity low
-- **Duplication**: Eliminate code duplication
+### Качество кода
+- **Линтинг**: Использовать линтеры для соблюдения стандартов
+- **Форматирование**: Использовать форматтеры для согласованности
+- **Сложность**: Держать сложность кода низкой
+- **Дублирование**: Устранять дублирование кода
 
-### Testing Quality
-- **Coverage**: Maintain good test coverage
-- **Effectiveness**: Ensure tests are effective
-- **Maintenance**: Keep tests maintained
-- **Automation**: Automate testing where possible
+### Качество тестирования
+- **Покрытие**: Поддерживать хорошее покрытие тестами
+- **Эффективность**: Обеспечивать эффективность тестов
+- **Сопровождение**: Поддерживать тесты в актуальном состоянии
+- **Автоматизация**: Автоматизировать тестирование где возможно
 
-## Innovation
+## Инновации
 
-### Experimentation
-- **Prototyping**: Build prototypes for new ideas
-- **A/B testing**: Test new features with A/B testing
-- **Feedback**: Gather feedback early and often
-- **Iteration**: Iterate based on feedback
+### Экспериментирование
+- **Прототипирование**: Создавать прототипы для новых идей
+- **A/B тестирование**: Тестировать новые функции с A/B тестированием
+- **Обратная связь**: Собирать обратную связь рано и часто
+- **Итерации**: Итерировать на основе обратной связи
 
-### Learning
-- **Research**: Stay updated with industry trends
-- **Training**: Invest in team training
-- **Experimentation**: Try new technologies safely
-- **Retrospectives**: Learn from experiences
+### Обучение
+- **Исследования**: Быть в курсе трендов индустрии
+- **Обучение**: Инвестировать в обучение команды
+- **Экспериментирование**: Безопасно пробовать новые технологии
+- **Ретроспективы**: Учиться на опыте
 
-## Sustainability
+## Устойчивость
 
-### Technical Debt
-- **Awareness**: Be aware of technical debt
-- **Management**: Manage technical debt actively
-- **Refactoring**: Refactor regularly
-- **Prioritization**: Prioritize debt reduction
+### Технический долг
+- **Осведомленность**: Быть осведомленным о техническом долге
+- **Управление**: Активно управлять техническим долгом
+- **Рефакторинг**: Регулярно проводить рефакторинг
+- **Приоритизация**: Приоритизировать снижение долга
 
-### Scalability
-- **Design**: Design for scalability from the start
-- **Performance**: Optimize for performance
-- **Architecture**: Use scalable architecture patterns
-- **Monitoring**: Monitor scaling indicators
+### Масштабируемость
+- **Дизайн**: Проектировать для масштабируемости с самого начала
+- **Производительность**: Оптимизировать для производительности
+- **Архитектура**: Использовать паттерны масштабируемой архитектуры
+- **Мониторинг**: Мониторить индикаторы масштабирования

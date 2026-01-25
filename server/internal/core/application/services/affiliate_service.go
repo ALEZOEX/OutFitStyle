@@ -36,12 +36,12 @@ func NewAffiliateService(
 
 // AffiliateClickParams параметры для регистрации аффилированного клика
 type AffiliateClickParams struct {
-	UserID         *domain.ID  // Идентификатор пользователя (может быть nil для анонимных кликов)
-	PartnerID      domain.ID   // Идентификатор партнера
-	ClothingItemID *domain.ID  // Идентификатор элемента одежды (если применимо)
+	UserID           *domain.ID // Идентификатор пользователя (может быть nil для анонимных кликов)
+	PartnerID        domain.ID  // Идентификатор партнера
+	ClothingItemID   *domain.ID // Идентификатор элемента одежды (если применимо)
 	RecommendationID *domain.ID // Идентификатор рекомендации (если клик по рекомендации)
-	SessionID      *string     // Идентификатор сессии
-	ClickID        *string     // Уникальный идентификатор клика (для трекинга)
+	SessionID        *string    // Идентификатор сессии
+	ClickID          *string    // Уникальный идентификатор клика (для трекинга)
 }
 
 // RecordClick регистрирует аффилированный клик
@@ -160,4 +160,3 @@ func (s *AffiliateService) UpdateAffiliateProgram(ctx context.Context, program d
 func (s *AffiliateService) ListAffiliatePrograms(ctx context.Context, activeOnly bool) ([]domain.AffiliateProgram, error) {
 	return s.partnerRepo.List(ctx, activeOnly)
 }
-

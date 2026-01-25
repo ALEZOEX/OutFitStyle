@@ -12,8 +12,8 @@ import (
 
 // AccountService сервис для работы с аккаунтами пользователей
 type AccountService struct {
-	users    repositories.UserRepository      // Репозиторий пользователей
-	sessions repositories.SessionRepository  // Репозиторий сессий
+	users    repositories.UserRepository    // Репозиторий пользователей
+	sessions repositories.SessionRepository // Репозиторий сессий
 }
 
 // NewAccountService создает новый экземпляр сервиса аккаунтов

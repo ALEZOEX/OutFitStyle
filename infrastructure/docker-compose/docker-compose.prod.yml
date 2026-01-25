@@ -41,7 +41,7 @@ services:
   # ML Service (Python)
   ml-service:
     build:
-      context: ../../server/ml-service
+      context: ../../ml-service
       dockerfile: Dockerfile.prod
     restart: unless-stopped
     environment:

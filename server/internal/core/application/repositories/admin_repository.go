@@ -9,23 +9,25 @@ import (
 
 // AdminStats структура для статистики администратора
 type AdminStats struct {
-	UsersTotal           int     `json:"users_total"`           // Всего пользователей
-	RecommendationsTotal int     `json:"recommendations_total"` // Всего рекомендаций
-	WardrobeTotal        int     `json:"wardrobe_total"`        // Всего вещей в гардеробах
-	PaymentsTotal        int     `json:"payments_total"`        // Всего платежей
-	PaymentsRevenue      float64 `json:"payments_revenue_completed"` // Доход от завершенных платежей
-	ActiveSubscriptions  int     `json:"active_subscriptions"`  // Активные подписки
-	NotificationsTotal   int     `json:"notifications_total"`   // Всего уведомлений
+	TotalUsers           int `json:"total_users"`           // Общее количество пользователей
+	ActiveUsers          int `json:"active_users"`          // Количество активных пользователей
+	TotalRecommendations int `json:"total_recommendations"` // Общее количество рекомендаций
+	TotalOutfitsSaved    int `json:"total_outfits_saved"`   // Общее количество сохраненных нарядов
+	TotalWardrobeItems   int `json:"total_wardrobe_items"`  // Общее количество вещей в гардеробах
+	TotalAchievements    int `json:"total_achievements"`    // Общее количество полученных достижений
+	TotalPayments        int `json:"total_payments"`        // Общее количество платежей
+	TotalSupportTickets  int `json:"total_support_tickets"` // Общее количество тикетов поддержки
+	TotalFeedback        int `json:"total_feedback"`        // Общее количество отзывов
 }
 
 // AdminUserRow структура для строки информации о пользователе в админке
 type AdminUserRow struct {
-	ID          domain.ID  `json:"id"`                    // Уникальный идентификатор пользователя
-	Email       string     `json:"email"`                 // Электронная почта
-	DisplayName *string    `json:"display_name,omitempty"` // Отображаемое имя
-	IsActive    bool       `json:"is_active"`             // Активен ли пользователь
-	IsVerified  bool       `json:"is_verified"`           // Подтвержден ли аккаунт
-	CreatedAt   time.Time  `json:"created_at"`            // Дата создания аккаунта
+	ID          domain.ID  `json:"id"`                      // Уникальный идентификатор пользователя
+	Email       string     `json:"email"`                   // Электронная почта
+	DisplayName *string    `json:"display_name,omitempty"`  // Отображаемое имя
+	IsActive    bool       `json:"is_active"`               // Активен ли пользователь
+	IsVerified  bool       `json:"is_verified"`             // Подтвержден ли аккаунт
+	CreatedAt   time.Time  `json:"created_at"`              // Дата создания аккаунта
 	LastLoginAt *time.Time `json:"last_login_at,omitempty"` // Дата последнего входа
 }
 
@@ -34,6 +36,8 @@ type AuditRow struct {
 	ID           domain.ID  `json:"id"`                      // Уникальный идентификатор записи аудита
 	UserID       *domain.ID `json:"user_id,omitempty"`       // Идентификатор пользователя (если применимо)
 	Action       string     `json:"action"`                  // Выполненное действие
+	EntityID     string     `json:"entity_id"`               // Идентификатор сущности
+	EntityType   string     `json:"entity_type"`             // Тип сущности
 	ResourceType *string    `json:"resource_type,omitempty"` // Тип ресурса (если применимо)
 	ResourceID   *domain.ID `json:"resource_id,omitempty"`   // Идентификатор ресурса (если применимо)
 	IP           *string    `json:"ip_address,omitempty"`    // IP-адрес пользователя
@@ -44,13 +48,20 @@ type AuditRow struct {
 
 // CreatePromoRequest структура запроса на создание промо-акции
 type CreatePromoRequest struct {
-	Code            string      `json:"code"`                   // Код промо-акции
-	DiscountType    string      `json:"discount_type"`          // Тип скидки: percent|fixed|trial_days
-	DiscountValue   float64     `json:"discount_value"`         // Значение скидки
-	ApplicablePlans []domain.ID `json:"applicable_plans,omitempty"` // Применимые планы подписки
-	MaxUses         *int        `json:"max_uses,omitempty"`     // Максимальное количество использований
-	ValidUntil      *time.Time  `json:"valid_until,omitempty"`  // Дата окончания действия
-	IsActive        *bool       `json:"is_active,omitempty"`    // Активна ли промо-акция
+	Code              string      `json:"code"`                       // Код промо-акции
+	Type              string      `json:"type"`                       // Тип промо-акции
+	Value             float64     `json:"value"`                      // Значение промо-акции
+	Currency          string      `json:"currency"`                   // Валюта
+	MinOrderAmount    float64     `json:"min_order_amount"`           // Минимальная сумма заказа
+	MaxDiscount       float64     `json:"max_discount"`               // Максимальная скидка
+	UsageLimit        int         `json:"usage_limit"`                // Лимит использования
+	UsageLimitPerUser int         `json:"usage_limit_per_user"`       // Лимит использования на пользователя
+	StartDate         time.Time   `json:"start_date"`                 // Дата начала
+	EndDate           time.Time   `json:"end_date"`                   // Дата окончания
+	IsActive          bool        `json:"is_active"`                  // Активна ли промо-акция
+	ApplicablePlans   []domain.ID `json:"applicable_plans,omitempty"` // Применимые планы подписки
+	DiscountType      string      `json:"discount_type"`              // Тип скидки: percent|fixed|trial_days
+	DiscountValue     float64     `json:"discount_value"`             // Значение скидки
 }
 
 // AdminRepository интерфейс репозитория административных функций

@@ -11,7 +11,7 @@ import (
 
 // UserService сервис для работы с пользователями
 type UserService struct {
-	userRepo repositories.UserRepository  // Репозиторий пользователей
+	userRepo repositories.UserRepository // Репозиторий пользователей
 	logger   *zap.Logger                 // Логгер
 }
 

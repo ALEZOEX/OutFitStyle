@@ -7,19 +7,22 @@ import (
 
 // CatalogSearchParams параметры поиска в каталоге
 type CatalogSearchParams struct {
-	Q           *string  // Поисковый запрос
-	Category    *string  // Категория
-	Subcategory *string  // Подкатегория
-	Style       *string  // Стиль
-	Color       *string  // Цвет
+	Q           *string // Поисковый запрос
+	Category    *string // Категория
+	Subcategory *string // Подкатегория
+	Style       *string // Стиль
+	Color       *string // Цвет
 
-	MinPrice *float64  // Минимальная цена
-	MaxPrice *float64  // Максимальная цена
+	MinPrice *float64 // Минимальная цена
+	MaxPrice *float64 // Максимальная цена
 
-	Partner *string  // Партнер (partners.code)
+	Partner *string // Партнер (partners.code)
 
-	Page  int  // Номер страницы
-	Limit int  // Количество элементов на странице
+	Page  int // Номер страницы
+	Limit int // Количество элементов на странице
+
+	SearchTerm string                     // Поисковый термин
+	Filters    domain.ClothingItemFilters // Фильтры для элементов одежды
 }
 
 // CatalogRepository интерфейс репозитория каталога

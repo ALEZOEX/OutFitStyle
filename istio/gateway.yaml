@@ -1,0 +1,43 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: outfitstyle-gateway
+  namespace: outfitstyle
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: outfitstyle
+  namespace: outfitstyle
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - outfitstyle-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/
+    route:
+    - destination:
+        host: api-service
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: /ml/
+    route:
+    - destination:
+        host: ml-service
+        port:
+          number: 80

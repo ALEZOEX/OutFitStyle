@@ -1,78 +1,78 @@
-# Security Guidelines for OutfitStyle
+# Руководящие принципы безопасности для OutfitStyle
 
-## Overview
+## Обзор
 
-This document outlines the security measures and best practices for the OutfitStyle platform.
+Этот документ описывает меры безопасности и лучшие практики для платформы OutfitStyle.
 
-## Authentication & Authorization
+## Аутентификация и авторизация
 
-### JWT Token Management
-- **Algorithm**: Use RS256 (asymmetric) instead of HS256
-- **Lifetime**: 15-60 minutes for access tokens
-- **Refresh tokens**: httpOnly cookies with SameSite=Strict
-- **Rotation**: Refresh token rotation on each use
-- **Blacklisting**: Revoked tokens in Redis
-- **Validation**: Check issuer and audience
+### Управление JWT-токенами
+- **Алгоритм**: Использовать RS256 (асимметричный) вместо HS256
+- **Срок действия**: 15-60 минут для токенов доступа
+- **Токены обновления**: httpOnly cookies с SameSite=Strict
+- **Ротация**: Ротация токенов обновления при каждом использовании
+- **Черный список**: Отозванные токены в Redis
+- **Проверка**: Проверка издателя и аудитории
 
-### OAuth 2.0 with Google
-- **Validation**: Validate ID tokens on backend, don't trust client
-- **Verification**: Check `email_verified: true`
-- **Data**: Store only necessary data (email, name)
-- **Tokens**: Don't store Google refresh tokens unless needed
+### OAuth 2.0 с Google
+- **Проверка**: Проверка ID-токенов на бэкенде, не доверять клиенту
+- **Верификация**: Проверить `email_verified: true`
+- **Данные**: Хранить только необходимые данные (email, имя)
+- **Токены**: Не хранить токены обновления Google, если не требуется
 
-## API Protection
+## Защита API
 
-### Rate Limiting
+### Ограничение частоты запросов
 ```
-Levels:
-├── Global: 10,000 req/min for entire service
-├── Per IP: 100 req/min (anonymous), 300 req/min (authenticated)
-├── Per User: 200 req/min
-└── Per Endpoint:
-    ├── /auth/*: 10 req/min (brute force protection)
-    ├── /recommendations: 30 req/min (heavy endpoint)
-    └── /wardrobe/*: 100 req/min
-```
-
-### Input Validation
-- **Framework**: Go: go-playground/validator
-- **Sanitization**: Trim, escape HTML
-- **Size limits**: Max 1MB payload, Max 5MB images
-- **Content-Type**: Validate headers
-- **SQL Injection**: Only parameterized queries
-
-### CORS Configuration
-```
-Production:
-├── Allowed Origins: Only your domain
-├── Allowed Methods: GET, POST, PUT, DELETE
-├── Allowed Headers: Authorization, Content-Type
-├── Max Age: 3600 (caching preflight)
-└── Credentials: true (for cookies)
+Уровни:
+├── Глобально: 10 000 запросов/мин для всего сервиса
+├── На IP: 100 запросов/мин (анонимный), 300 запросов/мин (аутентифицированный)
+├── На пользователя: 200 запросов/мин
+└── На эндпоинт:
+    ├── /auth/*: 10 запросов/мин (защита от подбора)
+    ├── /recommendations: 30 запросов/мин (тяжелый эндпоинт)
+    └── /wardrobe/*: 100 запросов/мин
 ```
 
-## Data Protection
+### Валидация ввода
+- **Фреймворк**: Go: go-playground/validator
+- **Санитизация**: Обрезка, экранирование HTML
+- **Ограничения по размеру**: Макс. 1МБ полезная нагрузка, Макс. 5МБ изображения
+- **Content-Type**: Проверка заголовков
+- **SQL-инъекции**: Только параметризованные запросы
 
-### In Transit
-- **TLS**: 1.3 everywhere
-- **HSTS**: Strict-Transport-Security header
-- **Certificate pinning**: In mobile app (optional)
+### Конфигурация CORS
+```
+Продакшен:
+├── Разрешенные источники: Только ваш домен
+├── Разрешенные методы: GET, POST, PUT, DELETE
+├── Разрешенные заголовки: Authorization, Content-Type
+├── Макс. возраст: 3600 (кеширование префлайта)
+└── Учетные данные: true (для cookies)
+```
 
-### At Rest
-- **Disk encryption**: On servers
-- **Backup encryption**: GPG or cloud KMS
-- **Passwords**: bcrypt/argon2 hashing
+## Защита данных
 
-### Personal Identifiable Information (PII)
-- **Minimization**: Collect only necessary data
-- **Logging**: Mask emails, don't log tokens
-- **Audit**: Who accessed what data when
+### В пути передачи
+- **TLS**: 1.3 везде
+- **HSTS**: Заголовок Strict-Transport-Security
+- **Прикрепление сертификата**: В мобильном приложении (опционально)
 
-## Secrets Management
+### В состоянии покоя
+- **Шифрование диска**: На серверах
+- **Шифрование резервных копий**: GPG или облачный KMS
+- **Пароли**: Хеширование bcrypt/argon2
+
+### Персональная идентифицируемая информация (PII)
+- **Минимизация**: Собирать только необходимые данные
+- **Логирование**: Маскировать email, не логировать токены
+- **Аудит**: Кто и когда получил доступ к каким данным
+
+## Управление секретами
 
 ### GitHub Secrets
 ```
-Environments:
+Окружения:
 ├── PROD_DATABASE_URL
 ├── PROD_JWT_SECRET
 ├── PROD_OPENWEATHER_API_KEY
@@ -88,20 +88,20 @@ Environments:
 ```
 
 ### SOPS (Secrets OPerationS)
-- **Encryption**: YAML/JSON files with age, KMS, or PGP
-- **Git storage**: Encrypted files in git
-- **CI decryption**: Decrypt during deployment
+- **Шифрование**: YAML/JSON файлы с age, KMS или PGP
+- **Хранение в Git**: Зашифрованные файлы в git
+- **Расшифровка CI**: Расшифровка во время развертывания
 
-### HashiCorp Vault (for scale)
-- **Dynamic secrets**: Temporary DB credentials
-- **Audit logs**: All access logs
-- **Rotation**: Automatic secret rotation
+### HashiCorp Vault (для масштаба)
+- **Динамические секреты**: Временные учетные данные БД
+- **Журналы аудита**: Все журналы доступа
+- **Ротация**: Автоматическая ротация секретов
 
-## Security Headers
+## Заголовки безопасности
 
-### Recommended Headers
+### Рекомендуемые заголовки
 ```
-Nginx configuration:
+Конфигурация Nginx:
 ├── X-Content-Type-Options: nosniff
 ├── X-Frame-Options: DENY
 ├── X-XSS-Protection: 1; mode=block
@@ -110,120 +110,120 @@ Nginx configuration:
 └── Permissions-Policy: geolocation=(self)
 ```
 
-## Security Testing
+## Тестирование безопасности
 
-### Static Analysis
-- **Go**: golangci-lint with security linters
+### Статический анализ
+- **Go**: golangci-lint с линтерами безопасности
 - **Python**: bandit, semgrep
-- **Flutter**: flutter analyze with security rules
-- **Frequency**: Every commit
+- **Flutter**: flutter analyze с правилами безопасности
+- **Частота**: При каждом коммите
 
-### Dynamic Analysis
-- **Tools**: OWASP ZAP, Burp Suite
-- **Scope**: Runtime vulnerabilities
-- **Frequency**: Periodic scans
+### Динамический анализ
+- **Инструменты**: OWASP ZAP, Burp Suite
+- **Объем**: Уязвимости во время выполнения
+- **Частота**: Периодические сканирования
 
-### Dependency Scanning
-- **Tools**: snyk, dependabot, trivy
-- **Scope**: Vulnerable dependencies
-- **Frequency**: Continuous monitoring
+### Сканирование зависимостей
+- **Инструменты**: snyk, dependabot, trivy
+- **Объем**: Уязвимые зависимости
+- **Частота**: Непрерывный мониторинг
 
-## Incident Response
+## Реагирование на инциденты
 
-### Detection
-- **Monitoring**: Anomaly detection in logs
-- **Alerting**: Immediate notification of security events
-- **SIEM**: Security Information and Event Management
+### Обнаружение
+- **Мониторинг**: Обнаружение аномалий в логах
+- **Оповещения**: Немедленное уведомление о событиях безопасности
+- **SIEM**: Управление информацией и событиями безопасности
 
-### Response
-- **Escalation**: Defined escalation procedures
-- **Containment**: Isolate affected systems
-- **Eradication**: Remove threat source
-- **Recovery**: Restore normal operations
+### Ответ
+- **Эскалация**: Определенные процедуры эскалации
+- **Изоляция**: Изолировать затронутые системы
+- **Устранение**: Удалить источник угрозы
+- **Восстановление**: Восстановить нормальную работу
 
-### Post-Incident
-- **Analysis**: Root cause analysis
-- **Improvement**: Implement preventive measures
-- **Communication**: Stakeholder communication
+### После инцидента
+- **Анализ**: Анализ корневой причины
+- **Улучшение**: Реализовать профилактические меры
+- **Коммуникация**: Коммуникация с заинтересованными сторонами
 
-## Compliance
+## Соответствие требованиям
 
 ### GDPR
-- **Consent**: Explicit consent for data processing
-- **Rights**: Right to access, rectify, erase data
-- **Transparency**: Clear privacy policy
-- **Data minimization**: Collect only necessary data
+- **Согласие**: Явное согласие на обработку данных
+- **Права**: Право на доступ, исправление, удаление данных
+- **Прозрачность**: Четкая политика конфиденциальности
+- **Минимизация данных**: Собирать только необходимые данные
 
 ### CCPA
-- **Notice**: Clear notice of data collection
-- **Rights**: Rights to know, delete, opt-out
-- **Verification**: Identity verification for requests
+- **Уведомление**: Четкое уведомление о сборе данных
+- **Права**: Права знать, удалить, отказаться
+- **Проверка**: Проверка личности для запросов
 
-## Mobile Security
+## Мобильная безопасность
 
-### App Security
-- **Code obfuscation**: Protect against reverse engineering
-- **Certificate pinning**: Prevent man-in-the-middle attacks
-- **Root/jailbreak detection**: Detect compromised devices
-- **Biometric authentication**: Secure user authentication
+### Безопасность приложения
+- **Обфускация кода**: Защита от обратной разработки
+- **Прикрепление сертификата**: Предотвращение атак "человек посередине"
+- **Обнаружение root/jailbreak**: Обнаружение скомпрометированных устройств
+- **Биометрическая аутентификация**: Безопасная аутентификация пользователя
 
-### Data Security
-- **Local encryption**: Encrypt sensitive data on device
-- **Secure storage**: Use platform-specific secure storage
-- **Key management**: Proper key generation and storage
+### Безопасность данных
+- **Локальное шифрование**: Шифрование конфиденциальных данных на устройстве
+- **Безопасное хранение**: Использовать специфичное для платформы безопасное хранилище
+- **Управление ключами**: Правильная генерация и хранение ключей
 
-## Security Monitoring
+## Мониторинг безопасности
 
-### Log Analysis
-- **Centralized logging**: All logs in one place
-- **Anomaly detection**: Detect unusual patterns
-- **Correlation**: Correlate events across systems
-- **Retention**: Appropriate log retention periods
+### Анализ логов
+- **Централизованное логирование**: Все логи в одном месте
+- **Обнаружение аномалий**: Обнаружение необычных паттернов
+- **Корреляция**: Корреляция событий между системами
+- **Хранение**: Подходящие периоды хранения логов
 
-### Threat Detection
-- **Behavioral analysis**: Analyze user behavior patterns
-- **Network monitoring**: Monitor network traffic
-- **File integrity**: Monitor critical files
-- **Vulnerability scanning**: Regular scans
+### Обнаружение угроз
+- **Анализ поведения**: Анализ паттернов поведения пользователей
+- **Мониторинг сети**: Мониторинг сетевого трафика
+- **Целостность файлов**: Мониторинг критических файлов
+- **Сканирование уязвимостей**: Регулярные сканирования
 
-## Security Training
+## Обучение безопасности
 
-### Developer Training
-- **Secure coding**: Training on secure coding practices
-- **Threat modeling**: Understanding threats and mitigations
-- **Security tools**: Using security tools effectively
-- **Incident response**: Knowing how to respond to incidents
+### Обучение разработчиков
+- **Безопасное программирование**: Обучение безопасным методам программирования
+- **Моделирование угроз**: Понимание угроз и мер смягчения
+- **Инструменты безопасности**: Эффективное использование инструментов безопасности
+- **Реагирование на инциденты**: Знание того, как реагировать на инциденты
 
-### Awareness
-- **Phishing**: Recognizing phishing attempts
-- **Social engineering**: Understanding social engineering tactics
-- **Physical security**: Securing physical access
-- **Information handling**: Proper handling of sensitive information
+### Осведомленность
+- **Фишинг**: Распознавание попыток фишинга
+- **Социальная инженерия**: Понимание тактик социальной инженерии
+- **Физическая безопасность**: Обеспечение физического доступа
+- **Обработка информации**: Правильная обработка конфиденциальной информации
 
-## Security Policies
+## Политики безопасности
 
-### Access Control
-- **Principle of least privilege**: Minimum necessary access
-- **Role-based access**: Access based on roles
-- **Regular reviews**: Periodic access reviews
-- **Segregation of duties**: Separate critical functions
+### Контроль доступа
+- **Принцип минимальных привилегий**: Минимально необходимый доступ
+- **Доступ на основе ролей**: Доступ на основе ролей
+- **Регулярные проверки**: Периодические проверки доступа
+- **Разделение обязанностей**: Разделение критических функций
 
-### Change Management
-- **Approval process**: Proper approval for changes
-- **Testing**: Thorough testing of changes
-- **Rollback plans**: Plans to revert changes
-- **Documentation**: Document all changes
+### Управление изменениями
+- **Процесс одобрения**: Правильное одобрение изменений
+- **Тестирование**: Тщательное тестирование изменений
+- **Планы отката**: Планы для отмены изменений
+- **Документация**: Документирование всех изменений
 
-## Security Metrics
+## Метрики безопасности
 
-### Key Metrics
-- **Mean time to detect**: How quickly threats are detected
-- **Mean time to respond**: How quickly incidents are responded to
-- **Vulnerability remediation time**: How quickly vulnerabilities are fixed
-- **Security training completion**: Percentage of staff trained
+### Ключевые метрики
+- **Среднее время обнаружения**: Насколько быстро обнаруживаются угрозы
+- **Среднее время реагирования**: Насколько быстро реагируют на инциденты
+- **Время устранения уязвимостей**: Насколько быстро устраняются уязвимости
+- **Завершение обучения безопасности**: Процент обученного персонала
 
-### Reporting
-- **Regular reports**: Regular security reports
-- **Executive dashboards**: High-level security metrics
-- **Trend analysis**: Security trends over time
-- **Compliance reporting**: Compliance status reports
+### Отчетность
+- **Регулярные отчеты**: Регулярные отчеты по безопасности
+- **Панели руководства**: Метрики безопасности высокого уровня
+- **Анализ тенденций**: Тенденции безопасности с течением времени
+- **Отчеты о соответствии**: Отчеты о статусе соответствия
