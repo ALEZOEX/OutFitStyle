@@ -25,7 +25,7 @@ require (
 	// Messaging
 	github.com/segmentio/kafka-go v0.4.37
 	github.com/swaggo/http-swagger v1.3.4
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.27.1
 	golang.org/x/crypto v0.45.0
 	google.golang.org/api v0.257.0
 )
