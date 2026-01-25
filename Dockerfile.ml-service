@@ -8,17 +8,17 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
-COPY server/ml-service/requirements.txt .
+COPY ml-service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the ML service code (includes contracts subdirectory)
-COPY server/ml-service/ ./
+COPY ml-service/ ./
 
 # Ensure models directory exists
 RUN mkdir -p /app/models
 
 # Copy model files
-COPY server/ml-service/models/ /app/models/
+COPY ml-service/models/ /app/models/
 
 # List the contents of models directory to debug
 RUN ls -la /app/models/

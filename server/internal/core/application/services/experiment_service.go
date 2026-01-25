@@ -47,7 +47,7 @@ func (s *ExperimentService) Assign(ctx context.Context, experimentName string, u
 		return assigned.Variant, &exp.ID, nil
 	}
 
-	v, err := pickVariant(userID.String()+"|"+exp.Name, exp.VariantsJSON)
+	v, err := pickVariantFromList(userID.String()+"|"+exp.Name, exp.Variants)
 	if err != nil {
 		return "", &exp.ID, err
 	}
@@ -74,6 +74,20 @@ func inPercentage(key string, pct int) bool {
 	h := sha256.Sum256([]byte(key))
 	n := int(binary.BigEndian.Uint32(h[:4]) % 100)
 	return n < pct
+}
+
+func pickVariantFromList(key string, variants []string) (string, error) {
+	if len(variants) == 0 {
+		return "", errors.New("variants list is empty")
+	}
+
+	// Create a map with equal weights for all variants
+	m := make(map[string]float64)
+	for _, variant := range variants {
+		m[variant] = 1.0 // Equal weight for all variants
+	}
+
+	return pickFromMap(key, m), nil
 }
 
 func pickVariant(key string, variantsJSON []byte) (string, error) {
@@ -106,6 +120,16 @@ func pickVariant(key string, variantsJSON []byte) (string, error) {
 			return "", errors.New("variants weights are empty")
 		}
 		return pickFromMap(key, m2), nil
+	}
+
+	// try simple string array
+	var stringArr []string
+	if err := json.Unmarshal(variantsJSON, &stringArr); err == nil && len(stringArr) > 0 {
+		m3 := make(map[string]float64)
+		for _, variant := range stringArr {
+			m3[variant] = 1.0 // Equal weight for all variants
+		}
+		return pickFromMap(key, m3), nil
 	}
 
 	return "", errors.New("unsupported variants json format")

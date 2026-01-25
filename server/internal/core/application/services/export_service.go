@@ -31,7 +31,7 @@ const (
 type ExportService struct {
 	exportRepo repositories.ExportRepository        // Репозиторий для экспорта данных
 	filesRepo  repositories.UploadedFilesRepository // Репозиторий для работы с загруженными файлами
-	storage    *external.S3Storage                 // Хранилище для сохранения файлов
+	storage    *external.S3Storage                  // Хранилище для сохранения файлов
 }
 
 // NewExportService создает новый экземпляр сервиса экспорта данных

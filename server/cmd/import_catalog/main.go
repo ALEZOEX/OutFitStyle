@@ -16,25 +16,25 @@ import (
 )
 
 type NDItem struct {
-	ID            int64    `json:"id"`
-	Name          string   `json:"name"`
-	Category      string   `json:"category"`
-	Subcategory   string   `json:"subcategory"`
-	Gender        string   `json:"gender"`
-	Style         string   `json:"style"`
-	Formality     int      `json:"formality_level"`
-	Warmth        int      `json:"warmth_level"`
-	MinTemp       int      `json:"min_temp"`
-	MaxTemp       int      `json:"max_temp"`
-	Season        string   `json:"season"`
-	BaseColour    string   `json:"base_colour"`
-	Usage         string   `json:"usage"`
-	Materials     []string `json:"materials"`
-	Fit           string   `json:"fit"`
-	Pattern       string   `json:"pattern"`
-	IconEmoji     string   `json:"icon_emoji"`
-	Source        string   `json:"source"`
-	IsOwned       bool     `json:"is_owned"`
+	ID          int64    `json:"id"`
+	Name        string   `json:"name"`
+	Category    string   `json:"category"`
+	Subcategory string   `json:"subcategory"`
+	Gender      string   `json:"gender"`
+	Style       string   `json:"style"`
+	Formality   int      `json:"formality_level"`
+	Warmth      int      `json:"warmth_level"`
+	MinTemp     int      `json:"min_temp"`
+	MaxTemp     int      `json:"max_temp"`
+	Season      string   `json:"season"`
+	BaseColour  string   `json:"base_colour"`
+	Usage       string   `json:"usage"`
+	Materials   []string `json:"materials"`
+	Fit         string   `json:"fit"`
+	Pattern     string   `json:"pattern"`
+	IconEmoji   string   `json:"icon_emoji"`
+	Source      string   `json:"source"`
+	IsOwned     bool     `json:"is_owned"`
 }
 
 func norm(s string) string {
@@ -342,8 +342,8 @@ func main() {
 		}
 
 		baseColour := mapColour(it.BaseColour) // nil или string
-		fit := mapFit(it.Fit)                 // nil или string
-		pattern := mapPattern(it.Pattern)     // nil или string
+		fit := mapFit(it.Fit)                  // nil или string
+		pattern := mapPattern(it.Pattern)      // nil или string
 
 		materials := it.Materials
 		if materials == nil {

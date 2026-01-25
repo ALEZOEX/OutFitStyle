@@ -102,8 +102,8 @@ func AuditMiddleware(repo repositories.AuditRepository, logger *zap.Logger) mux.
 				ResourceType: resTypePtr,
 				ResourceID:   resIDPtr,
 
-				OldValue: oldJSON,
-				NewValue: newJSON,
+				OldValues: oldJSON,
+				NewValues: newJSON,
 
 				IPAddress: ip,
 				UserAgent: uaPtr,

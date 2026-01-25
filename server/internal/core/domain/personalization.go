@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type UserStylePreferences struct {
-	ID                   ID        `json:"id"`
+	ID                 ID        `json:"id"`
 	UserID             ID        `json:"user_id"`
 	PreferredStyles    []string  `json:"preferred_styles"`
 	DislikedStyles     []string  `json:"disliked_styles"`
@@ -20,13 +20,13 @@ type UserStylePreferences struct {
 }
 
 type UserWeatherPreferences struct {
-	ID                      ID        `json:"id"`
-	UserID                ID        `json:"user_id"`
-	PreferredTemperature  *float64  `json:"preferred_temperature,omitempty"`
-	TemperatureSensitivity int       `json:"temperature_sensitivity"` // -2 to 2: cold, slightly cold, neutral, slightly warm, warm
-	PreferredWeather      []string  `json:"preferred_weather,omitempty"` // clear, clouds, rain, snow, etc.
-	MaxWindSpeed          *float64  `json:"max_wind_speed,omitempty"`
-	MaxHumidity           *float64  `json:"max_humidity,omitempty"`
-	CreatedAt             time.Time `json:"created_at"`
-	UpdatedAt             time.Time `json:"updated_at"`
+	ID                     ID        `json:"id"`
+	UserID                 ID        `json:"user_id"`
+	PreferredTemperature   *float64  `json:"preferred_temperature,omitempty"`
+	TemperatureSensitivity int       `json:"temperature_sensitivity"`     // -2 to 2: cold, slightly cold, neutral, slightly warm, warm
+	PreferredWeather       []string  `json:"preferred_weather,omitempty"` // clear, clouds, rain, snow, etc.
+	MaxWindSpeed           *float64  `json:"max_wind_speed,omitempty"`
+	MaxHumidity            *float64  `json:"max_humidity,omitempty"`
+	CreatedAt              time.Time `json:"created_at"`
+	UpdatedAt              time.Time `json:"updated_at"`
 }

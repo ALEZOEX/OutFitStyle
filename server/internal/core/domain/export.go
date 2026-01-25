@@ -5,11 +5,11 @@ import "time"
 type ExportStatus string
 
 const (
-	ExportStatusPending ExportStatus = "pending"
+	ExportStatusPending    ExportStatus = "pending"
 	ExportStatusProcessing ExportStatus = "processing"
-	ExportStatusCompleted ExportStatus = "completed"
-	ExportStatusFailed ExportStatus = "failed"
-	ExportStatusCancelled ExportStatus = "cancelled"
+	ExportStatusCompleted  ExportStatus = "completed"
+	ExportStatusFailed     ExportStatus = "failed"
+	ExportStatusCancelled  ExportStatus = "cancelled"
 )
 
 type ExportJob struct {

@@ -9,42 +9,45 @@ import (
 
 // Session структура сессии пользователя
 type Session struct {
-	ID               domain.ID     // Уникальный идентификатор сессии
-	UserID           domain.ID     // Идентификатор пользователя
-	RefreshTokenHash string        // Хэш refresh-токена
-	IsActive         bool          // Активна ли сессия
-	ExpiresAt        time.Time     // Время истечения срока действия
-	CreatedAt        time.Time     // Время создания сессии
-	LastUsedAt       time.Time     // Время последнего использования
-	DeviceID         *string       // Идентификатор устройства
-	DeviceName       *string       // Название устройства
-	DeviceType       *string       // Тип устройства
-	IPAddress        *string       // IP-адрес
-	UserAgent        *string       // User-Agent
+	ID               domain.ID  // Уникальный идентификатор сессии
+	UserID           domain.ID  // Идентификатор пользователя
+	RefreshTokenHash string     // Хэш refresh-токена
+	IsActive         bool       // Активна ли сессия
+	ExpiresAt        *time.Time // Время истечения срока действия
+	CreatedAt        *time.Time // Время создания сессии
+	LastUsedAt       *time.Time // Время последнего использования
+	DeviceID         *string    // Идентификатор устройства
+	DeviceName       *string    // Название устройства
+	DeviceType       *string    // Тип устройства
+	IPAddress        *string    // IP-адрес
+	UserAgent        *string    // User-Agent
+	DeviceInfo       *string    // Информация об устройстве
 }
 
 // CreateSessionParams параметры для создания сессии
 type CreateSessionParams struct {
-	UserID           domain.ID  // Идентификатор пользователя
-	RefreshTokenHash string     // Хэш refresh-токена
+	UserID           domain.ID // Идентификатор пользователя
+	RefreshTokenHash string    // Хэш refresh-токена
 
-	DeviceID   *string  // Идентификатор устройства
-	DeviceName *string  // Название устройства
-	DeviceType *string  // Тип устройства
+	DeviceID   *string // Идентификатор устройства
+	DeviceName *string // Название устройства
+	DeviceType *string // Тип устройства
 
-	IPAddress *string  // IP-адрес
-	UserAgent *string  // User-Agent
+	IPAddress  *string // IP-адрес
+	UserAgent  *string // User-Agent
+	DeviceInfo *string // Информация об устройстве
 
-	ExpiresAt time.Time  // Время истечения срока действия
+	ExpiresAt *time.Time // Время истечения срока действия
 }
 
 // UpdateDeviceInfoParams параметры для обновления информации об устройстве
 type UpdateDeviceInfoParams struct {
-	DeviceID   *string  // Идентификатор устройства
-	DeviceName *string  // Название устройства
-	DeviceType *string  // Тип устройства
-	IPAddress  *string  // IP-адрес
-	UserAgent  *string  // User-Agent
+	DeviceID   *string // Идентификатор устройства
+	DeviceName *string // Название устройства
+	DeviceType *string // Тип устройства
+	IPAddress  *string // IP-адрес
+	UserAgent  *string // User-Agent
+	DeviceInfo *string // Информация об устройстве
 }
 
 // SessionRepository интерфейс репозитория сессий

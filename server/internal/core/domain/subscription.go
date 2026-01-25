@@ -65,22 +65,22 @@ type CurrentSubscriptionResponse struct {
 }
 
 type Subscription struct {
-	ID                  ID        `json:"id"`
-	UserID              ID        `json:"user_id"`
-	PlanID              string    `json:"plan_id"`
-	Name                string    `json:"name"`
-	Description         string    `json:"description"`
-	Interval            string    `json:"interval"` // month, year
-	IntervalCount       int       `json:"interval_count"`
-	TrialPeriodDays     *int      `json:"trial_period_days,omitempty"`
-	IsActive            bool      `json:"is_active"`
-	IsTrial             bool      `json:"is_trial"`
-	IsCanceled          bool      `json:"is_canceled"`
-	CancelAtPeriodEnd   bool      `json:"cancel_at_period_end"`
-	CurrentPeriodStart  time.Time `json:"current_period_start"`
-	CurrentPeriodEnd    time.Time `json:"current_period_end"`
-	CanceledAt          *time.Time `json:"canceled_at,omitempty"`
-	ExpiresAt           *time.Time `json:"expires_at,omitempty"`
-	CreatedAt           time.Time `json:"created_at"`
-	UpdatedAt           time.Time `json:"updated_at"`
+	ID                 ID         `json:"id"`
+	UserID             ID         `json:"user_id"`
+	PlanID             string     `json:"plan_id"`
+	Name               string     `json:"name"`
+	Description        *string    `json:"description"`
+	Interval           string     `json:"interval"` // month, year
+	IntervalCount      int        `json:"interval_count"`
+	TrialPeriodDays    *int       `json:"trial_period_days,omitempty"`
+	IsActive           bool       `json:"is_active"`
+	IsTrial            bool       `json:"is_trial"`
+	IsCanceled         bool       `json:"is_canceled"`
+	CancelAtPeriodEnd  bool       `json:"cancel_at_period_end"`
+	CurrentPeriodStart *time.Time `json:"current_period_start"`
+	CurrentPeriodEnd   *time.Time `json:"current_period_end"`
+	CanceledAt         *time.Time `json:"canceled_at,omitempty"`
+	ExpiresAt          *time.Time `json:"expires_at,omitempty"`
+	CreatedAt          time.Time  `json:"created_at"`
+	UpdatedAt          time.Time  `json:"updated_at"`
 }

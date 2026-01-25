@@ -43,7 +43,7 @@ services:
   # ML Service (Python Flask)
   ml-service:
     build:
-      context: ../../server/ml-service
+      context: ../../ml-service
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
@@ -52,7 +52,7 @@ services:
       - DATABASE_URL=postgresql://outfitstyle:${DB_PASSWORD}@postgres:5432/outfitstyle
       - WEATHER_API_KEY=${WEATHER_API_KEY}
     volumes:
-      - ../../server/ml-service:/app
+      - ../../ml-service:/app
     depends_on:
       - postgres
     restart: unless-stopped

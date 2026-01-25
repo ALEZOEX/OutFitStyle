@@ -114,6 +114,12 @@ type APIKeysConfig struct {
 	Pepper string // для хеширования ключей (server-side secret)
 }
 
+type EventingConfig struct {
+	KafkaBrokers []string
+	KafkaTopic   string
+	Enabled      bool
+}
+
 type AdminConfig struct {
 	APIKey string
 }
@@ -135,6 +141,7 @@ type AppConfig struct {
 	Queue           QueueConfig
 	Features        FeaturesConfig
 	APIKeys         APIKeysConfig
+	Eventing        EventingConfig
 }
 
 func Load() (*AppConfig, error) {
@@ -243,6 +250,11 @@ func Load() (*AppConfig, error) {
 		},
 		APIKeys: APIKeysConfig{
 			Pepper: getEnvFirst([]string{"API_KEY_PEPPER"}, getEnvFirst([]string{"JWT_SECRET"}, "")),
+		},
+		Eventing: EventingConfig{
+			KafkaBrokers: splitCSV(getEnvFirst([]string{"KAFKA_BROKERS"}, "localhost:9092")),
+			KafkaTopic:   getEnvFirst([]string{"KAFKA_TOPIC"}, "outfitstyle-events"),
+			Enabled:      getEnvBool("EVENTING_ENABLED", true),
 		},
 	}
 

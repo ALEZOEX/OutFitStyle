@@ -20,14 +20,15 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 
+	_ "outfitstyle/server/docs"
 	"outfitstyle/server/internal/api/handlers"
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/config"
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
-	_ "outfitstyle/server/docs"
 	"outfitstyle/server/internal/infrastructure/cache"
+	"outfitstyle/server/internal/infrastructure/eventing"
 	ext "outfitstyle/server/internal/infrastructure/external"
 	"outfitstyle/server/internal/infrastructure/observability"
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
@@ -155,6 +156,17 @@ func main() {
 	// ---------- Personalization repository ----------
 	personalizationRepo := pg.NewPersonalizationRepository(db.Pool())
 
+	// ---------- Event Publisher ----------
+	var eventPublisher eventing.EventPublisher
+	if cfg.Eventing.Enabled {
+		eventPublisher = eventing.NewKafkaEventPublisher(cfg.Eventing.KafkaBrokers, cfg.Eventing.KafkaTopic)
+		logger.Info("Event publisher enabled", zap.Strings("brokers", cfg.Eventing.KafkaBrokers), zap.String("topic", cfg.Eventing.KafkaTopic))
+	} else {
+		// Заглушка для event publisher, если отключен
+		eventPublisher = nil
+		logger.Info("Event publisher disabled")
+	}
+
 	// ---------- Доменные сервисы ----------
 	recommendationService := services.NewRecommendationService(
 		recommendationRepo,
@@ -163,6 +175,7 @@ func main() {
 		weatherService,
 		mlClient,
 		personalizationRepo,
+		eventPublisher,
 		logger,
 	)
 

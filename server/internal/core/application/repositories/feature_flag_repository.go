@@ -2,20 +2,24 @@ package repositories
 
 import (
 	"context"
+	"time"
 
 	"outfitstyle/server/internal/core/domain"
 )
 
 // FeatureFlag структура флага функции (фича-флаг)
 type FeatureFlag struct {
-	ID          domain.ID   // Уникальный идентификатор флага
-	Key         string      // Ключ флага (уникальный идентификатор в системе)
-	Name        string      // Название флага
-	Description *string     // Описание флага (опционально)
+	ID          domain.ID // Уникальный идентификатор флага
+	Key         string    // Ключ флага (уникальный идентификатор в системе)
+	Name        string    // Название флага
+	Description *string   // Описание флага (опционально)
 
-	Enabled      bool       // Включен ли флаг
-	DefaultValue []byte     // Значение по умолчанию (в сериализованном виде)
-	Rules        []byte     // Правила включения/выключения (в сериализованном виде)
+	Enabled      bool      // Включен ли флаг
+	IsEnabled    bool      // Включен ли флаг (альтернативное поле)
+	DefaultValue []byte    // Значение по умолчанию (в сериализованном виде)
+	Rules        []byte    // Правила включения/выключения (в сериализованном виде)
+	CreatedAt    time.Time // Дата создания
+	UpdatedAt    time.Time // Дата последнего обновления
 }
 
 // FeatureFlagRepository интерфейс репозитория флагов функций
