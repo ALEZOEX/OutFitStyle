@@ -20,7 +20,7 @@ require (
 	github.com/pkg/errors v0.9.1
 
 	// Logging and monitoring
-	github.com/prometheus/client_golang v1.23.0
+	github.com/prometheus/client_golang v1.23.2
 
 	// Messaging
 	github.com/segmentio/kafka-go v0.4.37
