@@ -11,12 +11,12 @@ import (
 type WeatherCondition string
 
 const (
-	Clear        WeatherCondition = "clear"      // Ясно
-	Clouds       WeatherCondition = "clouds"     // Облачно
-	Rain         WeatherCondition = "rain"       // Дождь
-	Drizzle      WeatherCondition = "drizzle"    // Морось
-	Snow         WeatherCondition = "snow"       // Снег
-	Mist         WeatherCondition = "mist"       // Туман
+	Clear        WeatherCondition = "clear"        // Ясно
+	Clouds       WeatherCondition = "clouds"       // Облачно
+	Rain         WeatherCondition = "rain"         // Дождь
+	Drizzle      WeatherCondition = "drizzle"      // Морось
+	Snow         WeatherCondition = "snow"         // Снег
+	Mist         WeatherCondition = "mist"         // Туман
 	Thunderstorm WeatherCondition = "thunderstorm" // Гроза
 )
 

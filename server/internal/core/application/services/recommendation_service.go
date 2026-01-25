@@ -14,21 +14,23 @@ import (
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/eventing"
 	"outfitstyle/server/internal/infrastructure/external"
 )
 
 // RecommendationService сервис для рекомендаций одежды
 type RecommendationService struct {
-	recRepo         repositories.RecommendationRepository      // Репозиторий рекомендаций
-	clothingRepo    repositories.ClothingRepository           // Репозиторий одежды
-	userRepo        repositories.UserRepository               // Репозиторий пользователей
-	personalization repositories.PersonalizationRepository    // Репозиторий персонализации
+	recRepo         repositories.RecommendationRepository  // Репозиторий рекомендаций
+	clothingRepo    repositories.ClothingRepository        // Репозиторий одежды
+	userRepo        repositories.UserRepository            // Репозиторий пользователей
+	personalization repositories.PersonalizationRepository // Репозиторий персонализации
 
-	weather *external.WeatherService  // Сервис погоды
-	ml      *external.MLClient       // ML-клиент
+	eventPublisher eventing.EventPublisher  // Паблишер событий
+	weather        *external.WeatherService // Сервис погоды
+	ml             *external.MLClient       // ML-клиент
 
-	fallback *FallbackRanker  // Резервный ранжировщик
-	logger   *zap.Logger      // Логгер
+	fallback *FallbackRanker // Резервный ранжировщик
+	logger   *zap.Logger     // Логгер
 }
 
 // NewRecommendationService создает новый экземпляр сервиса рекомендаций
@@ -39,6 +41,7 @@ func NewRecommendationService(
 	weather *external.WeatherService,
 	ml *external.MLClient,
 	personalization repositories.PersonalizationRepository,
+	eventPublisher eventing.EventPublisher,
 	logger *zap.Logger,
 ) *RecommendationService {
 	return &RecommendationService{
@@ -46,6 +49,7 @@ func NewRecommendationService(
 		clothingRepo:    clothingRepo,
 		userRepo:        userRepo,
 		personalization: personalization,
+		eventPublisher:  eventPublisher,
 		weather:         weather,
 		ml:              ml,
 		fallback:        NewFallbackRanker(),
@@ -55,15 +59,15 @@ func NewRecommendationService(
 
 // rankedLite структура для ранжированного элемента
 type rankedLite struct {
-	ID         domain.ID  // Идентификатор
-	Score      float64    // Оценка
-	Confidence float64    // Уверенность
+	ID         domain.ID // Идентификатор
+	Score      float64   // Оценка
+	Confidence float64   // Уверенность
 }
 
 // altItem структура альтернативного элемента
 type altItem struct {
-	ID         string  `json:"id"`      // Идентификатор
-	Score      float64 `json:"score"`   // Оценка
+	ID         string  `json:"id"`         // Идентификатор
+	Score      float64 `json:"score"`      // Оценка
 	Confidence float64 `json:"confidence"` // Уверенность
 }
 
@@ -133,25 +137,58 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 		occ = *req.Occasion
 	}
 
-	modelVersion, processingMs, styleC, colorH, rankings := s.rankLiteOrFallback(ctx, userID, ws, occ, reqStyle, reqFormality, candidates, nil)
-
-	rec, itemsCreate, err := s.buildRecommendationFromRankings(ctx, userID, req, weatherJSON, modelVersion, processingMs, styleC, colorH, rankings, candByID, wardrobeLite, lat, lon)
-	if err != nil {
-		return nil, err
+	// Вместо синхронного вызова ML-сервиса, публикуем событие
+	contextData := map[string]interface{}{
+		"temperature":         ws.Temperature,
+		"feels_like":          ws.FeelsLike,
+		"humidity":            ws.Humidity,
+		"wind_speed":          ws.WindSpeed,
+		"weather_code":        ws.WeatherCode,
+		"occasion":            occ,
+		"requested_style":     reqStyle,
+		"requested_formality": reqFormality,
+		"location":            req.Location,
+		"latitude":            lat,
+		"longitude":           lon,
 	}
 
-	// Создаем сессию для логирования в ML сервисе
-	session := &repositories.RecommendationSession{
-		UserID:         userID,
-		ContextHash:    nil, // Можно вычислить хэш от контекста
-		ModelVersion:   &modelVersion,
-		WeatherData:    weatherJSON,
-		UserPreferences: nil, // Можно сериализовать предпочтения пользователя
+	// Публикуем событие запроса рекомендации
+	err = s.eventPublisher.PublishRecommendationRequested(ctx, userID, contextData, convertCandidatesToInterface(candidates))
+	if err != nil {
+		s.logger.Error("Не удалось опубликовать событие запроса рекомендации", zap.Error(err))
+		// Возвращаемся к синхронному вызову в случае ошибки публикации события
+		modelVersion, processingMs, styleC, colorH, rankings := s.rankLiteOrFallback(ctx, userID, ws, occ, reqStyle, reqFormality, candidates, nil)
+
+		rec, itemsCreate, err := s.buildRecommendationFromRankings(ctx, userID, req, weatherJSON, modelVersion, processingMs, styleC, colorH, rankings, candByID, wardrobeLite, lat, lon)
+		if err != nil {
+			return nil, err
+		}
+
+		// Создаем сессию для логирования в ML сервисе
+		session := &repositories.RecommendationSession{
+			UserID:          userID,
+			ContextHash:     nil, // Можно вычислить хэш от контекста
+			ModelVersion:    &modelVersion,
+			WeatherData:     weatherJSON,
+			UserPreferences: nil, // Можно сериализовать предпочтения пользователя
+		}
+
+		_, err = s.recRepo.CreateWithSession(ctx, session, rec, itemsCreate)
+		if err != nil {
+			return nil, errors.Wrap(err, "сохранение рекомендации с сессией")
+		}
+
+		return rec, nil
 	}
 
-	_, err = s.recRepo.CreateWithSession(ctx, session, rec, itemsCreate)
-	if err != nil {
-		return nil, errors.Wrap(err, "сохранение рекомендации с сессией")
+	// Возвращаем заглушку рекомендации, пока асинхронная обработка не завершена
+	// В реальной системе здесь может быть логика возврата промиса или ID задачи
+	status := "processing"
+	rec := &domain.RecommendationRecord{
+		ID:        domain.NewID(),
+		UserID:    userID,
+		Status:    &status, // Статус указывает, что рекомендация обрабатывается
+		CreatedAt: time.Now(),
 	}
 
 	return rec, nil
@@ -880,10 +917,10 @@ func (s *RecommendationService) rankLiteOrFallback(
 
 	// Создаем сессию для логирования в ML сервисе
 	session := &repositories.RecommendationSession{
-		UserID:         userID,
-		ContextHash:    nil, // Можно вычислить хэш от контекста
-		ModelVersion:   nil, // Будет заполнено из ответа ML
-		WeatherData:    nil, // Может быть заполнено позже
+		UserID:          userID,
+		ContextHash:     nil, // Можно вычислить хэш от контекста
+		ModelVersion:    nil, // Будет заполнено из ответа ML
+		WeatherData:     nil, // Может быть заполнено позже
 		UserPreferences: nil, // Можно сериализовать предпочтения пользователя
 	}
 
@@ -1082,6 +1119,15 @@ func derefString(p *string, def string) string {
 	return *p
 }
 
+// convertCandidatesToInterface преобразует кандидатов в интерфейс для event publisher
+func convertCandidatesToInterface(candidates []domain.CandidateLite) []interface{} {
+	interfaces := make([]interface{}, len(candidates))
+	for i, candidate := range candidates {
+		interfaces[i] = candidate
+	}
+	return interfaces
+}
+
 // List/Get/Rate/Favorite — оставляем как в вашем текущем сервисе (из Модуля 19).
 // List возвращает список рекомендаций пользователя
 func (s *RecommendationService) List(ctx context.Context, userID domain.ID, q domain.RecommendationListQuery) ([]domain.RecommendationRecord, int, error) {
@@ -1111,6 +1157,13 @@ func (s *RecommendationService) Rate(ctx context.Context, userID domain.ID, id d
 		return changed, err
 	}
 
+	// Публикуем событие обратной связи пользователя
+	err = s.eventPublisher.PublishUserFeedback(ctx, userID, id, rating, derefString(feedback, ""))
+	if err != nil {
+		s.logger.Error("Не удалось опубликовать событие обратной связи пользователя", zap.Error(err))
+		// Продолжаем выполнение, даже если не удалось опубликовать событие
+	}
+
 	// Отправляем действие в ML сервис для обучения Ranker
 	meta := map[string]interface{}{
 		"rating":   rating,
@@ -1136,6 +1189,17 @@ func (s *RecommendationService) SetFavorite(ctx context.Context, userID domain.I
 	err := s.recRepo.SetFavorite(ctx, userID, id, fav)
 	if err != nil {
 		return err
+	}
+
+	// Публикуем событие обратной связи пользователя (избранное)
+	rating := 5
+	if !fav {
+		rating = 1
+	}
+	err = s.eventPublisher.PublishUserFeedback(ctx, userID, id, rating, "favorite")
+	if err != nil {
+		s.logger.Error("Не удалось опубликовать событие обратной связи пользователя (избранное)", zap.Error(err))
+		// Продолжаем выполнение, даже если не удалось опубликовать событие
 	}
 
 	// Отправляем действие в ML сервис для обучения Ranker

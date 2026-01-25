@@ -17,10 +17,10 @@ const (
 
 // UserAchievementResult структура для возврата результатов метода My
 type UserAchievementResult struct {
-	Unlocked     []domain.Achievement
-	InProgress   []domain.Achievement
-	TotalPoints  int
-	Rank         string
+	Unlocked    []domain.Achievement
+	InProgress  []domain.Achievement
+	TotalPoints int
+	Rank        string
 }
 
 type AchievementsService struct {

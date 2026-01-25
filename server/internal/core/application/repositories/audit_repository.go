@@ -8,20 +8,22 @@ import (
 
 // AuditCreate структура для создания записи аудита
 type AuditCreate struct {
-	UserID *domain.ID  // Идентификатор пользователя (если применимо)
+	UserID *domain.ID // Идентификатор пользователя (если применимо)
 
 	Action       string     // Выполненное действие
+	EntityID     string     // Идентификатор сущности
+	EntityType   string     // Тип сущности
 	ResourceType *string    // Тип ресурса (если применимо)
 	ResourceID   *domain.ID // Идентификатор ресурса (если применимо)
 
-	OldValue []byte  // Старое значение (в сериализованном виде)
-	NewValue []byte  // Новое значение (в сериализованном виде)
+	OldValues []byte // Старые значения (в сериализованном виде)
+	NewValues []byte // Новые значения (в сериализованном виде)
 
 	IPAddress *string // IP-адрес пользователя
 	UserAgent *string // User-Agent пользователя
 
-	Success      bool      // Успешно ли выполнено действие
-	ErrorMessage *string   // Сообщение об ошибке (если было)
+	Success      bool    // Успешно ли выполнено действие
+	ErrorMessage *string // Сообщение об ошибке (если было)
 }
 
 // AuditRepository интерфейс репозитория аудита

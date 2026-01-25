@@ -1,255 +1,255 @@
-# OutfitStyle Operations Runbook
+# Руководство по эксплуатации OutfitStyle
 
-## Overview
+## Обзор
 
-This runbook provides operational procedures for maintaining and troubleshooting the OutfitStyle platform.
+Это руководство предоставляет операционные процедуры для обслуживания и устранения неполадок платформы OutfitStyle.
 
-## Contact Information
+## Контактная информация
 
-- **On-Call Engineer**: [Slack channel or phone number]
-- **Support Team**: [Email address]
-- **Emergency Contact**: [Phone number]
+- **Инженер по сопровождению**: [канал Slack или телефонный номер]
+- **Команда поддержки**: [адрес электронной почты]
+- **Экстренный контакт**: [телефонный номер]
 
-## Monitoring and Alerting
+## Мониторинг и оповещения
 
-### Key Metrics to Monitor
+### Ключевые метрики для мониторинга
 
-#### System Health
-- **API Response Time**: p95 < 200ms, p99 < 500ms
-- **Error Rate**: < 1% for all endpoints
-- **Availability**: > 99.9%
-- **Database Connections**: < 80% of max connections
-- **Disk Usage**: < 80% on all systems
+#### Состояние системы
+- **Время ответа API**: p95 < 200мс, p99 < 500мс
+- **Коэффициент ошибок**: < 1% для всех эндпоинтов
+- **Доступность**: > 99.9%
+- **Соединения с базой данных**: < 80% от максимального количества соединений
+- **Использование диска**: < 80% на всех системах
 
-#### Business Metrics
-- **Recommendations Generated**: Baseline varies by season/day
-- **Recommendation Acceptance Rate**: Target > 60%
-- **Daily Active Users**: Baseline varies by season/day
-- **App Crashes**: < 0.1%
+#### Бизнес-метрики
+- **Сгенерированные рекомендации**: Базовый уровень варьируется в зависимости от сезона/дня
+- **Коэффициент принятия рекомендаций**: Цель > 60%
+- **Ежедневные активные пользователи**: Базовый уровень варьируется в зависимости от сезона/дня
+- **Сбои приложения**: < 0.1%
 
-### Alert Categories
+### Категории оповещений
 
-#### Critical (Immediate Response Required)
-- Service completely unavailable
-- Database connection failures
-- High error rates (> 10% for 5+ minutes)
-- Security incidents
-- Data loss
+#### Критические (требуется немедленный отклик)
+- Сервис полностью недоступен
+- Сбои подключения к базе данных
+- Высокий коэффициент ошибок (> 10% в течение 5+ минут)
+- Инциденты безопасности
+- Потеря данных
 
-#### Warning (Address Within 1 Hour)
-- Degraded performance
-- Moderate error rates (1-10%)
-- Resource utilization > 80%
-- Failed background jobs
+#### Предупреждение (решить в течение 1 часа)
+- Деградация производительности
+- Умеренный коэффициент ошибок (1-10%)
+- Использование ресурсов > 80%
+- Сбой фоновых заданий
 
-#### Info (Monitor and Investigate)
-- Minor performance degradation
-- Low error rates (< 1%)
-- Resource utilization 60-80%
+#### Информационные (мониторить и исследовать)
+- Незначительная деградация производительности
+- Низкий коэффициент ошибок (< 1%)
+- Использование ресурсов 60-80%
 
-## Common Incidents and Solutions
+## Распространенные инциденты и решения
 
-### Incident: API Service Unavailable
+### Инцидент: API-сервис недоступен
 
-**Symptoms**:
-- All API requests return 5xx errors
-- Health check fails
-- Users cannot access the app
+**Симптомы**:
+- Все API-запросы возвращают ошибки 5xx
+- Проверка работоспособности не проходит
+- Пользователи не могут получить доступ к приложению
 
-**Investigation Steps**:
-1. Check health endpoint: `curl -v https://api.outfitstyle.app/health`
-2. Check logs: `kubectl logs -l app=api --tail=100`
-3. Check database connectivity: `kubectl exec -it <api-pod> -- psql <connection-string>`
-4. Check resource usage: `kubectl top pods`
+**Шаги по расследованию**:
+1. Проверить эндпоинт работоспособности: `curl -v https://api.outfitstyle.app/health`
+2. Проверить логи: `kubectl logs -l app=api --tail=100`
+3. Проверить подключение к базе данных: `kubectl exec -it <api-pod> -- psql <connection-string>`
+4. Проверить использование ресурсов: `kubectl top pods`
 
-**Resolution Steps**:
-1. If database issue: Check PostgreSQL status and restart if needed
-2. If resource issue: Scale up deployment or increase resources
-3. If code issue: Rollback to previous version
-4. If network issue: Check load balancer and networking
+**Шаги по решению**:
+1. Если проблема с базой данных: Проверить статус PostgreSQL и перезапустить при необходимости
+2. Если проблема с ресурсами: Масштабировать развертывание или увеличить ресурсы
+3. Если проблема с кодом: Откатить к предыдущей версии
+4. Если проблема с сетью: Проверить балансировщик нагрузки и сеть
 
-### Incident: High Error Rate
+### Инцидент: Высокий коэффициент ошибок
 
-**Symptoms**:
-- Error rate > 5% for 5+ minutes
-- Specific endpoints failing
-- Users reporting issues
+**Симптомы**:
+- Коэффициент ошибок > 5% в течение 5+ минут
+- Сбой конкретных эндпоинтов
+- Пользователи сообщают о проблемах
 
-**Investigation Steps**:
-1. Check Grafana dashboard for error patterns
-2. Filter logs by error status codes
-3. Identify affected endpoints/users
-4. Check external service dependencies
+**Шаги по расследованию**:
+1. Проверить панель мониторинга Grafana на наличие шаблонов ошибок
+2. Фильтровать логи по кодам статуса ошибок
+3. Определить затронутые эндпоинты/пользователей
+4. Проверить зависимости внешних сервисов
 
-**Resolution Steps**:
-1. If external API issue: Implement circuit breaker or fallback
-2. If database issue: Optimize queries or add indices
-3. If code bug: Deploy hotfix or rollback
-4. If rate limiting: Adjust limits or investigate abuse
+**Шаги по решению**:
+1. Если проблема с внешним API: Реализовать circuit breaker или резервный вариант
+2. Если проблема с базой данных: Оптимизировать запросы или добавить индексы
+3. Если ошибка в коде: Развернуть срочный патч или откатить
+4. Если ограничение частоты: Настроить лимиты или расследовать злоупотребление
 
-### Incident: Slow Response Times
+### Инцидент: Медленное время отклика
 
-**Symptoms**:
-- API response times > 1s consistently
-- Users experiencing delays
-- High p95/p99 latency
+**Симптомы**:
+- Время ответа API > 1с последовательно
+- Пользователи испытывают задержки
+- Высокая задержка p95/p99
 
-**Investigation Steps**:
-1. Check Grafana latency dashboards
-2. Identify slow endpoints
-3. Check database query performance
-4. Check external service response times
+**Шаги по расследованию**:
+1. Проверить панели мониторинга задержек Grafana
+2. Определить медленные эндпоинты
+3. Проверить производительность запросов к базе данных
+4. Проверить время отклика внешних сервисов
 
-**Resolution Steps**:
-1. Add database indices
-2. Implement caching
-3. Optimize slow queries
-4. Scale services horizontally
-5. Add CDN for static assets
+**Шаги по решению**:
+1. Добавить индексы базы данных
+2. Реализовать кэширование
+3. Оптимизировать медленные запросы
+4. Масштабировать сервисы по горизонтали
+5. Добавить CDN для статических ресурсов
 
-### Incident: ML Service Unavailable
+### Инцидент: ML-сервис недоступен
 
-**Symptoms**:
-- Recommendation generation fails
-- ML service health check fails
-- Users cannot get new recommendations
+**Симптомы**:
+- Генерация рекомендаций не удается
+- Проверка работоспособности ML-сервиса не проходит
+- Пользователи не могут получить новые рекомендации
 
-**Investigation Steps**:
-1. Check ML service logs
-2. Check model loading status
-3. Check resource usage (memory/CPU)
-4. Check model file integrity
+**Шаги по расследованию**:
+1. Проверить логи ML-сервиса
+2. Проверить статус загрузки модели
+3. Проверить использование ресурсов (память/CPU)
+4. Проверить целостность файла модели
 
-**Resolution Steps**:
-1. Restart ML service
-2. Reload model if corrupted
-3. Scale ML service if resource constrained
-4. Rollback to previous model version if needed
+**Шаги по решению**:
+1. Перезапустить ML-сервис
+2. Перезагрузить модель, если она повреждена
+3. Масштабировать ML-сервис, если ресурсы ограничены
+4. Откатить к предыдущей версии модели при необходимости
 
-## Maintenance Procedures
+## Процедуры обслуживания
 
-### Database Maintenance
+### Обслуживание базы данных
 
-#### Backup Verification (Weekly)
-1. Download latest backup from storage
-2. Restore to temporary database
-3. Verify data integrity
-4. Document results
+#### Проверка резервных копий (еженедельно)
+1. Загрузить последнюю резервную копию из хранилища
+2. Восстановить во временную базу данных
+3. Проверить целостность данных
+4. Документировать результаты
 
-#### Index Optimization (Monthly)
-1. Run `EXPLAIN ANALYZE` on slow queries
-2. Identify missing indices
-3. Create new indices during maintenance window
-4. Monitor performance improvement
+#### Оптимизация индексов (ежемесячно)
+1. Выполнить `EXPLAIN ANALYZE` для медленных запросов
+2. Определить отсутствующие индексы
+3. Создать новые индексы во время окна обслуживания
+4. Мониторить улучшение производительности
 
-### Security Maintenance
+### Обслуживание безопасности
 
-#### Certificate Renewal (Quarterly)
-1. Check certificate expiration dates
-2. Renew certificates before expiration
-3. Update all services with new certificates
-4. Test all HTTPS endpoints
+#### Обновление сертификатов (ежеквартально)
+1. Проверить сроки действия сертификатов
+2. Обновить сертификаты до истечения срока
+3. Обновить все сервисы новыми сертификатами
+4. Протестировать все HTTPS-эндпоинты
 
-#### Dependency Updates (Monthly)
-1. Run security scans on all services
-2. Update vulnerable dependencies
-3. Test updates in staging environment
-4. Deploy to production
+#### Обновление зависимостей (ежемесячно)
+1. Запустить сканирование безопасности для всех сервисов
+2. Обновить уязвимые зависимости
+3. Протестировать обновления в промежуточной среде
+4. Развернуть в продакшн
 
-## Deployment Procedures
+## Процедуры развертывания
 
-### Standard Deployment
+### Стандартное развертывание
 
-1. **Pre-deployment Checks**:
-   - All tests passing in CI
-   - Staging environment stable
-   - No active incidents
+1. **Проверки перед развертыванием**:
+   - Все тесты проходят в CI
+   - Промежуточная среда стабильна
+   - Нет активных инцидентов
 
-2. **Deployment**:
-   - Deploy to staging first
-   - Manual testing on staging
-   - Deploy to production using blue-green strategy
-   - Monitor key metrics
+2. **Развертывание**:
+   - Сначала развернуть в промежуточную среду
+   - Ручное тестирование в промежуточной среде
+   - Развернуть в продакшн с использованием стратегии сине-зеленого
+   - Мониторить ключевые метрики
 
-3. **Post-deployment**:
-   - Verify health checks pass
-   - Monitor error rates and latency
-   - Update documentation if needed
+3. **После развертывания**:
+   - Проверить, что проверки работоспособности проходят
+   - Мониторить коэффициенты ошибок и задержки
+   - Обновить документацию при необходимости
 
-### Emergency Rollback
+### Аварийный откат
 
-1. **Identify Issue**: Determine if rollback is needed
-2. **Prepare Rollback**: Have previous version ready
-3. **Execute Rollback**: Deploy previous version
-4. **Verify**: Check health and metrics
-5. **Communicate**: Inform team and stakeholders
+1. **Определить проблему**: Определить, нужен ли откат
+2. **Подготовить откат**: Подготовить предыдущую версию
+3. **Выполнить откат**: Развернуть предыдущую версию
+4. **Проверить**: Проверить работоспособность и метрики
+5. **Коммуникация**: Сообщить команде и заинтересованным сторонам
 
-## Troubleshooting Commands
+## Команды устранения неполадок
 
-### Kubernetes Commands
+### Команды Kubernetes
 ```bash
-# Check pod status
+# Проверить статус pod
 kubectl get pods -n outfitstyle
 
-# Check logs
+# Проверить логи
 kubectl logs -n outfitstyle <pod-name>
 
-# Check resource usage
+# Проверить использование ресурсов
 kubectl top pods -n outfitstyle
 
-# Describe pod for detailed info
+# Описать pod для подробной информации
 kubectl describe pod -n outfitstyle <pod-name>
 ```
 
-### Database Commands
+### Команды базы данных
 ```bash
-# Check database connections
+# Проверить соединения с базой данных
 SELECT count(*) FROM pg_stat_activity;
 
-# Check slow queries
+# Проверить медленные запросы
 SELECT * FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 10;
 
-# Check table sizes
-SELECT schemaname, tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) 
-FROM pg_tables 
+# Проверить размеры таблиц
+SELECT schemaname, tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename))
+FROM pg_tables
 WHERE schemaname = 'public';
 ```
 
-### Monitoring Commands
+### Команды мониторинга
 ```bash
-# Check service status
+# Проверить статус сервиса
 curl -s https://api.outfitstyle.app/health | jq
 
-# Check metrics endpoint
+# Проверить эндпоинт метрик
 curl -s https://api.outfitstyle.app/metrics | grep http_requests_total
 ```
 
-## Escalation Procedures
+## Процедуры эскалации
 
-### Level 1: On-Call Engineer
-- Initial incident response
-- Basic troubleshooting
-- Communication with users
+### Уровень 1: Инженер по сопровождению
+- Первоначальный отклик на инцидент
+- Базовое устранение неполадок
+- Коммуникация с пользователями
 
-### Level 2: Senior Engineer
-- Complex technical issues
-- Architecture decisions
-- Coordination with other teams
+### Уровень 2: Старший инженер
+- Сложные технические проблемы
+- Архитектурные решения
+- Координация с другими командами
 
-### Level 3: Engineering Manager
-- Critical incidents
-- Customer communication
-- Executive updates
+### Уровень 3: Менеджер по инженерии
+- Критические инциденты
+- Коммуникация с клиентами
+- Обновления для руководства
 
-## Useful Resources
+## Полезные ресурсы
 
-- **Grafana Dashboard**: https://monitoring.outfitstyle.app
-- **GitHub Repository**: https://github.com/your-org/outfitstyle
-- **Slack Channel**: #outfitstyle-ops
-- **Documentation**: https://docs.outfitstyle.app
-- **Incident Report Template**: [Link to template]
+- **Панель мониторинга Grafana**: https://monitoring.outfitstyle.app
+- **Репозиторий GitHub**: https://github.com/your-org/outfitstyle
+- **Канал Slack**: #outfitstyle-ops
+- **Документация**: https://docs.outfitstyle.app
+- **Шаблон отчета об инциденте**: [Ссылка на шаблон]
 
-## Revision History
+## История изменений
 
-- **v1.0** - Initial runbook (January 2024)
-- **v1.1** - Added ML service procedures (February 2024)
+- **v1.0** - Начальное руководство (январь 2024)
+- **v1.1** - Добавлены процедуры ML-сервиса (февраль 2024)

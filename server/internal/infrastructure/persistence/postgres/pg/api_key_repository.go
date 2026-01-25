@@ -1,3 +1,5 @@
+// Пакет pg содержит реализацию репозиториев для работы с PostgreSQL
+// Реализует интерфейсы репозиториев с использованием библиотеки pgx
 package pg
 
 import (
@@ -13,17 +15,17 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
-// APIKeyRepository represents the API key repository
+// APIKeyRepository репозиторий для работы с API-ключами
 type APIKeyRepository struct {
-	db *pgxpool.Pool
+	db *pgxpool.Pool // Пул подключений к базе данных PostgreSQL
 }
 
-// NewAPIKeyRepository creates a new API key repository
+// NewAPIKeyRepository создает новый экземпляр репозитория API-ключей
 func NewAPIKeyRepository(db *pgxpool.Pool) *APIKeyRepository {
 	return &APIKeyRepository{db: db}
 }
 
-// GetForAuthByPrefix retrieves the API key record for authentication purposes
+// GetForAuthByPrefix возвращает запись API-ключа для аутентификации по префиксу
 func (r *APIKeyRepository) GetForAuthByPrefix(ctx context.Context, prefix string) (*repositories.APIKeyAuthRecord, error) {
 	query := `
 		SELECT

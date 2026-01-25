@@ -1,69 +1,69 @@
-# Security Guidelines for OutfitStyle
+# Руководящие принципы безопасности для OutfitStyle
 
-## Authentication & Authorization
+## Аутентификация и авторизация
 
-### JWT Token Management
-- Use RS256 algorithm for asymmetric signing
-- Short-lived access tokens (15-60 minutes)
-- Refresh tokens with rotation
-- Blacklist revoked tokens in Redis
-- Validate issuer and audience claims
+### Управление JWT-токенами
+- Использовать алгоритм RS256 для асимметричной подписи
+- Краткосрочные токены доступа (15-60 минут)
+- Токены обновления с ротацией
+- Черный список отозванных токенов в Redis
+- Проверка утверждений издателя и аудитории
 
-### OAuth 2.0 with Google
-- Validate ID tokens on backend
-- Verify `email_verified: true`
-- Store minimal user data (email, name only)
-- Don't store Google refresh tokens unless needed
+### OAuth 2.0 с Google
+- Проверка ID-токенов на бэкенде
+- Проверить `email_verified: true`
+- Хранить минимальные пользовательские данные (только email, имя)
+- Не хранить токены обновления Google, если не требуется
 
-## API Protection
+## Защита API
 
-### Rate Limiting
-- Global: 10,000 req/min for entire service
-- Per IP: 100 req/min (anonymous), 300 req/min (authenticated)
-- Per User: 200 req/min
-- Per Endpoint:
-  - `/auth/*`: 10 req/min (brute force protection)
-  - `/recommendations`: 30 req/min (heavy endpoint)
-  - `/wardrobe/*`: 100 req/min
+### Ограничение частоты запросов
+- Глобально: 10 000 запросов/мин для всего сервиса
+- На IP: 100 запросов/мин (анонимный), 300 запросов/мин (аутентифицированный)
+- На пользователя: 200 запросов/мин
+- На эндпоинт:
+  - `/auth/*`: 10 запросов/мин (защита от подбора)
+  - `/recommendations`: 30 запросов/мин (тяжелый эндпоинт)
+  - `/wardrobe/*`: 100 запросов/мин
 
-### Input Validation
-- Validate at HTTP handler level
-- Sanitize strings (trim, HTML escape)
-- Limit payload size (max 1MB)
-- Limit image uploads (max 5MB)
-- Validate Content-Type headers
+### Валидация ввода
+- Проверка на уровне HTTP-обработчика
+- Санитизация строк (обрезка, экранирование HTML)
+- Ограничение размера полезной нагрузки (макс. 1МБ)
+- Ограничение загрузки изображений (макс. 5МБ)
+- Проверка заголовков Content-Type
 
-### SQL Injection Prevention
-- Use parameterized queries only
-- Never concatenate user input
-- Use ORM or query builder instead of raw SQL
+### Предотвращение SQL-инъекций
+- Использовать только параметризованные запросы
+- Никогда не конкатенировать пользовательский ввод
+- Использовать ORM или построитель запросов вместо сырого SQL
 
-### CORS Configuration
-- Allow only your domain in production
-- Allow GET, POST, PUT, DELETE methods
-- Allow Authorization and Content-Type headers
-- Use credentials: true for cookies
+### Конфигурация CORS
+- Разрешить только ваш домен в продакшене
+- Разрешить методы GET, POST, PUT, DELETE
+- Разрешить заголовки Authorization и Content-Type
+- Использовать credentials: true для cookies
 
-## Data Protection
+## Защита данных
 
-### In Transit
-- TLS 1.3 everywhere
-- HSTS header (Strict-Transport-Security)
-- Certificate pinning in mobile app (optional)
+### В пути передачи
+- TLS 1.3 везде
+- Заголовок HSTS (Strict-Transport-Security)
+- Прикрепление сертификата в мобильном приложении (опционально)
 
-### At Rest
-- Disk encryption on servers
-- Encrypted backups
-- Password hashing with bcrypt/argon2
+### В состоянии покоя
+- Шифрование диска на серверах
+- Зашифрованные резервные копии
+- Хеширование паролей с помощью bcrypt/argon2
 
-### Personal Identifiable Information (PII)
-- Minimize collection: gather only necessary data
-- Logs: mask emails, never log tokens
-- Audit: who accessed what data when
+### Персональная идентифицируемая информация (PII)
+- Минимизация сбора: собирать только необходимые данные
+- Логи: маскировать email, никогда не логировать токены
+- Аудит: кто и когда получил доступ к каким данным
 
-## Security Headers
+## Заголовки безопасности
 
-### Recommended Headers
+### Рекомендуемые заголовки
 ```
 X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
@@ -73,31 +73,57 @@ Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: geolocation=(self)
 ```
 
-## Secrets Management
+## Управление секретами
 
-### Best Practices
-- Never commit secrets to git
-- Use environment variables in production
-- Use SOPS for encrypting config files
-- Rotate secrets regularly
-- Use least privilege principle
+### Лучшие практики
+- Никогда не коммитить секреты в git
+- Использовать переменные окружения в продакшене
+- Использовать SOPS для шифрования конфигурационных файлов
+- Регулярно ротировать секреты
+- Использовать принцип минимальных привилегий
 
-### Secret Storage
-- GitHub Secrets for CI/CD
-- HashiCorp Vault for production (recommended)
-- AWS/GCP KMS for cloud environments
-- Kubernetes Secrets for containerized deployments
+### Хранение секретов
+- GitHub Secrets для CI/CD
+- HashiCorp Vault для продакшена (рекомендуется)
+- AWS/GCP KMS для облачных окружений
+- Kubernetes Secrets для контейнеризированных развертываний
 
-## Monitoring & Incident Response
+## Мониторинг и реагирование на инциденты
 
-### Security Monitoring
-- Monitor for unusual API usage patterns
-- Track failed authentication attempts
-- Alert on schema changes to sensitive tables
-- Log all access to PII data
+### Мониторинг безопасности
+- Мониторинг необычных паттернов использования API
+- Отслеживание неудачных попыток аутентификации
+- Оповещение о изменениях схемы в чувствительных таблицах
+- Логирование всего доступа к PII-данным
 
-### Incident Response
-- Immediate notification for security events
-- Predefined escalation procedures
-- Regular security drills
-- Post-incident analysis and improvements
+### Безопасность в Service Mesh (Istio)
+
+### Конфигурация mTLS
+- Включение mTLS между всеми сервисами по умолчанию
+- Использование STRICT режима для защиты трафика
+- Ротация сертификатов автоматически каждые 24 часа
+
+### Policy Enforcement
+- Ограничение доступа между сервисами через AuthorizationPolicy
+- Проверка JWT токенов на уровне sidecar
+- Ограничение частоты запросов через RateLimit
+
+## Безопасность в Event-driven архитектуре
+
+### Безопасность брокера сообщений
+- Аутентификация и авторизация для Kafka
+- Шифрование сообщений при передаче
+- Аудит всех операций с топиками
+
+### Безопасность событий
+- Подпись событий для проверки целостности
+- Проверка источника событий
+- Защита от повторного воспроизведения событий
+
+## Реагирование на инциденты
+- Немедленное уведомление о событиях безопасности
+- Предопределенные процедуры эскалации
+- Регулярные учения по безопасности
+- Анализ после инцидента и улучшения
+- Процедуры реагирования на инциденты в Service Mesh
+- Процедуры реагирования на инциденты в event-driven архитектуре

@@ -21,7 +21,7 @@ type APIKey struct {
 	IsActive bool `json:"is_active"` // Активен ли ключ
 
 	LastUsedAt *time.Time `json:"last_used_at,omitempty"` // Время последнего использования
-	ExpiresAt  *time.Time `json:"expires_at,omitempty"`  // Время истечения срока действия
+	ExpiresAt  *time.Time `json:"expires_at,omitempty"`   // Время истечения срока действия
 
 	CreatedAt time.Time `json:"created_at"` // Время создания
 	UpdatedAt time.Time `json:"updated_at"` // Время последнего обновления

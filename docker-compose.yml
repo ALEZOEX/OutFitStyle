@@ -42,7 +42,7 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - ./server/ml-service/models:/app/models
+      - ./ml-service/models:/app/models
 
   migrate:
     build:

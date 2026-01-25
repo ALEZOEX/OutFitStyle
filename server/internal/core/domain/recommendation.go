@@ -35,6 +35,27 @@ type RecommendationRecord struct {
 	ThermalFeedback *string    `json:"thermal_feedback,omitempty"`
 	RatedAt         *time.Time `json:"rated_at,omitempty"`
 
+	City        *string              `json:"city,omitempty"`         // Город, для которого создана рекомендация
+	Source      *string              `json:"source,omitempty"`       // Источник рекомендации (например, "ml", "rule_based")
+	Score       *float64             `json:"score,omitempty"`        // Общий рейтинг рекомендации
+	OutfitScore *float64             `json:"outfit_score,omitempty"` // Рейтинг наряда
+	Algorithm   *string              `json:"algorithm,omitempty"`    // Алгоритм, использованный для генерации рекомендации
+	Temperature *float64             `json:"temperature,omitempty"`  // Температура
+	FeelsLike   *float64             `json:"feels_like,omitempty"`   // Ощущаемая температура
+	WindSpeed   *float64             `json:"wind_speed,omitempty"`   // Скорость ветра
+	MinTemp     *float64             `json:"min_temp,omitempty"`     // Минимальная температура
+	MaxTemp     *float64             `json:"max_temp,omitempty"`     // Максимальная температура
+	WillRain    *bool                `json:"will_rain,omitempty"`    // Будет ли дождь
+	WillSnow    *bool                `json:"will_snow,omitempty"`    // Будет ли снег
+	Humidity    *int                 `json:"humidity,omitempty"`     // Влажность
+	Timestamp   *time.Time           `json:"timestamp,omitempty"`    // Временная метка
+	Weather     *WeatherData         `json:"weather,omitempty"`      // Данные о погоде
+	Outfit      []RecommendationItem `json:"outfit,omitempty"`       // Рекомендованный наряд
+	Items       []RecommendationItem `json:"items,omitempty"`        // Элементы рекомендованного наряда
+
+	MLPowered *bool `json:"ml_powered,omitempty"` // Использовалась ли машинное обучение
+
+	Status     *string   `json:"status,omitempty"` // Статус рекомендации (например, "processing", "completed", "failed")
 	IsFavorite bool      `json:"is_favorite"`
 	CreatedAt  time.Time `json:"created_at"`
 }

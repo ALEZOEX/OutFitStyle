@@ -9,12 +9,12 @@ import (
 
 // APIKeyCreateRecord структура для создания API-ключа
 type APIKeyCreateRecord struct {
-	ClientID  domain.ID  // Идентификатор клиента
-	KeyPrefix string     // Префикс ключа (для идентификации)
-	KeyHash   []byte     // Хэш ключа (секретная часть)
+	ClientID  domain.ID // Идентификатор клиента
+	KeyPrefix string    // Префикс ключа (для идентификации)
+	KeyHash   []byte    // Хэш ключа (секретная часть)
 
-	Name        *string  // Имя ключа (опционально)
-	Description *string  // Описание ключа (опционально)
+	Name        *string // Имя ключа (опционально)
+	Description *string // Описание ключа (опционально)
 
 	Permissions []string // Разрешения ключа
 
@@ -23,10 +23,10 @@ type APIKeyCreateRecord struct {
 }
 
 type APIKeyRecord struct {
-	ID       domain.ID   // Уникальный идентификатор ключа
-	ClientID domain.ID   // Идентификатор клиента
+	ID       domain.ID // Уникальный идентификатор ключа
+	ClientID domain.ID // Идентификатор клиента
 
-	KeyPrefix string    // Префикс ключа
+	KeyPrefix string // Префикс ключа
 
 	Name        *string // Имя ключа (опционально)
 	Description *string // Описание ключа (опционально)
@@ -41,9 +41,9 @@ type APIKeyRecord struct {
 
 // APIKeyAuthRecord представляет данные, необходимые для аутентификации по API-ключу
 type APIKeyAuthRecord struct {
-	APIKeyID domain.ID  // Идентификатор API-ключа
-	ClientID domain.ID  // Идентификатор клиента
-	KeyHash  []byte     // Хэш ключа
+	APIKeyID domain.ID // Идентификатор API-ключа
+	ClientID domain.ID // Идентификатор клиента
+	KeyHash  []byte    // Хэш ключа
 
 	Permissions []string // Разрешения ключа
 

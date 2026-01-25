@@ -1,34 +1,34 @@
-# OutfitStyle API Documentation
+# Документация по API OutfitStyle
 
-## Base URL
+## Базовый URL
 
 ```
 https://api.outfitstyle.app
 ```
 
-## Authentication
+## Аутентификация
 
-All API requests require authentication via JWT token in the Authorization header:
+Все запросы к API требуют аутентификации с помощью JWT-токена в заголовке Authorization:
 
 ```
 Authorization: Bearer <jwt_token>
 ```
 
-## Endpoints
+## Конечные точки
 
-### Authentication
+### Аутентификация
 
 #### POST /api/v1/auth/google
-Authenticate with Google account
+Аутентификация с помощью аккаунта Google
 
-**Request Body:**
+**Тело запроса:**
 ```json
 {
   "id_token": "google_id_token"
 }
 ```
 
-**Response:**
+**Ответ:**
 ```json
 {
   "user": {
@@ -41,22 +41,22 @@ Authenticate with Google account
 }
 ```
 
-### Wardrobe
+### Гардероб
 
 #### GET /api/v1/wardrobe
-Get user's wardrobe items
+Получить элементы гардероба пользователя
 
-**Query Parameters:**
-- `page` (optional): Page number (default: 1)
-- `limit` (optional): Items per page (default: 20, max: 100)
+**Параметры запроса:**
+- `page` (необязательно): Номер страницы (по умолчанию: 1)
+- `limit` (необязательно): Элементов на странице (по умолчанию: 20, максимум: 100)
 
-**Response:**
+**Ответ:**
 ```json
 {
   "items": [
     {
       "id": "item_id",
-      "name": "Blue T-Shirt",
+      "name": "Синяя футболка",
       "category": "top",
       "color": "blue",
       "warmth_level": 2,
@@ -73,12 +73,12 @@ Get user's wardrobe items
 ```
 
 #### POST /api/v1/wardrobe
-Add a new wardrobe item
+Добавить новый элемент гардероба
 
-**Request Body:**
+**Тело запроса:**
 ```json
 {
-  "name": "Blue T-Shirt",
+  "name": "Синяя футболка",
   "category": "top",
   "color": "blue",
   "warmth_level": 2,
@@ -88,12 +88,12 @@ Add a new wardrobe item
 }
 ```
 
-**Response:**
+**Ответ:**
 ```json
 {
   "item": {
     "id": "item_id",
-    "name": "Blue T-Shirt",
+    "name": "Синяя футболка",
     "category": "top",
     "color": "blue",
     "warmth_level": 2,
@@ -106,25 +106,25 @@ Add a new wardrobe item
 ```
 
 #### DELETE /api/v1/wardrobe/{item_id}
-Remove a wardrobe item
+Удалить элемент гардероба
 
-**Response:**
+**Ответ:**
 ```json
 {
   "success": true
 }
 ```
 
-### Recommendations
+### Рекомендации
 
 #### GET /api/v1/recommendations
-Get recommendation history
+Получить историю рекомендаций
 
-**Query Parameters:**
-- `page` (optional): Page number (default: 1)
-- `limit` (optional): Items per page (default: 20, max: 100)
+**Параметры запроса:**
+- `page` (необязательно): Номер страницы (по умолчанию: 1)
+- `limit` (необязательно): Элементов на странице (по умолчанию: 20, максимум: 100)
 
-**Response:**
+**Ответ:**
 ```json
 {
   "recommendations": [
@@ -132,7 +132,7 @@ Get recommendation history
       "id": "rec_id",
       "items": ["item_id_1", "item_id_2"],
       "score": 0.95,
-      "reason": "Perfect for sunny weather",
+      "reason": "Идеально для солнечной погоды",
       "occasion": "daily",
       "weather_condition": "sunny",
       "created_at": "2024-01-15T10:30:00Z"
@@ -145,9 +145,9 @@ Get recommendation history
 ```
 
 #### POST /api/v1/recommendations
-Generate new recommendations
+Сгенерировать новые рекомендации
 
-**Request Body:**
+**Тело запроса:**
 ```json
 {
   "occasion": "daily",
@@ -156,14 +156,14 @@ Generate new recommendations
 }
 ```
 
-**Response:**
+**Ответ:**
 ```json
 {
   "recommendation": {
     "id": "rec_id",
     "items": ["item_id_1", "item_id_2"],
     "score": 0.95,
-    "reason": "Perfect for sunny weather",
+    "reason": "Идеально для солнечной погоды",
     "occasion": "daily",
     "weather_condition": "sunny",
     "created_at": "2024-01-15T10:30:00Z"
@@ -171,12 +171,12 @@ Generate new recommendations
 }
 ```
 
-### User Preferences
+### Предпочтения пользователя
 
 #### GET /api/v1/preferences
-Get user preferences
+Получить предпочтения пользователя
 
-**Response:**
+**Ответ:**
 ```json
 {
   "preferences": {
@@ -191,9 +191,9 @@ Get user preferences
 ```
 
 #### PUT /api/v1/preferences
-Update user preferences
+Обновить предпочтения пользователя
 
-**Request Body:**
+**Тело запроса:**
 ```json
 {
   "preferred_styles": ["casual", "smart casual"],
@@ -205,7 +205,7 @@ Update user preferences
 }
 ```
 
-**Response:**
+**Ответ:**
 ```json
 {
   "preferences": {
@@ -219,9 +219,9 @@ Update user preferences
 }
 ```
 
-## Error Responses
+## Ответы об ошибках
 
-All error responses follow this format:
+Все ответы об ошибках следуют следующему формату:
 
 ```json
 {
@@ -230,28 +230,28 @@ All error responses follow this format:
 }
 ```
 
-### Common HTTP Status Codes
+### Общие HTTP-статусы
 
-- `200 OK` - Request successful
-- `400 Bad Request` - Invalid request format
-- `401 Unauthorized` - Authentication required
-- `403 Forbidden` - Access denied
-- `404 Not Found` - Resource not found
-- `429 Too Many Requests` - Rate limit exceeded
-- `500 Internal Server Error` - Server error
+- `200 OK` - Запрос выполнен успешно
+- `400 Bad Request` - Неверный формат запроса
+- `401 Unauthorized` - Требуется аутентификация
+- `403 Forbidden` - Доступ запрещен
+- `404 Not Found` - Ресурс не найден
+- `429 Too Many Requests` - Превышено ограничение на количество запросов
+- `500 Internal Server Error` - Ошибка сервера
 
-## Rate Limiting
+## Ограничение частоты запросов
 
-All authenticated endpoints have rate limiting:
-- 100 requests per minute per user
-- 1000 requests per minute per IP (unauthenticated)
+Все аутентифицированные конечные точки имеют ограничение частоты:
+- 100 запросов в минуту на пользователя
+- 1000 запросов в минуту на IP-адрес (для неаутентифицированных)
 
-## Health Check
+## Проверка работоспособности
 
 #### GET /health
-Check service health
+Проверить работоспособность сервиса
 
-**Response:**
+**Ответ:**
 ```json
 {
   "status": "healthy",
@@ -271,9 +271,9 @@ Check service health
 ```
 
 #### GET /ready
-Check service readiness for traffic
+Проверить готовность сервиса к работе
 
-**Response:**
+**Ответ:**
 ```json
 {
   "status": "ready",
@@ -281,9 +281,9 @@ Check service readiness for traffic
 }
 ```
 
-## Metrics
+## Метрики
 
 #### GET /metrics
-Prometheus metrics endpoint
+Конечная точка метрик Prometheus
 
-Returns metrics in Prometheus format for monitoring and alerting.
+Возвращает метрики в формате Prometheus для мониторинга и оповещения.

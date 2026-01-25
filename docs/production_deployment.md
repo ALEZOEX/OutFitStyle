@@ -71,7 +71,7 @@ cd server
 docker build -t outfitstyle/api:latest -f Dockerfile.prod .
 
 # ML-сервис
-cd ../server/ml-service
+cd ../ml-service
 docker build -t outfitstyle/ml-service:latest -f Dockerfile.prod .
 
 # Marketplace-сервис (при необходимости)
@@ -174,7 +174,7 @@ docker compose -f docker-compose.prod.yml logs -f ml-service
     pg_dump -U "$DB_USER" "$DB_NAME" > backup_$(date +%F).sql
   ```
 
-- Модельные файлы (`server/ml-service/models/*`).
+- Модельные файлы (`ml-service/models/*`).
 - Важные логи (если нужны для аналитики/отладки).
 
 ---
