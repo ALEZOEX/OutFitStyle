@@ -1,0 +1,36 @@
+# Training Dockerfile for model training
+
+FROM python:3.9-slim
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the training scripts
+COPY scripts /app/scripts
+COPY model /app/model
+COPY train_styles_only.py /app/train_styles_only.py
+COPY data /app/data
+COPY models /app/models
+
+# Create non-root user for security
+RUN groupadd -g 1000 mluser && \
+    useradd -u 1000 -g mluser -d /app mluser
+
+# Set permissions
+RUN chown -R mluser:mluser /app
+
+# Switch to non-root user
+USER mluser
+
+# Command to run the training script
+CMD ["python", "train_styles_only.py"]
