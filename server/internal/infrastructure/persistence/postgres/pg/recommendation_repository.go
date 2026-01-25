@@ -2,11 +2,13 @@ package pg
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pkg/errors"
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
@@ -147,58 +149,747 @@ func (r *RecommendationRepository) createWithSessionInternal(ctx context.Context
 }
 
 func (r *RecommendationRepository) CreateRecommendation(ctx context.Context, rec *domain.RecommendationResponse) (*domain.RecommendationResponse, error) {
-	// TODO: Implement
-	return nil, fmt.Errorf("not implemented")
+	query := `
+		INSERT INTO recommendations (
+			id, user_id, city, weather, outfit, created_at, source, score, outfit_score, algorithm, items, location, temperature, feels_like, wind_speed, min_temp, max_temp, will_rain, will_snow, humidity, timestamp, ml_powered
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+	`
+
+	id := domain.NewID()
+	now := time.Now()
+
+	weatherJSON, err := json.Marshal(rec.Weather)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal weather data")
+	}
+
+	outfitJSON, err := json.Marshal(rec.Outfit)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal outfit data")
+	}
+
+	itemsJSON, err := json.Marshal(rec.Items)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal items data")
+	}
+
+	_, err = r.db.Exec(ctx, query,
+		id,
+		rec.UserID,
+		rec.City,
+		weatherJSON,
+		outfitJSON,
+		now,
+		rec.Source,
+		rec.Score,
+		rec.OutfitScore,
+		rec.Algorithm,
+		itemsJSON,
+		rec.Location,
+		rec.Temperature,
+		rec.FeelsLike,
+		rec.WindSpeed,
+		rec.MinTemp,
+		rec.MaxTemp,
+		rec.WillRain,
+		rec.WillSnow,
+		rec.Humidity,
+		rec.Timestamp,
+		rec.MLPowered,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create recommendation")
+	}
+
+	rec.ID = id
+	rec.CreatedAt = now
+
+	return rec, nil
 }
 
 func (r *RecommendationRepository) GetByID(ctx context.Context, id domain.ID) (*domain.RecommendationRecord, error) {
-	// TODO: Implement
-	return nil, fmt.Errorf("not implemented")
+	query := `
+		SELECT
+			id, user_id, city, weather, outfit, created_at, source, score, outfit_score, algorithm, items, location, temperature, feels_like, wind_speed, min_temp, max_temp, will_rain, will_snow, humidity, timestamp, ml_powered
+		FROM recommendations
+		WHERE id = $1
+	`
+
+	var rec domain.RecommendationRecord
+	var weatherJSON []byte
+	var outfitJSON []byte
+	var itemsJSON []byte
+	var createdAt time.Time
+	var timestamp time.Time
+
+	err := r.db.QueryRow(ctx, query, id).Scan(
+		&rec.ID,
+		&rec.UserID,
+		&rec.City,
+		&weatherJSON,
+		&outfitJSON,
+		&createdAt,
+		&rec.Source,
+		&rec.Score,
+		&rec.OutfitScore,
+		&rec.Algorithm,
+		&itemsJSON,
+		&rec.Location,
+		&rec.Temperature,
+		&rec.FeelsLike,
+		&rec.WindSpeed,
+		&rec.MinTemp,
+		&rec.MaxTemp,
+		&rec.WillRain,
+		&rec.WillSnow,
+		&rec.Humidity,
+		&timestamp,
+		&rec.MLPowered,
+	)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "failed to get recommendation by ID")
+	}
+
+	// Parse JSON fields
+	if len(weatherJSON) > 0 {
+		err = json.Unmarshal(weatherJSON, &rec.Weather)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal weather data")
+		}
+	}
+
+	if len(outfitJSON) > 0 {
+		err = json.Unmarshal(outfitJSON, &rec.Outfit)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal outfit data")
+		}
+	}
+
+	if len(itemsJSON) > 0 {
+		err = json.Unmarshal(itemsJSON, &rec.Items)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal items data")
+		}
+	}
+
+	rec.CreatedAt = createdAt
+	if !timestamp.IsZero() {
+		rec.Timestamp = &timestamp
+	}
+
+	return &rec, nil
 }
 
 func (r *RecommendationRepository) GetByUser(ctx context.Context, userID domain.ID, limit, offset int) ([]domain.Recommendation, error) {
-	// TODO: Implement
-	return nil, fmt.Errorf("not implemented")
+	query := `
+		SELECT
+			id, user_id, city, weather, outfit, created_at, source, score, outfit_score, algorithm, items, location, temperature, feels_like, wind_speed, min_temp, max_temp, will_rain, will_snow, humidity, timestamp, ml_powered
+		FROM recommendations
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3
+	`
+
+	rows, err := r.db.Query(ctx, query, userID, limit, offset)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query recommendations by user")
+	}
+	defer rows.Close()
+
+	var recommendations []domain.Recommendation
+	for rows.Next() {
+		var rec domain.Recommendation
+		var weatherJSON []byte
+		var outfitJSON []byte
+		var itemsJSON []byte
+		var createdAt time.Time
+		var timestamp time.Time
+
+		err := rows.Scan(
+			&rec.ID,
+			&rec.UserID,
+			&rec.City,
+			&weatherJSON,
+			&outfitJSON,
+			&createdAt,
+			&rec.Source,
+			&rec.Score,
+			&rec.OutfitScore,
+			&rec.Algorithm,
+			&itemsJSON,
+			&rec.Location,
+			&rec.Temperature,
+			&rec.FeelsLike,
+			&rec.WindSpeed,
+			&rec.MinTemp,
+			&rec.MaxTemp,
+			&rec.WillRain,
+			&rec.WillSnow,
+			&rec.Humidity,
+			&timestamp,
+			&rec.MLPowered,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to scan recommendation")
+		}
+
+		// Parse JSON fields
+		if len(weatherJSON) > 0 {
+			err = json.Unmarshal(weatherJSON, &rec.Weather)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal weather data")
+			}
+		}
+
+		if len(outfitJSON) > 0 {
+			err = json.Unmarshal(outfitJSON, &rec.Outfit)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal outfit data")
+			}
+		}
+
+		if len(itemsJSON) > 0 {
+			err = json.Unmarshal(itemsJSON, &rec.Items)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal items data")
+			}
+		}
+
+		rec.CreatedAt = createdAt
+		if !timestamp.IsZero() {
+			rec.Timestamp = &timestamp
+		}
+
+		recommendations = append(recommendations, rec)
+	}
+
+	return recommendations, nil
 }
 
 func (r *RecommendationRepository) GetByUserAndDateRange(ctx context.Context, userID domain.ID, from, to *string) ([]domain.Recommendation, error) {
-	// TODO: Implement
-	return nil, fmt.Errorf("not implemented")
+	query := `
+		SELECT
+			id, user_id, city, weather, outfit, created_at, source, score, outfit_score, algorithm, items, location, temperature, feels_like, wind_speed, min_temp, max_temp, will_rain, will_snow, humidity, timestamp, ml_powered
+		FROM recommendations
+		WHERE user_id = $1
+	`
+	args := []interface{}{userID}
+	argIndex := 2
+
+	if from != nil {
+		query += fmt.Sprintf(" AND created_at >= $%d", argIndex)
+		args = append(args, *from)
+		argIndex++
+	}
+
+	if to != nil {
+		query += fmt.Sprintf(" AND created_at <= $%d", argIndex)
+		args = append(args, *to)
+		argIndex++
+	}
+
+	query += " ORDER BY created_at DESC"
+
+	rows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query recommendations by user and date range")
+	}
+	defer rows.Close()
+
+	var recommendations []domain.Recommendation
+	for rows.Next() {
+		var rec domain.Recommendation
+		var weatherJSON []byte
+		var outfitJSON []byte
+		var itemsJSON []byte
+		var createdAt time.Time
+		var timestamp time.Time
+
+		err := rows.Scan(
+			&rec.ID,
+			&rec.UserID,
+			&rec.City,
+			&weatherJSON,
+			&outfitJSON,
+			&createdAt,
+			&rec.Source,
+			&rec.Score,
+			&rec.OutfitScore,
+			&rec.Algorithm,
+			&itemsJSON,
+			&rec.Location,
+			&rec.Temperature,
+			&rec.FeelsLike,
+			&rec.WindSpeed,
+			&rec.MinTemp,
+			&rec.MaxTemp,
+			&rec.WillRain,
+			&rec.WillSnow,
+			&rec.Humidity,
+			&timestamp,
+			&rec.MLPowered,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to scan recommendation")
+		}
+
+		// Parse JSON fields
+		if len(weatherJSON) > 0 {
+			err = json.Unmarshal(weatherJSON, &rec.Weather)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal weather data")
+			}
+		}
+
+		if len(outfitJSON) > 0 {
+			err = json.Unmarshal(outfitJSON, &rec.Outfit)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal outfit data")
+			}
+		}
+
+		if len(itemsJSON) > 0 {
+			err = json.Unmarshal(itemsJSON, &rec.Items)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal items data")
+			}
+		}
+
+		rec.CreatedAt = createdAt
+		if !timestamp.IsZero() {
+			rec.Timestamp = &timestamp
+		}
+
+		recommendations = append(recommendations, rec)
+	}
+
+	return recommendations, nil
 }
 
 func (r *RecommendationRepository) Update(ctx context.Context, rec *domain.Recommendation) error {
-	// TODO: Implement
-	return fmt.Errorf("not implemented")
+	query := `
+		UPDATE recommendations
+		SET city = $1, weather = $2, outfit = $3, source = $4, score = $5, outfit_score = $6, algorithm = $7, items = $8, location = $9, temperature = $10, feels_like = $11, wind_speed = $12, min_temp = $13, max_temp = $14, will_rain = $15, will_snow = $16, humidity = $17, timestamp = $18, ml_powered = $19, updated_at = $20
+		WHERE id = $21
+	`
+
+	weatherJSON, err := json.Marshal(rec.Weather)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal weather data")
+	}
+
+	outfitJSON, err := json.Marshal(rec.Outfit)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal outfit data")
+	}
+
+	itemsJSON, err := json.Marshal(rec.Items)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal items data")
+	}
+
+	_, err = r.db.Exec(ctx, query,
+		rec.City,
+		weatherJSON,
+		outfitJSON,
+		rec.Source,
+		rec.Score,
+		rec.OutfitScore,
+		rec.Algorithm,
+		itemsJSON,
+		rec.Location,
+		rec.Temperature,
+		rec.FeelsLike,
+		rec.WindSpeed,
+		rec.MinTemp,
+		rec.MaxTemp,
+		rec.WillRain,
+		rec.WillSnow,
+		rec.Humidity,
+		rec.Timestamp,
+		rec.MLPowered,
+		time.Now(),
+		rec.ID,
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to update recommendation")
+	}
+
+	return nil
 }
 
 func (r *RecommendationRepository) Delete(ctx context.Context, id domain.ID) error {
-	// TODO: Implement
-	return fmt.Errorf("not implemented")
+	query := `DELETE FROM recommendations WHERE id = $1`
+
+	_, err := r.db.Exec(ctx, query, id)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete recommendation")
+	}
+
+	return nil
 }
 
 func (r *RecommendationRepository) GetItemRows(ctx context.Context, recommendationID domain.ID) ([]repositories.RecommendationItemRow, error) {
-	// TODO: Implement
-	return nil, fmt.Errorf("not implemented")
+	query := `
+		SELECT
+			id, recommendation_id, clothing_item_id, score, category, created_at
+		FROM recommendation_items
+		WHERE recommendation_id = $1
+		ORDER BY created_at DESC
+	`
+
+	rows, err := r.db.Query(ctx, query, recommendationID)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query recommendation item rows")
+	}
+	defer rows.Close()
+
+	var items []repositories.RecommendationItemRow
+	for rows.Next() {
+		var item repositories.RecommendationItemRow
+		var createdAt time.Time
+
+		err := rows.Scan(
+			&item.ID,
+			&item.RecommendationID,
+			&item.ClothingItemID,
+			&item.Score,
+			&item.Category,
+			&createdAt,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to scan recommendation item row")
+		}
+
+		item.CreatedAt = createdAt
+		items = append(items, item)
+	}
+
+	return items, nil
 }
 
 func (r *RecommendationRepository) SetRating(ctx context.Context, userID, recommendationID domain.ID, rating int, thermalFeedback *string, feedback *string) (bool, error) {
-	// TODO: Implement
-	return false, fmt.Errorf("not implemented")
+	query := `
+		INSERT INTO recommendation_ratings (
+			id, user_id, recommendation_id, rating, thermal_feedback, feedback, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		ON CONFLICT (user_id, recommendation_id)
+		DO UPDATE SET
+			rating = $4, thermal_feedback = $5, feedback = $6, updated_at = $8
+	`
+
+	id := domain.NewID()
+	now := time.Now()
+
+	_, err := r.db.Exec(ctx, query,
+		id,
+		userID,
+		recommendationID,
+		rating,
+		thermalFeedback,
+		feedback,
+		now,
+		now,
+	)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to set recommendation rating")
+	}
+
+	return true, nil
 }
 
 func (r *RecommendationRepository) SetFavorite(ctx context.Context, userID, recommendationID domain.ID, isFavorite bool) error {
-	// TODO: Implement
-	return fmt.Errorf("not implemented")
+	query := `
+		INSERT INTO recommendation_favorites (
+			id, user_id, recommendation_id, is_favorite, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (user_id, recommendation_id)
+		DO UPDATE SET
+			is_favorite = $4, updated_at = $6
+	`
+
+	id := domain.NewID()
+	now := time.Now()
+
+	_, err := r.db.Exec(ctx, query,
+		id,
+		userID,
+		recommendationID,
+		isFavorite,
+		now,
+		now,
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to set recommendation favorite status")
+	}
+
+	return nil
 }
 
 func (r *RecommendationRepository) ListFavorites(ctx context.Context, userID domain.ID, limit int) ([]domain.RecommendationRecord, error) {
-	// TODO: Implement
-	return nil, fmt.Errorf("not implemented")
+	query := `
+		SELECT
+			r.id, r.user_id, r.city, r.weather, r.outfit, r.created_at, r.source, r.score, r.outfit_score, r.algorithm, r.items, r.location, r.temperature, r.feels_like, r.wind_speed, r.min_temp, r.max_temp, r.will_rain, r.will_snow, r.humidity, r.timestamp, r.ml_powered
+		FROM recommendations r
+		JOIN recommendation_favorites rf ON r.id = rf.recommendation_id
+		WHERE rf.user_id = $1 AND rf.is_favorite = true
+		ORDER BY r.created_at DESC
+		LIMIT $2
+	`
+
+	rows, err := r.db.Query(ctx, query, userID, limit)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query favorite recommendations")
+	}
+	defer rows.Close()
+
+	var recommendations []domain.RecommendationRecord
+	for rows.Next() {
+		var rec domain.RecommendationRecord
+		var weatherJSON []byte
+		var outfitJSON []byte
+		var itemsJSON []byte
+		var createdAt time.Time
+		var timestamp time.Time
+
+		err := rows.Scan(
+			&rec.ID,
+			&rec.UserID,
+			&rec.City,
+			&weatherJSON,
+			&outfitJSON,
+			&createdAt,
+			&rec.Source,
+			&rec.Score,
+			&rec.OutfitScore,
+			&rec.Algorithm,
+			&itemsJSON,
+			&rec.Location,
+			&rec.Temperature,
+			&rec.FeelsLike,
+			&rec.WindSpeed,
+			&rec.MinTemp,
+			&rec.MaxTemp,
+			&rec.WillRain,
+			&rec.WillSnow,
+			&rec.Humidity,
+			&timestamp,
+			&rec.MLPowered,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to scan favorite recommendation")
+		}
+
+		// Parse JSON fields
+		if len(weatherJSON) > 0 {
+			err = json.Unmarshal(weatherJSON, &rec.Weather)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal weather data")
+			}
+		}
+
+		if len(outfitJSON) > 0 {
+			err = json.Unmarshal(outfitJSON, &rec.Outfit)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal outfit data")
+			}
+		}
+
+		if len(itemsJSON) > 0 {
+			err = json.Unmarshal(itemsJSON, &rec.Items)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal items data")
+			}
+		}
+
+		rec.CreatedAt = createdAt
+		if !timestamp.IsZero() {
+			rec.Timestamp = &timestamp
+		}
+
+		recommendations = append(recommendations, rec)
+	}
+
+	return recommendations, nil
 }
 
 func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain.ID, q domain.RecommendationListQuery) ([]domain.RecommendationRecord, int, error) {
-	// TODO: Implement
-	return nil, 0, fmt.Errorf("not implemented")
+	// Calculate offset
+	offset := (q.Page - 1) * q.Limit
+
+	// Base query
+	query := `
+		SELECT
+			id, user_id, city, weather, outfit, created_at, source, score, outfit_score, algorithm, items, location, temperature, feels_like, wind_speed, min_temp, max_temp, will_rain, will_snow, humidity, timestamp, ml_powered
+		FROM recommendations
+		WHERE user_id = $1
+	`
+	args := []interface{}{userID}
+	argIndex := 2
+
+	// Apply filters
+	if q.FromDate != nil {
+		query += fmt.Sprintf(" AND created_at >= $%d", argIndex)
+		args = append(args, *q.FromDate)
+		argIndex++
+	}
+
+	if q.ToDate != nil {
+		query += fmt.Sprintf(" AND created_at <= $%d", argIndex)
+		args = append(args, *q.ToDate)
+		argIndex++
+	}
+
+	if q.Occasion != nil {
+		query += fmt.Sprintf(" AND occasion = $%d", argIndex)
+		args = append(args, *q.Occasion)
+		argIndex++
+	}
+
+	if q.MinRating != nil {
+		query += fmt.Sprintf(" AND score >= $%d", argIndex)
+		args = append(args, *q.MinRating)
+		argIndex++
+	}
+
+	if q.IsFavorite != nil {
+		query += fmt.Sprintf(` AND id IN (
+			SELECT recommendation_id FROM recommendation_favorites
+			WHERE user_id = $1 AND is_favorite = $%d
+		)`, argIndex)
+		args = append(args, *q.IsFavorite)
+		argIndex++
+	}
+
+	query += " ORDER BY created_at DESC LIMIT $"
+	query += string(rune('0'+argIndex)) + " OFFSET $" + string(rune('0'+argIndex+1))
+	args = append(args, q.Limit, offset)
+
+	rows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to query recommendations by user with filters")
+	}
+	defer rows.Close()
+
+	var recommendations []domain.RecommendationRecord
+	for rows.Next() {
+		var rec domain.RecommendationRecord
+		var weatherJSON []byte
+		var outfitJSON []byte
+		var itemsJSON []byte
+		var createdAt time.Time
+		var timestamp time.Time
+
+		err := rows.Scan(
+			&rec.ID,
+			&rec.UserID,
+			&rec.City,
+			&weatherJSON,
+			&outfitJSON,
+			&createdAt,
+			&rec.Source,
+			&rec.Score,
+			&rec.OutfitScore,
+			&rec.Algorithm,
+			&itemsJSON,
+			&rec.Location,
+			&rec.Temperature,
+			&rec.FeelsLike,
+			&rec.WindSpeed,
+			&rec.MinTemp,
+			&rec.MaxTemp,
+			&rec.WillRain,
+			&rec.WillSnow,
+			&rec.Humidity,
+			&timestamp,
+			&rec.MLPowered,
+		)
+		if err != nil {
+			return nil, 0, errors.Wrap(err, "failed to scan recommendation")
+		}
+
+		// Parse JSON fields
+		if len(weatherJSON) > 0 {
+			err = json.Unmarshal(weatherJSON, &rec.Weather)
+			if err != nil {
+				return nil, 0, errors.Wrap(err, "failed to unmarshal weather data")
+			}
+		}
+
+		if len(outfitJSON) > 0 {
+			err = json.Unmarshal(outfitJSON, &rec.Outfit)
+			if err != nil {
+				return nil, 0, errors.Wrap(err, "failed to unmarshal outfit data")
+			}
+		}
+
+		if len(itemsJSON) > 0 {
+			err = json.Unmarshal(itemsJSON, &rec.Items)
+			if err != nil {
+				return nil, 0, errors.Wrap(err, "failed to unmarshal items data")
+			}
+		}
+
+		rec.CreatedAt = createdAt
+		if !timestamp.IsZero() {
+			rec.Timestamp = &timestamp
+		}
+
+		recommendations = append(recommendations, rec)
+	}
+
+	// Get total count
+	countQuery := `
+		SELECT COUNT(*)
+		FROM recommendations r
+		WHERE user_id = $1
+	`
+	countArgs := []interface{}{userID}
+	countArgIndex := 2
+
+	if q.FromDate != nil {
+		countQuery += fmt.Sprintf(" AND created_at >= $%d", countArgIndex)
+		countArgs = append(countArgs, *q.FromDate)
+		countArgIndex++
+	}
+
+	if q.ToDate != nil {
+		countQuery += fmt.Sprintf(" AND created_at <= $%d", countArgIndex)
+		countArgs = append(countArgs, *q.ToDate)
+		countArgIndex++
+	}
+
+	if q.Occasion != nil {
+		countQuery += fmt.Sprintf(" AND occasion = $%d", countArgIndex)
+		countArgs = append(countArgs, *q.Occasion)
+		countArgIndex++
+	}
+
+	if q.MinRating != nil {
+		countQuery += fmt.Sprintf(" AND score >= $%d", countArgIndex)
+		countArgs = append(countArgs, *q.MinRating)
+		countArgIndex++
+	}
+
+	if q.IsFavorite != nil {
+		countQuery += fmt.Sprintf(` AND id IN (
+			SELECT recommendation_id FROM recommendation_favorites
+			WHERE user_id = $1 AND is_favorite = $%d
+		)`, countArgIndex)
+		countArgs = append(countArgs, *q.IsFavorite)
+		countArgIndex++
+	}
+
+	var total int
+	err = r.db.QueryRow(ctx, countQuery, countArgs...).Scan(&total)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to count recommendations")
+	}
+
+	return recommendations, total, nil
 }
 
 func (r *RecommendationRepository) CreateSession(ctx context.Context, session *repositories.RecommendationSession) (domain.ID, error) {

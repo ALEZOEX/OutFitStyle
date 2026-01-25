@@ -1,10 +1,10 @@
-# OutfitStyle Architecture
+# Архитектура OutfitStyle
 
-## Overview
+## Обзор
 
-OutfitStyle follows a microservices architecture with clean architecture principles. The system consists of three main services that communicate via REST APIs and share data through a PostgreSQL database.
+OutfitStyle следует архитектуре микросервисов с принципами чистой архитектуры. Система состоит из трех основных сервисов, которые взаимодействуют через REST API и обмениваются данными через базу данных PostgreSQL.
 
-## System Architecture
+## Системная архитектура
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -21,36 +21,36 @@ OutfitStyle follows a microservices architecture with clean architecture princip
                        └─────────────────┘
 ```
 
-## Service Architecture
+## Архитектура сервисов
 
 ### Go Backend Service
 
-**Purpose**: Main API gateway, authentication, business logic, and data orchestration.
+**Назначение**: Главный шлюз API, аутентификация, бизнес-логика и оркестрация данных.
 
-**Components**:
-- **API Layer**: HTTP handlers and middleware
-- **Service Layer**: Business logic and cross-service coordination
-- **Repository Layer**: Database interactions
-- **Infrastructure Layer**: External service integrations
+**Компоненты**:
+- **Слой API**: Обработчики HTTP и промежуточное ПО
+- **Слой сервисов**: Бизнес-логика и координация между сервисами
+- **Слой репозитория**: Взаимодействие с базой данных
+- **Инфраструктурный слой**: Интеграция с внешними сервисами
 
-**Technologies**:
+**Технологии**:
 - Go 1.21+
 - PostgreSQL
-- JWT for authentication
-- Prometheus for metrics
-- Zap for logging
+- JWT для аутентификации
+- Prometheus для метрик
+- Zap для логирования
 
 ### Python ML Service
 
-**Purpose**: Machine learning-powered outfit recommendations and predictions.
+**Назначение**: Рекомендации и прогнозы образов одежды на основе машинного обучения.
 
-**Components**:
-- **API Layer**: FastAPI endpoints
-- **Service Layer**: ML model orchestration
-- **Model Layer**: scikit-learn models and algorithms
-- **Data Layer**: Feature engineering and preprocessing
+**Компоненты**:
+- **Слой API**: Конечные точки FastAPI
+- **Слой сервисов**: Оркестрация ML-моделей
+- **Слой моделей**: Модели и алгоритмы scikit-learn
+- **Слой данных**: Инженерия признаков и предварительная обработка
 
-**Technologies**:
+**Технологии**:
 - Python 3.11+
 - FastAPI
 - scikit-learn
@@ -59,139 +59,139 @@ OutfitStyle follows a microservices architecture with clean architecture princip
 
 ### Flutter Frontend
 
-**Purpose**: User interface and client-side data management.
+**Назначение**: Пользовательский интерфейс и управление данными на стороне клиента.
 
-**Components**:
-- **Presentation Layer**: UI widgets and screens
-- **Domain Layer**: Business logic and use cases
-- **Data Layer**: API clients and local storage
-- **Core Layer**: Utilities and shared functionality
+**Компоненты**:
+- **Слой презентации**: Виджеты и экраны UI
+- **Слой домена**: Бизнес-логика и варианты использования
+- **Слой данных**: Клиенты API и локальное хранилище
+- **Основной слой**: Утилиты и общая функциональность
 
-**Technologies**:
+**Технологии**:
 - Flutter
-- Riverpod (state management)
-- Drift (local SQLite)
-- Firebase (analytics, crashlytics)
+- Riverpod (управление состоянием)
+- Drift (локальный SQLite)
+- Firebase (аналитика, crashlytics)
 
-## Data Flow
+## Поток данных
 
-### Recommendation Generation
+### Генерация рекомендаций
 
-1. User requests recommendations via Flutter app
-2. Flutter app calls Go API `/api/v1/recommendations`
-3. Go API retrieves user's wardrobe and preferences from database
-4. Go API fetches current weather data from external API
-5. Go API sends request to Python ML service with user data
-6. Python ML service processes data through ML models
-7. Python ML service returns ranked recommendations
-8. Go API saves recommendations to database
-9. Go API returns recommendations to Flutter app
-10. Flutter app displays recommendations to user
+1. Пользователь запрашивает рекомендации через приложение Flutter
+2. Приложение Flutter вызывает Go API `/api/v1/recommendations`
+3. Go API получает данные о гардеробе и предпочтениях пользователя из базы данных
+4. Go API получает текущие данные о погоде из внешнего API
+5. Go API отправляет запрос в Python ML сервис с пользовательскими данными
+6. Python ML сервис обрабатывает данные через ML-модели
+7. Python ML сервис возвращает ранжированные рекомендации
+8. Go API сохраняет рекомендации в базу данных
+9. Go API возвращает рекомендации в приложение Flutter
+10. Приложение Flutter отображает рекомендации пользователю
 
-### User Interaction
+### Взаимодействие с пользователем
 
-1. User swipes on recommendation (like/dislike)
-2. Flutter app sends feedback to Go API
-3. Go API stores feedback in database
-4. Go API updates ML service with feedback (for model improvement)
-5. Feedback is used to improve future recommendations
+1. Пользователь свайпит рекомендацию (лайк/дизлайк)
+2. Приложение Flutter отправляет обратную связь в Go API
+3. Go API сохраняет обратную связь в базу данных
+4. Go API обновляет ML сервис с обратной связью (для улучшения модели)
+5. Обратная связь используется для улучшения будущих рекомендаций
 
-## Security
+## Безопасность
 
-### Authentication
-- OAuth 2.0 with Google Sign-In
-- JWT tokens for session management
-- Refresh token rotation
-- Secure token storage
+### Аутентификация
+- OAuth 2.0 с входом через Google
+- JWT-токены для управления сессией
+- Ротация refresh-токенов
+- Безопасное хранение токенов
 
-### Authorization
-- Role-based access control
-- API key authentication for service-to-service communication
-- Rate limiting per user/IP
+### Авторизация
+- Контроль доступа на основе ролей
+- Аутентификация по API-ключам для взаимодействия между сервисами
+- Ограничение частоты запросов на пользователя/IP
 
-### Data Protection
-- HTTPS encryption in transit
-- Database encryption at rest
-- Input validation and sanitization
-- SQL injection prevention
+### Защита данных
+- Шифрование HTTPS в пути
+- Шифрование базы данных в состоянии покоя
+- Валидация и очистка ввода
+- Предотвращение SQL-инъекций
 
-## Scalability
+## Масштабируемость
 
-### Horizontal Scaling
-- Stateless services (can be scaled independently)
-- Load balancing with NGINX
-- Database connection pooling
-- Caching with Redis
+### Горизонтальное масштабирование
+- Состоятельные сервисы (могут масштабироваться независимо)
+- Балансировка нагрузки с помощью NGINX
+- Пул соединений с базой данных
+- Кэширование с помощью Redis
 
-### Vertical Scaling
-- Resource limits and requests in Kubernetes
-- Auto-scaling based on CPU/memory usage
-- Database indexing and query optimization
+### Вертикальное масштабирование
+- Ограничения ресурсов и запросы в Kubernetes
+- Автомасштабирование на основе использования CPU/памяти
+- Индексация базы данных и оптимизация запросов
 
-## Monitoring and Observability
+## Мониторинг и наблюдаемость
 
-### Metrics
-- Request rate, error rate, and latency (RED metrics)
-- Business metrics (recommendations generated, accepted)
-- System metrics (CPU, memory, disk usage)
+### Метрики
+- Скорость запросов, уровень ошибок и задержка (RED-метрики)
+- Бизнес-метрики (сгенерированные, принятые рекомендации)
+- Системные метрики (использование CPU, памяти, диска)
 
-### Logging
-- Structured JSON logging
-- Correlation IDs for request tracing
-- Log levels (debug, info, warn, error, fatal)
+### Логирование
+- Структурированное JSON-логирование
+- Корреляционные ID для трассировки запросов
+- Уровни логов (debug, info, warn, error, fatal)
 
-### Tracing
-- Distributed tracing with OpenTelemetry
-- Request flow visualization
-- Performance bottleneck identification
+### Трассировка
+- Распределенная трассировка с OpenTelemetry
+- Визуализация потока запросов
+- Идентификация узких мест производительности
 
-## Deployment
+## Развертывание
 
-### Environments
-- **Development**: Local Docker Compose
-- **Staging**: Separate deployment for testing
-- **Production**: Production-grade deployment
+### Среды
+- **Разработка**: Локальный Docker Compose
+- **Тестирование**: Отдельное развертывание для тестирования
+- **Продакшен**: Развертывание уровня продакшена
 
 ### CI/CD
-- GitHub Actions for automated testing
-- Automated Docker image building
-- Blue-green deployment strategy
-- Rollback capabilities
+- GitHub Actions для автоматизированного тестирования
+- Автоматическое создание Docker-образов
+- Стратегия развертывания blue-green
+- Возможности отката
 
-## Technology Decisions
+## Решения по технологиям
 
-### Why Go for Backend?
-- High performance and concurrency
-- Strong standard library
-- Excellent for microservices
-- Good ecosystem for web services
+### Почему Go для бэкенда?
+- Высокая производительность и конкурентность
+- Сильная стандартная библиотека
+- Отлично подходит для микросервисов
+- Хорошая экосистема для веб-сервисов
 
-### Why Python for ML?
-- Rich ML ecosystem (scikit-learn, pandas, numpy)
-- Easy model prototyping and experimentation
-- Strong community support
-- Good integration with data science tools
+### Почему Python для ML?
+- Богатая ML-экосистема (scikit-learn, pandas, numpy)
+- Простое прототипирование и экспериментирование моделей
+- Сильная поддержка сообщества
+- Хорошая интеграция с инструментами для науки о данных
 
-### Why Flutter for Frontend?
-- Single codebase for iOS and Android
-- Fast development cycle
-- Good performance
-- Rich widget library
+### Почему Flutter для фронтенда?
+- Единая кодовая база для iOS и Android
+- Быстрый цикл разработки
+- Хорошая производительность
+- Богатая библиотека виджетов
 
-## Future Considerations
+## Будущие перспективы
 
-### Potential Improvements
-- GraphQL for more flexible API queries
-- gRPC for service-to-service communication
-- Event-driven architecture for real-time updates
-- Container orchestration with Kubernetes
-- Advanced caching strategies
-- A/B testing framework (implemented)
-- Feature flag management (implemented)
-- Push notifications (implemented)
-- Offline synchronization enhancements (implemented)
-- Advanced ML model personalization
-- Computer vision for wardrobe item recognition
-- Wearable device integration
-- Voice assistant integration
-- Social features and outfit sharing
+### Возможные улучшения
+- GraphQL для более гибких API-запросов
+- gRPC для взаимодействия между сервисами
+- Архитектура на основе событий для обновлений в реальном времени
+- Оркестрация контейнеров с помощью Kubernetes
+- Продвинутые стратегии кэширования
+- Фреймворк A/B тестирования (реализован)
+- Управление флагами функций (реализовано)
+- Push-уведомления (реализовано)
+- Улучшения синхронизации в автономном режиме (реализовано)
+- Продвинутая персонализация ML-моделей
+- Компьютерное зрение для распознавания предметов гардероба
+- Интеграция с носимыми устройствами
+- Интеграция голосового помощника
+- Социальные функции и обмен образами

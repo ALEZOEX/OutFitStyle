@@ -7,6 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
@@ -180,13 +182,49 @@ func (m *MockSessionRepository) UpdateDeviceInfo(ctx context.Context, sessionID 
 	return args.Error(0)
 }
 
+// MockTokenService - мок-реализация TokenService для тестов
+type MockTokenService struct {
+	mock.Mock
+}
+
+func (m *MockTokenService) GenerateRefreshToken() (string, error) {
+	args := m.Called()
+	return args.String(0), args.Error(1)
+}
+
+func (m *MockTokenService) HashRefreshToken(refreshToken string) string {
+	args := m.Called(refreshToken)
+	return args.String(0)
+}
+
+func (m *MockTokenService) GenerateAccessToken(userID, sessionID domain.ID) (token string, expiresAt time.Time, err error) {
+	args := m.Called(userID, sessionID)
+	return args.String(0), args.Get(1).(time.Time), args.Error(2)
+}
+
+func (m *MockTokenService) ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, err error) {
+	args := m.Called(tokenString)
+	return args.Get(0).(domain.ID), args.Get(1).(domain.ID), args.Error(2)
+}
+
+func (m *MockTokenService) AccessTTL() time.Duration {
+	args := m.Called()
+	return args.Get(0).(time.Duration)
+}
+
+func (m *MockTokenService) RefreshTTL() time.Duration {
+	args := m.Called()
+	return args.Get(0).(time.Duration)
+}
+
 // Тест для AuthService
 func TestAuthService_Register(t *testing.T) {
 	// Подготовка
 	mockUserRepo := new(MockUserRepository)
 	mockSessionRepo := new(MockSessionRepository)
-	
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, nil, nil)
+	mockTokenSvc := new(MockTokenService)
+
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
 
 	// Тестовые данные
 	input := domain.UserRegistration{
@@ -197,6 +235,13 @@ func TestAuthService_Register(t *testing.T) {
 	// Ожидания
 	mockUserRepo.On("GetUserByEmail", mock.Anything, "test@example.com").Return(nil, repositories.ErrNotFound)
 	mockUserRepo.On("CreateUser", mock.Anything, mock.AnythingOfType("*domain.User")).Return(nil)
+
+	// Mock token service calls
+	mockTokenSvc.On("GenerateRefreshToken").Return("refresh_token_mock", nil)
+	mockTokenSvc.On("HashRefreshToken", "refresh_token_mock").Return("hashed_refresh_token")
+	mockTokenSvc.On("GenerateAccessToken", mock.Anything, mock.Anything).Return("access_token_mock", time.Now().Add(time.Hour), nil)
+	mockTokenSvc.On("RefreshTTL").Return(time.Hour)
+	mockSessionRepo.On("Create", mock.Anything, mock.Anything).Return(domain.NewID(), nil)
 
 	// Выполнение
 	result, err := authService.Register(context.Background(), input, DeviceInfo{})
@@ -209,21 +254,28 @@ func TestAuthService_Register(t *testing.T) {
 
 	// Проверка вызовов
 	mockUserRepo.AssertExpectations(t)
+	mockTokenSvc.AssertExpectations(t)
+	mockSessionRepo.AssertExpectations(t)
 }
 
 func TestAuthService_Login_Success(t *testing.T) {
 	// Подготовка
 	mockUserRepo := new(MockUserRepository)
 	mockSessionRepo := new(MockSessionRepository)
-	
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, nil, nil)
+	mockTokenSvc := new(MockTokenService)
+
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
 
 	// Тестовые данные
-	passwordHash := "$2a$10$N9qo8uLOickgxRVrF80HM.ALX9.HB2rOEq21Mp8zJEMpivZJz7z1O" // bcrypt хэш для "password123"
+	password := "password123"
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatalf("Failed to generate password hash: %v", err)
+	}
 	user := &domain.User{
 		ID:           domain.NewID(),
 		Email:        "test@example.com",
-		PasswordHash: passwordHash,
+		PasswordHash: string(passwordHash),
 		IsActive:     true,
 		IsVerified:   true,
 	}
@@ -233,14 +285,20 @@ func TestAuthService_Login_Success(t *testing.T) {
 	}
 
 	// Ожидания
-	mockUserRepo.On("GetUserByEmail", mock.Anything, "test@example.com").Return(user, nil)
-	mockSessionRepo.On("Create", mock.Anything, mock.AnythingOfType("repositories.CreateSessionParams")).Return(domain.NewID(), nil)
+	mockUserRepo.On("GetUserByEmail", mock.Anything, mock.Anything).Return(user, nil)
+
+	// Mock token service calls
+	mockTokenSvc.On("GenerateRefreshToken").Return("refresh_token_mock", nil)
+	mockTokenSvc.On("HashRefreshToken", "refresh_token_mock").Return("hashed_refresh_token")
+	mockTokenSvc.On("GenerateAccessToken", mock.Anything, mock.Anything).Return("access_token_mock", time.Now().Add(time.Hour), nil)
+	mockTokenSvc.On("RefreshTTL").Return(time.Hour)
+	mockSessionRepo.On("Create", mock.Anything, mock.Anything).Return(domain.NewID(), nil)
 
 	// Выполнение
 	result, err := authService.Login(context.Background(), loginInput, DeviceInfo{})
 
 	// Проверка
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, result.User)
 	assert.NotEmpty(t, result.Tokens.AccessToken)
 	assert.NotEmpty(t, result.Tokens.RefreshToken)
@@ -248,4 +306,5 @@ func TestAuthService_Login_Success(t *testing.T) {
 	// Проверка вызовов
 	mockUserRepo.AssertExpectations(t)
 	mockSessionRepo.AssertExpectations(t)
+	mockTokenSvc.AssertExpectations(t)
 }

@@ -1,3 +1,5 @@
+// Пакет queue предоставляет функциональность для работы с очередью задач
+// Использует библиотеку asynq для асинхронной обработки задач через Redis
 package queue
 
 import (
@@ -8,7 +10,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// ParseRedisURLToAsynqOpt converts REDIS_URL (redis://host:port/db) to asynq.RedisClientOpt.
+// ParseRedisURLToAsynqOpt преобразует REDIS_URL (redis://host:port/db) в asynq.RedisClientOpt
+// Используется для настройки подключения к Redis для очереди задач
 func ParseRedisURLToAsynqOpt(redisURL string) (asynq.RedisClientOpt, error) {
 	if strings.TrimSpace(redisURL) == "" {
 		return asynq.RedisClientOpt{}, fmt.Errorf("empty redis url")
@@ -16,7 +19,7 @@ func ParseRedisURLToAsynqOpt(redisURL string) (asynq.RedisClientOpt, error) {
 
 	opt, err := redis.ParseURL(redisURL)
 	if err != nil {
-		// fallback: treat as addr
+		// резервный вариант: рассматривать как адрес
 		return asynq.RedisClientOpt{Addr: redisURL}, nil
 	}
 

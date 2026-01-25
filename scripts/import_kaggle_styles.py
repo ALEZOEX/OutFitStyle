@@ -1,11 +1,15 @@
 import os
+import sys
 import logging
 import psycopg2
 import psycopg2.extras
 import pandas as pd
 
+# Добавляем путь к ml-service для импорта
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'ml-service'))
+
 # Берём функции маппинга из твоего train_styles_only.py
-from server.ml_service.train_styles_only import map_category_to_warmth, map_formality
+from train_styles_only import map_category_to_warmth, map_formality
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -23,7 +27,7 @@ def get_db_connection():
     return conn
 
 def main():
-    styles_path = 'server/ml-service/data/raw/styles.csv'
+    styles_path = 'ml-service/data/raw/styles.csv'
     if not os.path.exists(styles_path):
         logger.error(f"styles.csv not found at {styles_path}")
         return

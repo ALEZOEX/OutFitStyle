@@ -21,6 +21,9 @@ require (
 
 	// Logging and monitoring
 	github.com/prometheus/client_golang v1.23.0
+
+	// Messaging
+	github.com/segmentio/kafka-go v0.4.37
 	github.com/swaggo/http-swagger v1.3.4
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.45.0
@@ -107,6 +110,7 @@ require (
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
+	github.com/pierrec/lz4/v4 v4.1.16 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect

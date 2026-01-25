@@ -20,24 +20,34 @@ var (
 	ErrUnauthorized       = errors.New("не авторизован")
 )
 
+// TokenServiceInterface интерфейс для сервиса токенов
+type TokenServiceInterface interface {
+	GenerateRefreshToken() (string, error)
+	HashRefreshToken(refreshToken string) string
+	GenerateAccessToken(userID, sessionID domain.ID) (token string, expiresAt time.Time, err error)
+	ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, err error)
+	AccessTTL() time.Duration
+	RefreshTTL() time.Duration
+}
+
 // AuthService сервис аутентификации и авторизации пользователей
 type AuthService struct {
-	userRepo    repositories.UserRepository      // Репозиторий пользователей
-	sessionRepo repositories.SessionRepository  // Репозиторий сессий
-	tokenSvc    *TokenService                   // Сервис токенов
-	google      *external.GoogleAuthClient      // Клиент Google аутентификации
+	userRepo    repositories.UserRepository    // Репозиторий пользователей
+	sessionRepo repositories.SessionRepository // Репозиторий сессий
+	tokenSvc    TokenServiceInterface          // Сервис токенов
+	google      *external.GoogleAuthClient     // Клиент Google аутентификации
 }
 
 // RegisterResult результат регистрации пользователя
 type RegisterResult struct {
-	User   *domain.User     `json:"user"`      // Пользователь
-	Tokens domain.TokenPair `json:"tokens"`    // Пара токенов (access и refresh)
+	User   *domain.User     `json:"user"`   // Пользователь
+	Tokens domain.TokenPair `json:"tokens"` // Пара токенов (access и refresh)
 }
 
 // LoginResult результат входа пользователя
 type LoginResult struct {
-	User   *domain.User     `json:"user"`      // Пользователь
-	Tokens domain.TokenPair `json:"tokens"`    // Пара токенов (access и refresh)
+	User   *domain.User     `json:"user"`   // Пользователь
+	Tokens domain.TokenPair `json:"tokens"` // Пара токенов (access и refresh)
 	// subscription добавим позже (модуль подписок)
 }
 
@@ -45,7 +55,7 @@ type LoginResult struct {
 func NewAuthService(
 	userRepo repositories.UserRepository,
 	sessionRepo repositories.SessionRepository,
-	tokenSvc *TokenService,
+	tokenSvc TokenServiceInterface,
 	google *external.GoogleAuthClient,
 ) *AuthService {
 	return &AuthService{
@@ -58,11 +68,11 @@ func NewAuthService(
 
 // DeviceInfo информация об устройстве пользователя
 type DeviceInfo struct {
-	DeviceID   *string  // Идентификатор устройства
-	DeviceName *string  // Название устройства
-	DeviceType *string  // Тип устройства
-	IPAddress  *string  // IP-адрес
-	UserAgent  *string  // User-Agent
+	DeviceID   *string // Идентификатор устройства
+	DeviceName *string // Название устройства
+	DeviceType *string // Тип устройства
+	IPAddress  *string // IP-адрес
+	UserAgent  *string // User-Agent
 }
 
 // Register регистрирует нового пользователя
@@ -78,7 +88,7 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 	email := strings.TrimSpace(strings.ToLower(input.Email))
 
 	existing, err := s.userRepo.GetUserByEmail(ctx, email)
-	if err != nil {
+	if err != nil && !errors.Is(err, repositories.ErrNotFound) {
 		return nil, err
 	}
 	if existing != nil {
@@ -123,7 +133,13 @@ func (s *AuthService) Login(ctx context.Context, input domain.UserLogin, device 
 	}
 
 	u, err := s.userRepo.GetUserByEmail(ctx, email)
-	if err != nil || u == nil {
+	if err != nil {
+		if errors.Is(err, repositories.ErrNotFound) {
+			return nil, ErrInvalidCredentials
+		}
+		return nil, err
+	}
+	if u == nil {
 		return nil, ErrInvalidCredentials
 	}
 
@@ -150,7 +166,7 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 	if err != nil {
 		return domain.TokenPair{}, err
 	}
-	if sess == nil || !sess.IsActive || time.Now().After(sess.ExpiresAt) {
+	if sess == nil || !sess.IsActive || (sess.ExpiresAt != nil && time.Now().After(*sess.ExpiresAt)) {
 		return domain.TokenPair{}, ErrUnauthorized
 	}
 
@@ -387,7 +403,7 @@ func (s *AuthService) createSessionAndTokens(ctx context.Context, userID domain.
 		DeviceType:       device.DeviceType,
 		IPAddress:        device.IPAddress,
 		UserAgent:        device.UserAgent,
-		ExpiresAt:        refreshExp,
+		ExpiresAt:        &refreshExp,
 	})
 	if err != nil {
 		return domain.TokenPair{}, err

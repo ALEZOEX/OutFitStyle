@@ -1,3 +1,5 @@
+// Пакет pg содержит реализацию репозиториев для работы с PostgreSQL
+// Реализует интерфейсы репозиториев с использованием библиотеки pgx
 package pg
 
 import (
@@ -12,7 +14,7 @@ import (
 
 // AffiliateRepository реализация репозитория аффилированных программ
 type AffiliateRepository struct {
-	db *pgxpool.Pool
+	db *pgxpool.Pool // Пул подключений к базе данных PostgreSQL
 }
 
 // NewAffiliateRepository создает новый экземпляр репозитория аффилированных программ

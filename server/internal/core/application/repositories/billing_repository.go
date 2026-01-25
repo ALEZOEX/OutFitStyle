@@ -30,16 +30,19 @@ type BillingRepository interface {
 
 // CreatePaymentParams параметры для создания платежа
 type CreatePaymentParams struct {
-	UserID         int64      // Идентификатор пользователя
-	SubscriptionID *int64     // Идентификатор подписки (если применимо)
+	UserID         int64  // Идентификатор пользователя
+	SubscriptionID *int64 // Идентификатор подписки (если применимо)
 
-	Amount   float64         // Сумма платежа
-	Currency string          // Валюта
+	Amount   float64 // Сумма платежа
+	Currency string  // Валюта
 
-	Status          string  // Статус платежа
-	PaymentProvider string  // Платежный провайдер
+	Status          string // Статус платежа
+	PaymentProvider string // Платежный провайдер
 
-	ExternalPaymentID *string // Внешний идентификатор платежа
-	PaymentMethod     *string // Метод оплаты
-	Description       *string // Описание платежа
+	ExternalPaymentID *string    // Внешний идентификатор платежа
+	PaymentMethod     *string    // Метод оплаты
+	Description       *string    // Описание платежа
+	ReceiptURL        *string    // URL чека
+	ErrorMessage      *string    // Сообщение об ошибке
+	PaidAt            *time.Time // Время оплаты
 }

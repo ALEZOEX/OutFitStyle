@@ -10,7 +10,7 @@ import (
 
 // WardrobeService сервис для работы с гардеробом пользователя
 type WardrobeService struct {
-	wardrobeRepo repositories.WardrobeRepository  // Репозиторий гардероба
+	wardrobeRepo repositories.WardrobeRepository // Репозиторий гардероба
 	clothingRepo repositories.ClothingRepository // Репозиторий одежды
 }
 

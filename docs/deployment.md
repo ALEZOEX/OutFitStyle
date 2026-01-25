@@ -1,84 +1,84 @@
-# Deployment Guide for OutfitStyle
+# Руководство по развертыванию для OutfitStyle
 
-## Overview
+## Обзор
 
-This guide provides instructions for deploying OutfitStyle to different environments.
+Это руководство предоставляет инструкции по развертыванию OutfitStyle в различных средах.
 
-## Environments
+## Среды
 
-### Development Environment
-- **Purpose**: Local development and testing
-- **Location**: Local machine or development server
-- **Configuration**: Debug mode, verbose logging
-- **Access**: Developer access only
+### Среда разработки
+- **Назначение**: Локальная разработка и тестирование
+- **Расположение**: Локальная машина или сервер разработки
+- **Конфигурация**: Режим отладки, подробное логирование
+- **Доступ**: Только доступ разработчиков
 
-### Staging Environment
-- **Purpose**: Pre-production testing
-- **Location**: Cloud server or dedicated staging environment
-- **Configuration**: Production-like settings
-- **Access**: Limited access for QA and authorized personnel
+### Среда тестирования
+- **Назначение**: Предпроизводственное тестирование
+- **Расположение**: Облачный сервер или выделенная среда тестирования
+- **Конфигурация**: Настройки, аналогичные продакшену
+- **Доступ**: Ограниченный доступ для QA и авторизованных сотрудников
 
-### Production Environment
-- **Purpose**: Live application serving users
-- **Location**: Production cloud infrastructure
-- **Configuration**: Optimized for performance and security
-- **Access**: Restricted access with proper authorization
+### Продакшен-среда
+- **Назначение**: Живое приложение, обслуживающее пользователей
+- **Расположение**: Облачная инфраструктура продакшена
+- **Конфигурация**: Оптимизировано для производительности и безопасности
+- **Доступ**: Ограниченный доступ с надлежащей авторизацией
 
-## Deployment Methods
+## Методы развертывания
 
-### Docker Compose (Recommended for Small Deployments)
+### Docker Compose (Рекомендуется для небольших развертываний)
 
-#### Prerequisites
-- Docker & Docker Compose installed
-- Domain name configured
-- SSL certificate ready
+#### Предварительные требования
+- Установленные Docker и Docker Compose
+- Настроенное доменное имя
+- Готовый SSL-сертификат
 
-#### Steps
-1. **Configure Environment Variables**
+#### Шаги
+1. **Настройка переменных окружения**
 ```bash
-# Create environment file
+# Создать файл окружения
 cp .env.example .env
-# Edit .env with production values
+# Отредактировать .env с производственными значениями
 ```
 
-2. **Prepare SSL Certificates**
+2. **Подготовка SSL-сертификатов**
 ```bash
-# Place SSL certificates in nginx/ssl/
+# Разместить SSL-сертификаты в nginx/ssl/
 mkdir -p nginx/ssl
-# Add cert.pem and key.pem
+# Добавить cert.pem и key.pem
 ```
 
-3. **Deploy Services**
+3. **Развертывание сервисов**
 ```bash
-# Deploy with production compose file
+# Развертывание с файлом продакшен-состава
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-4. **Verify Deployment**
+4. **Проверка развертывания**
 ```bash
-# Check service status
+# Проверить статус сервиса
 docker-compose -f docker-compose.prod.yml ps
 
-# Check logs
+# Проверить логи
 docker-compose -f docker-compose.prod.yml logs -f
 ```
 
-### Kubernetes (Recommended for Large Deployments)
+### Kubernetes (Рекомендуется для крупных развертываний)
 
-#### Prerequisites
-- Kubernetes cluster running
-- kubectl configured
-- Helm or kustomize installed
+#### Предварительные требования
+- Запущенный кластер Kubernetes
+- Настроенный kubectl
+- Установленный Helm или kustomize
 
-#### Steps
-1. **Configure Namespace**
+#### Шаги
+1. **Настройка пространства имен**
 ```bash
 kubectl apply -f k8s/namespace.yaml
 ```
 
-2. **Deploy Secrets**
+2. **Развертывание секретов**
 ```bash
-# Create secrets from environment variables
+# Создать секреты из переменных окружения
 kubectl create secret generic outfitstyle-secrets \
   --from-literal=database-url=$DATABASE_URL \
   --from-literal=jwt-secret=$JWT_SECRET \
@@ -86,48 +86,48 @@ kubectl create secret generic outfitstyle-secrets \
   -n outfitstyle
 ```
 
-3. **Deploy Applications**
+3. **Развертывание приложений**
 ```bash
 kubectl apply -f k8s/deployment.yaml -n outfitstyle
 ```
 
-4. **Verify Deployment**
+4. **Проверка развертывания**
 ```bash
-# Check pods
+# Проверить поды
 kubectl get pods -n outfitstyle
 
-# Check services
+# Проверить сервисы
 kubectl get services -n outfitstyle
 ```
 
-### Cloud Platforms
+### Облачные платформы
 
 #### AWS
-- **ECS**: Use ECS with Fargate for serverless containers
-- **EKS**: Use EKS for Kubernetes deployment
-- **ECR**: Store Docker images in ECR
-- **RDS**: Use RDS for managed PostgreSQL
-- **ALB**: Use Application Load Balancer for traffic distribution
+- **ECS**: Использовать ECS с Fargate для бессерверных контейнеров
+- **EKS**: Использовать EKS для развертывания Kubernetes
+- **ECR**: Хранить Docker-образы в ECR
+- **RDS**: Использовать RDS для управляемого PostgreSQL
+- **ALB**: Использовать Application Load Balancer для распределения трафика
 
 #### Google Cloud
-- **GKE**: Use GKE for Kubernetes deployment
-- **Cloud Run**: Use Cloud Run for serverless deployment
-- **Artifact Registry**: Store Docker images in Artifact Registry
-- **Cloud SQL**: Use Cloud SQL for managed PostgreSQL
-- **Cloud Load Balancing**: Use for traffic distribution
+- **GKE**: Использовать GKE для развертывания Kubernetes
+- **Cloud Run**: Использовать Cloud Run для бессерверного развертывания
+- **Artifact Registry**: Хранить Docker-образы в Artifact Registry
+- **Cloud SQL**: Использовать Cloud SQL для управляемого PostgreSQL
+- **Cloud Load Balancing**: Использовать для распределения трафика
 
 #### Azure
-- **AKS**: Use AKS for Kubernetes deployment
-- **Container Instances**: Use for simple deployments
-- **Container Registry**: Store Docker images in ACR
-- **Database for PostgreSQL**: Use managed PostgreSQL
-- **Application Gateway**: Use for traffic distribution
+- **AKS**: Использовать AKS для развертывания Kubernetes
+- **Container Instances**: Использовать для простых развертываний
+- **Container Registry**: Хранить Docker-образы в ACR
+- **Database for PostgreSQL**: Использовать управляемый PostgreSQL
+- **Application Gateway**: Использовать для распределения трафика
 
-## Configuration Management
+## Управление конфигурацией
 
-### Environment Variables
+### Переменные окружения
 ```bash
-# Production environment variables
+# Переменные окружения продакшена
 ENVIRONMENT=production
 LOG_LEVEL=info
 DATABASE_URL=postgresql://user:pass@host:port/db
@@ -139,185 +139,185 @@ ML_SERVICE_URL=https://ml-service.yourdomain.com
 ML_SERVICE_API_KEY=your-ml-api-key
 ```
 
-### Secrets Management
-- **HashiCorp Vault**: Recommended for enterprise deployments
-- **AWS Secrets Manager**: For AWS deployments
-- **Google Secret Manager**: For GCP deployments
-- **Azure Key Vault**: For Azure deployments
-- **Kubernetes Secrets**: For Kubernetes deployments
+### Управление секретами
+- **HashiCorp Vault**: Рекомендуется для корпоративных развертываний
+- **AWS Secrets Manager**: Для развертываний в AWS
+- **Google Secret Manager**: Для развертываний в GCP
+- **Azure Key Vault**: Для развертываний в Azure
+- **Kubernetes Secrets**: Для развертываний в Kubernetes
 
-## Security Considerations
+## Соображения безопасности
 
 ### SSL/TLS
-- **Certificate**: Use valid SSL certificate from trusted CA
-- **Renewal**: Automate certificate renewal (Let's Encrypt)
-- **HSTS**: Enable HTTP Strict Transport Security
-- **OCSP**: Enable OCSP stapling for faster SSL handshakes
+- **Сертификат**: Использовать действительный SSL-сертификат от доверенного CA
+- **Обновление**: Автоматизировать обновление сертификатов (Let's Encrypt)
+- **HSTS**: Включить HTTP Strict Transport Security
+- **OCSP**: Включить OCSP stapling для более быстрых SSL-рукопожатий
 
-### Firewall Rules
-- **Ports**: Only expose necessary ports (80, 443, 22 for SSH)
-- **IP Restrictions**: Restrict access to admin interfaces
-- **DDoS Protection**: Enable cloud provider DDoS protection
-- **WAF**: Enable Web Application Firewall
+### Правила брандмауэра
+- **Порты**: Открывать только необходимые порты (80, 443, 22 для SSH)
+- **Ограничения IP**: Ограничить доступ к административным интерфейсам
+- **Защита от DDoS**: Включить защиту от DDoS облачного провайдера
+- **WAF**: Включить Web Application Firewall
 
-### Database Security
-- **Encryption**: Enable encryption at rest and in transit
-- **Access**: Restrict database access to application servers only
-- **Backups**: Enable automated encrypted backups
-- **Monitoring**: Enable database access monitoring
+### Безопасность базы данных
+- **Шифрование**: Включить шифрование при хранении и передаче
+- **Доступ**: Ограничить доступ к базе данных только серверами приложений
+- **Резервные копии**: Включить автоматические зашифрованные резервные копии
+- **Мониторинг**: Включить мониторинг доступа к базе данных
 
-## Monitoring and Observability
+## Мониторинг и наблюдаемость
 
-### Health Checks
-- **Liveness**: Check if application is running
-- **Readiness**: Check if application is ready to serve traffic
-- **Custom**: Implement business-specific health checks
+### Проверки работоспособности
+- **Liveness**: Проверить, работает ли приложение
+- **Readiness**: Проверить, готово ли приложение обслуживать трафик
+- **Пользовательские**: Реализовать специфические проверки работоспособности бизнеса
 
-### Logging
-- **Structured**: Use structured JSON logging
-- **Centralized**: Send logs to centralized logging system
-- **Retention**: Configure appropriate log retention
-- **Alerting**: Set up alerts for critical log events
+### Логирование
+- **Структурированное**: Использовать структурированное JSON-логирование
+- **Централизованное**: Отправлять логи в централизованную систему логирования
+- **Хранение**: Настроить соответствующее хранение логов
+- **Оповещения**: Настроить оповещения для критических событий логов
 
-### Metrics
-- **Application**: Monitor application-specific metrics
-- **System**: Monitor system resources (CPU, memory, disk)
-- **Business**: Monitor business metrics (DAU, conversions)
-- **Alerting**: Set up alerts for metric thresholds
+### Метрики
+- **Приложение**: Мониторить специфические метрики приложения
+- **Система**: Мониторить системные ресурсы (CPU, память, диск)
+- **Бизнес**: Мониторить бизнес-метрики (DAU, конверсии)
+- **Оповещения**: Настроить оповещения для порогов метрик
 
-## Backup and Recovery
+## Резервное копирование и восстановление
 
-### Database Backups
-- **Frequency**: Daily full backups, hourly incremental
-- **Retention**: 30-day retention for daily, 1-year for weekly
-- **Encryption**: Encrypt backups at rest
-- **Testing**: Regular restore testing
+### Резервные копии базы данных
+- **Частота**: Ежедневные полные резервные копии, почасовые инкрементные
+- **Хранение**: 30-дневное хранение для ежедневных, 1-летнее для еженедельных
+- **Шифрование**: Шифровать резервные копии при хранении
+- **Тестирование**: Регулярное тестирование восстановления
 
-### Configuration Backups
-- **Version Control**: Store configurations in Git
-- **Infrastructure**: Use Infrastructure as Code (Terraform)
-- **Documentation**: Maintain deployment documentation
-- **Runbooks**: Keep operational runbooks updated
+### Резервные копии конфигурации
+- **Система контроля версий**: Хранить конфигурации в Git
+- **Инфраструктура**: Использовать Infrastructure as Code (Terraform)
+- **Документация**: Поддерживать документацию по развертыванию
+- **Руководства**: Поддерживать актуальные операционные руководства
 
-## Scaling Strategies
+## Стратегии масштабирования
 
-### Horizontal Scaling
-- **Auto-scaling**: Configure based on CPU/memory metrics
-- **Load Balancing**: Distribute traffic across instances
-- **Database**: Consider read replicas for scaling reads
-- **Caching**: Implement caching to reduce load
+### Горизонтальное масштабирование
+- **Автомасштабирование**: Настроить на основе метрик CPU/памяти
+- **Балансировка нагрузки**: Распределять трафик по инстансам
+- **База данных**: Рассмотреть реплики для масштабирования чтения
+- **Кэширование**: Реализовать кэширование для снижения нагрузки
 
-### Vertical Scaling
-- **Instance Types**: Choose appropriate instance types
-- **Resources**: Allocate sufficient CPU and memory
-- **Storage**: Use SSDs for better I/O performance
-- **Network**: Ensure sufficient network bandwidth
+### Вертикальное масштабирование
+- **Типы инстансов**: Выбрать подходящие типы инстансов
+- **Ресурсы**: Выделить достаточный CPU и память
+- **Хранилище**: Использовать SSD для лучшей производительности ввода-вывода
+- **Сеть**: Обеспечить достаточную пропускную способность сети
 
-## Deployment Strategies
+## Стратегии развертывания
 
-### Blue-Green Deployment
-- **Benefits**: Zero-downtime deployments
-- **Implementation**: Maintain two identical environments
-- **Switching**: Route traffic to new environment
-- **Rollback**: Instant rollback to previous version
+### Сине-зеленое развертывание
+- **Преимущества**: Развертывания без простоя
+- **Реализация**: Поддерживать две идентичные среды
+- **Переключение**: Направлять трафик в новую среду
+- **Откат**: Мгновенный откат к предыдущей версии
 
-### Canary Deployment
-- **Benefits**: Gradual rollout to minimize risk
-- **Implementation**: Deploy to subset of users first
-- **Monitoring**: Monitor metrics during rollout
-- **Scaling**: Gradually increase traffic to new version
+### Канареечное развертывание
+- **Преимущества**: Постепенный запуск для минимизации рисков
+- **Реализация**: Сначала развертывание для подмножества пользователей
+- **Мониторинг**: Мониторить метрики во время запуска
+- **Масштабирование**: Постепенно увеличивать трафик к новой версии
 
-### Rolling Deployment
-- **Benefits**: Gradual replacement of instances
-- **Implementation**: Replace instances one by one
-- **Health Checks**: Verify health before proceeding
-- **Rollback**: Stop deployment on failure
+### Последовательное развертывание
+- **Преимущества**: Постепенная замена инстансов
+- **Реализация**: Заменять инстансы по одному
+- **Проверки работоспособности**: Проверять работоспособность перед продолжением
+- **Откат**: Остановить развертывание при сбое
 
-## Rollback Procedures
+## Процедуры отката
 
-### Automated Rollback
-- **Health Checks**: Monitor health after deployment
-- **Metrics**: Watch for performance degradation
-- **Error Rates**: Monitor error rate increases
-- **Response Time**: Watch for response time spikes
+### Автоматический откат
+- **Проверки работоспособности**: Мониторить работоспособность после развертывания
+- **Метрики**: Следить за ухудшением производительности
+- **Коэффициенты ошибок**: Мониторить увеличение коэффициентов ошибок
+- **Время отклика**: Следить за всплесками времени отклика
 
-### Manual Rollback
-- **Previous Version**: Keep previous version available
-- **Database Migrations**: Maintain rollback scripts
-- **Configuration**: Keep previous configuration
-- **Documentation**: Document rollback procedures
+### Ручной откат
+- **Предыдущая версия**: Держать предыдущую версию доступной
+- **Миграции базы данных**: Поддерживать скрипты отката
+- **Конфигурация**: Сохранить предыдущую конфигурацию
+- **Документация**: Документировать процедуры отката
 
-## Post-Deployment Tasks
+## Задачи после развертывания
 
-### Verification
-- **Health Checks**: Verify all services are healthy
-- **Functionality**: Test critical user journeys
-- **Performance**: Monitor response times and error rates
-- **Security**: Verify security measures are in place
+### Проверка
+- **Проверки работоспособности**: Проверить, что все сервисы работоспособны
+- **Функциональность**: Протестировать критические пользовательские пути
+- **Производительность**: Мониторить время отклика и коэффициенты ошибок
+- **Безопасность**: Проверить, что меры безопасности на месте
 
-### Monitoring Setup
-- **Dashboards**: Configure monitoring dashboards
-- **Alerts**: Set up appropriate alerts
-- **Logging**: Verify log aggregation is working
-- **Metrics**: Confirm metrics collection is active
+### Настройка мониторинга
+- **Панели мониторинга**: Настроить панели мониторинга
+- **Оповещения**: Настроить соответствующие оповещения
+- **Логирование**: Проверить, что агрегация логов работает
+- **Метрики**: Подтвердить, что сбор метрик активен
 
-### Documentation Updates
-- **Runbooks**: Update operational runbooks
-- **Architecture**: Update architecture diagrams
-- **Processes**: Document any process changes
-- **Contacts**: Update emergency contact information
+### Обновления документации
+- **Руководства**: Обновить операционные руководства
+- **Архитектура**: Обновить диаграммы архитектуры
+- **Процессы**: Документировать любые изменения процессов
+- **Контакты**: Обновить информацию об экстренных контактах
 
-## Troubleshooting
+## Устранение неполадок
 
-### Common Deployment Issues
-- **Port Conflicts**: Check for port conflicts
-- **Resource Limits**: Verify sufficient resources
-- **Dependency Issues**: Check service dependencies
-- **Configuration Errors**: Verify environment variables
+### Распространенные проблемы развертывания
+- **Конфликты портов**: Проверить наличие конфликтов портов
+- **Ограничения ресурсов**: Проверить достаточность ресурсов
+- **Проблемы с зависимостями**: Проверить зависимости сервисов
+- **Ошибки конфигурации**: Проверить переменные окружения
 
-### Diagnostic Commands
+### Диагностические команды
 ```bash
-# Check container status
+# Проверить статус контейнера
 docker ps
 
-# View container logs
+# Просмотреть логи контейнера
 docker logs <container_name>
 
-# Check Kubernetes resources
+# Проверить ресурсы Kubernetes
 kubectl get pods,svc,ingress -n outfitstyle
 
-# Check application health
+# Проверить работоспособность приложения
 curl -v https://your-domain.com/health
 ```
 
-## Best Practices
+## Лучшие практики
 
-### Pre-Deployment
-- **Testing**: Thoroughly test in staging environment
-- **Backup**: Take backup before deployment
-- **Communication**: Notify stakeholders of deployment
-- **Rollback Plan**: Prepare rollback plan
+### Перед развертыванием
+- **Тестирование**: Тщательно тестировать в среде тестирования
+- **Резервное копирование**: Сделать резервную копию перед развертыванием
+- **Коммуникация**: Уведомить заинтересованные стороны о развертывании
+- **План отката**: Подготовить план отката
 
-### During Deployment
-- **Monitoring**: Monitor during deployment
-- **Gradual Rollout**: Use gradual rollout strategies
-- **Communication**: Keep stakeholders informed
-- **Patience**: Allow time for health checks
+### Во время развертывания
+- **Мониторинг**: Мониторить во время развертывания
+- **Постепенный запуск**: Использовать стратегии постепенного запуска
+- **Коммуникация**: Держать заинтересованные стороны в курсе
+- **Терпение**: Предоставить время для проверок работоспособности
 
-### Post-Deployment
-- **Verification**: Verify functionality after deployment
-- **Monitoring**: Monitor for issues after deployment
-- **Documentation**: Update documentation
-- **Communication**: Notify stakeholders of completion
+### После развертывания
+- **Проверка**: Проверить функциональность после развертывания
+- **Мониторинг**: Мониторить наличие проблем после развертывания
+- **Документация**: Обновить документацию
+- **Коммуникация**: Уведомить заинтересованные стороны о завершении
 
-## Next Steps
+## Следующие шаги
 
-1. Choose appropriate deployment method for your environment
-2. Prepare infrastructure and configure prerequisites
-3. Test deployment process in staging environment
-4. Schedule deployment with appropriate stakeholders
-5. Execute deployment following chosen strategy
-6. Monitor and verify deployment success
-7. Update documentation and runbooks
+1. Выбрать подходящий метод развертывания для вашей среды
+2. Подготовить инфраструктуру и настроить предварительные требования
+3. Протестировать процесс развертывания в среде тестирования
+4. Назначить развертывание с соответствующими заинтересованными сторонами
+5. Выполнить развертывание в соответствии с выбранной стратегией
+6. Мониторить и проверить успешность развертывания
+7. Обновить документацию и руководства
 
-Happy deploying! 🚀
+Удачного развертывания! 🚀

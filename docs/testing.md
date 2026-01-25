@@ -1,236 +1,236 @@
-# Testing Strategy for OutfitStyle
+# Стратегия тестирования для OutfitStyle
 
-## Overview
+## Обзор
 
-This document outlines the comprehensive testing strategy for the OutfitStyle platform.
+Этот документ описывает комплексную стратегию тестирования для платформы OutfitStyle.
 
-## Testing Pyramid
+## Пирамида тестирования
 
 ```
                     ┌───────┐
-                    │  E2E  │ ← 5%  (slow, brittle)
+                    │  E2E  │ ← 5%  (медленные, хрупкие)
                    ─┴───────┴─
                  ┌─────────────┐
-                 │ Integration │ ← 20% (API, DB)
+                 │ Integration │ ← 20% (API, БД)
                 ─┴─────────────┴─
               ┌───────────────────┐
-              │      Unit         │ ← 75% (fast, reliable)
+              │      Unit         │ ← 75% (быстрые, надежные)
               └───────────────────┘
 ```
 
-## Unit Testing
+## Модульное тестирование
 
 ### Go Backend
-- **Coverage**: >70% for business logic
-- **Tools**: `go test`, `testify` for assertions
-- **Focus**: Business logic, validation, utilities
-- **Speed**: Fast execution, no external dependencies
+- **Покрытие**: >70% для бизнес-логики
+- **Инструменты**: `go test`, `testify` для утверждений
+- **Фокус**: Бизнес-логика, валидация, утилиты
+- **Скорость**: Быстрое выполнение, без внешних зависимостей
 
 ### Python ML Service
-- **Coverage**: >70% for ML algorithms
-- **Tools**: `pytest`, `pytest-mock`, `pytest-asyncio`
-- **Focus**: ML functions, data processing, model validation
-- **Speed**: Fast execution, mocked external dependencies
+- **Покрытие**: >70% для ML-алгоритмов
+- **Инструменты**: `pytest`, `pytest-mock`, `pytest-asyncio`
+- **Фокус**: ML-функции, обработка данных, валидация модели
+- **Скорость**: Быстрое выполнение, внешние зависимости с моками
 
 ### Flutter Frontend
-- **Coverage**: >70% for business logic
-- **Tools**: `flutter test`, `mockito` for mocking
-- **Focus**: Providers, use cases, data models
-- **Speed**: Fast execution, pure Dart functions
+- **Покрытие**: >70% для бизнес-логики
+- **Инструменты**: `flutter test`, `mockito` для моков
+- **Фокус**: Провайдеры, варианты использования, модели данных
+- **Скорость**: Быстрое выполнение, чистые Dart-функции
 
-## Integration Testing
+## Интеграционное тестирование
 
-### Backend + Database
-- **Purpose**: Test repository implementations
-- **Scope**: CRUD operations, transactions, migrations
-- **Tools**: Test containers, in-memory databases
-- **Frequency**: Run with every build
+### Backend + База данных
+- **Назначение**: Тестирование реализации репозиториев
+- **Область**: CRUD-операции, транзакции, миграции
+- **Инструменты**: Тестовые контейнеры, in-memory базы данных
+- **Частота**: Запуск при каждой сборке
 
-### Backend + External APIs
-- **Purpose**: Test integration with external services
-- **Scope**: Weather API, Google OAuth, ML service
-- **Tools**: WireMock, Hoverfly, or real API with rate limits
-- **Frequency**: Run in CI/CD pipeline
+### Backend + Внешние API
+- **Назначение**: Тестирование интеграции с внешними сервисами
+- **Область**: Weather API, Google OAuth, ML-сервис
+- **Инструменты**: WireMock, Hoverfly или реальное API с ограничениями частоты
+- **Частота**: Запуск в CI/CD-конвейере
 
-### Backend + ML Service
-- **Purpose**: Test contract compatibility
-- **Scope**: Request/response schemas, error handling
-- **Tools**: Contract testing (Pact), integration tests
-- **Frequency**: Run when either service changes
+### Backend + ML-сервис
+- **Назначение**: Тестирование совместимости контрактов
+- **Область**: Схемы запросов/ответов, обработка ошибок
+- **Инструменты**: Тестирование контрактов (Pact), интеграционные тесты
+- **Частота**: Запуск при изменении любого из сервисов
 
-## End-to-End Testing
+## Сквозное тестирование
 
-### Critical User Journeys
-1. Registration → Add item → Get recommendation
-2. Login → View weather → Swipe recommendations
-3. Offline mode → Sync when connection restored
+### Критические пользовательские пути
+1. Регистрация → Добавить вещь → Получить рекомендацию
+2. Вход → Просмотр погоды → Свайп рекомендаций
+3. Автономный режим → Синхронизация при восстановлении соединения
 
-### Tools
-- **Flutter**: Integration tests with `integration_test` package
-- **Backend**: Custom Go test suite with real HTTP calls
-- **Full stack**: Docker Compose with seed data
+### Инструменты
+- **Flutter**: Интеграционные тесты с пакетом `integration_test`
+- **Backend**: Пользовательский Go-тестовый набор с реальными HTTP-вызовами
+- **Full stack**: Docker Compose с тестовыми данными
 
-### Frequency
-- **Development**: Run before major releases
-- **CI/CD**: Run on main branch changes
-- **Staging**: Run before production deployment
+### Частота
+- **Разработка**: Запуск перед крупными релизами
+- **CI/CD**: Запуск при изменениях в главной ветке
+- **Staging**: Запуск перед продакшен-развертыванием
 
-## Contract Testing
+## Тестирование контрактов
 
-### Between Go and Python Services
+### Между Go и Python-сервисами
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    CONTRACT TESTING FLOW                            │
+│                    ПОТОК ТЕСТИРОВАНИЯ КОНТРАКТОВ                    │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  1. Define contract in JSON Schema or OpenAPI                      │
+│  1. Определить контракт в JSON Schema или OpenAPI                  │
 │                                                                     │
-│  2. Go generates test request → Saves to file                      │
+│  2. Go генерирует тестовый запрос → Сохраняет в файл               │
 │                                                                     │
-│  3. Python reads file → Validates its structure                    │
+│  3. Python читает файл → Проверяет его структуру                   │
 │                                                                     │
-│  4. Python generates response → Saves to file                      │
+│  4. Python генерирует ответ → Сохраняет в файл                     │
 │                                                                     │
-│  5. Go reads file → Validates response parsing                     │
+│  5. Go читает файл → Проверяет парсинг ответа                      │
 │                                                                     │
-│  6. Any change breaks CI → Forced update                           │
+│  6. Любое изменение ломает CI → Принудительное обновление          │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### What to Test
-- All fields present
-- Type compatibility (especially int vs float, null handling)
-- Enum values match
-- Date/time formats match
-- Nested structures are correct
+### Что тестировать
+- Все поля присутствуют
+- Совместимость типов (особенно int против float, обработка null)
+- Значения enum совпадают
+- Форматы даты/времени совпадают
+- Вложенные структуры корректны
 
-## Test Data Management
+## Управление тестовыми данными
 
-### Seeding Strategy
-- **Development**: Consistent seed data for predictable testing
-- **CI/CD**: Fresh data for each test run
-- **Staging**: Anonymized production data
+### Стратегия заполнения
+- **Разработка**: Последовательные тестовые данные для предсказуемого тестирования
+- **CI/CD**: Свежие данные для каждого запуска теста
+- **Staging**: Анонимизированные продакшен-данные
 
-### Test Data Lifecycle
-- **Setup**: Create necessary test data before tests
-- **Cleanup**: Remove test data after tests
-- **Isolation**: Each test has independent data
+### Жизненный цикл тестовых данных
+- **Настройка**: Создать необходимые тестовые данные перед тестами
+- **Очистка**: Удалить тестовые данные после тестов
+- **Изоляция**: У каждого теста независимые данные
 
-## Test Environment
+## Тестовая среда
 
-### Local Development
-- **Docker Compose**: Isolated test environment
-- **In-memory databases**: Fast test execution
-- **Mock services**: Controlled external dependencies
+### Локальная разработка
+- **Docker Compose**: Изолированная тестовая среда
+- **In-memory базы данных**: Быстрое выполнение тестов
+- **Mock-сервисы**: Контролируемые внешние зависимости
 
-### CI/CD Pipeline
-- **Parallel execution**: Speed up test runs
-- **Resource isolation**: Prevent test interference
-- **Artifact collection**: Test results and coverage reports
+### CI/CD-конвейер
+- **Параллельное выполнение**: Ускорение запуска тестов
+- **Изоляция ресурсов**: Предотвращение помех тестов
+- **Сбор артефактов**: Результаты тестов и отчеты о покрытии
 
-## Performance Testing
+## Тестирование производительности
 
-### Load Testing
-- **Tools**: Artillery, k6, JMeter
-- **Scenarios**: Peak usage, sustained load
-- **Metrics**: Response time, error rate, throughput
-- **Thresholds**: p95 < 200ms, error rate < 1%
+### Тестирование нагрузки
+- **Инструменты**: Artillery, k6, JMeter
+- **Сценарии**: Пиковая нагрузка, постоянная нагрузка
+- **Метрики**: Время отклика, коэффициент ошибок, пропускная способность
+- **Пороги**: p95 < 200мс, коэффициент ошибок < 1%
 
-### Stress Testing
-- **Purpose**: Find breaking points
-- **Approach**: Gradually increase load
-- **Metrics**: System behavior under stress
-- **Recovery**: How system recovers from overload
+### Тестирование стресса
+- **Назначение**: Найти точки отказа
+- **Подход**: Постепенное увеличение нагрузки
+- **Метрики**: Поведение системы под стрессом
+- **Восстановление**: Как система восстанавливается после перегрузки
 
-## Security Testing
+## Тестирование безопасности
 
-### Static Analysis
-- **Tools**: SonarQube, Semgrep, Bandit
-- **Scope**: Code vulnerabilities, security issues
-- **Frequency**: Every commit
+### Статический анализ
+- **Инструменты**: SonarQube, Semgrep, Bandit
+- **Область**: Уязвимости кода, проблемы безопасности
+- **Частота**: При каждом коммите
 
-### Dynamic Analysis
-- **Tools**: OWASP ZAP, Burp Suite
-- **Scope**: Runtime vulnerabilities
-- **Frequency**: Periodic security scans
+### Динамический анализ
+- **Инструменты**: OWASP ZAP, Burp Suite
+- **Область**: Уязвимости во время выполнения
+- **Частота**: Периодические сканирования безопасности
 
-### Dependency Scanning
-- **Tools**: Snyk, Dependabot, Trivy
-- **Scope**: Vulnerable dependencies
-- **Frequency**: Continuous monitoring
+### Сканирование зависимостей
+- **Инструменты**: Snyk, Dependabot, Trivy
+- **Область**: Уязвимые зависимости
+- **Частота**: Непрерывный мониторинг
 
-## Test Automation
+## Автоматизация тестирования
 
-### CI/CD Integration
-- **Unit tests**: Run on every commit
-- **Integration tests**: Run on pull requests
-- **E2E tests**: Run on main branch
-- **Performance tests**: Run nightly
+### Интеграция CI/CD
+- **Модульные тесты**: Запуск при каждом коммите
+- **Интеграционные тесты**: Запуск при pull-запросах
+- **E2E-тесты**: Запуск в главной ветке
+- **Тесты производительности**: Запуск ночью
 
-### Quality Gates
-- **Coverage**: Minimum 70% coverage
-- **Performance**: Meet SLA requirements
-- **Security**: No critical vulnerabilities
-- **Compatibility**: Pass contract tests
+### Контроль качества
+- **Покрытие**: Минимум 70% покрытия
+- **Производительность**: Соответствие требованиям SLA
+- **Безопасность**: Нет критических уязвимостей
+- **Совместимость**: Прохождение тестов контрактов
 
-## Test Maintenance
+## Поддержка тестов
 
-### Flaky Tests
-- **Detection**: Automatically detect flaky tests
-- **Quarantine**: Isolate flaky tests
-- **Fix**: Prioritize fixing flaky tests
-- **Removal**: Remove tests that can't be fixed
+### Нестабильные тесты
+- **Обнаружение**: Автоматическое обнаружение нестабильных тестов
+- **Карантин**: Изоляция нестабильных тестов
+- **Исправление**: Приоритетное исправление нестабильных тестов
+- **Удаление**: Удаление тестов, которые невозможно исправить
 
-### Test Refactoring
-- **Regular review**: Review tests during code refactoring
-- **Shared utilities**: Maintain common test utilities
-- **Documentation**: Keep test documentation up to date
+### Рефакторинг тестов
+- **Регулярный обзор**: Обзор тестов во время рефакторинга кода
+- **Общие утилиты**: Поддержка общих тестовых утилит
+- **Документация**: Актуальная документация тестов
 
-## Test Reporting
+## Отчетность по тестированию
 
-### Coverage Reports
-- **Individual**: Per developer coverage
-- **Team**: Team coverage metrics
-- **Project**: Overall project coverage
-- **Trends**: Coverage over time
+### Отчеты о покрытии
+- **Индивидуальные**: Покрытие по разработчику
+- **Командные**: Метрики покрытия команды
+- **Проектные**: Общее покрытие проекта
+- **Тренды**: Покрытие с течением времени
 
-### Performance Reports
-- **Baselines**: Establish performance baselines
-- **Regression**: Detect performance regressions
-- **Trends**: Performance over time
-- **Alerting**: Alert on performance degradation
+### Отчеты о производительности
+- **Базовые показатели**: Установление базовых показателей производительности
+- **Регрессия**: Обнаружение регрессии производительности
+- **Тренды**: Производительность с течением времени
+- **Оповещения**: Оповещения о снижении производительности
 
-## Testing Best Practices
+## Лучшие практики тестирования
 
-### Writing Tests
-- **Arrange-Act-Assert**: Clear test structure
-- **Single responsibility**: Each test tests one thing
-- **Descriptive names**: Clear test names
-- **No magic numbers**: Use constants and variables
+### Написание тестов
+- **Arrange-Act-Assert**: Четкая структура теста
+- **Единственная ответственность**: Каждый тест тестирует одну вещь
+- **Описательные имена**: Четкие имена тестов
+- **Без магических чисел**: Использование констант и переменных
 
-### Test Organization
-- **Group by feature**: Organize tests by feature
-- **Separate concerns**: Unit vs integration vs E2E
-- **Clear hierarchy**: Logical test structure
-- **Easy navigation**: Easy to find relevant tests
+### Организация тестов
+- **Группировка по функциям**: Организация тестов по функциям
+- **Разделение забот**: Модульные vs интеграционные vs E2E
+- **Четкая иерархия**: Логическая структура тестов
+- **Простая навигация**: Простота поиска соответствующих тестов
 
-### Test Data
-- **Realistic**: Use realistic test data
-- **Consistent**: Consistent test data across tests
-- **Maintainable**: Easy to update test data
-- **Secure**: Don't use real sensitive data
+### Тестовые данные
+- **Реалистичность**: Использование реалистичных тестовых данных
+- **Последовательность**: Последовательные тестовые данные в тестах
+- **Поддерживаемость**: Простота обновления тестовых данных
+- **Безопасность**: Не использовать настоящие конфиденциальные данные
 
-## Quality Metrics
+## Метрики качества
 
-### Test Effectiveness
-- **Defect detection**: How many defects caught by tests
-- **Time to detection**: How quickly defects are found
-- **False positives**: How often tests fail incorrectly
-- **Maintenance overhead**: Effort to maintain tests
+### Эффективность тестов
+- **Обнаружение дефектов**: Сколько дефектов обнаружено тестами
+- **Время обнаружения**: Насколько быстро обнаруживаются дефекты
+- **Ложные срабатывания**: Как часто тесты неправильно падают
+- **Накладные расходы на поддержку**: Усилия на поддержку тестов
 
-### Test Efficiency
-- **Execution time**: How long tests take to run
-- **Resource usage**: How much resources tests consume
-- **Parallelization**: How well tests can run in parallel
-- **Reliability**: How often tests pass/fail consistently
+### Эффективность тестов
+- **Время выполнения**: Сколько времени занимают тесты
+- **Использование ресурсов**: Сколько ресурсов потребляют тесты
+- **Параллелизация**: Насколько хорошо тесты могут выполняться параллельно
+- **Надежность**: Как часто тесты проходят/падают последовательно

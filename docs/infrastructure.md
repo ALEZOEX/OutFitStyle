@@ -1,12 +1,12 @@
-# Infrastructure for OutfitStyle
+# Инфраструктура для OutfitStyle
 
-## Overview
+## Обзор
 
-This document describes the infrastructure setup and deployment strategies for the OutfitStyle platform.
+Этот документ описывает настройку инфраструктуры и стратегии развертывания для платформы OutfitStyle.
 
-## Architecture
+## Архитектура
 
-### High-Level Architecture
+### Высокоуровневая архитектура
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Flutter App   │    │    Go API       │    │  Python ML      │
@@ -28,70 +28,70 @@ This document describes the infrastructure setup and deployment strategies for t
                        └─────────────────┘
 ```
 
-## Environment Setup
+## Настройка окружения
 
-### Development Environment
-- **Docker Compose**: For local development
-- **Hot reloading**: For rapid development
-- **Seed data**: For consistent development environment
-- **Local databases**: Isolated from other environments
+### Среда разработки
+- **Docker Compose**: Для локальной разработки
+- **Горячая перезагрузка**: Для быстрой разработки
+- **Тестовые данные**: Для согласованной среды разработки
+- **Локальные базы данных**: Изолированы от других окружений
 
-### Staging Environment
-- **Production-like setup**: Mirror of production
-- **Automated deployment**: From develop branch
-- **Test data**: Not production data
-- **QA access**: For testing new features
+### Среда тестирования
+- **Настройка как продакшен**: Зеркало продакшена
+- **Автоматическое развертывание**: Из ветки develop
+- **Тестовые данные**: Не продакшен-данные
+- **Доступ QA**: Для тестирования новых функций
 
-### Production Environment
-- **Manual approval**: For deployments
-- **Blue-green deployment**: Zero-downtime deployments
-- **Auto-scaling**: Based on load
-- **Full monitoring**: Complete observability
+### Продакшен-среда
+- **Ручное одобрение**: Для развертываний
+- **Сине-зеленое развертывание**: Развертывания без простоя
+- **Автомасштабирование**: На основе нагрузки
+- **Полный мониторинг**: Полная наблюдаемость
 
-## Containerization
+## Контейнеризация
 
-### Docker Best Practices
+### Лучшие практики Docker
 ```
-1. Multi-stage builds (builder → runtime)
-2. Minimal base images (alpine, distroless)
-3. Non-root user in containers
-4. .dockerignore for excluding unnecessary files
-5. Specific versions (not :latest)
-6. Health checks in Dockerfile
-7. Labels for metadata
+1. Многоступенчатые сборки (builder → runtime)
+2. Минимальные базовые образы (alpine, distroless)
+3. Не-root пользователь в контейнерах
+4. .dockerignore для исключения ненужных файлов
+5. Конкретные версии (не :latest)
+6. Проверки работоспособности в Dockerfile
+7. Метки для метаданных
 ```
 
-### Docker Compose for Local Development
+### Docker Compose для локальной разработки
 ```
-Services:
+Сервисы:
 ├── api (Go backend)
-├── ml (Python ML service)
+├── ml (Python ML сервис)
 ├── db (PostgreSQL)
-├── redis (cache and rate limiting)
-├── nginx (reverse proxy)
-├── prometheus (metrics)
-├── grafana (dashboards)
-└── jaeger (tracing)
+├── redis (кэш и ограничение частоты)
+├── nginx (обратный прокси)
+├── prometheus (метрики)
+├── grafana (панели мониторинга)
+└── jaeger (трассировка)
 
-Volumes:
-├── postgres_data (persist DB)
-├── ml_models (persist trained models)
-└── grafana_data (persist dashboards)
+Тома:
+├── postgres_data (постоянная БД)
+├── ml_models (постоянные обученные модели)
+└── grafana_data (постоянные панели мониторинга)
 ```
 
-## Kubernetes (Production)
+## Kubernetes (Продакшен)
 
-### Minimal Configuration
+### Минимальная конфигурация
 ```
-Deployments:
-├── api (2-10 replicas, HPA by CPU)
-├── ml (2-4 replicas, HPA by CPU)
-└── nginx (2 replicas)
+Развертывания:
+├── api (2-10 реплик, HPA по CPU)
+├── ml (2-4 реплики, HPA по CPU)
+└── nginx (2 реплики)
 
 StatefulSets:
-└── postgresql (1 primary + 1 replica)
+└── postgresql (1 основной + 1 реплика)
 
-Services:
+Сервисы:
 ├── api-service (ClusterIP)
 ├── ml-service (ClusterIP)
 └── nginx-service (LoadBalancer)
@@ -101,149 +101,149 @@ ConfigMaps:
 ├── ml-config
 └── nginx-config
 
-Secrets:
+Секреты:
 ├── database-credentials
 ├── jwt-keys
 └── api-keys
 ```
 
-### Important Settings
+### Важные настройки
 ```
-Pod Disruption Budget:
-└── minAvailable: 1 (always minimum 1 pod running)
+Бюджет прерывания Pod:
+└── minAvailable: 1 (всегда минимум 1 запущенный pod)
 
-Resource Limits:
+Ограничения ресурсов:
 ├── API: 256Mi-512Mi RAM, 250m-500m CPU
 ├── ML: 512Mi-1Gi RAM, 500m-1000m CPU
 └── PostgreSQL: 1Gi-2Gi RAM
 
-Probes:
-├── livenessProbe: /health (restart if fails)
-├── readinessProbe: /ready (remove from LB if fails)
-└── startupProbe: /health (for slow startup ML)
+Пробы:
+├── livenessProbe: /health (перезапуск при сбое)
+├── readinessProbe: /ready (удаление из LB при сбое)
+└── startupProbe: /health (для медленного запуска ML)
 ```
 
-## Deployment Strategies
+## Стратегии развертывания
 
-### Rolling Update (Default)
+### Последовательное обновление (По умолчанию)
 ```
-├── Gradual replacement of old pods with new ones
-├── maxSurge: 25% (how many extra pods)
-├── maxUnavailable: 0 (always full availability)
-└── Rollback via: kubectl rollout undo
-```
-
-### Blue-Green
-```
-├── Two identical environments
-├── Switch DNS/Load Balancer
-├── Instant rollback
-└── More expensive (2x resources)
+├── Пошаговая замена старых pod на новые
+├── maxSurge: 25% (сколько дополнительных pod)
+├── maxUnavailable: 0 (всегда полная доступность)
+└── Откат через: kubectl rollout undo
 ```
 
-### Canary
+### Сине-зеленое
 ```
-├── 5% traffic to new version
-├── Monitor error rate
-├── Gradually increase to 100%
-└── Rollback on issues
+├── Две идентичные среды
+├── Переключение DNS/Load Balancer
+├── Мгновенный откат
+└── Дороже (2x ресурсы)
 ```
 
-## Load Balancing & Reverse Proxy
+### Канареечное
+```
+├── 5% трафика на новую версию
+├── Мониторинг коэффициента ошибок
+├── Постепенное увеличение до 100%
+└── Откат при проблемах
+```
 
-### NGINX Configuration
-- **SSL Termination**: HTTPS to HTTP for internal services
-- **Rate Limiting**: Per IP and per user
-- **Caching**: Static assets and API responses
-- **Compression**: Gzip for responses
-- **Security Headers**: HSTS, CSP, etc.
+## Балансировка нагрузки и обратный прокси
 
-### Health Checks
-- **Liveness Probe**: Check if process is alive
-- **Readiness Probe**: Check if ready to serve traffic
-- **Startup Probe**: For slow-starting services
+### Конфигурация NGINX
+- **Завершение SSL**: HTTPS в HTTP для внутренних сервисов
+- **Ограничение частоты**: На IP и на пользователя
+- **Кэширование**: Статические ресурсы и ответы API
+- **Сжатие**: Gzip для ответов
+- **Заголовки безопасности**: HSTS, CSP и т.д.
 
-## Monitoring & Observability
+### Проверки работоспособности
+- **Liveness Probe**: Проверить, жив ли процесс
+- **Readiness Probe**: Проверить, готов ли к обслуживанию трафика
+- **Startup Probe**: Для медленно запускающихся сервисов
 
-### Infrastructure Monitoring
-- **Prometheus**: Metrics collection
-- **Grafana**: Visualization and dashboards
-- **AlertManager**: Alerting and notification
-- **Loki**: Log aggregation
-- **Jaeger**: Distributed tracing
+## Мониторинг и наблюдаемость
 
-### Key Metrics
-- **System**: CPU, memory, disk, network
-- **Application**: Response time, error rate, throughput
-- **Business**: DAU, conversion rates, feature usage
-- **Database**: Connections, queries, locks, replication lag
+### Мониторинг инфраструктуры
+- **Prometheus**: Сбор метрик
+- **Grafana**: Визуализация и панели мониторинга
+- **AlertManager**: Оповещения и уведомления
+- **Loki**: Агрегация логов
+- **Jaeger**: Распределенная трассировка
 
-## Security
+### Ключевые метрики
+- **Система**: CPU, память, диск, сеть
+- **Приложение**: Время отклика, коэффициент ошибок, пропускная способность
+- **Бизнес**: DAU, коэффициенты конверсии, использование функций
+- **База данных**: Соединения, запросы, блокировки, задержка репликации
 
-### Network Security
-- **Firewall**: Restrict access to necessary ports
-- **VPC/Subnets**: Isolate services
-- **VPN**: For administrative access
-- **DDoS Protection**: Cloudflare or similar
+## Безопасность
 
-### Container Security
-- **Image scanning**: Vulnerability detection
-- **Non-root users**: Run containers as non-root
-- **Resource limits**: Prevent resource exhaustion
-- **Immutable containers**: Prevent runtime changes
+### Сетевая безопасность
+- **Брандмауэр**: Ограничить доступ к необходимым портам
+- **VPC/Подсети**: Изолировать сервисы
+- **VPN**: Для административного доступа
+- **Защита от DDoS**: Cloudflare или аналогичный
 
-## Backup & Disaster Recovery
+### Безопасность контейнеров
+- **Сканирование образов**: Обнаружение уязвимостей
+- **Не-root пользователи**: Запускать контейнеры не от root
+- **Ограничения ресурсов**: Предотвратить истощение ресурсов
+- **Неизменяемые контейнеры**: Предотвратить изменения во время выполнения
 
-### Backup Strategy
-- **Database**: Regular dumps with point-in-time recovery
-- **Configuration**: Version-controlled infrastructure
-- **Certificates**: Automated renewal and backup
-- **Application data**: Regular snapshots
+## Резервное копирование и восстановление после сбоев
 
-### Recovery Plans
-- **RTO (Recovery Time Objective)**: Target < 4 hours
-- **RPO (Recovery Point Objective)**: Target < 1 hour data loss
-- **Failover procedures**: Automated where possible
-- **Testing**: Regular disaster recovery drills
+### Стратегия резервного копирования
+- **База данных**: Регулярные дампы с восстановлением на момент времени
+- **Конфигурация**: Инфраструктура с контролем версий
+- **Сертификаты**: Автоматическое обновление и резервное копирование
+- **Данные приложения**: Регулярные снимки
 
-## Scaling
+### Планы восстановления
+- **RTO (Целевое время восстановления)**: Цель < 4 часа
+- **RPO (Целевая точка восстановления)**: Цель < 1 час потерь данных
+- **Процедуры переключения**: Автоматизированные где возможно
+- **Тестирование**: Регулярные учения по восстановлению после сбоев
 
-### Horizontal Scaling
-- **Auto-scaling**: Based on CPU, memory, or custom metrics
-- **Load balancing**: Distribute traffic across instances
-- **Database read replicas**: Offload read queries
-- **Caching**: Reduce database load
+## Масштабирование
 
-### Vertical Scaling
-- **Instance sizing**: Choose appropriate instance types
-- **Resource allocation**: Optimize CPU and memory
-- **Storage**: Use SSDs for better performance
-- **Network**: Higher bandwidth for data transfer
+### Горизонтальное масштабирование
+- **Автомасштабирование**: На основе CPU, памяти или пользовательских метрик
+- **Балансировка нагрузки**: Распределение трафика по инстансам
+- **Реплики чтения базы данных**: Выгрузка запросов на чтение
+- **Кэширование**: Снижение нагрузки на базу данных
 
-## Cost Optimization
+### Вертикальное масштабирование
+- **Размер инстансов**: Выбирать подходящие типы инстансов
+- **Распределение ресурсов**: Оптимизировать CPU и память
+- **Хранилище**: Использовать SSD для лучшей производительности
+- **Сеть**: Более высокая пропускная способность для передачи данных
 
-### Resource Management
-- **Right-sizing**: Match resources to actual usage
-- **Reserved instances**: Commit to longer-term usage
-- **Spot instances**: For non-critical workloads
-- **Auto-scaling**: Scale down during low usage
+## Оптимизация стоимости
 
-### Monitoring Costs
-- **Cost tracking**: Monitor spending by service
-- **Resource tagging**: Track costs by team/project
-- **Optimization alerts**: Notify of cost anomalies
-- **Regular reviews**: Optimize based on usage patterns
+### Управление ресурсами
+- **Правильный размер**: Соответствие ресурсов фактическому использованию
+- **Зарезервированные инстансы**: Привязка к длительному использованию
+- **Spot инстансы**: Для некритичных рабочих нагрузок
+- **Автомасштабирование**: Снижение масштаба при низком использовании
 
-## Documentation & Runbooks
+### Мониторинг стоимости
+- **Отслеживание стоимости**: Мониторинг расходов по сервису
+- **Тегирование ресурсов**: Отслеживание стоимости по команде/проекту
+- **Оповещения об оптимизации**: Уведомлять о аномалиях стоимости
+- **Регулярные обзоры**: Оптимизация на основе паттернов использования
 
-### Infrastructure Documentation
-- **Architecture diagrams**: Current state and changes
-- **Runbooks**: Step-by-step operational procedures
-- **Incident response**: Playbooks for common issues
-- **Change management**: Process for infrastructure changes
+## Документация и руководства
 
-### Operational Procedures
-- **Deployment procedures**: Step-by-step deployment guides
-- **Monitoring procedures**: How to interpret metrics
-- **Troubleshooting**: Common issues and solutions
-- **Security procedures**: Incident response and forensics
+### Документация инфраструктуры
+- **Диаграммы архитектуры**: Текущее состояние и изменения
+- **Руководства**: Пошаговые операционные процедуры
+- **Реагирование на инциденты**: Руководства по распространенным проблемам
+- **Управление изменениями**: Процесс для изменений инфраструктуры
+
+### Операционные процедуры
+- **Процедуры развертывания**: Пошаговые руководства по развертыванию
+- **Процедуры мониторинга**: Как интерпретировать метрики
+- **Устранение неполадок**: Распространенные проблемы и решения
+- **Процедуры безопасности**: Реагирование на инциденты и криминалистика

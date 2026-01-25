@@ -2,37 +2,43 @@ package repositories
 
 import (
 	"context"
+	"time"
+
 	"outfitstyle/server/internal/core/domain"
 )
 
 // RecommendationItemCreate структура для создания элемента рекомендации
 type RecommendationItemCreate struct {
-	ClothingItemID   domain.ID  // Идентификатор элемента одежды
-	Category         string     // Категория
-	LayerPosition    *int       // Позиция слоя (опционально)
-	Score            *float64   // Оценка (опционально)
-	Source           string     // Источник (clothing_source)
-	IsFromWardrobe   bool       // Из гардероба ли
-	AlternativesJSON []byte     // Альтернативы в формате JSON (опционально)
+	ClothingItemID   domain.ID // Идентификатор элемента одежды
+	Category         string    // Категория
+	LayerPosition    *int      // Позиция слоя (опционально)
+	Score            *float64  // Оценка (опционально)
+	Source           string    // Источник (clothing_source)
+	IsFromWardrobe   bool      // Из гардероба ли
+	AlternativesJSON []byte    // Альтернативы в формате JSON (опционально)
 }
 
 // RecommendationItemRow структура строки элемента рекомендации
 type RecommendationItemRow struct {
-	ClothingItemID   domain.ID  // Идентификатор элемента одежды
-	Category         string     // Категория
-	Source           string     // Источник
-	IsFromWardrobe   bool       // Из гардероба ли
-	AlternativesJSON []byte     // Альтернативы в формате JSON
+	ID               domain.ID // Уникальный идентификатор элемента
+	RecommendationID domain.ID // Идентификатор рекомендации
+	ClothingItemID   domain.ID // Идентификатор элемента одежды
+	Score            float64   // Рейтинг элемента
+	Category         string    // Категория
+	Source           string    // Источник
+	IsFromWardrobe   bool      // Из гардероба ли
+	AlternativesJSON []byte    // Альтернативы в формате JSON
+	CreatedAt        time.Time // Время создания элемента
 }
 
 // RecommendationSession структура сессии рекомендации
 type RecommendationSession struct {
-	ID             domain.ID     // Идентификатор сессии
-	UserID         domain.ID     // Идентификатор пользователя
-	ContextHash    *string       // Хэш контекста
-	ModelVersion   *string       // Версия модели
-	WeatherData    []byte        // Данные о погоде
-	UserPreferences []byte        // Предпочтения пользователя
+	ID              domain.ID // Идентификатор сессии
+	UserID          domain.ID // Идентификатор пользователя
+	ContextHash     *string   // Хэш контекста
+	ModelVersion    *string   // Версия модели
+	WeatherData     []byte    // Данные о погоде
+	UserPreferences []byte    // Предпочтения пользователя
 }
 
 // RecommendationRepository интерфейс репозитория рекомендаций

@@ -65,7 +65,7 @@ func (s *APIKeyService) Create(ctx context.Context, clientID domain.ID, req doma
 		ExpiresAt: nil,
 	}
 
-	id, err := s.repo.Create(ctx, rec)  // Исправлена опечатка: было s.repo, должно быть s.repo
+	id, err := s.repo.Create(ctx, rec) // Исправлена опечатка: было s.repo, должно быть s.repo
 	if err != nil {
 		return nil, err
 	}

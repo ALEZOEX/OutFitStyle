@@ -69,6 +69,19 @@ func (s *NotificationService) CreateAndDispatch(ctx context.Context, userID doma
 }
 
 func (s *NotificationService) EnsureReady() error {
-	// для будущих проверок
-	return errors.New("not implemented")
+	// Проверяем, что все зависимости доступны
+	if s.notifRepo == nil {
+		return errors.New("notification repository is not configured")
+	}
+	if s.tokenRepo == nil {
+		return errors.New("push token repository is not configured")
+	}
+
+	// Если используется очередь, проверяем, что она доступна
+	if s.queue != nil {
+		// Можно добавить проверку работоспособности очереди
+		// Например, проверить, что можно подключиться к Redis
+	}
+
+	return nil
 }

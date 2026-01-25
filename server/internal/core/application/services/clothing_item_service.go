@@ -19,11 +19,11 @@ import (
 
 // ClothingItemService сервис для работы с элементами одежды
 type ClothingItemService struct {
-	clothingRepo       repositories.ClothingItemRepository      // Репозиторий элементов одежды
-	specRepo           clothing.SubcategorySpecRepository       // Репозиторий спецификаций подкатегорий
-	mlClient           *mlclient.Client                         // ML-клиент для ранжирования
-	outfitPlanner      *planner.OutfitPlanner                   // Планировщик нарядов
-	translationService translation.ServiceInterface             // Сервис перевода
+	clothingRepo       repositories.ClothingItemRepository // Репозиторий элементов одежды
+	specRepo           clothing.SubcategorySpecRepository  // Репозиторий спецификаций подкатегорий
+	mlClient           *mlclient.Client                    // ML-клиент для ранжирования
+	outfitPlanner      *planner.OutfitPlanner              // Планировщик нарядов
+	translationService translation.ServiceInterface        // Сервис перевода
 }
 
 // NewClothingItemService создает новый экземпляр сервиса элементов одежды
