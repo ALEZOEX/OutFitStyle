@@ -200,11 +200,7 @@ func (r *BillingRepository) CreateUserSubscription(ctx context.Context, userID i
 }
 
 func (r *BillingRepository) CancelSubscription(ctx context.Context, userID int64, immediate bool) error {
-	query := `
-		UPDATE user_subscriptions
-		SET status = 'cancelled', cancelled_at = NOW()
-		WHERE user_id = $1 AND status = 'active'
-	`
+	var query string
 
 	if immediate {
 		query = `

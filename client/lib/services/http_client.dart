@@ -65,7 +65,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
       }
     } catch (e) {
       // Игнорируем ошибки обновления токена
-      print('Token refresh failed: $e');
+      // Token refresh failed: $e - logging would be handled by error handler
     }
     return false;
   }

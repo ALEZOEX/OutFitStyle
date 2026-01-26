@@ -80,7 +80,7 @@ class BrandBadge extends StatelessWidget {
           BoxShadow(
             blurRadius: 14,
             offset: const Offset(0, 8),
-            color: purple.withOpacity(0.25),
+            color: purple.withValues(alpha: 0.25),
           ),
         ],
       ),

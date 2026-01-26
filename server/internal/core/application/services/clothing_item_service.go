@@ -139,7 +139,7 @@ func (s *ClothingItemService) GetItemsForPlan(ctx context.Context, plan *planner
 		}
 
 		// Предварительная фильтрация кандидатов по температуре и базовой совместимости
-		filteredItems := s.preFilterCandidates(ctx, items, float64(temperature))
+		filteredItems := s.preFilterCandidates(items, float64(temperature))
 
 		result[category] = filteredItems
 	}
@@ -148,7 +148,7 @@ func (s *ClothingItemService) GetItemsForPlan(ctx context.Context, plan *planner
 }
 
 // preFilterCandidates фильтрует элементы по базовой совместимости перед ML-ранжированием
-func (s *ClothingItemService) preFilterCandidates(ctx context.Context, candidates []domain.ClothingItem, temperature float64) []domain.ClothingItem {
+func (s *ClothingItemService) preFilterCandidates(candidates []domain.ClothingItem, temperature float64) []domain.ClothingItem {
 	var filtered []domain.ClothingItem
 
 	for _, item := range candidates {
@@ -200,11 +200,7 @@ func (s *ClothingItemService) validateClothingItem(item domain.ClothingItem) err
 	validation.ValidateClothingItem(v, item)
 
 	if !v.Valid() {
-		// Преобразование ошибок валидации в одну ошибку для обратной совместимости
-		var errorMessages []string
-		for _, msg := range v.Errors {
-			errorMessages = append(errorMessages, msg)
-		}
+		// Возвращаем ошибку валидации
 		return NewValidationError(v.Errors) // Использование ValidationError, созданного ранее
 	}
 

@@ -56,9 +56,9 @@ class ApiException implements Exception {
 }
 
 class NetworkException extends ApiException {
-  const NetworkException(String message) : super(message);
+  const NetworkException(super.message);
 }
 
 class UnauthorizedException extends ApiException {
-  const UnauthorizedException(String message) : super(message);
+  const UnauthorizedException(super.message);
 }

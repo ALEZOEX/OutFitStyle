@@ -33,7 +33,7 @@ class WeatherCard extends StatelessWidget {
               Text(
                 condition.isEmpty ? 'Погода уточняется' : condition,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.75),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
                     ),
               ),
             ]),
