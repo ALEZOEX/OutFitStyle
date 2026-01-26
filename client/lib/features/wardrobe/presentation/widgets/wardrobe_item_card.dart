@@ -12,11 +12,11 @@ class WardrobeItemCard extends StatelessWidget {
   final VoidCallback onLongPress;
 
   const WardrobeItemCard({
-    Key? key,
+    super.key,
     required this.item,
     required this.onTap,
     required this.onLongPress,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class WardrobeItemCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.65),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -57,7 +57,7 @@ class WardrobeItemCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
                     ),
                   ),
                   const SizedBox(height: 6),

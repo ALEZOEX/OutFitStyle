@@ -31,31 +31,31 @@ func (r *CatalogRepository) GetItems(ctx context.Context, filters domain.Catalog
 	argIndex := 1
 
 	// Apply filters
-	if filters.Categories != nil && len(filters.Categories) > 0 {
+	if len(filters.Categories) > 0 {
 		query += " AND category = ANY($" + string(rune('0'+argIndex)) + ")"
 		args = append(args, filters.Categories)
 		argIndex++
 	}
 
-	if filters.Subcategories != nil && len(filters.Subcategories) > 0 {
+	if len(filters.Subcategories) > 0 {
 		query += " AND subcategory = ANY($" + string(rune('0'+argIndex)) + ")"
 		args = append(args, filters.Subcategories)
 		argIndex++
 	}
 
-	if filters.Genders != nil && len(filters.Genders) > 0 {
+	if len(filters.Genders) > 0 {
 		query += " AND gender = ANY($" + string(rune('0'+argIndex)) + ")"
 		args = append(args, filters.Genders)
 		argIndex++
 	}
 
-	if filters.Styles != nil && len(filters.Styles) > 0 {
+	if len(filters.Styles) > 0 {
 		query += " AND style = ANY($" + string(rune('0'+argIndex)) + ")"
 		args = append(args, filters.Styles)
 		argIndex++
 	}
 
-	if filters.Seasons != nil && len(filters.Seasons) > 0 {
+	if len(filters.Seasons) > 0 {
 		query += " AND season = ANY($" + string(rune('0'+argIndex)) + ")"
 		args = append(args, filters.Seasons)
 		argIndex++
@@ -97,13 +97,13 @@ func (r *CatalogRepository) GetItems(ctx context.Context, filters domain.Catalog
 		argIndex++
 	}
 
-	if filters.Colors != nil && len(filters.Colors) > 0 {
+	if len(filters.Colors) > 0 {
 		query += " AND base_colour = ANY($" + string(rune('0'+argIndex)) + ")"
 		args = append(args, filters.Colors)
 		argIndex++
 	}
 
-	if filters.Materials != nil && len(filters.Materials) > 0 {
+	if len(filters.Materials) > 0 {
 		query += " AND materials && $" + string(rune('0'+argIndex)) // Overlap operator
 		args = append(args, filters.Materials)
 		argIndex++
@@ -378,14 +378,14 @@ func (r *CatalogRepository) Search(ctx context.Context, p repositories.CatalogSe
 		argIndex++
 	}
 
-	if p.Filters.Materials != nil && len(p.Filters.Materials) > 0 {
+	if len(p.Filters.Materials) > 0 {
 		query += " AND materials && $" + string(rune('0'+argIndex)) // Overlap operator
 		countQuery += " AND materials && $" + string(rune('0'+argIndex))
 		args = append(args, p.Filters.Materials)
 		argIndex++
 	}
 
-	if p.Filters.Colors != nil && len(p.Filters.Colors) > 0 {
+	if len(p.Filters.Colors) > 0 {
 		query += " AND base_colour = ANY($" + string(rune('0'+argIndex)) + ")"
 		countQuery += " AND base_colour = ANY($" + string(rune('0'+argIndex)) + ")"
 		args = append(args, p.Filters.Colors)

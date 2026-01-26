@@ -22,7 +22,7 @@ class Env {
 
     if (kDebugMode) {
       // ignore: avoid_print
-      print('✅ API host: $raw');
+      // print('✅ API host: $raw'); // Debug print removed for production
     }
     return ApiConfig(apiBase: raw);
   }
