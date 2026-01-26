@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: migrate
-        image: ghcr.io/your-org/outfitstyle-backend:latest
+        image: outfitstyle-backend
         command: ["/app/migrate"]
         env:
         - name: DB_HOST
@@ -55,7 +55,7 @@ spec:
       initContainers:
       - name: wait-for-db
         image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z postgres.outfitstyle.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;']
+        command: ['sh', '-c', 'until wget --spider --quiet postgres.outfitstyle.svc.cluster.local:5432; do echo waiting for postgres; sleep 2; done;']
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
