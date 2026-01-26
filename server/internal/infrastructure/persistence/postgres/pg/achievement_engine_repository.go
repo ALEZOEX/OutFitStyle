@@ -1,5 +1,5 @@
-// Пакет pg содержит реализацию репозиториев для работы с PostgreSQL
-// Реализует интерфейсы репозиториев с использованием библиотеки pgx
+// Package pg contains implementations of repositories for working with PostgreSQL
+// Implements repository interfaces using the pgx library
 package pg
 
 import (
@@ -13,18 +13,18 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
-// AchievementEngineRepository репозиторий для работы с достижениями пользователей
+// AchievementEngineRepository repository for working with user achievements
 type AchievementEngineRepository struct {
-	db *pgxpool.Pool // Пул подключений к базе данных PostgreSQL
+	db *pgxpool.Pool // Pool of connections to PostgreSQL database
 }
 
-// NewAchievementEngineRepository создает новый экземпляр репозитория достижений
+// NewAchievementEngineRepository creates a new instance of achievement repository
 func NewAchievementEngineRepository(db *pgxpool.Pool) *AchievementEngineRepository {
 	return &AchievementEngineRepository{db: db}
 }
 
-// ListActiveDefinitions возвращает список активных определений достижений
-// Используется для получения всех активных достижений в системе
+// ListActiveDefinitions returns a list of active achievement definitions
+// Used to retrieve all active achievements in the system
 func (r *AchievementEngineRepository) ListActiveDefinitions(ctx context.Context) ([]repositories.AchievementDef, error) {
 	query := `
 		SELECT
@@ -61,8 +61,8 @@ func (r *AchievementEngineRepository) ListActiveDefinitions(ctx context.Context)
 	return defs, nil
 }
 
-// ListUnlockedCodes возвращает список разблокированных кодов достижений для пользователя
-// Используется для проверки, какие достижения уже получены пользователем
+// ListUnlockedCodes returns a list of unlocked achievement codes for a user
+// Used to check which achievements have already been earned by the user
 func (r *AchievementEngineRepository) ListUnlockedCodes(ctx context.Context, userID domain.ID) (map[string]bool, error) {
 	query := `
 		SELECT ad.code
@@ -90,8 +90,8 @@ func (r *AchievementEngineRepository) ListUnlockedCodes(ctx context.Context, use
 	return unlockedCodes, nil
 }
 
-// UpsertProgress обновляет или создает прогресс достижения для пользователя
-// Если unlock=true, устанавливает статус как разблокированное
+// UpsertProgress updates or creates achievement progress for a user
+// If unlock=true, sets the status as unlocked
 func (r *AchievementEngineRepository) UpsertProgress(ctx context.Context, userID domain.ID, achievementID domain.ID, progress int, unlock bool) error {
 	query := `
 		INSERT INTO user_achievements (
