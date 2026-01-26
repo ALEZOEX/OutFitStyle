@@ -49,7 +49,7 @@ func (g *YooKassaGateway) ParseWebhook(ctx context.Context, headers map[string]s
 		return "", "", nil, nil, errors.New("yookassa webhook missing object.id/status")
 	}
 
-	status := "pending"
+	var status string
 	switch rawStatus {
 	case "succeeded":
 		status = "completed"

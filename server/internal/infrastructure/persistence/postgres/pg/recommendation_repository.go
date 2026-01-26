@@ -388,7 +388,6 @@ func (r *RecommendationRepository) GetByUserAndDateRange(ctx context.Context, us
 	if to != nil {
 		query += fmt.Sprintf(" AND created_at <= $%d", argIndex)
 		args = append(args, *to)
-		argIndex++
 	}
 
 	query += " ORDER BY created_at DESC"
@@ -755,17 +754,20 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 		argIndex++
 	}
 
+	var limitOffsetIndex int
 	if q.IsFavorite != nil {
 		query += fmt.Sprintf(` AND id IN (
 			SELECT recommendation_id FROM recommendation_favorites
 			WHERE user_id = $1 AND is_favorite = $%d
 		)`, argIndex)
 		args = append(args, *q.IsFavorite)
-		argIndex++
+		limitOffsetIndex = argIndex + 1
+	} else {
+		limitOffsetIndex = argIndex
 	}
 
 	query += " ORDER BY created_at DESC LIMIT $"
-	query += string(rune('0'+argIndex)) + " OFFSET $" + string(rune('0'+argIndex+1))
+	query += string(rune('0'+limitOffsetIndex)) + " OFFSET $" + string(rune('0'+limitOffsetIndex+1))
 	args = append(args, q.Limit, offset)
 
 	rows, err := r.db.Query(ctx, query, args...)
@@ -880,7 +882,6 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 			WHERE user_id = $1 AND is_favorite = $%d
 		)`, countArgIndex)
 		countArgs = append(countArgs, *q.IsFavorite)
-		countArgIndex++
 	}
 
 	var total int

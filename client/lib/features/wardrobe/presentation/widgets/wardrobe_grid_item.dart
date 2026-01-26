@@ -104,14 +104,14 @@ class _WardrobeGridItemState extends State<WardrobeGridItem> with SingleTickerPr
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.65),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Wear count: ${e.wearCount}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
                     ),
                   ),
                 ],
@@ -226,7 +226,7 @@ class _IconAction extends StatelessWidget {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(999),
         ),
         child: Center(child: child),

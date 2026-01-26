@@ -396,7 +396,6 @@ func (r *WardrobeRepository) List(ctx context.Context, userID domain.ID, q domai
 		countQuery += fmt.Sprintf(" AND (custom_name ILIKE $%d OR item_data->>'name' ILIKE $%d)", countArgIndex, countArgIndex)
 		searchTerm := "%" + *q.Search + "%"
 		countArgs = append(countArgs, searchTerm)
-		countArgIndex++
 	}
 
 	err = r.db.QueryRow(ctx, countQuery, countArgs...).Scan(&total)

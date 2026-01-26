@@ -31,7 +31,7 @@ class WardrobeController extends AutoDisposeNotifier<app_state.AsyncState<List<W
     } catch (e) {
       // Не показываем ошибку пользователю, т.к. у нас есть локальные данные
       // ignore: avoid_print
-      print('Network error during wardrobe sync: $e');
+      // Network error during wardrobe sync: $e - logging would be handled by error handler
     }
   }
 

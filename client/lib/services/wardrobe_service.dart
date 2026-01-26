@@ -18,9 +18,9 @@ class WardrobeService {
     // Убедимся, что baseUrl заканчивается на /api/v1
     if (!apiConfig.apiBase.endsWith('/api/v1')) {
       if (apiConfig.apiBase.endsWith('/')) {
-        return apiConfig.apiBase + 'api/v1';
+        return '${apiConfig.apiBase}api/v1';
       } else {
-        return apiConfig.apiBase + '/api/v1';
+        return '${apiConfig.apiBase}/api/v1';
       }
     }
     return apiConfig.apiBase;

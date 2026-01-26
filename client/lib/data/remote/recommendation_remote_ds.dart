@@ -9,7 +9,7 @@ class RecommendationRemoteDataSource {
     try {
       return await _svc.createUsingProfile(occasion: occasion);
     } catch (e) {
-      print('RecommendationRemoteDataSource: createUsingProfile error: $e');
+      // print('RecommendationRemoteDataSource: createUsingProfile error: $e'); // Removed for production, use proper logging
       rethrow;
     }
   }

@@ -1015,7 +1015,7 @@ func fallbackScoreLite(w domain.WeatherSnapshot, requestedStyle string, c domain
 	}
 
 	if requestedStyle != "" {
-		if strings.ToLower(c.Style) == strings.ToLower(requestedStyle) {
+		if strings.EqualFold(c.Style, requestedStyle) {
 			score += 0.20
 		} else {
 			score -= 0.05

@@ -38,7 +38,7 @@ class RecommendationRepository {
       final rec = await remote.createUsingProfile(occasion: occasion);
       await _saveRecord(rec);
     } catch (e) {
-      print('RecommendationRepository: createNew error: $e');
+      // print('RecommendationRepository: createNew error: $e'); // Removed for production, use proper logging
       rethrow;
     }
   }
