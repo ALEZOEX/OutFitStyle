@@ -25,7 +25,7 @@ spec:
         fsGroup: 2000
       containers:
       - name: api
-        image: ghcr.io/your-org/outfitstyle-backend:latest
+        image: outfitstyle-backend
         ports:
         - containerPort: 8080
         env:
@@ -111,7 +111,7 @@ spec:
         fsGroup: 2000
       containers:
       - name: ml-service
-        image: ghcr.io/your-org/outfitstyle-ml-service:latest
+        image: outfitstyle-ml-service
         ports:
         - containerPort: 8000
         env:
