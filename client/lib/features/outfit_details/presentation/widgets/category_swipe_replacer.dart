@@ -106,8 +106,8 @@ class _CategorySwipeReplacerState extends State<CategorySwipeReplacer> {
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           color: isSelected
-                              ? Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8)
-                              : Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
+                              ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
                         ),
                       ),
                     ],

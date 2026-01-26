@@ -292,7 +292,7 @@ class _OutfitCard extends StatelessWidget {
                         cond.isEmpty ? 'Погода' : cond,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.65)),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65)),
                       ),
                     ),
                   ],
@@ -353,7 +353,7 @@ class _SimpleCollage extends StatelessWidget {
               const SizedBox(height: 6),
               Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
-              Text(cat, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
+              Text(cat, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
             ],
           ),
         );

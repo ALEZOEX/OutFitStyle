@@ -3,7 +3,6 @@ package pg
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -142,7 +141,7 @@ func (r *NotificationRepository) List(ctx context.Context, userID domain.ID, unr
 	argIndex := 2
 
 	if unreadOnly {
-		query += fmt.Sprintf(" AND is_read = false")
+		query += " AND is_read = false"
 	}
 
 	query += " ORDER BY created_at DESC LIMIT $" + string(rune('0'+argIndex)) + " OFFSET $" + string(rune('0'+argIndex+1))

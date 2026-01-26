@@ -154,13 +154,13 @@ class _ChoiceCard extends StatelessWidget {
       width: 160,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withOpacity(0.94),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
             blurRadius: 18,
             offset: const Offset(0, 10),
-            color: Colors.black.withOpacity(0.10),
+            color: Colors.black.withValues(alpha: 0.10),
           )
         ],
       ),
@@ -181,7 +181,7 @@ class _ChoiceCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
           ),
           if (hasAlts) ...[
@@ -189,7 +189,7 @@ class _ChoiceCard extends StatelessWidget {
             Text(
               'Свайп ⇄ заменить',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
                   ),
             ),
           ],

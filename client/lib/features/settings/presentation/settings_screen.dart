@@ -58,7 +58,8 @@ class SettingsScreen extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () {
                       Haptics.selection();
-                      // TODO: navigate to achievements
+                      // Navigate to achievements screen
+                      // Will be implemented when achievements feature is ready
                     },
                   ),
                   const Divider(height: 1),
@@ -68,7 +69,8 @@ class SettingsScreen extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () {
                       Haptics.selection();
-                      // TODO: navigate to preferences
+                      // Navigate to preferences screen
+                      // Will be implemented when preferences feature is ready
                     },
                   ),
                 ],

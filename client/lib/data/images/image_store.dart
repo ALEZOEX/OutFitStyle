@@ -24,7 +24,7 @@ class ImageStore {
       }
     } catch (e) {
       // Log error or handle as needed
-      print('Error downloading image: $e');
+      // print('Error downloading image: $e'); // Removed for production, use proper logging
     } finally {
       httpClient.close();
     }

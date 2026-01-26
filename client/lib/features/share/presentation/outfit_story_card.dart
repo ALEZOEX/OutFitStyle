@@ -47,9 +47,9 @@ class OutfitStoryCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.10),
+                      color: Colors.white.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.white.withOpacity(0.12)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                     ),
                     child: Row(
                       children: [
@@ -67,7 +67,7 @@ class OutfitStoryCard extends StatelessWidget {
                             cond.isEmpty ? 'Погода' : cond,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.white.withOpacity(0.85), fontWeight: FontWeight.w700),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontWeight: FontWeight.w700),
                           ),
                         ),
                       ],
@@ -77,7 +77,7 @@ class OutfitStoryCard extends StatelessWidget {
                   const SizedBox(height: 14),
                   Text(
                     'Образ дня',
-                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w900, fontSize: 22),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontWeight: FontWeight.w900, fontSize: 22),
                   ),
                   const SizedBox(height: 12),
 
@@ -93,9 +93,9 @@ class OutfitStoryCard extends StatelessWidget {
                           width: 154,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.10),
+                            color: Colors.white.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: Colors.white.withOpacity(0.12)),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +113,7 @@ class OutfitStoryCard extends StatelessWidget {
                                 cat,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: Colors.white.withOpacity(0.70), fontWeight: FontWeight.w700, fontSize: 12),
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.70), fontWeight: FontWeight.w700, fontSize: 12),
                               ),
                             ],
                           ),
@@ -125,7 +125,7 @@ class OutfitStoryCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     'Собрано автоматически • $appName',
-                    style: TextStyle(color: Colors.white.withOpacity(0.65), fontWeight: FontWeight.w700, fontSize: 12),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontWeight: FontWeight.w700, fontSize: 12),
                   ),
                 ],
               ),

@@ -15,6 +15,10 @@ spec:
       labels:
         app: ml-service
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
       containers:
       - name: ml-service
         image: ghcr.io/your-org/outfitstyle-ml-service:latest
@@ -30,6 +34,14 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # ML-сервису может потребоваться запись моделей
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
         livenessProbe:
           httpGet:
             path: /

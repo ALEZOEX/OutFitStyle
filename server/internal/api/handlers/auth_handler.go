@@ -60,16 +60,15 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	out, err := h.auth.Register(r.Context(), req, device)
 	if err != nil {
+		// Проверяем, является ли это ошибкой валидации
+		if validationErr, ok := err.(*services.ValidationError); ok {
+			resp.ValidationError(w, validationErr.Errors)
+			return
+		}
+
 		status := http.StatusInternalServerError
 		if errors.Is(err, services.ErrInvalidCredentials) {
 			status = http.StatusBadRequest
-		}
-
-		// Проверяем, является ли это ошибкой валидации
-		if validationErr, ok := err.(*services.ValidationError); ok {
-			status = http.StatusBadRequest
-			resp.ValidationError(w, validationErr.Errors)
-			return
 		}
 
 		resp.Error(w, status, err)
