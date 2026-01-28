@@ -1,5 +1,9 @@
 FROM golang:1.24-alpine AS builder
 
+# Установить локаль
+ENV LANG=ru_RU.UTF-8
+ENV LC_ALL=ru_RU.UTF-8
+
 # Установить зависимости
 RUN apk add --no-cache git ca-certificates gcc musl-dev
 
@@ -18,6 +22,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate cmd/migra
 
 # Второй этап - минимальный образ
 FROM alpine:latest
+
+# Установить локаль
+ENV LANG=ru_RU.UTF-8
+ENV LC_ALL=ru_RU.UTF-8
 
 # Установить ca-certificates для HTTPS
 RUN apk --no-cache add ca-certificates

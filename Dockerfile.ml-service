@@ -1,5 +1,10 @@
 FROM python:3.11-slim
 
+# Set locale to UTF-8
+ENV LANG=ru_RU.UTF-8
+ENV LC_ALL=ru_RU.UTF-8
+ENV PYTHONIOENCODING=utf-8
+
 WORKDIR /app
 
 # Install system dependencies for matplotlib and other packages
@@ -27,23 +32,10 @@ COPY ml-service/ ./
 # Ensure models directory exists
 RUN mkdir -p /app/models
 
-# Copy model files
-COPY ml-service/models/ /app/models/
-
-# List the contents of models directory to debug
-RUN ls -la /app/models/
-
-# Create model.pkl if it doesn't exist by copying from available models, or create a dummy one if none exist
-RUN if [ -f /app/models/kaggle_trained_recommender.pkl ]; then \
-        cp /app/models/kaggle_trained_recommender.pkl /app/models/model.pkl; \
-    elif [ -f /app/models/advanced_recommender.pkl ]; then \
-        cp /app/models/advanced_recommender.pkl /app/models/model.pkl; \
-    elif [ -f /app/models/advanced_recommender_v1.pkl ]; then \
-        cp /app/models/advanced_recommender_v1.pkl /app/models/model.pkl; \
-    else \
-        echo "No model files found in /app/models/, creating a dummy model.pkl"; \
-        python -c "import pickle; pickle.dump({'dummy': True}, open('/app/models/model.pkl', 'wb'))"; \
-    fi
+# Models will be mounted as a volume, so we don't need to copy them in the Dockerfile
+# Just create a dummy model file if no models are mounted
+RUN python -c "import pickle; pickle.dump({'dummy': True}, open('/app/models/model.pkl', 'wb'))" && \
+    echo "Dummy model created for build purposes"
 
 # Also create the model file in the expected relative location for the application
 RUN mkdir -p /app/api/models && \
