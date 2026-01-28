@@ -30,35 +30,27 @@ class AuthenticatedHttpClient extends http.BaseClient {
     if (response.statusCode == 401) {
       final refreshed = await _tryRefreshToken();
       if (refreshed) {
-        // Повторяем запрос с новым токеном
-        // Создаем новый запрос, так как старый может быть уже использован
-        final newRequest = _cloneRequest(request);
+        // Повторяем оригинальный запрос с новым токеном
+        // Для этого нужно создать новый запрос с теми же параметрами
         final newToken = await _authStorage.readAccessToken();
         if (newToken != null) {
-          newRequest.headers['Authorization'] = 'Bearer $newToken';
+          // Повторяем тот же самый запрос, но с новым токеном
+          final retryRequest = http.Request(request.method, request.url)
+            ..headers.addAll(request.headers)
+            ..headers['Authorization'] = 'Bearer $newToken';
+
+          // Копируем тело запроса, если оно есть
+          if (request.method != 'GET' && request.method != 'HEAD') {
+            final bytes = await request.finalize().toBytes();
+            retryRequest.bodyBytes = bytes;
+          }
+
+          return await _inner.send(retryRequest);
         }
-        return await _inner.send(newRequest);
       }
     }
 
     return response;
-  }
-
-  // Вспомогательный метод для клонирования запроса
-  http.BaseRequest _cloneRequest(http.BaseRequest original) {
-    final newRequest = http.Request(original.method, original.url)
-      ..headers.addAll(original.headers)
-      ..encoding = original.encoding;
-
-    if (original.method != 'GET' && original.method != 'HEAD') {
-      original.finalize().listen((bytes) {
-        newRequest.sink.add(bytes);
-      }, onDone: () {
-        newRequest.sink.close();
-      });
-    }
-
-    return newRequest;
   }
 
   Future<bool> _tryRefreshToken() async {
