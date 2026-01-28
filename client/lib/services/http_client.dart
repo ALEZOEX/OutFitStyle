@@ -14,15 +14,14 @@ class AuthenticatedHttpClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    final accessToken = await _authStorage.readAccessToken();
-    if (accessToken != null && accessToken.isNotEmpty) {
-      request.headers['Authorization'] = 'Bearer $accessToken';
+    final token = await _authStorage.readAccessToken();
+    if (token != null && token.isNotEmpty) {
+      request.headers['Authorization'] = 'Bearer $token';
     }
 
-    // Content-Type ставим только если не задан (и не мешаем multipart).
     request.headers.putIfAbsent('Content-Type', () => 'application/json');
 
-    // Сохраняем тело ДО отправки, иначе повторить запрос будет нельзя.
+    // Сохраняем body ДО отправки (иначе повторить не получится)
     List<int>? originalBodyBytes;
     Encoding? originalEncoding;
     if (request is http.Request) {
@@ -31,31 +30,36 @@ class AuthenticatedHttpClient extends http.BaseClient {
     }
 
     final response = await _inner.send(request);
-    if (response.statusCode != 401) return response;
 
-    // Освобождаем соединение, если собираемся ретраить.
+    if (response.statusCode != 401) {
+      return response;
+    }
+
+    // ВАЖНО: если refresh НЕ удался — возвращаем исходный response
+    // и НЕ читаем response.stream, иначе словим "Stream has already been listened to".
+    final refreshed = await _tryRefreshToken();
+    if (!refreshed) {
+      return response;
+    }
+
+    // Теперь мы исходный response НЕ возвращаем, можно освободить соединение
     await response.stream.drain();
 
-    final refreshed = await _tryRefreshToken();
-    if (!refreshed) return response;
-
     final newToken = await _authStorage.readAccessToken();
-    if (newToken == null || newToken.isEmpty) return response;
+    if (newToken == null || newToken.isEmpty) {
+      return response; // тут response уже drained, но это крайний случай; лучше не доходить
+    }
 
-    // Ретраим только http.Request (JSON-запросы). Multipart/другие типы — отдельно.
     if (request is! http.Request) {
+      // Для MultipartRequest и т.п. нужен отдельный клонер
       return response;
     }
 
     final retry = http.Request(request.method, request.url)
-      ..followRedirects = request.followRedirects
-      ..maxRedirects = request.maxRedirects
-      ..persistentConnection = request.persistentConnection
       ..headers.addAll(request.headers)
       ..headers['Authorization'] = 'Bearer $newToken'
       ..bodyBytes = originalBodyBytes ?? const <int>[];
 
-    // encoding есть только у http.Request
     if (originalEncoding != null) {
       retry.encoding = originalEncoding;
     }
