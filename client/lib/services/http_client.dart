@@ -18,7 +18,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
     if (token != null) {
       request.headers['Authorization'] = 'Bearer $token';
     }
-    
+
     // Устанавливаем Content-Type, если его нет
     if (!request.headers.containsKey('Content-Type')) {
       request.headers['Content-Type'] = 'application/json';
@@ -31,15 +31,34 @@ class AuthenticatedHttpClient extends http.BaseClient {
       final refreshed = await _tryRefreshToken();
       if (refreshed) {
         // Повторяем запрос с новым токеном
+        // Создаем новый запрос, так как старый может быть уже использован
+        final newRequest = _cloneRequest(request);
         final newToken = await _authStorage.readAccessToken();
         if (newToken != null) {
-          request.headers['Authorization'] = 'Bearer $newToken';
+          newRequest.headers['Authorization'] = 'Bearer $newToken';
         }
-        return await _inner.send(request);
+        return await _inner.send(newRequest);
       }
     }
 
     return response;
+  }
+
+  // Вспомогательный метод для клонирования запроса
+  http.BaseRequest _cloneRequest(http.BaseRequest original) {
+    final newRequest = http.Request(original.method, original.url)
+      ..headers.addAll(original.headers)
+      ..encoding = original.encoding;
+
+    if (original.method != 'GET' && original.method != 'HEAD') {
+      original.finalize().listen((bytes) {
+        newRequest.sink.add(bytes);
+      }, onDone: () {
+        newRequest.sink.close();
+      });
+    }
+
+    return newRequest;
   }
 
   Future<bool> _tryRefreshToken() async {
@@ -50,9 +69,9 @@ class AuthenticatedHttpClient extends http.BaseClient {
       final response = await http.post(
         Uri.parse('${_apiConfig.apiBase}/auth/refresh'),
         headers: {
-          'Authorization': 'Bearer $refreshToken',
           'Content-Type': 'application/json',
         },
+        body: jsonEncode({'refresh_token': refreshToken}),
       );
 
       if (response.statusCode == 200) {
