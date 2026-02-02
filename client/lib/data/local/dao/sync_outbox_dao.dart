@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables.dart';
@@ -7,55 +6,51 @@ part 'sync_outbox_dao.g.dart';
 
 @DriftAccessor(tables: [SyncOutbox])
 class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMixin {
-  SyncOutboxDao(super.db);
+  SyncOutboxDao(AppDatabase db) : super(db);
 
-  Future<int> enqueue({
-    required String type,
-    String? entityId,
-    required String payloadJson,
-  }) {
-    return into(syncOutbox).insert(
-      SyncOutboxCompanion.insert(
-        type: type,
-        entityId: Value(entityId),
-        payloadJson: payloadJson,
-        attempts: const Value(0),
-        nextAttemptAt: Value(DateTime.now()),
-        lastError: const Value(null),
-      ),
-    );
+  // Получить все отложенные изменения
+  Future<List<SyncOutboxRow>> getAll() {
+    return select(syncOutbox).get();
   }
 
-  Future<List<SyncOutboxRow>> takeDue({int limit = 20}) {
-    final now = DateTime.now();
-    final q = (select(syncOutbox)
-          ..where((t) => t.nextAttemptAt.isSmallerOrEqualValue(now))
-          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)])
-          ..limit(limit))
-        .get();
-    return q;
+  // Получить отложенные изменения
+  Future<List<SyncOutboxRow>> getPendingChanges() {
+    return (select(syncOutbox)..where((tbl) => tbl.synced.equals(false))).get();
   }
 
-  Future<void> markSuccess(int localId) {
-    return (delete(syncOutbox)..where((t) => t.localId.equals(localId))).go();
+  // Добавить новое действие в очередь
+  Future<int> insertAction(String action, String entityType, String entityId, String payload) {
+    return into(syncOutbox).insert(SyncOutboxCompanion(
+      action: Value(action),
+      entityType: Value(entityType),
+      entityId: Value(entityId),
+      payload: Value(payload),
+      createdAt: Value(DateTime.now()),
+      synced: Value(false),
+    ));
   }
 
-  Future<void> markFailed(int localId, String error, int attempts) {
-    // backoff: 2^attempts секунд, максимум 1 час
-    final delaySec = math.min(math.pow(2, attempts).toInt(), 3600);
-    final next = DateTime.now().add(Duration(seconds: delaySec));
-
-    return (update(syncOutbox)..where((t) => t.localId.equals(localId))).write(
-      SyncOutboxCompanion(
-        attempts: Value(attempts),
-        lastError: Value(error),
-        nextAttemptAt: Value(next),
-      ),
-    );
+  // Отметить действие как синхронизированное
+  Future<void> markAsSynced(int id) {
+    return (update(syncOutbox)..where((tbl) => tbl.id.equals(id)))
+        .write(const SyncOutboxCompanion(synced: Value(true)));
   }
 
+  // Удалить действие из очереди
+  Future<void> removeAction(int id) {
+    return (delete(syncOutbox)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  // Получить количество отложенных действий
   Stream<int> watchPendingCount() {
-    final q = select(syncOutbox);
-    return q.watch().map((rows) => rows.length);
+    return (selectOnly(syncOutbox)..addColumns([count(syncOutbox.id).alias('count')])
+          ..where(syncOutbox.synced.equals(false)))
+        .watchSingle()
+        .map((row) => row.read<int>('count'));
+  }
+
+  // Очистить завершенные действия
+  Future<void> cleanupCompleted() {
+    return (delete(syncOutbox)..where((tbl) => tbl.synced.equals(true))).go();
   }
 }

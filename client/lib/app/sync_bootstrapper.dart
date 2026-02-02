@@ -3,7 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'di.dart';
+import '../app/di.dart';
 
 class SyncBootstrapper extends ConsumerStatefulWidget {
   final Widget child;

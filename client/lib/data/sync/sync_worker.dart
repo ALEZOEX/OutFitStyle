@@ -1,82 +1,96 @@
-import 'dart:convert';
-
 import '../local/app_database.dart';
-import '../sync/outbox_actions.dart';
+import '../local/dao/sync_outbox_dao.dart';
 import '../remote/wardrobe_remote_ds.dart';
-import '../remote/recommendation_remote_ds.dart';
+import '../remote/recommendations_remote_ds.dart';
 
 class SyncWorker {
-  final AppDatabase db;
-  final WardrobeRemoteDataSource wardrobeRemote;
-  final RecommendationRemoteDataSource recRemote;
-
-  bool _running = false;
+  final AppDatabase _db;
+  final WardrobeRemoteDataSource _wardrobeRemote;
+  final RecommendationsRemoteDataSource _recRemote;
 
   SyncWorker({
-    required this.db,
-    required this.wardrobeRemote,
-    required this.recRemote,
+    required AppDatabase db,
+    required WardrobeRemoteDataSource wardrobeRemote,
+    required RecommendationsRemoteDataSource recRemote,
+  })  : _db = db,
+        _wardrobeRemote = wardrobeRemote,
+        _recRemote = recRemote;
+
+  Future<void> syncPendingChanges() async {
+    // Получаем отложенные изменения
+    final pendingChanges = await _db.syncOutboxDao.getPendingChanges();
+
+    for (final change in pendingChanges) {
+      try {
+        // Выполняем синхронизацию в зависимости от типа действия
+        switch (change.action) {
+          case 'wardrobe_create':
+            await _wardrobeRemote.create(change.payload);
+            break;
+          case 'wardrobe_update':
+            await _wardrobeRemote.update(change.entityId, change.payload);
+            break;
+          case 'wardrobe_delete':
+            await _wardrobeRemote.delete(change.entityId);
+            break;
+          case 'recommendation_create':
+            await _recRemote.create(change.payload);
+            break;
+          case 'recommendation_update':
+            await _recRemote.update(change.entityId, change.payload);
+            break;
+          case 'recommendation_delete':
+            await _recRemote.delete(change.entityId);
+            break;
+        }
+
+        // Отмечаем, что синхронизация прошла успешно
+        await _db.syncOutboxDao.markAsSynced(change.id);
+      } catch (e) {
+        // Логируем ошибку, но не прерываем синхронизацию других элементов
+        // print('Sync error for ${change.id}: $e');
+      }
+    }
+  }
+}
+
+// Класс для представления действия в очереди синхронизации
+class SyncOutboxRow {
+  final int id;
+  final String action;
+  final String entityType;
+  final String entityId;
+  final String payload;
+  final DateTime createdAt;
+  final bool synced;
+
+  SyncOutboxRow({
+    required this.id,
+    required this.action,
+    required this.entityType,
+    required this.entityId,
+    required this.payload,
+    required this.createdAt,
+    required this.synced,
   });
 
-  Future<void> runOnce({int batch = 20}) async {
-    if (_running) return;
-    _running = true;
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'action': action,
+        'entity_type': entityType,
+        'entity_id': entityId,
+        'payload': payload,
+        'created_at': createdAt.toIso8601String(),
+        'synced': synced,
+      };
 
-    try {
-      final due = await db.syncOutboxDao.takeDue(limit: batch);
-      for (final job in due) {
-        try {
-          await _execute(job);
-          await db.syncOutboxDao.markSuccess(job.localId);
-        } catch (e) {
-          final nextAttempts = job.attempts + 1;
-          await db.syncOutboxDao.markFailed(job.localId, e.toString(), nextAttempts);
-        }
-      }
-    } finally {
-      _running = false;
-    }
-  }
-
-  Future<void> _execute(SyncOutboxRow job) async {
-    final payload = (jsonDecode(job.payloadJson) as Map).cast<String, dynamic>();
-
-    switch (job.type) {
-      case OutboxActions.wardrobeSetFavorite:
-        await wardrobeRemote.setFavorite(payload['id'] as String, payload['value'] as bool);
-        return;
-
-      case OutboxActions.wardrobeSetArchived:
-        await wardrobeRemote.setArchived(payload['id'] as String, payload['value'] as bool);
-        return;
-
-      case OutboxActions.wardrobeWorn:
-        await wardrobeRemote.worn(payload['id'] as String);
-        return;
-
-      case OutboxActions.recSetFavorite:
-        await recRemote.setFavorite(
-          id: payload['id'] as String,
-          isFavorite: payload['value'] as bool,
-        );
-        return;
-
-      case OutboxActions.outfitPublishLocal: {
-        final localId = payload['local_id'] as String;
-        final outfitJson = payload['outfit_data_json'] as String;
-        final weatherJson = payload['weather_data_json'] as String;
-
-        final serverId = await recRemote.publishCustomOutfit(
-          outfitDataJson: outfitJson,
-          weatherDataJson: weatherJson,
-        );
-
-        await db.recommendationDao.markPublished(localId: localId, serverId: serverId);
-        return;
-      }
-
-      default:
-        throw Exception('Unknown outbox action: ${job.type}');
-    }
-  }
+  static SyncOutboxRow fromJson(Map<String, dynamic> json) => SyncOutboxRow(
+        id: json['id'],
+        action: json['action'],
+        entityType: json['entity_type'],
+        entityId: json['entity_id'],
+        payload: json['payload'],
+        createdAt: DateTime.parse(json['created_at']),
+        synced: json['synced'] ?? false,
+      );
 }

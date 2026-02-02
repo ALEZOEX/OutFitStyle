@@ -14,6 +14,12 @@ class $WardrobeEntriesTable extends WardrobeEntries
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _serverIdMeta =
+      const VerificationMeta('serverId');
+  @override
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
+      'server_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -29,62 +35,24 @@ class $WardrobeEntriesTable extends WardrobeEntries
       const VerificationMeta('subcategory');
   @override
   late final GeneratedColumn<String> subcategory = GeneratedColumn<String>(
-      'subcategory', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'subcategory', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _styleMeta = const VerificationMeta('style');
   @override
   late final GeneratedColumn<String> style = GeneratedColumn<String>(
       'style', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(''));
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _iconEmojiMeta =
       const VerificationMeta('iconEmoji');
   @override
   late final GeneratedColumn<String> iconEmoji = GeneratedColumn<String>(
       'icon_emoji', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('👕'));
-  static const VerificationMeta _isFavoriteMeta =
-      const VerificationMeta('isFavorite');
-  @override
-  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
-      'is_favorite', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _isArchivedMeta =
-      const VerificationMeta('isArchived');
-  @override
-  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
-      'is_archived', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_archived" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _wearCountMeta =
-      const VerificationMeta('wearCount');
-  @override
-  late final GeneratedColumn<int> wearCount = GeneratedColumn<int>(
-      'wear_count', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _imageUrlMeta =
       const VerificationMeta('imageUrl');
   @override
   late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
       'image_url', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _localImagePathMeta =
-      const VerificationMeta('localImagePath');
-  @override
-  late final GeneratedColumn<String> localImagePath = GeneratedColumn<String>(
-      'local_image_path', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _blurHashMeta =
       const VerificationMeta('blurHash');
@@ -92,44 +60,174 @@ class $WardrobeEntriesTable extends WardrobeEntries
   late final GeneratedColumn<String> blurHash = GeneratedColumn<String>(
       'blur_hash', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _minTempMeta =
+      const VerificationMeta('minTemp');
+  @override
+  late final GeneratedColumn<int> minTemp = GeneratedColumn<int>(
+      'min_temp', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _maxTempMeta =
+      const VerificationMeta('maxTemp');
+  @override
+  late final GeneratedColumn<int> maxTemp = GeneratedColumn<int>(
+      'max_temp', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _warmthLevelMeta =
+      const VerificationMeta('warmthLevel');
+  @override
+  late final GeneratedColumn<int> warmthLevel = GeneratedColumn<int>(
+      'warmth_level', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _rainOkMeta = const VerificationMeta('rainOk');
+  @override
+  late final GeneratedColumn<bool> rainOk = GeneratedColumn<bool>(
+      'rain_ok', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("rain_ok" IN (0, 1))'));
+  static const VerificationMeta _snowOkMeta = const VerificationMeta('snowOk');
+  @override
+  late final GeneratedColumn<bool> snowOk = GeneratedColumn<bool>(
+      'snow_ok', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("snow_ok" IN (0, 1))'));
+  static const VerificationMeta _windOkMeta = const VerificationMeta('windOk');
+  @override
+  late final GeneratedColumn<bool> windOk = GeneratedColumn<bool>(
+      'wind_ok', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("wind_ok" IN (0, 1))'));
+  static const VerificationMeta _usageMeta = const VerificationMeta('usage');
+  @override
+  late final GeneratedColumn<String> usage = GeneratedColumn<String>(
+      'usage', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _materialsMeta =
+      const VerificationMeta('materials');
+  @override
+  late final GeneratedColumn<String> materials = GeneratedColumn<String>(
+      'materials', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _wearCountMeta =
+      const VerificationMeta('wearCount');
+  @override
+  late final GeneratedColumn<int> wearCount = GeneratedColumn<int>(
+      'wear_count', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lastWornAtMeta =
+      const VerificationMeta('lastWornAt');
+  @override
+  late final GeneratedColumn<DateTime> lastWornAt = GeneratedColumn<DateTime>(
+      'last_worn_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _isFavoriteMeta =
+      const VerificationMeta('isFavorite');
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+      'is_favorite', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_favorite" IN (0, 1))'));
+  static const VerificationMeta _isArchivedMeta =
+      const VerificationMeta('isArchived');
+  @override
+  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
+      'is_archived', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_archived" IN (0, 1))'));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
-  @override
-  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
-      'dirty', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("dirty" IN (0, 1))'),
-      defaultValue: const Constant(false));
   static const VerificationMeta _lastSyncedAtMeta =
       const VerificationMeta('lastSyncedAt');
   @override
   late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
       'last_synced_at', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+      'dirty', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("dirty" IN (0, 1))'));
+  static const VerificationMeta _seasonMeta = const VerificationMeta('season');
+  @override
+  late final GeneratedColumn<String> season = GeneratedColumn<String>(
+      'season', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _genderMeta = const VerificationMeta('gender');
+  @override
+  late final GeneratedColumn<String> gender = GeneratedColumn<String>(
+      'gender', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _fitMeta = const VerificationMeta('fit');
+  @override
+  late final GeneratedColumn<String> fit = GeneratedColumn<String>(
+      'fit', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _patternMeta =
+      const VerificationMeta('pattern');
+  @override
+  late final GeneratedColumn<String> pattern = GeneratedColumn<String>(
+      'pattern', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _localImagePathMeta =
+      const VerificationMeta('localImagePath');
+  @override
+  late final GeneratedColumn<String> localImagePath = GeneratedColumn<String>(
+      'local_image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
+        serverId,
         name,
         category,
         subcategory,
         style,
         iconEmoji,
+        imageUrl,
+        blurHash,
+        minTemp,
+        maxTemp,
+        warmthLevel,
+        rainOk,
+        snowOk,
+        windOk,
+        usage,
+        materials,
+        wearCount,
+        lastWornAt,
         isFavorite,
         isArchived,
-        wearCount,
-        imageUrl,
-        localImagePath,
-        blurHash,
+        createdAt,
         updatedAt,
+        lastSyncedAt,
         dirty,
-        lastSyncedAt
+        season,
+        gender,
+        fit,
+        pattern,
+        localImagePath
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -145,6 +243,10 @@ class $WardrobeEntriesTable extends WardrobeEntries
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('server_id')) {
+      context.handle(_serverIdMeta,
+          serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta));
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -163,44 +265,102 @@ class $WardrobeEntriesTable extends WardrobeEntries
           _subcategoryMeta,
           subcategory.isAcceptableOrUnknown(
               data['subcategory']!, _subcategoryMeta));
+    } else if (isInserting) {
+      context.missing(_subcategoryMeta);
     }
     if (data.containsKey('style')) {
       context.handle(
           _styleMeta, style.isAcceptableOrUnknown(data['style']!, _styleMeta));
+    } else if (isInserting) {
+      context.missing(_styleMeta);
     }
     if (data.containsKey('icon_emoji')) {
       context.handle(_iconEmojiMeta,
           iconEmoji.isAcceptableOrUnknown(data['icon_emoji']!, _iconEmojiMeta));
+    } else if (isInserting) {
+      context.missing(_iconEmojiMeta);
+    }
+    if (data.containsKey('image_url')) {
+      context.handle(_imageUrlMeta,
+          imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta));
+    }
+    if (data.containsKey('blur_hash')) {
+      context.handle(_blurHashMeta,
+          blurHash.isAcceptableOrUnknown(data['blur_hash']!, _blurHashMeta));
+    }
+    if (data.containsKey('min_temp')) {
+      context.handle(_minTempMeta,
+          minTemp.isAcceptableOrUnknown(data['min_temp']!, _minTempMeta));
+    }
+    if (data.containsKey('max_temp')) {
+      context.handle(_maxTempMeta,
+          maxTemp.isAcceptableOrUnknown(data['max_temp']!, _maxTempMeta));
+    }
+    if (data.containsKey('warmth_level')) {
+      context.handle(
+          _warmthLevelMeta,
+          warmthLevel.isAcceptableOrUnknown(
+              data['warmth_level']!, _warmthLevelMeta));
+    }
+    if (data.containsKey('rain_ok')) {
+      context.handle(_rainOkMeta,
+          rainOk.isAcceptableOrUnknown(data['rain_ok']!, _rainOkMeta));
+    } else if (isInserting) {
+      context.missing(_rainOkMeta);
+    }
+    if (data.containsKey('snow_ok')) {
+      context.handle(_snowOkMeta,
+          snowOk.isAcceptableOrUnknown(data['snow_ok']!, _snowOkMeta));
+    } else if (isInserting) {
+      context.missing(_snowOkMeta);
+    }
+    if (data.containsKey('wind_ok')) {
+      context.handle(_windOkMeta,
+          windOk.isAcceptableOrUnknown(data['wind_ok']!, _windOkMeta));
+    } else if (isInserting) {
+      context.missing(_windOkMeta);
+    }
+    if (data.containsKey('usage')) {
+      context.handle(
+          _usageMeta, usage.isAcceptableOrUnknown(data['usage']!, _usageMeta));
+    }
+    if (data.containsKey('materials')) {
+      context.handle(_materialsMeta,
+          materials.isAcceptableOrUnknown(data['materials']!, _materialsMeta));
+    }
+    if (data.containsKey('wear_count')) {
+      context.handle(_wearCountMeta,
+          wearCount.isAcceptableOrUnknown(data['wear_count']!, _wearCountMeta));
+    } else if (isInserting) {
+      context.missing(_wearCountMeta);
+    }
+    if (data.containsKey('last_worn_at')) {
+      context.handle(
+          _lastWornAtMeta,
+          lastWornAt.isAcceptableOrUnknown(
+              data['last_worn_at']!, _lastWornAtMeta));
     }
     if (data.containsKey('is_favorite')) {
       context.handle(
           _isFavoriteMeta,
           isFavorite.isAcceptableOrUnknown(
               data['is_favorite']!, _isFavoriteMeta));
+    } else if (isInserting) {
+      context.missing(_isFavoriteMeta);
     }
     if (data.containsKey('is_archived')) {
       context.handle(
           _isArchivedMeta,
           isArchived.isAcceptableOrUnknown(
               data['is_archived']!, _isArchivedMeta));
+    } else if (isInserting) {
+      context.missing(_isArchivedMeta);
     }
-    if (data.containsKey('wear_count')) {
-      context.handle(_wearCountMeta,
-          wearCount.isAcceptableOrUnknown(data['wear_count']!, _wearCountMeta));
-    }
-    if (data.containsKey('image_url')) {
-      context.handle(_imageUrlMeta,
-          imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta));
-    }
-    if (data.containsKey('local_image_path')) {
-      context.handle(
-          _localImagePathMeta,
-          localImagePath.isAcceptableOrUnknown(
-              data['local_image_path']!, _localImagePathMeta));
-    }
-    if (data.containsKey('blur_hash')) {
-      context.handle(_blurHashMeta,
-          blurHash.isAcceptableOrUnknown(data['blur_hash']!, _blurHashMeta));
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
@@ -208,15 +368,39 @@ class $WardrobeEntriesTable extends WardrobeEntries
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
-    if (data.containsKey('dirty')) {
-      context.handle(
-          _dirtyMeta, dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta));
-    }
     if (data.containsKey('last_synced_at')) {
       context.handle(
           _lastSyncedAtMeta,
           lastSyncedAt.isAcceptableOrUnknown(
               data['last_synced_at']!, _lastSyncedAtMeta));
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+          _dirtyMeta, dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta));
+    } else if (isInserting) {
+      context.missing(_dirtyMeta);
+    }
+    if (data.containsKey('season')) {
+      context.handle(_seasonMeta,
+          season.isAcceptableOrUnknown(data['season']!, _seasonMeta));
+    }
+    if (data.containsKey('gender')) {
+      context.handle(_genderMeta,
+          gender.isAcceptableOrUnknown(data['gender']!, _genderMeta));
+    }
+    if (data.containsKey('fit')) {
+      context.handle(
+          _fitMeta, fit.isAcceptableOrUnknown(data['fit']!, _fitMeta));
+    }
+    if (data.containsKey('pattern')) {
+      context.handle(_patternMeta,
+          pattern.isAcceptableOrUnknown(data['pattern']!, _patternMeta));
+    }
+    if (data.containsKey('local_image_path')) {
+      context.handle(
+          _localImagePathMeta,
+          localImagePath.isAcceptableOrUnknown(
+              data['local_image_path']!, _localImagePathMeta));
     }
     return context;
   }
@@ -229,34 +413,64 @@ class $WardrobeEntriesTable extends WardrobeEntries
     return WardrobeEntry(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      serverId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}server_id']),
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       category: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
       subcategory: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}subcategory']),
+          .read(DriftSqlType.string, data['${effectivePrefix}subcategory'])!,
       style: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}style'])!,
       iconEmoji: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}icon_emoji'])!,
+      imageUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_url']),
+      blurHash: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}blur_hash']),
+      minTemp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}min_temp']),
+      maxTemp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}max_temp']),
+      warmthLevel: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}warmth_level']),
+      rainOk: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}rain_ok'])!,
+      snowOk: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}snow_ok'])!,
+      windOk: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}wind_ok'])!,
+      usage: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}usage']),
+      materials: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}materials']),
+      wearCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}wear_count'])!,
+      lastWornAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_worn_at']),
       isFavorite: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
       isArchived: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_archived'])!,
-      wearCount: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}wear_count'])!,
-      imageUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}image_url']),
-      localImagePath: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}local_image_path']),
-      blurHash: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}blur_hash']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
-      dirty: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}dirty'])!,
       lastSyncedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_synced_at']),
+      dirty: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}dirty'])!,
+      season: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}season']),
+      gender: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}gender']),
+      fit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}fit']),
+      pattern: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pattern']),
+      localImagePath: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}local_image_path']),
     );
   }
 
@@ -268,63 +482,128 @@ class $WardrobeEntriesTable extends WardrobeEntries
 
 class WardrobeEntry extends DataClass implements Insertable<WardrobeEntry> {
   final String id;
+  final String? serverId;
   final String name;
   final String category;
-  final String? subcategory;
+  final String subcategory;
   final String style;
   final String iconEmoji;
+  final String? imageUrl;
+  final String? blurHash;
+  final int? minTemp;
+  final int? maxTemp;
+  final int? warmthLevel;
+  final bool rainOk;
+  final bool snowOk;
+  final bool windOk;
+  final String? usage;
+  final String? materials;
+  final int wearCount;
+  final DateTime? lastWornAt;
   final bool isFavorite;
   final bool isArchived;
-  final int wearCount;
-  final String? imageUrl;
-  final String? localImagePath;
-  final String? blurHash;
+  final DateTime createdAt;
   final DateTime updatedAt;
-  final bool dirty;
   final DateTime? lastSyncedAt;
+  final bool dirty;
+  final String? season;
+  final String? gender;
+  final String? fit;
+  final String? pattern;
+  final String? localImagePath;
   const WardrobeEntry(
       {required this.id,
+      this.serverId,
       required this.name,
       required this.category,
-      this.subcategory,
+      required this.subcategory,
       required this.style,
       required this.iconEmoji,
+      this.imageUrl,
+      this.blurHash,
+      this.minTemp,
+      this.maxTemp,
+      this.warmthLevel,
+      required this.rainOk,
+      required this.snowOk,
+      required this.windOk,
+      this.usage,
+      this.materials,
+      required this.wearCount,
+      this.lastWornAt,
       required this.isFavorite,
       required this.isArchived,
-      required this.wearCount,
-      this.imageUrl,
-      this.localImagePath,
-      this.blurHash,
+      required this.createdAt,
       required this.updatedAt,
+      this.lastSyncedAt,
       required this.dirty,
-      this.lastSyncedAt});
+      this.season,
+      this.gender,
+      this.fit,
+      this.pattern,
+      this.localImagePath});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || serverId != null) {
+      map['server_id'] = Variable<String>(serverId);
+    }
     map['name'] = Variable<String>(name);
     map['category'] = Variable<String>(category);
-    if (!nullToAbsent || subcategory != null) {
-      map['subcategory'] = Variable<String>(subcategory);
-    }
+    map['subcategory'] = Variable<String>(subcategory);
     map['style'] = Variable<String>(style);
     map['icon_emoji'] = Variable<String>(iconEmoji);
-    map['is_favorite'] = Variable<bool>(isFavorite);
-    map['is_archived'] = Variable<bool>(isArchived);
-    map['wear_count'] = Variable<int>(wearCount);
     if (!nullToAbsent || imageUrl != null) {
       map['image_url'] = Variable<String>(imageUrl);
-    }
-    if (!nullToAbsent || localImagePath != null) {
-      map['local_image_path'] = Variable<String>(localImagePath);
     }
     if (!nullToAbsent || blurHash != null) {
       map['blur_hash'] = Variable<String>(blurHash);
     }
+    if (!nullToAbsent || minTemp != null) {
+      map['min_temp'] = Variable<int>(minTemp);
+    }
+    if (!nullToAbsent || maxTemp != null) {
+      map['max_temp'] = Variable<int>(maxTemp);
+    }
+    if (!nullToAbsent || warmthLevel != null) {
+      map['warmth_level'] = Variable<int>(warmthLevel);
+    }
+    map['rain_ok'] = Variable<bool>(rainOk);
+    map['snow_ok'] = Variable<bool>(snowOk);
+    map['wind_ok'] = Variable<bool>(windOk);
+    if (!nullToAbsent || usage != null) {
+      map['usage'] = Variable<String>(usage);
+    }
+    if (!nullToAbsent || materials != null) {
+      map['materials'] = Variable<String>(materials);
+    }
+    map['wear_count'] = Variable<int>(wearCount);
+    if (!nullToAbsent || lastWornAt != null) {
+      map['last_worn_at'] = Variable<DateTime>(lastWornAt);
+    }
+    map['is_favorite'] = Variable<bool>(isFavorite);
+    map['is_archived'] = Variable<bool>(isArchived);
+    map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
-    map['dirty'] = Variable<bool>(dirty);
     if (!nullToAbsent || lastSyncedAt != null) {
       map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    if (!nullToAbsent || season != null) {
+      map['season'] = Variable<String>(season);
+    }
+    if (!nullToAbsent || gender != null) {
+      map['gender'] = Variable<String>(gender);
+    }
+    if (!nullToAbsent || fit != null) {
+      map['fit'] = Variable<String>(fit);
+    }
+    if (!nullToAbsent || pattern != null) {
+      map['pattern'] = Variable<String>(pattern);
+    }
+    if (!nullToAbsent || localImagePath != null) {
+      map['local_image_path'] = Variable<String>(localImagePath);
     }
     return map;
   }
@@ -332,30 +611,60 @@ class WardrobeEntry extends DataClass implements Insertable<WardrobeEntry> {
   WardrobeEntriesCompanion toCompanion(bool nullToAbsent) {
     return WardrobeEntriesCompanion(
       id: Value(id),
+      serverId: serverId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverId),
       name: Value(name),
       category: Value(category),
-      subcategory: subcategory == null && nullToAbsent
-          ? const Value.absent()
-          : Value(subcategory),
+      subcategory: Value(subcategory),
       style: Value(style),
       iconEmoji: Value(iconEmoji),
-      isFavorite: Value(isFavorite),
-      isArchived: Value(isArchived),
-      wearCount: Value(wearCount),
       imageUrl: imageUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(imageUrl),
-      localImagePath: localImagePath == null && nullToAbsent
-          ? const Value.absent()
-          : Value(localImagePath),
       blurHash: blurHash == null && nullToAbsent
           ? const Value.absent()
           : Value(blurHash),
+      minTemp: minTemp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(minTemp),
+      maxTemp: maxTemp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(maxTemp),
+      warmthLevel: warmthLevel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warmthLevel),
+      rainOk: Value(rainOk),
+      snowOk: Value(snowOk),
+      windOk: Value(windOk),
+      usage:
+          usage == null && nullToAbsent ? const Value.absent() : Value(usage),
+      materials: materials == null && nullToAbsent
+          ? const Value.absent()
+          : Value(materials),
+      wearCount: Value(wearCount),
+      lastWornAt: lastWornAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastWornAt),
+      isFavorite: Value(isFavorite),
+      isArchived: Value(isArchived),
+      createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
-      dirty: Value(dirty),
       lastSyncedAt: lastSyncedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncedAt),
+      dirty: Value(dirty),
+      season:
+          season == null && nullToAbsent ? const Value.absent() : Value(season),
+      gender:
+          gender == null && nullToAbsent ? const Value.absent() : Value(gender),
+      fit: fit == null && nullToAbsent ? const Value.absent() : Value(fit),
+      pattern: pattern == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pattern),
+      localImagePath: localImagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localImagePath),
     );
   }
 
@@ -364,20 +673,35 @@ class WardrobeEntry extends DataClass implements Insertable<WardrobeEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return WardrobeEntry(
       id: serializer.fromJson<String>(json['id']),
+      serverId: serializer.fromJson<String?>(json['serverId']),
       name: serializer.fromJson<String>(json['name']),
       category: serializer.fromJson<String>(json['category']),
-      subcategory: serializer.fromJson<String?>(json['subcategory']),
+      subcategory: serializer.fromJson<String>(json['subcategory']),
       style: serializer.fromJson<String>(json['style']),
       iconEmoji: serializer.fromJson<String>(json['iconEmoji']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
+      blurHash: serializer.fromJson<String?>(json['blurHash']),
+      minTemp: serializer.fromJson<int?>(json['minTemp']),
+      maxTemp: serializer.fromJson<int?>(json['maxTemp']),
+      warmthLevel: serializer.fromJson<int?>(json['warmthLevel']),
+      rainOk: serializer.fromJson<bool>(json['rainOk']),
+      snowOk: serializer.fromJson<bool>(json['snowOk']),
+      windOk: serializer.fromJson<bool>(json['windOk']),
+      usage: serializer.fromJson<String?>(json['usage']),
+      materials: serializer.fromJson<String?>(json['materials']),
+      wearCount: serializer.fromJson<int>(json['wearCount']),
+      lastWornAt: serializer.fromJson<DateTime?>(json['lastWornAt']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
-      wearCount: serializer.fromJson<int>(json['wearCount']),
-      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
-      localImagePath: serializer.fromJson<String?>(json['localImagePath']),
-      blurHash: serializer.fromJson<String?>(json['blurHash']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
-      dirty: serializer.fromJson<bool>(json['dirty']),
       lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+      season: serializer.fromJson<String?>(json['season']),
+      gender: serializer.fromJson<String?>(json['gender']),
+      fit: serializer.fromJson<String?>(json['fit']),
+      pattern: serializer.fromJson<String?>(json['pattern']),
+      localImagePath: serializer.fromJson<String?>(json['localImagePath']),
     );
   }
   @override
@@ -385,82 +709,144 @@ class WardrobeEntry extends DataClass implements Insertable<WardrobeEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'serverId': serializer.toJson<String?>(serverId),
       'name': serializer.toJson<String>(name),
       'category': serializer.toJson<String>(category),
-      'subcategory': serializer.toJson<String?>(subcategory),
+      'subcategory': serializer.toJson<String>(subcategory),
       'style': serializer.toJson<String>(style),
       'iconEmoji': serializer.toJson<String>(iconEmoji),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
+      'blurHash': serializer.toJson<String?>(blurHash),
+      'minTemp': serializer.toJson<int?>(minTemp),
+      'maxTemp': serializer.toJson<int?>(maxTemp),
+      'warmthLevel': serializer.toJson<int?>(warmthLevel),
+      'rainOk': serializer.toJson<bool>(rainOk),
+      'snowOk': serializer.toJson<bool>(snowOk),
+      'windOk': serializer.toJson<bool>(windOk),
+      'usage': serializer.toJson<String?>(usage),
+      'materials': serializer.toJson<String?>(materials),
+      'wearCount': serializer.toJson<int>(wearCount),
+      'lastWornAt': serializer.toJson<DateTime?>(lastWornAt),
       'isFavorite': serializer.toJson<bool>(isFavorite),
       'isArchived': serializer.toJson<bool>(isArchived),
-      'wearCount': serializer.toJson<int>(wearCount),
-      'imageUrl': serializer.toJson<String?>(imageUrl),
-      'localImagePath': serializer.toJson<String?>(localImagePath),
-      'blurHash': serializer.toJson<String?>(blurHash),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
-      'dirty': serializer.toJson<bool>(dirty),
       'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+      'season': serializer.toJson<String?>(season),
+      'gender': serializer.toJson<String?>(gender),
+      'fit': serializer.toJson<String?>(fit),
+      'pattern': serializer.toJson<String?>(pattern),
+      'localImagePath': serializer.toJson<String?>(localImagePath),
     };
   }
 
   WardrobeEntry copyWith(
           {String? id,
+          Value<String?> serverId = const Value.absent(),
           String? name,
           String? category,
-          Value<String?> subcategory = const Value.absent(),
+          String? subcategory,
           String? style,
           String? iconEmoji,
+          Value<String?> imageUrl = const Value.absent(),
+          Value<String?> blurHash = const Value.absent(),
+          Value<int?> minTemp = const Value.absent(),
+          Value<int?> maxTemp = const Value.absent(),
+          Value<int?> warmthLevel = const Value.absent(),
+          bool? rainOk,
+          bool? snowOk,
+          bool? windOk,
+          Value<String?> usage = const Value.absent(),
+          Value<String?> materials = const Value.absent(),
+          int? wearCount,
+          Value<DateTime?> lastWornAt = const Value.absent(),
           bool? isFavorite,
           bool? isArchived,
-          int? wearCount,
-          Value<String?> imageUrl = const Value.absent(),
-          Value<String?> localImagePath = const Value.absent(),
-          Value<String?> blurHash = const Value.absent(),
+          DateTime? createdAt,
           DateTime? updatedAt,
+          Value<DateTime?> lastSyncedAt = const Value.absent(),
           bool? dirty,
-          Value<DateTime?> lastSyncedAt = const Value.absent()}) =>
+          Value<String?> season = const Value.absent(),
+          Value<String?> gender = const Value.absent(),
+          Value<String?> fit = const Value.absent(),
+          Value<String?> pattern = const Value.absent(),
+          Value<String?> localImagePath = const Value.absent()}) =>
       WardrobeEntry(
         id: id ?? this.id,
+        serverId: serverId.present ? serverId.value : this.serverId,
         name: name ?? this.name,
         category: category ?? this.category,
-        subcategory: subcategory.present ? subcategory.value : this.subcategory,
+        subcategory: subcategory ?? this.subcategory,
         style: style ?? this.style,
         iconEmoji: iconEmoji ?? this.iconEmoji,
+        imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+        blurHash: blurHash.present ? blurHash.value : this.blurHash,
+        minTemp: minTemp.present ? minTemp.value : this.minTemp,
+        maxTemp: maxTemp.present ? maxTemp.value : this.maxTemp,
+        warmthLevel: warmthLevel.present ? warmthLevel.value : this.warmthLevel,
+        rainOk: rainOk ?? this.rainOk,
+        snowOk: snowOk ?? this.snowOk,
+        windOk: windOk ?? this.windOk,
+        usage: usage.present ? usage.value : this.usage,
+        materials: materials.present ? materials.value : this.materials,
+        wearCount: wearCount ?? this.wearCount,
+        lastWornAt: lastWornAt.present ? lastWornAt.value : this.lastWornAt,
         isFavorite: isFavorite ?? this.isFavorite,
         isArchived: isArchived ?? this.isArchived,
-        wearCount: wearCount ?? this.wearCount,
-        imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
-        localImagePath:
-            localImagePath.present ? localImagePath.value : this.localImagePath,
-        blurHash: blurHash.present ? blurHash.value : this.blurHash,
+        createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
-        dirty: dirty ?? this.dirty,
         lastSyncedAt:
             lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+        dirty: dirty ?? this.dirty,
+        season: season.present ? season.value : this.season,
+        gender: gender.present ? gender.value : this.gender,
+        fit: fit.present ? fit.value : this.fit,
+        pattern: pattern.present ? pattern.value : this.pattern,
+        localImagePath:
+            localImagePath.present ? localImagePath.value : this.localImagePath,
       );
   WardrobeEntry copyWithCompanion(WardrobeEntriesCompanion data) {
     return WardrobeEntry(
       id: data.id.present ? data.id.value : this.id,
+      serverId: data.serverId.present ? data.serverId.value : this.serverId,
       name: data.name.present ? data.name.value : this.name,
       category: data.category.present ? data.category.value : this.category,
       subcategory:
           data.subcategory.present ? data.subcategory.value : this.subcategory,
       style: data.style.present ? data.style.value : this.style,
       iconEmoji: data.iconEmoji.present ? data.iconEmoji.value : this.iconEmoji,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      blurHash: data.blurHash.present ? data.blurHash.value : this.blurHash,
+      minTemp: data.minTemp.present ? data.minTemp.value : this.minTemp,
+      maxTemp: data.maxTemp.present ? data.maxTemp.value : this.maxTemp,
+      warmthLevel:
+          data.warmthLevel.present ? data.warmthLevel.value : this.warmthLevel,
+      rainOk: data.rainOk.present ? data.rainOk.value : this.rainOk,
+      snowOk: data.snowOk.present ? data.snowOk.value : this.snowOk,
+      windOk: data.windOk.present ? data.windOk.value : this.windOk,
+      usage: data.usage.present ? data.usage.value : this.usage,
+      materials: data.materials.present ? data.materials.value : this.materials,
+      wearCount: data.wearCount.present ? data.wearCount.value : this.wearCount,
+      lastWornAt:
+          data.lastWornAt.present ? data.lastWornAt.value : this.lastWornAt,
       isFavorite:
           data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
       isArchived:
           data.isArchived.present ? data.isArchived.value : this.isArchived,
-      wearCount: data.wearCount.present ? data.wearCount.value : this.wearCount,
-      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
-      localImagePath: data.localImagePath.present
-          ? data.localImagePath.value
-          : this.localImagePath,
-      blurHash: data.blurHash.present ? data.blurHash.value : this.blurHash,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      dirty: data.dirty.present ? data.dirty.value : this.dirty,
       lastSyncedAt: data.lastSyncedAt.present
           ? data.lastSyncedAt.value
           : this.lastSyncedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+      season: data.season.present ? data.season.value : this.season,
+      gender: data.gender.present ? data.gender.value : this.gender,
+      fit: data.fit.present ? data.fit.value : this.fit,
+      pattern: data.pattern.present ? data.pattern.value : this.pattern,
+      localImagePath: data.localImagePath.present
+          ? data.localImagePath.value
+          : this.localImagePath,
     );
   }
 
@@ -468,189 +854,351 @@ class WardrobeEntry extends DataClass implements Insertable<WardrobeEntry> {
   String toString() {
     return (StringBuffer('WardrobeEntry(')
           ..write('id: $id, ')
+          ..write('serverId: $serverId, ')
           ..write('name: $name, ')
           ..write('category: $category, ')
           ..write('subcategory: $subcategory, ')
           ..write('style: $style, ')
           ..write('iconEmoji: $iconEmoji, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('blurHash: $blurHash, ')
+          ..write('minTemp: $minTemp, ')
+          ..write('maxTemp: $maxTemp, ')
+          ..write('warmthLevel: $warmthLevel, ')
+          ..write('rainOk: $rainOk, ')
+          ..write('snowOk: $snowOk, ')
+          ..write('windOk: $windOk, ')
+          ..write('usage: $usage, ')
+          ..write('materials: $materials, ')
+          ..write('wearCount: $wearCount, ')
+          ..write('lastWornAt: $lastWornAt, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('isArchived: $isArchived, ')
-          ..write('wearCount: $wearCount, ')
-          ..write('imageUrl: $imageUrl, ')
-          ..write('localImagePath: $localImagePath, ')
-          ..write('blurHash: $blurHash, ')
+          ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
           ..write('dirty: $dirty, ')
-          ..write('lastSyncedAt: $lastSyncedAt')
+          ..write('season: $season, ')
+          ..write('gender: $gender, ')
+          ..write('fit: $fit, ')
+          ..write('pattern: $pattern, ')
+          ..write('localImagePath: $localImagePath')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id,
-      name,
-      category,
-      subcategory,
-      style,
-      iconEmoji,
-      isFavorite,
-      isArchived,
-      wearCount,
-      imageUrl,
-      localImagePath,
-      blurHash,
-      updatedAt,
-      dirty,
-      lastSyncedAt);
+  int get hashCode => Object.hashAll([
+        id,
+        serverId,
+        name,
+        category,
+        subcategory,
+        style,
+        iconEmoji,
+        imageUrl,
+        blurHash,
+        minTemp,
+        maxTemp,
+        warmthLevel,
+        rainOk,
+        snowOk,
+        windOk,
+        usage,
+        materials,
+        wearCount,
+        lastWornAt,
+        isFavorite,
+        isArchived,
+        createdAt,
+        updatedAt,
+        lastSyncedAt,
+        dirty,
+        season,
+        gender,
+        fit,
+        pattern,
+        localImagePath
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is WardrobeEntry &&
           other.id == this.id &&
+          other.serverId == this.serverId &&
           other.name == this.name &&
           other.category == this.category &&
           other.subcategory == this.subcategory &&
           other.style == this.style &&
           other.iconEmoji == this.iconEmoji &&
+          other.imageUrl == this.imageUrl &&
+          other.blurHash == this.blurHash &&
+          other.minTemp == this.minTemp &&
+          other.maxTemp == this.maxTemp &&
+          other.warmthLevel == this.warmthLevel &&
+          other.rainOk == this.rainOk &&
+          other.snowOk == this.snowOk &&
+          other.windOk == this.windOk &&
+          other.usage == this.usage &&
+          other.materials == this.materials &&
+          other.wearCount == this.wearCount &&
+          other.lastWornAt == this.lastWornAt &&
           other.isFavorite == this.isFavorite &&
           other.isArchived == this.isArchived &&
-          other.wearCount == this.wearCount &&
-          other.imageUrl == this.imageUrl &&
-          other.localImagePath == this.localImagePath &&
-          other.blurHash == this.blurHash &&
+          other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
+          other.lastSyncedAt == this.lastSyncedAt &&
           other.dirty == this.dirty &&
-          other.lastSyncedAt == this.lastSyncedAt);
+          other.season == this.season &&
+          other.gender == this.gender &&
+          other.fit == this.fit &&
+          other.pattern == this.pattern &&
+          other.localImagePath == this.localImagePath);
 }
 
 class WardrobeEntriesCompanion extends UpdateCompanion<WardrobeEntry> {
   final Value<String> id;
+  final Value<String?> serverId;
   final Value<String> name;
   final Value<String> category;
-  final Value<String?> subcategory;
+  final Value<String> subcategory;
   final Value<String> style;
   final Value<String> iconEmoji;
+  final Value<String?> imageUrl;
+  final Value<String?> blurHash;
+  final Value<int?> minTemp;
+  final Value<int?> maxTemp;
+  final Value<int?> warmthLevel;
+  final Value<bool> rainOk;
+  final Value<bool> snowOk;
+  final Value<bool> windOk;
+  final Value<String?> usage;
+  final Value<String?> materials;
+  final Value<int> wearCount;
+  final Value<DateTime?> lastWornAt;
   final Value<bool> isFavorite;
   final Value<bool> isArchived;
-  final Value<int> wearCount;
-  final Value<String?> imageUrl;
-  final Value<String?> localImagePath;
-  final Value<String?> blurHash;
+  final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
-  final Value<bool> dirty;
   final Value<DateTime?> lastSyncedAt;
+  final Value<bool> dirty;
+  final Value<String?> season;
+  final Value<String?> gender;
+  final Value<String?> fit;
+  final Value<String?> pattern;
+  final Value<String?> localImagePath;
   final Value<int> rowid;
   const WardrobeEntriesCompanion({
     this.id = const Value.absent(),
+    this.serverId = const Value.absent(),
     this.name = const Value.absent(),
     this.category = const Value.absent(),
     this.subcategory = const Value.absent(),
     this.style = const Value.absent(),
     this.iconEmoji = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.blurHash = const Value.absent(),
+    this.minTemp = const Value.absent(),
+    this.maxTemp = const Value.absent(),
+    this.warmthLevel = const Value.absent(),
+    this.rainOk = const Value.absent(),
+    this.snowOk = const Value.absent(),
+    this.windOk = const Value.absent(),
+    this.usage = const Value.absent(),
+    this.materials = const Value.absent(),
+    this.wearCount = const Value.absent(),
+    this.lastWornAt = const Value.absent(),
     this.isFavorite = const Value.absent(),
     this.isArchived = const Value.absent(),
-    this.wearCount = const Value.absent(),
-    this.imageUrl = const Value.absent(),
-    this.localImagePath = const Value.absent(),
-    this.blurHash = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.dirty = const Value.absent(),
     this.lastSyncedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.season = const Value.absent(),
+    this.gender = const Value.absent(),
+    this.fit = const Value.absent(),
+    this.pattern = const Value.absent(),
+    this.localImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WardrobeEntriesCompanion.insert({
     required String id,
+    this.serverId = const Value.absent(),
     required String name,
     required String category,
-    this.subcategory = const Value.absent(),
-    this.style = const Value.absent(),
-    this.iconEmoji = const Value.absent(),
-    this.isFavorite = const Value.absent(),
-    this.isArchived = const Value.absent(),
-    this.wearCount = const Value.absent(),
+    required String subcategory,
+    required String style,
+    required String iconEmoji,
     this.imageUrl = const Value.absent(),
-    this.localImagePath = const Value.absent(),
     this.blurHash = const Value.absent(),
+    this.minTemp = const Value.absent(),
+    this.maxTemp = const Value.absent(),
+    this.warmthLevel = const Value.absent(),
+    required bool rainOk,
+    required bool snowOk,
+    required bool windOk,
+    this.usage = const Value.absent(),
+    this.materials = const Value.absent(),
+    required int wearCount,
+    this.lastWornAt = const Value.absent(),
+    required bool isFavorite,
+    required bool isArchived,
+    required DateTime createdAt,
     required DateTime updatedAt,
-    this.dirty = const Value.absent(),
     this.lastSyncedAt = const Value.absent(),
+    required bool dirty,
+    this.season = const Value.absent(),
+    this.gender = const Value.absent(),
+    this.fit = const Value.absent(),
+    this.pattern = const Value.absent(),
+    this.localImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
         category = Value(category),
-        updatedAt = Value(updatedAt);
+        subcategory = Value(subcategory),
+        style = Value(style),
+        iconEmoji = Value(iconEmoji),
+        rainOk = Value(rainOk),
+        snowOk = Value(snowOk),
+        windOk = Value(windOk),
+        wearCount = Value(wearCount),
+        isFavorite = Value(isFavorite),
+        isArchived = Value(isArchived),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        dirty = Value(dirty);
   static Insertable<WardrobeEntry> custom({
     Expression<String>? id,
+    Expression<String>? serverId,
     Expression<String>? name,
     Expression<String>? category,
     Expression<String>? subcategory,
     Expression<String>? style,
     Expression<String>? iconEmoji,
+    Expression<String>? imageUrl,
+    Expression<String>? blurHash,
+    Expression<int>? minTemp,
+    Expression<int>? maxTemp,
+    Expression<int>? warmthLevel,
+    Expression<bool>? rainOk,
+    Expression<bool>? snowOk,
+    Expression<bool>? windOk,
+    Expression<String>? usage,
+    Expression<String>? materials,
+    Expression<int>? wearCount,
+    Expression<DateTime>? lastWornAt,
     Expression<bool>? isFavorite,
     Expression<bool>? isArchived,
-    Expression<int>? wearCount,
-    Expression<String>? imageUrl,
-    Expression<String>? localImagePath,
-    Expression<String>? blurHash,
+    Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<bool>? dirty,
     Expression<DateTime>? lastSyncedAt,
+    Expression<bool>? dirty,
+    Expression<String>? season,
+    Expression<String>? gender,
+    Expression<String>? fit,
+    Expression<String>? pattern,
+    Expression<String>? localImagePath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (serverId != null) 'server_id': serverId,
       if (name != null) 'name': name,
       if (category != null) 'category': category,
       if (subcategory != null) 'subcategory': subcategory,
       if (style != null) 'style': style,
       if (iconEmoji != null) 'icon_emoji': iconEmoji,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (blurHash != null) 'blur_hash': blurHash,
+      if (minTemp != null) 'min_temp': minTemp,
+      if (maxTemp != null) 'max_temp': maxTemp,
+      if (warmthLevel != null) 'warmth_level': warmthLevel,
+      if (rainOk != null) 'rain_ok': rainOk,
+      if (snowOk != null) 'snow_ok': snowOk,
+      if (windOk != null) 'wind_ok': windOk,
+      if (usage != null) 'usage': usage,
+      if (materials != null) 'materials': materials,
+      if (wearCount != null) 'wear_count': wearCount,
+      if (lastWornAt != null) 'last_worn_at': lastWornAt,
       if (isFavorite != null) 'is_favorite': isFavorite,
       if (isArchived != null) 'is_archived': isArchived,
-      if (wearCount != null) 'wear_count': wearCount,
-      if (imageUrl != null) 'image_url': imageUrl,
-      if (localImagePath != null) 'local_image_path': localImagePath,
-      if (blurHash != null) 'blur_hash': blurHash,
+      if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
-      if (dirty != null) 'dirty': dirty,
       if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (season != null) 'season': season,
+      if (gender != null) 'gender': gender,
+      if (fit != null) 'fit': fit,
+      if (pattern != null) 'pattern': pattern,
+      if (localImagePath != null) 'local_image_path': localImagePath,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   WardrobeEntriesCompanion copyWith(
       {Value<String>? id,
+      Value<String?>? serverId,
       Value<String>? name,
       Value<String>? category,
-      Value<String?>? subcategory,
+      Value<String>? subcategory,
       Value<String>? style,
       Value<String>? iconEmoji,
+      Value<String?>? imageUrl,
+      Value<String?>? blurHash,
+      Value<int?>? minTemp,
+      Value<int?>? maxTemp,
+      Value<int?>? warmthLevel,
+      Value<bool>? rainOk,
+      Value<bool>? snowOk,
+      Value<bool>? windOk,
+      Value<String?>? usage,
+      Value<String?>? materials,
+      Value<int>? wearCount,
+      Value<DateTime?>? lastWornAt,
       Value<bool>? isFavorite,
       Value<bool>? isArchived,
-      Value<int>? wearCount,
-      Value<String?>? imageUrl,
-      Value<String?>? localImagePath,
-      Value<String?>? blurHash,
+      Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
-      Value<bool>? dirty,
       Value<DateTime?>? lastSyncedAt,
+      Value<bool>? dirty,
+      Value<String?>? season,
+      Value<String?>? gender,
+      Value<String?>? fit,
+      Value<String?>? pattern,
+      Value<String?>? localImagePath,
       Value<int>? rowid}) {
     return WardrobeEntriesCompanion(
       id: id ?? this.id,
+      serverId: serverId ?? this.serverId,
       name: name ?? this.name,
       category: category ?? this.category,
       subcategory: subcategory ?? this.subcategory,
       style: style ?? this.style,
       iconEmoji: iconEmoji ?? this.iconEmoji,
+      imageUrl: imageUrl ?? this.imageUrl,
+      blurHash: blurHash ?? this.blurHash,
+      minTemp: minTemp ?? this.minTemp,
+      maxTemp: maxTemp ?? this.maxTemp,
+      warmthLevel: warmthLevel ?? this.warmthLevel,
+      rainOk: rainOk ?? this.rainOk,
+      snowOk: snowOk ?? this.snowOk,
+      windOk: windOk ?? this.windOk,
+      usage: usage ?? this.usage,
+      materials: materials ?? this.materials,
+      wearCount: wearCount ?? this.wearCount,
+      lastWornAt: lastWornAt ?? this.lastWornAt,
       isFavorite: isFavorite ?? this.isFavorite,
       isArchived: isArchived ?? this.isArchived,
-      wearCount: wearCount ?? this.wearCount,
-      imageUrl: imageUrl ?? this.imageUrl,
-      localImagePath: localImagePath ?? this.localImagePath,
-      blurHash: blurHash ?? this.blurHash,
+      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      dirty: dirty ?? this.dirty,
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      dirty: dirty ?? this.dirty,
+      season: season ?? this.season,
+      gender: gender ?? this.gender,
+      fit: fit ?? this.fit,
+      pattern: pattern ?? this.pattern,
+      localImagePath: localImagePath ?? this.localImagePath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -660,6 +1208,9 @@ class WardrobeEntriesCompanion extends UpdateCompanion<WardrobeEntry> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (serverId.present) {
+      map['server_id'] = Variable<String>(serverId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -676,32 +1227,74 @@ class WardrobeEntriesCompanion extends UpdateCompanion<WardrobeEntry> {
     if (iconEmoji.present) {
       map['icon_emoji'] = Variable<String>(iconEmoji.value);
     }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
+    if (blurHash.present) {
+      map['blur_hash'] = Variable<String>(blurHash.value);
+    }
+    if (minTemp.present) {
+      map['min_temp'] = Variable<int>(minTemp.value);
+    }
+    if (maxTemp.present) {
+      map['max_temp'] = Variable<int>(maxTemp.value);
+    }
+    if (warmthLevel.present) {
+      map['warmth_level'] = Variable<int>(warmthLevel.value);
+    }
+    if (rainOk.present) {
+      map['rain_ok'] = Variable<bool>(rainOk.value);
+    }
+    if (snowOk.present) {
+      map['snow_ok'] = Variable<bool>(snowOk.value);
+    }
+    if (windOk.present) {
+      map['wind_ok'] = Variable<bool>(windOk.value);
+    }
+    if (usage.present) {
+      map['usage'] = Variable<String>(usage.value);
+    }
+    if (materials.present) {
+      map['materials'] = Variable<String>(materials.value);
+    }
+    if (wearCount.present) {
+      map['wear_count'] = Variable<int>(wearCount.value);
+    }
+    if (lastWornAt.present) {
+      map['last_worn_at'] = Variable<DateTime>(lastWornAt.value);
+    }
     if (isFavorite.present) {
       map['is_favorite'] = Variable<bool>(isFavorite.value);
     }
     if (isArchived.present) {
       map['is_archived'] = Variable<bool>(isArchived.value);
     }
-    if (wearCount.present) {
-      map['wear_count'] = Variable<int>(wearCount.value);
-    }
-    if (imageUrl.present) {
-      map['image_url'] = Variable<String>(imageUrl.value);
-    }
-    if (localImagePath.present) {
-      map['local_image_path'] = Variable<String>(localImagePath.value);
-    }
-    if (blurHash.present) {
-      map['blur_hash'] = Variable<String>(blurHash.value);
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
     if (dirty.present) {
       map['dirty'] = Variable<bool>(dirty.value);
     }
-    if (lastSyncedAt.present) {
-      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    if (season.present) {
+      map['season'] = Variable<String>(season.value);
+    }
+    if (gender.present) {
+      map['gender'] = Variable<String>(gender.value);
+    }
+    if (fit.present) {
+      map['fit'] = Variable<String>(fit.value);
+    }
+    if (pattern.present) {
+      map['pattern'] = Variable<String>(pattern.value);
+    }
+    if (localImagePath.present) {
+      map['local_image_path'] = Variable<String>(localImagePath.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -713,20 +1306,35 @@ class WardrobeEntriesCompanion extends UpdateCompanion<WardrobeEntry> {
   String toString() {
     return (StringBuffer('WardrobeEntriesCompanion(')
           ..write('id: $id, ')
+          ..write('serverId: $serverId, ')
           ..write('name: $name, ')
           ..write('category: $category, ')
           ..write('subcategory: $subcategory, ')
           ..write('style: $style, ')
           ..write('iconEmoji: $iconEmoji, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('blurHash: $blurHash, ')
+          ..write('minTemp: $minTemp, ')
+          ..write('maxTemp: $maxTemp, ')
+          ..write('warmthLevel: $warmthLevel, ')
+          ..write('rainOk: $rainOk, ')
+          ..write('snowOk: $snowOk, ')
+          ..write('windOk: $windOk, ')
+          ..write('usage: $usage, ')
+          ..write('materials: $materials, ')
+          ..write('wearCount: $wearCount, ')
+          ..write('lastWornAt: $lastWornAt, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('isArchived: $isArchived, ')
-          ..write('wearCount: $wearCount, ')
-          ..write('imageUrl: $imageUrl, ')
-          ..write('localImagePath: $localImagePath, ')
-          ..write('blurHash: $blurHash, ')
+          ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('dirty: $dirty, ')
           ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('season: $season, ')
+          ..write('gender: $gender, ')
+          ..write('fit: $fit, ')
+          ..write('pattern: $pattern, ')
+          ..write('localImagePath: $localImagePath, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -734,7 +1342,7 @@ class WardrobeEntriesCompanion extends UpdateCompanion<WardrobeEntry> {
 }
 
 class $RecommendationsTable extends Recommendations
-    with TableInfo<$RecommendationsTable, RecommendationRow> {
+    with TableInfo<$RecommendationsTable, Recommendation> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -744,35 +1352,17 @@ class $RecommendationsTable extends Recommendations
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _originMeta = const VerificationMeta('origin');
-  @override
-  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
-      'origin', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('server'));
   static const VerificationMeta _serverIdMeta =
       const VerificationMeta('serverId');
   @override
   late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
       'server_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _isFavoriteMeta =
-      const VerificationMeta('isFavorite');
-  @override
-  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
-      'is_favorite', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
-      defaultValue: const Constant(false));
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+      'origin', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _outfitDataJsonMeta =
       const VerificationMeta('outfitDataJson');
   @override
@@ -785,46 +1375,67 @@ class $RecommendationsTable extends Recommendations
   late final GeneratedColumn<String> weatherDataJson = GeneratedColumn<String>(
       'weather_data_json', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _isFavoriteMeta =
+      const VerificationMeta('isFavorite');
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+      'is_favorite', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_favorite" IN (0, 1))'));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
-  @override
-  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
-      'dirty', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("dirty" IN (0, 1))'),
-      defaultValue: const Constant(false));
   static const VerificationMeta _lastSyncedAtMeta =
       const VerificationMeta('lastSyncedAt');
   @override
   late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
       'last_synced_at', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
-  static const VerificationMeta _publishedAtMeta =
-      const VerificationMeta('publishedAt');
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
   @override
-  late final GeneratedColumn<DateTime> publishedAt = GeneratedColumn<DateTime>(
-      'published_at', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+      'dirty', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("dirty" IN (0, 1))'));
+  static const VerificationMeta _imageUrlMeta =
+      const VerificationMeta('imageUrl');
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+      'image_url', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _localImagePathMeta =
+      const VerificationMeta('localImagePath');
+  @override
+  late final GeneratedColumn<String> localImagePath = GeneratedColumn<String>(
+      'local_image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
-        origin,
         serverId,
-        createdAt,
-        isFavorite,
+        origin,
         outfitDataJson,
         weatherDataJson,
+        isFavorite,
+        createdAt,
         updatedAt,
-        dirty,
         lastSyncedAt,
-        publishedAt
+        dirty,
+        imageUrl,
+        localImagePath
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -832,7 +1443,7 @@ class $RecommendationsTable extends Recommendations
   String get actualTableName => $name;
   static const String $name = 'recommendations';
   @override
-  VerificationContext validateIntegrity(Insertable<RecommendationRow> instance,
+  VerificationContext validateIntegrity(Insertable<Recommendation> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -841,25 +1452,15 @@ class $RecommendationsTable extends Recommendations
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('origin')) {
-      context.handle(_originMeta,
-          origin.isAcceptableOrUnknown(data['origin']!, _originMeta));
-    }
     if (data.containsKey('server_id')) {
       context.handle(_serverIdMeta,
           serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta));
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    if (data.containsKey('origin')) {
+      context.handle(_originMeta,
+          origin.isAcceptableOrUnknown(data['origin']!, _originMeta));
     } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    if (data.containsKey('is_favorite')) {
-      context.handle(
-          _isFavoriteMeta,
-          isFavorite.isAcceptableOrUnknown(
-              data['is_favorite']!, _isFavoriteMeta));
+      context.missing(_originMeta);
     }
     if (data.containsKey('outfit_data_json')) {
       context.handle(
@@ -877,15 +1478,25 @@ class $RecommendationsTable extends Recommendations
     } else if (isInserting) {
       context.missing(_weatherDataJsonMeta);
     }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+          _isFavoriteMeta,
+          isFavorite.isAcceptableOrUnknown(
+              data['is_favorite']!, _isFavoriteMeta));
+    } else if (isInserting) {
+      context.missing(_isFavoriteMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
-    }
-    if (data.containsKey('dirty')) {
-      context.handle(
-          _dirtyMeta, dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta));
     }
     if (data.containsKey('last_synced_at')) {
       context.handle(
@@ -893,11 +1504,21 @@ class $RecommendationsTable extends Recommendations
           lastSyncedAt.isAcceptableOrUnknown(
               data['last_synced_at']!, _lastSyncedAtMeta));
     }
-    if (data.containsKey('published_at')) {
+    if (data.containsKey('dirty')) {
       context.handle(
-          _publishedAtMeta,
-          publishedAt.isAcceptableOrUnknown(
-              data['published_at']!, _publishedAtMeta));
+          _dirtyMeta, dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta));
+    } else if (isInserting) {
+      context.missing(_dirtyMeta);
+    }
+    if (data.containsKey('image_url')) {
+      context.handle(_imageUrlMeta,
+          imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta));
+    }
+    if (data.containsKey('local_image_path')) {
+      context.handle(
+          _localImagePathMeta,
+          localImagePath.isAcceptableOrUnknown(
+              data['local_image_path']!, _localImagePathMeta));
     }
     return context;
   }
@@ -905,31 +1526,33 @@ class $RecommendationsTable extends Recommendations
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  RecommendationRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Recommendation map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return RecommendationRow(
+    return Recommendation(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      origin: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}origin'])!,
       serverId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}server_id']),
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      isFavorite: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
+      origin: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}origin'])!,
       outfitDataJson: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}outfit_data_json'])!,
       weatherDataJson: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}weather_data_json'])!,
+      isFavorite: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
-      dirty: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}dirty'])!,
       lastSyncedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_synced_at']),
-      publishedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}published_at']),
+      dirty: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}dirty'])!,
+      imageUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_url']),
+      localImagePath: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}local_image_path']),
     );
   }
 
@@ -939,50 +1562,54 @@ class $RecommendationsTable extends Recommendations
   }
 }
 
-class RecommendationRow extends DataClass
-    implements Insertable<RecommendationRow> {
+class Recommendation extends DataClass implements Insertable<Recommendation> {
   final String id;
-  final String origin;
   final String? serverId;
-  final DateTime createdAt;
-  final bool isFavorite;
+  final String origin;
   final String outfitDataJson;
   final String weatherDataJson;
+  final bool isFavorite;
+  final DateTime createdAt;
   final DateTime updatedAt;
-  final bool dirty;
   final DateTime? lastSyncedAt;
-  final DateTime? publishedAt;
-  const RecommendationRow(
+  final bool dirty;
+  final String? imageUrl;
+  final String? localImagePath;
+  const Recommendation(
       {required this.id,
-      required this.origin,
       this.serverId,
-      required this.createdAt,
-      required this.isFavorite,
+      required this.origin,
       required this.outfitDataJson,
       required this.weatherDataJson,
+      required this.isFavorite,
+      required this.createdAt,
       required this.updatedAt,
-      required this.dirty,
       this.lastSyncedAt,
-      this.publishedAt});
+      required this.dirty,
+      this.imageUrl,
+      this.localImagePath});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['origin'] = Variable<String>(origin);
     if (!nullToAbsent || serverId != null) {
       map['server_id'] = Variable<String>(serverId);
     }
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['is_favorite'] = Variable<bool>(isFavorite);
+    map['origin'] = Variable<String>(origin);
     map['outfit_data_json'] = Variable<String>(outfitDataJson);
     map['weather_data_json'] = Variable<String>(weatherDataJson);
+    map['is_favorite'] = Variable<bool>(isFavorite);
+    map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
-    map['dirty'] = Variable<bool>(dirty);
     if (!nullToAbsent || lastSyncedAt != null) {
       map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
     }
-    if (!nullToAbsent || publishedAt != null) {
-      map['published_at'] = Variable<DateTime>(publishedAt);
+    map['dirty'] = Variable<bool>(dirty);
+    if (!nullToAbsent || imageUrl != null) {
+      map['image_url'] = Variable<String>(imageUrl);
+    }
+    if (!nullToAbsent || localImagePath != null) {
+      map['local_image_path'] = Variable<String>(localImagePath);
     }
     return map;
   }
@@ -990,40 +1617,44 @@ class RecommendationRow extends DataClass
   RecommendationsCompanion toCompanion(bool nullToAbsent) {
     return RecommendationsCompanion(
       id: Value(id),
-      origin: Value(origin),
       serverId: serverId == null && nullToAbsent
           ? const Value.absent()
           : Value(serverId),
-      createdAt: Value(createdAt),
-      isFavorite: Value(isFavorite),
+      origin: Value(origin),
       outfitDataJson: Value(outfitDataJson),
       weatherDataJson: Value(weatherDataJson),
+      isFavorite: Value(isFavorite),
+      createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
-      dirty: Value(dirty),
       lastSyncedAt: lastSyncedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncedAt),
-      publishedAt: publishedAt == null && nullToAbsent
+      dirty: Value(dirty),
+      imageUrl: imageUrl == null && nullToAbsent
           ? const Value.absent()
-          : Value(publishedAt),
+          : Value(imageUrl),
+      localImagePath: localImagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localImagePath),
     );
   }
 
-  factory RecommendationRow.fromJson(Map<String, dynamic> json,
+  factory Recommendation.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return RecommendationRow(
+    return Recommendation(
       id: serializer.fromJson<String>(json['id']),
-      origin: serializer.fromJson<String>(json['origin']),
       serverId: serializer.fromJson<String?>(json['serverId']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      origin: serializer.fromJson<String>(json['origin']),
       outfitDataJson: serializer.fromJson<String>(json['outfitDataJson']),
       weatherDataJson: serializer.fromJson<String>(json['weatherDataJson']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
-      dirty: serializer.fromJson<bool>(json['dirty']),
       lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
-      publishedAt: serializer.fromJson<DateTime?>(json['publishedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
+      localImagePath: serializer.fromJson<String?>(json['localImagePath']),
     );
   }
   @override
@@ -1031,83 +1662,90 @@ class RecommendationRow extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'origin': serializer.toJson<String>(origin),
       'serverId': serializer.toJson<String?>(serverId),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'isFavorite': serializer.toJson<bool>(isFavorite),
+      'origin': serializer.toJson<String>(origin),
       'outfitDataJson': serializer.toJson<String>(outfitDataJson),
       'weatherDataJson': serializer.toJson<String>(weatherDataJson),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
-      'dirty': serializer.toJson<bool>(dirty),
       'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
-      'publishedAt': serializer.toJson<DateTime?>(publishedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
+      'localImagePath': serializer.toJson<String?>(localImagePath),
     };
   }
 
-  RecommendationRow copyWith(
+  Recommendation copyWith(
           {String? id,
-          String? origin,
           Value<String?> serverId = const Value.absent(),
-          DateTime? createdAt,
-          bool? isFavorite,
+          String? origin,
           String? outfitDataJson,
           String? weatherDataJson,
+          bool? isFavorite,
+          DateTime? createdAt,
           DateTime? updatedAt,
-          bool? dirty,
           Value<DateTime?> lastSyncedAt = const Value.absent(),
-          Value<DateTime?> publishedAt = const Value.absent()}) =>
-      RecommendationRow(
+          bool? dirty,
+          Value<String?> imageUrl = const Value.absent(),
+          Value<String?> localImagePath = const Value.absent()}) =>
+      Recommendation(
         id: id ?? this.id,
-        origin: origin ?? this.origin,
         serverId: serverId.present ? serverId.value : this.serverId,
-        createdAt: createdAt ?? this.createdAt,
-        isFavorite: isFavorite ?? this.isFavorite,
+        origin: origin ?? this.origin,
         outfitDataJson: outfitDataJson ?? this.outfitDataJson,
         weatherDataJson: weatherDataJson ?? this.weatherDataJson,
+        isFavorite: isFavorite ?? this.isFavorite,
+        createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
-        dirty: dirty ?? this.dirty,
         lastSyncedAt:
             lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
-        publishedAt: publishedAt.present ? publishedAt.value : this.publishedAt,
+        dirty: dirty ?? this.dirty,
+        imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+        localImagePath:
+            localImagePath.present ? localImagePath.value : this.localImagePath,
       );
-  RecommendationRow copyWithCompanion(RecommendationsCompanion data) {
-    return RecommendationRow(
+  Recommendation copyWithCompanion(RecommendationsCompanion data) {
+    return Recommendation(
       id: data.id.present ? data.id.value : this.id,
-      origin: data.origin.present ? data.origin.value : this.origin,
       serverId: data.serverId.present ? data.serverId.value : this.serverId,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      isFavorite:
-          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
+      origin: data.origin.present ? data.origin.value : this.origin,
       outfitDataJson: data.outfitDataJson.present
           ? data.outfitDataJson.value
           : this.outfitDataJson,
       weatherDataJson: data.weatherDataJson.present
           ? data.weatherDataJson.value
           : this.weatherDataJson,
+      isFavorite:
+          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      dirty: data.dirty.present ? data.dirty.value : this.dirty,
       lastSyncedAt: data.lastSyncedAt.present
           ? data.lastSyncedAt.value
           : this.lastSyncedAt,
-      publishedAt:
-          data.publishedAt.present ? data.publishedAt.value : this.publishedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      localImagePath: data.localImagePath.present
+          ? data.localImagePath.value
+          : this.localImagePath,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('RecommendationRow(')
+    return (StringBuffer('Recommendation(')
           ..write('id: $id, ')
-          ..write('origin: $origin, ')
           ..write('serverId: $serverId, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('isFavorite: $isFavorite, ')
+          ..write('origin: $origin, ')
           ..write('outfitDataJson: $outfitDataJson, ')
           ..write('weatherDataJson: $weatherDataJson, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('dirty: $dirty, ')
           ..write('lastSyncedAt: $lastSyncedAt, ')
-          ..write('publishedAt: $publishedAt')
+          ..write('dirty: $dirty, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('localImagePath: $localImagePath')
           ..write(')'))
         .toString();
   }
@@ -1115,133 +1753,145 @@ class RecommendationRow extends DataClass
   @override
   int get hashCode => Object.hash(
       id,
-      origin,
       serverId,
-      createdAt,
-      isFavorite,
+      origin,
       outfitDataJson,
       weatherDataJson,
+      isFavorite,
+      createdAt,
       updatedAt,
-      dirty,
       lastSyncedAt,
-      publishedAt);
+      dirty,
+      imageUrl,
+      localImagePath);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is RecommendationRow &&
+      (other is Recommendation &&
           other.id == this.id &&
-          other.origin == this.origin &&
           other.serverId == this.serverId &&
-          other.createdAt == this.createdAt &&
-          other.isFavorite == this.isFavorite &&
+          other.origin == this.origin &&
           other.outfitDataJson == this.outfitDataJson &&
           other.weatherDataJson == this.weatherDataJson &&
+          other.isFavorite == this.isFavorite &&
+          other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.dirty == this.dirty &&
           other.lastSyncedAt == this.lastSyncedAt &&
-          other.publishedAt == this.publishedAt);
+          other.dirty == this.dirty &&
+          other.imageUrl == this.imageUrl &&
+          other.localImagePath == this.localImagePath);
 }
 
-class RecommendationsCompanion extends UpdateCompanion<RecommendationRow> {
+class RecommendationsCompanion extends UpdateCompanion<Recommendation> {
   final Value<String> id;
-  final Value<String> origin;
   final Value<String?> serverId;
-  final Value<DateTime> createdAt;
-  final Value<bool> isFavorite;
+  final Value<String> origin;
   final Value<String> outfitDataJson;
   final Value<String> weatherDataJson;
+  final Value<bool> isFavorite;
+  final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
-  final Value<bool> dirty;
   final Value<DateTime?> lastSyncedAt;
-  final Value<DateTime?> publishedAt;
+  final Value<bool> dirty;
+  final Value<String?> imageUrl;
+  final Value<String?> localImagePath;
   final Value<int> rowid;
   const RecommendationsCompanion({
     this.id = const Value.absent(),
-    this.origin = const Value.absent(),
     this.serverId = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.isFavorite = const Value.absent(),
+    this.origin = const Value.absent(),
     this.outfitDataJson = const Value.absent(),
     this.weatherDataJson = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.dirty = const Value.absent(),
     this.lastSyncedAt = const Value.absent(),
-    this.publishedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.localImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecommendationsCompanion.insert({
     required String id,
-    this.origin = const Value.absent(),
     this.serverId = const Value.absent(),
-    required DateTime createdAt,
-    this.isFavorite = const Value.absent(),
+    required String origin,
     required String outfitDataJson,
     required String weatherDataJson,
+    required bool isFavorite,
+    required DateTime createdAt,
     required DateTime updatedAt,
-    this.dirty = const Value.absent(),
     this.lastSyncedAt = const Value.absent(),
-    this.publishedAt = const Value.absent(),
+    required bool dirty,
+    this.imageUrl = const Value.absent(),
+    this.localImagePath = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        createdAt = Value(createdAt),
+        origin = Value(origin),
         outfitDataJson = Value(outfitDataJson),
         weatherDataJson = Value(weatherDataJson),
-        updatedAt = Value(updatedAt);
-  static Insertable<RecommendationRow> custom({
+        isFavorite = Value(isFavorite),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        dirty = Value(dirty);
+  static Insertable<Recommendation> custom({
     Expression<String>? id,
-    Expression<String>? origin,
     Expression<String>? serverId,
-    Expression<DateTime>? createdAt,
-    Expression<bool>? isFavorite,
+    Expression<String>? origin,
     Expression<String>? outfitDataJson,
     Expression<String>? weatherDataJson,
+    Expression<bool>? isFavorite,
+    Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<bool>? dirty,
     Expression<DateTime>? lastSyncedAt,
-    Expression<DateTime>? publishedAt,
+    Expression<bool>? dirty,
+    Expression<String>? imageUrl,
+    Expression<String>? localImagePath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (origin != null) 'origin': origin,
       if (serverId != null) 'server_id': serverId,
-      if (createdAt != null) 'created_at': createdAt,
-      if (isFavorite != null) 'is_favorite': isFavorite,
+      if (origin != null) 'origin': origin,
       if (outfitDataJson != null) 'outfit_data_json': outfitDataJson,
       if (weatherDataJson != null) 'weather_data_json': weatherDataJson,
+      if (isFavorite != null) 'is_favorite': isFavorite,
+      if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
-      if (dirty != null) 'dirty': dirty,
       if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
-      if (publishedAt != null) 'published_at': publishedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (localImagePath != null) 'local_image_path': localImagePath,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   RecommendationsCompanion copyWith(
       {Value<String>? id,
-      Value<String>? origin,
       Value<String?>? serverId,
-      Value<DateTime>? createdAt,
-      Value<bool>? isFavorite,
+      Value<String>? origin,
       Value<String>? outfitDataJson,
       Value<String>? weatherDataJson,
+      Value<bool>? isFavorite,
+      Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
-      Value<bool>? dirty,
       Value<DateTime?>? lastSyncedAt,
-      Value<DateTime?>? publishedAt,
+      Value<bool>? dirty,
+      Value<String?>? imageUrl,
+      Value<String?>? localImagePath,
       Value<int>? rowid}) {
     return RecommendationsCompanion(
       id: id ?? this.id,
-      origin: origin ?? this.origin,
       serverId: serverId ?? this.serverId,
-      createdAt: createdAt ?? this.createdAt,
-      isFavorite: isFavorite ?? this.isFavorite,
+      origin: origin ?? this.origin,
       outfitDataJson: outfitDataJson ?? this.outfitDataJson,
       weatherDataJson: weatherDataJson ?? this.weatherDataJson,
+      isFavorite: isFavorite ?? this.isFavorite,
+      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      dirty: dirty ?? this.dirty,
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
-      publishedAt: publishedAt ?? this.publishedAt,
+      dirty: dirty ?? this.dirty,
+      imageUrl: imageUrl ?? this.imageUrl,
+      localImagePath: localImagePath ?? this.localImagePath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1252,17 +1902,11 @@ class RecommendationsCompanion extends UpdateCompanion<RecommendationRow> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (origin.present) {
-      map['origin'] = Variable<String>(origin.value);
-    }
     if (serverId.present) {
       map['server_id'] = Variable<String>(serverId.value);
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (isFavorite.present) {
-      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
     }
     if (outfitDataJson.present) {
       map['outfit_data_json'] = Variable<String>(outfitDataJson.value);
@@ -1270,17 +1914,26 @@ class RecommendationsCompanion extends UpdateCompanion<RecommendationRow> {
     if (weatherDataJson.present) {
       map['weather_data_json'] = Variable<String>(weatherDataJson.value);
     }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
-    }
-    if (dirty.present) {
-      map['dirty'] = Variable<bool>(dirty.value);
     }
     if (lastSyncedAt.present) {
       map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
     }
-    if (publishedAt.present) {
-      map['published_at'] = Variable<DateTime>(publishedAt.value);
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
+    if (localImagePath.present) {
+      map['local_image_path'] = Variable<String>(localImagePath.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1292,16 +1945,17 @@ class RecommendationsCompanion extends UpdateCompanion<RecommendationRow> {
   String toString() {
     return (StringBuffer('RecommendationsCompanion(')
           ..write('id: $id, ')
-          ..write('origin: $origin, ')
           ..write('serverId: $serverId, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('isFavorite: $isFavorite, ')
+          ..write('origin: $origin, ')
           ..write('outfitDataJson: $outfitDataJson, ')
           ..write('weatherDataJson: $weatherDataJson, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('dirty: $dirty, ')
           ..write('lastSyncedAt: $lastSyncedAt, ')
-          ..write('publishedAt: $publishedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('localImagePath: $localImagePath, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1309,154 +1963,134 @@ class RecommendationsCompanion extends UpdateCompanion<RecommendationRow> {
 }
 
 class $SyncOutboxTable extends SyncOutbox
-    with TableInfo<$SyncOutboxTable, SyncOutboxRow> {
+    with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $SyncOutboxTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _localIdMeta =
-      const VerificationMeta('localId');
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> localId = GeneratedColumn<int>(
-      'local_id', aliasedName, false,
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
       hasAutoIncrement: true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  static const VerificationMeta _actionMeta = const VerificationMeta('action');
   @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
-      'type', aliasedName, false,
+  late final GeneratedColumn<String> action = GeneratedColumn<String>(
+      'action', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _entityTypeMeta =
+      const VerificationMeta('entityType');
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+      'entity_type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _entityIdMeta =
       const VerificationMeta('entityId');
   @override
   late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
-      'entity_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _payloadJsonMeta =
-      const VerificationMeta('payloadJson');
-  @override
-  late final GeneratedColumn<String> payloadJson = GeneratedColumn<String>(
-      'payload_json', aliasedName, false,
+      'entity_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _attemptsMeta =
-      const VerificationMeta('attempts');
+  static const VerificationMeta _payloadMeta =
+      const VerificationMeta('payload');
   @override
-  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
-      'attempts', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+      'payload', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
-  static const VerificationMeta _nextAttemptAtMeta =
-      const VerificationMeta('nextAttemptAt');
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _syncedMeta = const VerificationMeta('synced');
   @override
-  late final GeneratedColumn<DateTime> nextAttemptAt =
-      GeneratedColumn<DateTime>('next_attempt_at', aliasedName, false,
-          type: DriftSqlType.dateTime,
-          requiredDuringInsert: false,
-          defaultValue: currentDateAndTime);
-  static const VerificationMeta _lastErrorMeta =
-      const VerificationMeta('lastError');
+  late final GeneratedColumn<bool> synced = GeneratedColumn<bool>(
+      'synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("synced" IN (0, 1))'));
   @override
-  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
-      'last_error', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  @override
-  List<GeneratedColumn> get $columns => [
-        localId,
-        type,
-        entityId,
-        payloadJson,
-        attempts,
-        createdAt,
-        nextAttemptAt,
-        lastError
-      ];
+  List<GeneratedColumn> get $columns =>
+      [id, action, entityType, entityId, payload, createdAt, synced];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'sync_outbox';
   @override
-  VerificationContext validateIntegrity(Insertable<SyncOutboxRow> instance,
+  VerificationContext validateIntegrity(Insertable<SyncOutboxData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('local_id')) {
-      context.handle(_localIdMeta,
-          localId.isAcceptableOrUnknown(data['local_id']!, _localIdMeta));
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('type')) {
-      context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    if (data.containsKey('action')) {
+      context.handle(_actionMeta,
+          action.isAcceptableOrUnknown(data['action']!, _actionMeta));
     } else if (isInserting) {
-      context.missing(_typeMeta);
+      context.missing(_actionMeta);
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+          _entityTypeMeta,
+          entityType.isAcceptableOrUnknown(
+              data['entity_type']!, _entityTypeMeta));
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
     }
     if (data.containsKey('entity_id')) {
       context.handle(_entityIdMeta,
           entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta));
-    }
-    if (data.containsKey('payload_json')) {
-      context.handle(
-          _payloadJsonMeta,
-          payloadJson.isAcceptableOrUnknown(
-              data['payload_json']!, _payloadJsonMeta));
     } else if (isInserting) {
-      context.missing(_payloadJsonMeta);
+      context.missing(_entityIdMeta);
     }
-    if (data.containsKey('attempts')) {
-      context.handle(_attemptsMeta,
-          attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta));
+    if (data.containsKey('payload')) {
+      context.handle(_payloadMeta,
+          payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta));
+    } else if (isInserting) {
+      context.missing(_payloadMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
-    if (data.containsKey('next_attempt_at')) {
-      context.handle(
-          _nextAttemptAtMeta,
-          nextAttemptAt.isAcceptableOrUnknown(
-              data['next_attempt_at']!, _nextAttemptAtMeta));
-    }
-    if (data.containsKey('last_error')) {
-      context.handle(_lastErrorMeta,
-          lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta));
+    if (data.containsKey('synced')) {
+      context.handle(_syncedMeta,
+          synced.isAcceptableOrUnknown(data['synced']!, _syncedMeta));
+    } else if (isInserting) {
+      context.missing(_syncedMeta);
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {localId};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  SyncOutboxRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+  SyncOutboxData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SyncOutboxRow(
-      localId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}local_id'])!,
-      type: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+    return SyncOutboxData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      action: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}action'])!,
+      entityType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}entity_type'])!,
       entityId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}entity_id']),
-      payloadJson: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}payload_json'])!,
-      attempts: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}attempts'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}entity_id'])!,
+      payload: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}payload'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      nextAttemptAt: attachedDatabase.typeMapping.read(
-          DriftSqlType.dateTime, data['${effectivePrefix}next_attempt_at'])!,
-      lastError: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}last_error']),
+      synced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}synced'])!,
     );
   }
 
@@ -1466,260 +2100,227 @@ class $SyncOutboxTable extends SyncOutbox
   }
 }
 
-class SyncOutboxRow extends DataClass implements Insertable<SyncOutboxRow> {
-  final int localId;
-
-  /// тип операции: wardrobe_set_favorite, wardrobe_set_archived, wardrobe_worn, rec_set_favorite, ...
-  final String type;
-
-  /// например id вещи/рекомендации (удобно для дедупликации и диагностики)
-  final String? entityId;
-
-  /// payload как JSON string (минимально необходимое)
-  final String payloadJson;
-  final int attempts;
+class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
+  final int id;
+  final String action;
+  final String entityType;
+  final String entityId;
+  final String payload;
   final DateTime createdAt;
-  final DateTime nextAttemptAt;
-  final String? lastError;
-  const SyncOutboxRow(
-      {required this.localId,
-      required this.type,
-      this.entityId,
-      required this.payloadJson,
-      required this.attempts,
+  final bool synced;
+  const SyncOutboxData(
+      {required this.id,
+      required this.action,
+      required this.entityType,
+      required this.entityId,
+      required this.payload,
       required this.createdAt,
-      required this.nextAttemptAt,
-      this.lastError});
+      required this.synced});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['local_id'] = Variable<int>(localId);
-    map['type'] = Variable<String>(type);
-    if (!nullToAbsent || entityId != null) {
-      map['entity_id'] = Variable<String>(entityId);
-    }
-    map['payload_json'] = Variable<String>(payloadJson);
-    map['attempts'] = Variable<int>(attempts);
+    map['id'] = Variable<int>(id);
+    map['action'] = Variable<String>(action);
+    map['entity_type'] = Variable<String>(entityType);
+    map['entity_id'] = Variable<String>(entityId);
+    map['payload'] = Variable<String>(payload);
     map['created_at'] = Variable<DateTime>(createdAt);
-    map['next_attempt_at'] = Variable<DateTime>(nextAttemptAt);
-    if (!nullToAbsent || lastError != null) {
-      map['last_error'] = Variable<String>(lastError);
-    }
+    map['synced'] = Variable<bool>(synced);
     return map;
   }
 
   SyncOutboxCompanion toCompanion(bool nullToAbsent) {
     return SyncOutboxCompanion(
-      localId: Value(localId),
-      type: Value(type),
-      entityId: entityId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(entityId),
-      payloadJson: Value(payloadJson),
-      attempts: Value(attempts),
+      id: Value(id),
+      action: Value(action),
+      entityType: Value(entityType),
+      entityId: Value(entityId),
+      payload: Value(payload),
       createdAt: Value(createdAt),
-      nextAttemptAt: Value(nextAttemptAt),
-      lastError: lastError == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastError),
+      synced: Value(synced),
     );
   }
 
-  factory SyncOutboxRow.fromJson(Map<String, dynamic> json,
+  factory SyncOutboxData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SyncOutboxRow(
-      localId: serializer.fromJson<int>(json['localId']),
-      type: serializer.fromJson<String>(json['type']),
-      entityId: serializer.fromJson<String?>(json['entityId']),
-      payloadJson: serializer.fromJson<String>(json['payloadJson']),
-      attempts: serializer.fromJson<int>(json['attempts']),
+    return SyncOutboxData(
+      id: serializer.fromJson<int>(json['id']),
+      action: serializer.fromJson<String>(json['action']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      payload: serializer.fromJson<String>(json['payload']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      nextAttemptAt: serializer.fromJson<DateTime>(json['nextAttemptAt']),
-      lastError: serializer.fromJson<String?>(json['lastError']),
+      synced: serializer.fromJson<bool>(json['synced']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'localId': serializer.toJson<int>(localId),
-      'type': serializer.toJson<String>(type),
-      'entityId': serializer.toJson<String?>(entityId),
-      'payloadJson': serializer.toJson<String>(payloadJson),
-      'attempts': serializer.toJson<int>(attempts),
+      'id': serializer.toJson<int>(id),
+      'action': serializer.toJson<String>(action),
+      'entityType': serializer.toJson<String>(entityType),
+      'entityId': serializer.toJson<String>(entityId),
+      'payload': serializer.toJson<String>(payload),
       'createdAt': serializer.toJson<DateTime>(createdAt),
-      'nextAttemptAt': serializer.toJson<DateTime>(nextAttemptAt),
-      'lastError': serializer.toJson<String?>(lastError),
+      'synced': serializer.toJson<bool>(synced),
     };
   }
 
-  SyncOutboxRow copyWith(
-          {int? localId,
-          String? type,
-          Value<String?> entityId = const Value.absent(),
-          String? payloadJson,
-          int? attempts,
+  SyncOutboxData copyWith(
+          {int? id,
+          String? action,
+          String? entityType,
+          String? entityId,
+          String? payload,
           DateTime? createdAt,
-          DateTime? nextAttemptAt,
-          Value<String?> lastError = const Value.absent()}) =>
-      SyncOutboxRow(
-        localId: localId ?? this.localId,
-        type: type ?? this.type,
-        entityId: entityId.present ? entityId.value : this.entityId,
-        payloadJson: payloadJson ?? this.payloadJson,
-        attempts: attempts ?? this.attempts,
+          bool? synced}) =>
+      SyncOutboxData(
+        id: id ?? this.id,
+        action: action ?? this.action,
+        entityType: entityType ?? this.entityType,
+        entityId: entityId ?? this.entityId,
+        payload: payload ?? this.payload,
         createdAt: createdAt ?? this.createdAt,
-        nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
-        lastError: lastError.present ? lastError.value : this.lastError,
+        synced: synced ?? this.synced,
       );
-  SyncOutboxRow copyWithCompanion(SyncOutboxCompanion data) {
-    return SyncOutboxRow(
-      localId: data.localId.present ? data.localId.value : this.localId,
-      type: data.type.present ? data.type.value : this.type,
+  SyncOutboxData copyWithCompanion(SyncOutboxCompanion data) {
+    return SyncOutboxData(
+      id: data.id.present ? data.id.value : this.id,
+      action: data.action.present ? data.action.value : this.action,
+      entityType:
+          data.entityType.present ? data.entityType.value : this.entityType,
       entityId: data.entityId.present ? data.entityId.value : this.entityId,
-      payloadJson:
-          data.payloadJson.present ? data.payloadJson.value : this.payloadJson,
-      attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      payload: data.payload.present ? data.payload.value : this.payload,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      nextAttemptAt: data.nextAttemptAt.present
-          ? data.nextAttemptAt.value
-          : this.nextAttemptAt,
-      lastError: data.lastError.present ? data.lastError.value : this.lastError,
+      synced: data.synced.present ? data.synced.value : this.synced,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('SyncOutboxRow(')
-          ..write('localId: $localId, ')
-          ..write('type: $type, ')
+    return (StringBuffer('SyncOutboxData(')
+          ..write('id: $id, ')
+          ..write('action: $action, ')
+          ..write('entityType: $entityType, ')
           ..write('entityId: $entityId, ')
-          ..write('payloadJson: $payloadJson, ')
-          ..write('attempts: $attempts, ')
+          ..write('payload: $payload, ')
           ..write('createdAt: $createdAt, ')
-          ..write('nextAttemptAt: $nextAttemptAt, ')
-          ..write('lastError: $lastError')
+          ..write('synced: $synced')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(localId, type, entityId, payloadJson,
-      attempts, createdAt, nextAttemptAt, lastError);
+  int get hashCode =>
+      Object.hash(id, action, entityType, entityId, payload, createdAt, synced);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is SyncOutboxRow &&
-          other.localId == this.localId &&
-          other.type == this.type &&
+      (other is SyncOutboxData &&
+          other.id == this.id &&
+          other.action == this.action &&
+          other.entityType == this.entityType &&
           other.entityId == this.entityId &&
-          other.payloadJson == this.payloadJson &&
-          other.attempts == this.attempts &&
+          other.payload == this.payload &&
           other.createdAt == this.createdAt &&
-          other.nextAttemptAt == this.nextAttemptAt &&
-          other.lastError == this.lastError);
+          other.synced == this.synced);
 }
 
-class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
-  final Value<int> localId;
-  final Value<String> type;
-  final Value<String?> entityId;
-  final Value<String> payloadJson;
-  final Value<int> attempts;
+class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
+  final Value<int> id;
+  final Value<String> action;
+  final Value<String> entityType;
+  final Value<String> entityId;
+  final Value<String> payload;
   final Value<DateTime> createdAt;
-  final Value<DateTime> nextAttemptAt;
-  final Value<String?> lastError;
+  final Value<bool> synced;
   const SyncOutboxCompanion({
-    this.localId = const Value.absent(),
-    this.type = const Value.absent(),
+    this.id = const Value.absent(),
+    this.action = const Value.absent(),
+    this.entityType = const Value.absent(),
     this.entityId = const Value.absent(),
-    this.payloadJson = const Value.absent(),
-    this.attempts = const Value.absent(),
+    this.payload = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.nextAttemptAt = const Value.absent(),
-    this.lastError = const Value.absent(),
+    this.synced = const Value.absent(),
   });
   SyncOutboxCompanion.insert({
-    this.localId = const Value.absent(),
-    required String type,
-    this.entityId = const Value.absent(),
-    required String payloadJson,
-    this.attempts = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.nextAttemptAt = const Value.absent(),
-    this.lastError = const Value.absent(),
-  })  : type = Value(type),
-        payloadJson = Value(payloadJson);
-  static Insertable<SyncOutboxRow> custom({
-    Expression<int>? localId,
-    Expression<String>? type,
+    this.id = const Value.absent(),
+    required String action,
+    required String entityType,
+    required String entityId,
+    required String payload,
+    required DateTime createdAt,
+    required bool synced,
+  })  : action = Value(action),
+        entityType = Value(entityType),
+        entityId = Value(entityId),
+        payload = Value(payload),
+        createdAt = Value(createdAt),
+        synced = Value(synced);
+  static Insertable<SyncOutboxData> custom({
+    Expression<int>? id,
+    Expression<String>? action,
+    Expression<String>? entityType,
     Expression<String>? entityId,
-    Expression<String>? payloadJson,
-    Expression<int>? attempts,
+    Expression<String>? payload,
     Expression<DateTime>? createdAt,
-    Expression<DateTime>? nextAttemptAt,
-    Expression<String>? lastError,
+    Expression<bool>? synced,
   }) {
     return RawValuesInsertable({
-      if (localId != null) 'local_id': localId,
-      if (type != null) 'type': type,
+      if (id != null) 'id': id,
+      if (action != null) 'action': action,
+      if (entityType != null) 'entity_type': entityType,
       if (entityId != null) 'entity_id': entityId,
-      if (payloadJson != null) 'payload_json': payloadJson,
-      if (attempts != null) 'attempts': attempts,
+      if (payload != null) 'payload': payload,
       if (createdAt != null) 'created_at': createdAt,
-      if (nextAttemptAt != null) 'next_attempt_at': nextAttemptAt,
-      if (lastError != null) 'last_error': lastError,
+      if (synced != null) 'synced': synced,
     });
   }
 
   SyncOutboxCompanion copyWith(
-      {Value<int>? localId,
-      Value<String>? type,
-      Value<String?>? entityId,
-      Value<String>? payloadJson,
-      Value<int>? attempts,
+      {Value<int>? id,
+      Value<String>? action,
+      Value<String>? entityType,
+      Value<String>? entityId,
+      Value<String>? payload,
       Value<DateTime>? createdAt,
-      Value<DateTime>? nextAttemptAt,
-      Value<String?>? lastError}) {
+      Value<bool>? synced}) {
     return SyncOutboxCompanion(
-      localId: localId ?? this.localId,
-      type: type ?? this.type,
+      id: id ?? this.id,
+      action: action ?? this.action,
+      entityType: entityType ?? this.entityType,
       entityId: entityId ?? this.entityId,
-      payloadJson: payloadJson ?? this.payloadJson,
-      attempts: attempts ?? this.attempts,
+      payload: payload ?? this.payload,
       createdAt: createdAt ?? this.createdAt,
-      nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
-      lastError: lastError ?? this.lastError,
+      synced: synced ?? this.synced,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (localId.present) {
-      map['local_id'] = Variable<int>(localId.value);
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
     }
-    if (type.present) {
-      map['type'] = Variable<String>(type.value);
+    if (action.present) {
+      map['action'] = Variable<String>(action.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
     }
     if (entityId.present) {
       map['entity_id'] = Variable<String>(entityId.value);
     }
-    if (payloadJson.present) {
-      map['payload_json'] = Variable<String>(payloadJson.value);
-    }
-    if (attempts.present) {
-      map['attempts'] = Variable<int>(attempts.value);
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (nextAttemptAt.present) {
-      map['next_attempt_at'] = Variable<DateTime>(nextAttemptAt.value);
-    }
-    if (lastError.present) {
-      map['last_error'] = Variable<String>(lastError.value);
+    if (synced.present) {
+      map['synced'] = Variable<bool>(synced.value);
     }
     return map;
   }
@@ -1727,14 +2328,13 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxRow> {
   @override
   String toString() {
     return (StringBuffer('SyncOutboxCompanion(')
-          ..write('localId: $localId, ')
-          ..write('type: $type, ')
+          ..write('id: $id, ')
+          ..write('action: $action, ')
+          ..write('entityType: $entityType, ')
           ..write('entityId: $entityId, ')
-          ..write('payloadJson: $payloadJson, ')
-          ..write('attempts: $attempts, ')
+          ..write('payload: $payload, ')
           ..write('createdAt: $createdAt, ')
-          ..write('nextAttemptAt: $nextAttemptAt, ')
-          ..write('lastError: $lastError')
+          ..write('synced: $synced')
           ..write(')'))
         .toString();
   }
@@ -1763,39 +2363,69 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$WardrobeEntriesTableCreateCompanionBuilder = WardrobeEntriesCompanion
     Function({
   required String id,
+  Value<String?> serverId,
   required String name,
   required String category,
-  Value<String?> subcategory,
-  Value<String> style,
-  Value<String> iconEmoji,
-  Value<bool> isFavorite,
-  Value<bool> isArchived,
-  Value<int> wearCount,
+  required String subcategory,
+  required String style,
+  required String iconEmoji,
   Value<String?> imageUrl,
-  Value<String?> localImagePath,
   Value<String?> blurHash,
+  Value<int?> minTemp,
+  Value<int?> maxTemp,
+  Value<int?> warmthLevel,
+  required bool rainOk,
+  required bool snowOk,
+  required bool windOk,
+  Value<String?> usage,
+  Value<String?> materials,
+  required int wearCount,
+  Value<DateTime?> lastWornAt,
+  required bool isFavorite,
+  required bool isArchived,
+  required DateTime createdAt,
   required DateTime updatedAt,
-  Value<bool> dirty,
   Value<DateTime?> lastSyncedAt,
+  required bool dirty,
+  Value<String?> season,
+  Value<String?> gender,
+  Value<String?> fit,
+  Value<String?> pattern,
+  Value<String?> localImagePath,
   Value<int> rowid,
 });
 typedef $$WardrobeEntriesTableUpdateCompanionBuilder = WardrobeEntriesCompanion
     Function({
   Value<String> id,
+  Value<String?> serverId,
   Value<String> name,
   Value<String> category,
-  Value<String?> subcategory,
+  Value<String> subcategory,
   Value<String> style,
   Value<String> iconEmoji,
+  Value<String?> imageUrl,
+  Value<String?> blurHash,
+  Value<int?> minTemp,
+  Value<int?> maxTemp,
+  Value<int?> warmthLevel,
+  Value<bool> rainOk,
+  Value<bool> snowOk,
+  Value<bool> windOk,
+  Value<String?> usage,
+  Value<String?> materials,
+  Value<int> wearCount,
+  Value<DateTime?> lastWornAt,
   Value<bool> isFavorite,
   Value<bool> isArchived,
-  Value<int> wearCount,
-  Value<String?> imageUrl,
-  Value<String?> localImagePath,
-  Value<String?> blurHash,
+  Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
-  Value<bool> dirty,
   Value<DateTime?> lastSyncedAt,
+  Value<bool> dirty,
+  Value<String?> season,
+  Value<String?> gender,
+  Value<String?> fit,
+  Value<String?> pattern,
+  Value<String?> localImagePath,
   Value<int> rowid,
 });
 
@@ -1810,6 +2440,9 @@ class $$WardrobeEntriesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get serverId => $composableBuilder(
+      column: $table.serverId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
@@ -1826,33 +2459,75 @@ class $$WardrobeEntriesTableFilterComposer
   ColumnFilters<String> get iconEmoji => $composableBuilder(
       column: $table.iconEmoji, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+      column: $table.imageUrl, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get blurHash => $composableBuilder(
+      column: $table.blurHash, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get minTemp => $composableBuilder(
+      column: $table.minTemp, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get maxTemp => $composableBuilder(
+      column: $table.maxTemp, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get warmthLevel => $composableBuilder(
+      column: $table.warmthLevel, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get rainOk => $composableBuilder(
+      column: $table.rainOk, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get snowOk => $composableBuilder(
+      column: $table.snowOk, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get windOk => $composableBuilder(
+      column: $table.windOk, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get usage => $composableBuilder(
+      column: $table.usage, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get materials => $composableBuilder(
+      column: $table.materials, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get wearCount => $composableBuilder(
+      column: $table.wearCount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastWornAt => $composableBuilder(
+      column: $table.lastWornAt, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<bool> get isFavorite => $composableBuilder(
       column: $table.isFavorite, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isArchived => $composableBuilder(
       column: $table.isArchived, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get wearCount => $composableBuilder(
-      column: $table.wearCount, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get imageUrl => $composableBuilder(
-      column: $table.imageUrl, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get localImagePath => $composableBuilder(
-      column: $table.localImagePath,
-      builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get blurHash => $composableBuilder(
-      column: $table.blurHash, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<bool> get dirty => $composableBuilder(
       column: $table.dirty, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get season => $composableBuilder(
+      column: $table.season, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get gender => $composableBuilder(
+      column: $table.gender, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fit => $composableBuilder(
+      column: $table.fit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pattern => $composableBuilder(
+      column: $table.pattern, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get localImagePath => $composableBuilder(
+      column: $table.localImagePath,
+      builder: (column) => ColumnFilters(column));
 }
 
 class $$WardrobeEntriesTableOrderingComposer
@@ -1866,6 +2541,9 @@ class $$WardrobeEntriesTableOrderingComposer
   });
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get serverId => $composableBuilder(
+      column: $table.serverId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnOrderings(column));
@@ -1882,33 +2560,75 @@ class $$WardrobeEntriesTableOrderingComposer
   ColumnOrderings<String> get iconEmoji => $composableBuilder(
       column: $table.iconEmoji, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+      column: $table.imageUrl, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get blurHash => $composableBuilder(
+      column: $table.blurHash, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get minTemp => $composableBuilder(
+      column: $table.minTemp, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get maxTemp => $composableBuilder(
+      column: $table.maxTemp, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get warmthLevel => $composableBuilder(
+      column: $table.warmthLevel, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get rainOk => $composableBuilder(
+      column: $table.rainOk, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get snowOk => $composableBuilder(
+      column: $table.snowOk, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get windOk => $composableBuilder(
+      column: $table.windOk, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get usage => $composableBuilder(
+      column: $table.usage, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get materials => $composableBuilder(
+      column: $table.materials, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get wearCount => $composableBuilder(
+      column: $table.wearCount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastWornAt => $composableBuilder(
+      column: $table.lastWornAt, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get isFavorite => $composableBuilder(
       column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<bool> get isArchived => $composableBuilder(
       column: $table.isArchived, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get wearCount => $composableBuilder(
-      column: $table.wearCount, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get imageUrl => $composableBuilder(
-      column: $table.imageUrl, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get localImagePath => $composableBuilder(
-      column: $table.localImagePath,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get blurHash => $composableBuilder(
-      column: $table.blurHash, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get dirty => $composableBuilder(
       column: $table.dirty, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt,
+  ColumnOrderings<String> get season => $composableBuilder(
+      column: $table.season, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get gender => $composableBuilder(
+      column: $table.gender, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fit => $composableBuilder(
+      column: $table.fit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pattern => $composableBuilder(
+      column: $table.pattern, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get localImagePath => $composableBuilder(
+      column: $table.localImagePath,
       builder: (column) => ColumnOrderings(column));
 }
 
@@ -1923,6 +2643,9 @@ class $$WardrobeEntriesTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get serverId =>
+      $composableBuilder(column: $table.serverId, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -1939,32 +2662,74 @@ class $$WardrobeEntriesTableAnnotationComposer
   GeneratedColumn<String> get iconEmoji =>
       $composableBuilder(column: $table.iconEmoji, builder: (column) => column);
 
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get blurHash =>
+      $composableBuilder(column: $table.blurHash, builder: (column) => column);
+
+  GeneratedColumn<int> get minTemp =>
+      $composableBuilder(column: $table.minTemp, builder: (column) => column);
+
+  GeneratedColumn<int> get maxTemp =>
+      $composableBuilder(column: $table.maxTemp, builder: (column) => column);
+
+  GeneratedColumn<int> get warmthLevel => $composableBuilder(
+      column: $table.warmthLevel, builder: (column) => column);
+
+  GeneratedColumn<bool> get rainOk =>
+      $composableBuilder(column: $table.rainOk, builder: (column) => column);
+
+  GeneratedColumn<bool> get snowOk =>
+      $composableBuilder(column: $table.snowOk, builder: (column) => column);
+
+  GeneratedColumn<bool> get windOk =>
+      $composableBuilder(column: $table.windOk, builder: (column) => column);
+
+  GeneratedColumn<String> get usage =>
+      $composableBuilder(column: $table.usage, builder: (column) => column);
+
+  GeneratedColumn<String> get materials =>
+      $composableBuilder(column: $table.materials, builder: (column) => column);
+
+  GeneratedColumn<int> get wearCount =>
+      $composableBuilder(column: $table.wearCount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastWornAt => $composableBuilder(
+      column: $table.lastWornAt, builder: (column) => column);
+
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
       column: $table.isFavorite, builder: (column) => column);
 
   GeneratedColumn<bool> get isArchived => $composableBuilder(
       column: $table.isArchived, builder: (column) => column);
 
-  GeneratedColumn<int> get wearCount =>
-      $composableBuilder(column: $table.wearCount, builder: (column) => column);
-
-  GeneratedColumn<String> get imageUrl =>
-      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
-
-  GeneratedColumn<String> get localImagePath => $composableBuilder(
-      column: $table.localImagePath, builder: (column) => column);
-
-  GeneratedColumn<String> get blurHash =>
-      $composableBuilder(column: $table.blurHash, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => column);
+
   GeneratedColumn<bool> get dirty =>
       $composableBuilder(column: $table.dirty, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt, builder: (column) => column);
+  GeneratedColumn<String> get season =>
+      $composableBuilder(column: $table.season, builder: (column) => column);
+
+  GeneratedColumn<String> get gender =>
+      $composableBuilder(column: $table.gender, builder: (column) => column);
+
+  GeneratedColumn<String> get fit =>
+      $composableBuilder(column: $table.fit, builder: (column) => column);
+
+  GeneratedColumn<String> get pattern =>
+      $composableBuilder(column: $table.pattern, builder: (column) => column);
+
+  GeneratedColumn<String> get localImagePath => $composableBuilder(
+      column: $table.localImagePath, builder: (column) => column);
 }
 
 class $$WardrobeEntriesTableTableManager extends RootTableManager<
@@ -1995,74 +2760,134 @@ class $$WardrobeEntriesTableTableManager extends RootTableManager<
               $$WardrobeEntriesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
+            Value<String?> serverId = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> category = const Value.absent(),
-            Value<String?> subcategory = const Value.absent(),
+            Value<String> subcategory = const Value.absent(),
             Value<String> style = const Value.absent(),
             Value<String> iconEmoji = const Value.absent(),
+            Value<String?> imageUrl = const Value.absent(),
+            Value<String?> blurHash = const Value.absent(),
+            Value<int?> minTemp = const Value.absent(),
+            Value<int?> maxTemp = const Value.absent(),
+            Value<int?> warmthLevel = const Value.absent(),
+            Value<bool> rainOk = const Value.absent(),
+            Value<bool> snowOk = const Value.absent(),
+            Value<bool> windOk = const Value.absent(),
+            Value<String?> usage = const Value.absent(),
+            Value<String?> materials = const Value.absent(),
+            Value<int> wearCount = const Value.absent(),
+            Value<DateTime?> lastWornAt = const Value.absent(),
             Value<bool> isFavorite = const Value.absent(),
             Value<bool> isArchived = const Value.absent(),
-            Value<int> wearCount = const Value.absent(),
-            Value<String?> imageUrl = const Value.absent(),
-            Value<String?> localImagePath = const Value.absent(),
-            Value<String?> blurHash = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
-            Value<bool> dirty = const Value.absent(),
             Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<bool> dirty = const Value.absent(),
+            Value<String?> season = const Value.absent(),
+            Value<String?> gender = const Value.absent(),
+            Value<String?> fit = const Value.absent(),
+            Value<String?> pattern = const Value.absent(),
+            Value<String?> localImagePath = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               WardrobeEntriesCompanion(
             id: id,
+            serverId: serverId,
             name: name,
             category: category,
             subcategory: subcategory,
             style: style,
             iconEmoji: iconEmoji,
+            imageUrl: imageUrl,
+            blurHash: blurHash,
+            minTemp: minTemp,
+            maxTemp: maxTemp,
+            warmthLevel: warmthLevel,
+            rainOk: rainOk,
+            snowOk: snowOk,
+            windOk: windOk,
+            usage: usage,
+            materials: materials,
+            wearCount: wearCount,
+            lastWornAt: lastWornAt,
             isFavorite: isFavorite,
             isArchived: isArchived,
-            wearCount: wearCount,
-            imageUrl: imageUrl,
-            localImagePath: localImagePath,
-            blurHash: blurHash,
+            createdAt: createdAt,
             updatedAt: updatedAt,
-            dirty: dirty,
             lastSyncedAt: lastSyncedAt,
+            dirty: dirty,
+            season: season,
+            gender: gender,
+            fit: fit,
+            pattern: pattern,
+            localImagePath: localImagePath,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String id,
+            Value<String?> serverId = const Value.absent(),
             required String name,
             required String category,
-            Value<String?> subcategory = const Value.absent(),
-            Value<String> style = const Value.absent(),
-            Value<String> iconEmoji = const Value.absent(),
-            Value<bool> isFavorite = const Value.absent(),
-            Value<bool> isArchived = const Value.absent(),
-            Value<int> wearCount = const Value.absent(),
+            required String subcategory,
+            required String style,
+            required String iconEmoji,
             Value<String?> imageUrl = const Value.absent(),
-            Value<String?> localImagePath = const Value.absent(),
             Value<String?> blurHash = const Value.absent(),
+            Value<int?> minTemp = const Value.absent(),
+            Value<int?> maxTemp = const Value.absent(),
+            Value<int?> warmthLevel = const Value.absent(),
+            required bool rainOk,
+            required bool snowOk,
+            required bool windOk,
+            Value<String?> usage = const Value.absent(),
+            Value<String?> materials = const Value.absent(),
+            required int wearCount,
+            Value<DateTime?> lastWornAt = const Value.absent(),
+            required bool isFavorite,
+            required bool isArchived,
+            required DateTime createdAt,
             required DateTime updatedAt,
-            Value<bool> dirty = const Value.absent(),
             Value<DateTime?> lastSyncedAt = const Value.absent(),
+            required bool dirty,
+            Value<String?> season = const Value.absent(),
+            Value<String?> gender = const Value.absent(),
+            Value<String?> fit = const Value.absent(),
+            Value<String?> pattern = const Value.absent(),
+            Value<String?> localImagePath = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               WardrobeEntriesCompanion.insert(
             id: id,
+            serverId: serverId,
             name: name,
             category: category,
             subcategory: subcategory,
             style: style,
             iconEmoji: iconEmoji,
+            imageUrl: imageUrl,
+            blurHash: blurHash,
+            minTemp: minTemp,
+            maxTemp: maxTemp,
+            warmthLevel: warmthLevel,
+            rainOk: rainOk,
+            snowOk: snowOk,
+            windOk: windOk,
+            usage: usage,
+            materials: materials,
+            wearCount: wearCount,
+            lastWornAt: lastWornAt,
             isFavorite: isFavorite,
             isArchived: isArchived,
-            wearCount: wearCount,
-            imageUrl: imageUrl,
-            localImagePath: localImagePath,
-            blurHash: blurHash,
+            createdAt: createdAt,
             updatedAt: updatedAt,
-            dirty: dirty,
             lastSyncedAt: lastSyncedAt,
+            dirty: dirty,
+            season: season,
+            gender: gender,
+            fit: fit,
+            pattern: pattern,
+            localImagePath: localImagePath,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -2090,31 +2915,33 @@ typedef $$WardrobeEntriesTableProcessedTableManager = ProcessedTableManager<
 typedef $$RecommendationsTableCreateCompanionBuilder = RecommendationsCompanion
     Function({
   required String id,
-  Value<String> origin,
   Value<String?> serverId,
-  required DateTime createdAt,
-  Value<bool> isFavorite,
+  required String origin,
   required String outfitDataJson,
   required String weatherDataJson,
+  required bool isFavorite,
+  required DateTime createdAt,
   required DateTime updatedAt,
-  Value<bool> dirty,
   Value<DateTime?> lastSyncedAt,
-  Value<DateTime?> publishedAt,
+  required bool dirty,
+  Value<String?> imageUrl,
+  Value<String?> localImagePath,
   Value<int> rowid,
 });
 typedef $$RecommendationsTableUpdateCompanionBuilder = RecommendationsCompanion
     Function({
   Value<String> id,
-  Value<String> origin,
   Value<String?> serverId,
-  Value<DateTime> createdAt,
-  Value<bool> isFavorite,
+  Value<String> origin,
   Value<String> outfitDataJson,
   Value<String> weatherDataJson,
+  Value<bool> isFavorite,
+  Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
-  Value<bool> dirty,
   Value<DateTime?> lastSyncedAt,
-  Value<DateTime?> publishedAt,
+  Value<bool> dirty,
+  Value<String?> imageUrl,
+  Value<String?> localImagePath,
   Value<int> rowid,
 });
 
@@ -2130,17 +2957,11 @@ class $$RecommendationsTableFilterComposer
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get origin => $composableBuilder(
-      column: $table.origin, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<String> get serverId => $composableBuilder(
       column: $table.serverId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get origin => $composableBuilder(
+      column: $table.origin, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get outfitDataJson => $composableBuilder(
       column: $table.outfitDataJson,
@@ -2150,17 +2971,27 @@ class $$RecommendationsTableFilterComposer
       column: $table.weatherDataJson,
       builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<bool> get dirty => $composableBuilder(
-      column: $table.dirty, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
       column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get publishedAt => $composableBuilder(
-      column: $table.publishedAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<bool> get dirty => $composableBuilder(
+      column: $table.dirty, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+      column: $table.imageUrl, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get localImagePath => $composableBuilder(
+      column: $table.localImagePath,
+      builder: (column) => ColumnFilters(column));
 }
 
 class $$RecommendationsTableOrderingComposer
@@ -2175,17 +3006,11 @@ class $$RecommendationsTableOrderingComposer
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get origin => $composableBuilder(
-      column: $table.origin, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get serverId => $composableBuilder(
       column: $table.serverId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get origin => $composableBuilder(
+      column: $table.origin, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get outfitDataJson => $composableBuilder(
       column: $table.outfitDataJson,
@@ -2195,18 +3020,28 @@ class $$RecommendationsTableOrderingComposer
       column: $table.weatherDataJson,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<bool> get dirty => $composableBuilder(
-      column: $table.dirty, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
       column: $table.lastSyncedAt,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get publishedAt => $composableBuilder(
-      column: $table.publishedAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<bool> get dirty => $composableBuilder(
+      column: $table.dirty, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+      column: $table.imageUrl, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get localImagePath => $composableBuilder(
+      column: $table.localImagePath,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$RecommendationsTableAnnotationComposer
@@ -2221,17 +3056,11 @@ class $$RecommendationsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get origin =>
-      $composableBuilder(column: $table.origin, builder: (column) => column);
-
   GeneratedColumn<String> get serverId =>
       $composableBuilder(column: $table.serverId, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => column);
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
 
   GeneratedColumn<String> get outfitDataJson => $composableBuilder(
       column: $table.outfitDataJson, builder: (column) => column);
@@ -2239,33 +3068,42 @@ class $$RecommendationsTableAnnotationComposer
   GeneratedColumn<String> get weatherDataJson => $composableBuilder(
       column: $table.weatherDataJson, builder: (column) => column);
 
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  GeneratedColumn<bool> get dirty =>
-      $composableBuilder(column: $table.dirty, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
       column: $table.lastSyncedAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get publishedAt => $composableBuilder(
-      column: $table.publishedAt, builder: (column) => column);
+  GeneratedColumn<bool> get dirty =>
+      $composableBuilder(column: $table.dirty, builder: (column) => column);
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get localImagePath => $composableBuilder(
+      column: $table.localImagePath, builder: (column) => column);
 }
 
 class $$RecommendationsTableTableManager extends RootTableManager<
     _$AppDatabase,
     $RecommendationsTable,
-    RecommendationRow,
+    Recommendation,
     $$RecommendationsTableFilterComposer,
     $$RecommendationsTableOrderingComposer,
     $$RecommendationsTableAnnotationComposer,
     $$RecommendationsTableCreateCompanionBuilder,
     $$RecommendationsTableUpdateCompanionBuilder,
     (
-      RecommendationRow,
-      BaseReferences<_$AppDatabase, $RecommendationsTable, RecommendationRow>
+      Recommendation,
+      BaseReferences<_$AppDatabase, $RecommendationsTable, Recommendation>
     ),
-    RecommendationRow,
+    Recommendation,
     PrefetchHooks Function()> {
   $$RecommendationsTableTableManager(
       _$AppDatabase db, $RecommendationsTable table)
@@ -2280,58 +3118,62 @@ class $$RecommendationsTableTableManager extends RootTableManager<
               $$RecommendationsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String> origin = const Value.absent(),
             Value<String?> serverId = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<bool> isFavorite = const Value.absent(),
+            Value<String> origin = const Value.absent(),
             Value<String> outfitDataJson = const Value.absent(),
             Value<String> weatherDataJson = const Value.absent(),
+            Value<bool> isFavorite = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
-            Value<bool> dirty = const Value.absent(),
             Value<DateTime?> lastSyncedAt = const Value.absent(),
-            Value<DateTime?> publishedAt = const Value.absent(),
+            Value<bool> dirty = const Value.absent(),
+            Value<String?> imageUrl = const Value.absent(),
+            Value<String?> localImagePath = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecommendationsCompanion(
             id: id,
-            origin: origin,
             serverId: serverId,
-            createdAt: createdAt,
-            isFavorite: isFavorite,
+            origin: origin,
             outfitDataJson: outfitDataJson,
             weatherDataJson: weatherDataJson,
+            isFavorite: isFavorite,
+            createdAt: createdAt,
             updatedAt: updatedAt,
-            dirty: dirty,
             lastSyncedAt: lastSyncedAt,
-            publishedAt: publishedAt,
+            dirty: dirty,
+            imageUrl: imageUrl,
+            localImagePath: localImagePath,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String id,
-            Value<String> origin = const Value.absent(),
             Value<String?> serverId = const Value.absent(),
-            required DateTime createdAt,
-            Value<bool> isFavorite = const Value.absent(),
+            required String origin,
             required String outfitDataJson,
             required String weatherDataJson,
+            required bool isFavorite,
+            required DateTime createdAt,
             required DateTime updatedAt,
-            Value<bool> dirty = const Value.absent(),
             Value<DateTime?> lastSyncedAt = const Value.absent(),
-            Value<DateTime?> publishedAt = const Value.absent(),
+            required bool dirty,
+            Value<String?> imageUrl = const Value.absent(),
+            Value<String?> localImagePath = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecommendationsCompanion.insert(
             id: id,
-            origin: origin,
             serverId: serverId,
-            createdAt: createdAt,
-            isFavorite: isFavorite,
+            origin: origin,
             outfitDataJson: outfitDataJson,
             weatherDataJson: weatherDataJson,
+            isFavorite: isFavorite,
+            createdAt: createdAt,
             updatedAt: updatedAt,
-            dirty: dirty,
             lastSyncedAt: lastSyncedAt,
-            publishedAt: publishedAt,
+            dirty: dirty,
+            imageUrl: imageUrl,
+            localImagePath: localImagePath,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -2344,37 +3186,35 @@ class $$RecommendationsTableTableManager extends RootTableManager<
 typedef $$RecommendationsTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
     $RecommendationsTable,
-    RecommendationRow,
+    Recommendation,
     $$RecommendationsTableFilterComposer,
     $$RecommendationsTableOrderingComposer,
     $$RecommendationsTableAnnotationComposer,
     $$RecommendationsTableCreateCompanionBuilder,
     $$RecommendationsTableUpdateCompanionBuilder,
     (
-      RecommendationRow,
-      BaseReferences<_$AppDatabase, $RecommendationsTable, RecommendationRow>
+      Recommendation,
+      BaseReferences<_$AppDatabase, $RecommendationsTable, Recommendation>
     ),
-    RecommendationRow,
+    Recommendation,
     PrefetchHooks Function()>;
 typedef $$SyncOutboxTableCreateCompanionBuilder = SyncOutboxCompanion Function({
-  Value<int> localId,
-  required String type,
-  Value<String?> entityId,
-  required String payloadJson,
-  Value<int> attempts,
-  Value<DateTime> createdAt,
-  Value<DateTime> nextAttemptAt,
-  Value<String?> lastError,
+  Value<int> id,
+  required String action,
+  required String entityType,
+  required String entityId,
+  required String payload,
+  required DateTime createdAt,
+  required bool synced,
 });
 typedef $$SyncOutboxTableUpdateCompanionBuilder = SyncOutboxCompanion Function({
-  Value<int> localId,
-  Value<String> type,
-  Value<String?> entityId,
-  Value<String> payloadJson,
-  Value<int> attempts,
+  Value<int> id,
+  Value<String> action,
+  Value<String> entityType,
+  Value<String> entityId,
+  Value<String> payload,
   Value<DateTime> createdAt,
-  Value<DateTime> nextAttemptAt,
-  Value<String?> lastError,
+  Value<bool> synced,
 });
 
 class $$SyncOutboxTableFilterComposer
@@ -2386,29 +3226,26 @@ class $$SyncOutboxTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get localId => $composableBuilder(
-      column: $table.localId, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get type => $composableBuilder(
-      column: $table.type, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get action => $composableBuilder(
+      column: $table.action, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+      column: $table.entityType, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get entityId => $composableBuilder(
       column: $table.entityId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get payloadJson => $composableBuilder(
-      column: $table.payloadJson, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get attempts => $composableBuilder(
-      column: $table.attempts, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get payload => $composableBuilder(
+      column: $table.payload, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get nextAttemptAt => $composableBuilder(
-      column: $table.nextAttemptAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get lastError => $composableBuilder(
-      column: $table.lastError, builder: (column) => ColumnFilters(column));
+  ColumnFilters<bool> get synced => $composableBuilder(
+      column: $table.synced, builder: (column) => ColumnFilters(column));
 }
 
 class $$SyncOutboxTableOrderingComposer
@@ -2420,30 +3257,26 @@ class $$SyncOutboxTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get localId => $composableBuilder(
-      column: $table.localId, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get type => $composableBuilder(
-      column: $table.type, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get action => $composableBuilder(
+      column: $table.action, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+      column: $table.entityType, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get entityId => $composableBuilder(
       column: $table.entityId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get payloadJson => $composableBuilder(
-      column: $table.payloadJson, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get attempts => $composableBuilder(
-      column: $table.attempts, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get payload => $composableBuilder(
+      column: $table.payload, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get nextAttemptAt => $composableBuilder(
-      column: $table.nextAttemptAt,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get lastError => $composableBuilder(
-      column: $table.lastError, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<bool> get synced => $composableBuilder(
+      column: $table.synced, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SyncOutboxTableAnnotationComposer
@@ -2455,45 +3288,42 @@ class $$SyncOutboxTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get localId =>
-      $composableBuilder(column: $table.localId, builder: (column) => column);
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get action =>
+      $composableBuilder(column: $table.action, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+      column: $table.entityType, builder: (column) => column);
 
   GeneratedColumn<String> get entityId =>
       $composableBuilder(column: $table.entityId, builder: (column) => column);
 
-  GeneratedColumn<String> get payloadJson => $composableBuilder(
-      column: $table.payloadJson, builder: (column) => column);
-
-  GeneratedColumn<int> get attempts =>
-      $composableBuilder(column: $table.attempts, builder: (column) => column);
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get nextAttemptAt => $composableBuilder(
-      column: $table.nextAttemptAt, builder: (column) => column);
-
-  GeneratedColumn<String> get lastError =>
-      $composableBuilder(column: $table.lastError, builder: (column) => column);
+  GeneratedColumn<bool> get synced =>
+      $composableBuilder(column: $table.synced, builder: (column) => column);
 }
 
 class $$SyncOutboxTableTableManager extends RootTableManager<
     _$AppDatabase,
     $SyncOutboxTable,
-    SyncOutboxRow,
+    SyncOutboxData,
     $$SyncOutboxTableFilterComposer,
     $$SyncOutboxTableOrderingComposer,
     $$SyncOutboxTableAnnotationComposer,
     $$SyncOutboxTableCreateCompanionBuilder,
     $$SyncOutboxTableUpdateCompanionBuilder,
     (
-      SyncOutboxRow,
-      BaseReferences<_$AppDatabase, $SyncOutboxTable, SyncOutboxRow>
+      SyncOutboxData,
+      BaseReferences<_$AppDatabase, $SyncOutboxTable, SyncOutboxData>
     ),
-    SyncOutboxRow,
+    SyncOutboxData,
     PrefetchHooks Function()> {
   $$SyncOutboxTableTableManager(_$AppDatabase db, $SyncOutboxTable table)
       : super(TableManagerState(
@@ -2506,44 +3336,40 @@ class $$SyncOutboxTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$SyncOutboxTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<int> localId = const Value.absent(),
-            Value<String> type = const Value.absent(),
-            Value<String?> entityId = const Value.absent(),
-            Value<String> payloadJson = const Value.absent(),
-            Value<int> attempts = const Value.absent(),
+            Value<int> id = const Value.absent(),
+            Value<String> action = const Value.absent(),
+            Value<String> entityType = const Value.absent(),
+            Value<String> entityId = const Value.absent(),
+            Value<String> payload = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
-            Value<DateTime> nextAttemptAt = const Value.absent(),
-            Value<String?> lastError = const Value.absent(),
+            Value<bool> synced = const Value.absent(),
           }) =>
               SyncOutboxCompanion(
-            localId: localId,
-            type: type,
+            id: id,
+            action: action,
+            entityType: entityType,
             entityId: entityId,
-            payloadJson: payloadJson,
-            attempts: attempts,
+            payload: payload,
             createdAt: createdAt,
-            nextAttemptAt: nextAttemptAt,
-            lastError: lastError,
+            synced: synced,
           ),
           createCompanionCallback: ({
-            Value<int> localId = const Value.absent(),
-            required String type,
-            Value<String?> entityId = const Value.absent(),
-            required String payloadJson,
-            Value<int> attempts = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<DateTime> nextAttemptAt = const Value.absent(),
-            Value<String?> lastError = const Value.absent(),
+            Value<int> id = const Value.absent(),
+            required String action,
+            required String entityType,
+            required String entityId,
+            required String payload,
+            required DateTime createdAt,
+            required bool synced,
           }) =>
               SyncOutboxCompanion.insert(
-            localId: localId,
-            type: type,
+            id: id,
+            action: action,
+            entityType: entityType,
             entityId: entityId,
-            payloadJson: payloadJson,
-            attempts: attempts,
+            payload: payload,
             createdAt: createdAt,
-            nextAttemptAt: nextAttemptAt,
-            lastError: lastError,
+            synced: synced,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -2555,17 +3381,17 @@ class $$SyncOutboxTableTableManager extends RootTableManager<
 typedef $$SyncOutboxTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
     $SyncOutboxTable,
-    SyncOutboxRow,
+    SyncOutboxData,
     $$SyncOutboxTableFilterComposer,
     $$SyncOutboxTableOrderingComposer,
     $$SyncOutboxTableAnnotationComposer,
     $$SyncOutboxTableCreateCompanionBuilder,
     $$SyncOutboxTableUpdateCompanionBuilder,
     (
-      SyncOutboxRow,
-      BaseReferences<_$AppDatabase, $SyncOutboxTable, SyncOutboxRow>
+      SyncOutboxData,
+      BaseReferences<_$AppDatabase, $SyncOutboxTable, SyncOutboxData>
     ),
-    SyncOutboxRow,
+    SyncOutboxData,
     PrefetchHooks Function()>;
 
 class $AppDatabaseManager {

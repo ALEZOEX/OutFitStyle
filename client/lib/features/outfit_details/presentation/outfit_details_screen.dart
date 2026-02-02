@@ -6,10 +6,11 @@ import 'package:go_router/go_router.dart';
 import '../../../app/di.dart';
 import '../../../data/local/app_database.dart';
 import '../../../ui/atoms/haptics.dart';
+import '../../../ui/atoms/outfit_app_bar.dart';
 import '../../../domain/outfit/outfit_builder.dart';
-import '../../wardrobe/presentation/wardrobe_controller.dart';
+import '../wardrobe/presentation/wardrobe_controller.dart';
 import 'widgets/category_swipe_replacer.dart';
-import '../../share/presentation/outfit_share_screen.dart';
+import '../share/presentation/outfit_share_screen.dart';
 
 final outfitByIdProvider =
     StreamProvider.autoDispose.family<RecommendationRow?, String>((ref, id) {
@@ -70,8 +71,8 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
         final wardrobeAsync = ref.watch(wardrobeStreamProvider);
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Образ'),
+          appBar: OutfitAppBar(
+            title: 'Образ',
             actions: [
               Row(
                 mainAxisSize: MainAxisSize.min,

@@ -1,4 +1,4 @@
-import '../../data/local/app_database.dart';
+import '../data/local/app_database.dart';
 
 class OutfitBuilder {
   /// Собираем финальный список линий образа:
