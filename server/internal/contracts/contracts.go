@@ -34,7 +34,7 @@ type UserProfile struct {
 
 // MLItem represents a clothing item for ranking
 type MLItem struct {
-	ID          int64    `json:"id"`
+	ID          int      `json:"id"`
 	Name        string   `json:"name"`
 	Category    string   `json:"category"`
 	Subcategory string   `json:"subcategory"`
@@ -43,10 +43,10 @@ type MLItem struct {
 	Usage       string   `json:"usage"`
 	Season      string   `json:"season"`
 	BaseColour  string   `json:"base_colour"`
-	Formality   int16    `json:"formality"`
-	Warmth      int16    `json:"warmth"`
-	MinTemp     int16    `json:"min_temp"`
-	MaxTemp     int16    `json:"max_temp"`
+	Formality   int      `json:"formality"`
+	Warmth      int      `json:"warmth"`
+	MinTemp     int      `json:"min_temp"`
+	MaxTemp     int      `json:"max_temp"`
 	Materials   []string `json:"materials"`
 	Fit         string   `json:"fit"`
 	Pattern     string   `json:"pattern"`
@@ -69,6 +69,6 @@ type MLRankResponse struct {
 
 // RankedItem represents a ranked clothing item
 type RankedItem struct {
-	ID    int64   `json:"id"`
+	ID    int     `json:"id"`
 	Score float64 `json:"score"`
 }

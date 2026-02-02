@@ -6,17 +6,15 @@ package integration_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
-	"sort"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/handlers"
@@ -24,10 +22,9 @@ import (
 	"outfitstyle/server/internal/config"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/infrastructure/external"
+	"outfitstyle/server/internal/infrastructure/eventing"
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
 	pg "outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
-
-	"github.com/gorilla/mux"
 )
 
 // TestSmoke_AuthWardrobeRecommendation выполняет сквозной тест аутентификации, создания гардероба и получения рекомендаций
@@ -40,16 +37,14 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 
 	logger := zap.NewNop()
 
-	// Применяем миграции (идемпотентная операция)
-	if err := applyMigrations(t, dsn, filepath.Join(".", "migrations")); err != nil {
-		t.Fatalf("apply migrations: %v", err)
-	}
-
 	db, err := dbpg.NewDB(dsn, logger)
 	if err != nil {
 		t.Fatalf("db connect: %v", err)
 	}
 	defer db.Close()
+
+	// Apply migrations using the db pool
+	applyMigrations(t, db.Pool())
 
 	// Создаем заглушку OpenWeather API для тестирования
 	weatherSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -91,13 +86,13 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 		_ = json.NewDecoder(r.Body).Decode(&req)
 
 		cands, _ := req["candidates"].([]any)
-		byCat := map[string][]string{}
+		byCat := map[string][]int{}
 		for _, c := range cands {
 			m, _ := c.(map[string]any)
 			cat, _ := m["category"].(string)
-			id, _ := m["id"].(string)
-			if cat != "" && id != "" {
-				byCat[cat] = append(byCat[cat], id)
+			id, _ := m["id"].(float64) // JSON numbers are parsed as float64
+			if cat != "" {
+				byCat[cat] = append(byCat[cat], int(id))
 			}
 		}
 
@@ -111,7 +106,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 			// выбираем первый элемент
 			rankings[cat] = []any{
 				map[string]any{
-					"id":         ids[0],
+					"id":         float64(ids[0]), // Convert back to float64 for JSON
 					"score":      0.9,
 					"confidence": 0.8,
 					"factors":    map[string]any{"stub": true},
@@ -157,27 +152,31 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	}
 
 	// Repos
-	userRepo := pg.NewUserRepository(db, logger)
-	sessionRepo := pg.NewSessionRepository(db, logger)
-	clothingRepo := pg.NewClothingRepository(db, logger)
-	wardrobeRepo := pg.NewWardrobeRepository(db)
-	recRepo := pg.NewRecommendationRepository(db, logger)
-	subRepo := pg.NewSubscriptionRepository(db, logger)
+	userRepo := pg.NewUserRepository(db.Pool(), logger)
+	sessionRepo := pg.NewSessionRepository(db.Pool(), logger)
+	clothingRepo := pg.NewClothingRepository(db.Pool(), nil, logger)
+	wardrobeRepo := pg.NewWardrobeRepository(db.Pool())
+	recRepo := pg.NewRecommendationRepository(db.Pool(), nil, logger)
+	subRepo := pg.NewSubscriptionRepository(db.Pool(), logger)
 
 	// Clients/services
 	tokenSvc := services.NewTokenService(cfg.Security.JWTSecret, cfg.Security.AccessTokenTTL, cfg.Security.RefreshTokenTTL)
-	authSvc := services.NewAuthService(userRepo, sessionRepo, tokenSvc)
+	googleClient := external.NewGoogleAuthClient(cfg.Security.GoogleClientID)
+	authSvc := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient)
 
 	subSvc := services.NewSubscriptionService(subRepo)
 	subLimiter := middleware.NewSubscriptionLimiter(subSvc)
 
 	ow := external.NewOpenWeatherClient(cfg.OpenWeather.APIKey, cfg.OpenWeather.BaseURL, 5*time.Second)
-	weatherSvc := external.NewWeatherService(ow, nil, 0)
+	provider := external.NewOpenWeatherProvider(ow)
+	weatherSvc := external.NewWeatherService(provider, nil, 0, "") // Pass empty provider name
 
 	ml := external.NewMLClient(cfg.MLService.BaseURL, cfg.MLService.Timeout)
 
 	wardrobeSvc := services.NewWardrobeService(wardrobeRepo, clothingRepo)
-	recSvc := services.NewRecommendationService(recRepo, clothingRepo, wardrobeRepo, weatherSvc, ml, nil, logger)
+	personalizationRepo := pg.NewPersonalizationRepository(db.Pool())
+	var eventPublisher eventing.EventPublisher = nil // No event publisher for tests
+	recSvc := services.NewRecommendationService(recRepo, clothingRepo, userRepo, weatherSvc, ml, personalizationRepo, eventPublisher, logger)
 
 	userSvc := services.NewUserService(userRepo, logger)
 
@@ -185,7 +184,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	authH := handlers.NewAuthHandler(authSvc)
 	userH := handlers.NewUserHandler(userSvc, nil, nil, nil, nil, logger) // only profile here, not testing for module 12
 	wardrobeH := handlers.NewWardrobeHandler(wardrobeSvc, logger)
-	recH := handlers.NewRecommendationHandler(recSvc, subSvc, weatherSvc, logger)
+	recH := handlers.NewRecommendationHandlerWithUseCases(recSvc, nil, logger, nil) // Using new constructor with use cases
 	subH := handlers.NewSubscriptionHandler(subSvc, logger)
 
 	// Router
@@ -302,89 +301,3 @@ func doGET(t *testing.T, url string, accessToken string) map[string]any {
 	return out
 }
 
-// applyMigrations применяет миграции к базе данных
-// Используется для подготовки тестовой базы данных перед запуском интеграционных тестов
-func applyMigrations(t *testing.T, dsn, dir string) error {
-	t.Helper()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
-	pool, err := dbpg.NewPGXPool(ctx, dsn) // см. helper ниже
-	if err != nil {
-		return err
-	}
-	defer pool.Close()
-
-	_, err = pool.Exec(ctx, `
-CREATE TABLE IF NOT EXISTS schema_migrations (
-version VARCHAR(64) PRIMARY KEY,
-applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-)`)
-	if err != nil {
-		return err
-	}
-
-	type mig struct {
-		version string
-		path    string
-		sql     []byte
-	}
-
-	var migs []mig
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return err
-	}
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		name := e.Name()
-		if !strings.HasSuffix(name, ".up.sql") {
-			continue
-		}
-		b, err := os.ReadFile(filepath.Join(dir, name))
-		if err != nil {
-			return err
-		}
-		v := strings.SplitN(name, "_", 2)[0]
-		migs = append(migs, mig{version: v, path: name, sql: b})
-	}
-	sort.Slice(migs, func(i, j int) bool { return migs[i].path < migs[j].path })
-
-	applied := map[string]bool{}
-	rows, err := pool.Query(ctx, `SELECT version FROM schema_migrations`)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var v string
-		_ = rows.Scan(&v)
-		applied[v] = true
-	}
-	rows.Close()
-
-	for _, m := range migs {
-		if applied[m.version] {
-			continue
-		}
-		tx, err := pool.Begin(ctx)
-		if err != nil {
-			return err
-		}
-		if _, err := tx.Exec(ctx, string(m.sql)); err != nil {
-			_ = tx.Rollback(ctx)
-			return err
-		}
-		if _, err := tx.Exec(ctx, `INSERT INTO schema_migrations(version) VALUES ($1)`, m.version); err != nil {
-			_ = tx.Rollback(ctx)
-			return err
-		}
-		if err := tx.Commit(ctx); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}

@@ -340,17 +340,17 @@ func (s *ClothingItemService) RankCandidatesByML(ctx context.Context, contextDat
 		return s.ruleBasedRank(candidates, contextData), nil
 	}
 
-	// Создание сопоставления из временных int64 ID в UUID и оценки
-	idToUUIDMap := make(map[int64]domain.ID)
-	scoreMap := make(map[int64]float64)
+	// Создание сопоставления из временных int ID в UUID и оценки
+	idToUUIDMap := make(map[int]domain.ID)
+	scoreMap := make(map[int]float64)
 
 	for _, rankedItem := range resp.Ranked {
 		scoreMap[rankedItem.ID] = rankedItem.Score
 	}
 
-	// Создание сопоставления из элементов одежды в их временные int64 ID
+	// Создание сопоставления из элементов одежды в их временные int ID
 	for _, item := range candidates {
-		tempID := domain.IDToInt64(item.ID)
+		tempID := int(domain.IDToInt64(item.ID)) // Convert int64 to int for ML service compatibility
 		idToUUIDMap[tempID] = item.ID
 	}
 
@@ -367,7 +367,7 @@ func (s *ClothingItemService) RankCandidatesByML(ctx context.Context, contextDat
 
 	scoredItems := make([]scoredItem, len(candidates))
 	for i, item := range candidates {
-		tempID := domain.IDToInt64(item.ID)
+		tempID := int(domain.IDToInt64(item.ID)) // Convert int64 to int for ML service compatibility
 		scoredItems[i] = scoredItem{
 			item:  item,
 			score: scoreMap[tempID],
@@ -412,7 +412,7 @@ func (s *ClothingItemService) domainToMLItem(item domain.ClothingItem) contracts
 	// Создание сопоставления из UUID в последовательные целочисленные ID для ML-сервиса
 	// Это временная схема сопоставления только для ML-коммуникации
 	// В реальной системе вы можете поддерживать постоянное сопоставление
-	tempID := domain.IDToInt64(item.ID) // Использование хэш-преобразования в int64
+	tempID := int(domain.IDToInt64(item.ID)) // Использование хэш-преобразования в int64, then convert to int
 
 	return contracts.MLItem{
 		ID:          tempID,
@@ -429,27 +429,27 @@ func (s *ClothingItemService) domainToMLItem(item domain.ClothingItem) contracts
 			}
 			return ""
 		}(),
-		Formality: func() int16 {
+		Formality: func() int {
 			if item.FormalityLevel != nil {
-				return *item.FormalityLevel
+				return int(*item.FormalityLevel) // Convert int16 to int
 			}
 			return 0
 		}(),
-		Warmth: func() int16 {
+		Warmth: func() int {
 			if item.WarmthLevel != nil {
-				return *item.WarmthLevel
+				return int(*item.WarmthLevel) // Convert int16 to int
 			}
 			return 0
 		}(),
-		MinTemp: func() int16 {
+		MinTemp: func() int {
 			if item.MinTemp != nil {
-				return *item.MinTemp
+				return int(*item.MinTemp) // Convert int16 to int
 			}
 			return 0
 		}(),
-		MaxTemp: func() int16 {
+		MaxTemp: func() int {
 			if item.MaxTemp != nil {
-				return *item.MaxTemp
+				return int(*item.MaxTemp) // Convert int16 to int
 			}
 			return 0
 		}(),
@@ -526,9 +526,9 @@ func (s *ClothingItemService) calculateRuleScore(item domain.ClothingItem, conte
 
 	// Соответствие теплу для холодной погоды
 	if temp < 10 { // Холодная погода
-		warmthValue := int64(0)
+		warmthValue := int(0)
 		if item.WarmthLevel != nil {
-			warmthValue = int64(*item.WarmthLevel)
+			warmthValue = int(*item.WarmthLevel) // Convert int16 to int
 		}
 		warmthFactor := float64(warmthValue) / 10.0
 		score += warmthFactor * 30
