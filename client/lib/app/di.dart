@@ -24,11 +24,20 @@ import '../data/repositories/auth_repository.dart';
 import '../data/repositories/profile_repository.dart';
 import '../data/image_store.dart';
 import '../features/recommendations/presentation/recommendations_controller.dart';
+import '../features/recommendations/presentation/recommendations_screen.dart';
+import '../features/recommendations/presentation/recommendation_detail_screen.dart';
 import '../features/wardrobe/presentation/wardrobe_controller.dart';
+import '../features/wardrobe/presentation/wardrobe_screen.dart';
 import '../features/admin/presentation/admin_controller.dart';
+import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/profile/presentation/profile_controller.dart';
 import '../features/generator/presentation/generator_controller.dart';
 import '../domain/states/generator_state.dart';
+import '../features/home/presentation/home_controller.dart';
+import '../features/settings/presentation/settings_controller.dart';
+import '../features/auth/presentation/auth_controller.dart';
+import '../features/onboarding/presentation/onboarding_controller.dart';
+import '../storage/local_storage.dart';
 
 final apiConfigProvider = Provider((ref) => Env.apiConfig());
 
@@ -127,6 +136,46 @@ final outboxPendingCountProvider = StreamProvider<int>((ref) {
   return db.syncOutboxDao.watchPendingCount();
 });
 
+// Добавляем недостающие провайдеры для контроллеров
+final recommendationsControllerProvider = StateNotifierProvider<RecommendationsController, RecommendationsState>((ref) {
+  return RecommendationsController(ref.watch(recommendationsDomainServiceProvider));
+});
+
+final wardrobeControllerProvider = StateNotifierProvider<WardrobeController, WardrobeState>((ref) {
+  return WardrobeController(ref.watch(wardrobeDomainServiceProvider));
+});
+
+final homeControllerProvider = StateNotifierProvider<HomeController, HomeState>((ref) {
+  return HomeController(
+    ref.watch(recommendationsDomainServiceProvider),
+    ref.watch(wardrobeDomainServiceProvider),
+  );
+});
+
+final settingsControllerProvider = StateNotifierProvider<SettingsController, SettingsState>((ref) {
+  return SettingsController();
+});
+
+final authControllerProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
+  return AuthController(ref.watch(authRepositoryProvider));
+});
+
+final onboardingControllerProvider = StateNotifierProvider<OnboardingController, OnboardingState>((ref) {
+  return OnboardingController(ref.watch(localStorageProvider));
+});
+
+final profileControllerProvider = StateNotifierProvider<ProfileController, ProfileState>((ref) {
+  return ProfileController();
+});
+
+final generatorControllerProvider = StateNotifierProvider<GeneratorController, GeneratorState>((ref) {
+  return GeneratorController(ref.watch(recommendationsDomainServiceProvider));
+});
+
+final adminControllerProvider = StateNotifierProvider<AdminController, AdminState>((ref) {
+  return AdminController();
+});
+
 enum SessionStatus { unknown, authed } // Убрали guest режим
 
 final sessionProvider = NotifierProvider<SessionController, SessionStatus>(SessionController.new);
@@ -156,7 +205,7 @@ class SessionController extends Notifier<SessionStatus> {
       } catch (e) {
         // Если токен недействителен, сбрасываем сессию
         await ref.read(authStorageProvider).clearSession();
-        state = SessionStatus.unknown; // Вместо guest используем unknown
+        state = SessionStatus.unknown;
       }
     } else {
       state = SessionStatus.unknown; // Вместо guest используем unknown

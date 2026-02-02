@@ -4,156 +4,137 @@ import 'package:go_router/go_router.dart';
 
 import '../features/home/presentation/home_screen.dart';
 import '../features/wardrobe/presentation/wardrobe_screen.dart';
+import '../features/recommendations/presentation/recommendations_screen.dart';
+import '../features/recommendations/presentation/screens/recommendation_detail_screen.dart';
+import '../features/wardrobe/presentation/screens/wardrobe_item_detail_screen.dart';
 import '../features/generator/presentation/generator_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
-import '../features/outfit_details/presentation/outfit_details_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/onboarding/presentation/onboarding_wizard_screen.dart';
-import '../features/settings/presentation/settings_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
-import '../features/wardrobe/presentation/screens/use_wardrobe_item_in_recommendation_screen.dart';
-import '../features/recommendations/presentation/screens/recommendation_wardrobe_integration_screen.dart';
-import 'di.dart';
-import 'onboarding/onboarding_providers.dart';
-
+import '../features/outfit_details/presentation/outfit_details_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final session = ref.watch(sessionProvider);
-  // onboarding done читаем асинхронно: делаем provider
-  final onboardingDone = ref.watch(onboardingDoneProvider);
-
   return GoRouter(
-    initialLocation: '/auth', // Изменили начальный маршрут на аутентификацию
+    initialLocation: '/home',
     redirect: (context, state) {
-      final loc = state.matchedLocation;
+      // Проверяем статус сессии и перенаправляем при необходимости
+      final sessionStatus = ref.read(sessionProvider);
 
-      final goingAuth = loc.startsWith('/auth');
-      final goingOnboarding = loc.startsWith('/onboarding');
-
-      // пока не знаем — не редиректим
-      if (session == SessionStatus.unknown || onboardingDone.isLoading) {
-        // Если состояние неизвестно, направляем на аутентификацию
-        if (!goingAuth) return '/auth';
-        return null;
+      // Если пользователь не авторизован и пытается зайти не на экран аутентификации или онбординга
+      if (sessionStatus == SessionStatus.unknown &&
+          !state.location.startsWith('/auth') &&
+          !state.location.startsWith('/onboarding')) {
+        return '/auth';
       }
 
-      final isAuthed = session == SessionStatus.authed;
-      final done = onboardingDone.value ?? false;
-
-      if (!isAuthed) {
-        return goingAuth ? null : '/auth';
+      // Если пользователь авторизован, но заходит на экран аутентификации
+      if (sessionStatus == SessionStatus.authed &&
+          state.location.startsWith('/auth')) {
+        return '/home';
       }
 
-      // залогинен, но онбординг не пройден
-      if (!done) {
-        return goingOnboarding ? null : '/onboarding';
+      // Если пользователь не завершил онбординг, но пытается зайти в приложение
+      final onboardingDone = ref.read(onboardingDoneProvider);
+      if (!onboardingDone &&
+          !state.location.startsWith('/onboarding') &&
+          !state.location.startsWith('/auth')) {
+        return '/onboarding';
       }
 
-      // залогинен и онбординг пройден
-      if (goingAuth || goingOnboarding) return '/home';
-
-      return null;
+      return null; // Не перенаправляем, если все условия соблюдены
     },
     routes: [
-      GoRoute(path: '/auth', builder: (_, __) => const AuthScreen()),
-      GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingWizardScreen()),
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return _AppScaffold(shell: navigationShell);
-        },
-        branches: [
-          StatefulShellBranch(
+      GoRoute(
+        path: '/',
+        redirect: (_) => '/home',
+      ),
+      GoRoute(
+        path: '/home',
+        name: 'home',
+        builder: (context, state) => const HomeScreen(),
+        routes: [
+          GoRoute(
+            path: 'wardrobe',
+            name: 'wardrobe',
+            builder: (context, state) => const WardrobeScreen(),
+          ),
+          GoRoute(
+            path: 'recommendations',
+            name: 'recommendations',
+            builder: (context, state) => const RecommendationsScreen(),
             routes: [
               GoRoute(
-                path: '/home',
-                builder: (_, __) => const HomeScreen(),
-                routes: [
-                  GoRoute(path: 'recommendations/:id', builder: (_, state) => RecommendationDetailScreen(recommendationId: state.pathParameters['id']!)),
-                ],
+                path: ':id',
+                name: 'recommendation-detail',
+                builder: (context, state) => RecommendationDetailScreen(
+                  recommendationId: state.pathParameters['id']!,
+                ),
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/wardrobe',
-                builder: (_, __) => const WardrobeScreen(),
-                routes: [
-                  GoRoute(path: 'add', builder: (_, __) => const AddWardrobeItemScreen()),
-                  GoRoute(path: ':id', builder: (_, state) => WardrobeItemDetailScreen(itemId: state.pathParameters['id']!)),
-                  GoRoute(
-                    path: ':id/use-in-recommendation',
-                    builder: (_, state) => UseWardrobeItemInRecommendationScreen(itemId: state.pathParameters['id']!),
-                  ),
-                ],
-              ),
-              GoRoute(
-                path: '/recommendations',
-                builder: (_, __) => const RecommendationsScreen(),
-                routes: [
-                  GoRoute(
-                    path: ':id',
-                    builder: (_, state) => RecommendationDetailScreen(recommendationId: state.pathParameters['id']!),
-                    routes: [
-                      GoRoute(
-                        path: 'integrate',
-                        builder: (_, state) => RecommendationWardrobeIntegrationScreen(recommendationId: state.pathParameters['id']!),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
+          GoRoute(
+            path: 'generator',
+            name: 'generator',
+            builder: (context, state) => const GeneratorScreen(),
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(path: '/generator', builder: (_, __) => const GeneratorScreen()),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/profile',
-                builder: (_, __) => const ProfileScreen(),
-                routes: [
-                  GoRoute(path: 'settings', builder: (_, __) => const SettingsScreen()),
-                ],
-              ),
-            ],
+          GoRoute(
+            path: 'outfit/:id',
+            name: 'outfit-details',
+            builder: (context, state) => OutfitDetailsScreen(
+              outfitId: state.pathParameters['id']!,
+            ),
           ),
         ],
       ),
       GoRoute(
-        path: '/outfit/:id',
-        builder: (_, state) => OutfitDetailsScreen(outfitId: state.pathParameters['id']!),
+        path: '/wardrobe',
+        name: 'wardrobe-root',
+        builder: (context, state) => const WardrobeScreen(),
+        routes: [
+          GoRoute(
+            path: 'add',
+            name: 'wardrobe-add',
+            builder: (context, state) => const AddWardrobeItemScreen(),
+          ),
+          GoRoute(
+            path: ':id',
+            name: 'wardrobe-item-detail',
+            builder: (context, state) => WardrobeItemDetailScreen(
+              itemId: state.pathParameters['id']!,
+            ),
+          ),
+        ],
       ),
       GoRoute(
-        path: '/admin',
-        builder: (_, __) => const AdminDashboardScreen(),
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfileScreen(),
+        routes: [
+          GoRoute(
+            path: 'settings',
+            name: 'settings',
+            builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: 'admin',
+            name: 'admin',
+            builder: (context, state) => const AdminDashboardScreen(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/auth',
+        name: 'auth',
+        builder: (context, state) => const AuthScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        name: 'onboarding',
+        builder: (context, state) => const OnboardingWizardScreen(),
       ),
     ],
   );
 });
-
-class _AppScaffold extends StatelessWidget {
-  final StatefulNavigationShell shell;
-  const _AppScaffold({required this.shell});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: shell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: shell.goBranch,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_rounded), label: 'Домой'),
-          NavigationDestination(icon: Icon(Icons.checkroom_rounded), label: 'Шкаф'),
-          NavigationDestination(icon: Icon(Icons.auto_awesome_rounded), label: 'Подбор'),
-          NavigationDestination(icon: Icon(Icons.person_rounded), label: 'Профиль'),
-        ],
-      ),
-    );
-  }
-}
