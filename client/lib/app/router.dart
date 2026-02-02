@@ -15,6 +15,8 @@ import '../features/onboarding/presentation/onboarding_wizard_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
 import '../features/outfit_details/presentation/outfit_details_screen.dart';
+import '../app/session.dart';
+import '../app/onboarding.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -25,22 +27,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Если пользователь не авторизован и пытается зайти не на экран аутентификации или онбординга
       if (sessionStatus == SessionStatus.unknown &&
-          !state.location.startsWith('/auth') &&
-          !state.location.startsWith('/onboarding')) {
+          !state.uri.toString().startsWith('/auth') &&
+          !state.uri.toString().startsWith('/onboarding')) {
         return '/auth';
       }
 
       // Если пользователь авторизован, но заходит на экран аутентификации
       if (sessionStatus == SessionStatus.authed &&
-          state.location.startsWith('/auth')) {
+          state.uri.toString().startsWith('/auth')) {
         return '/home';
       }
 
       // Если пользователь не завершил онбординг, но пытается зайти в приложение
       final onboardingDone = ref.read(onboardingDoneProvider);
       if (!onboardingDone &&
-          !state.location.startsWith('/onboarding') &&
-          !state.location.startsWith('/auth')) {
+          !state.uri.toString().startsWith('/onboarding') &&
+          !state.uri.toString().startsWith('/auth')) {
         return '/onboarding';
       }
 

@@ -25,7 +25,7 @@ import '../data/repositories/profile_repository.dart';
 import '../data/image_store.dart';
 import '../features/recommendations/presentation/recommendations_controller.dart';
 import '../features/recommendations/presentation/recommendations_screen.dart';
-import '../features/recommendations/presentation/recommendation_detail_screen.dart';
+import '../features/recommendations/presentation/screens/recommendation_detail_screen.dart';
 import '../features/wardrobe/presentation/wardrobe_controller.dart';
 import '../features/wardrobe/presentation/wardrobe_screen.dart';
 import '../features/admin/presentation/admin_controller.dart';
