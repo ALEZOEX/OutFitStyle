@@ -1,27 +1,46 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
 import '../services/auth_storage.dart';
 import '../services/wardrobe_service.dart';
 import '../services/recommendation_service.dart';
+import '../domain/services/recommendations_domain_service.dart';
+import '../domain/services/wardrobe_service.dart'; // Обновленный импорт
+import '../domain/entities/recommendation_entity.dart';
+import '../domain/entities/wardrobe_entity.dart';
 import 'env.dart';
 import 'api/api_client.dart';
 
 import '../data/local/app_database.dart';
 import '../data/remote/wardrobe_remote_ds.dart';
-import '../data/remote/recommendation_remote_ds.dart';
+import '../data/remote/recommendations_remote_ds.dart';
 import '../data/repositories/wardrobe_repository.dart';
-import '../data/repositories/recommendation_repository.dart';
+import '../data/repositories/recommendations_repository.dart'; // Обновленный импорт
 import '../data/sync/sync_worker.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/profile_repository.dart';
-import '../services/admin_service.dart';
+import '../data/image_store.dart';
+import '../features/recommendations/presentation/recommendations_controller.dart';
+import '../features/wardrobe/presentation/wardrobe_controller.dart';
+import '../features/admin/presentation/admin_controller.dart';
+import '../features/profile/presentation/profile_controller.dart';
+import '../features/generator/presentation/generator_controller.dart';
+import '../domain/states/generator_state.dart';
 
 final apiConfigProvider = Provider((ref) => Env.apiConfig());
 
 final authStorageProvider = Provider<AuthStorage>((ref) => AuthStorage());
+
+final imageStoreProvider = Provider<ImageStore>((ref) {
+  return ImageStore();
+});
+
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('Provide SharedPreferences manually');
+});
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   final cfg = ref.watch(apiConfigProvider);
@@ -35,16 +54,12 @@ final adminServiceProvider = Provider<AdminService>((ref) {
   return AdminService(cfg, auth, http.Client());
 });
 
-final wardrobeServiceProvider = Provider<WardrobeService>((ref) {
-  final cfg = ref.watch(apiConfigProvider);
-  final auth = ref.watch(authStorageProvider);
-  return WardrobeService(apiConfig: cfg, authStorage: auth, httpClient: http.Client());
+final wardrobeRemoteDsProvider = Provider<WardrobeRemoteDataSource>((ref) {
+  return WardrobeRemoteDataSource(ref.watch(apiClientProvider));
 });
 
-final recommendationServiceProvider = Provider<RecommendationService>((ref) {
-  final cfg = ref.watch(apiConfigProvider);
-  final auth = ref.watch(authStorageProvider);
-  return RecommendationService(apiConfig: cfg, authStorage: auth, httpClient: http.Client());
+final recommendationsRemoteDsProvider = Provider<RecommendationsRemoteDataSource>((ref) {
+  return RecommendationsRemoteDataSource(ref.watch(apiClientProvider), ref.watch(wardrobeRemoteDsProvider));
 });
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -53,25 +68,31 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-final wardrobeRemoteDsProvider = Provider<WardrobeRemoteDataSource>((ref) {
-  return WardrobeRemoteDataSource(ref.watch(wardrobeServiceProvider));
-});
-
-final recommendationRemoteDsProvider = Provider<RecommendationRemoteDataSource>((ref) {
-  return RecommendationRemoteDataSource(ref.watch(recommendationServiceProvider));
-});
-
 final wardrobeRepositoryProvider = Provider<WardrobeRepository>((ref) {
   return WardrobeRepository(
-    db: ref.watch(appDatabaseProvider),
-    remote: ref.watch(wardrobeRemoteDsProvider),
+    ref.watch(appDatabaseProvider),
+    ref.watch(wardrobeRemoteDsProvider),
+    ref.watch(imageStoreProvider),
   );
 });
 
-final recommendationRepositoryProvider = Provider<RecommendationRepository>((ref) {
-  return RecommendationRepository(
-    db: ref.watch(appDatabaseProvider),
-    remote: ref.watch(recommendationRemoteDsProvider),
+final recommendationsRepositoryProvider = Provider<RecommendationsRepository>((ref) {
+  return RecommendationsRepository(
+    ref.watch(appDatabaseProvider),
+    ref.watch(recommendationsRemoteDsProvider),
+  );
+});
+
+final recommendationsDomainServiceProvider = Provider<RecommendationsDomainService>((ref) {
+  return RecommendationsDomainService(
+    ref.watch(recommendationsRepositoryProvider),
+    ref.watch(wardrobeRepositoryProvider),
+  );
+});
+
+final wardrobeDomainServiceProvider = Provider<WardrobeDomainService>((ref) {
+  return WardrobeDomainService(
+    ref.watch(wardrobeRepositoryProvider),
   );
 });
 
@@ -81,7 +102,7 @@ final syncWorkerProvider = Provider<SyncWorker>((ref) {
   return SyncWorker(
     db: ref.watch(appDatabaseProvider),
     wardrobeRemote: ref.watch(wardrobeRemoteDsProvider),
-    recRemote: ref.watch(recommendationRemoteDsProvider),
+    recRemote: ref.watch(recommendationsRemoteDsProvider),
   );
 });
 

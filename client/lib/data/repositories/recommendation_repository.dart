@@ -1,152 +1,144 @@
 import 'dart:convert';
-import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../models/recommendation_models.dart';
 import '../local/app_database.dart';
-import '../remote/recommendation_remote_ds.dart';
-import '../sync/outbox_actions.dart';
+import '../remote/recommendations_remote_ds.dart';
+import '../../domain/entities/recommendation_entity.dart';
 
 class RecommendationRepository {
-  final AppDatabase db;
-  final RecommendationRemoteDataSource remote;
+  final AppDatabase _db;
+  final RecommendationsRemoteDataSource _remote;
 
-  RecommendationRepository({required this.db, required this.remote});
+  RecommendationRepository(this._db, this._remote);
 
+  // Получить историю рекомендаций
+  Stream<List<RecommendationRow>> watchHistory({required int limit}) {
+    return _db.recommendationDao.watchHistory(limit: limit);
+  }
+
+  // Получить рекомендацию по ID
+  Stream<RecommendationRow?> watchById(String id) {
+    return _db.recommendationDao.watchById(id);
+  }
+
+  // Получить сегодняшнюю последнюю рекомендацию
   Stream<RecommendationRow?> watchTodayLatest() {
-    return db.recommendationDao.watchLatestForDay(DateTime.now());
+    final today = DateTime.now();
+    return _db.recommendationDao.watchLatestForDay(today);
   }
 
-  Stream<RecommendationRow?> watchLatest() => db.recommendationDao.watchLatest();
-  Stream<List<RecommendationRow>> watchHistory({int limit = 50}) =>
-      db.recommendationDao.watchHistory(limit: limit);
-
-  Future<void> ensureToday({String occasion = 'daily'}) async {
-    // Если в БД уже есть "сегодняшний" — ничего не делаем.
-    final start = DateTime.now();
-    final sub = db.recommendationDao.watchLatestForDay(start);
-    final current = await sub.first;
-    if (current != null) return;
-
-    // Иначе создаём и сохраняем локально.
-    final rec = await remote.createUsingProfile(occasion: occasion);
-    await _saveRecord(rec);
-  }
-
-  Future<void> createNew({required String occasion}) async {
+  // Синхронизировать с сервера
+  Future<void> syncFromServer() async {
     try {
-      final rec = await remote.createUsingProfile(occasion: occasion);
-      await _saveRecord(rec);
+      final recommendations = await _remote.fetchHistory();
+      await upsertMany(recommendations.map(RecommendationRow.fromExternal).toList());
     } catch (e) {
-      // print('RecommendationRepository: createNew error: $e'); // Removed for production, use proper logging
+      // Логируем ошибку синхронизации
+      // print('Recommendations sync error: $e'); // В реальном приложении используйте proper logging
       rethrow;
     }
   }
 
-  Future<void> syncHistory({int pages = 2, int limit = 20}) async {
-    final now = DateTime.now();
-    final rows = <RecommendationsCompanion>[];
-
-    for (var page = 1; page <= pages; page++) {
-      final (list, _) = await remote.list(page: page, limit: limit);
-      for (final r in list) {
-        rows.add(
-          RecommendationsCompanion(
-            id: Value(r.id),
-            createdAt: Value(r.createdAt),
-            isFavorite: Value(r.isFavorite),
-            outfitDataJson: Value(jsonEncode(r.outfitData)),
-            weatherDataJson: Value(jsonEncode(r.weatherData)),
-            updatedAt: Value(now),
-            dirty: const Value(false),
-            lastSyncedAt: Value(now),
-          ),
-        );
+  // Вставить или обновить несколько рекомендаций
+  Future<void> upsertMany(List<RecommendationRow> recommendations) async {
+    await _db.transaction(() async {
+      for (final rec in recommendations) {
+        await _db.recommendationDao.upsertOne(RecommendationsCompanion(
+          id: Value(rec.id),
+          serverId: Value(rec.serverId),
+          origin: Value(rec.origin),
+          outfitDataJson: Value(rec.outfitDataJson),
+          weatherDataJson: Value(rec.weatherDataJson),
+          isFavorite: Value(rec.isFavorite),
+          createdAt: Value(rec.createdAt),
+          updatedAt: Value(rec.updatedAt),
+          lastSyncedAt: Value(rec.lastSyncedAt),
+          dirty: Value(rec.dirty),
+          imageUrl: Value(rec.imageUrl),
+          localImagePath: Value(rec.localImagePath),
+        ));
       }
-    }
-
-    await db.recommendationDao.upsertMany(rows);
+    });
   }
 
-  Future<void> toggleFavorite(RecommendationRow row) async {
-    final newValue = !row.isFavorite;
-    await db.recommendationDao.setFavorite(row.id, newValue);
-
-    try {
-      await remote.setFavorite(id: row.id, isFavorite: newValue);
-      await (db.update(db.recommendations)..where((t) => t.id.equals(row.id))).write(
-        RecommendationsCompanion(
-          dirty: const Value(false),
-          lastSyncedAt: Value(DateTime.now()),
-        ),
-      );
-    } catch (err) {
-      await db.syncOutboxDao.enqueue(
-        type: OutboxActions.recSetFavorite,
-        entityId: row.id,
-        payloadJson: jsonEncode({'id': row.id, 'value': newValue}),
-      );
-    }
+  // Переключить избранное
+  Future<void> toggleFavorite(RecommendationRow r) async {
+    await _db.recommendationDao.setFavorite(r.id, r.isFavorite);
   }
 
-  Future<void> _saveRecord(RecommendationRecord r) async {
-    final now = DateTime.now();
-    await db.recommendationDao.upsertOne(
-      RecommendationsCompanion(
-        id: Value(r.id),
-        createdAt: Value(r.createdAt),
-        isFavorite: Value(r.isFavorite),
-        outfitDataJson: Value(jsonEncode(r.outfitData)),
-        weatherDataJson: Value(jsonEncode(r.weatherData)),
-        updatedAt: Value(now),
-        dirty: const Value(false),
-        lastSyncedAt: Value(now),
-      ),
-    );
+  // Предзагрузить изображения
+  Future<void> prefetchMissingImages({int limit = 30}) async {
+    // В реальном приложении здесь будет логика предзагрузки изображений
   }
 
-  Stream<RecommendationRow?> watchById(String id) => db.recommendationDao.watchById(id);
-
-  Future<String> saveLocalOutfit({
+  // Создать локальную рекомендацию
+  Future<RecommendationRow> createLocal({
     required Map<String, dynamic> outfitData,
     required Map<String, dynamic> weatherData,
-    bool favorite = true,
   }) async {
-    final id = 'local_${const Uuid().v4()}';
+    final id = const Uuid().v4();
     final now = DateTime.now();
-
-    await db.recommendationDao.insertLocal(
+    final recommendation = RecommendationRow(
       id: id,
-      createdAt: now,
-      isFavorite: favorite,
+      serverId: null,
+      origin: 'local',
       outfitDataJson: jsonEncode(outfitData),
       weatherDataJson: jsonEncode(weatherData),
+      isFavorite: false,
+      createdAt: now,
+      updatedAt: now,
+      lastSyncedAt: null,
+      dirty: true,
+      imageUrl: null,
+      localImagePath: null,
     );
 
-    // Автопубликация через outbox (невидимо для пользователя)
-    await enqueuePublishLocalOutfit(id);
+    await _db.recommendationDao.insertLocal(
+      id: recommendation.id,
+      createdAt: recommendation.createdAt,
+      isFavorite: recommendation.isFavorite,
+      outfitDataJson: recommendation.outfitDataJson,
+      weatherDataJson: recommendation.weatherDataJson,
+    );
 
-    return id;
+    return recommendation;
   }
 
-  Future<void> enqueuePublishLocalOutfit(String localId) async {
-    final row = await (db.select(db.recommendations)
-          ..where((t) => t.id.equals(localId))
-          ..limit(1))
-        .getSingleOrNull();
+  // Получить рекомендацию по ID (однократно)
+  Future<RecommendationRow?> getById(String id) async {
+    return await _db.recommendationDao.watchById(id).first;
+  }
 
-    if (row == null) return;
-    if (!row.id.startsWith('local_')) return;
-    if (row.serverId != null) return; // уже опубликовано
-
-    await db.syncOutboxDao.enqueue(
-      type: OutboxActions.outfitPublishLocal,
-      entityId: localId,
-      payloadJson: jsonEncode({
-        'local_id': localId,
-        'outfit_data_json': row.outfitDataJson,
-        'weather_data_json': row.weatherDataJson,
-      }),
+  // Сохранить локальный образ
+  Future<RecommendationRow> saveLocalOutfit({
+    required Map<String, dynamic> outfitData,
+    required Map<String, dynamic> weatherData,
+    required bool favorite,
+  }) async {
+    final id = const Uuid().v4();
+    final now = DateTime.now();
+    final recommendation = RecommendationRow(
+      id: id,
+      serverId: null,
+      origin: 'local',
+      outfitDataJson: jsonEncode(outfitData),
+      weatherDataJson: jsonEncode(weatherData),
+      isFavorite: favorite,
+      createdAt: now,
+      updatedAt: now,
+      lastSyncedAt: null,
+      dirty: true,
+      imageUrl: null,
+      localImagePath: null,
     );
+
+    await _db.recommendationDao.insertLocal(
+      id: recommendation.id,
+      createdAt: recommendation.createdAt,
+      isFavorite: recommendation.isFavorite,
+      outfitDataJson: recommendation.outfitDataJson,
+      weatherDataJson: recommendation.weatherDataJson,
+    );
+
+    return recommendation;
   }
 }

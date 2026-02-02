@@ -28,7 +28,6 @@ class AppDatabase extends _$AppDatabase {
           if (from < 3) {
             await m.addColumn(recommendations, recommendations.origin);
             await m.addColumn(recommendations, recommendations.serverId);
-            await m.addColumn(recommendations, recommendations.publishedAt);
           }
         },
       );

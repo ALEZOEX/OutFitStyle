@@ -11,6 +11,9 @@ import '../features/auth/presentation/auth_screen.dart';
 import '../features/onboarding/presentation/onboarding_wizard_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
+import '../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
+import '../features/wardrobe/presentation/screens/use_wardrobe_item_in_recommendation_screen.dart';
+import '../features/recommendations/presentation/screens/recommendation_wardrobe_integration_screen.dart';
 import 'di.dart';
 import 'onboarding/onboarding_providers.dart';
 
@@ -62,12 +65,45 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
+              GoRoute(
+                path: '/home',
+                builder: (_, __) => const HomeScreen(),
+                routes: [
+                  GoRoute(path: 'recommendations/:id', builder: (_, state) => RecommendationDetailScreen(recommendationId: state.pathParameters['id']!)),
+                ],
+              ),
             ],
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/wardrobe', builder: (_, __) => const WardrobeScreen()),
+              GoRoute(
+                path: '/wardrobe',
+                builder: (_, __) => const WardrobeScreen(),
+                routes: [
+                  GoRoute(path: 'add', builder: (_, __) => const AddWardrobeItemScreen()),
+                  GoRoute(path: ':id', builder: (_, state) => WardrobeItemDetailScreen(itemId: state.pathParameters['id']!)),
+                  GoRoute(
+                    path: ':id/use-in-recommendation',
+                    builder: (_, state) => UseWardrobeItemInRecommendationScreen(itemId: state.pathParameters['id']!),
+                  ),
+                ],
+              ),
+              GoRoute(
+                path: '/recommendations',
+                builder: (_, __) => const RecommendationsScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (_, state) => RecommendationDetailScreen(recommendationId: state.pathParameters['id']!),
+                    routes: [
+                      GoRoute(
+                        path: 'integrate',
+                        builder: (_, state) => RecommendationWardrobeIntegrationScreen(recommendationId: state.pathParameters['id']!),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
           StatefulShellBranch(

@@ -1,49 +1,15 @@
+import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di.dart';
-import '../../../data/local/app_database.dart';
-import '../../../data/repositories/recommendation_repository.dart';
-
-class GeneratorState {
-  final String occasion; // daily/date/office/walk...
-  final bool isGenerating;
-  final String? error;
-  final Set<String> dismissed; // session-only
-
-  const GeneratorState({
-    required this.occasion,
-    required this.isGenerating,
-    required this.dismissed,
-    this.error,
-  });
-
-  GeneratorState copyWith({
-    String? occasion,
-    bool? isGenerating,
-    String? error,
-    Set<String>? dismissed,
-  }) {
-    return GeneratorState(
-      occasion: occasion ?? this.occasion,
-      isGenerating: isGenerating ?? this.isGenerating,
-      dismissed: dismissed ?? this.dismissed,
-      error: error,
-    );
-  }
-
-  factory GeneratorState.initial() => const GeneratorState(
-        occasion: 'daily',
-        isGenerating: false,
-        dismissed: <String>{},
-        error: null,
-      );
-}
+import '../../../domain/states/async_state.dart' as app_state;
+import '../../../domain/states/generator_state.dart';
 
 final recommendationHistoryProvider =
     StreamProvider.autoDispose<List<RecommendationRow>>((ref) {
-  final repo = ref.watch(recommendationRepositoryProvider);
-  return repo.watchHistory(limit: 60);
+  final service = ref.watch(recommendationsDomainServiceProvider);
+  return service.watchHistory(limit: 60);
 });
 
 final generatorControllerProvider =
@@ -79,9 +45,9 @@ final generatorDeckProvider = Provider.autoDispose<List<RecommendationRow>>((ref
 
 class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
   @override
-  GeneratorState build() => GeneratorState.initial();
+  GeneratorState build() => const GeneratorState();
 
-  RecommendationRepository get _repo => ref.read(recommendationRepositoryProvider);
+  RecommendationsDomainService get _service => ref.read(recommendationsDomainServiceProvider);
 
   Future<void> bootstrap() async {
     // Подтягиваем историю (в БД), UI сразу покажет кэш.
@@ -89,7 +55,7 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
     // GeneratorController: bootstrap started - logging would be handled by error handler
 
     // Запускаем синхронизацию в фоне, чтобы не блокировать UI
-    _repo.syncHistory(pages: 1, limit: 20).then((_) {
+    _service.syncFromServer().then((_) {
       // GeneratorController: syncHistory completed - logging would be handled by error handler
     }).catchError((e) {
       // GeneratorController: syncHistory error: $e - logging would be handled by error handler
@@ -97,7 +63,7 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
 
     // Если после синка колода пустая — создаём одну карточку.
     // Избегаем циклической зависимости, используя напрямую историю и состояние
-    final hist = await _repo.watchHistory(limit: 20).first;
+    final hist = await _service.watchHistory(limit: 20).first;
     // GeneratorController: history loaded, count: ${hist.length} - logging would be handled by error handler
     final dismissed = state.dismissed;
     // GeneratorController: dismissed count: ${dismissed.length} - logging would be handled by error handler
@@ -121,7 +87,7 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
     state = state.copyWith(isGenerating: true, error: null);
 
     try {
-      await _repo.createNew(occasion: state.occasion);
+      await _service.generateRecommendation(occasion: state.occasion);
     } catch (e) {
       // Не показываем ошибку пользователю, т.к. у нас есть локальные данные
       // Вместо этого просто логируем (в реальном приложении - в систему логирования)
@@ -134,7 +100,7 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
 
   Future<void> like(RecommendationRow r) async {
     try {
-      await _repo.toggleFavorite(r);
+      await _service.toggleFavorite(r);
     } catch (e) {
       // Не показываем ошибку пользователю, т.к. UI уже обновился оптимистично
       // Ошибка будет обработана через outbox
@@ -171,5 +137,11 @@ class GeneratorController extends AutoDisposeNotifier<GeneratorState> {
       // не await: UI не должен "виснуть"
       generate();
     }
+  }
+
+  // Метод для получения рекомендаций, основанных на вещах из гардероба
+  Future<List<RecommendationRow>> getRecommendationsWithWardrobeItems() async {
+    final recommendations = await _service.watchHistory(limit: 20).first;
+    return recommendations;
   }
 }

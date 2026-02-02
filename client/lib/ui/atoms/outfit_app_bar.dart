@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/theme_controller.dart';
+import '../design_system/outfit_style_components.dart';
 
 class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
@@ -48,6 +49,7 @@ class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 themeNotifier.setMode(next);
               },
               icon: Icon(themeIcon),
+              style: OutfitStyleComponents.iconButtonStyle(),
             )
           : null,
       titleSpacing: 0,
@@ -55,7 +57,7 @@ class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {
         children: [
           const BrandBadge(),
           const SizedBox(width: 10),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
+          Text(title, style: OutfitStyleComponents.titleLarge(context).copyWith(fontWeight: FontWeight.w900)),
         ],
       ),
       actions: actions,

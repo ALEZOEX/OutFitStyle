@@ -1,13 +1,11 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../data/local/app_database.dart';
+import '../../../app/di.dart';
 import '../../../ui/atoms/haptics.dart';
+import '../../../ui/atoms/outfit_app_bar.dart';
 import '../../../ui/atoms/skeleton.dart';
 import '../../../ui/atoms/like_burst.dart';
-import '../../../ui/atoms/outfit_app_bar.dart';
 import 'generator_controller.dart';
 import 'widgets/tinder_swipe_card.dart';
 import 'widgets/tinder_deck.dart';
@@ -43,7 +41,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(generatorControllerProvider);
-    final ctl = ref.read(generatorControllerProvider.notifier);
+    final controller = ref.read(generatorControllerProvider.notifier);
     final deck = ref.watch(generatorDeckProvider);
 
     return Scaffold(
@@ -53,7 +51,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
           IconButton(
             onPressed: () {
               Haptics.selection();
-              ctl.resetDeck();
+              controller.resetDeck();
             },
             icon: const Icon(Icons.restart_alt_rounded),
             tooltip: 'Сбросить колоду',
@@ -67,7 +65,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
             value: state.occasion,
             onChanged: (v) {
               Haptics.selection();
-              ctl.setOccasion(v);
+              controller.setOccasion(v);
             },
           ),
           if (state.error != null)
@@ -86,7 +84,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
                           : FilledButton.icon(
                               onPressed: () {
                                 Haptics.light();
-                                ctl.generate();
+                                controller.generate();
                               },
                               icon: const Icon(Icons.auto_awesome_rounded),
                               label: const Text('Сгенерировать образ'),
@@ -101,15 +99,15 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
                             if (decision == SwipeDecision.like) {
                               Haptics.success();
                               _burst.play();
-                              await ctl.like(row);
+                              await controller.like(row);
                             } else {
                               Haptics.light();
-                              ctl.dislike(row);
+                              controller.dislike(row);
                             }
                           },
                           cardBuilder: (row) => _OutfitCard(
                             row: row,
-                            onOpen: () => context.push('/outfit/${row.id}'),
+                            onOpen: () => context.push('/home/recommendations/${row.id}'),
                             heroTag: 'outfit_${row.id}',
                           ),
                         ),
@@ -124,63 +122,60 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
                     ),
             ),
           ),
-          const SizedBox(height: 12),
-
-          // One-thumb bottom controls
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: deck.isEmpty ? null : () {
-                        Haptics.light();
-                        _topKey.currentState?.swipeLeft();
-                      },
-                      icon: const Icon(Icons.close_rounded),
-                      label: const Text('Не то'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: deck.isEmpty ? () { Haptics.light(); ctl.generate(); } : () {
-                        Haptics.success();
-                        _burst.play();
-                        _topKey.currentState?.swipeRight();
-                      },
-                      icon: Icon(deck.isEmpty ? Icons.auto_awesome_rounded : Icons.favorite_rounded),
-                      label: Text(deck.isEmpty ? 'Ещё' : 'В избранное'),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  IconButton.filledTonal(
-                    onPressed: state.isGenerating
-                        ? null
-                        : () {
-                            Haptics.selection();
-                            ctl.generate();
-                          },
-                    icon: state.isGenerating
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.shuffle_rounded),
-                    tooltip: 'Сгенерировать новую',
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: deck.isEmpty ? null : () {
+                    Haptics.light();
+                    _topKey.currentState?.swipeLeft();
+                  },
+                  icon: const Icon(Icons.close_rounded),
+                  label: const Text('Не то'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: deck.isEmpty ? () { Haptics.light(); controller.generate(); } : () {
+                    Haptics.success();
+                    _burst.play();
+                    _topKey.currentState?.swipeRight();
+                  },
+                  icon: Icon(deck.isEmpty ? Icons.auto_awesome_rounded : Icons.favorite_rounded),
+                  label: Text(deck.isEmpty ? 'Ещё' : 'В избранное'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              IconButton.filledTonal(
+                onPressed: state.isGenerating
+                    ? null
+                    : () {
+                        Haptics.selection();
+                        controller.generate();
+                      },
+                icon: state.isGenerating
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.shuffle_rounded),
+                tooltip: 'Сгенерировать новую',
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -189,7 +184,6 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
 class _OccasionChips extends StatelessWidget {
   final String value;
   final void Function(String) onChanged;
-
   const _OccasionChips({required this.value, required this.onChanged});
 
   @override
@@ -223,37 +217,17 @@ class _OccasionChips extends StatelessWidget {
   }
 }
 
-class _OutfitCard extends StatelessWidget {
+class _OutfitCard extends ConsumerWidget {
   final RecommendationRow row;
   final VoidCallback onOpen;
   final String heroTag;
-
   const _OutfitCard({required this.row, required this.onOpen, required this.heroTag});
 
-  Map<String, dynamic> _outfit() {
-    try {
-      return (jsonDecode(row.outfitDataJson) as Map).cast<String, dynamic>();
-    } catch (_) {
-      return {};
-    }
-  }
-
-  Map<String, dynamic> _weather() {
-    try {
-      return (jsonDecode(row.weatherDataJson) as Map).cast<String, dynamic>();
-    } catch (_) {
-      return {};
-    }
-  }
-
   @override
-  Widget build(BuildContext context) {
-    final outfit = _outfit();
-    final weather = _weather();
-
-    final lines = (outfit['outfit'] is List)
-        ? (outfit['outfit'] as List).whereType<Map>().map((e) => e.cast<String, dynamic>()).toList()
-        : <Map<String, dynamic>>[];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final lines = _decode(row.outfitDataJson);
+    final weather = _decode(row.weatherDataJson);
 
     final temp = (weather['temp'] ?? weather['temperature'] ?? '').toString();
     final cond = (weather['condition'] ?? weather['description'] ?? weather['weather'] ?? '').toString();
@@ -262,6 +236,9 @@ class _OutfitCard extends StatelessWidget {
       tag: heroTag,
       child: Card(
         clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
         child: InkWell(
           onTap: onOpen,
           child: Padding(
@@ -273,7 +250,7 @@ class _OutfitCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Образ',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                       ),
                     ),
                     Icon(
@@ -292,7 +269,7 @@ class _OutfitCard extends StatelessWidget {
                         cond.isEmpty ? 'Погода' : cond,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65)),
+                        style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.65)),
                       ),
                     ),
                   ],
@@ -313,6 +290,24 @@ class _OutfitCard extends StatelessWidget {
       ),
     );
   }
+
+  List<Map<String, dynamic>> _decode(String jsonStr) {
+    try {
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is Map<String, dynamic>) {
+        final outfit = decoded['outfit'];
+        if (outfit is List) {
+          return outfit
+              .whereType<Map<String, dynamic>>()
+              .map((e) => e.cast<String, dynamic>())
+              .toList();
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
 }
 
 class _SimpleCollage extends StatelessWidget {
@@ -324,7 +319,7 @@ class _SimpleCollage extends StatelessWidget {
     if (lines.isEmpty) {
       return Center(
         child: Text(
-          'Нет данных образа',
+          'Нет данных об образе',
           style: Theme.of(context).textTheme.titleMedium,
         ),
       );
@@ -351,9 +346,19 @@ class _SimpleCollage extends StatelessWidget {
             children: [
               Text(icon, style: const TextStyle(fontSize: 28)),
               const SizedBox(height: 6),
-              Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(
+                name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
               const SizedBox(height: 4),
-              Text(cat, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
+              Text(
+                cat,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+              ),
             ],
           ),
         );
