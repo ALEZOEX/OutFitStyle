@@ -4,9 +4,10 @@ import '../../../app/di.dart';
 import '../../../domain/states/async_state.dart' as app_state;
 import '../../../domain/entities/recommendation_entity.dart';
 import '../../../domain/entities/wardrobe_entity.dart';
+import '../../../domain/states/ui_states.dart';
 
 final recommendationsControllerProvider =
-    AutoDisposeNotifierProvider<RecommendationsController, app_state.AsyncState<List<RecommendationRow>>>(
+    StateNotifierProvider<RecommendationsController, RecommendationsState>(
   RecommendationsController.new,
 );
 
@@ -21,12 +22,8 @@ final recommendationByIdProvider =
   return service.watchById(id);
 });
 
-class RecommendationsController extends AutoDisposeNotifier<app_state.AsyncState<List<RecommendationRow>>> {
-  @override
-  app_state.AsyncState<List<RecommendationRow>> build() {
-    // Состояние контроллера — поверх стрима. Экран при этом подписан на streamProvider.
-    return const app_state.AsyncLoading();
-  }
+class RecommendationsController extends StateNotifier<RecommendationsState> {
+  RecommendationsController() : super(RecommendationsState());
 
   Future<void> sync() async {
     final service = ref.read(recommendationsDomainServiceProvider);

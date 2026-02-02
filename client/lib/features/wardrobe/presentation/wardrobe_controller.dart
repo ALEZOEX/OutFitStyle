@@ -4,9 +4,10 @@ import '../../../app/di.dart';
 import '../../../domain/states/async_state.dart' as app_state;
 import '../../../domain/entities/wardrobe_entity.dart';
 import '../../../domain/entities/wardrobe_request_entities.dart';
+import '../../../domain/states/ui_states.dart';
 
 final wardrobeControllerProvider =
-    AutoDisposeNotifierProvider<WardrobeController, app_state.AsyncState<List<WardrobeEntry>>>(
+    StateNotifierProvider<WardrobeController, WardrobeState>(
   WardrobeController.new,
 );
 
@@ -15,12 +16,8 @@ final wardrobeStreamProvider = StreamProvider.autoDispose<List<WardrobeEntry>>((
   return service.watchWardrobe(includeArchived: false);
 });
 
-class WardrobeController extends AutoDisposeNotifier<app_state.AsyncState<List<WardrobeEntry>>> {
-  @override
-  app_state.AsyncState<List<WardrobeEntry>> build() {
-    // Состояние контроллера — поверх стрима. Экран при этом подписан на streamProvider.
-    return const app_state.AsyncLoading();
-  }
+class WardrobeController extends StateNotifier<WardrobeState> {
+  WardrobeController() : super(WardrobeState());
 
   Future<void> sync() async {
     final service = ref.read(wardrobeDomainServiceProvider);
