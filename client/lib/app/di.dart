@@ -160,8 +160,12 @@ final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
   return AuthController(ref.watch(authRepositoryProvider));
 });
 
+final localStorageProvider = Provider((ref) {
+  return LocalStorage.prefs;
+});
+
 final onboardingControllerProvider = StateNotifierProvider<OnboardingController, OnboardingState>((ref) {
-  return OnboardingController(ref.watch(localStorageProvider));
+  return OnboardingController();
 });
 
 final profileControllerProvider = StateNotifierProvider<ProfileController, ProfileState>((ref) {
