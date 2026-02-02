@@ -24,7 +24,7 @@ class _SyncBootstrapperState extends ConsumerState<SyncBootstrapper>
 
     // 1) пробуем синк на старте (если сети нет — просто ничего не выполнится успешно)
     // ignore: discarded_futures
-    ref.read(syncWorkerProvider).runOnce();
+    ref.read(syncWorkerProvider).startSync();
 
     // 2) слушаем сеть
     final conn = ref.read(connectivityProvider);
@@ -32,7 +32,7 @@ class _SyncBootstrapperState extends ConsumerState<SyncBootstrapper>
       final online = results.any((r) => r != ConnectivityResult.none);
       if (online) {
         // ignore: discarded_futures
-        ref.read(syncWorkerProvider).runOnce();
+        ref.read(syncWorkerProvider).startSync();
       }
     });
   }
@@ -41,7 +41,7 @@ class _SyncBootstrapperState extends ConsumerState<SyncBootstrapper>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // ignore: discarded_futures
-      ref.read(syncWorkerProvider).runOnce();
+      ref.read(syncWorkerProvider).startSync();
     }
   }
 
