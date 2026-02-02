@@ -412,7 +412,20 @@ func (s *ClothingItemService) domainToMLItem(item domain.ClothingItem) contracts
 	// Создание сопоставления из UUID в последовательные целочисленные ID для ML-сервиса
 	// Это временная схема сопоставления только для ML-коммуникации
 	// В реальной системе вы можете поддерживать постоянное сопоставление
-	tempID := int(domain.IDToInt64(item.ID)) // Использование хэш-преобразования в int64, then convert to int
+	tempIDInt64 := domain.IDToInt64(item.ID) // Получаем int64 из UUID
+	var tempID int
+
+	// Проверяем, что значение помещается в int (предотвращаем переполнение)
+	if tempIDInt64 > math.MaxInt || tempIDInt64 < math.MinInt {
+		log.Printf("Warning: ID conversion would overflow: %d", tempIDInt64)
+		// Используем хеш от UUID для получения значения в допустимом диапазоне
+		tempID = int(tempIDInt64 % math.MaxInt)
+		if tempID < 0 {
+			tempID = -tempID
+		}
+	} else {
+		tempID = int(tempIDInt64) // Использование хэш-преобразования в int64, затем конвертация в int
+	}
 
 	return contracts.MLItem{
 		ID:          tempID,
