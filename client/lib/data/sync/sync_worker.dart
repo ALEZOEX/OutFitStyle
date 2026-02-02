@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
 import '../local/app_database.dart';
 import '../local/dao/sync_outbox_dao.dart';
 import '../remote/wardrobe_remote_ds.dart';
@@ -7,6 +10,7 @@ class SyncWorker {
   final AppDatabase _db;
   final WardrobeRemoteDataSource _wardrobeRemote;
   final RecommendationsRemoteDataSource _recRemote;
+  Timer? _periodicTimer;
 
   SyncWorker({
     required AppDatabase db,
@@ -51,6 +55,35 @@ class SyncWorker {
         // print('Sync error for ${change.id}: $e');
       }
     }
+  }
+
+  /// Метод для однократного запуска синхронизации
+  Future<void> startSync() async {
+    try {
+      await syncPendingChanges();
+    } catch (e) {
+      // Логируем ошибку
+      print('Sync error: $e');
+    }
+  }
+
+  /// Метод для запуска периодической синхронизации
+  Future<void> startPeriodicSync() async {
+    // Проверяем подключение к интернету перед синхронизацией
+    final connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult != ConnectivityResult.none) {
+      // Запускаем синхронизацию каждые 5 минут при наличии подключения
+      _periodicTimer = Timer.periodic(Duration(minutes: 5), (timer) async {
+        await startSync();
+      });
+    }
+  }
+
+  /// Метод для остановки периодической синхронизации
+  void stopPeriodicSync() {
+    _periodicTimer?.cancel();
+    _periodicTimer = null;
   }
 }
 
