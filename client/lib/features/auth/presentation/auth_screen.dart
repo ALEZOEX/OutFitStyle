@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di.dart';
 import '../../../ui/atoms/haptics.dart';
+import '../../../ui/design_system/outfit_style_components.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -146,10 +147,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
         const SizedBox(height: 20),
         FilledButton(
           onPressed: _loggingIn ? null : _login,
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
+          style: OutfitStyleComponents.primaryButtonStyle(),
           child: _loggingIn
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : const Text('Войти', style: TextStyle(fontWeight: FontWeight.w800)),
@@ -169,10 +167,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
             icon: Icon(Icons.g_mobiledata, color: Colors.red), // Используем встроенную иконку Google
             label: const Text('Войти через Google'),
             onPressed: _loggingInWithGoogle ? null : _loginWithGoogle,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
+            style: OutfitStyleComponents.secondaryButtonStyle(),
           ),
         ),
       ],
@@ -212,10 +207,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
         const SizedBox(height: 20),
         FilledButton(
           onPressed: _registering ? null : _register,
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
+          style: OutfitStyleComponents.primaryButtonStyle(),
           child: _registering
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : const Text('Создать аккаунт', style: TextStyle(fontWeight: FontWeight.w800)),

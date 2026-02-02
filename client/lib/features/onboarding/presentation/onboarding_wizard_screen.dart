@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/di.dart';
 import '../../../app/onboarding/onboarding_providers.dart';
 import '../../../ui/atoms/haptics.dart';
+import '../../../ui/design_system/outfit_style_components.dart';
 
 class OnboardingWizardScreen extends ConsumerStatefulWidget {
   const OnboardingWizardScreen({super.key});
@@ -101,7 +102,7 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
             : null,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: OutfitStyleComponents.paddingMedium,
         children: [
           if (_error != null) _ErrorBox(_error!),
           Text(
@@ -127,10 +128,7 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
                       await _finishOnboarding();
                     }
                   },
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
+            style: OutfitStyleComponents.primaryButtonStyle(),
             child: _busy
                 ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
                 : Text(
@@ -168,108 +166,116 @@ class _PreferencesStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Чувствительность к температуре', style: TextStyle(fontWeight: FontWeight.w900)),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: OutfitStyleComponents.radiusXLarge,
+      ),
+      child: Padding(
+        padding: OutfitStyleComponents.paddingMedium,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FilterChip(
-              label: const Text('Холодно'),
-              selected: tempSensitivity == 'cold',
-              onSelected: (_) => onTempSensitivityChanged('cold'),
+            const Text('Чувствительность к температуре', style: TextStyle(fontWeight: FontWeight.w900)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                FilterChip(
+                  label: const Text('Холодно'),
+                  selected: tempSensitivity == 'cold',
+                  onSelected: (_) => onTempSensitivityChanged('cold'),
+                ),
+                FilterChip(
+                  label: const Text('Нормально'),
+                  selected: tempSensitivity == 'normal',
+                  onSelected: (_) => onTempSensitivityChanged('normal'),
+                ),
+                FilterChip(
+                  label: const Text('Жарко'),
+                  selected: tempSensitivity == 'warm',
+                  onSelected: (_) => onTempSensitivityChanged('warm'),
+                ),
+              ],
             ),
-            FilterChip(
-              label: const Text('Нормально'),
-              selected: tempSensitivity == 'normal',
-              onSelected: (_) => onTempSensitivityChanged('normal'),
+            const SizedBox(height: 16),
+
+            const Text('Предпочитаемые стили', style: TextStyle(fontWeight: FontWeight.w900)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                FilterChip(
+                  label: const Text('Повседневный'),
+                  selected: selectedStyles.contains('casual'),
+                  onSelected: (isSelected) {
+                    if (isSelected) {
+                      onStylesChanged([...selectedStyles, 'casual']);
+                    } else {
+                      onStylesChanged(selectedStyles.where((s) => s != 'casual').toList());
+                    }
+                  },
+                ),
+                FilterChip(
+                  label: const Text('Офисный'),
+                  selected: selectedStyles.contains('business'),
+                  onSelected: (isSelected) {
+                    if (isSelected) {
+                      onStylesChanged([...selectedStyles, 'business']);
+                    } else {
+                      onStylesChanged(selectedStyles.where((s) => s != 'business').toList());
+                    }
+                  },
+                ),
+                FilterChip(
+                  label: const Text('Спорт'),
+                  selected: selectedStyles.contains('sporty'),
+                  onSelected: (isSelected) {
+                    if (isSelected) {
+                      onStylesChanged([...selectedStyles, 'sporty']);
+                    } else {
+                      onStylesChanged(selectedStyles.where((s) => s != 'sporty').toList());
+                    }
+                  },
+                ),
+                FilterChip(
+                  label: const Text('Элегантный'),
+                  selected: selectedStyles.contains('elegant'),
+                  onSelected: (isSelected) {
+                    if (isSelected) {
+                      onStylesChanged([...selectedStyles, 'elegant']);
+                    } else {
+                      onStylesChanged(selectedStyles.where((s) => s != 'elegant').toList());
+                    }
+                  },
+                ),
+              ],
             ),
-            FilterChip(
-              label: const Text('Жарко'),
-              selected: tempSensitivity == 'warm',
-              onSelected: (_) => onTempSensitivityChanged('warm'),
+            const SizedBox(height: 16),
+
+            const Text('Предпочтения по категориям', style: TextStyle(fontWeight: FontWeight.w900)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final cat in const ['outerwear', 'top', 'bottom', 'footwear', 'accessories'])
+                  FilterChip(
+                    label: Text(_categoryLabel(cat)),
+                    selected: preferredCategories.contains(cat),
+                    onSelected: (_) => onCategoryToggled(cat),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Умные уведомления'),
+              value: notificationsEnabled,
+              onChanged: onNotificationsChanged,
             ),
           ],
         ),
-        const SizedBox(height: 16),
-
-        const Text('Предпочитаемые стили', style: TextStyle(fontWeight: FontWeight.w900)),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: [
-            FilterChip(
-              label: const Text('Повседневный'),
-              selected: selectedStyles.contains('casual'),
-              onSelected: (isSelected) {
-                if (isSelected) {
-                  onStylesChanged([...selectedStyles, 'casual']);
-                } else {
-                  onStylesChanged(selectedStyles.where((s) => s != 'casual').toList());
-                }
-              },
-            ),
-            FilterChip(
-              label: const Text('Офисный'),
-              selected: selectedStyles.contains('business'),
-              onSelected: (isSelected) {
-                if (isSelected) {
-                  onStylesChanged([...selectedStyles, 'business']);
-                } else {
-                  onStylesChanged(selectedStyles.where((s) => s != 'business').toList());
-                }
-              },
-            ),
-            FilterChip(
-              label: const Text('Спорт'),
-              selected: selectedStyles.contains('sporty'),
-              onSelected: (isSelected) {
-                if (isSelected) {
-                  onStylesChanged([...selectedStyles, 'sporty']);
-                } else {
-                  onStylesChanged(selectedStyles.where((s) => s != 'sporty').toList());
-                }
-              },
-            ),
-            FilterChip(
-              label: const Text('Элегантный'),
-              selected: selectedStyles.contains('elegant'),
-              onSelected: (isSelected) {
-                if (isSelected) {
-                  onStylesChanged([...selectedStyles, 'elegant']);
-                } else {
-                  onStylesChanged(selectedStyles.where((s) => s != 'elegant').toList());
-                }
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        const Text('Предпочтения по категориям', style: TextStyle(fontWeight: FontWeight.w900)),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: [
-            for (final cat in const ['outerwear', 'top', 'bottom', 'footwear', 'accessories'])
-              FilterChip(
-                label: Text(_categoryLabel(cat)),
-                selected: preferredCategories.contains(cat),
-                onSelected: (_) => onCategoryToggled(cat),
-              ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('Умные уведомления'),
-          value: notificationsEnabled,
-          onChanged: onNotificationsChanged,
-        ),
-      ],
+      ),
     );
   }
 
@@ -301,29 +307,37 @@ class _BodyParamsStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Параметры тела (опционально)', style: TextStyle(fontWeight: FontWeight.w900)),
-        const SizedBox(height: 12),
-        TextField(
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Рост (см)',
-            prefixIcon: Icon(Icons.straighten_rounded),
-          ),
-          onChanged: (v) => onHeightChanged(int.tryParse(v)),
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: OutfitStyleComponents.radiusXLarge,
+      ),
+      child: Padding(
+        padding: OutfitStyleComponents.paddingMedium,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Параметры тела (опционально)', style: TextStyle(fontWeight: FontWeight.w900)),
+            const SizedBox(height: 12),
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Рост (см)',
+                prefixIcon: Icon(Icons.straighten_rounded),
+              ),
+              onChanged: (v) => onHeightChanged(int.tryParse(v)),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Вес (кг)',
+                prefixIcon: Icon(Icons.scale_rounded),
+              ),
+              onChanged: (v) => onWeightChanged(int.tryParse(v)),
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
-        TextField(
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Вес (кг)',
-            prefixIcon: Icon(Icons.scale_rounded),
-          ),
-          onChanged: (v) => onWeightChanged(int.tryParse(v)),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -339,7 +353,7 @@ class _ErrorBox extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: OutfitStyleComponents.radiusLarge,
       ),
       child: Text(text),
     );

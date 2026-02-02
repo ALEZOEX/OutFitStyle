@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables.dart';
+import '../../domain/entities/recommendation_entity.dart';
 
 part 'recommendation_dao.g.dart';
 
@@ -92,7 +93,6 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
       RecommendationsCompanion(
         origin: const Value('local'),
         serverId: Value(serverId),
-        publishedAt: Value(DateTime.now()),
         lastSyncedAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
       ),
