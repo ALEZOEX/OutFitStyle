@@ -158,6 +158,11 @@ final recommendationsControllerProvider =
   return RecommendationsController(ref);
 });
 
+final wardrobeStreamProvider = StreamProvider<List<WardrobeEntry>>((ref) {
+  final repo = ref.watch(wardrobeRepositoryProvider);
+  return repo.watchWardrobe(); // По умолчанию не включает архивные элементы
+});
+
 final wardrobeControllerProvider =
     StateNotifierProvider<WardrobeController, WardrobeState>((ref) {
   return WardrobeController(ref);

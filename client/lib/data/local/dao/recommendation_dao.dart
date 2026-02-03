@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables.dart';
-import '../../domain/entities/recommendation_entity.dart' as domain;
+import '../../../domain/entities/recommendation_entity.dart' as domain;
 
 part 'recommendation_dao.g.dart';
 
