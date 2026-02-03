@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../local/app_database.dart';
 import '../local/dao/sync_outbox_dao.dart';
 import '../remote/wardrobe_remote_ds.dart';
 import '../remote/recommendations_remote_ds.dart';
+import '../../models/wardrobe_models.dart';
 
 class SyncWorker {
   final AppDatabase _db;
@@ -29,30 +31,96 @@ class SyncWorker {
         // Выполняем синхронизацию в зависимости от типа действия
         switch (change.action) {
           case 'wardrobe_create':
-            await _wardrobeRemote.create(change.payload);
+            // Parse the payload to WardrobeCreateRequest
+            final payload = json.decode(change.payload);
+            final request = WardrobeCreateRequest(
+              name: payload['name'] ?? '',
+              category: payload['category'] ?? '',
+              subcategory: payload['subcategory'] ?? '',
+              style: payload['style'] ?? '',
+              iconEmoji: payload['icon_emoji'] ?? '',
+              imageUrl: payload['image_url'],
+              blurHash: payload['blur_hash'],
+              minTemp: payload['min_temp'],
+              maxTemp: payload['max_temp'],
+              warmthLevel: payload['warmth_level'],
+              rainOk: payload['rain_ok'] ?? false,
+              snowOk: payload['snow_ok'] ?? false,
+              windOk: payload['wind_ok'] ?? false,
+              usage: payload['usage'],
+              materials: payload['materials'],
+              isFavorite: payload['is_favorite'] ?? false,
+              isArchived: payload['is_archived'] ?? false,
+              season: payload['season'],
+              gender: payload['gender'],
+              fit: payload['fit'],
+              pattern: payload['pattern'],
+              localImagePath: payload['local_image_path'],
+            );
+            await _wardrobeRemote.create(request);
             break;
           case 'wardrobe_update':
-            await _wardrobeRemote.update(change.entityId, change.payload);
+            // Parse the payload to WardrobeUpdateRequest
+            final payload = json.decode(change.payload);
+            final request = WardrobeUpdateRequest(
+              name: payload['name'],
+              category: payload['category'],
+              subcategory: payload['subcategory'],
+              style: payload['style'],
+              iconEmoji: payload['icon_emoji'],
+              imageUrl: payload['image_url'],
+              blurHash: payload['blur_hash'],
+              minTemp: payload['min_temp'],
+              maxTemp: payload['max_temp'],
+              warmthLevel: payload['warmth_level'],
+              rainOk: payload['rain_ok'],
+              snowOk: payload['snow_ok'],
+              windOk: payload['wind_ok'],
+              usage: payload['usage'],
+              materials: payload['materials'],
+              isFavorite: payload['is_favorite'],
+              isArchived: payload['is_archived'],
+              season: payload['season'],
+              gender: payload['gender'],
+              fit: payload['fit'],
+              pattern: payload['pattern'],
+              localImagePath: payload['local_image_path'],
+            );
+            await _wardrobeRemote.update(change.entityId, request);
             break;
           case 'wardrobe_delete':
             await _wardrobeRemote.delete(change.entityId);
             break;
-          case 'recommendation_create':
-            await _recRemote.create(change.payload);
+          case 'recommendation_publish':
+            // For recommendations, we publish the outfit data
+            final payload = json.decode(change.payload);
+            await _recRemote.publishOutfit(
+              outfitDataJson: payload['outfit_data'] ?? {},
+              weatherDataJson: payload['weather_data'] ?? {},
+            );
             break;
-          case 'recommendation_update':
-            await _recRemote.update(change.entityId, change.payload);
+          case 'recommendation_favorite':
+            // Toggle favorite status for recommendation
+            final payload = json.decode(change.payload);
+            await _recRemote.setFavorite(
+              id: change.entityId,
+              isFavorite: payload['is_favorite'] ?? false,
+            );
             break;
-          case 'recommendation_delete':
-            await _recRemote.delete(change.entityId);
-            break;
+          default:
+            print('Unknown sync action: ${change.action}');
+            continue; // Skip unknown actions
         }
 
         // Отмечаем, что синхронизация прошла успешно
         await _db.syncOutboxDao.markAsSynced(change.id);
-      } catch (e) {
-        // Логируем ошибку, но не прерываем синхронизацию других элементов
-        // print('Sync error for ${change.id}: $e');
+      } catch (e, stackTrace) {
+        // Логируем ошибку с деталями, но не прерываем синхронизацию других элементов
+        print('Sync error for ${change.id} (${change.action}): $e');
+        print('Stack trace: $stackTrace');
+
+        // Optionally, we could implement retry logic or mark failed items differently
+        // For now, we'll continue with other items
       }
     }
   }
@@ -61,9 +129,10 @@ class SyncWorker {
   Future<void> startSync() async {
     try {
       await syncPendingChanges();
-    } catch (e) {
-      // Логируем ошибку
+    } catch (e, stackTrace) {
+      // Логируем ошибку с деталями
       print('Sync error: $e');
+      print('Stack trace: $stackTrace');
     }
   }
 
@@ -87,43 +156,3 @@ class SyncWorker {
   }
 }
 
-// Класс для представления действия в очереди синхронизации
-class SyncOutboxRow {
-  final int id;
-  final String action;
-  final String entityType;
-  final String entityId;
-  final String payload;
-  final DateTime createdAt;
-  final bool synced;
-
-  SyncOutboxRow({
-    required this.id,
-    required this.action,
-    required this.entityType,
-    required this.entityId,
-    required this.payload,
-    required this.createdAt,
-    required this.synced,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'action': action,
-        'entity_type': entityType,
-        'entity_id': entityId,
-        'payload': payload,
-        'created_at': createdAt.toIso8601String(),
-        'synced': synced,
-      };
-
-  static SyncOutboxRow fromJson(Map<String, dynamic> json) => SyncOutboxRow(
-        id: json['id'],
-        action: json['action'],
-        entityType: json['entity_type'],
-        entityId: json['entity_id'],
-        payload: json['payload'],
-        createdAt: DateTime.parse(json['created_at']),
-        synced: json['synced'] ?? false,
-      );
-}

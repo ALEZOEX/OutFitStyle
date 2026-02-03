@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables.dart';
-import '../../domain/entities/wardrobe_entity.dart';
+import '../../domain/entities/wardrobe_entity.dart' as domain;
 
 part 'wardrobe_dao.g.dart';
 
@@ -10,115 +10,19 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
     with _$WardrobeDaoMixin {
   WardrobeDao(super.db);
 
-  Stream<List<WardrobeEntry>> watchAll() {
+  Stream<List<domain.WardrobeEntry>> watchAll() {
     final q = select(wardrobeEntries).watch();
-    return q.map((rows) => rows.map((row) => WardrobeEntry(
-      id: row.id,
-      serverId: row.serverId,
-      name: row.name,
-      category: row.category,
-      subcategory: row.subcategory,
-      style: row.style,
-      iconEmoji: row.iconEmoji,
-      imageUrl: row.imageUrl,
-      blurHash: row.blurHash,
-      minTemp: row.minTemp,
-      maxTemp: row.maxTemp,
-      warmthLevel: row.warmthLevel,
-      rainOk: row.rainOk,
-      snowOk: row.snowOk,
-      windOk: row.windOk,
-      usage: row.usage,
-      materials: row.materials,
-      wearCount: row.wearCount,
-      lastWornAt: row.lastWornAt,
-      isFavorite: row.isFavorite,
-      isArchived: row.isArchived,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      lastSyncedAt: row.lastSyncedAt,
-      dirty: row.dirty,
-      season: row.season,
-      gender: row.gender,
-      fit: row.fit,
-      pattern: row.pattern,
-      localImagePath: row.localImagePath,
-    )).toList());
+    return q.map((rows) => rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
   }
 
-  Stream<WardrobeEntry?> watchById(String id) {
+  Stream<domain.WardrobeEntry?> watchById(String id) {
     final q = (select(wardrobeEntries)..where((t) => t.id.equals(id))).watchSingleOrNull();
-    return q.map((row) => row != null ? WardrobeEntry(
-      id: row.id,
-      serverId: row.serverId,
-      name: row.name,
-      category: row.category,
-      subcategory: row.subcategory,
-      style: row.style,
-      iconEmoji: row.iconEmoji,
-      imageUrl: row.imageUrl,
-      blurHash: row.blurHash,
-      minTemp: row.minTemp,
-      maxTemp: row.maxTemp,
-      warmthLevel: row.warmthLevel,
-      rainOk: row.rainOk,
-      snowOk: row.snowOk,
-      windOk: row.windOk,
-      usage: row.usage,
-      materials: row.materials,
-      wearCount: row.wearCount,
-      lastWornAt: row.lastWornAt,
-      isFavorite: row.isFavorite,
-      isArchived: row.isArchived,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      lastSyncedAt: row.lastSyncedAt,
-      dirty: row.dirty,
-      season: row.season,
-      gender: row.gender,
-      fit: row.fit,
-      pattern: row.pattern,
-      localImagePath: row.localImagePath,
-    ) : null);
+    return q.map((row) => row != null ? domain.WardrobeEntry.fromDbEntity(row) : null);
   }
 
-  Future<WardrobeEntry?> getById(String id) async {
+  Future<domain.WardrobeEntry?> getById(String id) async {
     final row = await (select(wardrobeEntries)..where((t) => t.id.equals(id))).getSingleOrNull();
-    if (row != null) {
-      return WardrobeEntry(
-        id: row.id,
-        serverId: row.serverId,
-        name: row.name,
-        category: row.category,
-        subcategory: row.subcategory,
-        style: row.style,
-        iconEmoji: row.iconEmoji,
-        imageUrl: row.imageUrl,
-        blurHash: row.blurHash,
-        minTemp: row.minTemp,
-        maxTemp: row.maxTemp,
-        warmthLevel: row.warmthLevel,
-        rainOk: row.rainOk,
-        snowOk: row.snowOk,
-        windOk: row.windOk,
-        usage: row.usage,
-        materials: row.materials,
-        wearCount: row.wearCount,
-        lastWornAt: row.lastWornAt,
-        isFavorite: row.isFavorite,
-        isArchived: row.isArchived,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-        lastSyncedAt: row.lastSyncedAt,
-        dirty: row.dirty,
-        season: row.season,
-        gender: row.gender,
-        fit: row.fit,
-        pattern: row.pattern,
-        localImagePath: row.localImagePath,
-      );
-    }
-    return null;
+    return row != null ? domain.WardrobeEntry.fromDbEntity(row) : null;
   }
 
   Future<void> upsertOne(WardrobeEntriesCompanion companion) {
@@ -155,8 +59,8 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
     return customUpdate(
       'UPDATE wardrobe_entries SET wear_count = wear_count + 1, last_worn_at = ? WHERE id = ?',
       variables: [
-        DateTimeType().mapToSqlVariable(DateTime.now()),
-        StringType().mapToSqlVariable(id),
+        Variable.withDateTime(DateTime.now()),
+        Variable.withString(id),
       ],
     );
   }
@@ -177,41 +81,100 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
     return (delete(wardrobeEntries)..where((t) => t.id.equals(id))).go();
   }
 
-  Stream<List<WardrobeEntry>> watchByCategory(String category) {
+  Stream<List<domain.WardrobeEntry>> watchByCategory(String category) {
     final q = (select(wardrobeEntries)
           ..where((t) => t.category.equals(category)))
         .watch();
-    return q.map((rows) => rows.map((row) => WardrobeEntry(
-      id: row.id,
-      serverId: row.serverId,
-      name: row.name,
-      category: row.category,
-      subcategory: row.subcategory,
-      style: row.style,
-      iconEmoji: row.iconEmoji,
-      imageUrl: row.imageUrl,
-      blurHash: row.blurHash,
-      minTemp: row.minTemp,
-      maxTemp: row.maxTemp,
-      warmthLevel: row.warmthLevel,
-      rainOk: row.rainOk,
-      snowOk: row.snowOk,
-      windOk: row.windOk,
-      usage: row.usage,
-      materials: row.materials,
-      wearCount: row.wearCount,
-      lastWornAt: row.lastWornAt,
-      isFavorite: row.isFavorite,
-      isArchived: row.isArchived,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      lastSyncedAt: row.lastSyncedAt,
-      dirty: row.dirty,
-      season: row.season,
-      gender: row.gender,
-      fit: row.fit,
-      pattern: row.pattern,
-      localImagePath: row.localImagePath,
-    )).toList());
+    return q.map((rows) => rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
+  }
+
+  // Получить все элементы (однократно)
+  Future<List<domain.WardrobeEntry>> getAll() async {
+    final rows = await select(wardrobeEntries).get();
+    return rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList();
+  }
+
+  // Получить элементы по категориям
+  Future<List<domain.WardrobeEntry>> getByCategories(List<String> categories) async {
+    final rows = await (select(wardrobeEntries)
+          ..where((t) => t.category.isIn(categories))
+          ..where((t) => t.isArchived.equals(false)))
+        .get();
+    return rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList();
+  }
+
+  // Получить элементы по сезону
+  Stream<List<domain.WardrobeEntry>> watchBySeason(String season) {
+    final q = (select(wardrobeEntries)
+          ..where((t) => t.season.equals(season))
+          ..where((t) => t.isArchived.equals(false)))
+        .watch();
+    return q.map((rows) => rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
+  }
+
+  // Получить элементы по температуре
+  Future<List<domain.WardrobeEntry>> getByTemperature(int temperature) async {
+    final rows = await (select(wardrobeEntries)
+          ..where((t) => t.minTemp.isSmallerOrEqualValue(temperature))
+          ..where((t) => t.maxTemp.isBiggerOrEqualValue(temperature))
+          ..where((t) => t.isArchived.equals(false)))
+        .get();
+    return rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList();
+  }
+
+  // Получить избранные элементы
+  Stream<List<domain.WardrobeEntry>> watchFavorites() {
+    final q = (select(wardrobeEntries)
+          ..where((t) => t.isFavorite.equals(true))
+          ..where((t) => t.isArchived.equals(false))
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+        .watch();
+    return q.map((rows) => rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
+  }
+
+
+  // Получить количество элементов
+  Future<int> count() async {
+    return (select(wardrobeEntries)..where((t) => t.isArchived.equals(false))).get().then((value) => value.length);
+  }
+
+  // Отметить как синхронизированное
+  Future<void> markAsSynced(String id, String serverId) {
+    return (update(wardrobeEntries)..where((t) => t.id.equals(id))).write(
+      WardrobeEntriesCompanion(
+        serverId: Value(serverId),
+        lastSyncedAt: Value(DateTime.now()),
+        dirty: const Value(false),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  // Получить несинхронизированные элементы
+  Future<List<domain.WardrobeEntry>> getUnsynced() async {
+    final rows = await (select(wardrobeEntries)
+          ..where((t) => t.dirty.equals(true) | t.lastSyncedAt.isNull()))
+        .get();
+    return rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList();
+  }
+
+  // Сбросить счетчик использования
+  Future<void> resetWearCount(String id) {
+    return (update(wardrobeEntries)..where((t) => t.id.equals(id))).write(
+      WardrobeEntriesCompanion(
+        wearCount: const Value(0),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  // Обновить дату последнего ношения
+  Future<void> updateLastWorn(String id, DateTime date) {
+    return (update(wardrobeEntries)..where((t) => t.id.equals(id))).write(
+      WardrobeEntriesCompanion(
+        lastWornAt: Value(date),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
 }

@@ -1,21 +1,22 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/di.dart';
-import '../../../ui/atoms/haptics.dart';
-import '../../../ui/atoms/outfit_app_bar.dart';
-import 'package:outfitstyle_client/models/wardrobe_models.dart';
-import '../../../data/local/app_database.dart';
+import '../../../../app/di.dart';
+import '../../../../ui/atoms/haptics.dart';
+import '../../../../ui/atoms/outfit_app_bar.dart';
+import '../../../../domain/entities/wardrobe_entity.dart';
+import '../../../../domain/entities/recommendation_entity.dart';
 
 final _wardrobeByCategoryProvider = FutureProvider<Map<String, List<WardrobeEntry>>>((ref) async {
   final repo = ref.watch(wardrobeRepositoryProvider);
   final items = await repo.watchWardrobe(includeArchived: false).first;
   final byCat = <String, List<WardrobeEntry>>{};
-  
+
   for (final item in items) {
     byCat.putIfAbsent(item.category, () => []).add(item);
   }
-  
+
   return byCat;
 });
 
@@ -34,7 +35,6 @@ class WardrobeRecommendationIntegration extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wardrobeByCategory = ref.watch(_wardrobeByCategoryProvider);
-    final controller = ref.read(recommendationRepositoryProvider);
 
     return Scaffold(
       appBar: OutfitAppBar(
@@ -54,8 +54,8 @@ class WardrobeRecommendationIntegration extends ConsumerWidget {
                 dirty: false,
                 lastSyncedAt: DateTime.now(),
               );
-              
-              await controller.toggleFavorite(row);
+
+              await ref.read(recommendationsRepositoryProvider).toggleFavorite(row);
             },
             icon: const Icon(Icons.bookmark_add_rounded),
             tooltip: 'Сохранить',
@@ -97,7 +97,7 @@ class WardrobeRecommendationIntegration extends ConsumerWidget {
                     'outfit': finalLines,
                   };
 
-                  final newId = await controller.saveLocalOutfit(
+                  final newId = await ref.read(recommendationsRepositoryProvider).saveLocalOutfit(
                     outfitData: finalOutfit,
                     weatherData: weatherData,
                     favorite: true,

@@ -55,6 +55,9 @@ type RecommendationRepository interface {
 	// GetByID возвращает рекомендацию по идентификатору
 	GetByID(ctx context.Context, id domain.ID) (*domain.RecommendationRecord, error)
 
+	// GetByUserAndID возвращает рекомендацию по идентификатору и проверяет, что она принадлежит пользователю
+	GetByUserAndID(ctx context.Context, userID, id domain.ID) (*domain.RecommendationRecord, error)
+
 	// ListByUser возвращает список рекомендаций пользователя
 	ListByUser(ctx context.Context, userID domain.ID, q domain.RecommendationListQuery) (items []domain.RecommendationRecord, total int, err error)
 

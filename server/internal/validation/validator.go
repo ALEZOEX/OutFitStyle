@@ -7,8 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 
 	"outfitstyle/server/internal/core/domain"
 )
@@ -219,4 +223,93 @@ func ValidateClothingItem(v *Validator, item domain.ClothingItem) {
 	if item.IconEmoji != nil {
 		v.Check(len(*item.IconEmoji) <= 10, "icon_emoji", "must not be more than 10 characters long")
 	}
+}
+
+// ValidateUUID validates that a string is a valid UUID
+func ValidateUUID(v *Validator, uuidStr, fieldName string) {
+	_, err := uuid.Parse(uuidStr)
+	v.Check(err == nil, fieldName, fmt.Sprintf("%s must be a valid UUID", fieldName))
+}
+
+// ValidateIntegerRange проверяет, находится ли целое число в заданном диапазоне
+func ValidateIntegerRange(v *Validator, value int, min, max int, fieldName, fieldLabel string) {
+	v.Check(value >= min, fieldName, fmt.Sprintf("%s must be greater than or equal to %d", fieldLabel, min))
+	v.Check(value <= max, fieldName, fmt.Sprintf("%s must be less than or equal to %d", fieldLabel, max))
+}
+
+// ValidateStringLength проверяет длину строки
+func ValidateStringLength(v *Validator, value string, minLen, maxLen int, fieldName, fieldLabel string) {
+	v.Check(len(value) >= minLen, fieldName, fmt.Sprintf("%s must be at least %d characters long", fieldLabel, minLen))
+	v.Check(len(value) <= maxLen, fieldName, fmt.Sprintf("%s must not be more than %d characters long", fieldLabel, maxLen))
+}
+
+// ValidateFloatRange проверяет, находится ли число с плавающей точкой в заданном диапазоне
+func ValidateFloatRange(v *Validator, value float64, min, max float64, fieldName, fieldLabel string) {
+	v.Check(value >= min, fieldName, fmt.Sprintf("%s must be greater than or equal to %.2f", fieldLabel, min))
+	v.Check(value <= max, fieldName, fmt.Sprintf("%s must be less than or equal to %.2f", fieldLabel, max))
+}
+
+// ValidateLatitude проверяет, находится ли широта в допустимом диапазоне [-90, 90]
+func ValidateLatitude(v *Validator, lat *float64) {
+	if lat != nil {
+		ValidateFloatRange(v, *lat, -90.0, 90.0, "latitude", "latitude")
+	}
+}
+
+// ValidateLongitude проверяет, находится ли долгота в допустимом диапазоне [-180, 180]
+func ValidateLongitude(v *Validator, lng *float64) {
+	if lng != nil {
+		ValidateFloatRange(v, *lng, -180.0, 180.0, "longitude", "longitude")
+	}
+}
+
+// ValidateURL проверяет, является ли строка допустимым URL
+func ValidateURL(v *Validator, urlStr *string, fieldName, fieldLabel string) {
+	if urlStr != nil && *urlStr != "" {
+		_, err := url.ParseRequestURI(*urlStr)
+		v.Check(err == nil, fieldName, fmt.Sprintf("%s must be a valid URL", fieldLabel))
+	}
+}
+
+// ValidateEnumValue проверяет, является ли значение одним из разрешенных значений
+func ValidateEnumValue(v *Validator, value, validValue string, fieldName, fieldLabel string) {
+	v.Check(value == validValue, fieldName, fmt.Sprintf("%s must be %s", fieldLabel, validValue))
+}
+
+// ValidateInSlice проверяет, содержится ли значение в срезе допустимых значений
+func ValidateInSlice(v *Validator, value string, validValues []string, fieldName, fieldLabel string) {
+	inSlice := false
+	for _, validValue := range validValues {
+		if value == validValue {
+			inSlice = true
+			break
+		}
+	}
+	v.Check(inSlice, fieldName, fmt.Sprintf("%s must be one of [%s]", fieldLabel, strings.Join(validValues, ", ")))
+}
+
+// ValidatePositiveInt проверяет, является ли целое число положительным
+func ValidatePositiveInt(v *Validator, value *int, fieldName, fieldLabel string) {
+	if value != nil {
+		v.Check(*value > 0, fieldName, fmt.Sprintf("%s must be positive", fieldLabel))
+	}
+}
+
+// ValidateNonNegativeInt проверяет, является ли целое число неотрицательным
+func ValidateNonNegativeInt(v *Validator, value *int, fieldName, fieldLabel string) {
+	if value != nil {
+		v.Check(*value >= 0, fieldName, fmt.Sprintf("%s must be non-negative", fieldLabel))
+	}
+}
+
+// ValidateDate проверяет, является ли строка допустимой датой в формате YYYY-MM-DD
+func ValidateDate(v *Validator, dateStr string, fieldName, fieldLabel string) {
+	_, err := time.Parse("2006-01-02", dateStr)
+	v.Check(err == nil, fieldName, fmt.Sprintf("%s must be a valid date in YYYY-MM-DD format", fieldLabel))
+}
+
+// ValidateDateTime проверяет, является ли строка допустимой датой и временем
+func ValidateDateTime(v *Validator, dateTimeStr string, fieldName, fieldLabel string) {
+	_, err := time.Parse(time.RFC3339, dateTimeStr)
+	v.Check(err == nil, fieldName, fmt.Sprintf("%s must be a valid datetime in RFC3339 format", fieldLabel))
 }

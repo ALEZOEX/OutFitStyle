@@ -9,9 +9,11 @@ class ProfileRepository {
   final ApiConfig _config;
   final AuthStorage _auth;
   final http.Client _httpClient;
+  final bool _shouldDispose;
 
   ProfileRepository(this._config, this._auth, [http.Client? httpClient])
-      : _httpClient = httpClient ?? http.Client();
+      : _httpClient = httpClient ?? http.Client(),
+        _shouldDispose = httpClient == null;
 
   Future<Map<String, dynamic>> getMe() async {
     try {
@@ -63,6 +65,12 @@ class ProfileRepository {
       }
     } catch (e) {
       throw Exception('Update body error: $e');
+    }
+  }
+
+  void dispose() {
+    if (_shouldDispose) {
+      _httpClient.close();
     }
   }
 }

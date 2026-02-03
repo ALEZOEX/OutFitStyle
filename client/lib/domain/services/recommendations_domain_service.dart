@@ -50,12 +50,8 @@ class RecommendationsDomainService {
     // Здесь временная реализация
     final now = DateTime.now();
     return await _recommendationsRepository.createLocal(
-      id: 'rec_${now.millisecondsSinceEpoch}',
-      outfitDataJson: '{"occasion": "$occasion"}',
-      weatherDataJson: '{}',
-      isFavorite: false,
-      imageUrl: null,
-      localImagePath: null,
+      outfitData: {"occasion": occasion},
+      weatherData: {},
     );
   }
 
@@ -66,14 +62,9 @@ class RecommendationsDomainService {
   }) async {
     // В реальной реализации вызываем API для генерации рекомендации с учетом выбранного элемента
     // Здесь временная реализация
-    final now = DateTime.now();
     return await _recommendationsRepository.createLocal(
-      id: 'rec_with_item_${now.millisecondsSinceEpoch}',
-      outfitDataJson: '{"occasion": "$occasion", "itemId": "${item.id}"}',
-      weatherDataJson: includeWeather ? '{}' : '{}',
-      isFavorite: false,
-      imageUrl: null,
-      localImagePath: null,
+      outfitData: {"occasion": occasion, "itemId": item.id},
+      weatherData: includeWeather ? {} : {},
     );
   }
 
@@ -81,14 +72,9 @@ class RecommendationsDomainService {
     required Map<String, dynamic> outfitData,
     required Map<String, dynamic> weatherData,
   }) async {
-    final now = DateTime.now();
     return await _recommendationsRepository.createLocal(
-      id: 'local_${now.millisecondsSinceEpoch}',
-      outfitDataJson: _encodeJson(outfitData),
-      weatherDataJson: _encodeJson(weatherData),
-      isFavorite: false,
-      imageUrl: null,
-      localImagePath: null,
+      outfitData: outfitData,
+      weatherData: weatherData,
     );
   }
 
@@ -97,18 +83,17 @@ class RecommendationsDomainService {
     required Map<String, dynamic> weatherData,
     required bool favorite,
   }) async {
-    final now = DateTime.now();
-    return await _recommendationsRepository.createLocal(
-      id: 'saved_${now.millisecondsSinceEpoch}',
-      outfitDataJson: _encodeJson(outfitData),
-      weatherDataJson: _encodeJson(weatherData),
-      isFavorite: favorite,
-      imageUrl: null,
-      localImagePath: null,
+    final recommendation = await _recommendationsRepository.createLocal(
+      outfitData: outfitData,
+      weatherData: weatherData,
     );
+
+    // Update favorite status if needed
+    if (favorite != recommendation.isFavorite) {
+      await _recommendationsRepository.toggleFavorite(recommendation);
+    }
+
+    return recommendation;
   }
 
-  String _encodeJson(Map<String, dynamic> data) {
-    return data.toString(); // Временная реализация, в реальности использовать json.encode
-  }
 }

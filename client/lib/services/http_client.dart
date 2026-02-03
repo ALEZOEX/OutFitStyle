@@ -84,19 +84,32 @@ class AuthenticatedHttpClient extends http.BaseClient {
     final data = jsonDecode(resp.body);
     // подстрой под фактический формат ответа API:
     // либо { "tokens": {...} }, либо { "access_token": "...", "refresh_token": "..." }
-    final tokensJson = data['tokens'];
 
-    if (tokensJson == null) {
+    // Проверяем, является ли 'tokens' мапом
+    if (data['tokens'] != null && data['tokens'] is Map<String, dynamic>) {
+      try {
+        final tokens = TokenPair.fromJson(data['tokens']);
+        await _authStorage.writeTokenPair(tokens);
+        return true;
+      } catch (e) {
+        // Если не удалось распарсить токены, возвращаем false
+        return false;
+      }
+    } else if (data is Map<String, dynamic> &&
+               data.containsKey('access_token') &&
+               data.containsKey('refresh_token') &&
+               data.containsKey('expires_at')) {
+      // Альтернативный формат: прямой объект с токенами
+      try {
+        final tokens = TokenPair.fromJson(data);
+        await _authStorage.writeTokenPair(tokens);
+        return true;
+      } catch (e) {
+        // Если не удалось распарсить токены, возвращаем false
+        return false;
+      }
+    } else {
       // Если формат ответа не соответствует ожидаемому, возвращаем false
-      return false;
-    }
-
-    try {
-      final tokens = TokenPair.fromJson(tokensJson);
-      await _authStorage.writeTokenPair(tokens);
-      return true;
-    } catch (e) {
-      // Если не удалось распарсить токены, возвращаем false
       return false;
     }
   }

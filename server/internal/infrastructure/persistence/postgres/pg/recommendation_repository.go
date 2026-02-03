@@ -9,17 +9,32 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/cache"
 )
 
 type RecommendationRepository struct {
-	db *pgxpool.Pool
+	db    *pgxpool.Pool
+	cache *cache.RepositoryCache
 }
 
-func NewRecommendationRepository(db *pgxpool.Pool, logger interface{}) *RecommendationRepository {
-	return &RecommendationRepository{db: db}
+func NewRecommendationRepository(db *pgxpool.Pool, redisClient *redis.Client, logger interface{}) *RecommendationRepository {
+	var zapLogger *zap.Logger
+	if l, ok := logger.(*zap.Logger); ok {
+		zapLogger = l
+	} else {
+		// Create a default logger if the passed logger is not a zap logger
+		zapLogger = zap.NewNop()
+	}
+
+	return &RecommendationRepository{
+		db:    db,
+		cache: cache.NewRepositoryCache(redisClient, zapLogger),
+	}
 }
 
 func (r *RecommendationRepository) Create(ctx context.Context, rec *domain.RecommendationRecord, items []repositories.RecommendationItemCreate) (domain.ID, error) {
@@ -208,6 +223,15 @@ func (r *RecommendationRepository) CreateRecommendation(ctx context.Context, rec
 }
 
 func (r *RecommendationRepository) GetByID(ctx context.Context, id domain.ID) (*domain.RecommendationRecord, error) {
+	cacheKey := r.cache.GenerateKey("recommendation:id", id)
+
+	var cachedRec domain.RecommendationRecord
+	err := r.cache.Get(ctx, cacheKey, &cachedRec)
+	if err == nil && cachedRec.ID != domain.NilID {
+		// Return cached recommendation if found
+		return &cachedRec, nil
+	}
+
 	query := `
 		SELECT
 			id, user_id, city, weather, outfit, created_at, source, score, outfit_score, algorithm, items, location, temperature, feels_like, wind_speed, min_temp, max_temp, will_rain, will_snow, humidity, timestamp, ml_powered
@@ -222,7 +246,7 @@ func (r *RecommendationRepository) GetByID(ctx context.Context, id domain.ID) (*
 	var createdAt time.Time
 	var timestamp time.Time
 
-	err := r.db.QueryRow(ctx, query, id).Scan(
+	err = r.db.QueryRow(ctx, query, id).Scan(
 		&rec.ID,
 		&rec.UserID,
 		&rec.City,
@@ -251,6 +275,90 @@ func (r *RecommendationRepository) GetByID(ctx context.Context, id domain.ID) (*
 			return nil, nil
 		}
 		return nil, errors.Wrap(err, "failed to get recommendation by ID")
+	}
+
+	// Parse JSON fields
+	if len(weatherJSON) > 0 {
+		err = json.Unmarshal(weatherJSON, &rec.Weather)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal weather data")
+		}
+	}
+
+	if len(outfitJSON) > 0 {
+		err = json.Unmarshal(outfitJSON, &rec.Outfit)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal outfit data")
+		}
+	}
+
+	if len(itemsJSON) > 0 {
+		err = json.Unmarshal(itemsJSON, &rec.Items)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal items data")
+		}
+	}
+
+	rec.CreatedAt = createdAt
+	if !timestamp.IsZero() {
+		rec.Timestamp = &timestamp
+	}
+
+	// Cache the result
+	go func() {
+		// Use background context to avoid cancellation issues
+		bgCtx := context.Background()
+		_ = r.cache.Set(bgCtx, cacheKey, &rec, 10*time.Minute)
+	}()
+
+	return &rec, nil
+}
+
+// GetByUserAndID gets a recommendation by its ID and verifies it belongs to the user
+func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, id domain.ID) (*domain.RecommendationRecord, error) {
+	query := `
+		SELECT
+			id, user_id, city, weather, outfit, created_at, source, score, outfit_score, algorithm, items, location, temperature, feels_like, wind_speed, min_temp, max_temp, will_rain, will_snow, humidity, timestamp, ml_powered
+		FROM recommendations
+		WHERE user_id = $1 AND id = $2
+	`
+
+	var rec domain.RecommendationRecord
+	var weatherJSON []byte
+	var outfitJSON []byte
+	var itemsJSON []byte
+	var createdAt time.Time
+	var timestamp time.Time
+
+	err := r.db.QueryRow(ctx, query, userID, id).Scan(
+		&rec.ID,
+		&rec.UserID,
+		&rec.City,
+		&weatherJSON,
+		&outfitJSON,
+		&createdAt,
+		&rec.Source,
+		&rec.Score,
+		&rec.OutfitScore,
+		&rec.Algorithm,
+		&itemsJSON,
+		&rec.Location,
+		&rec.Temperature,
+		&rec.FeelsLike,
+		&rec.WindSpeed,
+		&rec.MinTemp,
+		&rec.MaxTemp,
+		&rec.WillRain,
+		&rec.WillSnow,
+		&rec.Humidity,
+		&timestamp,
+		&rec.MLPowered,
+	)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "failed to get recommendation by user and ID")
 	}
 
 	// Parse JSON fields
@@ -531,6 +639,22 @@ func (r *RecommendationRepository) Delete(ctx context.Context, id domain.ID) err
 	return nil
 }
 
+// DeleteByUserAndID deletes a recommendation by its ID and verifies it belongs to the user
+func (r *RecommendationRepository) DeleteByUserAndID(ctx context.Context, userID, id domain.ID) error {
+	query := `DELETE FROM recommendations WHERE user_id = $1 AND id = $2`
+
+	tag, err := r.db.Exec(ctx, query, userID, id)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete recommendation by user and ID")
+	}
+
+	if tag.RowsAffected() == 0 {
+		return errors.New("no recommendation found with the given ID for this user")
+	}
+
+	return nil
+}
+
 func (r *RecommendationRepository) GetItemRows(ctx context.Context, recommendationID domain.ID) ([]repositories.RecommendationItemRow, error) {
 	query := `
 		SELECT
@@ -766,8 +890,7 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 		limitOffsetIndex = argIndex
 	}
 
-	query += " ORDER BY created_at DESC LIMIT $"
-	query += string(rune('0'+limitOffsetIndex)) + " OFFSET $" + string(rune('0'+limitOffsetIndex+1))
+	query += " ORDER BY created_at DESC LIMIT $" + fmt.Sprintf("%d", limitOffsetIndex) + " OFFSET $" + fmt.Sprintf("%d", limitOffsetIndex+1)
 	args = append(args, q.Limit, offset)
 
 	rows, err := r.db.Query(ctx, query, args...)
