@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'ui_states.dart';
+part of 'wardrobe_state.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,55 +15,55 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
-mixin _$AdminState {
-  AsyncState<Map<String, dynamic>> get adminData =>
+mixin _$WardrobeState {
+  AsyncState<List<WardrobeEntry>> get wardrobeItems =>
       throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
 
-  /// Create a copy of AdminState
+  /// Create a copy of WardrobeState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $AdminStateCopyWith<AdminState> get copyWith =>
+  $WardrobeStateCopyWith<WardrobeState> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $AdminStateCopyWith<$Res> {
-  factory $AdminStateCopyWith(
-          AdminState value, $Res Function(AdminState) then) =
-      _$AdminStateCopyWithImpl<$Res, AdminState>;
+abstract class $WardrobeStateCopyWith<$Res> {
+  factory $WardrobeStateCopyWith(
+          WardrobeState value, $Res Function(WardrobeState) then) =
+      _$WardrobeStateCopyWithImpl<$Res, WardrobeState>;
   @useResult
   $Res call(
-      {AsyncState<Map<String, dynamic>> adminData,
+      {AsyncState<List<WardrobeEntry>> wardrobeItems,
       bool isLoading,
       String? error});
 }
 
 /// @nodoc
-class _$AdminStateCopyWithImpl<$Res, $Val extends AdminState>
-    implements $AdminStateCopyWith<$Res> {
-  _$AdminStateCopyWithImpl(this._value, this._then);
+class _$WardrobeStateCopyWithImpl<$Res, $Val extends WardrobeState>
+    implements $WardrobeStateCopyWith<$Res> {
+  _$WardrobeStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AdminState
+  /// Create a copy of WardrobeState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? adminData = null,
+    Object? wardrobeItems = null,
     Object? isLoading = null,
     Object? error = freezed,
   }) {
     return _then(_value.copyWith(
-      adminData: null == adminData
-          ? _value.adminData
-          : adminData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+      wardrobeItems: null == wardrobeItems
+          ? _value.wardrobeItems
+          : wardrobeItems // ignore: cast_nullable_to_non_nullable
+              as AsyncState<List<WardrobeEntry>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -77,41 +77,41 @@ class _$AdminStateCopyWithImpl<$Res, $Val extends AdminState>
 }
 
 /// @nodoc
-abstract class _$$AdminStateImplCopyWith<$Res>
-    implements $AdminStateCopyWith<$Res> {
-  factory _$$AdminStateImplCopyWith(
-          _$AdminStateImpl value, $Res Function(_$AdminStateImpl) then) =
-      __$$AdminStateImplCopyWithImpl<$Res>;
+abstract class _$$WardrobeStateImplCopyWith<$Res>
+    implements $WardrobeStateCopyWith<$Res> {
+  factory _$$WardrobeStateImplCopyWith(
+          _$WardrobeStateImpl value, $Res Function(_$WardrobeStateImpl) then) =
+      __$$WardrobeStateImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
-      {AsyncState<Map<String, dynamic>> adminData,
+      {AsyncState<List<WardrobeEntry>> wardrobeItems,
       bool isLoading,
       String? error});
 }
 
 /// @nodoc
-class __$$AdminStateImplCopyWithImpl<$Res>
-    extends _$AdminStateCopyWithImpl<$Res, _$AdminStateImpl>
-    implements _$$AdminStateImplCopyWith<$Res> {
-  __$$AdminStateImplCopyWithImpl(
-      _$AdminStateImpl _value, $Res Function(_$AdminStateImpl) _then)
+class __$$WardrobeStateImplCopyWithImpl<$Res>
+    extends _$WardrobeStateCopyWithImpl<$Res, _$WardrobeStateImpl>
+    implements _$$WardrobeStateImplCopyWith<$Res> {
+  __$$WardrobeStateImplCopyWithImpl(
+      _$WardrobeStateImpl _value, $Res Function(_$WardrobeStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AdminState
+  /// Create a copy of WardrobeState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? adminData = null,
+    Object? wardrobeItems = null,
     Object? isLoading = null,
     Object? error = freezed,
   }) {
-    return _then(_$AdminStateImpl(
-      adminData: null == adminData
-          ? _value.adminData
-          : adminData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+    return _then(_$WardrobeStateImpl(
+      wardrobeItems: null == wardrobeItems
+          ? _value.wardrobeItems
+          : wardrobeItems // ignore: cast_nullable_to_non_nullable
+              as AsyncState<List<WardrobeEntry>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -126,16 +126,16 @@ class __$$AdminStateImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$AdminStateImpl extends _AdminState {
-  const _$AdminStateImpl(
-      {this.adminData = const AsyncLoading<Map<String, dynamic>>(),
+class _$WardrobeStateImpl extends _WardrobeState {
+  const _$WardrobeStateImpl(
+      {this.wardrobeItems = const AsyncLoading<List<WardrobeEntry>>(),
       this.isLoading = false,
       this.error})
       : super._();
 
   @override
   @JsonKey()
-  final AsyncState<Map<String, dynamic>> adminData;
+  final AsyncState<List<WardrobeEntry>> wardrobeItems;
   @override
   @JsonKey()
   final bool isLoading;
@@ -144,51 +144,51 @@ class _$AdminStateImpl extends _AdminState {
 
   @override
   String toString() {
-    return 'AdminState(adminData: $adminData, isLoading: $isLoading, error: $error)';
+    return 'WardrobeState(wardrobeItems: $wardrobeItems, isLoading: $isLoading, error: $error)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AdminStateImpl &&
-            (identical(other.adminData, adminData) ||
-                other.adminData == adminData) &&
+            other is _$WardrobeStateImpl &&
+            (identical(other.wardrobeItems, wardrobeItems) ||
+                other.wardrobeItems == wardrobeItems) &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, adminData, isLoading, error);
+  int get hashCode => Object.hash(runtimeType, wardrobeItems, isLoading, error);
 
-  /// Create a copy of AdminState
+  /// Create a copy of WardrobeState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$AdminStateImplCopyWith<_$AdminStateImpl> get copyWith =>
-      __$$AdminStateImplCopyWithImpl<_$AdminStateImpl>(this, _$identity);
+  _$$WardrobeStateImplCopyWith<_$WardrobeStateImpl> get copyWith =>
+      __$$WardrobeStateImplCopyWithImpl<_$WardrobeStateImpl>(this, _$identity);
 }
 
-abstract class _AdminState extends AdminState {
-  const factory _AdminState(
-      {final AsyncState<Map<String, dynamic>> adminData,
+abstract class _WardrobeState extends WardrobeState {
+  const factory _WardrobeState(
+      {final AsyncState<List<WardrobeEntry>> wardrobeItems,
       final bool isLoading,
-      final String? error}) = _$AdminStateImpl;
-  const _AdminState._() : super._();
+      final String? error}) = _$WardrobeStateImpl;
+  const _WardrobeState._() : super._();
 
   @override
-  AsyncState<Map<String, dynamic>> get adminData;
+  AsyncState<List<WardrobeEntry>> get wardrobeItems;
   @override
   bool get isLoading;
   @override
   String? get error;
 
-  /// Create a copy of AdminState
+  /// Create a copy of WardrobeState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$AdminStateImplCopyWith<_$AdminStateImpl> get copyWith =>
+  _$$WardrobeStateImplCopyWith<_$WardrobeStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
