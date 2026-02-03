@@ -1,15 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../domain/states/ui_states.dart';
+import '../../../domain/states/generator_state.dart';
 
 class GeneratorController extends StateNotifier<GeneratorState> {
-  GeneratorController() : super(GeneratorState());
+  final Ref _ref;
 
-  Future<void> generateOutfit() async {
+  GeneratorController(this._ref) : super(const GeneratorState());
+
+  Future<void> bootstrap() async {
+    // Initialize the generator
+  }
+
+  Future<void> resetDeck() async {
+    // Reset the generator deck
+  }
+
+  Future<void> setOccasion(String occasion) async {
+    state = state.copyWith(occasion: occasion);
+  }
+
+  Future<void> generate() async {
     // Логика генерации аутфита
   }
 
-  Future<void> saveGeneratedOutfit() async {
-    // Логика сохранения сгенерированного аутфита
+  Future<void> like() async {
+    // Логика лайка
+  }
+
+  Future<void> dislike() async {
+    // Логика дизлайка
   }
 }
