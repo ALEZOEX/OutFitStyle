@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 // Основная сущность элемента гардероба
 class WardrobeEntries extends Table {
@@ -104,37 +103,63 @@ class WardrobeEntry {
   });
 
   factory WardrobeEntry.fromJson(Map<String, dynamic> json) {
+    // Проверяем обязательные поля
+    if (json['id'] == null) {
+      throw ArgumentError('Field "id" is required but was null');
+    }
+    if (json['name'] == null) {
+      throw ArgumentError('Field "name" is required but was null');
+    }
+    if (json['category'] == null) {
+      throw ArgumentError('Field "category" is required but was null');
+    }
+    if (json['subcategory'] == null) {
+      throw ArgumentError('Field "subcategory" is required but was null');
+    }
+    if (json['style'] == null) {
+      throw ArgumentError('Field "style" is required but was null');
+    }
+    if (json['icon_emoji'] == null) {
+      throw ArgumentError('Field "icon_emoji" is required but was null');
+    }
+    if (json['created_at'] == null) {
+      throw ArgumentError('Field "created_at" is required but was null');
+    }
+    if (json['updated_at'] == null) {
+      throw ArgumentError('Field "updated_at" is required but was null');
+    }
+
     return WardrobeEntry(
-      id: json['id'],
-      serverId: json['server_id'],
-      name: json['name'],
-      category: json['category'],
-      subcategory: json['subcategory'],
-      style: json['style'],
-      iconEmoji: json['icon_emoji'],
-      imageUrl: json['image_url'],
-      blurHash: json['blur_hash'],
-      minTemp: json['min_temp'],
-      maxTemp: json['max_temp'],
-      warmthLevel: json['warmth_level'],
-      rainOk: json['rain_ok'] ?? false,
-      snowOk: json['snow_ok'] ?? false,
-      windOk: json['wind_ok'] ?? false,
-      usage: json['usage'],
-      materials: json['materials'],
-      wearCount: json['wear_count'] ?? 0,
-      lastWornAt: json['last_worn_at'] != null ? DateTime.parse(json['last_worn_at']) : null,
-      isFavorite: json['is_favorite'] ?? false,
-      isArchived: json['is_archived'] ?? false,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      lastSyncedAt: json['last_synced_at'] != null ? DateTime.parse(json['last_synced_at']) : null,
-      dirty: json['dirty'] ?? false,
-      season: json['season'],
-      gender: json['gender'],
-      fit: json['fit'],
-      pattern: json['pattern'],
-      localImagePath: json['local_image_path'],
+      id: json['id'] as String,
+      serverId: json['server_id'] as String?,
+      name: json['name'] as String,
+      category: json['category'] as String,
+      subcategory: json['subcategory'] as String,
+      style: json['style'] as String,
+      iconEmoji: json['icon_emoji'] as String,
+      imageUrl: json['image_url'] as String?,
+      blurHash: json['blur_hash'] as String?,
+      minTemp: json['min_temp'] as int?,
+      maxTemp: json['max_temp'] as int?,
+      warmthLevel: json['warmth_level'] as int?,
+      rainOk: json['rain_ok'] as bool? ?? false,
+      snowOk: json['snow_ok'] as bool? ?? false,
+      windOk: json['wind_ok'] as bool? ?? false,
+      usage: json['usage'] as String?,
+      materials: json['materials'] as String?,
+      wearCount: json['wear_count'] as int? ?? 0,
+      lastWornAt: json['last_worn_at'] != null ? DateTime.parse(json['last_worn_at'] as String) : null,
+      isFavorite: json['is_favorite'] as bool? ?? false,
+      isArchived: json['is_archived'] as bool? ?? false,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+      lastSyncedAt: json['last_synced_at'] != null ? DateTime.parse(json['last_synced_at'] as String) : null,
+      dirty: json['dirty'] as bool? ?? false,
+      season: json['season'] as String?,
+      gender: json['gender'] as String?,
+      fit: json['fit'] as String?,
+      pattern: json['pattern'] as String?,
+      localImagePath: json['local_image_path'] as String?,
     );
   }
 
@@ -241,7 +266,7 @@ class WardrobeEntry {
 
   static WardrobeEntry fromExternal(Map<String, dynamic> external) {
     return WardrobeEntry(
-      id: external['id'] ?? '',
+      id: external['id'] ?? '', // Keep empty if not provided, should be handled by caller
       serverId: external['id'], // External ID becomes serverId
       name: external['name'] ?? '',
       category: external['category'] ?? '',
@@ -271,6 +296,41 @@ class WardrobeEntry {
       fit: external['fit'],
       pattern: external['pattern'],
       localImagePath: external['local_image_path'],
+    );
+  }
+
+  static WardrobeEntry fromDbEntity(dynamic dbEntity) {
+    return WardrobeEntry(
+      id: dbEntity.id,
+      serverId: dbEntity.serverId,
+      name: dbEntity.name,
+      category: dbEntity.category,
+      subcategory: dbEntity.subcategory,
+      style: dbEntity.style,
+      iconEmoji: dbEntity.iconEmoji,
+      imageUrl: dbEntity.imageUrl,
+      blurHash: dbEntity.blurHash,
+      minTemp: dbEntity.minTemp,
+      maxTemp: dbEntity.maxTemp,
+      warmthLevel: dbEntity.warmthLevel,
+      rainOk: dbEntity.rainOk,
+      snowOk: dbEntity.snowOk,
+      windOk: dbEntity.windOk,
+      usage: dbEntity.usage,
+      materials: dbEntity.materials,
+      wearCount: dbEntity.wearCount,
+      lastWornAt: dbEntity.lastWornAt,
+      isFavorite: dbEntity.isFavorite,
+      isArchived: dbEntity.isArchived,
+      createdAt: dbEntity.createdAt,
+      updatedAt: dbEntity.updatedAt,
+      lastSyncedAt: dbEntity.lastSyncedAt,
+      dirty: dbEntity.dirty,
+      season: dbEntity.season,
+      gender: dbEntity.gender,
+      fit: dbEntity.fit,
+      pattern: dbEntity.pattern,
+      localImagePath: dbEntity.localImagePath,
     );
   }
 }

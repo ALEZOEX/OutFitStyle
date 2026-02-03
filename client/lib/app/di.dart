@@ -13,6 +13,7 @@ import '../domain/entities/recommendation_entity.dart';
 import '../domain/entities/wardrobe_entity.dart';
 import 'env.dart';
 import 'api/api_client.dart';
+import 'session.dart';
 
 import '../data/local/app_database.dart';
 import '../data/remote/wardrobe_remote_ds.dart';
@@ -47,8 +48,8 @@ final imageStoreProvider = Provider<ImageStore>((ref) {
   return ImageStore();
 });
 
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('Provide SharedPreferences manually');
+final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async {
+  return await SharedPreferences.getInstance();
 });
 
 final apiClientProvider = Provider<ApiClient>((ref) {
@@ -57,11 +58,12 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(config: cfg, storage: storage);
 });
 
-final adminServiceProvider = Provider<AdminService>((ref) {
-  final cfg = ref.watch(apiConfigProvider);
-  final auth = ref.watch(authStorageProvider);
-  return AdminService(cfg, auth, http.Client());
-});
+// AdminService is not defined, commenting out for now
+// final adminServiceProvider = Provider<AdminService>((ref) {
+//   final cfg = ref.watch(apiConfigProvider);
+//   final auth = ref.watch(authStorageProvider);
+//   return AdminService(cfg, auth, http.Client());
+// });
 
 final wardrobeRemoteDsProvider = Provider<WardrobeRemoteDataSource>((ref) {
   return WardrobeRemoteDataSource(ref.watch(apiClientProvider));
@@ -116,19 +118,27 @@ final syncWorkerProvider = Provider<SyncWorker>((ref) {
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(
+  final repo = AuthRepository(
     ref.watch(apiConfigProvider),
     ref.watch(authStorageProvider),
     http.Client(),
   );
+
+  ref.onDispose(() => repo.dispose());
+
+  return repo;
 });
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
-  return ProfileRepository(
+  final repo = ProfileRepository(
     ref.watch(apiConfigProvider),
     ref.watch(authStorageProvider),
     http.Client(),
   );
+
+  ref.onDispose(() => repo.dispose());
+
+  return repo;
 });
 
 final outboxPendingCountProvider = StreamProvider<int>((ref) {
@@ -138,18 +148,15 @@ final outboxPendingCountProvider = StreamProvider<int>((ref) {
 
 // Добавляем недостающие провайдеры для контроллеров
 final recommendationsControllerProvider = StateNotifierProvider<RecommendationsController, RecommendationsState>((ref) {
-  return RecommendationsController(ref.watch(recommendationsDomainServiceProvider));
+  return RecommendationsController(ref);
 });
 
 final wardrobeControllerProvider = StateNotifierProvider<WardrobeController, WardrobeState>((ref) {
-  return WardrobeController(ref.watch(wardrobeDomainServiceProvider));
+  return WardrobeController(ref);
 });
 
 final homeControllerProvider = StateNotifierProvider<HomeController, HomeState>((ref) {
-  return HomeController(
-    ref.watch(recommendationsDomainServiceProvider),
-    ref.watch(wardrobeDomainServiceProvider),
-  );
+  return HomeController(ref);
 });
 
 final settingsControllerProvider = StateNotifierProvider<SettingsController, SettingsState>((ref) {
@@ -173,14 +180,12 @@ final profileControllerProvider = StateNotifierProvider<ProfileController, Profi
 });
 
 final generatorControllerProvider = StateNotifierProvider<GeneratorController, GeneratorState>((ref) {
-  return GeneratorController(ref.watch(recommendationsDomainServiceProvider));
+  return GeneratorController();
 });
 
 final adminControllerProvider = StateNotifierProvider<AdminController, AdminState>((ref) {
   return AdminController();
 });
-
-enum SessionStatus { unknown, authed } // Убрали guest режим
 
 final sessionProvider = NotifierProvider<SessionController, SessionStatus>(SessionController.new);
 

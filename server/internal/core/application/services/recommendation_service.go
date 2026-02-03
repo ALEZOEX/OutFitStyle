@@ -205,11 +205,11 @@ func (s *RecommendationService) Regenerate(
 	preferStyle *string,
 ) (*domain.RecommendationRecord, error) {
 
-	oldRec, err := s.recRepo.GetByID(ctx, oldID)
+	oldRec, err := s.recRepo.GetByUserAndID(ctx, userID, oldID)
 	if err != nil {
 		return nil, err
 	}
-	if oldRec == nil || oldRec.UserID != userID {
+	if oldRec == nil {
 		return nil, repositories.ErrNotFound
 	}
 
@@ -1136,12 +1136,9 @@ func (s *RecommendationService) List(ctx context.Context, userID domain.ID, q do
 
 // Get возвращает рекомендацию по идентификатору
 func (s *RecommendationService) Get(ctx context.Context, userID domain.ID, id domain.ID) (*domain.RecommendationRecord, error) {
-	rec, err := s.recRepo.GetByID(ctx, id)
+	rec, err := s.recRepo.GetByUserAndID(ctx, userID, id)
 	if err != nil {
 		return nil, err
-	}
-	if rec == nil || rec.UserID != userID {
-		return nil, nil
 	}
 	return rec, nil
 }

@@ -52,12 +52,18 @@ class AuthService {
       }
 
       final data = jsonDecode(response.body);
-      final tokens = TokenPair.fromJson(data['tokens'] as Map<String, dynamic>);
 
-      // 4. Сохраняем сессию
-      await authStorage.writeTokenPair(tokens);
+      // Проверяем, что 'tokens' существует и является Map
+      if (data['tokens'] != null && data['tokens'] is Map<String, dynamic>) {
+        final tokens = TokenPair.fromJson(data['tokens'] as Map<String, dynamic>);
 
-      return tokens;
+        // 4. Сохраняем сессию
+        await authStorage.writeTokenPair(tokens);
+
+        return tokens;
+      } else {
+        throw Exception('Неверный формат ответа от сервера: отсутствуют токены');
+      }
     } catch (e) {
       // Если ошибка, разлогиниваем гугл, чтобы в след. раз можно было выбрать аккаунт снова
       await _googleSignIn.signOut();

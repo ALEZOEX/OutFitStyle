@@ -10,9 +10,11 @@ class AuthRepository {
   final ApiConfig _config;
   final AuthStorage _storage;
   final http.Client _httpClient;
+  final bool _shouldDispose;
 
   AuthRepository(this._config, this._storage, [http.Client? httpClient])
-      : _httpClient = httpClient ?? http.Client();
+      : _httpClient = httpClient ?? http.Client(),
+        _shouldDispose = httpClient == null;
 
   Future<void> login({required String email, required String password}) async {
     try {
@@ -78,5 +80,11 @@ class AuthRepository {
   Future<bool> isAuthed() async {
     final token = await _storage.readAccessToken();
     return token != null && token.isNotEmpty;
+  }
+
+  void dispose() {
+    if (_shouldDispose) {
+      _httpClient.close();
+    }
   }
 }

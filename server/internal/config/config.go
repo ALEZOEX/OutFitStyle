@@ -175,7 +175,7 @@ func Load() (*AppConfig, error) {
 			MaxIdleConnections: getEnvInt("DATABASE_MAX_IDLE_CONNECTIONS", 10, 1, 500),
 		},
 		Redis: RedisConfig{
-			URL:      getEnvFirst([]string{"REDIS_URL"}, "redis://localhost:6379/0"),
+			URL:      getEnvFirst([]string{"REDIS_URL"}, ""),
 			Password: getEnvFirst([]string{"REDIS_PASSWORD"}, ""),
 		},
 		Security: SecurityConfig{
@@ -240,7 +240,7 @@ func Load() (*AppConfig, error) {
 			APNSEnvironment: getEnvFirst([]string{"APNS_ENVIRONMENT"}, "development"),
 		},
 		Queue: QueueConfig{
-			RedisURL: getEnvFirst([]string{"REDIS_URL"}, "redis://localhost:6379/0"),
+			RedisURL: getEnvFirst([]string{"QUEUE_REDIS_URL", "REDIS_URL"}, ""),
 		},
 		Features: FeaturesConfig{
 			PartnerCatalog: getEnvBool("FEATURE_PARTNER_CATALOG", true),
@@ -252,7 +252,7 @@ func Load() (*AppConfig, error) {
 			Pepper: getEnvFirst([]string{"API_KEY_PEPPER"}, getEnvFirst([]string{"JWT_SECRET"}, "")),
 		},
 		Eventing: EventingConfig{
-			KafkaBrokers: splitCSV(getEnvFirst([]string{"KAFKA_BROKERS"}, "localhost:9092")),
+			KafkaBrokers: splitCSV(getEnvFirst([]string{"KAFKA_BROKERS"}, "")),
 			KafkaTopic:   getEnvFirst([]string{"KAFKA_TOPIC"}, "outfitstyle-events"),
 			Enabled:      getEnvBool("EVENTING_ENABLED", true),
 		},

@@ -5,6 +5,7 @@ package pg
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -123,7 +124,7 @@ func (r *CatalogRepository) GetItems(ctx context.Context, filters domain.Catalog
 	}
 
 	offset := (page - 1) * limit
-	query += " LIMIT $" + string(rune('0'+argIndex)) + " OFFSET $" + string(rune('0'+argIndex+1))
+	query += " LIMIT $" + fmt.Sprintf("%d", argIndex) + " OFFSET $" + fmt.Sprintf("%d", argIndex+1)
 	args = append(args, limit, offset)
 
 	rows, err := r.db.Query(ctx, query, args...)
@@ -426,7 +427,7 @@ func (r *CatalogRepository) Search(ctx context.Context, p repositories.CatalogSe
 	}
 
 	offset := (page - 1) * limit
-	query += " LIMIT $" + string(rune('0'+argIndex)) + " OFFSET $" + string(rune('0'+argIndex+1))
+	query += " LIMIT $" + fmt.Sprintf("%d", argIndex) + " OFFSET $" + fmt.Sprintf("%d", argIndex+1)
 	args = append(args, limit, offset)
 
 	rows, err := r.db.Query(ctx, query, args...)

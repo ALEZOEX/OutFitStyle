@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -11,6 +12,7 @@ import (
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
@@ -58,6 +60,25 @@ func (h *TripHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req domain.TripCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		resp.Error(w, 400, errors.New("invalid body"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+
+	validation.ValidateStringLength(v, req.Name, 1, 200, "name", "name")
+	validation.ValidateStringLength(v, req.Destination, 1, 200, "destination", "destination")
+	validation.ValidateDate(v, req.StartDate, "start_date", "start date")
+	validation.ValidateDate(v, req.EndDate, "end_date", "end date")
+
+	if req.Occasions != nil && len(req.Occasions) > 0 {
+		for i, occasion := range req.Occasions {
+			validation.ValidateStringLength(v, occasion, 1, 100, "occasions["+strconv.Itoa(i)+"]", "occasion")
+		}
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 
@@ -111,6 +132,36 @@ func (h *TripHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var req domain.TripUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		resp.Error(w, 400, errors.New("invalid body"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+
+	if req.Name != nil {
+		validation.ValidateStringLength(v, *req.Name, 1, 200, "name", "name")
+	}
+
+	if req.Destination != nil {
+		validation.ValidateStringLength(v, *req.Destination, 1, 200, "destination", "destination")
+	}
+
+	if req.StartDate != nil {
+		validation.ValidateDate(v, *req.StartDate, "start_date", "start date")
+	}
+
+	if req.EndDate != nil {
+		validation.ValidateDate(v, *req.EndDate, "end_date", "end date")
+	}
+
+	if req.Occasions != nil && len(req.Occasions) > 0 {
+		for i, occasion := range req.Occasions {
+			validation.ValidateStringLength(v, occasion, 1, 100, "occasions["+strconv.Itoa(i)+"]", "occasion")
+		}
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 

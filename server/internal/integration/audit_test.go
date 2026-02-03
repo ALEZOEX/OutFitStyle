@@ -32,7 +32,7 @@ func TestAuditMiddleware_InsertsRow(t *testing.T) {
 	}
 	defer db.Close()
 
-	auditRepo := pg.NewAuditRepository(db)
+	auditRepo := pg.NewAuditRepository(db.Pool())
 
 	inject := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

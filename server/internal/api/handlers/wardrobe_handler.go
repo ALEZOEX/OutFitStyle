@@ -12,6 +12,7 @@ import (
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
@@ -126,6 +127,42 @@ func (h *WardrobeHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate input data
+	v := validation.NewValidator()
+
+	if req.Name != nil {
+		validation.ValidateStringLength(v, *req.Name, 1, 200, "name", "name")
+	}
+
+	if req.Category != nil {
+		validation.ValidateStringLength(v, *req.Category, 1, 100, "category", "category")
+	}
+
+	if req.Subcategory != nil {
+		validation.ValidateStringLength(v, *req.Subcategory, 1, 100, "subcategory", "subcategory")
+	}
+
+	if req.Style != nil {
+		validation.ValidateStringLength(v, *req.Style, 1, 100, "style", "style")
+	}
+
+	if req.BaseColour != nil {
+		validation.ValidateStringLength(v, *req.BaseColour, 1, 50, "base_colour", "base colour")
+	}
+
+	if req.CustomName != nil {
+		validation.ValidateStringLength(v, *req.CustomName, 1, 200, "custom_name", "custom name")
+	}
+
+	if req.Notes != nil {
+		validation.ValidateStringLength(v, *req.Notes, 1, 1000, "notes", "notes")
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
 	item, err := h.svc.Create(r.Context(), userID, req)
 	if err != nil {
 		resp.Error(w, http.StatusBadRequest, err)
@@ -176,6 +213,22 @@ func (h *WardrobeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var req domain.WardrobeUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+
+	if req.CustomName != nil {
+		validation.ValidateStringLength(v, *req.CustomName, 1, 200, "custom_name", "custom name")
+	}
+
+	if req.Notes != nil {
+		validation.ValidateStringLength(v, *req.Notes, 1, 1000, "notes", "notes")
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 
@@ -247,6 +300,16 @@ func (h *WardrobeHandler) Favorite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate input data
+	v := validation.NewValidator()
+	v.Check(req.IsFavorite != nil, "is_favorite", "is_favorite is required")
+	v.Check(*req.IsFavorite == true || *req.IsFavorite == false, "is_favorite", "is_favorite must be a boolean value")
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
 	if err := h.svc.SetFavorite(r.Context(), userID, id, *req.IsFavorite); err != nil {
 		resp.Error(w, http.StatusNotFound, err)
 		return
@@ -271,6 +334,16 @@ func (h *WardrobeHandler) Archive(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&req)
 	if req.IsArchived == nil {
 		resp.Error(w, http.StatusBadRequest, errors.New("is_archived required"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+	v.Check(req.IsArchived != nil, "is_archived", "is_archived is required")
+	v.Check(*req.IsArchived == true || *req.IsArchived == false, "is_archived", "is_archived must be a boolean value")
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 
