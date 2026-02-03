@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../data/local/app_database.dart';
+import '../../../../domain/entities/recommendation_entity.dart';
 import 'tinder_swipe_card.dart';
 
 class TinderDeck extends StatelessWidget {
