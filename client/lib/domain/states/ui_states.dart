@@ -1,15 +1,75 @@
-class RecommendationsState {}
+import 'package:freezed_annotation/freezed_annotation.dart';
+import '../entities/recommendation_entity.dart';
+import '../entities/wardrobe_entity.dart';
+import 'async_state.dart';
 
-class WardrobeState {}
+part 'ui_states.freezed.dart';
 
-class HomeState {}
+@freezed
+class RecommendationsState with _$RecommendationsState {
+  const factory RecommendationsState({
+    @Default(AsyncLoading<List<RecommendationRow>>())
+    AsyncState<List<RecommendationRow>> recommendations,
+    @Default(false) bool isLoading,
+    String? error,
+  }) = _RecommendationsState;
+}
 
-class SettingsState {}
+@freezed
+class WardrobeState with _$WardrobeState {
+  const factory WardrobeState({
+    @Default(AsyncLoading<List<WardrobeEntry>>())
+    AsyncState<List<WardrobeEntry>> wardrobeItems,
+    @Default(false) bool isLoading,
+    String? error,
+  }) = _WardrobeState;
+}
 
-class AuthState {}
+@freezed
+class HomeState with _$HomeState {
+  const factory HomeState({
+    @Default(AsyncLoading<List<RecommendationRow>>())
+    AsyncState<List<RecommendationRow>> todayRecommendations,
+    @Default(AsyncLoading<List<WardrobeEntry>>())
+    AsyncState<List<WardrobeEntry>> wardrobeStats,
+    @Default(false) bool isLoading,
+    String? error,
+  }) = _HomeState;
+}
 
-class OnboardingState {}
+@freezed
+class SettingsState with _$SettingsState {
+  const factory SettingsState({
+    @Default(false) bool isLoading,
+    String? error,
+  }) = _SettingsState;
+}
 
-class ProfileState {}
+@freezed
+class AuthState with _$AuthState {
+  const factory AuthState({
+    @Default(false) bool isLoading,
+    @Default(false) bool isAuthenticated,
+    String? error,
+  }) = _AuthState;
+}
 
-class GeneratorState {}
+@freezed
+class OnboardingState with _$OnboardingState {
+  const factory OnboardingState({
+    @Default(0) int currentStep,
+    @Default(false) bool isComplete,
+    @Default(false) bool isLoading,
+    String? error,
+  }) = _OnboardingState;
+}
+
+@freezed
+class ProfileState with _$ProfileState {
+  const factory ProfileState({
+    @Default(AsyncLoading<Map<String, dynamic>>())
+    AsyncState<Map<String, dynamic>> profileData,
+    @Default(false) bool isLoading,
+    String? error,
+  }) = _ProfileState;
+}

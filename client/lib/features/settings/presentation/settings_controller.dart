@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../domain/states/ui_states.dart';
 
 final settingsControllerProvider =
     StateNotifierProvider<SettingsController, SettingsState>((ref) {
@@ -8,5 +9,3 @@ final settingsControllerProvider =
 class SettingsController extends StateNotifier<SettingsState> {
   SettingsController() : super(const SettingsState());
 }
-
-class SettingsState {}
