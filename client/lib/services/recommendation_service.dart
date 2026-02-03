@@ -11,7 +11,10 @@ class RecommendationService {
   final AuthStorage authStorage;
   final http.Client httpClient;
 
-  RecommendationService({required this.apiConfig, required this.authStorage, http.Client? httpClient})
+  RecommendationService(
+      {required this.apiConfig,
+      required this.authStorage,
+      http.Client? httpClient})
       : httpClient = httpClient ?? http.Client();
 
   String get _apiUrl {
@@ -26,7 +29,8 @@ class RecommendationService {
     return apiConfig.apiBase;
   }
 
-  Future<RecommendationRecord> createUsingProfile({required String occasion}) async {
+  Future<RecommendationRecord> createUsingProfile(
+      {required String occasion}) async {
     final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
     final response = await client.post(
       Uri.parse('$_apiUrl/recommendations'), // Убрано /generate
@@ -43,11 +47,13 @@ class RecommendationService {
         return RecommendationRecord.fromJson(json);
       }
     } else {
-      throw Exception('Failed to create recommendation: ${response.statusCode}');
+      throw Exception(
+          'Failed to create recommendation: ${response.statusCode}');
     }
   }
 
-  Future<(List<RecommendationRecord>, int total)> list({required int page, required int limit}) async {
+  Future<(List<RecommendationRecord>, int total)> list(
+      {required int page, required int limit}) async {
     final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
     final response = await client.get(
       Uri.parse('$_apiUrl/recommendations?page=$page&limit=$limit'),
@@ -68,7 +74,8 @@ class RecommendationService {
     }
   }
 
-  Future<void> setFavorite({required String recommendationId, required bool isFavorite}) async {
+  Future<void> setFavorite(
+      {required String recommendationId, required bool isFavorite}) async {
     final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
     final response = await client.patch(
       Uri.parse('$_apiUrl/recommendations/$recommendationId/favorite'),

@@ -19,7 +19,8 @@ final wardrobeItemForRecommendationProvider =
 
 class UseWardrobeItemInRecommendationScreen extends ConsumerWidget {
   final String itemId;
-  const UseWardrobeItemInRecommendationScreen({super.key, required this.itemId});
+  const UseWardrobeItemInRecommendationScreen(
+      {super.key, required this.itemId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,10 +55,12 @@ class _UseWardrobeItemContent extends ConsumerStatefulWidget {
   const _UseWardrobeItemContent({required this.item, required this.service});
 
   @override
-  ConsumerState<_UseWardrobeItemContent> createState() => _UseWardrobeItemContentState();
+  ConsumerState<_UseWardrobeItemContent> createState() =>
+      _UseWardrobeItemContentState();
 }
 
-class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent> {
+class _UseWardrobeItemContentState
+    extends ConsumerState<_UseWardrobeItemContent> {
   String _occasion = 'daily';
   bool _includeWeather = true;
 
@@ -75,12 +78,14 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
           // Карточка выбранной вещи
           Card(
             clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text(widget.item.iconEmoji, style: const TextStyle(fontSize: 48)),
+                  Text(widget.item.iconEmoji,
+                      style: const TextStyle(fontSize: 48)),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -88,14 +93,21 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
                       children: [
                         Text(
                           widget.item.name,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w900),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${widget.item.category} • ${widget.item.subcategory}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.65),
+                                  ),
                         ),
                       ],
                     ),
@@ -108,7 +120,8 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
 
           // Выбор случая/повода
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -116,7 +129,10 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
                 children: [
                   Text(
                     'Выберите повод',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -158,7 +174,8 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
 
           // Опции
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -166,13 +183,17 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
                 children: [
                   Text(
                     'Опции',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 12),
                   SwitchListTile(
                     title: const Text('Учитывать погоду'),
                     value: _includeWeather,
-                    onChanged: (value) => setState(() => _includeWeather = value),
+                    onChanged: (value) =>
+                        setState(() => _includeWeather = value),
                   ),
                 ],
               ),
@@ -190,7 +211,8 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
 
               try {
                 // Создаем рекомендацию с учетом выбранной вещи
-                final recommendation = await service.generateRecommendationWithItem(
+                final recommendation =
+                    await service.generateRecommendationWithItem(
                   item: widget.item,
                   occasion: _occasion,
                   includeWeather: _includeWeather,
@@ -202,7 +224,8 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
 
                   // Показываем сообщение
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Рекомендация создана с вашей вещью')),
+                    const SnackBar(
+                        content: Text('Рекомендация создана с вашей вещью')),
                   );
                 }
               } catch (e) {
@@ -217,7 +240,8 @@ class _UseWardrobeItemContentState extends ConsumerState<_UseWardrobeItemContent
             label: const Text('Создать рекомендацию'),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
             ),
           ),
         ),

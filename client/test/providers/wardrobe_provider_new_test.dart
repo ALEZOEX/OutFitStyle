@@ -21,7 +21,8 @@ void main() {
   setUp(() {
     mockRepository = MockWardrobeRepository();
 
-    when(() => mockRepository.watchWardrobe(includeArchived: any(named: 'includeArchived')))
+    when(() => mockRepository.watchWardrobe(
+            includeArchived: any(named: 'includeArchived')))
         .thenAnswer((_) => Stream.value(<WardrobeEntry>[]));
 
     container = ProviderContainer(
@@ -53,7 +54,9 @@ void main() {
       final item = _entry('1');
       when(() => mockRepository.toggleFavorite(any())).thenAnswer((_) async {});
 
-      await container.read(wardrobeControllerProvider.notifier).toggleFavorite(item);
+      await container
+          .read(wardrobeControllerProvider.notifier)
+          .toggleFavorite(item);
 
       verify(() => mockRepository.toggleFavorite(item)).called(1);
     });
@@ -62,7 +65,9 @@ void main() {
       final item = _entry('1');
       when(() => mockRepository.toggleArchived(any())).thenAnswer((_) async {});
 
-      await container.read(wardrobeControllerProvider.notifier).toggleArchived(item);
+      await container
+          .read(wardrobeControllerProvider.notifier)
+          .toggleArchived(item);
 
       verify(() => mockRepository.toggleArchived(item)).called(1);
     });
@@ -77,10 +82,13 @@ void main() {
     });
 
     test('prefetchImages calls with limit 40', () async {
-      when(() => mockRepository.prefetchMissingImages(limit: any(named: 'limit')))
+      when(() =>
+              mockRepository.prefetchMissingImages(limit: any(named: 'limit')))
           .thenAnswer((_) async {});
 
-      await container.read(wardrobeControllerProvider.notifier).prefetchImages();
+      await container
+          .read(wardrobeControllerProvider.notifier)
+          .prefetchImages();
 
       verify(() => mockRepository.prefetchMissingImages(limit: 40)).called(1);
     });
@@ -108,7 +116,8 @@ void main() {
   });
 }
 
-WardrobeEntry _entry(String id, {
+WardrobeEntry _entry(
+  String id, {
   String category = 'tops',
   bool isFavorite = false,
 }) {

@@ -42,8 +42,12 @@ class WardrobeGridItem extends ConsumerWidget {
                       File(entry.localImagePath!),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: Center(child: Text(entry.iconEmoji, style: const TextStyle(fontSize: 56))),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        child: Center(
+                            child: Text(entry.iconEmoji,
+                                style: const TextStyle(fontSize: 56))),
                       ),
                     )
                   : entry.imageUrl != null
@@ -51,17 +55,28 @@ class WardrobeGridItem extends ConsumerWidget {
                           imageUrl: entry.imageUrl!,
                           fit: BoxFit.cover,
                           placeholder: (_, __) => Container(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            child: const Center(child: CircularProgressIndicator()),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            child: const Center(
+                                child: CircularProgressIndicator()),
                           ),
                           errorWidget: (_, __, ___) => Container(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            child: Center(child: Text(entry.iconEmoji, style: const TextStyle(fontSize: 56))),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            child: Center(
+                                child: Text(entry.iconEmoji,
+                                    style: const TextStyle(fontSize: 56))),
                           ),
                         )
                       : Container(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          child: Center(child: Text(entry.iconEmoji, style: const TextStyle(fontSize: 56))),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          child: Center(
+                              child: Text(entry.iconEmoji,
+                                  style: const TextStyle(fontSize: 56))),
                         ),
             ),
 
@@ -100,7 +115,9 @@ class WardrobeGridItem extends ConsumerWidget {
                   ),
                   const Spacer(),
                   _IconAction(
-                    icon: entry.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                    icon: entry.isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
                     active: entry.isFavorite,
                     onTap: () async {
                       Haptics.selection();
@@ -110,7 +127,9 @@ class WardrobeGridItem extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   _IconAction(
-                    icon: entry.isArchived ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                    icon: entry.isArchived
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility_rounded,
                     active: entry.isArchived,
                     onTap: () async {
                       Haptics.light();
@@ -132,7 +151,8 @@ class _ActionPill extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _ActionPill({required this.icon, required this.label, required this.onTap});
+  const _ActionPill(
+      {required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -153,11 +173,13 @@ class _IconAction extends ConsumerWidget {
   final IconData icon;
   final bool active;
   final VoidCallback onTap;
-  const _IconAction({required this.icon, required this.active, required this.onTap});
+  const _IconAction(
+      {required this.icon, required this.active, required this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = active ? Colors.pinkAccent : Theme.of(context).colorScheme.onSurface;
+    final color =
+        active ? Colors.pinkAccent : Theme.of(context).colorScheme.onSurface;
 
     return InkResponse(
       onTap: onTap,

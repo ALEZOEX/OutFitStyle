@@ -14,7 +14,8 @@ class TokenPair {
     required this.expiresAt,
   });
 
-  factory TokenPair.fromJson(Map<String, dynamic> json) => _$TokenPairFromJson(json);
+  factory TokenPair.fromJson(Map<String, dynamic> json) =>
+      _$TokenPairFromJson(json);
 
   Map<String, dynamic> toJson() => _$TokenPairToJson(this);
 }

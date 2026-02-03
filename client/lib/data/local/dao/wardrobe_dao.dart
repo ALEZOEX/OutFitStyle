@@ -12,16 +12,20 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<domain.WardrobeEntry>> watchAll() {
     final q = select(wardrobeEntries).watch();
-    return q.map((rows) => rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
+    return q.map((rows) =>
+        rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
   }
 
   Stream<domain.WardrobeEntry?> watchById(String id) {
-    final q = (select(wardrobeEntries)..where((t) => t.id.equals(id))).watchSingleOrNull();
-    return q.map((row) => row != null ? domain.WardrobeEntry.fromDbEntity(row) : null);
+    final q = (select(wardrobeEntries)..where((t) => t.id.equals(id)))
+        .watchSingleOrNull();
+    return q.map(
+        (row) => row != null ? domain.WardrobeEntry.fromDbEntity(row) : null);
   }
 
   Future<domain.WardrobeEntry?> getById(String id) async {
-    final row = await (select(wardrobeEntries)..where((t) => t.id.equals(id))).getSingleOrNull();
+    final row = await (select(wardrobeEntries)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
     return row != null ? domain.WardrobeEntry.fromDbEntity(row) : null;
   }
 
@@ -72,7 +76,9 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
   Future<void> updateOne(WardrobeEntriesCompanion companion) {
     // Для обновления нужен ID
     if (companion.id.present) {
-      return (update(wardrobeEntries)..where((t) => t.id.equals(companion.id.value))).write(companion);
+      return (update(wardrobeEntries)
+            ..where((t) => t.id.equals(companion.id.value)))
+          .write(companion);
     }
     throw Exception('ID must be present for update operation');
   }
@@ -85,7 +91,8 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
     final q = (select(wardrobeEntries)
           ..where((t) => t.category.equals(category)))
         .watch();
-    return q.map((rows) => rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
+    return q.map((rows) =>
+        rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
   }
 
   // Получить все элементы (однократно)
@@ -95,7 +102,8 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
   }
 
   // Получить элементы по категориям
-  Future<List<domain.WardrobeEntry>> getByCategories(List<String> categories) async {
+  Future<List<domain.WardrobeEntry>> getByCategories(
+      List<String> categories) async {
     final rows = await (select(wardrobeEntries)
           ..where((t) => t.category.isIn(categories))
           ..where((t) => t.isArchived.equals(false)))
@@ -109,7 +117,8 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
           ..where((t) => t.season.equals(season))
           ..where((t) => t.isArchived.equals(false)))
         .watch();
-    return q.map((rows) => rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
+    return q.map((rows) =>
+        rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
   }
 
   // Получить элементы по температуре
@@ -129,13 +138,15 @@ class WardrobeDao extends DatabaseAccessor<AppDatabase>
           ..where((t) => t.isArchived.equals(false))
           ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
         .watch();
-    return q.map((rows) => rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
+    return q.map((rows) =>
+        rows.map((row) => domain.WardrobeEntry.fromDbEntity(row)).toList());
   }
-
 
   // Получить количество элементов
   Future<int> count() async {
-    return (select(wardrobeEntries)..where((t) => t.isArchived.equals(false))).get().then((value) => value.length);
+    return (select(wardrobeEntries)..where((t) => t.isArchived.equals(false)))
+        .get()
+        .then((value) => value.length);
   }
 
   // Отметить как синхронизированное

@@ -10,7 +10,8 @@ import 'recommendations_controller.dart';
 class RecommendationCard extends ConsumerWidget {
   final RecommendationRow recommendation;
   final VoidCallback? onTap;
-  const RecommendationCard({super.key, required this.recommendation, this.onTap});
+  const RecommendationCard(
+      {super.key, required this.recommendation, this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,7 +34,10 @@ class RecommendationCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       'Рекомендация',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w900),
                     ),
                   ),
                   IconButton(
@@ -42,8 +46,11 @@ class RecommendationCard extends ConsumerWidget {
                       await controller.toggleFavorite(recommendation);
                     },
                     icon: Icon(
-                      recommendation.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                      color: recommendation.isFavorite ? Colors.pinkAccent : null,
+                      recommendation.isFavorite
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      color:
+                          recommendation.isFavorite ? Colors.pinkAccent : null,
                     ),
                   ),
                 ],
@@ -69,7 +76,11 @@ class _WeatherPreview extends StatelessWidget {
     try {
       final weather = (jsonDecode(weatherJson) as Map).cast<String, dynamic>();
       final temp = (weather['temp'] ?? weather['temperature'] ?? '').toString();
-      final condition = (weather['condition'] ?? weather['description'] ?? weather['weather'] ?? '').toString();
+      final condition = (weather['condition'] ??
+              weather['description'] ??
+              weather['weather'] ??
+              '')
+          .toString();
 
       return Row(
         children: [
@@ -84,7 +95,10 @@ class _WeatherPreview extends StatelessWidget {
           ),
           Text(
             temp.isEmpty ? '—' : '$temp°',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w900),
           ),
         ],
       );
@@ -141,7 +155,8 @@ class _OutfitPreview extends StatelessWidget {
                     name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -151,7 +166,10 @@ class _OutfitPreview extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 10,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.65),
                   ),
                 ),
               ],

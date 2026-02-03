@@ -155,4 +155,3 @@ class SyncWorker {
     _periodicTimer = null;
   }
 }
-

@@ -148,12 +148,16 @@ class WardrobeEntry {
       usage: json['usage'] as String?,
       materials: json['materials'] as String?,
       wearCount: json['wear_count'] as int? ?? 0,
-      lastWornAt: json['last_worn_at'] != null ? DateTime.parse(json['last_worn_at'] as String) : null,
+      lastWornAt: json['last_worn_at'] != null
+          ? DateTime.parse(json['last_worn_at'] as String)
+          : null,
       isFavorite: json['is_favorite'] as bool? ?? false,
       isArchived: json['is_archived'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
-      lastSyncedAt: json['last_synced_at'] != null ? DateTime.parse(json['last_synced_at'] as String) : null,
+      lastSyncedAt: json['last_synced_at'] != null
+          ? DateTime.parse(json['last_synced_at'] as String)
+          : null,
       dirty: json['dirty'] as bool? ?? false,
       season: json['season'] as String?,
       gender: json['gender'] as String?,
@@ -266,7 +270,8 @@ class WardrobeEntry {
 
   static WardrobeEntry fromExternal(Map<String, dynamic> external) {
     return WardrobeEntry(
-      id: external['id'] ?? '', // Keep empty if not provided, should be handled by caller
+      id: external['id'] ??
+          '', // Keep empty if not provided, should be handled by caller
       serverId: external['id'], // External ID becomes serverId
       name: external['name'] ?? '',
       category: external['category'] ?? '',
@@ -284,11 +289,15 @@ class WardrobeEntry {
       usage: external['usage'],
       materials: external['materials'],
       wearCount: external['wear_count'] ?? 0,
-      lastWornAt: external['last_worn_at'] != null ? DateTime.parse(external['last_worn_at']) : null,
+      lastWornAt: external['last_worn_at'] != null
+          ? DateTime.parse(external['last_worn_at'])
+          : null,
       isFavorite: external['is_favorite'] ?? false,
       isArchived: external['is_archived'] ?? false,
-      createdAt: DateTime.parse(external['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(external['updated_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+          external['created_at'] ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(
+          external['updated_at'] ?? DateTime.now().toIso8601String()),
       lastSyncedAt: DateTime.now(),
       dirty: false, // Сразу синхронизировано
       season: external['season'],

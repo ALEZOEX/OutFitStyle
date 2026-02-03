@@ -34,14 +34,18 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     'Тема оформления',
-                    style: OutfitStyleComponents.titleMedium(context).copyWith(fontWeight: FontWeight.w900),
+                    style: OutfitStyleComponents.titleMedium(context)
+                        .copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 12),
                   SegmentedButton<ThemeMode>(
                     segments: const [
-                      ButtonSegment(value: ThemeMode.system, label: Text('Системная')),
-                      ButtonSegment(value: ThemeMode.light, label: Text('Светлая')),
-                      ButtonSegment(value: ThemeMode.dark, label: Text('Тёмная')),
+                      ButtonSegment(
+                          value: ThemeMode.system, label: Text('Системная')),
+                      ButtonSegment(
+                          value: ThemeMode.light, label: Text('Светлая')),
+                      ButtonSegment(
+                          value: ThemeMode.dark, label: Text('Тёмная')),
                     ],
                     selected: {themeMode},
                     onSelectionChanged: (s) => themeNotifier.setMode(s.first),
@@ -140,7 +144,8 @@ class SettingsScreen extends ConsumerWidget {
               backgroundColor: Theme.of(context).colorScheme.errorContainer,
               foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
             ),
           ),
         ],

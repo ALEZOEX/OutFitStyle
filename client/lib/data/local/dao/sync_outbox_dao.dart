@@ -5,7 +5,8 @@ import '../tables.dart';
 part 'sync_outbox_dao.g.dart';
 
 @DriftAccessor(tables: [SyncOutbox])
-class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMixin {
+class SyncOutboxDao extends DatabaseAccessor<AppDatabase>
+    with _$SyncOutboxDaoMixin {
   SyncOutboxDao(AppDatabase db) : super(db);
 
   // Получить все отложенные изменения
@@ -19,7 +20,8 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
   }
 
   // Добавить новое действие в очередь
-  Future<int> insertAction(String action, String entityType, String entityId, String payload) {
+  Future<int> insertAction(
+      String action, String entityType, String entityId, String payload) {
     return into(syncOutbox).insert(SyncOutboxCompanion(
       action: Value(action),
       entityType: Value(entityType),
@@ -43,7 +45,8 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
 
   // Получить количество отложенных действий
   Stream<int> watchPendingCount() {
-    return (selectOnly(syncOutbox)..addColumns([count(syncOutbox.id).alias('count')])
+    return (selectOnly(syncOutbox)
+          ..addColumns([count(syncOutbox.id).alias('count')])
           ..where(syncOutbox.synced.equals(false)))
         .watchSingle()
         .map((row) => row.read<int>('count'));

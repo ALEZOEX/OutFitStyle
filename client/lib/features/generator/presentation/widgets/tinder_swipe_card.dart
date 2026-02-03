@@ -20,8 +20,8 @@ class TinderSwipeCard extends StatefulWidget {
 class TinderSwipeCardState extends State<TinderSwipeCard>
     with SingleTickerProviderStateMixin {
   Offset _offset = Offset.zero;
-  late final AnimationController _ctrl =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 220));
+  late final AnimationController _ctrl = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 220));
   Animation<Offset>? _anim;
 
   static const _threshold = 110.0;

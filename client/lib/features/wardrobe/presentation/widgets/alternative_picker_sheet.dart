@@ -20,7 +20,10 @@ class AlternativePickerSheet extends ConsumerWidget {
           children: [
             Text(
               'Заменить ($category)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
             SizedBox(
@@ -29,9 +32,12 @@ class AlternativePickerSheet extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(child: Text('Ошибка: $e')),
                 data: (items) {
-                  final filtered = items.where((e) => e.category == category && !e.isArchived).toList();
+                  final filtered = items
+                      .where((e) => e.category == category && !e.isArchived)
+                      .toList();
                   if (filtered.isEmpty) {
-                    return const Center(child: Text('Нет альтернатив в гардеробе'));
+                    return const Center(
+                        child: Text('Нет альтернатив в гардеробе'));
                   }
 
                   return ListView.separated(
@@ -40,12 +46,16 @@ class AlternativePickerSheet extends ConsumerWidget {
                     itemBuilder: (context, i) {
                       final e = filtered[i];
                       return ListTile(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                         tileColor: Theme.of(context).colorScheme.surface,
-                        leading: Text(e.iconEmoji, style: const TextStyle(fontSize: 26)),
-                        title: Text(e.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        leading: Text(e.iconEmoji,
+                            style: const TextStyle(fontSize: 26)),
+                        title: Text(e.name,
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
                         subtitle: Text('Wear: ${e.wearCount}'),
-                        onTap: () => Navigator.pop(context, AltPick(e.id, e.name)),
+                        onTap: () =>
+                            Navigator.pop(context, AltPick(e.id, e.name)),
                       );
                     },
                   );

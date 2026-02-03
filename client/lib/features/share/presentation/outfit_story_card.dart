@@ -15,7 +15,11 @@ class OutfitStoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final temp = (weather['temp'] ?? weather['temperature'] ?? '').toString();
-    final cond = (weather['condition'] ?? weather['description'] ?? weather['weather'] ?? '').toString();
+    final cond = (weather['condition'] ??
+            weather['description'] ??
+            weather['weather'] ??
+            '')
+        .toString();
 
     return AspectRatio(
       aspectRatio: 9 / 16,
@@ -43,13 +47,14 @@ class OutfitStoryCard extends StatelessWidget {
                         letterSpacing: 0.3,
                       )),
                   const SizedBox(height: 12),
-
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.12)),
                     ),
                     child: Row(
                       children: [
@@ -67,20 +72,23 @@ class OutfitStoryCard extends StatelessWidget {
                             cond.isEmpty ? 'Погода' : cond,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontWeight: FontWeight.w700),
+                            style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.85),
+                                fontWeight: FontWeight.w700),
                           ),
                         ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 14),
                   Text(
                     'Образ дня',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontWeight: FontWeight.w900, fontSize: 22),
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 22),
                   ),
                   const SizedBox(height: 12),
-
                   Expanded(
                     child: Wrap(
                       spacing: 12,
@@ -95,7 +103,8 @@ class OutfitStoryCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.12)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,14 +115,19 @@ class OutfitStoryCard extends StatelessWidget {
                                 name,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 cat,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: Colors.white.withValues(alpha: 0.70), fontWeight: FontWeight.w700, fontSize: 12),
+                                style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.70),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12),
                               ),
                             ],
                           ),
@@ -121,11 +135,13 @@ class OutfitStoryCard extends StatelessWidget {
                       }).toList(),
                     ),
                   ),
-
                   const SizedBox(height: 10),
                   Text(
                     'Собрано автоматически • $appName',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontWeight: FontWeight.w700, fontSize: 12),
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.65),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12),
                   ),
                 ],
               ),
