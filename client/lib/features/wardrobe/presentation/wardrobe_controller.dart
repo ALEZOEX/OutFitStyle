@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../domain/entities/wardrobe_entity.dart';
 import '../../../domain/entities/wardrobe_request_entities.dart';
-import '../../../domain/states/ui_states.dart';
+import '../../../domain/states/wardrobe_state.dart';
 import '../../../domain/states/async_state.dart';
 import '../../../app/di.dart';
 
