@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables.dart';
-import '../../domain/entities/wardrobe_entity.dart' as domain;
+import '../../../domain/entities/wardrobe_entity.dart' as domain;
 
 part 'wardrobe_dao.g.dart';
 
