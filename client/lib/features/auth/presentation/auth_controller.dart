@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/repositories/auth_repository.dart';
-import '../../../domain/states/ui_states.dart';
+import '../../../domain/states/auth_state.dart';
 
 final authControllerProvider =
     StateNotifierProvider<AuthController, AuthState>((ref) {

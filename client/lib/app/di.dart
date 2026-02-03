@@ -10,7 +10,7 @@ import '../services/recommendation_service.dart';
 import '../domain/services/recommendations_domain_service.dart';
 import '../domain/services/wardrobe_service.dart'; // Обновленный импорт
 import '../domain/entities/recommendation_entity.dart';
-import '../domain/entities/wardrobe_entity.dart';
+import '../domain/entities/wardrobe_entity.dart' as domain;
 import 'env.dart';
 import 'api/api_client.dart';
 import 'session.dart';
@@ -39,6 +39,14 @@ import '../features/settings/presentation/settings_controller.dart';
 import '../features/auth/presentation/auth_controller.dart';
 import '../features/onboarding/presentation/onboarding_controller.dart';
 import '../storage/local_storage.dart';
+import '../domain/states/recommendations_state.dart';
+import '../domain/states/wardrobe_state.dart';
+import '../domain/states/home_state.dart';
+import '../domain/states/settings_state.dart';
+import '../domain/states/auth_state.dart';
+import '../domain/states/onboarding_state.dart';
+import '../domain/states/profile_state.dart';
+import '../domain/states/ui_states.dart'; // Contains AdminState
 
 final apiConfigProvider = Provider((ref) => Env.apiConfig());
 
@@ -66,8 +74,16 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 //   return AdminService(cfg, auth, http.Client());
 // });
 
+final wardrobeServiceProvider = Provider<WardrobeService>((ref) {
+  return WardrobeService(
+    apiConfig: ref.watch(apiConfigProvider),
+    authStorage: ref.watch(authStorageProvider),
+    httpClient: http.Client(),
+  );
+});
+
 final wardrobeRemoteDsProvider = Provider<WardrobeRemoteDataSource>((ref) {
-  return WardrobeRemoteDataSource(ref.watch(apiClientProvider));
+  return WardrobeRemoteDataSource(ref.watch(wardrobeServiceProvider));
 });
 
 final recommendationsRemoteDsProvider =
@@ -158,7 +174,7 @@ final recommendationsControllerProvider =
   return RecommendationsController(ref);
 });
 
-final wardrobeStreamProvider = StreamProvider<List<WardrobeEntry>>((ref) {
+final wardrobeStreamProvider = StreamProvider<List<domain.WardrobeEntry>>((ref) {
   final repo = ref.watch(wardrobeRepositoryProvider);
   return repo.watchWardrobe(); // По умолчанию не включает архивные элементы
 });
