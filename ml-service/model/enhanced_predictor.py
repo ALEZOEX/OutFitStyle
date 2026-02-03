@@ -2,6 +2,7 @@ import os
 import pickle
 import logging
 from typing import List, Optional
+import gc
 
 import pandas as pd
 from catboost import CatBoostClassifier, CatBoostRanker, Pool
@@ -54,6 +55,8 @@ class EnhancedPredictor:
         if feature_df is None or len(feature_df) == 0:
             return []
 
+        original_shape = feature_df.shape
+
         # Выравнивание фичей по сохраненному списку колонок
         if self.feature_columns:
             # Добавляем отсутствующие колонки с пустыми значениями
@@ -73,9 +76,31 @@ class EnhancedPredictor:
         if self.cat_features:
             data = Pool(feature_df, cat_features=self.cat_features)
 
-        if self.model_kind == "classifier":
-            proba = self.model.predict_proba(data)[:, 1]
-            return [float(x) for x in proba]
+        # Memory optimization: explicitly manage memory during prediction
+        try:
+            if self.model_kind == "classifier":
+                proba = self.model.predict_proba(data)[:, 1]
+                result = [float(x) for x in proba]
+            else:
+                preds = self.model.predict(data)
+                result = [float(x) for x in preds]
 
-        preds = self.model.predict(data)
-        return [float(x) for x in preds]
+            # Explicitly delete temporary variables to free memory
+            del data
+            if 'proba' in locals():
+                del proba
+            if 'preds' in locals():
+                del preds
+
+            # Trigger garbage collection periodically
+            if original_shape[0] > 100:  # Only for larger datasets
+                gc.collect()
+
+            return result
+        except Exception as e:
+            logger.error(f"Prediction error: {e}")
+            # Clean up on error
+            if 'data' in locals():
+                del data
+            gc.collect()
+            raise

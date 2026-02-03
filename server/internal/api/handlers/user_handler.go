@@ -17,6 +17,7 @@ import (
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
@@ -131,6 +132,42 @@ func (h *UserHandler) UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate input data
+	v := validation.NewValidator()
+
+	if patch.DisplayName != nil {
+		validation.ValidateStringLength(v, *patch.DisplayName, 1, 500, "display_name", "display name")
+	}
+
+	if patch.DefaultLocation != nil {
+		validation.ValidateStringLength(v, *patch.DefaultLocation, 1, 200, "default_location", "default location")
+	}
+
+	if patch.Gender != nil {
+		validation.ValidateInSlice(v, *patch.Gender, []string{"male", "female", "other", "prefer_not_to_say"}, "gender", "gender")
+	}
+
+	if patch.Timezone != nil {
+		validation.ValidateStringLength(v, *patch.Timezone, 1, 100, "timezone", "timezone")
+	}
+
+	if patch.Locale != nil {
+		validation.ValidateStringLength(v, *patch.Locale, 2, 10, "locale", "locale")
+	}
+
+	if patch.DefaultLatitude != nil {
+		validation.ValidateLatitude(v, patch.DefaultLatitude)
+	}
+
+	if patch.DefaultLongitude != nil {
+		validation.ValidateLongitude(v, patch.DefaultLongitude)
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
 	out, err := h.userService.UpdateUserProfile(r.Context(), userID, patch)
 	if err != nil {
 		h.logger.Error("update profile failed", zap.Error(err))
@@ -164,6 +201,24 @@ func (h *UserHandler) UpdateBodyMeasurements(w http.ResponseWriter, r *http.Requ
 	var body domain.BodyMeasurements
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+
+	// Validate height if provided
+	if body.Height != nil {
+		validation.ValidateIntegerRange(v, *body.Height, 50, 300, "height", "height in cm")
+	}
+
+	// Validate weight if provided
+	if body.Weight != nil {
+		validation.ValidateIntegerRange(v, *body.Weight, 20, 500, "weight", "weight in kg")
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 
@@ -370,6 +425,23 @@ func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidatePasswordPlaintext(v, body.Password)
+
+	if body.Reason != nil {
+		validation.ValidateStringLength(v, *body.Reason, 1, 500, "reason", "reason for deletion")
+	}
+
+	if body.Feedback != nil {
+		validation.ValidateStringLength(v, *body.Feedback, 1, 1000, "feedback", "feedback")
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
 	if err := h.accountService.DeleteAccount(r.Context(), userID, body.Password); err != nil {
 		resp.Error(w, http.StatusBadRequest, err)
 		return
@@ -411,6 +483,19 @@ func (h *UserHandler) UpdatePreferences(w http.ResponseWriter, r *http.Request) 
 	if err := json.Unmarshal(bodyBytes, &rawPrefs); err != nil {
 		resp.Error(w, http.StatusBadRequest, fmt.Errorf("invalid JSON: %v", err))
 		h.logger.Error("invalid JSON in preferences", zap.String("body", string(bodyBytes)), zap.Error(err))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+
+	// Check if the preferences map is too large
+	if len(rawPrefs) > 50 { // Arbitrary limit to prevent abuse
+		v.AddError("preferences", "too many preference fields provided")
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 

@@ -14,7 +14,7 @@ import '../share/presentation/outfit_share_screen.dart';
 
 final outfitByIdProvider =
     StreamProvider.autoDispose.family<RecommendationRow?, String>((ref, id) {
-  final repo = ref.watch(recommendationRepositoryProvider);
+  final repo = ref.watch(recommendationsRepositoryProvider);
   return repo.watchById(id);
 });
 
@@ -35,7 +35,7 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final asyncRow = ref.watch(outfitByIdProvider(widget.outfitId));
-    final repo = ref.read(recommendationRepositoryProvider);
+    final repo = ref.read(recommendationsRepositoryProvider);
 
     return asyncRow.when(
       loading: () => const Scaffold(

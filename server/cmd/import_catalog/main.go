@@ -251,13 +251,15 @@ func main() {
 	ctx := context.Background()
 	db, err := pgxpool.New(ctx, *dsn)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Failed to connect to database: %v\n", err)
+		os.Exit(1)
 	}
 	defer db.Close()
 
 	hasExternalID, err := columnExists(ctx, db, "clothing_items", "external_id")
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Failed to check column existence: %v\n", err)
+		os.Exit(1)
 	}
 	if hasExternalID {
 		fmt.Println("Detected clothing_items.external_id -> will UPSERT by external_id (supports negative ids).")
@@ -267,7 +269,8 @@ func main() {
 
 	file, err := os.Open(*filePath)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Failed to open file: %v\n", err)
+		os.Exit(1)
 	}
 	defer file.Close()
 
@@ -289,16 +292,19 @@ func main() {
 		}
 		tx, err := db.Begin(ctx)
 		if err != nil {
-			panic(err)
+			fmt.Fprintf(os.Stderr, "Failed to begin transaction: %v\n", err)
+			os.Exit(1)
 		}
 		defer func() { _ = tx.Rollback(ctx) }()
 
 		br := tx.SendBatch(ctx, &batch)
 		if err := br.Close(); err != nil {
-			panic(err)
+			fmt.Fprintf(os.Stderr, "Failed to execute batch: %v\n", err)
+			os.Exit(1)
 		}
 		if err := tx.Commit(ctx); err != nil {
-			panic(err)
+			fmt.Fprintf(os.Stderr, "Failed to commit transaction: %v\n", err)
+			os.Exit(1)
 		}
 
 		batch = pgx.Batch{}
@@ -497,7 +503,8 @@ ON CONFLICT (id) DO UPDATE SET
 	}
 
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Scanner error: %v\n", err)
+		os.Exit(1)
 	}
 
 	flush()

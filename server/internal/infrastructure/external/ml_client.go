@@ -17,9 +17,20 @@ type MLClient struct {
 }
 
 func NewMLClient(baseURL string, timeout time.Duration) *MLClient {
+	// Create transport with connection pooling and keep-alive
+	transport := &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
 	return &MLClient{
 		baseURL: baseURL,
-		http:    &http.Client{Timeout: timeout},
+		http: &http.Client{
+			Timeout:   timeout,
+			Transport: transport,
+		},
 	}
 }
 
@@ -32,30 +43,66 @@ func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankRespo
 	}
 
 	u := fmt.Sprintf("%s/api/v1/rank", c.baseURL)
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(body))
-	if err != nil {
-		return out, errors.Wrap(err, "new request")
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
 
-	// Пробрасываем request_id в заголовке (он также есть в теле запроса)
-	httpReq.Header.Set("X-Request-Id", req.RequestID)
-	httpReq.Header.Set("X-User-Id", req.UserID.String())
+	// Retry mechanism with exponential backoff
+	maxRetries := 3
+	var lastErr error
 
-	res, err := c.http.Do(httpReq)
-	if err != nil {
-		return out, errors.Wrap(err, "do request")
-	}
-	defer res.Body.Close()
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(body))
+		if err != nil {
+			return out, errors.Wrap(err, "new request")
+		}
+		httpReq.Header.Set("Content-Type", "application/json")
 
-	if res.StatusCode/100 != 2 {
-		return out, errors.Errorf("ml bad status: %d", res.StatusCode)
+		// Пробрасываем request_id в заголовке (он также есть в теле запроса)
+		httpReq.Header.Set("X-Request-Id", req.RequestID)
+		httpReq.Header.Set("X-User-Id", req.UserID.String())
+
+		res, err := c.http.Do(httpReq)
+		if err != nil {
+			lastErr = errors.Wrap(err, "do request")
+
+			// If this was the last attempt, return the error
+			if attempt == maxRetries {
+				return out, lastErr
+			}
+
+			// Wait before retry with exponential backoff
+			select {
+			case <-ctx.Done():
+				return out, ctx.Err()
+			case <-time.After(time.Duration(attempt+1) * 500 * time.Millisecond):
+				continue
+			}
+		}
+
+		defer res.Body.Close()
+
+		if res.StatusCode/100 != 2 {
+			lastErr = errors.Errorf("ml bad status: %d", res.StatusCode)
+
+			// If this was the last attempt, return the error
+			if attempt == maxRetries {
+				return out, lastErr
+			}
+
+			// Wait before retry with exponential backoff
+			select {
+			case <-ctx.Done():
+				return out, ctx.Err()
+			case <-time.After(time.Duration(attempt+1) * 500 * time.Millisecond):
+				continue
+			}
+		}
+
+		if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
+			return out, errors.Wrap(err, "decode response")
+		}
+		return out, nil
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
-		return out, errors.Wrap(err, "decode response")
-	}
-	return out, nil
+	return out, lastErr
 }
 
 // ActionRequest представляет запрос для отправки действия пользователя

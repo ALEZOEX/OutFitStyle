@@ -10,7 +10,10 @@ import os
 import redis
 import requests
 import hashlib
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import asyncio
+import threading
+from queue import Queue
 
 from contracts.outfit_contract import OutfitsResponse, Outfit, OutfitItem
 from model.adapters import normalize_item
@@ -86,19 +89,40 @@ def adapt_ml_request_to_internal(external_request: MLRankRequest) -> InternalReq
     )
 
 
+# Global thread pool for model predictions to avoid blocking
+prediction_pool = ThreadPoolExecutor(max_workers=int(os.getenv("PREDICTION_WORKERS", "4")))
+
+class ThreadSafePredictor:
+    """
+    Thread-safe wrapper for the predictor to handle concurrent requests
+    """
+    def __init__(self, model_path: str):
+        self._lock = threading.RLock()
+        self._predictor = EnhancedPredictor(model_path)
+
+    def get_model_version(self) -> str:
+        with self._lock:
+            return self._predictor.get_model_version()
+
+    def predict(self, feature_df):
+        # Perform prediction in a thread-safe manner
+        with self._lock:
+            return self._predictor.predict(feature_df)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     global predictor
     model_path = os.getenv("MODEL_PATH", "models/model.pkl")  # путь к модели для загрузки
     try:
-        predictor = EnhancedPredictor(model_path)
+        predictor = ThreadSafePredictor(model_path)
         logging.info(f"ML model loaded successfully from {model_path}")
     except Exception as e:
         logging.error(f"Failed to load ML model: {e}")
         raise
     yield
-    # Shutdown (если нужно что-то освобождать)
+    # Shutdown
+    prediction_pool.shutdown(wait=True)
 
 
 app = FastAPI(
@@ -116,11 +140,18 @@ predictor = None
 
 # Initialize Redis client for translation caching
 redis_client = None
-TRANSLATION_CACHE_TTL = 86400  # 24 hours in seconds
+TRANSLATION_CACHE_TTL = int(os.getenv("TRANSLATION_CACHE_TTL", "86400"))  # 24 hours in seconds
 try:
-    redis_host = os.getenv("REDIS_HOST", "redis")
-    redis_port = int(os.getenv("REDIS_PORT", 6379))
-    redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True, socket_connect_timeout=5)
+    redis_host = os.getenv("REDIS_HOST", os.getenv("TRANSLATION_REDIS_HOST", "redis"))
+    redis_port = int(os.getenv("REDIS_PORT", os.getenv("TRANSLATION_REDIS_PORT", "6379")))
+    redis_password = os.getenv("REDIS_PASSWORD", "")
+
+    # Build Redis connection URL based on availability of password
+    if redis_password:
+        redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True, socket_connect_timeout=5)
+    else:
+        redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True, socket_connect_timeout=5)
+
     redis_client.ping()  # Test connection
     logger.info(f"Connected to Redis at {redis_host}:{redis_port} for translation caching")
 except Exception as e:
@@ -128,7 +159,7 @@ except Exception as e:
     redis_client = None
 
 # Yandex Translate API configuration
-YANDEX_TRANSLATE_API_URL = "https://translate.api.cloud.yandex.net/translate/v2/translate"
+YANDEX_TRANSLATE_API_URL = os.getenv("YANDEX_TRANSLATE_API_URL", "https://translate.api.cloud.yandex.net/translate/v2/translate")
 YANDEX_API_KEY = os.getenv("YANDEX_TRANSLATE_API_KEY")
 YANDEX_FOLDER_ID = os.getenv("YANDEX_FOLDER_ID")
 
@@ -185,9 +216,6 @@ async def rank_candidates(request: MLRankRequest, http_request: Request, respons
         if predictor is None:
             raise HTTPException(status_code=503, detail="ML model not available")
 
-        # Адаптер: преобразование внешнего запроса во внутреннюю схему
-        internal_request = adapt_ml_request_to_internal(request)
-
         # Подготовка признаков для модели (v2)
         items = [normalize_item(item.dict()) for item in request.candidates]
 
@@ -209,8 +237,9 @@ async def rank_candidates(request: MLRankRequest, http_request: Request, respons
             items=items
         )
 
-        # Получение предсказаний от модели
-        scores = predictor.predict(feature_df)
+        # Выполняем предсказание в пуле потоков для избежания блокировки
+        loop = asyncio.get_event_loop()
+        scores = await loop.run_in_executor(prediction_pool, predictor.predict, feature_df)
 
         # Сопоставление оценок с кандидатами (используем оригинальные id из внешнего запроса)
         ranked_items = []
@@ -356,7 +385,9 @@ async def rank_candidates_v1(request: TZRankRequest, http_request: Request, resp
         items=items
     )
 
-    scores = predictor.predict(feature_df)
+    # Выполняем предсказание в пуле потоков для избежания блокировки
+    loop = asyncio.get_event_loop()
+    scores = await loop.run_in_executor(prediction_pool, predictor.predict, feature_df)
 
     # build rankings by category
     rankings: Dict[str, List[TZRankedItem]] = {}
@@ -474,7 +505,10 @@ async def outfits(request: MLRankRequest, http_request: Request, response: Respo
             items=items
         )
 
-        scores = predictor.predict(feature_df)
+        # Выполняем предсказание в пуле потоков для избежания блокировки
+        loop = asyncio.get_event_loop()
+        scores = await loop.run_in_executor(prediction_pool, predictor.predict, feature_df)
+
         scores_by_id = {items[i]["id"]: float(scores[i]) for i in range(len(items))}
 
         temperature = float(request.context.weather.temperature)

@@ -6,7 +6,12 @@ class DatasetPreparer:
     """Подготовка датасета для обучения ML модели"""
     
     def __init__(self):
-        pass
+        self.weather_conditions = ['clear', 'clouds', 'rain', 'snow', 'drizzle']
+        self.seasons = ['winter', 'spring', 'summer', 'autumn']
+        self.age_ranges = ['18-25', '25-35', '35-45', '45+']
+        self.styles = ['casual', 'business', 'sporty', 'elegant']
+        self.sensitivities = ['very_cold', 'cold', 'normal', 'warm', 'very_warm']
+        self.formality_levels = ['informal', 'semi_formal', 'formal']
         
     def generate_weather_data(self, num_samples=5000):
         """

@@ -13,6 +13,7 @@ import (
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
@@ -129,6 +130,20 @@ func (h *NotificationHandler) RegisterToken(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidateStringLength(v, req.Token, 1, 500, "token", "push token")
+	validation.ValidateInSlice(v, req.Platform, []string{"ios", "android", "web"}, "platform", "platform")
+
+	if req.DeviceID != nil {
+		validation.ValidateStringLength(v, *req.DeviceID, 1, 200, "device_id", "device ID")
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
 	if err := h.svc.RegisterToken(r.Context(), userID, req); err != nil {
 		resp.Error(w, http.StatusBadRequest, err)
 		return
@@ -148,6 +163,15 @@ func (h *NotificationHandler) DeleteToken(w http.ResponseWriter, r *http.Request
 	var req domain.DeletePushTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidateStringLength(v, req.Token, 1, 500, "token", "push token")
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 

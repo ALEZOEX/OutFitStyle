@@ -27,6 +27,7 @@ import (
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/core/use_cases"
 	"outfitstyle/server/internal/infrastructure/cache"
 	"outfitstyle/server/internal/infrastructure/eventing"
 	ext "outfitstyle/server/internal/infrastructure/external"
@@ -34,6 +35,7 @@ import (
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
 	pg "outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 	"outfitstyle/server/internal/infrastructure/queue"
+	"outfitstyle/server/internal/infrastructure/adapters"
 	"outfitstyle/server/internal/pkg/health"
 
 	"github.com/redis/go-redis/v9"
@@ -99,11 +101,14 @@ func main() {
 	// ---------- Обновленный ML-сервис с новым контрактом ----------
 	mlClient := ext.NewMLClient(cfg.MLService.BaseURL, cfg.MLService.Timeout)
 
+	// ---------- ML Service Adapter ----------
+	mlService := adapters.NewMLServiceAdapterFromExternal(mlClient)
+
 	// ---------- Репозитории ----------
 	userRepo := pg.NewUserRepository(db.Pool(), logger)
 	sessionRepo := pg.NewSessionRepository(db.Pool(), logger)
-	recommendationRepo := pg.NewRecommendationRepository(db.Pool(), logger)
-	clothingRepo := pg.NewClothingRepository(db.Pool(), logger)
+	recommendationRepo := pg.NewRecommendationRepository(db.Pool(), redisClient, logger)
+	clothingRepo := pg.NewClothingRepository(db.Pool(), redisClient, logger)
 	wardrobeRepo := pg.NewWardrobeRepository(db.Pool())
 	// specRepo := pg.NewSubcategorySpecRepository(db.Pool(), logger)
 	subRepo := pg.NewSubscriptionRepository(db.Pool(), logger)
@@ -166,6 +171,17 @@ func main() {
 		eventPublisher = nil
 		logger.Info("Event publisher disabled")
 	}
+
+	// ---------- Weather Service Adapter ----------
+	weatherServiceAdapter := adapters.NewWeatherServiceAdapter(weatherService, geo)
+
+	// ---------- Use Cases ----------
+	getRecommendationsUC := usecases.NewGetRecommendationsUseCase(
+		userRepo,
+		recommendationRepo,
+		weatherServiceAdapter,
+		mlService, // Using the ML service adapter instead of the raw client
+	)
 
 	// ---------- Доменные сервисы ----------
 	recommendationService := services.NewRecommendationService(
@@ -235,7 +251,7 @@ func main() {
 	accountService := services.NewAccountService(userRepo, sessionRepo)
 
 	// ---------- HTTP‑обработчики ----------
-	recommendationHandler := handlers.NewRecommendationHandler(recommendationService, achEngine, logger)
+	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)

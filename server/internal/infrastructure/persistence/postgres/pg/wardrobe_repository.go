@@ -259,7 +259,7 @@ func (r *WardrobeRepository) List(ctx context.Context, userID domain.ID, q domai
 		argIndex++
 	}
 
-	// Apply sorting
+	// Apply sorting - validate allowed fields to prevent SQL injection
 	orderField := "created_at"
 	orderDir := "DESC"
 
@@ -270,6 +270,9 @@ func (r *WardrobeRepository) List(ctx context.Context, userID domain.ID, q domai
 		orderField = "wear_count"
 	case "name":
 		orderField = "item_data->>'name'"
+	default:
+		// Default to a safe field if an invalid sort field is provided
+		orderField = "created_at"
 	}
 
 	switch q.Order {
@@ -277,9 +280,28 @@ func (r *WardrobeRepository) List(ctx context.Context, userID domain.ID, q domai
 		orderDir = "ASC"
 	case domain.SortDesc:
 		orderDir = "DESC"
+	default:
+		// Default to descending order if an invalid order is provided
+		orderDir = "DESC"
 	}
 
-	query += fmt.Sprintf(" ORDER BY %s %s LIMIT $%d OFFSET $%d", orderField, orderDir, argIndex, argIndex+1)
+	// Use a switch statement to safely construct the ORDER BY clause
+	orderByClause := ""
+	switch orderField {
+	case "updated_at":
+		orderByClause = "ORDER BY updated_at"
+	case "wear_count":
+		orderByClause = "ORDER BY wear_count"
+	case "item_data->>'name'":
+		orderByClause = "ORDER BY item_data->>'name'"
+	default:
+		orderByClause = "ORDER BY created_at"
+	}
+
+	// Append direction
+	orderByClause += " " + orderDir
+
+	query += fmt.Sprintf(" %s LIMIT $%d OFFSET $%d", orderByClause, argIndex, argIndex+1)
 	args = append(args, q.Limit, offset)
 
 	rows, err := r.db.Query(ctx, query, args...)

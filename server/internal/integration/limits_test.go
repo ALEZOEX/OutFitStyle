@@ -36,7 +36,7 @@ func TestLimits_FreeRecommendationsPerDay(t *testing.T) {
 	}
 	defer db.Close()
 
-	subRepo := pg.NewSubscriptionRepository(db, logger)
+	subRepo := pg.NewSubscriptionRepository(db.Pool(), logger)
 	subSvc := services.NewSubscriptionService(subRepo)
 	limiter := middleware.NewSubscriptionLimiter(subSvc)
 
@@ -105,7 +105,7 @@ func TestLimits_FreeWardrobeLimit(t *testing.T) {
 	}
 	defer db.Close()
 
-	subRepo := pg.NewSubscriptionRepository(db, logger)
+	subRepo := pg.NewSubscriptionRepository(db.Pool(), logger)
 	subSvc := services.NewSubscriptionService(subRepo)
 	limiter := middleware.NewSubscriptionLimiter(subSvc)
 
