@@ -32,7 +32,8 @@ class ProfileRepository {
     }
   }
 
-  Future<Map<String, dynamic>> updatePreferences(Map<String, dynamic> patch) async {
+  Future<Map<String, dynamic>> updatePreferences(
+      Map<String, dynamic> patch) async {
     try {
       final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
       final response = await client.put(

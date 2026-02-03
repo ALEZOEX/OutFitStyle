@@ -15,9 +15,11 @@ class WardrobeRepository {
   WardrobeRepository(this._db, this._remote, this._imageStore);
 
   // Получить все элементы гардероба
-  Stream<List<domain.WardrobeEntry>> watchWardrobe({bool includeArchived = false}) {
+  Stream<List<domain.WardrobeEntry>> watchWardrobe(
+      {bool includeArchived = false}) {
     if (includeArchived) {
-      return _db.wardrobeDao.watchAll().map((dbEntries) => dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
+      return _db.wardrobeDao.watchAll().map((dbEntries) =>
+          dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
     } else {
       // Фильтруем архивные элементы
       return _db.wardrobeDao.watchAll().map((dbEntries) => dbEntries
@@ -29,7 +31,8 @@ class WardrobeRepository {
 
   // Получить элемент по ID
   Stream<domain.WardrobeEntry?> watchById(String id) {
-    return _db.wardrobeDao.watchById(id).map((dbEntry) => dbEntry != null ? domain.WardrobeEntry.fromDbEntity(dbEntry) : null);
+    return _db.wardrobeDao.watchById(id).map((dbEntry) =>
+        dbEntry != null ? domain.WardrobeEntry.fromDbEntity(dbEntry) : null);
   }
 
   // Получить элемент по ID (однократно)
@@ -113,7 +116,8 @@ class WardrobeRepository {
   }
 
   // Создать элемент гардероба
-  Future<domain.WardrobeEntry> createItem(WardrobeItemCreateRequest request) async {
+  Future<domain.WardrobeEntry> createItem(
+      WardrobeItemCreateRequest request) async {
     final id = const Uuid().v4();
     final now = DateTime.now();
     final item = domain.WardrobeEntry(
@@ -193,6 +197,23 @@ class WardrobeRepository {
       subcategory: Value(request.subcategory ?? ''),
       style: Value(request.style ?? ''),
       iconEmoji: Value(request.iconEmoji ?? ''),
+      imageUrl: Value(request.imageUrl ?? ''),
+      blurHash: Value(request.blurHash ?? ''),
+      minTemp: Value(request.minTemp ?? 0),
+      maxTemp: Value(request.maxTemp ?? 0),
+      warmthLevel: Value(request.warmthLevel ?? 0),
+      rainOk: Value(request.rainOk ?? false),
+      snowOk: Value(request.snowOk ?? false),
+      windOk: Value(request.windOk ?? false),
+      usage: Value(request.usage ?? ''),
+      materials: Value(request.materials ?? ''),
+      isFavorite: Value(request.isFavorite ?? false),
+      isArchived: Value(request.isArchived ?? false),
+      season: Value(request.season ?? ''),
+      gender: Value(request.gender ?? ''),
+      fit: Value(request.fit ?? ''),
+      pattern: Value(request.pattern ?? ''),
+      localImagePath: Value(request.localImagePath ?? ''),
       updatedAt: Value(now),
       dirty: Value(true),
     ));
@@ -204,7 +225,8 @@ class WardrobeRepository {
   }
 
   // Получить элементы для рекомендаций
-  Future<List<domain.WardrobeEntry>> getItemsForRecommendation({String? category, String? season, String? weather}) async {
+  Future<List<domain.WardrobeEntry>> getItemsForRecommendation(
+      {String? category, String? season, String? weather}) async {
     // Пока возвращаем все элементы, в будущем можно добавить фильтрацию
     final allItems = await _db.wardrobeDao.getAll();
     return allItems.where((item) {
@@ -223,18 +245,21 @@ class WardrobeRepository {
 
   // Получить элементы по категории
   Stream<List<domain.WardrobeEntry>> watchByCategory(String category) {
-    return _db.wardrobeDao.watchByCategory(category).map((dbEntries) => dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
+    return _db.wardrobeDao.watchByCategory(category).map((dbEntries) =>
+        dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
   }
 
   // Получить элементы по категориям
-  Future<List<domain.WardrobeEntry>> getByCategories(List<String> categories) async {
+  Future<List<domain.WardrobeEntry>> getByCategories(
+      List<String> categories) async {
     final dbEntries = await _db.wardrobeDao.getByCategories(categories);
     return dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList();
   }
 
   // Получить элементы по сезону
   Stream<List<domain.WardrobeEntry>> watchBySeason(String season) {
-    return _db.wardrobeDao.watchBySeason(season).map((dbEntries) => dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
+    return _db.wardrobeDao.watchBySeason(season).map((dbEntries) =>
+        dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
   }
 
   // Получить элементы по температуре
@@ -245,7 +270,8 @@ class WardrobeRepository {
 
   // Получить избранные элементы
   Stream<List<domain.WardrobeEntry>> watchFavorites() {
-    return _db.wardrobeDao.watchFavorites().map((dbEntries) => dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
+    return _db.wardrobeDao.watchFavorites().map((dbEntries) =>
+        dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
   }
 
   // Обновить элемент (полное обновление)
@@ -401,8 +427,9 @@ class WardrobeRepository {
   }
 
   // Get items for recommendations
-  Future<List<domain.WardrobeEntry>> getForRecommendations({String? category, String? season, String? weather}) async {
-    return getItemsForRecommendation(category: category, season: season, weather: weather);
+  Future<List<domain.WardrobeEntry>> getForRecommendations(
+      {String? category, String? season, String? weather}) async {
+    return getItemsForRecommendation(
+        category: category, season: season, weather: weather);
   }
 }
-

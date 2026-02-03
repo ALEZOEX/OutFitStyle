@@ -15,7 +15,8 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
           ..limit(1))
         .watchSingleOrNull();
-    return q.map((dbRow) => dbRow != null ? domain.RecommendationRow.fromDbEntity(dbRow) : null);
+    return q.map((dbRow) =>
+        dbRow != null ? domain.RecommendationRow.fromDbEntity(dbRow) : null);
   }
 
   Stream<domain.RecommendationRow?> watchLatestForDay(DateTime dayLocal) {
@@ -28,7 +29,8 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
           ..limit(1))
         .watchSingleOrNull();
-    return q.map((dbRow) => dbRow != null ? domain.RecommendationRow.fromDbEntity(dbRow) : null);
+    return q.map((dbRow) =>
+        dbRow != null ? domain.RecommendationRow.fromDbEntity(dbRow) : null);
   }
 
   Stream<List<domain.RecommendationRow>> watchHistory({int limit = 50}) {
@@ -36,12 +38,17 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
           ..limit(limit))
         .watch();
-    return q.map((dbRows) => dbRows.map((dbRow) => domain.RecommendationRow.fromDbEntity(dbRow)).toList());
+    return q.map((dbRows) => dbRows
+        .map((dbRow) => domain.RecommendationRow.fromDbEntity(dbRow))
+        .toList());
   }
 
   Stream<domain.RecommendationRow?> watchById(String id) {
-    return (select(recommendations)..where((t) => t.id.equals(id))).watchSingleOrNull()
-        .map((dbRow) => dbRow != null ? domain.RecommendationRow.fromDbEntity(dbRow) : null);
+    return (select(recommendations)..where((t) => t.id.equals(id)))
+        .watchSingleOrNull()
+        .map((dbRow) => dbRow != null
+            ? domain.RecommendationRow.fromDbEntity(dbRow)
+            : null);
   }
 
   Future<void> upsertOne(RecommendationsCompanion row) {
@@ -103,12 +110,15 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
   // Получить все рекомендации (однократно)
   Future<List<domain.RecommendationRow>> getAll() async {
     final rows = await select(recommendations).get();
-    return rows.map((row) => domain.RecommendationRow.fromDbEntity(row)).toList();
+    return rows
+        .map((row) => domain.RecommendationRow.fromDbEntity(row))
+        .toList();
   }
 
   // Получить рекомендацию по ID (однократно)
   Future<domain.RecommendationRow?> getById(String id) async {
-    final row = await (select(recommendations)..where((t) => t.id.equals(id))).getSingleOrNull();
+    final row = await (select(recommendations)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
     return row != null ? domain.RecommendationRow.fromDbEntity(row) : null;
   }
 
@@ -120,7 +130,9 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
   // Обновить рекомендацию
   Future<void> updateOne(RecommendationsCompanion companion) {
     if (companion.id.present) {
-      return (update(recommendations)..where((t) => t.id.equals(companion.id.value))).write(companion);
+      return (update(recommendations)
+            ..where((t) => t.id.equals(companion.id.value)))
+          .write(companion);
     }
     throw Exception('ID must be present for update operation');
   }
@@ -136,17 +148,20 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
           ..where((t) => t.isFavorite.equals(true))
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
         .watch();
-    return q.map((rows) => rows.map((row) => domain.RecommendationRow.fromDbEntity(row)).toList());
+    return q.map((rows) =>
+        rows.map((row) => domain.RecommendationRow.fromDbEntity(row)).toList());
   }
 
   // Получить рекомендации за определенный период
-  Stream<List<domain.RecommendationRow>> watchByDateRange(DateTime start, DateTime end) {
+  Stream<List<domain.RecommendationRow>> watchByDateRange(
+      DateTime start, DateTime end) {
     final q = (select(recommendations)
           ..where((t) => t.createdAt.isBiggerOrEqualValue(start))
           ..where((t) => t.createdAt.isSmallerThanValue(end))
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
         .watch();
-    return q.map((rows) => rows.map((row) => domain.RecommendationRow.fromDbEntity(row)).toList());
+    return q.map((rows) =>
+        rows.map((row) => domain.RecommendationRow.fromDbEntity(row)).toList());
   }
 
   // Получить количество рекомендаций
@@ -171,6 +186,8 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
     final rows = await (select(recommendations)
           ..where((t) => t.dirty.equals(true) | t.lastSyncedAt.isNull()))
         .get();
-    return rows.map((row) => domain.RecommendationRow.fromDbEntity(row)).toList();
+    return rows
+        .map((row) => domain.RecommendationRow.fromDbEntity(row))
+        .toList();
   }
 }

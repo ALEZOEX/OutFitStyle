@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../app/di.dart';
 import '../../../ui/atoms/haptics.dart';
 
-final timelineDaysProvider = StreamProvider.autoDispose<List<TimelineDay>>((ref) {
+final timelineDaysProvider =
+    StreamProvider.autoDispose<List<TimelineDay>>((ref) {
   final repo = ref.watch(recommendationsRepositoryProvider);
   return repo.watchTimeline(limit: 7); // 7 дней
 });

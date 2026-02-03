@@ -23,10 +23,6 @@ class RecommendationsService {
     return _repository.watchById(id);
   }
 
-  Stream<List<TimelineDay>> watchTimeline({int limit = 7}) {
-    return _repository.watchTimeline(limit: limit);
-  }
-
   Future<void> syncFromServer() async {
     await _repository.syncFromServer();
   }
@@ -35,7 +31,7 @@ class RecommendationsService {
     await _repository.toggleFavorite(r);
   }
 
-  Future<String> createLocal({
+  Future<RecommendationRow> createLocal({
     required Map<String, dynamic> outfitData,
     required Map<String, dynamic> weatherData,
   }) async {
@@ -45,7 +41,8 @@ class RecommendationsService {
     );
   }
 
-  Future<RecommendationRow> generateRecommendation({required String occasion}) async {
+  Future<RecommendationRow> generateRecommendation(
+      {required String occasion}) async {
     return await _repository.generateRecommendation(occasion: occasion);
   }
 
@@ -74,11 +71,17 @@ class RecommendationsService {
     required Map<String, dynamic> weatherData,
     required bool favorite,
   }) async {
-    return await _repository.saveLocalOutfit(
+    final recommendation = await _repository.saveLocalOutfit(
       outfitData: outfitData,
       weatherData: weatherData,
-      favorite: favorite,
     );
+
+    // Update favorite status if needed
+    if (favorite != recommendation.isFavorite) {
+      await _repository.toggleFavorite(recommendation);
+    }
+
+    return recommendation;
   }
 
   Future<RecommendationRow?> getById(String id) async {

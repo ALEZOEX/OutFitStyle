@@ -40,7 +40,10 @@ class WardrobeItemCard extends StatelessWidget {
                     item.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -48,8 +51,11 @@ class WardrobeItemCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
-                    ),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.65),
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -57,8 +63,11 @@ class WardrobeItemCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
-                    ),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.55),
+                        ),
                   ),
                   const SizedBox(height: 6),
                   _WarmthIndicator(warmthLevel: item.warmthLevel),
@@ -106,7 +115,8 @@ class _ItemImage extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
-      placeholder: (_, __) => const SkeletonBox(width: double.infinity, height: double.infinity),
+      placeholder: (_, __) =>
+          const SkeletonBox(width: double.infinity, height: double.infinity),
       errorWidget: (_, __, ___) => Container(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: const Center(child: Icon(Icons.broken_image_outlined)),

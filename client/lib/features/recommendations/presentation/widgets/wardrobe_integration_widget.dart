@@ -8,7 +8,8 @@ import '../../../../ui/atoms/outfit_app_bar.dart';
 import '../../../../domain/entities/wardrobe_entity.dart';
 import '../../../../domain/entities/recommendation_entity.dart';
 
-final _wardrobeByCategoryProvider = FutureProvider<Map<String, List<WardrobeEntry>>>((ref) async {
+final _wardrobeByCategoryProvider =
+    FutureProvider<Map<String, List<WardrobeEntry>>>((ref) async {
   final repo = ref.watch(wardrobeRepositoryProvider);
   final items = await repo.watchWardrobe(includeArchived: false).first;
   final byCat = <String, List<WardrobeEntry>>{};
@@ -24,7 +25,7 @@ class WardrobeRecommendationIntegration extends ConsumerWidget {
   final String recommendationId;
   final Map<String, dynamic> outfitData;
   final Map<String, dynamic> weatherData;
-  
+
   const WardrobeRecommendationIntegration({
     super.key,
     required this.recommendationId,
@@ -55,7 +56,9 @@ class WardrobeRecommendationIntegration extends ConsumerWidget {
                 lastSyncedAt: DateTime.now(),
               );
 
-              await ref.read(recommendationsRepositoryProvider).toggleFavorite(row);
+              await ref
+                  .read(recommendationsRepositoryProvider)
+                  .toggleFavorite(row);
             },
             icon: const Icon(Icons.bookmark_add_rounded),
             tooltip: 'Сохранить',
@@ -97,11 +100,13 @@ class WardrobeRecommendationIntegration extends ConsumerWidget {
                     'outfit': finalLines,
                   };
 
-                  final newId = await ref.read(recommendationsRepositoryProvider).saveLocalOutfit(
-                    outfitData: finalOutfit,
-                    weatherData: weatherData,
-                    favorite: true,
-                  );
+                  final newId = await ref
+                      .read(recommendationsRepositoryProvider)
+                      .saveLocalOutfit(
+                        outfitData: finalOutfit,
+                        weatherData: weatherData,
+                        favorite: true,
+                      );
 
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -124,8 +129,13 @@ class _WeatherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final temp = (weatherData['temp'] ?? weatherData['temperature'] ?? '').toString();
-    final condition = (weatherData['condition'] ?? weatherData['description'] ?? weatherData['weather'] ?? '').toString();
+    final temp =
+        (weatherData['temp'] ?? weatherData['temperature'] ?? '').toString();
+    final condition = (weatherData['condition'] ??
+            weatherData['description'] ??
+            weatherData['weather'] ??
+            '')
+        .toString();
 
     return Card(
       child: Padding(
@@ -140,7 +150,10 @@ class _WeatherCard extends StatelessWidget {
                 children: [
                   Text(
                     'Погода',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -152,7 +165,10 @@ class _WeatherCard extends StatelessWidget {
             ),
             Text(
               temp.isEmpty ? '—' : '$temp°',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
           ],
         ),
@@ -164,7 +180,7 @@ class _WeatherCard extends StatelessWidget {
 class _RecommendationComposition extends StatelessWidget {
   final List<Map<String, dynamic>> lines;
   final Map<String, List<WardrobeEntry>> wardrobeByCategory;
-  
+
   const _RecommendationComposition({
     required this.lines,
     required this.wardrobeByCategory,
@@ -180,7 +196,10 @@ class _RecommendationComposition extends StatelessWidget {
           children: [
             Text(
               'Рекомендованный состав',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             ...lines.asMap().entries.map((entry) {
@@ -207,12 +226,21 @@ class _RecommendationComposition extends StatelessWidget {
                             children: [
                               Text(
                                 (item['name'] ?? 'Вещь').toString(),
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w700),
                               ),
                               Text(
                                 category,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.65),
                                     ),
                               ),
                             ],
@@ -224,7 +252,10 @@ class _RecommendationComposition extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Альтернативы из вашего гардероба:',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 4),
                       Wrap(
@@ -263,16 +294,18 @@ class _WardrobeIntegrationSection extends StatefulWidget {
   });
 
   @override
-  State<_WardrobeIntegrationSection> createState() => _WardrobeIntegrationSectionState();
+  State<_WardrobeIntegrationSection> createState() =>
+      _WardrobeIntegrationSectionState();
 }
 
-class _WardrobeIntegrationSectionState extends State<_WardrobeIntegrationSection> {
+class _WardrobeIntegrationSectionState
+    extends State<_WardrobeIntegrationSection> {
   final Map<String, WardrobeEntry?> _selections = {};
 
   @override
   void initState() {
     super.initState();
-    
+
     // Инициализируем выбор по умолчанию (оригинальные вещи)
     for (final line in widget.lines) {
       final category = (line['category'] ?? '').toString();
@@ -290,7 +323,10 @@ class _WardrobeIntegrationSectionState extends State<_WardrobeIntegrationSection
           children: [
             Text(
               'Заменить на вещи из гардероба',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             ...widget.lines.map((line) {
@@ -305,7 +341,10 @@ class _WardrobeIntegrationSectionState extends State<_WardrobeIntegrationSection
                   children: [
                     Text(
                       category,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -315,7 +354,8 @@ class _WardrobeIntegrationSectionState extends State<_WardrobeIntegrationSection
                             segments: [
                               ButtonSegment(
                                 value: null,
-                                label: Text('Оригинал: ${(line['name'] ?? 'Вещь').toString()}'),
+                                label: Text(
+                                    'Оригинал: ${(line['name'] ?? 'Вещь').toString()}'),
                               ),
                               ...alternatives.map(
                                 (item) => ButtonSegment(
@@ -342,14 +382,14 @@ class _WardrobeIntegrationSectionState extends State<_WardrobeIntegrationSection
             FilledButton.icon(
               onPressed: () {
                 Haptics.selection();
-                
+
                 // Создаем финальный состав на основе выбора
                 final finalLines = <Map<String, dynamic>>[];
-                
+
                 for (final line in widget.lines) {
                   final category = (line['category'] ?? '').toString();
                   final selected = _selections[category];
-                  
+
                   if (selected != null) {
                     // Используем выбранную вещь из гардероба
                     finalLines.add({
@@ -366,7 +406,7 @@ class _WardrobeIntegrationSectionState extends State<_WardrobeIntegrationSection
                     finalLines.add(line);
                   }
                 }
-                
+
                 widget.onSave(finalLines);
               },
               icon: const Icon(Icons.save_rounded),

@@ -7,7 +7,8 @@ class NotificationService {
   NotificationService._internal();
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
     // Request permission
@@ -18,11 +19,12 @@ class NotificationService {
     );
 
     // Configure local notifications for Android
-    const androidInitializationSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInitializationSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const initializationSettings = InitializationSettings(
       android: androidInitializationSettings,
     );
-    
+
     await _localNotifications.initialize(initializationSettings);
 
     // Handle foreground messages
@@ -58,7 +60,7 @@ class NotificationService {
     // Handle notification tap - navigate to appropriate screen
     final data = message.data;
     final type = data['type'];
-    
+
     switch (type) {
       case 'daily_recommendation':
         // Navigate to recommendations screen

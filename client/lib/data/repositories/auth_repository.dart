@@ -36,7 +36,10 @@ class AuthRepository {
     }
   }
 
-  Future<void> register({required String name, required String email, required String password}) async {
+  Future<void> register(
+      {required String name,
+      required String email,
+      required String password}) async {
     try {
       final response = await _httpClient.post(
         Uri.parse('${_config.apiBase}/auth/register'),
@@ -68,12 +71,18 @@ class AuthRepository {
   }
 
   Future<void> loginWithGoogle() async {
-    final authService = AuthService(apiBase: _config.apiBase, authStorage: _storage, httpClient: _httpClient);
+    final authService = AuthService(
+        apiBase: _config.apiBase,
+        authStorage: _storage,
+        httpClient: _httpClient);
     await authService.loginWithGoogle();
   }
 
   Future<void> logout({bool allDevices = false}) async {
-    final authService = AuthService(apiBase: _config.apiBase, authStorage: _storage, httpClient: _httpClient);
+    final authService = AuthService(
+        apiBase: _config.apiBase,
+        authStorage: _storage,
+        httpClient: _httpClient);
     await authService.logout(allDevices: allDevices);
   }
 

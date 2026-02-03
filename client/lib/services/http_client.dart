@@ -96,9 +96,9 @@ class AuthenticatedHttpClient extends http.BaseClient {
         return false;
       }
     } else if (data is Map<String, dynamic> &&
-               data.containsKey('access_token') &&
-               data.containsKey('refresh_token') &&
-               data.containsKey('expires_at')) {
+        data.containsKey('access_token') &&
+        data.containsKey('refresh_token') &&
+        data.containsKey('expires_at')) {
       // Альтернативный формат: прямой объект с токенами
       try {
         final tokens = TokenPair.fromJson(data);

@@ -17,16 +17,16 @@ class FeatureFlagService {
 
   Future<void> initialize() async {
     _remoteConfig = FirebaseRemoteConfig.instance;
-    
+
     await _remoteConfig.setConfigSettings(
       RemoteConfigSettings(
         fetchTimeout: const Duration(minutes: 1),
         minimumFetchInterval: const Duration(hours: 1),
       ),
     );
-    
+
     await _remoteConfig.setDefaults(_defaultValues);
-    
+
     try {
       await _remoteConfig.fetchAndActivate();
     } catch (e) {
@@ -51,9 +51,11 @@ class FeatureFlagService {
   }
 
   // Feature flag methods
-  bool get isNewRecommendationAlgorithmEnabled => getBool('new_recommendation_algorithm');
+  bool get isNewRecommendationAlgorithmEnabled =>
+      getBool('new_recommendation_algorithm');
   bool get isOutfitPreviewEnabled => getBool('show_outfit_preview');
   bool get isSocialSharingEnabled => getBool('enable_social_sharing');
-  int get maxRecommendationsPerRequest => getInt('max_recommendations_per_request');
+  int get maxRecommendationsPerRequest =>
+      getInt('max_recommendations_per_request');
   String get mlModelVersion => getString('ml_model_version');
 }

@@ -7,8 +7,14 @@ class WeatherCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Пытаемся извлечь типичные поля (гибко)
-    final temp = _toDouble(weather['temp'] ?? weather['temperature'] ?? weather['t']) ?? 0.0;
-    final condition = (weather['condition'] ?? weather['description'] ?? weather['weather'] ?? '').toString();
+    final temp =
+        _toDouble(weather['temp'] ?? weather['temperature'] ?? weather['t']) ??
+            0.0;
+    final condition = (weather['condition'] ??
+            weather['description'] ??
+            weather['weather'] ??
+            '')
+        .toString();
     final city = (weather['city'] ?? weather['location'] ?? '').toString();
 
     final bg = _backgroundFor(condition, Theme.of(context).colorScheme);
@@ -24,16 +30,23 @@ class WeatherCard extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
                 city.isEmpty ? 'Сегодня' : city,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 6),
               Text(
                 condition.isEmpty ? 'Погода уточняется' : condition,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.75),
                     ),
               ),
             ]),
@@ -87,7 +100,10 @@ class _AnimatedTemp extends StatelessWidget {
         final t = value.round();
         return Text(
           '$t°',
-          style: Theme.of(context).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w800),
+          style: Theme.of(context)
+              .textTheme
+              .displaySmall
+              ?.copyWith(fontWeight: FontWeight.w800),
         );
       },
     );

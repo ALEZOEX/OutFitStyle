@@ -124,7 +124,8 @@ class _WardrobeSkeleton extends StatelessWidget {
         childAspectRatio: 0.78,
       ),
       itemCount: 10,
-      itemBuilder: (_, __) => const SkeletonBox(width: double.infinity, height: double.infinity),
+      itemBuilder: (_, __) =>
+          const SkeletonBox(width: double.infinity, height: double.infinity),
     );
   }
 }

@@ -11,7 +11,10 @@ class WardrobeService {
   final AuthStorage authStorage;
   final http.Client httpClient;
 
-  WardrobeService({required this.apiConfig, required this.authStorage, http.Client? httpClient})
+  WardrobeService(
+      {required this.apiConfig,
+      required this.authStorage,
+      http.Client? httpClient})
       : httpClient = httpClient ?? http.Client();
 
   String get _apiUrl {
@@ -26,7 +29,8 @@ class WardrobeService {
     return apiConfig.apiBase;
   }
 
-  Future<(List<WardrobeItem>, int)> list({required int page, required int limit}) async {
+  Future<(List<WardrobeItem>, int)> list(
+      {required int page, required int limit}) async {
     final client = AuthenticatedHttpClient(httpClient, apiConfig, authStorage);
     final response = await client.get(
       Uri.parse('$_apiUrl/wardrobe?page=$page&limit=$limit'),
@@ -41,7 +45,9 @@ class WardrobeService {
           .map((e) => WardrobeItem.fromJson(e.cast<String, dynamic>()))
           .toList();
       // Проверяем оба варианта: 'total' и 'pagination.total'
-      final int total = json.containsKey('pagination') ? json['pagination']['total'] as int : json['total'] as int;
+      final int total = json.containsKey('pagination')
+          ? json['pagination']['total'] as int
+          : json['total'] as int;
       return (items, total);
     } else {
       throw Exception('Failed to list wardrobe: ${response.statusCode}');
@@ -75,7 +81,8 @@ class WardrobeService {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
-      return WardrobeItem.fromJson(json['wardrobe_item'] as Map<String, dynamic>);
+      return WardrobeItem.fromJson(
+          json['wardrobe_item'] as Map<String, dynamic>);
     } else {
       throw Exception('Failed to create wardrobe item: ${response.statusCode}');
     }
@@ -171,20 +178,23 @@ class WardrobeService {
     // Пока что просто вызываем update для каждого элемента
     for (final item in items) {
       try {
-        await update(item.id, WardrobeUpdateRequest(
-          name: item.name,
-          category: item.category,
-          subcategory: item.subcategory,
-          style: item.style,
-          iconEmoji: item.iconEmoji,
-        ));
+        await update(
+            item.id,
+            WardrobeUpdateRequest(
+              name: item.name,
+              category: item.category,
+              subcategory: item.subcategory,
+              style: item.style,
+              iconEmoji: item.iconEmoji,
+            ));
       } catch (e) {
         // Игнорируем ошибки обновления отдельных элементов
       }
     }
   }
 
-  Future<List<WardrobeItem>> getItemsForRecommendation({String? category, String? season, String? weather}) async {
+  Future<List<WardrobeItem>> getItemsForRecommendation(
+      {String? category, String? season, String? weather}) async {
     // Получаем все элементы гардероба
     final allItems = await fetchAll();
 

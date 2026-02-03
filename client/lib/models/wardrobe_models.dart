@@ -68,11 +68,15 @@ class WardrobeItem {
         customName: json['custom_name'] as String?,
         notes: json['notes'] as String?,
         tags: (json['tags'] as List?)?.map((e) => e.toString()).toList() ?? [],
-        purchaseDate: json['purchase_date'] != null ? DateTime.parse(json['purchase_date'] as String) : null,
+        purchaseDate: json['purchase_date'] != null
+            ? DateTime.parse(json['purchase_date'] as String)
+            : null,
         purchasePrice: json['purchase_price'] as double?,
         purchaseCurrency: json['purchase_currency'] as String?,
         wearCount: json['wear_count'] as int? ?? 0,
-        lastWornAt: json['last_worn_at'] != null ? DateTime.parse(json['last_worn_at'] as String) : null,
+        lastWornAt: json['last_worn_at'] != null
+            ? DateTime.parse(json['last_worn_at'] as String)
+            : null,
         isFavorite: json['is_favorite'] as bool? ?? false,
         isArchived: json['is_archived'] as bool? ?? false,
         condition: json['condition'] as String? ?? 'good',

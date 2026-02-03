@@ -49,7 +49,9 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                   await controller.toggleFavorite(item);
                 },
                 icon: Icon(
-                  item.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  item.isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
                   color: item.isFavorite ? Colors.pinkAccent : null,
                 ),
               ),
@@ -75,33 +77,45 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                                 fit: BoxFit.cover,
                               )
                             : null,
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                   child: item.localImagePath == null && item.imageUrl == null
-                      ? Center(child: Text(item.iconEmoji, style: const TextStyle(fontSize: 64)))
+                      ? Center(
+                          child: Text(item.iconEmoji,
+                              style: const TextStyle(fontSize: 64)))
                       : null,
                 )
               else
                 Container(
                   height: 200,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Center(child: Text(item.iconEmoji, style: const TextStyle(fontSize: 64))),
+                  child: Center(
+                      child: Text(item.iconEmoji,
+                          style: const TextStyle(fontSize: 64))),
                 ),
               const SizedBox(height: 16),
 
               // Название и категория
               Text(
                 item.name,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 4),
               Text(
                 '${item.iconEmoji}  ${item.category} • ${item.subcategory}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.65),
                     ),
               ),
               const SizedBox(height: 16),
@@ -124,9 +138,18 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                 _InfoCard(
                   title: 'Температурные характеристики',
                   children: [
-                    if (item.minTemp != null) _InfoRow(label: 'Мин. температура', value: '${item.minTemp}°C'),
-                    if (item.maxTemp != null) _InfoRow(label: 'Макс. температура', value: '${item.maxTemp}°C'),
-                    if (item.warmthLevel != null) _InfoRow(label: 'Уровень теплоты', value: '${item.warmthLevel}/10'),
+                    if (item.minTemp != null)
+                      _InfoRow(
+                          label: 'Мин. температура',
+                          value: '${item.minTemp}°C'),
+                    if (item.maxTemp != null)
+                      _InfoRow(
+                          label: 'Макс. температура',
+                          value: '${item.maxTemp}°C'),
+                    if (item.warmthLevel != null)
+                      _InfoRow(
+                          label: 'Уровень теплоты',
+                          value: '${item.warmthLevel}/10'),
                   ],
                 ),
               const SizedBox(height: 16),
@@ -135,9 +158,15 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
               _InfoCard(
                 title: 'Погодные характеристики',
                 children: [
-                  _InfoRow(label: 'Подходит для дождя', value: item.rainOk ? 'Да' : 'Нет'),
-                  _InfoRow(label: 'Подходит для снега', value: item.snowOk ? 'Да' : 'Нет'),
-                  _InfoRow(label: 'Подходит для ветра', value: item.windOk ? 'Да' : 'Нет'),
+                  _InfoRow(
+                      label: 'Подходит для дождя',
+                      value: item.rainOk ? 'Да' : 'Нет'),
+                  _InfoRow(
+                      label: 'Подходит для снега',
+                      value: item.snowOk ? 'Да' : 'Нет'),
+                  _InfoRow(
+                      label: 'Подходит для ветра',
+                      value: item.windOk ? 'Да' : 'Нет'),
                 ],
               ),
               const SizedBox(height: 16),
@@ -151,7 +180,9 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Wrap(
                         spacing: 8,
-                        children: item.usage.map((u) => Chip(label: Text(_translateUsage(u)))).toList(),
+                        children: item.usage
+                            .map((u) => Chip(label: Text(_translateUsage(u))))
+                            .toList(),
                       ),
                     ),
                   if (item.materials.isNotEmpty)
@@ -159,7 +190,10 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(top: 8),
                       child: Wrap(
                         spacing: 8,
-                        children: item.materials.map((m) => Chip(label: Text(_translateMaterial(m)))).toList(),
+                        children: item.materials
+                            .map(
+                                (m) => Chip(label: Text(_translateMaterial(m))))
+                            .toList(),
                       ),
                     ),
                 ],
@@ -170,8 +204,13 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
               _InfoCard(
                 title: 'Статистика',
                 children: [
-                  _InfoRow(label: 'Количество носок', value: item.wearCount.toString()),
-                  if (item.lastWornAt != null) _InfoRow(label: 'Последняя носка', value: _formatDate(item.lastWornAt!)),
+                  _InfoRow(
+                      label: 'Количество носок',
+                      value: item.wearCount.toString()),
+                  if (item.lastWornAt != null)
+                    _InfoRow(
+                        label: 'Последняя носка',
+                        value: _formatDate(item.lastWornAt!)),
                 ],
               ),
               const SizedBox(height: 16),
@@ -180,12 +219,25 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
               _InfoCard(
                 title: 'Погодные и температурные характеристики',
                 children: [
-                  _InfoRow(label: 'Подходит для дождя', value: item.rainOk ? 'Да' : 'Нет'),
-                  _InfoRow(label: 'Подходит для снега', value: item.snowOk ? 'Да' : 'Нет'),
-                  _InfoRow(label: 'Подходит для ветра', value: item.windOk ? 'Да' : 'Нет'),
-                  if (item.warmthLevel != null) _InfoRow(label: 'Уровень теплоты', value: '${item.warmthLevel}/10'),
-                  if (item.minTemp != null) _InfoRow(label: 'Мин. температура', value: '${item.minTemp}°C'),
-                  if (item.maxTemp != null) _InfoRow(label: 'Макс. температура', value: '${item.maxTemp}°C'),
+                  _InfoRow(
+                      label: 'Подходит для дождя',
+                      value: item.rainOk ? 'Да' : 'Нет'),
+                  _InfoRow(
+                      label: 'Подходит для снега',
+                      value: item.snowOk ? 'Да' : 'Нет'),
+                  _InfoRow(
+                      label: 'Подходит для ветра',
+                      value: item.windOk ? 'Да' : 'Нет'),
+                  if (item.warmthLevel != null)
+                    _InfoRow(
+                        label: 'Уровень теплоты',
+                        value: '${item.warmthLevel}/10'),
+                  if (item.minTemp != null)
+                    _InfoRow(
+                        label: 'Мин. температура', value: '${item.minTemp}°C'),
+                  if (item.maxTemp != null)
+                    _InfoRow(
+                        label: 'Макс. температура', value: '${item.maxTemp}°C'),
                 ],
               ),
             ],
@@ -207,7 +259,9 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                               context.pop();
                             }
                           },
-                          icon: Icon(item.isArchived ? Icons.unarchive_rounded : Icons.archive_rounded),
+                          icon: Icon(item.isArchived
+                              ? Icons.unarchive_rounded
+                              : Icons.archive_rounded),
                           label: Text(item.isArchived ? 'Вернуть' : 'В архив'),
                         ),
                       ),
@@ -236,13 +290,15 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                       onPressed: () {
                         Haptics.selection();
                         // Перейти к экрану создания рекомендации с этой вещью
-                        context.push('/wardrobe/${item.id}/use-in-recommendation');
+                        context
+                            .push('/wardrobe/${item.id}/use-in-recommendation');
                       },
                       icon: const Icon(Icons.auto_awesome_rounded),
                       label: const Text('Использовать в образе'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
                     ),
                   ),
@@ -257,26 +313,41 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
 
   String _translateUsage(String usage) {
     switch (usage) {
-      case 'work': return 'Работа';
-      case 'casual': return 'Повседневное';
-      case 'sports': return 'Спорт';
-      case 'formal': return 'Формальное';
-      case 'party': return 'Вечеринка';
-      case 'travel': return 'Путешествие';
-      default: return usage;
+      case 'work':
+        return 'Работа';
+      case 'casual':
+        return 'Повседневное';
+      case 'sports':
+        return 'Спорт';
+      case 'formal':
+        return 'Формальное';
+      case 'party':
+        return 'Вечеринка';
+      case 'travel':
+        return 'Путешествие';
+      default:
+        return usage;
     }
   }
 
   String _translateMaterial(String material) {
     switch (material) {
-      case 'cotton': return 'Хлопок';
-      case 'wool': return 'Шерсть';
-      case 'polyester': return 'Полиэстер';
-      case 'silk': return 'Шелк';
-      case 'denim': return 'Джинса';
-      case 'leather': return 'Кожа';
-      case 'linen': return 'Лен';
-      default: return material;
+      case 'cotton':
+        return 'Хлопок';
+      case 'wool':
+        return 'Шерсть';
+      case 'polyester':
+        return 'Полиэстер';
+      case 'silk':
+        return 'Шелк';
+      case 'denim':
+        return 'Джинса';
+      case 'leather':
+        return 'Кожа';
+      case 'linen':
+        return 'Лен';
+      default:
+        return material;
     }
   }
 
@@ -303,7 +374,10 @@ class _InfoCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             ...children,
@@ -331,7 +405,10 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.65),
                   ),
             ),
           ),
@@ -339,7 +416,10 @@ class _InfoRow extends StatelessWidget {
             flex: 2,
             child: Text(
               value.isEmpty ? '—' : value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
         ],

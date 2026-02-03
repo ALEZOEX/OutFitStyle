@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final onboardingControllerProvider = StateNotifierProvider<OnboardingController, OnboardingState>((ref) {
+final onboardingControllerProvider =
+    StateNotifierProvider<OnboardingController, OnboardingState>((ref) {
   return OnboardingController(ref.watch(localStorageProvider));
 });
 

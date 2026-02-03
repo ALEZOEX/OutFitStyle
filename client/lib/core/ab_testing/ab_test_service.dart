@@ -14,28 +14,31 @@ class ABTestService {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  String getVariant(String testName, List<String> variants, {double allocation = 0.5}) {
+  String getVariant(String testName, List<String> variants,
+      {double allocation = 0.5}) {
     final storedVariant = _prefs.getString('ab_$testName');
-    
+
     if (storedVariant != null) {
       return storedVariant;
     }
-    
+
     // Simple A/B test: 50% allocation to each variant
     final shouldAssign = _random.nextDouble() < allocation;
     final variant = shouldAssign ? variants[0] : variants[1];
-    
+
     _prefs.setString('ab_$testName', variant);
     return variant;
   }
 
   // Specific A/B tests
   String getRecommendationAlgorithmVariant() {
-    return getVariant('recommendation_algorithm', ['current', 'new'], allocation: 0.5);
+    return getVariant('recommendation_algorithm', ['current', 'new'],
+        allocation: 0.5);
   }
 
   String getUITestVariant() {
-    return getVariant('ui_layout', ['standard', 'alternative'], allocation: 0.5);
+    return getVariant('ui_layout', ['standard', 'alternative'],
+        allocation: 0.5);
   }
 
   String getOnboardingVariant() {

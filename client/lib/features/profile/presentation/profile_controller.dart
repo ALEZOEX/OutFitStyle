@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final profileControllerProvider = StateNotifierProvider<ProfileController, ProfileState>((ref) {
+final profileControllerProvider =
+    StateNotifierProvider<ProfileController, ProfileState>((ref) {
   return ProfileController();
 });
 

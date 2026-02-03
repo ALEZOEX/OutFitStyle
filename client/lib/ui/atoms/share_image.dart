@@ -12,7 +12,8 @@ class ShareImage {
     required String fileName,
     String? text,
   }) async {
-    final boundary = boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    final boundary = boundaryKey.currentContext?.findRenderObject()
+        as RenderRepaintBoundary?;
     if (boundary == null) return;
 
     final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
