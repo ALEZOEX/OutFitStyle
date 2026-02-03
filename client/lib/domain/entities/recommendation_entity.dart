@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 // Основная сущность рекомендации
 class Recommendations extends Table {
@@ -51,19 +50,36 @@ class RecommendationRow {
   });
 
   factory RecommendationRow.fromJson(Map<String, dynamic> json) {
+    // Проверяем обязательные поля
+    if (json['id'] == null) {
+      throw ArgumentError('Field "id" is required but was null');
+    }
+    if (json['outfit_data_json'] == null) {
+      throw ArgumentError('Field "outfit_data_json" is required but was null');
+    }
+    if (json['weather_data_json'] == null) {
+      throw ArgumentError('Field "weather_data_json" is required but was null');
+    }
+    if (json['created_at'] == null) {
+      throw ArgumentError('Field "created_at" is required but was null');
+    }
+    if (json['updated_at'] == null) {
+      throw ArgumentError('Field "updated_at" is required but was null');
+    }
+
     return RecommendationRow(
-      id: json['id'],
-      serverId: json['server_id'],
-      origin: json['origin'] ?? 'local',
-      outfitDataJson: json['outfit_data_json'],
-      weatherDataJson: json['weather_data_json'],
-      isFavorite: json['is_favorite'] ?? false,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      lastSyncedAt: json['last_synced_at'] != null ? DateTime.parse(json['last_synced_at']) : null,
-      dirty: json['dirty'] ?? true,
-      imageUrl: json['image_url'],
-      localImagePath: json['local_image_path'],
+      id: json['id'] as String,
+      serverId: json['server_id'] as String?,
+      origin: json['origin'] as String? ?? 'local',
+      outfitDataJson: json['outfit_data_json'] as String,
+      weatherDataJson: json['weather_data_json'] as String,
+      isFavorite: json['is_favorite'] as bool? ?? false,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+      lastSyncedAt: json['last_synced_at'] != null ? DateTime.parse(json['last_synced_at'] as String) : null,
+      dirty: json['dirty'] as bool? ?? true,
+      imageUrl: json['image_url'] as String?,
+      localImagePath: json['local_image_path'] as String?,
     );
   }
 
@@ -128,6 +144,23 @@ class RecommendationRow {
       dirty: false, // Сразу синхронизировано
       imageUrl: external['image_url'],
       localImagePath: external['local_image_path'],
+    );
+  }
+
+  static RecommendationRow fromDbEntity(dynamic dbEntity) {
+    return RecommendationRow(
+      id: dbEntity.id,
+      serverId: dbEntity.serverId,
+      origin: dbEntity.origin,
+      outfitDataJson: dbEntity.outfitDataJson,
+      weatherDataJson: dbEntity.weatherDataJson,
+      isFavorite: dbEntity.isFavorite,
+      createdAt: dbEntity.createdAt,
+      updatedAt: dbEntity.updatedAt,
+      lastSyncedAt: dbEntity.lastSyncedAt,
+      dirty: dbEntity.dirty,
+      imageUrl: dbEntity.imageUrl,
+      localImagePath: dbEntity.localImagePath,
     );
   }
 }

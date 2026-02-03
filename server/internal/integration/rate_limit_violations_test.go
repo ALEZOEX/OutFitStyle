@@ -49,7 +49,7 @@ func TestRateLimitViolations_Inserted(t *testing.T) {
 	}
 	defer rdb.Close()
 
-	violRepo := pg.NewRateLimitViolationRepository(db)
+	violRepo := pg.NewRateLimitViolationRepository(db.Pool())
 	limiter := middleware.NewRedisRateLimiter(rdb, violRepo)
 
 	router := mux.NewRouter()

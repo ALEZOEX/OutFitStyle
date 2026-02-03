@@ -5,27 +5,52 @@ package pg
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/cache"
 )
 
 // ClothingRepository репозиторий для работы с элементами одежды
 type ClothingRepository struct {
-	db *pgxpool.Pool // Пул подключений к базе данных PostgreSQL
+	db    *pgxpool.Pool // Пул подключений к базе данных PostgreSQL
+	cache *cache.RepositoryCache
 }
 
 // NewClothingRepository создает новый экземпляр репозитория элементов одежды
-func NewClothingRepository(db *pgxpool.Pool, logger interface{}) *ClothingRepository {
-	return &ClothingRepository{db: db}
+func NewClothingRepository(db *pgxpool.Pool, redisClient *redis.Client, logger interface{}) *ClothingRepository {
+	var zapLogger *zap.Logger
+	if l, ok := logger.(*zap.Logger); ok {
+		zapLogger = l
+	} else {
+		// Create a default logger if the passed logger is not a zap logger
+		zapLogger = zap.NewNop()
+	}
+
+	return &ClothingRepository{
+		db:    db,
+		cache: cache.NewRepositoryCache(redisClient, zapLogger),
+	}
 }
 
 // GetByID возвращает элемент одежды по его идентификатору
 func (r *ClothingRepository) GetByID(ctx context.Context, id domain.ID) (*domain.ClothingItem, error) {
+	cacheKey := r.cache.GenerateKey("clothing:item:id", id)
+
+	var cachedItem domain.ClothingItem
+	err := r.cache.Get(ctx, cacheKey, &cachedItem)
+	if err == nil && cachedItem.ID != domain.NilID {
+		// Return cached item if found
+		return &cachedItem, nil
+	}
+
 	query := `
 		SELECT
 			id, name, description, category, subcategory, min_temp, max_temp, warmth_level,
@@ -33,7 +58,7 @@ func (r *ClothingRepository) GetByID(ctx context.Context, id domain.ID) (*domain
 			usage, materials, fit, icon_emoji, source, owner_id, is_owned, is_active,
 			created_at, updated_at
 		FROM clothing_items
-		WHERE id = $1
+		WHERE id = $1 AND is_active = true
 	`
 
 	var item domain.ClothingItem
@@ -46,7 +71,7 @@ func (r *ClothingRepository) GetByID(ctx context.Context, id domain.ID) (*domain
 	var ownerID *uuid.UUID
 	var createdAt, updatedAt time.Time
 
-	err := r.db.QueryRow(ctx, query, id).Scan(
+	err = r.db.QueryRow(ctx, query, id).Scan(
 		&item.ID,
 		&description,
 		&item.Category,
@@ -119,6 +144,13 @@ func (r *ClothingRepository) GetByID(ctx context.Context, id domain.ID) (*domain
 
 	item.CreatedAt = createdAt
 	item.UpdatedAt = updatedAt
+
+	// Cache the result
+	go func() {
+		// Use background context to avoid cancellation issues
+		bgCtx := context.Background()
+		_ = r.cache.Set(bgCtx, cacheKey, &item, 15*time.Minute)
+	}()
 
 	return &item, nil
 }
@@ -300,6 +332,19 @@ func (r *ClothingRepository) Create(ctx context.Context, item *domain.ClothingIt
 		return errors.Wrap(err, "failed to insert clothing item")
 	}
 
+	// Invalidate cache for this item
+	go func() {
+		// Use background context to avoid cancellation issues
+		bgCtx := context.Background()
+		cacheKey := r.cache.GenerateKey("clothing:item:id", item.ID)
+		_ = r.cache.Delete(bgCtx, cacheKey)
+
+		// Also invalidate related caches
+		if item.OwnerID != nil {
+			_ = r.cache.InvalidatePattern(bgCtx, r.cache.GenerateKey("clothing:user:", *item.OwnerID))
+		}
+	}()
+
 	return nil
 }
 
@@ -374,6 +419,19 @@ func (r *ClothingRepository) Update(ctx context.Context, item *domain.ClothingIt
 		return errors.Wrap(err, "failed to update clothing item")
 	}
 
+	// Invalidate cache for this item
+	go func() {
+		// Use background context to avoid cancellation issues
+		bgCtx := context.Background()
+		cacheKey := r.cache.GenerateKey("clothing:item:id", item.ID)
+		_ = r.cache.Delete(bgCtx, cacheKey)
+
+		// Also invalidate related caches
+		if item.OwnerID != nil {
+			_ = r.cache.InvalidatePattern(bgCtx, r.cache.GenerateKey("clothing:user:", *item.OwnerID))
+		}
+	}()
+
 	return nil
 }
 
@@ -405,6 +463,14 @@ func (r *ClothingRepository) Delete(ctx context.Context, id domain.ID) error {
 	if tag.RowsAffected() == 0 {
 		return errors.New("no clothing item found with the given ID")
 	}
+
+	// Invalidate cache for this item
+	go func() {
+		// Use background context to avoid cancellation issues
+		bgCtx := context.Background()
+		cacheKey := r.cache.GenerateKey("clothing:item:id", id)
+		_ = r.cache.Delete(bgCtx, cacheKey)
+	}()
 
 	return nil
 }
@@ -752,7 +818,7 @@ func (r *ClothingRepository) ListCatalogCandidates(ctx context.Context, includeP
 		query += " AND source != 'partner'"
 	}
 
-	query += " ORDER BY created_at DESC LIMIT $" + string(rune('0'+argIndex))
+	query += " ORDER BY created_at DESC LIMIT $" + fmt.Sprintf("%d", argIndex)
 	args = append(args, limit)
 
 	rows, err := r.db.Query(ctx, query, args...)
@@ -939,7 +1005,7 @@ func (r *ClothingRepository) ListCatalogCandidatesLite(ctx context.Context, incl
 		query += " AND source != 'partner'"
 	}
 
-	query += " ORDER BY created_at DESC LIMIT $" + string(rune('0'+argIndex))
+	query += " ORDER BY created_at DESC LIMIT $" + fmt.Sprintf("%d", argIndex)
 	args = append(args, limit)
 
 	rows, err := r.db.Query(ctx, query, args...)

@@ -13,6 +13,7 @@ import (
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
@@ -47,6 +48,15 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req domain.UserRegistration
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidateUserRegistration(v, req)
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 
@@ -89,6 +99,20 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidateEmail(v, req.Email)
+	validation.ValidatePasswordPlaintext(v, req.Password)
+
+	if req.DeviceName != nil {
+		validation.ValidateStringLength(v, *req.DeviceName, 1, 100, "device_name", "device name")
+	}
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
 	device := services.DeviceInfo{
 		DeviceID:   req.DeviceID,
 		DeviceName: req.DeviceName,
@@ -121,6 +145,15 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req refreshRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidateStringLength(v, req.RefreshToken, 1, 500, "refresh_token", "refresh token")
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 
@@ -178,6 +211,15 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	var req googleSignInRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidateStringLength(v, req.IDToken, 1, 2048, "id_token", "ID token")
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 

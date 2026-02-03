@@ -180,6 +180,83 @@ func (r *SavedOutfitRepository) GetByID(ctx context.Context, outfitID domain.ID)
 	return &outfit, nil
 }
 
+// GetByUserAndID gets a saved outfit by its ID and verifies it belongs to the user
+func (r *SavedOutfitRepository) GetByUserAndID(ctx context.Context, userID, outfitID domain.ID) (*domain.SavedOutfit, error) {
+	query := `
+		SELECT
+			id, user_id, name, description, items, occasions, seasons, min_temp, max_temp,
+			thumbnail_url, is_favorite, times_worn, last_worn_at, created_at
+		FROM saved_outfits
+		WHERE user_id = $1 AND id = $2
+	`
+
+	var outfit domain.SavedOutfit
+	var description *string
+	var itemsJSON []byte
+	var occasionsJSON []byte
+	var seasonsJSON []byte
+	var minTemp *int
+	var maxTemp *int
+	var thumbnailURL *string
+	var lastWornAt *time.Time
+	var createdAt time.Time
+
+	err := r.db.QueryRow(ctx, query, userID, outfitID).Scan(
+		&outfit.ID,
+		&outfit.UserID,
+		&outfit.Name,
+		&description,
+		&itemsJSON,
+		&occasionsJSON,
+		&seasonsJSON,
+		&minTemp,
+		&maxTemp,
+		&thumbnailURL,
+		&outfit.IsFavorite,
+		&outfit.TimesWorn,
+		&lastWornAt,
+		&createdAt,
+	)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "failed to get saved outfit by user and ID")
+	}
+
+	// Set nullable fields
+	outfit.Description = description
+	outfit.MinTemp = minTemp
+	outfit.MaxTemp = maxTemp
+	outfit.ThumbnailURL = thumbnailURL
+	outfit.LastWornAt = lastWornAt
+	outfit.CreatedAt = createdAt
+
+	// Parse JSON fields
+	if len(itemsJSON) > 0 {
+		err = json.Unmarshal(itemsJSON, &outfit.Items)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal items")
+		}
+	}
+
+	if len(occasionsJSON) > 0 {
+		err = json.Unmarshal(occasionsJSON, &outfit.Occasions)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal occasions")
+		}
+	}
+
+	if len(seasonsJSON) > 0 {
+		err = json.Unmarshal(seasonsJSON, &outfit.Seasons)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal seasons")
+		}
+	}
+
+	return &outfit, nil
+}
+
 func (r *SavedOutfitRepository) List(ctx context.Context, userID domain.ID) ([]domain.SavedOutfit, error) {
 	return r.GetByUser(ctx, userID)
 }

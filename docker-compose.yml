@@ -30,10 +30,11 @@ services:
       context: .
       dockerfile: ./Dockerfile.ml-service
     ports:
-      - "5000:8000"
+      - "${ML_SERVICE_PORT:-5000}:8000"
     environment:
       - MODEL_PATH=/app/models/model.pkl
       - LOG_LEVEL=info
+      - PORT=8000
     depends_on:
       - postgres
     healthcheck:
@@ -70,44 +71,44 @@ services:
     environment:
       - RUN_IN_DOCKER=1
       - SERVER_HOST=0.0.0.0
-      - SERVER_PORT=8080
-      - ENVIRONMENT=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
+      - SERVER_PORT=${SERVER_PORT:-8080}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-password}
       - DB_NAME=${DB_NAME:-outfitstyle}
-      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-outfitstyle}?sslmode=disable
-      - DATABASE_MAX_CONNECTIONS=100
-      - DATABASE_MAX_IDLE_CONNECTIONS=10
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-outfitstyle}?sslmode=disable
+      - DATABASE_MAX_CONNECTIONS=${DATABASE_MAX_CONNECTIONS:-100}
+      - DATABASE_MAX_IDLE_CONNECTIONS=${DATABASE_MAX_IDLE_CONNECTIONS:-10}
       - REDIS_URL=redis://redis:6379
-      - REDIS_PASSWORD=
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_ACCESS_TOKEN_TTL=15m
-      - JWT_REFRESH_TOKEN_TTL=720h
-      - CORS_ALLOWED_ORIGINS=*
-      - RATE_LIMIT_PER_MINUTE=100
+      - JWT_ACCESS_TOKEN_TTL=${JWT_ACCESS_TOKEN_TTL:-15m}
+      - JWT_REFRESH_TOKEN_TTL=${JWT_REFRESH_TOKEN_TTL:-720h}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-*}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-100}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - ML_SERVICE_URL=http://ml-service:8000
-      - ML_SERVICE_TIMEOUT=30s
+      - ML_SERVICE_URL=${ML_SERVICE_URL:-http://ml-service:8000}
+      - ML_SERVICE_TIMEOUT=${ML_SERVICE_TIMEOUT:-30s}
       - WEATHER_API_KEY=${WEATHER_API_KEY}
-      - OPENWEATHER_CACHE_TTL=10m
-      - OPENWEATHER_BASE_URL=https://api.openweathermap.org/data/2.5
-      - WEATHER_PROVIDER=openweather
-      - OPENMETEO_BASE_URL=https://api.open-meteo.com
-      - SMTP_HOST=smtp.gmail.com
-      - SMTP_PORT=587
+      - OPENWEATHER_CACHE_TTL=${OPENWEATHER_CACHE_TTL:-10m}
+      - OPENWEATHER_BASE_URL=${OPENWEATHER_BASE_URL:-https://api.openweathermap.org/data/2.5}
+      - WEATHER_PROVIDER=${WEATHER_PROVIDER:-openweather}
+      - OPENMETEO_BASE_URL=${OPENMETEO_BASE_URL:-https://api.open-meteo.com}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - FROM_EMAIL=noreply@outfitstyle.com
-      - SENTRY_DSN=
+      - FROM_EMAIL=${FROM_EMAIL:-noreply@outfitstyle.com}
+      - SENTRY_DSN=${SENTRY_DSN:-}
       - ADMIN_API_KEY=${ADMIN_API_KEY}
-      - FEATURE_PARTNER_CATALOG=true
-      - FEATURE_AB_TESTING=true
-      - FEATURE_ACHIEVEMENTS=true
-      - FEATURE_TRIPS=false
-      - API_KEY_PEPPER=dev-pepper
-      - LOG_LEVEL=info
+      - FEATURE_PARTNER_CATALOG=${FEATURE_PARTNER_CATALOG:-true}
+      - FEATURE_AB_TESTING=${FEATURE_AB_TESTING:-true}
+      - FEATURE_ACHIEVEMENTS=${FEATURE_ACHIEVEMENTS:-true}
+      - FEATURE_TRIPS=${FEATURE_TRIPS:-false}
+      - API_KEY_PEPPER=${API_KEY_PEPPER:-dev-pepper}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
     depends_on:
       migrate:
         condition: service_completed_successfully

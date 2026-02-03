@@ -152,6 +152,69 @@ func (r *TripRepository) GetByID(ctx context.Context, tripID domain.ID) (*domain
 	return &trip, nil
 }
 
+// GetByUserAndID gets a trip by its ID and verifies it belongs to the user
+func (r *TripRepository) GetByUserAndID(ctx context.Context, userID, tripID domain.ID) (*domain.Trip, error) {
+	query := `
+		SELECT
+			id, user_id, name, destination, destination_lat, destination_lon,
+			start_date, end_date, occasions, packing_list, status, created_at, updated_at
+		FROM trips
+		WHERE user_id = $1 AND id = $2
+	`
+
+	var trip domain.Trip
+	var destinationLat *float64
+	var destinationLon *float64
+	var occasionsJSON []byte
+	var packingListJSON []byte
+	var createdAt time.Time
+	var updatedAt time.Time
+
+	err := r.db.QueryRow(ctx, query, userID, tripID).Scan(
+		&trip.ID,
+		&trip.UserID,
+		&trip.Name,
+		&trip.Destination,
+		&destinationLat,
+		&destinationLon,
+		&trip.StartDate,
+		&trip.EndDate,
+		&occasionsJSON,
+		&packingListJSON,
+		&trip.Status,
+		&createdAt,
+		&updatedAt,
+	)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "failed to get trip by user and ID")
+	}
+
+	// Parse JSON fields
+	if len(occasionsJSON) > 0 {
+		err = json.Unmarshal(occasionsJSON, &trip.Occasions)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal occasions")
+		}
+	}
+
+	if len(packingListJSON) > 0 {
+		err = json.Unmarshal(packingListJSON, &trip.PackingList)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal packing list")
+		}
+	}
+
+	// Set nullable fields
+	trip.DestinationLat = destinationLat
+	trip.DestinationLon = destinationLon
+	trip.CreatedAt = createdAt
+
+	return &trip, nil
+}
+
 func (r *TripRepository) List(ctx context.Context, userID domain.ID) ([]domain.Trip, error) {
 	return r.GetByUser(ctx, userID)
 }

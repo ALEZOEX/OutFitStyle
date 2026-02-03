@@ -14,7 +14,8 @@ import (
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
-	httputils "outfitstyle/server/internal/pkg/http"
+	"outfitstyle/server/internal/validation"
+	resp "outfitstyle/server/internal/pkg/http"
 )
 
 // ClothingItemHandler handles clothing item-related HTTP requests
@@ -57,7 +58,7 @@ func (h *ClothingItemHandler) GetWardrobeItems(w http.ResponseWriter, r *http.Re
 		"count": len(items),
 	}
 
-	httputils.Success(w, response)
+	resp.Success(w, response)
 }
 
 // GetAllClothingItems retrieves all clothing items for users
@@ -80,7 +81,7 @@ func (h *ClothingItemHandler) GetAllClothingItems(w http.ResponseWriter, r *http
 		"count": len(items),
 	}
 
-	httputils.Success(w, response)
+	resp.Success(w, response)
 }
 
 // AddItemToWardrobe adds an item to user's wardrobe
@@ -111,7 +112,7 @@ func (h *ClothingItemHandler) AddItemToWardrobe(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	httputils.Success(w, map[string]string{
+	resp.Success(w, map[string]string{
 		"message": "Item added to wardrobe successfully",
 	})
 }
@@ -144,7 +145,7 @@ func (h *ClothingItemHandler) RemoveItemFromWardrobe(w http.ResponseWriter, r *h
 		return
 	}
 
-	httputils.Success(w, map[string]string{
+	resp.Success(w, map[string]string{
 		"message": "Item removed from wardrobe successfully",
 	})
 }
@@ -156,6 +157,15 @@ func (h *ClothingItemHandler) CreateClothingItem(w http.ResponseWriter, r *http.
 	var item domain.ClothingItem
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidateClothingItem(v, item)
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
 		return
 	}
 
@@ -172,7 +182,7 @@ func (h *ClothingItemHandler) CreateClothingItem(w http.ResponseWriter, r *http.
 		return
 	}
 
-	httputils.Success(w, map[string]string{
+	resp.Success(w, map[string]string{
 		"message": "clothing item created successfully",
 	})
 }
@@ -203,7 +213,7 @@ func (h *ClothingItemHandler) GetClothingItem(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	httputils.Success(w, map[string]interface{}{
+	resp.Success(w, map[string]interface{}{
 		"item": item,
 	})
 }
@@ -225,6 +235,15 @@ func (h *ClothingItemHandler) UpdateClothingItem(w http.ResponseWriter, r *http.
 		return
 	}
 
+	// Validate input data
+	v := validation.NewValidator()
+	validation.ValidateClothingItem(v, item)
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
 	item.ID = itemID
 
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
@@ -240,7 +259,7 @@ func (h *ClothingItemHandler) UpdateClothingItem(w http.ResponseWriter, r *http.
 		return
 	}
 
-	httputils.Success(w, map[string]string{
+	resp.Success(w, map[string]string{
 		"message": "clothing item updated successfully",
 	})
 }
@@ -266,7 +285,7 @@ func (h *ClothingItemHandler) DeleteClothingItem(w http.ResponseWriter, r *http.
 		return
 	}
 
-	httputils.Success(w, map[string]string{
+	resp.Success(w, map[string]string{
 		"message": "Item deleted successfully",
 	})
 }
