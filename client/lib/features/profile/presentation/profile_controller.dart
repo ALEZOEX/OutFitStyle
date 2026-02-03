@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/states/ui_states.dart';
+import '../../../domain/states/profile_state.dart';
 
 final profileControllerProvider =
     StateNotifierProvider<ProfileController, ProfileState>((ref) {

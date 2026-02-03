@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'ui_states.dart';
+part of 'auth_state.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,58 +15,53 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
-mixin _$AdminState {
-  AsyncState<Map<String, dynamic>> get adminData =>
-      throw _privateConstructorUsedError;
+mixin _$AuthState {
   bool get isLoading => throw _privateConstructorUsedError;
+  bool get isAuthenticated => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
 
-  /// Create a copy of AdminState
+  /// Create a copy of AuthState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $AdminStateCopyWith<AdminState> get copyWith =>
+  $AuthStateCopyWith<AuthState> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $AdminStateCopyWith<$Res> {
-  factory $AdminStateCopyWith(
-          AdminState value, $Res Function(AdminState) then) =
-      _$AdminStateCopyWithImpl<$Res, AdminState>;
+abstract class $AuthStateCopyWith<$Res> {
+  factory $AuthStateCopyWith(AuthState value, $Res Function(AuthState) then) =
+      _$AuthStateCopyWithImpl<$Res, AuthState>;
   @useResult
-  $Res call(
-      {AsyncState<Map<String, dynamic>> adminData,
-      bool isLoading,
-      String? error});
+  $Res call({bool isLoading, bool isAuthenticated, String? error});
 }
 
 /// @nodoc
-class _$AdminStateCopyWithImpl<$Res, $Val extends AdminState>
-    implements $AdminStateCopyWith<$Res> {
-  _$AdminStateCopyWithImpl(this._value, this._then);
+class _$AuthStateCopyWithImpl<$Res, $Val extends AuthState>
+    implements $AuthStateCopyWith<$Res> {
+  _$AuthStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AdminState
+  /// Create a copy of AuthState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? adminData = null,
     Object? isLoading = null,
+    Object? isAuthenticated = null,
     Object? error = freezed,
   }) {
     return _then(_value.copyWith(
-      adminData: null == adminData
-          ? _value.adminData
-          : adminData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAuthenticated: null == isAuthenticated
+          ? _value.isAuthenticated
+          : isAuthenticated // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _value.error
@@ -77,44 +72,41 @@ class _$AdminStateCopyWithImpl<$Res, $Val extends AdminState>
 }
 
 /// @nodoc
-abstract class _$$AdminStateImplCopyWith<$Res>
-    implements $AdminStateCopyWith<$Res> {
-  factory _$$AdminStateImplCopyWith(
-          _$AdminStateImpl value, $Res Function(_$AdminStateImpl) then) =
-      __$$AdminStateImplCopyWithImpl<$Res>;
+abstract class _$$AuthStateImplCopyWith<$Res>
+    implements $AuthStateCopyWith<$Res> {
+  factory _$$AuthStateImplCopyWith(
+          _$AuthStateImpl value, $Res Function(_$AuthStateImpl) then) =
+      __$$AuthStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {AsyncState<Map<String, dynamic>> adminData,
-      bool isLoading,
-      String? error});
+  $Res call({bool isLoading, bool isAuthenticated, String? error});
 }
 
 /// @nodoc
-class __$$AdminStateImplCopyWithImpl<$Res>
-    extends _$AdminStateCopyWithImpl<$Res, _$AdminStateImpl>
-    implements _$$AdminStateImplCopyWith<$Res> {
-  __$$AdminStateImplCopyWithImpl(
-      _$AdminStateImpl _value, $Res Function(_$AdminStateImpl) _then)
+class __$$AuthStateImplCopyWithImpl<$Res>
+    extends _$AuthStateCopyWithImpl<$Res, _$AuthStateImpl>
+    implements _$$AuthStateImplCopyWith<$Res> {
+  __$$AuthStateImplCopyWithImpl(
+      _$AuthStateImpl _value, $Res Function(_$AuthStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AdminState
+  /// Create a copy of AuthState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? adminData = null,
     Object? isLoading = null,
+    Object? isAuthenticated = null,
     Object? error = freezed,
   }) {
-    return _then(_$AdminStateImpl(
-      adminData: null == adminData
-          ? _value.adminData
-          : adminData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+    return _then(_$AuthStateImpl(
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAuthenticated: null == isAuthenticated
+          ? _value.isAuthenticated
+          : isAuthenticated // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _value.error
@@ -126,69 +118,68 @@ class __$$AdminStateImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$AdminStateImpl extends _AdminState {
-  const _$AdminStateImpl(
-      {this.adminData = const AsyncLoading<Map<String, dynamic>>(),
-      this.isLoading = false,
-      this.error})
+class _$AuthStateImpl extends _AuthState {
+  const _$AuthStateImpl(
+      {this.isLoading = false, this.isAuthenticated = false, this.error})
       : super._();
 
   @override
   @JsonKey()
-  final AsyncState<Map<String, dynamic>> adminData;
+  final bool isLoading;
   @override
   @JsonKey()
-  final bool isLoading;
+  final bool isAuthenticated;
   @override
   final String? error;
 
   @override
   String toString() {
-    return 'AdminState(adminData: $adminData, isLoading: $isLoading, error: $error)';
+    return 'AuthState(isLoading: $isLoading, isAuthenticated: $isAuthenticated, error: $error)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AdminStateImpl &&
-            (identical(other.adminData, adminData) ||
-                other.adminData == adminData) &&
+            other is _$AuthStateImpl &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
+            (identical(other.isAuthenticated, isAuthenticated) ||
+                other.isAuthenticated == isAuthenticated) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, adminData, isLoading, error);
+  int get hashCode =>
+      Object.hash(runtimeType, isLoading, isAuthenticated, error);
 
-  /// Create a copy of AdminState
+  /// Create a copy of AuthState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$AdminStateImplCopyWith<_$AdminStateImpl> get copyWith =>
-      __$$AdminStateImplCopyWithImpl<_$AdminStateImpl>(this, _$identity);
+  _$$AuthStateImplCopyWith<_$AuthStateImpl> get copyWith =>
+      __$$AuthStateImplCopyWithImpl<_$AuthStateImpl>(this, _$identity);
 }
 
-abstract class _AdminState extends AdminState {
-  const factory _AdminState(
-      {final AsyncState<Map<String, dynamic>> adminData,
-      final bool isLoading,
-      final String? error}) = _$AdminStateImpl;
-  const _AdminState._() : super._();
+abstract class _AuthState extends AuthState {
+  const factory _AuthState(
+      {final bool isLoading,
+      final bool isAuthenticated,
+      final String? error}) = _$AuthStateImpl;
+  const _AuthState._() : super._();
 
-  @override
-  AsyncState<Map<String, dynamic>> get adminData;
   @override
   bool get isLoading;
   @override
+  bool get isAuthenticated;
+  @override
   String? get error;
 
-  /// Create a copy of AdminState
+  /// Create a copy of AuthState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$AdminStateImplCopyWith<_$AdminStateImpl> get copyWith =>
+  _$$AuthStateImplCopyWith<_$AuthStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

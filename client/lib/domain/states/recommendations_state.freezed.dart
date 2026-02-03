@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'ui_states.dart';
+part of 'recommendations_state.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,55 +15,56 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
-mixin _$AdminState {
-  AsyncState<Map<String, dynamic>> get adminData =>
+mixin _$RecommendationsState {
+  AsyncState<List<RecommendationRow>> get recommendations =>
       throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
 
-  /// Create a copy of AdminState
+  /// Create a copy of RecommendationsState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $AdminStateCopyWith<AdminState> get copyWith =>
+  $RecommendationsStateCopyWith<RecommendationsState> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $AdminStateCopyWith<$Res> {
-  factory $AdminStateCopyWith(
-          AdminState value, $Res Function(AdminState) then) =
-      _$AdminStateCopyWithImpl<$Res, AdminState>;
+abstract class $RecommendationsStateCopyWith<$Res> {
+  factory $RecommendationsStateCopyWith(RecommendationsState value,
+          $Res Function(RecommendationsState) then) =
+      _$RecommendationsStateCopyWithImpl<$Res, RecommendationsState>;
   @useResult
   $Res call(
-      {AsyncState<Map<String, dynamic>> adminData,
+      {AsyncState<List<RecommendationRow>> recommendations,
       bool isLoading,
       String? error});
 }
 
 /// @nodoc
-class _$AdminStateCopyWithImpl<$Res, $Val extends AdminState>
-    implements $AdminStateCopyWith<$Res> {
-  _$AdminStateCopyWithImpl(this._value, this._then);
+class _$RecommendationsStateCopyWithImpl<$Res,
+        $Val extends RecommendationsState>
+    implements $RecommendationsStateCopyWith<$Res> {
+  _$RecommendationsStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AdminState
+  /// Create a copy of RecommendationsState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? adminData = null,
+    Object? recommendations = null,
     Object? isLoading = null,
     Object? error = freezed,
   }) {
     return _then(_value.copyWith(
-      adminData: null == adminData
-          ? _value.adminData
-          : adminData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+      recommendations: null == recommendations
+          ? _value.recommendations
+          : recommendations // ignore: cast_nullable_to_non_nullable
+              as AsyncState<List<RecommendationRow>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -77,41 +78,41 @@ class _$AdminStateCopyWithImpl<$Res, $Val extends AdminState>
 }
 
 /// @nodoc
-abstract class _$$AdminStateImplCopyWith<$Res>
-    implements $AdminStateCopyWith<$Res> {
-  factory _$$AdminStateImplCopyWith(
-          _$AdminStateImpl value, $Res Function(_$AdminStateImpl) then) =
-      __$$AdminStateImplCopyWithImpl<$Res>;
+abstract class _$$RecommendationsStateImplCopyWith<$Res>
+    implements $RecommendationsStateCopyWith<$Res> {
+  factory _$$RecommendationsStateImplCopyWith(_$RecommendationsStateImpl value,
+          $Res Function(_$RecommendationsStateImpl) then) =
+      __$$RecommendationsStateImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
-      {AsyncState<Map<String, dynamic>> adminData,
+      {AsyncState<List<RecommendationRow>> recommendations,
       bool isLoading,
       String? error});
 }
 
 /// @nodoc
-class __$$AdminStateImplCopyWithImpl<$Res>
-    extends _$AdminStateCopyWithImpl<$Res, _$AdminStateImpl>
-    implements _$$AdminStateImplCopyWith<$Res> {
-  __$$AdminStateImplCopyWithImpl(
-      _$AdminStateImpl _value, $Res Function(_$AdminStateImpl) _then)
+class __$$RecommendationsStateImplCopyWithImpl<$Res>
+    extends _$RecommendationsStateCopyWithImpl<$Res, _$RecommendationsStateImpl>
+    implements _$$RecommendationsStateImplCopyWith<$Res> {
+  __$$RecommendationsStateImplCopyWithImpl(_$RecommendationsStateImpl _value,
+      $Res Function(_$RecommendationsStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AdminState
+  /// Create a copy of RecommendationsState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? adminData = null,
+    Object? recommendations = null,
     Object? isLoading = null,
     Object? error = freezed,
   }) {
-    return _then(_$AdminStateImpl(
-      adminData: null == adminData
-          ? _value.adminData
-          : adminData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+    return _then(_$RecommendationsStateImpl(
+      recommendations: null == recommendations
+          ? _value.recommendations
+          : recommendations // ignore: cast_nullable_to_non_nullable
+              as AsyncState<List<RecommendationRow>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -126,16 +127,16 @@ class __$$AdminStateImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$AdminStateImpl extends _AdminState {
-  const _$AdminStateImpl(
-      {this.adminData = const AsyncLoading<Map<String, dynamic>>(),
+class _$RecommendationsStateImpl extends _RecommendationsState {
+  const _$RecommendationsStateImpl(
+      {this.recommendations = const AsyncLoading<List<RecommendationRow>>(),
       this.isLoading = false,
       this.error})
       : super._();
 
   @override
   @JsonKey()
-  final AsyncState<Map<String, dynamic>> adminData;
+  final AsyncState<List<RecommendationRow>> recommendations;
   @override
   @JsonKey()
   final bool isLoading;
@@ -144,51 +145,54 @@ class _$AdminStateImpl extends _AdminState {
 
   @override
   String toString() {
-    return 'AdminState(adminData: $adminData, isLoading: $isLoading, error: $error)';
+    return 'RecommendationsState(recommendations: $recommendations, isLoading: $isLoading, error: $error)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AdminStateImpl &&
-            (identical(other.adminData, adminData) ||
-                other.adminData == adminData) &&
+            other is _$RecommendationsStateImpl &&
+            (identical(other.recommendations, recommendations) ||
+                other.recommendations == recommendations) &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, adminData, isLoading, error);
+  int get hashCode =>
+      Object.hash(runtimeType, recommendations, isLoading, error);
 
-  /// Create a copy of AdminState
+  /// Create a copy of RecommendationsState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$AdminStateImplCopyWith<_$AdminStateImpl> get copyWith =>
-      __$$AdminStateImplCopyWithImpl<_$AdminStateImpl>(this, _$identity);
+  _$$RecommendationsStateImplCopyWith<_$RecommendationsStateImpl>
+      get copyWith =>
+          __$$RecommendationsStateImplCopyWithImpl<_$RecommendationsStateImpl>(
+              this, _$identity);
 }
 
-abstract class _AdminState extends AdminState {
-  const factory _AdminState(
-      {final AsyncState<Map<String, dynamic>> adminData,
+abstract class _RecommendationsState extends RecommendationsState {
+  const factory _RecommendationsState(
+      {final AsyncState<List<RecommendationRow>> recommendations,
       final bool isLoading,
-      final String? error}) = _$AdminStateImpl;
-  const _AdminState._() : super._();
+      final String? error}) = _$RecommendationsStateImpl;
+  const _RecommendationsState._() : super._();
 
   @override
-  AsyncState<Map<String, dynamic>> get adminData;
+  AsyncState<List<RecommendationRow>> get recommendations;
   @override
   bool get isLoading;
   @override
   String? get error;
 
-  /// Create a copy of AdminState
+  /// Create a copy of RecommendationsState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$AdminStateImplCopyWith<_$AdminStateImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  _$$RecommendationsStateImplCopyWith<_$RecommendationsStateImpl>
+      get copyWith => throw _privateConstructorUsedError;
 }
