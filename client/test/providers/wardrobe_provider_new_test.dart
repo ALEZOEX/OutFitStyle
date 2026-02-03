@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:outfitstyle_client/data/repositories/wardrobe_repository.dart';
-import 'package:outfitstyle_client/data/local/app_database.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart';
 import 'package:outfitstyle_client/features/wardrobe/presentation/wardrobe_controller.dart';
 import 'package:outfitstyle_client/app/di.dart';
 import 'package:outfitstyle_client/domain/states/async_state.dart' as app_state;
@@ -88,7 +88,7 @@ void main() {
 
       await container
           .read(wardrobeControllerProvider.notifier)
-          .prefetchImages();
+          .prefetchImages([]);
 
       verify(() => mockRepository.prefetchMissingImages(limit: 40)).called(1);
     });
@@ -137,5 +137,9 @@ WardrobeEntry _entry(
     imageUrl: null,
     localImagePath: null,
     blurHash: null,
+    rainOk: false,
+    snowOk: false,
+    windOk: false,
+    createdAt: DateTime.now(),
   );
 }
