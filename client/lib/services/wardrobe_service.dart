@@ -41,14 +41,21 @@ class WardrobeService {
       // Используем правильные ключи: 'items' и 'pagination.total'
       final List<dynamic> listJson = json['items'] as List;
       final List<WardrobeItem> items = listJson
-          .whereType<Map>()
-          .map((e) => WardrobeItem.fromJson(e.cast<String, dynamic>()))
+          .whereType<Map<String, dynamic>>()
+          .map((e) => WardrobeItem.fromJson(e))
           .toList();
+
       // Проверяем оба варианта: 'total' и 'pagination.total'
-      final int total = json.containsKey('pagination')
-          ? json['pagination']['total'] as int
-          : json['total'] as int;
-      return (items, total);
+      final int? total = json.containsKey('pagination') &&
+              json['pagination'].containsKey('total')
+          ? json['pagination']['total'] as int?
+          : json['total'] as int?;
+
+      if (total != null) {
+        return (items, total);
+      } else {
+        throw Exception('Total count not found in response');
+      }
     } else {
       throw Exception('Failed to list wardrobe: ${response.statusCode}');
     }
@@ -64,8 +71,8 @@ class WardrobeService {
       final Map<String, dynamic> json = jsonDecode(response.body);
       final List<dynamic> listJson = json['items'] as List;
       return listJson
-          .whereType<Map>()
-          .map((e) => WardrobeItem.fromJson(e.cast<String, dynamic>()))
+          .whereType<Map<String, dynamic>>()
+          .map((e) => WardrobeItem.fromJson(e))
           .toList();
     } else {
       throw Exception('Failed to load wardrobe: ${response.statusCode}');
@@ -79,10 +86,12 @@ class WardrobeService {
       body: jsonEncode(request.toJson()),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       final Map<String, dynamic> json = jsonDecode(response.body);
-      return WardrobeItem.fromJson(
-          json['wardrobe_item'] as Map<String, dynamic>);
+      // Handle both direct object response and nested object response
+      final Map<String, dynamic> itemData =
+          json.containsKey('wardrobe_item') ? json['wardrobe_item'] : json;
+      return WardrobeItem.fromJson(itemData);
     } else {
       throw Exception('Failed to create wardrobe item: ${response.statusCode}');
     }
@@ -96,7 +105,11 @@ class WardrobeService {
     );
 
     if (response.statusCode == 200) {
-      return WardrobeItem.fromJson(jsonDecode(response.body));
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      // Handle both direct object response and nested object response
+      final Map<String, dynamic> itemData =
+          json.containsKey('wardrobe_item') ? json['wardrobe_item'] : json;
+      return WardrobeItem.fromJson(itemData);
     } else {
       throw Exception('Failed to update wardrobe item: ${response.statusCode}');
     }
@@ -108,7 +121,7 @@ class WardrobeService {
       Uri.parse('$_apiUrl/wardrobe/$id'),
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Failed to delete wardrobe item: ${response.statusCode}');
     }
   }
@@ -120,7 +133,11 @@ class WardrobeService {
     );
 
     if (response.statusCode == 200) {
-      return WardrobeItem.fromJson(jsonDecode(response.body));
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      // Handle both direct object response and nested object response
+      final Map<String, dynamic> itemData =
+          json.containsKey('wardrobe_item') ? json['wardrobe_item'] : json;
+      return WardrobeItem.fromJson(itemData);
     } else {
       throw Exception('Failed to get wardrobe item: ${response.statusCode}');
     }
@@ -174,23 +191,9 @@ class WardrobeService {
   }
 
   Future<void> upsertMany(List<WardrobeItem> items) async {
-    // В реальном приложении этот метод будет обновлять локальную базу
-    // Пока что просто вызываем update для каждого элемента
-    for (final item in items) {
-      try {
-        await update(
-            item.id,
-            WardrobeUpdateRequest(
-              name: item.name,
-              category: item.category,
-              subcategory: item.subcategory,
-              style: item.style,
-              iconEmoji: item.iconEmoji,
-            ));
-      } catch (e) {
-        // Игнорируем ошибки обновления отдельных элементов
-      }
-    }
+    // В реальном приложении этот метод будет обновлять локальную базу данных
+    // Пока что оставляем заглушку для совместимости
+    // В будущем здесь должна быть реализация работы с локальным хранилищем
   }
 
   Future<List<WardrobeItem>> getItemsForRecommendation(
@@ -202,7 +205,7 @@ class WardrobeService {
     return allItems.where((item) {
       bool matches = true;
 
-      if (category != null && item.category != category) {
+      if (category != null && item.item.category != category) {
         matches = false;
       }
 
