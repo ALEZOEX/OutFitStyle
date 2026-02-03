@@ -20,7 +20,8 @@ class RecommendationDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recommendationAsync = ref.watch(recommendationByIdProvider(recommendationId));
+    final recommendationAsync =
+        ref.watch(recommendationByIdProvider(recommendationId));
     final controller = ref.read(recommendationsControllerProvider.notifier);
 
     return recommendationAsync.when(
@@ -49,7 +50,9 @@ class RecommendationDetailScreen extends ConsumerWidget {
                   await controller.toggleFavorite(recommendation);
                 },
                 icon: Icon(
-                  recommendation.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  recommendation.isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
                   color: recommendation.isFavorite ? Colors.pinkAccent : null,
                 ),
               ),
@@ -84,9 +87,14 @@ class _WeatherCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     try {
-      final weather = (jsonDecode(weatherDataJson) as Map).cast<String, dynamic>();
+      final weather =
+          (jsonDecode(weatherDataJson) as Map).cast<String, dynamic>();
       final temp = (weather['temp'] ?? weather['temperature'] ?? '').toString();
-      final condition = (weather['condition'] ?? weather['description'] ?? weather['weather'] ?? '').toString();
+      final condition = (weather['condition'] ??
+              weather['description'] ??
+              weather['weather'] ??
+              '')
+          .toString();
 
       return Card(
         child: Padding(
@@ -101,7 +109,10 @@ class _WeatherCard extends StatelessWidget {
                   children: [
                     Text(
                       'Погода',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -113,7 +124,10 @@ class _WeatherCard extends StatelessWidget {
               ),
               Text(
                 temp.isEmpty ? '—' : '$temp°',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.w900),
               ),
             ],
           ),
@@ -137,7 +151,8 @@ class _OutfitComposition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     try {
-      final outfit = (jsonDecode(outfitDataJson) as Map).cast<String, dynamic>();
+      final outfit =
+          (jsonDecode(outfitDataJson) as Map).cast<String, dynamic>();
       final lines = (outfit['outfit'] is List)
           ? (outfit['outfit'] as List)
               .whereType<Map>()
@@ -153,7 +168,10 @@ class _OutfitComposition extends StatelessWidget {
             children: [
               Text(
                 'Состав образа',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -168,7 +186,8 @@ class _OutfitComposition extends StatelessWidget {
                     width: 100,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -179,7 +198,8 @@ class _OutfitComposition extends StatelessWidget {
                           name,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 12),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -188,7 +208,10 @@ class _OutfitComposition extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 10,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.65),
                           ),
                         ),
                       ],
@@ -225,7 +248,10 @@ class _AdditionalInfo extends StatelessWidget {
           children: [
             Text(
               'Дополнительная информация',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             _InfoRow(
@@ -263,7 +289,10 @@ class _InfoRow extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.65),
                 ),
           ),
         ),
@@ -271,7 +300,10 @@ class _InfoRow extends StatelessWidget {
           flex: 2,
           child: Text(
             value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
       ],

@@ -33,7 +33,8 @@ class AuthService {
       }
 
       // 2. Получаем токены (нам нужен idToken)
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
@@ -48,21 +49,24 @@ class AuthService {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Ошибка Google Sign-In: ${response.statusCode} - ${response.body}');
+        throw Exception(
+            'Ошибка Google Sign-In: ${response.statusCode} - ${response.body}');
       }
 
       final data = jsonDecode(response.body);
 
       // Проверяем, что 'tokens' существует и является Map
       if (data['tokens'] != null && data['tokens'] is Map<String, dynamic>) {
-        final tokens = TokenPair.fromJson(data['tokens'] as Map<String, dynamic>);
+        final tokens =
+            TokenPair.fromJson(data['tokens'] as Map<String, dynamic>);
 
         // 4. Сохраняем сессию
         await authStorage.writeTokenPair(tokens);
 
         return tokens;
       } else {
-        throw Exception('Неверный формат ответа от сервера: отсутствуют токены');
+        throw Exception(
+            'Неверный формат ответа от сервера: отсутствуют токены');
       }
     } catch (e) {
       // Если ошибка, разлогиниваем гугл, чтобы в след. раз можно было выбрать аккаунт снова

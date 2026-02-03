@@ -6,8 +6,7 @@ import '../../../domain/entities/recommendation_entity.dart';
 import '../../../domain/entities/wardrobe_entity.dart';
 import '../../../domain/states/ui_states.dart';
 
-final homeControllerProvider =
-    StateNotifierProvider<HomeController, HomeState>(
+final homeControllerProvider = StateNotifierProvider<HomeController, HomeState>(
   HomeController.new,
 );
 

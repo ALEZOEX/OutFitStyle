@@ -23,7 +23,7 @@ class SyncManager {
         }
       },
     );
-    
+
     // Start periodic sync when online
     _startPeriodicSync();
   }
@@ -58,13 +58,13 @@ class SyncManager {
     try {
       // Sync user preferences
       await _syncUserPreferences();
-      
+
       // Sync wardrobe items
       await _syncWardrobe();
-      
+
       // Sync recommendations
       await _syncRecommendations();
-      
+
       // Sync feedback
       await _syncFeedback();
     } catch (e) {

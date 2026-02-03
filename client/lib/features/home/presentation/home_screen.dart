@@ -58,10 +58,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           // Погода
           todayRecAsync.when(
-            loading: () => const SkeletonBox(width: double.infinity, height: 110),
+            loading: () =>
+                const SkeletonBox(width: double.infinity, height: 110),
             error: (e, _) => _InlineError(text: e.toString()),
             data: (rec) {
-              if (rec == null) return const SkeletonBox(width: double.infinity, height: 110);
+              if (rec == null)
+                return const SkeletonBox(width: double.infinity, height: 110);
               final ctl = ref.read(homeControllerProvider.notifier);
               final weather = ctl.parseWeather(rec);
               return WeatherCard(weather: weather);
@@ -74,11 +76,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.55,
             child: todayRecAsync.when(
-              loading: () => const SkeletonBox(width: double.infinity, height: double.infinity),
+              loading: () => const SkeletonBox(
+                  width: double.infinity, height: double.infinity),
               error: (e, _) => _InlineError(text: e.toString()),
               data: (rec) {
                 if (rec == null) {
-                  return const SkeletonBox(width: double.infinity, height: double.infinity);
+                  return const SkeletonBox(
+                      width: double.infinity, height: double.infinity);
                 }
                 final ctl = ref.read(homeControllerProvider.notifier);
                 final outfit = ctl.parseOutfit(rec);

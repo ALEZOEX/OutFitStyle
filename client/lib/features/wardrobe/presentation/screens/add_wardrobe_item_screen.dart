@@ -10,7 +10,8 @@ class AddWardrobeItemScreen extends ConsumerStatefulWidget {
   const AddWardrobeItemScreen({super.key});
 
   @override
-  ConsumerState<AddWardrobeItemScreen> createState() => _AddWardrobeItemScreenState();
+  ConsumerState<AddWardrobeItemScreen> createState() =>
+      _AddWardrobeItemScreenState();
 }
 
 class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
@@ -150,7 +151,8 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
             items: const [
               DropdownMenuItem(value: 'top', child: Text('Верх')),
               DropdownMenuItem(value: 'bottom', child: Text('Низ')),
-              DropdownMenuItem(value: 'outerwear', child: Text('Верхняя одежда')),
+              DropdownMenuItem(
+                  value: 'outerwear', child: Text('Верхняя одежда')),
               DropdownMenuItem(value: 'footwear', child: Text('Обувь')),
               DropdownMenuItem(value: 'accessory', child: Text('Аксессуар')),
               DropdownMenuItem(value: 'dress', child: Text('Платье')),
@@ -197,7 +199,15 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   List<String> _getSubcategoriesForCategory(String category) {
     switch (category) {
       case 'top':
-        return ['t-shirt', 'shirt', 'blouse', 'sweater', 'hoodie', 'jacket', 'cardigan'];
+        return [
+          't-shirt',
+          'shirt',
+          'blouse',
+          'sweater',
+          'hoodie',
+          'jacket',
+          'cardigan'
+        ];
       case 'bottom':
         return ['jeans', 'trousers', 'skirt', 'shorts', 'leggings'];
       case 'outerwear':
@@ -459,7 +469,15 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   }
 
   Widget _buildMaterialsField() {
-    final allMaterials = ['cotton', 'wool', 'polyester', 'silk', 'denim', 'leather', 'linen'];
+    final allMaterials = [
+      'cotton',
+      'wool',
+      'polyester',
+      'silk',
+      'denim',
+      'leather',
+      'linen'
+    ];
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -551,26 +569,41 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
 
   String _translateUsage(String usage) {
     switch (usage) {
-      case 'work': return 'Работа';
-      case 'casual': return 'Повседневное';
-      case 'sports': return 'Спорт';
-      case 'formal': return 'Формальное';
-      case 'party': return 'Вечеринка';
-      case 'travel': return 'Путешествие';
-      default: return usage;
+      case 'work':
+        return 'Работа';
+      case 'casual':
+        return 'Повседневное';
+      case 'sports':
+        return 'Спорт';
+      case 'formal':
+        return 'Формальное';
+      case 'party':
+        return 'Вечеринка';
+      case 'travel':
+        return 'Путешествие';
+      default:
+        return usage;
     }
   }
 
   String _translateMaterial(String material) {
     switch (material) {
-      case 'cotton': return 'Хлопок';
-      case 'wool': return 'Шерсть';
-      case 'polyester': return 'Полиэстер';
-      case 'silk': return 'Шелк';
-      case 'denim': return 'Джинса';
-      case 'leather': return 'Кожа';
-      case 'linen': return 'Лен';
-      default: return material;
+      case 'cotton':
+        return 'Хлопок';
+      case 'wool':
+        return 'Шерсть';
+      case 'polyester':
+        return 'Полиэстер';
+      case 'silk':
+        return 'Шелк';
+      case 'denim':
+        return 'Джинса';
+      case 'leather':
+        return 'Кожа';
+      case 'linen':
+        return 'Лен';
+      default:
+        return material;
     }
   }
 

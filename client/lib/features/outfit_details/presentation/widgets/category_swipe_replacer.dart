@@ -54,7 +54,10 @@ class _CategorySwipeReplacerState extends State<CategorySwipeReplacer> {
       children: [
         Text(
           widget.category,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context)
+              .textTheme
+              .titleSmall
+              ?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -69,8 +72,9 @@ class _CategorySwipeReplacerState extends State<CategorySwipeReplacer> {
             },
             itemBuilder: (context, i) {
               final p = pages[i];
-              final isSelected = (p.alt?.id != null && widget.selected?.id == p.alt!.id) ||
-                  (p.alt == null && widget.selected == null);
+              final isSelected =
+                  (p.alt?.id != null && widget.selected?.id == p.alt!.id) ||
+                      (p.alt == null && widget.selected == null);
 
               return Padding(
                 padding: const EdgeInsets.only(right: 10),
@@ -95,7 +99,9 @@ class _CategorySwipeReplacerState extends State<CategorySwipeReplacer> {
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             color: isSelected
-                                ? Theme.of(context).colorScheme.onPrimaryContainer
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
                                 : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
@@ -106,8 +112,14 @@ class _CategorySwipeReplacerState extends State<CategorySwipeReplacer> {
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           color: isSelected
-                              ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
-                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer
+                                  .withValues(alpha: 0.8)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.55),
                         ),
                       ),
                     ],
@@ -132,6 +144,5 @@ class _PickPage {
   factory _PickPage.original({required String icon, required String name}) =>
       _PickPage._(icon, name, null);
 
-  factory _PickPage.alt(WardrobeEntry w) =>
-      _PickPage._(w.iconEmoji, w.name, w);
+  factory _PickPage.alt(WardrobeEntry w) => _PickPage._(w.iconEmoji, w.name, w);
 }

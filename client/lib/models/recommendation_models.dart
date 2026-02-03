@@ -1,4 +1,3 @@
-
 class RecommendationRecord {
   final String id;
   final DateTime createdAt;
@@ -22,7 +21,8 @@ class RecommendationRecord {
         'weather_data': weatherData,
       };
 
-  factory RecommendationRecord.fromJson(Map<String, dynamic> json) => RecommendationRecord(
+  factory RecommendationRecord.fromJson(Map<String, dynamic> json) =>
+      RecommendationRecord(
         id: json['id'] as String,
         createdAt: DateTime.parse(json['created_at'] as String),
         isFavorite: json['is_favorite'] as bool? ?? false,

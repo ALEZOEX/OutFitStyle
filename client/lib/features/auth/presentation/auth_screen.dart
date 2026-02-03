@@ -12,7 +12,8 @@ class AuthScreen extends ConsumerStatefulWidget {
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStateMixin {
+class _AuthScreenState extends ConsumerState<AuthScreen>
+    with TickerProviderStateMixin {
   final _loginEmail = TextEditingController();
   final _loginPassword = TextEditingController();
 
@@ -38,7 +39,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
 
   Future<void> _login() async {
     if (_loggingIn) return;
-    setState(() { _loggingIn = true; _error = null; });
+    setState(() {
+      _loggingIn = true;
+      _error = null;
+    });
 
     try {
       final repo = ref.read(authRepositoryProvider);
@@ -57,7 +61,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
 
   Future<void> _register() async {
     if (_registering) return;
-    setState(() { _registering = true; _error = null; });
+    setState(() {
+      _registering = true;
+      _error = null;
+    });
 
     try {
       final repo = ref.read(authRepositoryProvider);
@@ -77,7 +84,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
 
   Future<void> _loginWithGoogle() async {
     if (_loggingInWithGoogle) return;
-    setState(() { _loggingInWithGoogle = true; _error = null; });
+    setState(() {
+      _loggingInWithGoogle = true;
+      _error = null;
+    });
 
     try {
       final repo = ref.read(authRepositoryProvider);
@@ -149,8 +159,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
           onPressed: _loggingIn ? null : _login,
           style: OutfitStyleComponents.primaryButtonStyle(),
           child: _loggingIn
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Войти', style: TextStyle(fontWeight: FontWeight.w800)),
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : const Text('Войти',
+                  style: TextStyle(fontWeight: FontWeight.w800)),
         ),
         const SizedBox(height: 16),
         // Разделитель
@@ -164,7 +178,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            icon: Icon(Icons.g_mobiledata, color: Colors.red), // Используем встроенную иконку Google
+            icon: Icon(Icons.g_mobiledata,
+                color: Colors.red), // Используем встроенную иконку Google
             label: const Text('Войти через Google'),
             onPressed: _loggingInWithGoogle ? null : _loginWithGoogle,
             style: OutfitStyleComponents.secondaryButtonStyle(),
@@ -209,8 +224,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
           onPressed: _registering ? null : _register,
           style: OutfitStyleComponents.primaryButtonStyle(),
           child: _registering
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Создать аккаунт', style: TextStyle(fontWeight: FontWeight.w800)),
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : const Text('Создать аккаунт',
+                  style: TextStyle(fontWeight: FontWeight.w800)),
         ),
       ],
     );

@@ -23,7 +23,8 @@ void main() {
   setUp(() {
     repo = MockWardrobeRepository();
 
-    when(() => repo.watchWardrobe(includeArchived: any(named: 'includeArchived')))
+    when(() =>
+            repo.watchWardrobe(includeArchived: any(named: 'includeArchived')))
         .thenAnswer((_) => const Stream.empty());
 
     container = ProviderContainer(
@@ -45,7 +46,8 @@ void main() {
   test('wardrobeStreamProvider: emits items from repository', () async {
     final items = [_entry('1'), _entry('2')];
 
-    when(() => repo.watchWardrobe(includeArchived: false)).thenAnswer((_) => Stream.value(items));
+    when(() => repo.watchWardrobe(includeArchived: false))
+        .thenAnswer((_) => Stream.value(items));
 
     final result = await container.read(wardrobeStreamProvider.future);
     expect(result, items);
@@ -91,7 +93,8 @@ void main() {
   });
 
   test('prefetchImages calls repo.prefetchMissingImages(limit: 40)', () async {
-    when(() => repo.prefetchMissingImages(limit: any(named: 'limit'))).thenAnswer((_) async {});
+    when(() => repo.prefetchMissingImages(limit: any(named: 'limit')))
+        .thenAnswer((_) async {});
 
     await container.read(wardrobeControllerProvider.notifier).prefetchImages();
 

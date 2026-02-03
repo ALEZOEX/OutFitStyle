@@ -45,7 +45,8 @@ class RecommendationsDomainService {
   }
 
   // Методы для генерации рекомендаций
-  Future<RecommendationRow> generateRecommendation({required String occasion}) async {
+  Future<RecommendationRow> generateRecommendation(
+      {required String occasion}) async {
     // В реальной реализации вызываем API для генерации рекомендации
     // Здесь временная реализация
     final now = DateTime.now();
@@ -62,9 +63,10 @@ class RecommendationsDomainService {
   }) async {
     // В реальной реализации вызываем API для генерации рекомендации с учетом выбранного элемента
     // Здесь временная реализация
-    return await _recommendationsRepository.createLocal(
-      outfitData: {"occasion": occasion, "itemId": item.id},
-      weatherData: includeWeather ? {} : {},
+    return await _recommendationsRepository.generateRecommendationWithItem(
+      item: item,
+      occasion: occasion,
+      includeWeather: includeWeather,
     );
   }
 
@@ -95,5 +97,4 @@ class RecommendationsDomainService {
 
     return recommendation;
   }
-
 }

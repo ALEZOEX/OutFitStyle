@@ -36,7 +36,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'Статистика',
-                      style: OutfitStyleComponents.titleMedium(context).copyWith(fontWeight: FontWeight.w900),
+                      style: OutfitStyleComponents.titleMedium(context)
+                          .copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 16),
                     _StatItem(
@@ -76,7 +77,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'Последние пользователи',
-                      style: OutfitStyleComponents.titleMedium(context).copyWith(fontWeight: FontWeight.w900),
+                      style: OutfitStyleComponents.titleMedium(context)
+                          .copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 12),
                     usersAsync.when(
@@ -84,17 +86,21 @@ class AdminDashboardScreen extends ConsumerWidget {
                       error: (e, _) => Text('Ошибка: $e'),
                       data: (users) => Column(
                         children: [
-                          for (final user in users.take(5)) // показываем первых 5
+                          for (final user
+                              in users.take(5)) // показываем первых 5
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: ListTile(
                                 leading: const Icon(Icons.person_outline),
                                 title: Text(
                                   user['email'] ?? 'Без email',
-                                  style: const TextStyle(fontWeight: FontWeight.w500),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w500),
                                 ),
-                                subtitle: Text(user['display_name'] ?? 'Без имени'),
-                                trailing: const Icon(Icons.chevron_right_rounded),
+                                subtitle:
+                                    Text(user['display_name'] ?? 'Без имени'),
+                                trailing:
+                                    const Icon(Icons.chevron_right_rounded),
                                 onTap: () {
                                   Haptics.selection();
                                   // context.push('/admin/users/${user['id']}') если добавите route
@@ -166,12 +172,18 @@ class _StatItem extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.65),
               ),
         ),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontWeight: FontWeight.w900),
         ),
       ],
     );

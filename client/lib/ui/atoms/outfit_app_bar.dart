@@ -45,7 +45,9 @@ class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 // цикл: system -> dark -> light -> system
                 final next = themeMode == ThemeMode.system
                     ? ThemeMode.dark
-                    : (themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.system);
+                    : (themeMode == ThemeMode.dark
+                        ? ThemeMode.light
+                        : ThemeMode.system);
                 themeNotifier.setMode(next);
               },
               icon: Icon(themeIcon),
@@ -57,7 +59,9 @@ class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {
         children: [
           const BrandBadge(),
           const SizedBox(width: 10),
-          Text(title, style: OutfitStyleComponents.titleLarge(context).copyWith(fontWeight: FontWeight.w900)),
+          Text(title,
+              style: OutfitStyleComponents.titleLarge(context)
+                  .copyWith(fontWeight: FontWeight.w900)),
         ],
       ),
       actions: actions,

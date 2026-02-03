@@ -12,15 +12,19 @@ class OutfitCollageInteractive extends ConsumerStatefulWidget {
   const OutfitCollageInteractive({super.key, required this.lines});
 
   @override
-  ConsumerState<OutfitCollageInteractive> createState() => _OutfitCollageInteractiveState();
+  ConsumerState<OutfitCollageInteractive> createState() =>
+      _OutfitCollageInteractiveState();
 }
 
-class _OutfitCollageInteractiveState extends ConsumerState<OutfitCollageInteractive> {
-  final Map<String, int> _idxByCategory = {}; // 0 = original, 1.. = alternatives
+class _OutfitCollageInteractiveState
+    extends ConsumerState<OutfitCollageInteractive> {
+  final Map<String, int> _idxByCategory =
+      {}; // 0 = original, 1.. = alternatives
 
   @override
   Widget build(BuildContext context) {
-    final wardrobe = ref.watch(wardrobeStreamProvider).valueOrNull ?? const <WardrobeEntry>[];
+    final wardrobe = ref.watch(wardrobeStreamProvider).valueOrNull ??
+        const <WardrobeEntry>[];
 
     final byCat = <String, List<WardrobeEntry>>{};
     for (final w in wardrobe.where((w) => !w.isArchived)) {
@@ -55,8 +59,12 @@ class _OutfitCollageInteractiveState extends ConsumerState<OutfitCollageInteract
                   child: _SwipeCycleCard(
                     category: (show[i]['category'] ?? '').toString(),
                     original: show[i],
-                    alternatives: byCat[(show[i]['category'] ?? '').toString()] ?? const [],
-                    idx: _idxByCategory[(show[i]['category'] ?? '').toString()] ?? 0,
+                    alternatives:
+                        byCat[(show[i]['category'] ?? '').toString()] ??
+                            const [],
+                    idx: _idxByCategory[
+                            (show[i]['category'] ?? '').toString()] ??
+                        0,
                     onIdxChanged: (cat, nextIdx) {
                       setState(() => _idxByCategory[cat] = nextIdx);
                     },
@@ -94,7 +102,8 @@ class _SwipeCycleCard extends StatelessWidget {
     ];
 
     final safeIdx = choices.isEmpty ? 0 : idx.clamp(0, choices.length - 1);
-    final current = choices.isEmpty ? _Choice.original(original) : choices[safeIdx];
+    final current =
+        choices.isEmpty ? _Choice.original(original) : choices[safeIdx];
 
     // свайпы влево/вправо циклят варианты (локально, без API)
     return GestureDetector(
@@ -102,7 +111,9 @@ class _SwipeCycleCard extends StatelessWidget {
         if (choices.length <= 1) return;
 
         final v = d.primaryVelocity ?? 0;
-        final next = v < -50 ? _nextIdx(safeIdx, choices.length) : (v > 50 ? _prevIdx(safeIdx, choices.length) : safeIdx);
+        final next = v < -50
+            ? _nextIdx(safeIdx, choices.length)
+            : (v > 50 ? _prevIdx(safeIdx, choices.length) : safeIdx);
         if (next != safeIdx) {
           Haptics.selection();
           onIdxChanged(category, next);
@@ -173,7 +184,10 @@ class _ChoiceCard extends StatelessWidget {
             choice.name,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 6),
           Text(
@@ -181,7 +195,10 @@ class _ChoiceCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.6),
                 ),
           ),
           if (hasAlts) ...[
@@ -189,7 +206,10 @@ class _ChoiceCard extends StatelessWidget {
             Text(
               'Свайп ⇄ заменить',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.45),
                   ),
             ),
           ],
@@ -211,7 +231,8 @@ class _ChoiceMedia extends StatelessWidget {
       if (f.existsSync()) {
         return ClipRRect(
           borderRadius: BorderRadius.circular(14),
-          child: Image.file(f, height: 74, width: double.infinity, fit: BoxFit.cover),
+          child: Image.file(f,
+              height: 74, width: double.infinity, fit: BoxFit.cover),
         );
       }
     }

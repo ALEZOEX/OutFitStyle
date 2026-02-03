@@ -76,7 +76,9 @@ class RecommendationRow {
       isFavorite: json['is_favorite'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
-      lastSyncedAt: json['last_synced_at'] != null ? DateTime.parse(json['last_synced_at'] as String) : null,
+      lastSyncedAt: json['last_synced_at'] != null
+          ? DateTime.parse(json['last_synced_at'] as String)
+          : null,
       dirty: json['dirty'] as bool? ?? true,
       imageUrl: json['image_url'] as String?,
       localImagePath: json['local_image_path'] as String?,
@@ -138,8 +140,10 @@ class RecommendationRow {
       outfitDataJson: external['outfit_data_json'] ?? '{}',
       weatherDataJson: external['weather_data_json'] ?? '{}',
       isFavorite: external['is_favorite'] ?? false,
-      createdAt: DateTime.parse(external['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(external['updated_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+          external['created_at'] ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(
+          external['updated_at'] ?? DateTime.now().toIso8601String()),
       lastSyncedAt: DateTime.now(),
       dirty: false, // Сразу синхронизировано
       imageUrl: external['image_url'],

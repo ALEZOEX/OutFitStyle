@@ -12,7 +12,11 @@ class WeatherCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final temp = (weather['temp'] ?? weather['temperature'] ?? '').toString();
-    final condition = (weather['condition'] ?? weather['description'] ?? weather['weather'] ?? '').toString();
+    final condition = (weather['condition'] ??
+            weather['description'] ??
+            weather['weather'] ??
+            '')
+        .toString();
     final location = (weather['location'] ?? weather['city'] ?? '').toString();
 
     return Card(
@@ -32,7 +36,10 @@ class WeatherCard extends ConsumerWidget {
                 children: [
                   Text(
                     location.isEmpty ? 'Ваше местоположение' : location,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -44,7 +51,10 @@ class WeatherCard extends ConsumerWidget {
             ),
             Text(
               temp.isEmpty ? '—' : '$temp°',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
           ],
         ),
@@ -102,10 +112,11 @@ class OutfitOfDayCard extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Образ дня',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                ),
                       ),
                     ),
                     IconButton(
@@ -114,7 +125,9 @@ class OutfitOfDayCard extends ConsumerWidget {
                         recommendation.isFavorite
                             ? Icons.favorite_rounded
                             : Icons.favorite_border_rounded,
-                        color: recommendation.isFavorite ? Colors.pinkAccent : Colors.white,
+                        color: recommendation.isFavorite
+                            ? Colors.pinkAccent
+                            : Colors.white,
                       ),
                     ),
                   ],
@@ -136,7 +149,8 @@ class OutfitOfDayCard extends ConsumerWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black87,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
               ],
@@ -158,7 +172,10 @@ class _OutfitCollage extends StatelessWidget {
       return Center(
         child: Text(
           'Нет данных об образе',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(color: Colors.white),
         ),
       );
     }
@@ -185,7 +202,8 @@ class _OutfitCollage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(icon, style: const TextStyle(fontSize: 36, color: Colors.white)),
+              Text(icon,
+                  style: const TextStyle(fontSize: 36, color: Colors.white)),
               const SizedBox(height: 6),
               Text(
                 name,

@@ -48,7 +48,8 @@ final imageStoreProvider = Provider<ImageStore>((ref) {
   return ImageStore();
 });
 
-final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async {
+final sharedPreferencesProvider =
+    FutureProvider<SharedPreferences>((ref) async {
   return await SharedPreferences.getInstance();
 });
 
@@ -69,8 +70,10 @@ final wardrobeRemoteDsProvider = Provider<WardrobeRemoteDataSource>((ref) {
   return WardrobeRemoteDataSource(ref.watch(apiClientProvider));
 });
 
-final recommendationsRemoteDsProvider = Provider<RecommendationsRemoteDataSource>((ref) {
-  return RecommendationsRemoteDataSource(ref.watch(apiClientProvider), ref.watch(wardrobeRemoteDsProvider));
+final recommendationsRemoteDsProvider =
+    Provider<RecommendationsRemoteDataSource>((ref) {
+  return RecommendationsRemoteDataSource(
+      ref.watch(apiClientProvider), ref.watch(wardrobeRemoteDsProvider));
 });
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -87,14 +90,16 @@ final wardrobeRepositoryProvider = Provider<WardrobeRepository>((ref) {
   );
 });
 
-final recommendationsRepositoryProvider = Provider<RecommendationsRepository>((ref) {
+final recommendationsRepositoryProvider =
+    Provider<RecommendationsRepository>((ref) {
   return RecommendationsRepository(
     ref.watch(appDatabaseProvider),
     ref.watch(recommendationsRemoteDsProvider),
   );
 });
 
-final recommendationsDomainServiceProvider = Provider<RecommendationsDomainService>((ref) {
+final recommendationsDomainServiceProvider =
+    Provider<RecommendationsDomainService>((ref) {
   return RecommendationsDomainService(
     ref.watch(recommendationsRepositoryProvider),
     ref.watch(wardrobeRepositoryProvider),
@@ -147,23 +152,29 @@ final outboxPendingCountProvider = StreamProvider<int>((ref) {
 });
 
 // Добавляем недостающие провайдеры для контроллеров
-final recommendationsControllerProvider = StateNotifierProvider<RecommendationsController, RecommendationsState>((ref) {
+final recommendationsControllerProvider =
+    StateNotifierProvider<RecommendationsController, RecommendationsState>(
+        (ref) {
   return RecommendationsController(ref);
 });
 
-final wardrobeControllerProvider = StateNotifierProvider<WardrobeController, WardrobeState>((ref) {
+final wardrobeControllerProvider =
+    StateNotifierProvider<WardrobeController, WardrobeState>((ref) {
   return WardrobeController(ref);
 });
 
-final homeControllerProvider = StateNotifierProvider<HomeController, HomeState>((ref) {
+final homeControllerProvider =
+    StateNotifierProvider<HomeController, HomeState>((ref) {
   return HomeController(ref);
 });
 
-final settingsControllerProvider = StateNotifierProvider<SettingsController, SettingsState>((ref) {
+final settingsControllerProvider =
+    StateNotifierProvider<SettingsController, SettingsState>((ref) {
   return SettingsController();
 });
 
-final authControllerProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
+final authControllerProvider =
+    StateNotifierProvider<AuthController, AuthState>((ref) {
   return AuthController(ref.watch(authRepositoryProvider));
 });
 
@@ -171,23 +182,28 @@ final localStorageProvider = Provider((ref) {
   return LocalStorage.prefs;
 });
 
-final onboardingControllerProvider = StateNotifierProvider<OnboardingController, OnboardingState>((ref) {
+final onboardingControllerProvider =
+    StateNotifierProvider<OnboardingController, OnboardingState>((ref) {
   return OnboardingController();
 });
 
-final profileControllerProvider = StateNotifierProvider<ProfileController, ProfileState>((ref) {
+final profileControllerProvider =
+    StateNotifierProvider<ProfileController, ProfileState>((ref) {
   return ProfileController();
 });
 
-final generatorControllerProvider = StateNotifierProvider<GeneratorController, GeneratorState>((ref) {
+final generatorControllerProvider =
+    StateNotifierProvider<GeneratorController, GeneratorState>((ref) {
   return GeneratorController();
 });
 
-final adminControllerProvider = StateNotifierProvider<AdminController, AdminState>((ref) {
+final adminControllerProvider =
+    StateNotifierProvider<AdminController, AdminState>((ref) {
   return AdminController();
 });
 
-final sessionProvider = NotifierProvider<SessionController, SessionStatus>(SessionController.new);
+final sessionProvider =
+    NotifierProvider<SessionController, SessionStatus>(SessionController.new);
 
 class SessionController extends Notifier<SessionStatus> {
   @override
@@ -223,7 +239,8 @@ class SessionController extends Notifier<SessionStatus> {
 
   Future<void> refreshSession() async {
     final repo = ref.read(authRepositoryProvider);
-    state = (await repo.isAuthed()) ? SessionStatus.authed : SessionStatus.unknown;
+    state =
+        (await repo.isAuthed()) ? SessionStatus.authed : SessionStatus.unknown;
   }
 
   Future<void> logout() async {

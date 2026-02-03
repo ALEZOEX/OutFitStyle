@@ -3,7 +3,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 
 class ImageStore {
-  static Future<String?> ensureLocalCopy(String url, [http.Client? client]) async {
+  static Future<String?> ensureLocalCopy(String url,
+      [http.Client? client]) async {
     final httpClient = client ?? http.Client();
     try {
       final directory = await getApplicationDocumentsDirectory();

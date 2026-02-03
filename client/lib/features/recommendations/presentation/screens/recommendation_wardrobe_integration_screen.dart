@@ -12,11 +12,13 @@ import '../wardrobe/wardrobe_controller.dart';
 
 class RecommendationWardrobeIntegrationScreen extends ConsumerWidget {
   final String recommendationId;
-  const RecommendationWardrobeIntegrationScreen({super.key, required this.recommendationId});
+  const RecommendationWardrobeIntegrationScreen(
+      {super.key, required this.recommendationId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recommendationAsync = ref.watch(recommendationByIdProvider(recommendationId));
+    final recommendationAsync =
+        ref.watch(recommendationByIdProvider(recommendationId));
     final wardrobeAsync = ref.watch(wardrobeStreamProvider);
 
     return recommendationAsync.when(
@@ -51,10 +53,12 @@ class RecommendationWardrobeIntegrationScreen extends ConsumerWidget {
 class _IntegrationContent extends ConsumerStatefulWidget {
   final RecommendationRow recommendation;
   final List<WardrobeEntry> wardrobe;
-  const _IntegrationContent({required this.recommendation, required this.wardrobe});
+  const _IntegrationContent(
+      {required this.recommendation, required this.wardrobe});
 
   @override
-  ConsumerState<_IntegrationContent> createState() => _IntegrationContentState();
+  ConsumerState<_IntegrationContent> createState() =>
+      _IntegrationContentState();
 }
 
 class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
@@ -108,7 +112,10 @@ class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
                 children: [
                   Text(
                     'Оригинальная рекомендация',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 12),
                   _OutfitPreview(lines: outfitLines),
@@ -121,7 +128,10 @@ class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
           // Возможность замены
           Text(
             'Замените вещи из рекомендации на свои из гардероба',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 12),
 
@@ -140,14 +150,17 @@ class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
                 });
               },
             ),
-          
+
           const SizedBox(height: 16),
 
           // Предварительный просмотр результата
           if (_replacements.isNotEmpty) ...[
             Text(
               'Предварительный просмотр результата',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 12),
             Card(
@@ -167,7 +180,8 @@ class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
 
   List<Map<String, dynamic>> _parseOutfitLines(String outfitDataJson) {
     try {
-      final outfit = (jsonDecode(outfitDataJson) as Map).cast<String, dynamic>();
+      final outfit =
+          (jsonDecode(outfitDataJson) as Map).cast<String, dynamic>();
       final lines = (outfit['outfit'] is List)
           ? (outfit['outfit'] as List)
               .whereType<Map>()
@@ -184,7 +198,8 @@ class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
     final service = ref.read(recommendationsDomainServiceProvider);
 
     // Создаем объединенный образ
-    final originalLines = _parseOutfitLines(widget.recommendation.outfitDataJson);
+    final originalLines =
+        _parseOutfitLines(widget.recommendation.outfitDataJson);
     final finalLines = <Map<String, dynamic>>[];
 
     for (final line in originalLines) {
@@ -264,19 +279,23 @@ class _OutfitPreview extends StatelessWidget {
                   name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 12),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                  category,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
-                  ),
+                category,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.65),
                 ),
+              ),
             ],
           ),
         );
@@ -307,12 +326,16 @@ class _CategoryReplacementSection extends StatelessWidget {
           children: [
             Text(
               category,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 8),
 
             // Оригинальная вещь из рекомендации
-            Text('Рекомендованная вещь:', style: Theme.of(context).textTheme.titleSmall),
+            Text('Рекомендованная вещь:',
+                style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 6),
             Wrap(
               spacing: 8,
@@ -334,7 +357,11 @@ class _CategoryReplacementSection extends StatelessWidget {
             if (wardrobeItems.isEmpty)
               Text(
                 'Нет подходящих вещей в этой категории',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65)),
+                style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.65)),
               )
             else
               Wrap(
@@ -407,7 +434,8 @@ class _WardrobeItemChip extends StatelessWidget {
 class _CombinedOutfitPreview extends ConsumerWidget {
   final List<Map<String, dynamic>> originalLines;
   final Map<String, WardrobeEntry?> replacements;
-  const _CombinedOutfitPreview({required this.originalLines, required this.replacements});
+  const _CombinedOutfitPreview(
+      {required this.originalLines, required this.replacements});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
