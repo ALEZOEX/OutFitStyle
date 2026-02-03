@@ -25,16 +25,19 @@ class RecommendationDetailScreen extends ConsumerStatefulWidget {
   const RecommendationDetailScreen({super.key, required this.recommendationId});
 
   @override
-  ConsumerState<RecommendationDetailScreen> createState() => _RecommendationDetailScreenState();
+  ConsumerState<RecommendationDetailScreen> createState() =>
+      _RecommendationDetailScreenState();
 }
 
-class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetailScreen> {
+class _RecommendationDetailScreenState
+    extends ConsumerState<RecommendationDetailScreen> {
   // локальные замены (не сохраняем на сервер)
   final Map<String, WardrobeEntry> _overrideByCategory = {};
 
   @override
   Widget build(BuildContext context) {
-    final asyncRow = ref.watch(recommendationByIdProvider(widget.recommendationId));
+    final asyncRow =
+        ref.watch(recommendationByIdProvider(widget.recommendationId));
     final service = ref.read(recommendationsDomainServiceProvider);
 
     return asyncRow.when(
@@ -91,7 +94,9 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                       await service.toggleFavorite(row);
                     },
                     icon: Icon(
-                      row.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                      row.isFavorite
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
                       color: row.isFavorite ? Colors.pinkAccent : null,
                     ),
                   ),
@@ -112,7 +117,9 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
 
                   // Возможность заменить вещи из рекомендации на вещи из гардероба
                   wardrobeAsync.when(
-                    loading: () => const SizedBox(height: 120, child: Center(child: CircularProgressIndicator())),
+                    loading: () => const SizedBox(
+                        height: 120,
+                        child: Center(child: CircularProgressIndicator())),
                     error: (e, _) => Text('Ошибка гардероба: $e'),
                     data: (wardrobe) {
                       final byCat = <String, List<WardrobeEntry>>{};
@@ -125,7 +132,10 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                         children: [
                           Text(
                             'Заменить вещи из рекомендации',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w900),
                           ),
                           const SizedBox(height: 10),
                           for (final cat in categories)
@@ -133,7 +143,10 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                               padding: const EdgeInsets.only(bottom: 14),
                               child: CategoryReplacementWidget(
                                 category: cat,
-                                original: lines.firstWhere((e) => (e['category'] ?? '').toString() == cat, orElse: () => {}),
+                                original: lines.firstWhere(
+                                    (e) =>
+                                        (e['category'] ?? '').toString() == cat,
+                                    orElse: () => {}),
                                 alternatives: byCat[cat] ?? const [],
                                 selected: _overrideByCategory[cat],
                                 onSelected: (picked) {
@@ -157,7 +170,10 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
               const SizedBox(height: 14),
               Text(
                 'Состав рекомендации',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 10),
 
@@ -171,7 +187,9 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                     subtitle: 'Замена • $cat',
                   );
                 }
-                final original = lines.firstWhere((e) => (e['category'] ?? '') == cat, orElse: () => {});
+                final original = lines.firstWhere(
+                    (e) => (e['category'] ?? '') == cat,
+                    orElse: () => {});
                 return _LineTile(
                   icon: (original['icon_emoji'] ?? '👕').toString(),
                   title: (original['name'] ?? 'Вещь').toString(),
@@ -201,7 +219,8 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                           label: const Text('Сбросить замены'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
                           ),
                         ),
                       ),
@@ -216,7 +235,8 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                               overridesByCategory: _overrideByCategory,
                             );
 
-                            final finalOutfit = _buildOutfitData(lines: finalLines);
+                            final finalOutfit =
+                                _buildOutfitData(lines: finalLines);
 
                             final newId = await service.saveLocalOutfit(
                               outfitData: finalOutfit,
@@ -226,7 +246,8 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
 
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Сохранено как новый образ')),
+                              const SnackBar(
+                                  content: Text('Сохранено как новый образ')),
                             );
 
                             // перейти к сохраненному образу
@@ -237,7 +258,8 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                           label: const Text('Сохранить как новый'),
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
                           ),
                         ),
                       ),
@@ -256,7 +278,8 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                       label: const Text('Интегрировать с гардеробом'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
                     ),
                   ),
@@ -335,7 +358,11 @@ class _HeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final temp = (weather['temp'] ?? weather['temperature'] ?? '').toString();
-    final cond = (weather['condition'] ?? weather['description'] ?? weather['weather'] ?? '').toString();
+    final cond = (weather['condition'] ??
+            weather['description'] ??
+            weather['weather'] ??
+            '')
+        .toString();
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -344,18 +371,27 @@ class _HeaderCard extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Погода', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
-                const SizedBox(height: 6),
-                Text(cond.isEmpty ? '—' : cond),
-              ]),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Погода',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w900)),
+                    const SizedBox(height: 6),
+                    Text(cond.isEmpty ? '—' : cond),
+                  ]),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   temp.isEmpty ? '—' : '$temp°',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium
+                      ?.copyWith(fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 6),
                 Text(isFavorite ? 'В избранном' : 'Не сохранён'),
@@ -373,7 +409,8 @@ class _LineTile extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _LineTile({required this.icon, required this.title, required this.subtitle});
+  const _LineTile(
+      {required this.icon, required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -407,7 +444,8 @@ class CategoryReplacementWidget extends StatefulWidget {
   });
 
   @override
-  State<CategoryReplacementWidget> createState() => _CategoryReplacementWidgetState();
+  State<CategoryReplacementWidget> createState() =>
+      _CategoryReplacementWidgetState();
 }
 
 class _CategoryReplacementWidgetState extends State<CategoryReplacementWidget> {
@@ -440,7 +478,10 @@ class _CategoryReplacementWidgetState extends State<CategoryReplacementWidget> {
       children: [
         Text(
           widget.category,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context)
+              .textTheme
+              .titleSmall
+              ?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -455,8 +496,9 @@ class _CategoryReplacementWidgetState extends State<CategoryReplacementWidget> {
             },
             itemBuilder: (context, i) {
               final p = pages[i];
-              final isSelected = (p.alt?.id != null && widget.selected?.id == p.alt!.id) ||
-                  (p.alt == null && widget.selected == null);
+              final isSelected =
+                  (p.alt?.id != null && widget.selected?.id == p.alt!.id) ||
+                      (p.alt == null && widget.selected == null);
 
               return Padding(
                 padding: const EdgeInsets.only(right: 10),
@@ -481,7 +523,9 @@ class _CategoryReplacementWidgetState extends State<CategoryReplacementWidget> {
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             color: isSelected
-                                ? Theme.of(context).colorScheme.onPrimaryContainer
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
                                 : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
@@ -492,8 +536,14 @@ class _CategoryReplacementWidgetState extends State<CategoryReplacementWidget> {
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           color: isSelected
-                              ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
-                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer
+                                  .withValues(alpha: 0.8)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.55),
                         ),
                       ),
                     ],
@@ -518,6 +568,5 @@ class _PickPage {
   factory _PickPage.original({required String icon, required String name}) =>
       _PickPage._(icon, name, null);
 
-  factory _PickPage.alt(WardrobeEntry w) =>
-      _PickPage._(w.iconEmoji, w.name, w);
+  factory _PickPage.alt(WardrobeEntry w) => _PickPage._(w.iconEmoji, w.name, w);
 }

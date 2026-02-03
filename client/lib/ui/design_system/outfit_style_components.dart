@@ -48,36 +48,36 @@ class OutfitStyleComponents {
   // Типографика
   static TextStyle headlineLarge(BuildContext context) {
     return Theme.of(context).textTheme.headlineLarge?.copyWith(
-          fontWeight: FontWeight.w900,
-        ) ??
+              fontWeight: FontWeight.w900,
+            ) ??
         const TextStyle(fontSize: 32, fontWeight: FontWeight.w900);
   }
 
   static TextStyle headlineMedium(BuildContext context) {
     return Theme.of(context).textTheme.headlineMedium?.copyWith(
-          fontWeight: FontWeight.w800,
-        ) ??
+              fontWeight: FontWeight.w800,
+            ) ??
         const TextStyle(fontSize: 24, fontWeight: FontWeight.w800);
   }
 
   static TextStyle titleLarge(BuildContext context) {
     return Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-        ) ??
+              fontWeight: FontWeight.w700,
+            ) ??
         const TextStyle(fontSize: 20, fontWeight: FontWeight.w700);
   }
 
   static TextStyle titleMedium(BuildContext context) {
     return Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        ) ??
+              fontWeight: FontWeight.w700,
+            ) ??
         const TextStyle(fontSize: 18, fontWeight: FontWeight.w700);
   }
 
   static TextStyle bodyLarge(BuildContext context) {
     return Theme.of(context).textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w500,
-        ) ??
+              fontWeight: FontWeight.w500,
+            ) ??
         const TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
   }
 

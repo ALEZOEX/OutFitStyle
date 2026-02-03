@@ -5,7 +5,8 @@ class RecommendationRemoteDataSource {
   final RecommendationService _svc;
   RecommendationRemoteDataSource(this._svc);
 
-  Future<RecommendationRecord> createUsingProfile({required String occasion}) async {
+  Future<RecommendationRecord> createUsingProfile(
+      {required String occasion}) async {
     try {
       return await _svc.createUsingProfile(occasion: occasion);
     } catch (e) {
@@ -14,7 +15,8 @@ class RecommendationRemoteDataSource {
     }
   }
 
-  Future<(List<RecommendationRecord>, int total)> list({required int page, required int limit}) {
+  Future<(List<RecommendationRecord>, int total)> list(
+      {required int page, required int limit}) {
     return _svc.list(page: page, limit: limit);
   }
 
@@ -30,6 +32,7 @@ class RecommendationRemoteDataSource {
   }) async {
     // В идеале тут будет реальный API вызов.
     // Пока backend не поддерживает — бросаем, и outbox ретраит/хранит локально.
-    throw UnimplementedError('Backend endpoint for publishCustomOutfit is not implemented');
+    throw UnimplementedError(
+        'Backend endpoint for publishCustomOutfit is not implemented');
   }
 }

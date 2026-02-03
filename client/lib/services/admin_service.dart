@@ -18,7 +18,7 @@ class AdminService {
   Future<bool> isAdmin() async {
     try {
       final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
-      
+
       // Попытка получить статистику администратора
       final response = await client.get(
         Uri.parse('${_config.apiBase}/admin/stats'),

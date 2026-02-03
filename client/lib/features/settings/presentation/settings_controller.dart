@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final settingsControllerProvider = StateNotifierProvider<SettingsController, SettingsState>((ref) {
+final settingsControllerProvider =
+    StateNotifierProvider<SettingsController, SettingsState>((ref) {
   return SettingsController();
 });
 

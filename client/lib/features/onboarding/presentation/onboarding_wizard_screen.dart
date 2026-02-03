@@ -10,10 +10,12 @@ class OnboardingWizardScreen extends ConsumerStatefulWidget {
   const OnboardingWizardScreen({super.key});
 
   @override
-  ConsumerState<OnboardingWizardScreen> createState() => _OnboardingWizardScreenState();
+  ConsumerState<OnboardingWizardScreen> createState() =>
+      _OnboardingWizardScreenState();
 }
 
-class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen> {
+class _OnboardingWizardScreenState
+    extends ConsumerState<OnboardingWizardScreen> {
   int _step = 0;
 
   // Preferences
@@ -31,7 +33,10 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
 
   Future<void> _finishOnboarding() async {
     if (_busy) return;
-    setState(() { _busy = true; _error = null; });
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
 
     try {
       final repo = ref.read(profileRepositoryProvider);
@@ -107,7 +112,10 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
           if (_error != null) _ErrorBox(_error!),
           Text(
             'Шаг ${_step + 1} из ${steps.length}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 12),
           steps[_step],
@@ -130,7 +138,10 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
                   },
             style: OutfitStyleComponents.primaryButtonStyle(),
             child: _busy
-                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                 : Text(
                     _step < steps.length - 1 ? 'Далее' : 'Готово',
                     style: const TextStyle(fontWeight: FontWeight.w800),
@@ -175,7 +186,8 @@ class _PreferencesStep extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Чувствительность к температуре', style: TextStyle(fontWeight: FontWeight.w900)),
+            const Text('Чувствительность к температуре',
+                style: TextStyle(fontWeight: FontWeight.w900)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -198,8 +210,8 @@ class _PreferencesStep extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            const Text('Предпочитаемые стили', style: TextStyle(fontWeight: FontWeight.w900)),
+            const Text('Предпочитаемые стили',
+                style: TextStyle(fontWeight: FontWeight.w900)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -211,7 +223,8 @@ class _PreferencesStep extends StatelessWidget {
                     if (isSelected) {
                       onStylesChanged([...selectedStyles, 'casual']);
                     } else {
-                      onStylesChanged(selectedStyles.where((s) => s != 'casual').toList());
+                      onStylesChanged(
+                          selectedStyles.where((s) => s != 'casual').toList());
                     }
                   },
                 ),
@@ -222,7 +235,9 @@ class _PreferencesStep extends StatelessWidget {
                     if (isSelected) {
                       onStylesChanged([...selectedStyles, 'business']);
                     } else {
-                      onStylesChanged(selectedStyles.where((s) => s != 'business').toList());
+                      onStylesChanged(selectedStyles
+                          .where((s) => s != 'business')
+                          .toList());
                     }
                   },
                 ),
@@ -233,7 +248,8 @@ class _PreferencesStep extends StatelessWidget {
                     if (isSelected) {
                       onStylesChanged([...selectedStyles, 'sporty']);
                     } else {
-                      onStylesChanged(selectedStyles.where((s) => s != 'sporty').toList());
+                      onStylesChanged(
+                          selectedStyles.where((s) => s != 'sporty').toList());
                     }
                   },
                 ),
@@ -244,20 +260,27 @@ class _PreferencesStep extends StatelessWidget {
                     if (isSelected) {
                       onStylesChanged([...selectedStyles, 'elegant']);
                     } else {
-                      onStylesChanged(selectedStyles.where((s) => s != 'elegant').toList());
+                      onStylesChanged(
+                          selectedStyles.where((s) => s != 'elegant').toList());
                     }
                   },
                 ),
               ],
             ),
             const SizedBox(height: 16),
-
-            const Text('Предпочтения по категориям', style: TextStyle(fontWeight: FontWeight.w900)),
+            const Text('Предпочтения по категориям',
+                style: TextStyle(fontWeight: FontWeight.w900)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               children: [
-                for (final cat in const ['outerwear', 'top', 'bottom', 'footwear', 'accessories'])
+                for (final cat in const [
+                  'outerwear',
+                  'top',
+                  'bottom',
+                  'footwear',
+                  'accessories'
+                ])
                   FilterChip(
                     label: Text(_categoryLabel(cat)),
                     selected: preferredCategories.contains(cat),
@@ -266,7 +289,6 @@ class _PreferencesStep extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Умные уведомления'),
@@ -281,12 +303,18 @@ class _PreferencesStep extends StatelessWidget {
 
   String _categoryLabel(String cat) {
     switch (cat) {
-      case 'outerwear': return 'Верхняя одежда';
-      case 'top': return 'Топы';
-      case 'bottom': return 'Низ';
-      case 'footwear': return 'Обувь';
-      case 'accessories': return 'Аксессуары';
-      default: return cat;
+      case 'outerwear':
+        return 'Верхняя одежда';
+      case 'top':
+        return 'Топы';
+      case 'bottom':
+        return 'Низ';
+      case 'footwear':
+        return 'Обувь';
+      case 'accessories':
+        return 'Аксессуары';
+      default:
+        return cat;
     }
   }
 }
@@ -316,7 +344,8 @@ class _BodyParamsStep extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Параметры тела (опционально)', style: TextStyle(fontWeight: FontWeight.w900)),
+            const Text('Параметры тела (опционально)',
+                style: TextStyle(fontWeight: FontWeight.w900)),
             const SizedBox(height: 12),
             TextField(
               keyboardType: TextInputType.number,

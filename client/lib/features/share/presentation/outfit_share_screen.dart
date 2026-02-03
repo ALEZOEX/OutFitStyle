@@ -36,7 +36,10 @@ class _OutfitShareScreenState extends State<OutfitShareScreen> {
     final outfit = _decode(widget.outfitDataJson);
     final weather = _decode(widget.weatherDataJson);
     final lines = (outfit['outfit'] is List)
-        ? (outfit['outfit'] as List).whereType<Map>().map((e) => e.cast<String, dynamic>()).toList()
+        ? (outfit['outfit'] as List)
+            .whereType<Map>()
+            .map((e) => e.cast<String, dynamic>())
+            .toList()
         : <Map<String, dynamic>>[];
 
     return Scaffold(

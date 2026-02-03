@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final adminControllerProvider = StateNotifierProvider<AdminController, AdminState>((ref) {
+final adminControllerProvider =
+    StateNotifierProvider<AdminController, AdminState>((ref) {
   return AdminController();
 });
 

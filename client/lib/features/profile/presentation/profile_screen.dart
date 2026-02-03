@@ -57,8 +57,11 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       CircleAvatar(
                         radius: 36,
-                        backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-                        child: avatar.isEmpty ? const Icon(Icons.person_rounded, size: 36) : null,
+                        backgroundImage:
+                            avatar.isNotEmpty ? NetworkImage(avatar) : null,
+                        child: avatar.isEmpty
+                            ? const Icon(Icons.person_rounded, size: 36)
+                            : null,
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -67,13 +70,22 @@ class ProfileScreen extends ConsumerWidget {
                           children: [
                             Text(
                               name.isEmpty ? '—' : name,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.w900),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               email.isEmpty ? '—' : email,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.65),
                                   ),
                             ),
                           ],
@@ -95,7 +107,8 @@ class ProfileScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: ListTile(
-                          leading: const Icon(Icons.admin_panel_settings_rounded),
+                          leading:
+                              const Icon(Icons.admin_panel_settings_rounded),
                           title: const Text('Админ-панель'),
                           onTap: () {
                             Haptics.selection();

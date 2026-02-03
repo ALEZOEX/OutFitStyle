@@ -80,7 +80,8 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
               child: deck.isEmpty
                   ? Center(
                       child: state.isGenerating
-                          ? const SkeletonBox(width: double.infinity, height: double.infinity)
+                          ? const SkeletonBox(
+                              width: double.infinity, height: double.infinity)
                           : FilledButton.icon(
                               onPressed: () {
                                 Haptics.light();
@@ -107,7 +108,8 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
                           },
                           cardBuilder: (row) => _OutfitCard(
                             row: row,
-                            onOpen: () => context.push('/home/recommendations/${row.id}'),
+                            onOpen: () =>
+                                context.push('/home/recommendations/${row.id}'),
                             heroTag: 'outfit_${row.id}',
                           ),
                         ),
@@ -132,31 +134,42 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: deck.isEmpty ? null : () {
-                    Haptics.light();
-                    _topKey.currentState?.swipeLeft();
-                  },
+                  onPressed: deck.isEmpty
+                      ? null
+                      : () {
+                          Haptics.light();
+                          _topKey.currentState?.swipeLeft();
+                        },
                   icon: const Icon(Icons.close_rounded),
                   label: const Text('Не то'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: deck.isEmpty ? () { Haptics.light(); controller.generate(); } : () {
-                    Haptics.success();
-                    _burst.play();
-                    _topKey.currentState?.swipeRight();
-                  },
-                  icon: Icon(deck.isEmpty ? Icons.auto_awesome_rounded : Icons.favorite_rounded),
+                  onPressed: deck.isEmpty
+                      ? () {
+                          Haptics.light();
+                          controller.generate();
+                        }
+                      : () {
+                          Haptics.success();
+                          _burst.play();
+                          _topKey.currentState?.swipeRight();
+                        },
+                  icon: Icon(deck.isEmpty
+                      ? Icons.auto_awesome_rounded
+                      : Icons.favorite_rounded),
                   label: Text(deck.isEmpty ? 'Ещё' : 'В избранное'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
               ),
@@ -169,7 +182,10 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
                         controller.generate();
                       },
                 icon: state.isGenerating
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.shuffle_rounded),
                 tooltip: 'Сгенерировать новую',
               ),
@@ -209,7 +225,8 @@ class _OccasionChips extends StatelessWidget {
             label: Text(label),
             selected: selected,
             onSelected: (_) => onChanged(id),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999)),
           );
         },
       ),
@@ -221,7 +238,8 @@ class _OutfitCard extends ConsumerWidget {
   final RecommendationRow row;
   final VoidCallback onOpen;
   final String heroTag;
-  const _OutfitCard({required this.row, required this.onOpen, required this.heroTag});
+  const _OutfitCard(
+      {required this.row, required this.onOpen, required this.heroTag});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -230,7 +248,11 @@ class _OutfitCard extends ConsumerWidget {
     final weather = _decode(row.weatherDataJson);
 
     final temp = (weather['temp'] ?? weather['temperature'] ?? '').toString();
-    final cond = (weather['condition'] ?? weather['description'] ?? weather['weather'] ?? '').toString();
+    final cond = (weather['condition'] ??
+            weather['description'] ??
+            weather['weather'] ??
+            '')
+        .toString();
 
     return Hero(
       tag: heroTag,
@@ -250,11 +272,14 @@ class _OutfitCard extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Образ',
-                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                        style: theme.textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.w900),
                       ),
                     ),
                     Icon(
-                      row.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                      row.isFavorite
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
                       color: row.isFavorite ? Colors.pinkAccent : null,
                     ),
                   ],
@@ -262,14 +287,18 @@ class _OutfitCard extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    if (temp.isNotEmpty) Text('$temp°', style: const TextStyle(fontWeight: FontWeight.w800)),
+                    if (temp.isNotEmpty)
+                      Text('$temp°',
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         cond.isEmpty ? 'Погода' : cond,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.65)),
+                        style: TextStyle(
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.65)),
                       ),
                     ),
                   ],
@@ -357,7 +386,11 @@ class _SimpleCollage extends StatelessWidget {
                 cat,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+                style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.7)),
               ),
             ],
           ),

@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../data/local/app_database.dart';
 import 'outfit_collage_interactive.dart';
 
-
 class OutfitOfDayCard extends StatelessWidget {
   final RecommendationRow recommendation;
   final Map<String, dynamic> outfitData;
@@ -19,7 +18,10 @@ class OutfitOfDayCard extends StatelessWidget {
   List<Map<String, dynamic>> _outfitLines() {
     final raw = outfitData['outfit'];
     if (raw is List) {
-      return raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList();
+      return raw
+          .whereType<Map>()
+          .map((e) => e.cast<String, dynamic>())
+          .toList();
     }
     return const [];
   }
@@ -50,7 +52,6 @@ class OutfitOfDayCard extends StatelessWidget {
                   ),
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -60,14 +61,21 @@ class OutfitOfDayCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             'Образ дня',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
                         IconButton(
                           onPressed: onLike,
                           icon: Icon(
-                            recommendation.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                            color: recommendation.isFavorite ? Colors.pinkAccent : null,
+                            recommendation.isFavorite
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_border_rounded,
+                            color: recommendation.isFavorite
+                                ? Colors.pinkAccent
+                                : null,
                           ),
                         ),
                       ],

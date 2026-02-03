@@ -31,7 +31,7 @@ class _TabSwipeContainerState extends State<TabSwipeContainer> {
 
   double _dragDx = 0;
 
-  static const double _minDelta = 55;     // минимальный “протяг” в dp
+  static const double _minDelta = 55; // минимальный “протяг” в dp
   static const double _minVelocity = 650; // px/s
 
   @override
@@ -88,7 +88,8 @@ class _TabSwipeContainerState extends State<TabSwipeContainer> {
       children: [
         PageView(
           controller: _pc,
-          physics: const NeverScrollableScrollPhysics(), // важно: PageView не ворует жесты у контента
+          physics:
+              const NeverScrollableScrollPhysics(), // важно: PageView не ворует жесты у контента
           children: widget.children,
         ),
 

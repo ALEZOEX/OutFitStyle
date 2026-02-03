@@ -29,7 +29,8 @@ class AppConfig {
     if (!kDebugMode) return _prodHost;
 
     // Allow environment-based override for debug builds too
-    final debugHost = String.fromEnvironment('DEBUG_API_HOST', defaultValue: '');
+    final debugHost =
+        String.fromEnvironment('DEBUG_API_HOST', defaultValue: '');
     if (debugHost.isNotEmpty) return debugHost;
 
     if (kIsWeb) return 'http://localhost:$_port';
