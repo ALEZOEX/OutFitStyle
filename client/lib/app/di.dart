@@ -165,7 +165,7 @@ final wardrobeControllerProvider =
 
 final homeControllerProvider =
     StateNotifierProvider<HomeController, HomeState>((ref) {
-  return HomeController(ref);
+  return HomeController();
 });
 
 final settingsControllerProvider =
@@ -194,7 +194,7 @@ final profileControllerProvider =
 
 final generatorControllerProvider =
     StateNotifierProvider<GeneratorController, GeneratorState>((ref) {
-  return GeneratorController();
+  return GeneratorController(ref);
 });
 
 final adminControllerProvider =
