@@ -16,7 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$AdminState {
-  AsyncState<Map<String, dynamic>> get adminData =>
+  AsyncValue<Map<String, dynamic>> get adminData =>
       throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
@@ -35,7 +35,7 @@ abstract class $AdminStateCopyWith<$Res> {
       _$AdminStateCopyWithImpl<$Res, AdminState>;
   @useResult
   $Res call(
-      {AsyncState<Map<String, dynamic>> adminData,
+      {AsyncValue<Map<String, dynamic>> adminData,
       bool isLoading,
       String? error});
 }
@@ -63,7 +63,7 @@ class _$AdminStateCopyWithImpl<$Res, $Val extends AdminState>
       adminData: null == adminData
           ? _value.adminData
           : adminData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+              as AsyncValue<Map<String, dynamic>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -85,7 +85,7 @@ abstract class _$$AdminStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {AsyncState<Map<String, dynamic>> adminData,
+      {AsyncValue<Map<String, dynamic>> adminData,
       bool isLoading,
       String? error});
 }
@@ -111,7 +111,7 @@ class __$$AdminStateImplCopyWithImpl<$Res>
       adminData: null == adminData
           ? _value.adminData
           : adminData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+              as AsyncValue<Map<String, dynamic>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -128,14 +128,14 @@ class __$$AdminStateImplCopyWithImpl<$Res>
 
 class _$AdminStateImpl extends _AdminState {
   const _$AdminStateImpl(
-      {this.adminData = const AsyncLoading<Map<String, dynamic>>(),
+      {this.adminData = const AsyncValue.loading(),
       this.isLoading = false,
       this.error})
       : super._();
 
   @override
   @JsonKey()
-  final AsyncState<Map<String, dynamic>> adminData;
+  final AsyncValue<Map<String, dynamic>> adminData;
   @override
   @JsonKey()
   final bool isLoading;
@@ -173,13 +173,13 @@ class _$AdminStateImpl extends _AdminState {
 
 abstract class _AdminState extends AdminState {
   const factory _AdminState(
-      {final AsyncState<Map<String, dynamic>> adminData,
+      {final AsyncValue<Map<String, dynamic>> adminData,
       final bool isLoading,
       final String? error}) = _$AdminStateImpl;
   const _AdminState._() : super._();
 
   @override
-  AsyncState<Map<String, dynamic>> get adminData;
+  AsyncValue<Map<String, dynamic>> get adminData;
   @override
   bool get isLoading;
   @override

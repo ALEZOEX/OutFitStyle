@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/di.dart';
+import '../../../app/di.dart' hide onboardingStorageProvider, onboardingDoneProvider;
+import '../../../app/onboarding/onboarding_providers.dart';
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
 import '../../../ui/design_system/outfit_style_components.dart';
@@ -48,7 +49,7 @@ class SettingsScreen extends ConsumerWidget {
                           value: ThemeMode.dark, label: Text('Тёмная')),
                     ],
                     selected: {themeMode},
-                    onSelectionChanged: (s) => themeNotifier.setMode(s.first),
+                    onSelectionChanged: (s) => themeNotifier.state = s.first,
                   ),
                 ],
               ),
@@ -136,7 +137,9 @@ class SettingsScreen extends ConsumerWidget {
               await ref.read(onboardingStorageProvider).reset();
               ref.invalidate(onboardingDoneProvider);
               // Возвращаем на экран аутентификации
-              context.go('/auth');
+              if (context.mounted) {
+                context.go('/auth');
+              }
             },
             icon: const Icon(Icons.logout_rounded),
             label: const Text('Выйти из аккаунта'),

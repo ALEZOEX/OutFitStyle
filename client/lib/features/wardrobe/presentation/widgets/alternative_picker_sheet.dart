@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/di.dart';
 import '../../../../domain/entities/alt_pick.dart';
-import '../../../wardrobe/presentation/wardrobe_controller.dart';
 
 class AlternativePickerSheet extends ConsumerWidget {
   final String category;

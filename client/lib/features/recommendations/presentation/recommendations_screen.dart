@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
 import '../../../ui/atoms/skeleton.dart';
-import 'recommendations_controller.dart';
 import 'widgets/recommendation_card.dart';
 
 class RecommendationsScreen extends ConsumerStatefulWidget {
@@ -22,9 +22,12 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(recommendationsControllerProvider.notifier).sync();
+
       // Загружаем изображения для кэширования
+      // Получаем список рекомендаций и передаем его в prefetchImages
       // ignore: discarded_futures
-      ref.read(recommendationsControllerProvider.notifier).prefetchImages();
+      final recommendations = await ref.read(recommendationsRepositoryProvider).getAll();
+      ref.read(recommendationsControllerProvider.notifier).prefetchImages(recommendations);
     });
   }
 

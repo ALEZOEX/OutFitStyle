@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
-import '../../../data/local/app_database.dart';
+import '../../../domain/entities/recommendation_entity.dart';
+import '../../../domain/entities/wardrobe_entity.dart' as domain;
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
 import '../../../domain/outfit/outfit_builder.dart';
-import '../wardrobe/presentation/wardrobe_controller.dart';
 import 'widgets/category_swipe_replacer.dart';
-import '../share/presentation/outfit_share_screen.dart';
+import '../../share/presentation/outfit_share_screen.dart';
 
 final outfitByIdProvider =
     StreamProvider.autoDispose.family<RecommendationRow?, String>((ref, id) {
@@ -31,7 +31,7 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
   final _shareKey = GlobalKey();
 
   // локальные замены (не сохраняем на сервер)
-  final Map<String, WardrobeEntry> _overrideByCategory = {};
+  final Map<String, domain.WardrobeEntry> _overrideByCategory = {};
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +134,7 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
                           child: Center(child: CircularProgressIndicator())),
                       error: (e, _) => Text('Wardrobe error: $e'),
                       data: (wardrobe) {
-                        final byCat = <String, List<WardrobeEntry>>{};
+                        final byCat = <String, List<domain.WardrobeEntry>>{};
                         for (final w in wardrobe.where((w) => !w.isArchived)) {
                           byCat.putIfAbsent(w.category, () => []).add(w);
                         }
@@ -249,11 +249,14 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
                         final finalOutfit =
                             OutfitBuilder.buildOutfitData(lines: finalLines);
 
-                        final newId = await repo.saveLocalOutfit(
+                        final newRow = await repo.saveLocalOutfit(
                           outfitData: finalOutfit,
                           weatherData: weather,
-                          favorite: true,
                         );
+                        final newId = newRow.id;
+
+                        // Set as favorite after saving
+                        await repo.setFavorite(newId, true);
 
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -262,9 +265,9 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
                                   Text('Сохранено в избранное (локально)')),
                         );
 
-                        // опционально: сразу открыть сохранённый локальный образ
-                        // ignore: use_build_context_synchronously
-                        context.go('/outfit/$newId');
+                        if (context.mounted) {
+                          context.go('/outfit/$newId');
+                        }
                       },
                       icon: const Icon(Icons.bookmark_add_rounded),
                       label: const Text('Сохранить как новый'),

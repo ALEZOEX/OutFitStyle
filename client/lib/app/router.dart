@@ -21,7 +21,7 @@ import '../app/onboarding.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/home',
-    redirect: (context, state) {
+    redirect: (BuildContext context, GoRouterState state) async {
       // Проверяем статус сессии и перенаправляем при необходимости
       final sessionStatus = ref.read(sessionProvider);
 
@@ -51,7 +51,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        redirect: (_) => '/home',
+        redirect: (context, state) => '/home',
       ),
       GoRoute(
         path: '/home',

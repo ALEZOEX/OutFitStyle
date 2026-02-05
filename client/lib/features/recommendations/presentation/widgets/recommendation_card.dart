@@ -1,12 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/di.dart';
-import '../../../domain/entities/recommendation_entity.dart';
-import '../../../ui/atoms/haptics.dart';
-import '../../../ui/atoms/skeleton.dart';
-import '../../../ui/atoms/like_burst.dart';
-import 'recommendations_controller.dart';
+import 'package:outfitstyle_client/app/di.dart';
+import 'package:outfitstyle_client/domain/entities/recommendation_entity.dart';
+import 'package:outfitstyle_client/ui/atoms/haptics.dart';
 
 class RecommendationCard extends ConsumerWidget {
   final RecommendationRow recommendation;

@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../domain/entities/wardrobe_entity.dart';
-import '../../../domain/entities/wardrobe_request_entities.dart';
+import '../../../domain/entities/wardrobe_entity.dart' as domain;
 import '../../../domain/states/wardrobe_state.dart';
-import '../../../domain/states/async_state.dart';
 import '../../../app/di.dart';
 
 class WardrobeController extends StateNotifier<WardrobeState> {
@@ -19,12 +17,13 @@ class WardrobeController extends StateNotifier<WardrobeState> {
       final items = await repo.getAll();
       state = state.copyWith(
         isLoading: false,
-        wardrobeItems: const AsyncSuccess([]), // Will be updated with actual items
+        wardrobeItems: AsyncValue.data(items),
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
+        wardrobeItems: AsyncValue.error(e, StackTrace.current),
       );
     }
   }
@@ -38,39 +37,81 @@ class WardrobeController extends StateNotifier<WardrobeState> {
     }
   }
 
-  Future<void> prefetchImages(List<WardrobeEntry> items) async {
+  Future<void> prefetchImages(List<domain.WardrobeEntry> items) async {
     final imageStore = _ref.read(imageStoreProvider);
     await imageStore.prefetchImages(items);
   }
 
-  Future<void> toggleFavorite(WardrobeEntry item) async {
+  Future<void> toggleFavorite(domain.WardrobeEntry item) async {
     try {
       final repo = _ref.read(wardrobeRepositoryProvider);
       final updatedItem = item.copyWith(isFavorite: !item.isFavorite);
-      await repo.update(updatedItem);
+      await repo.updateOne(updatedItem);
+      // Also update the state to reflect the change
+      final currentState = state.wardrobeItems;
+      if (currentState.hasValue) {
+        final currentList = currentState.value ?? [];
+        final updatedList = currentList.map((wardrobeItem) {
+          if (wardrobeItem.id == item.id) {
+            return updatedItem;
+          }
+          return wardrobeItem;
+        }).toList();
+        state = state.copyWith(
+          wardrobeItems: AsyncValue.data(updatedList),
+        );
+      }
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
 
-  Future<void> toggleArchived(WardrobeEntry item) async {
+  Future<void> toggleArchived(domain.WardrobeEntry item) async {
     try {
       final repo = _ref.read(wardrobeRepositoryProvider);
       final updatedItem = item.copyWith(isArchived: !item.isArchived);
-      await repo.update(updatedItem);
+      await repo.updateOne(updatedItem);
+      // Also update the state to reflect the change
+      final currentState = state.wardrobeItems;
+      if (currentState.hasValue) {
+        final currentList = currentState.value ?? [];
+        final updatedList = currentList.map((wardrobeItem) {
+          if (wardrobeItem.id == item.id) {
+            return updatedItem;
+          }
+          return wardrobeItem;
+        }).toList();
+        state = state.copyWith(
+          wardrobeItems: AsyncValue.data(updatedList),
+        );
+      }
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
 
-  Future<void> markWorn(WardrobeEntry item) async {
+  Future<void> markWorn(domain.WardrobeEntry item) async {
     try {
       final repo = _ref.read(wardrobeRepositoryProvider);
       final updatedItem = item.copyWith(
         wearCount: item.wearCount + 1,
         lastWornAt: DateTime.now(),
       );
-      await repo.update(updatedItem);
+      await repo.updateOne(updatedItem);
+      // Also update the state to reflect the change
+      final currentState = state.wardrobeItems;
+      if (currentState.hasValue) {
+        final currentList = currentState.value ?? [];
+        final updatedList = currentList.map((wardrobeItem) {
+          if (wardrobeItem.id == item.id) {
+            return updatedItem;
+          }
+          return wardrobeItem;
+        }).toList();
+        state = state.copyWith(
+          wardrobeItems: AsyncValue.data(updatedList),
+        );
+      }
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }

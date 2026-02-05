@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../data/local/app_database.dart';
+import '../../../../app/di.dart';
+import '../../../../domain/entities/wardrobe_entity.dart' as domain;
 import '../../../../ui/atoms/haptics.dart';
-import '../../../wardrobe/presentation/wardrobe_controller.dart';
 
 class OutfitCollageInteractive extends ConsumerStatefulWidget {
   final List<Map<String, dynamic>> lines; // outfitData['outfit']
@@ -24,9 +24,9 @@ class _OutfitCollageInteractiveState
   @override
   Widget build(BuildContext context) {
     final wardrobe = ref.watch(wardrobeStreamProvider).valueOrNull ??
-        const <WardrobeEntry>[];
+        const <domain.WardrobeEntry>[];
 
-    final byCat = <String, List<WardrobeEntry>>{};
+    final byCat = <String, List<domain.WardrobeEntry>>{};
     for (final w in wardrobe.where((w) => !w.isArchived)) {
       byCat.putIfAbsent(w.category, () => []).add(w);
     }
@@ -61,7 +61,7 @@ class _OutfitCollageInteractiveState
                     original: show[i],
                     alternatives:
                         byCat[(show[i]['category'] ?? '').toString()] ??
-                            const [],
+                            const <domain.WardrobeEntry>[],
                     idx: _idxByCategory[
                             (show[i]['category'] ?? '').toString()] ??
                         0,
@@ -81,7 +81,7 @@ class _OutfitCollageInteractiveState
 class _SwipeCycleCard extends StatelessWidget {
   final String category;
   final Map<String, dynamic> original;
-  final List<WardrobeEntry> alternatives;
+  final List<domain.WardrobeEntry> alternatives;
 
   final int idx;
   final void Function(String category, int idx) onIdxChanged;
@@ -272,7 +272,7 @@ class _Choice {
         localPath: null,
       );
 
-  factory _Choice.alt(WardrobeEntry w) => _Choice._(
+  factory _Choice.alt(domain.WardrobeEntry w) => _Choice._(
         key: 'alt:${w.id}',
         name: w.name,
         iconEmoji: w.iconEmoji,

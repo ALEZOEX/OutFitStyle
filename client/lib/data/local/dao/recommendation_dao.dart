@@ -190,4 +190,26 @@ class RecommendationDao extends DatabaseAccessor<AppDatabase>
         .map((row) => domain.RecommendationRow.fromDbEntity(row))
         .toList();
   }
+
+  // Получить все рекомендации для таймлайна (не сгруппированные)
+  Stream<List<domain.RecommendationRow>> watchTimeline({int limit = 50}) {
+    final q = (select(recommendations)
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+          ..limit(limit))
+        .watch();
+    return q.map((dbRows) => dbRows
+        .map((dbRow) => domain.RecommendationRow.fromDbEntity(dbRow))
+        .toList());
+  }
+
+  // Получить последние рекомендации (однократно)
+  Future<List<domain.RecommendationRow>> getRecent(int limit) async {
+    final rows = await (select(recommendations)
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+          ..limit(limit))
+        .get();
+    return rows
+        .map((row) => domain.RecommendationRow.fromDbEntity(row))
+        .toList();
+  }
 }

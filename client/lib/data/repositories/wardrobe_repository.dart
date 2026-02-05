@@ -1,51 +1,92 @@
-import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import '../local/app_database.dart';
 import '../remote/wardrobe_remote_ds.dart';
-import '../image_store.dart';
 import '../../domain/entities/wardrobe_entity.dart' as domain;
 import '../../domain/entities/wardrobe_request_entities.dart';
 
 class WardrobeRepository {
   final AppDatabase _db;
   final WardrobeRemoteDataSource _remote;
-  final ImageStore _imageStore;
 
-  WardrobeRepository(this._db, this._remote, this._imageStore);
+  WardrobeRepository(this._db, this._remote);
 
   // Получить все элементы гардероба
   Stream<List<domain.WardrobeEntry>> watchWardrobe(
       {bool includeArchived = false}) {
     if (includeArchived) {
-      return _db.wardrobeDao.watchAll().map((dbEntries) =>
-          dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
+      return _db.wardrobeDao.watchAll();
     } else {
       // Фильтруем архивные элементы
-      return _db.wardrobeDao.watchAll().map((dbEntries) => dbEntries
+      return _db.wardrobeDao.watchAll().map((entries) => entries
           .where((entry) => !entry.isArchived)
-          .map(domain.WardrobeEntry.fromDbEntity)
           .toList());
     }
   }
 
   // Получить элемент по ID
   Stream<domain.WardrobeEntry?> watchById(String id) {
-    return _db.wardrobeDao.watchById(id).map((dbEntry) =>
-        dbEntry != null ? domain.WardrobeEntry.fromDbEntity(dbEntry) : null);
+    return _db.wardrobeDao.watchById(id);
   }
 
   // Получить элемент по ID (однократно)
   Future<domain.WardrobeEntry?> getById(String id) async {
-    final dbEntry = await _db.wardrobeDao.getById(id);
-    return dbEntry != null ? domain.WardrobeEntry.fromDbEntity(dbEntry) : null;
+    return await _db.wardrobeDao.getById(id);
+  }
+
+  // Получить все элементы гардероба (однократно)
+  Future<List<domain.WardrobeEntry>> getAll({bool includeArchived = false}) async {
+    final allItems = await _db.wardrobeDao.getAll();
+    if (includeArchived) {
+      return allItems;
+    } else {
+      // Фильтруем архивные элементы
+      return allItems.where((entry) => !entry.isArchived).toList();
+    }
   }
 
   // Синхронизировать с сервера
   Future<void> syncFromServer() async {
     try {
       final items = await _remote.fetchAll();
-      await upsertMany(items.map(domain.WardrobeEntry.fromExternal).toList());
+      final wardrobeEntries = <domain.WardrobeEntry>[];
+      for (final item in items) {
+        // Convert from API model to domain entity
+        final entry = domain.WardrobeEntry(
+          id: item.id,
+          serverId: item.id, // API ID becomes serverId
+          name: item.customName ?? item.item.name,
+          category: item.item.category,
+          subcategory: item.item.subcategory,
+          style: item.item.style,
+          iconEmoji: item.item.iconEmoji ?? '',
+          imageUrl: item.item.imageUrl,
+          blurHash: null, // blurHash не доступен в ClothingItem
+          minTemp: item.minTemp,
+          maxTemp: item.maxTemp,
+          warmthLevel: item.warmthLevel,
+          rainOk: item.rainOk,
+          snowOk: item.snowOk,
+          windOk: item.windOk,
+          usage: item.notes,
+          materials: item.item.materials.isNotEmpty ? item.item.materials.join(',') : null, // Преобразуем List<String> в String
+          wearCount: item.wearCount,
+          lastWornAt: item.lastWornAt,
+          isFavorite: item.isFavorite,
+          isArchived: item.isArchived,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          lastSyncedAt: DateTime.now(),
+          dirty: false, // Already synchronized
+          season: item.season,
+          gender: item.item.gender,
+          fit: item.item.fit,
+          pattern: item.item.pattern,
+          localImagePath: null,
+        );
+        wardrobeEntries.add(entry);
+      }
+      await upsertMany(wardrobeEntries);
     } catch (e) {
       // Логируем ошибку синхронизации
       // print('Wardrobe sync error: $e'); // В реальном приложении используйте proper logging
@@ -65,16 +106,16 @@ class WardrobeRepository {
           subcategory: Value(item.subcategory),
           style: Value(item.style),
           iconEmoji: Value(item.iconEmoji),
-          imageUrl: Value(item.imageUrl ?? ''),
-          blurHash: Value(item.blurHash ?? ''),
-          minTemp: Value(item.minTemp ?? 0),
-          maxTemp: Value(item.maxTemp ?? 0),
-          warmthLevel: Value(item.warmthLevel ?? 0),
+          imageUrl: Value(item.imageUrl),
+          blurHash: Value(item.blurHash),
+          minTemp: Value(item.minTemp),
+          maxTemp: Value(item.maxTemp),
+          warmthLevel: Value(item.warmthLevel),
           rainOk: Value(item.rainOk),
           snowOk: Value(item.snowOk),
           windOk: Value(item.windOk),
-          usage: Value(item.usage ?? ''),
-          materials: Value(item.materials ?? ''),
+          usage: Value(item.usage),
+          materials: Value(item.materials),
           wearCount: Value(item.wearCount),
           lastWornAt: Value(item.lastWornAt),
           isFavorite: Value(item.isFavorite),
@@ -83,11 +124,11 @@ class WardrobeRepository {
           updatedAt: Value(item.updatedAt),
           lastSyncedAt: Value(item.lastSyncedAt),
           dirty: Value(item.dirty),
-          season: Value(item.season ?? ''),
-          gender: Value(item.gender ?? ''),
-          fit: Value(item.fit ?? ''),
-          pattern: Value(item.pattern ?? ''),
-          localImagePath: Value(item.localImagePath ?? ''),
+          season: Value(item.season),
+          gender: Value(item.gender),
+          fit: Value(item.fit),
+          pattern: Value(item.pattern),
+          localImagePath: Value(item.localImagePath),
         ));
       }
     });
@@ -160,28 +201,28 @@ class WardrobeRepository {
       subcategory: item.subcategory,
       style: item.style,
       iconEmoji: item.iconEmoji,
-      imageUrl: item.imageUrl ?? '',
-      blurHash: item.blurHash ?? '',
-      minTemp: item.minTemp ?? 0,
-      maxTemp: item.maxTemp ?? 0,
-      warmthLevel: item.warmthLevel ?? 0,
+      imageUrl: Value(item.imageUrl),
+      blurHash: Value(item.blurHash),
+      minTemp: Value(item.minTemp),
+      maxTemp: Value(item.maxTemp),
+      warmthLevel: Value(item.warmthLevel),
       rainOk: item.rainOk,
       snowOk: item.snowOk,
       windOk: item.windOk,
-      usage: item.usage ?? '',
-      materials: item.materials ?? '',
+      usage: Value(item.usage),
+      materials: Value(item.materials),
       wearCount: item.wearCount,
-      lastWornAt: item.lastWornAt,
+      lastWornAt: Value(item.lastWornAt),
       isFavorite: item.isFavorite,
       isArchived: item.isArchived,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       dirty: item.dirty,
-      season: item.season ?? '',
-      gender: item.gender ?? '',
-      fit: item.fit ?? '',
-      pattern: item.pattern ?? '',
-      localImagePath: item.localImagePath ?? '',
+      season: Value(item.season),
+      gender: Value(item.gender),
+      fit: Value(item.fit),
+      pattern: Value(item.pattern),
+      localImagePath: Value(item.localImagePath),
     ));
 
     return item;
@@ -197,23 +238,23 @@ class WardrobeRepository {
       subcategory: Value(request.subcategory ?? ''),
       style: Value(request.style ?? ''),
       iconEmoji: Value(request.iconEmoji ?? ''),
-      imageUrl: Value(request.imageUrl ?? ''),
-      blurHash: Value(request.blurHash ?? ''),
-      minTemp: Value(request.minTemp ?? 0),
-      maxTemp: Value(request.maxTemp ?? 0),
-      warmthLevel: Value(request.warmthLevel ?? 0),
+      imageUrl: Value(request.imageUrl),
+      blurHash: Value(request.blurHash),
+      minTemp: Value(request.minTemp),
+      maxTemp: Value(request.maxTemp),
+      warmthLevel: Value(request.warmthLevel),
       rainOk: Value(request.rainOk ?? false),
       snowOk: Value(request.snowOk ?? false),
       windOk: Value(request.windOk ?? false),
-      usage: Value(request.usage ?? ''),
-      materials: Value(request.materials ?? ''),
+      usage: Value(request.usage),
+      materials: Value(request.materials),
       isFavorite: Value(request.isFavorite ?? false),
       isArchived: Value(request.isArchived ?? false),
-      season: Value(request.season ?? ''),
-      gender: Value(request.gender ?? ''),
-      fit: Value(request.fit ?? ''),
-      pattern: Value(request.pattern ?? ''),
-      localImagePath: Value(request.localImagePath ?? ''),
+      season: Value(request.season),
+      gender: Value(request.gender),
+      fit: Value(request.fit),
+      pattern: Value(request.pattern),
+      localImagePath: Value(request.localImagePath),
       updatedAt: Value(now),
       dirty: Value(true),
     ));
@@ -245,33 +286,28 @@ class WardrobeRepository {
 
   // Получить элементы по категории
   Stream<List<domain.WardrobeEntry>> watchByCategory(String category) {
-    return _db.wardrobeDao.watchByCategory(category).map((dbEntries) =>
-        dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
+    return _db.wardrobeDao.watchByCategory(category);
   }
 
   // Получить элементы по категориям
   Future<List<domain.WardrobeEntry>> getByCategories(
       List<String> categories) async {
-    final dbEntries = await _db.wardrobeDao.getByCategories(categories);
-    return dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList();
+    return await _db.wardrobeDao.getByCategories(categories);
   }
 
   // Получить элементы по сезону
   Stream<List<domain.WardrobeEntry>> watchBySeason(String season) {
-    return _db.wardrobeDao.watchBySeason(season).map((dbEntries) =>
-        dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
+    return _db.wardrobeDao.watchBySeason(season);
   }
 
   // Получить элементы по температуре
   Future<List<domain.WardrobeEntry>> getByTemperature(int temperature) async {
-    final dbEntries = await _db.wardrobeDao.getByTemperature(temperature);
-    return dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList();
+    return await _db.wardrobeDao.getByTemperature(temperature);
   }
 
   // Получить избранные элементы
   Stream<List<domain.WardrobeEntry>> watchFavorites() {
-    return _db.wardrobeDao.watchFavorites().map((dbEntries) =>
-        dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList());
+    return _db.wardrobeDao.watchFavorites();
   }
 
   // Обновить элемент (полное обновление)
@@ -284,25 +320,25 @@ class WardrobeRepository {
       subcategory: Value(item.subcategory),
       style: Value(item.style),
       iconEmoji: Value(item.iconEmoji),
-      imageUrl: Value(item.imageUrl ?? ''),
-      blurHash: Value(item.blurHash ?? ''),
-      minTemp: Value(item.minTemp ?? 0),
-      maxTemp: Value(item.maxTemp ?? 0),
-      warmthLevel: Value(item.warmthLevel ?? 0),
+      imageUrl: Value(item.imageUrl),
+      blurHash: Value(item.blurHash),
+      minTemp: Value(item.minTemp),
+      maxTemp: Value(item.maxTemp),
+      warmthLevel: Value(item.warmthLevel),
       rainOk: Value(item.rainOk),
       snowOk: Value(item.snowOk),
       windOk: Value(item.windOk),
-      usage: Value(item.usage ?? ''),
-      materials: Value(item.materials ?? ''),
+      usage: Value(item.usage),
+      materials: Value(item.materials),
       wearCount: Value(item.wearCount),
       lastWornAt: Value(item.lastWornAt),
       isFavorite: Value(item.isFavorite),
       isArchived: Value(item.isArchived),
-      season: Value(item.season ?? ''),
-      gender: Value(item.gender ?? ''),
-      fit: Value(item.fit ?? ''),
-      pattern: Value(item.pattern ?? ''),
-      localImagePath: Value(item.localImagePath ?? ''),
+      season: Value(item.season),
+      gender: Value(item.gender),
+      fit: Value(item.fit),
+      pattern: Value(item.pattern),
+      localImagePath: Value(item.localImagePath),
       updatedAt: Value(now),
       dirty: Value(true),
     ));
@@ -320,8 +356,7 @@ class WardrobeRepository {
 
   // Получить несинхронизированные элементы
   Future<List<domain.WardrobeEntry>> getUnsynced() async {
-    final dbEntries = await _db.wardrobeDao.getUnsynced();
-    return dbEntries.map(domain.WardrobeEntry.fromDbEntity).toList();
+    return await _db.wardrobeDao.getUnsynced();
   }
 
   // Сбросить счетчик использования
@@ -363,33 +398,34 @@ class WardrobeRepository {
       subcategory: item.subcategory,
       style: item.style,
       iconEmoji: item.iconEmoji,
-      imageUrl: item.imageUrl ?? '',
-      blurHash: item.blurHash ?? '',
-      minTemp: item.minTemp ?? 0,
-      maxTemp: item.maxTemp ?? 0,
-      warmthLevel: item.warmthLevel ?? 0,
+      imageUrl: Value(item.imageUrl),
+      blurHash: Value(item.blurHash),
+      minTemp: Value(item.minTemp),
+      maxTemp: Value(item.maxTemp),
+      warmthLevel: Value(item.warmthLevel),
       rainOk: item.rainOk,
       snowOk: item.snowOk,
       windOk: item.windOk,
-      usage: item.usage ?? '',
-      materials: item.materials ?? '',
+      usage: Value(item.usage),
+      materials: Value(item.materials),
       wearCount: item.wearCount,
-      lastWornAt: item.lastWornAt,
+      lastWornAt: Value(item.lastWornAt),
       isFavorite: item.isFavorite,
       isArchived: item.isArchived,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       dirty: item.dirty,
-      season: item.season ?? '',
-      gender: item.gender ?? '',
-      fit: item.fit ?? '',
-      pattern: item.pattern ?? '',
-      localImagePath: item.localImagePath ?? '',
+      season: Value(item.season),
+      gender: Value(item.gender),
+      fit: Value(item.fit),
+      pattern: Value(item.pattern),
+      localImagePath: Value(item.localImagePath),
     ));
   }
 
   // Update one item
   Future<void> updateOne(domain.WardrobeEntry item) async {
+    final now = DateTime.now();
     await _db.wardrobeDao.updateOne(WardrobeEntriesCompanion(
       id: Value(item.id),
       name: Value(item.name),
@@ -397,26 +433,26 @@ class WardrobeRepository {
       subcategory: Value(item.subcategory),
       style: Value(item.style),
       iconEmoji: Value(item.iconEmoji),
-      imageUrl: Value(item.imageUrl ?? ''),
-      blurHash: Value(item.blurHash ?? ''),
-      minTemp: Value(item.minTemp ?? 0),
-      maxTemp: Value(item.maxTemp ?? 0),
-      warmthLevel: Value(item.warmthLevel ?? 0),
+      imageUrl: Value(item.imageUrl),
+      blurHash: Value(item.blurHash),
+      minTemp: Value(item.minTemp),
+      maxTemp: Value(item.maxTemp),
+      warmthLevel: Value(item.warmthLevel),
       rainOk: Value(item.rainOk),
       snowOk: Value(item.snowOk),
       windOk: Value(item.windOk),
-      usage: Value(item.usage ?? ''),
-      materials: Value(item.materials ?? ''),
+      usage: Value(item.usage),
+      materials: Value(item.materials),
       wearCount: Value(item.wearCount),
       lastWornAt: Value(item.lastWornAt),
       isFavorite: Value(item.isFavorite),
       isArchived: Value(item.isArchived),
-      season: Value(item.season ?? ''),
-      gender: Value(item.gender ?? ''),
-      fit: Value(item.fit ?? ''),
-      pattern: Value(item.pattern ?? ''),
-      localImagePath: Value(item.localImagePath ?? ''),
-      updatedAt: Value(DateTime.now()),
+      season: Value(item.season),
+      gender: Value(item.gender),
+      fit: Value(item.fit),
+      pattern: Value(item.pattern),
+      localImagePath: Value(item.localImagePath),
+      updatedAt: Value(now),
       dirty: Value(true),
     ));
   }
