@@ -16,7 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$ProfileState {
-  AsyncState<Map<String, dynamic>> get profileData =>
+  AsyncValue<Map<String, dynamic>> get profileData =>
       throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
@@ -35,7 +35,7 @@ abstract class $ProfileStateCopyWith<$Res> {
       _$ProfileStateCopyWithImpl<$Res, ProfileState>;
   @useResult
   $Res call(
-      {AsyncState<Map<String, dynamic>> profileData,
+      {AsyncValue<Map<String, dynamic>> profileData,
       bool isLoading,
       String? error});
 }
@@ -63,7 +63,7 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
       profileData: null == profileData
           ? _value.profileData
           : profileData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+              as AsyncValue<Map<String, dynamic>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -85,7 +85,7 @@ abstract class _$$ProfileStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {AsyncState<Map<String, dynamic>> profileData,
+      {AsyncValue<Map<String, dynamic>> profileData,
       bool isLoading,
       String? error});
 }
@@ -111,7 +111,7 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
       profileData: null == profileData
           ? _value.profileData
           : profileData // ignore: cast_nullable_to_non_nullable
-              as AsyncState<Map<String, dynamic>>,
+              as AsyncValue<Map<String, dynamic>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -128,14 +128,14 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
 
 class _$ProfileStateImpl extends _ProfileState {
   const _$ProfileStateImpl(
-      {this.profileData = const AsyncLoading<Map<String, dynamic>>(),
+      {this.profileData = const AsyncValue.loading(),
       this.isLoading = false,
       this.error})
       : super._();
 
   @override
   @JsonKey()
-  final AsyncState<Map<String, dynamic>> profileData;
+  final AsyncValue<Map<String, dynamic>> profileData;
   @override
   @JsonKey()
   final bool isLoading;
@@ -173,13 +173,13 @@ class _$ProfileStateImpl extends _ProfileState {
 
 abstract class _ProfileState extends ProfileState {
   const factory _ProfileState(
-      {final AsyncState<Map<String, dynamic>> profileData,
+      {final AsyncValue<Map<String, dynamic>> profileData,
       final bool isLoading,
       final String? error}) = _$ProfileStateImpl;
   const _ProfileState._() : super._();
 
   @override
-  AsyncState<Map<String, dynamic>> get profileData;
+  AsyncValue<Map<String, dynamic>> get profileData;
   @override
   bool get isLoading;
   @override

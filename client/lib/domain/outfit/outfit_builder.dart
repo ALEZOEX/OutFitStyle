@@ -1,4 +1,4 @@
-import '../data/local/app_database.dart';
+import '../entities/wardrobe_entity.dart' as domain;
 
 class OutfitBuilder {
   /// Собираем финальный список линий образа:
@@ -6,7 +6,7 @@ class OutfitBuilder {
   /// - иначе оставляем оригинал из recommendation outfit_data
   static List<Map<String, dynamic>> buildFinalLines({
     required List<Map<String, dynamic>> originalLines,
-    required Map<String, WardrobeEntry> overridesByCategory,
+    required Map<String, domain.WardrobeEntry> overridesByCategory,
   }) {
     final out = <Map<String, dynamic>>[];
 
@@ -39,7 +39,7 @@ class OutfitBuilder {
     };
   }
 
-  static Map<String, dynamic> _mapWardrobeEntryToOutfitLine(WardrobeEntry w) {
+  static Map<String, dynamic> _mapWardrobeEntryToOutfitLine(domain.WardrobeEntry w) {
     return <String, dynamic>{
       'id': w.id,
       'name': w.name,

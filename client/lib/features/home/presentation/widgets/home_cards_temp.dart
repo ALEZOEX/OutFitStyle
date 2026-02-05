@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../domain/entities/recommendation_entity.dart';
-import '../../../../ui/atoms/haptics.dart';
+import 'package:outfitstyle_client/domain/entities/recommendation_entity.dart';
+import 'package:outfitstyle_client/ui/atoms/haptics.dart';
 
 class WeatherCard extends ConsumerWidget {
   final Map<String, dynamic> weather;

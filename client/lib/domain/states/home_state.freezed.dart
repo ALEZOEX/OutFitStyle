@@ -16,9 +16,13 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$HomeState {
-  AsyncState<List<RecommendationRow>> get todayRecommendations =>
+  AsyncValue<List<RecommendationRow>> get todayRecommendations =>
       throw _privateConstructorUsedError;
-  AsyncState<List<WardrobeEntry>> get wardrobeStats =>
+  AsyncValue<List<WardrobeEntry>> get wardrobeStats =>
+      throw _privateConstructorUsedError;
+  AsyncValue<WeatherEntity?> get currentWeather =>
+      throw _privateConstructorUsedError;
+  AsyncValue<OutfitEntity?> get currentOutfit =>
       throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
@@ -36,8 +40,10 @@ abstract class $HomeStateCopyWith<$Res> {
       _$HomeStateCopyWithImpl<$Res, HomeState>;
   @useResult
   $Res call(
-      {AsyncState<List<RecommendationRow>> todayRecommendations,
-      AsyncState<List<WardrobeEntry>> wardrobeStats,
+      {AsyncValue<List<RecommendationRow>> todayRecommendations,
+      AsyncValue<List<WardrobeEntry>> wardrobeStats,
+      AsyncValue<WeatherEntity?> currentWeather,
+      AsyncValue<OutfitEntity?> currentOutfit,
       bool isLoading,
       String? error});
 }
@@ -59,6 +65,8 @@ class _$HomeStateCopyWithImpl<$Res, $Val extends HomeState>
   $Res call({
     Object? todayRecommendations = null,
     Object? wardrobeStats = null,
+    Object? currentWeather = null,
+    Object? currentOutfit = null,
     Object? isLoading = null,
     Object? error = freezed,
   }) {
@@ -66,11 +74,19 @@ class _$HomeStateCopyWithImpl<$Res, $Val extends HomeState>
       todayRecommendations: null == todayRecommendations
           ? _value.todayRecommendations
           : todayRecommendations // ignore: cast_nullable_to_non_nullable
-              as AsyncState<List<RecommendationRow>>,
+              as AsyncValue<List<RecommendationRow>>,
       wardrobeStats: null == wardrobeStats
           ? _value.wardrobeStats
           : wardrobeStats // ignore: cast_nullable_to_non_nullable
-              as AsyncState<List<WardrobeEntry>>,
+              as AsyncValue<List<WardrobeEntry>>,
+      currentWeather: null == currentWeather
+          ? _value.currentWeather
+          : currentWeather // ignore: cast_nullable_to_non_nullable
+              as AsyncValue<WeatherEntity?>,
+      currentOutfit: null == currentOutfit
+          ? _value.currentOutfit
+          : currentOutfit // ignore: cast_nullable_to_non_nullable
+              as AsyncValue<OutfitEntity?>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -92,8 +108,10 @@ abstract class _$$HomeStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {AsyncState<List<RecommendationRow>> todayRecommendations,
-      AsyncState<List<WardrobeEntry>> wardrobeStats,
+      {AsyncValue<List<RecommendationRow>> todayRecommendations,
+      AsyncValue<List<WardrobeEntry>> wardrobeStats,
+      AsyncValue<WeatherEntity?> currentWeather,
+      AsyncValue<OutfitEntity?> currentOutfit,
       bool isLoading,
       String? error});
 }
@@ -113,6 +131,8 @@ class __$$HomeStateImplCopyWithImpl<$Res>
   $Res call({
     Object? todayRecommendations = null,
     Object? wardrobeStats = null,
+    Object? currentWeather = null,
+    Object? currentOutfit = null,
     Object? isLoading = null,
     Object? error = freezed,
   }) {
@@ -120,11 +140,19 @@ class __$$HomeStateImplCopyWithImpl<$Res>
       todayRecommendations: null == todayRecommendations
           ? _value.todayRecommendations
           : todayRecommendations // ignore: cast_nullable_to_non_nullable
-              as AsyncState<List<RecommendationRow>>,
+              as AsyncValue<List<RecommendationRow>>,
       wardrobeStats: null == wardrobeStats
           ? _value.wardrobeStats
           : wardrobeStats // ignore: cast_nullable_to_non_nullable
-              as AsyncState<List<WardrobeEntry>>,
+              as AsyncValue<List<WardrobeEntry>>,
+      currentWeather: null == currentWeather
+          ? _value.currentWeather
+          : currentWeather // ignore: cast_nullable_to_non_nullable
+              as AsyncValue<WeatherEntity?>,
+      currentOutfit: null == currentOutfit
+          ? _value.currentOutfit
+          : currentOutfit // ignore: cast_nullable_to_non_nullable
+              as AsyncValue<OutfitEntity?>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -141,19 +169,26 @@ class __$$HomeStateImplCopyWithImpl<$Res>
 
 class _$HomeStateImpl extends _HomeState {
   const _$HomeStateImpl(
-      {this.todayRecommendations =
-          const AsyncLoading<List<RecommendationRow>>(),
-      this.wardrobeStats = const AsyncLoading<List<WardrobeEntry>>(),
+      {this.todayRecommendations = const AsyncValue.loading(),
+      this.wardrobeStats = const AsyncValue.loading(),
+      this.currentWeather = const AsyncValue.data(null),
+      this.currentOutfit = const AsyncValue.data(null),
       this.isLoading = false,
       this.error})
       : super._();
 
   @override
   @JsonKey()
-  final AsyncState<List<RecommendationRow>> todayRecommendations;
+  final AsyncValue<List<RecommendationRow>> todayRecommendations;
   @override
   @JsonKey()
-  final AsyncState<List<WardrobeEntry>> wardrobeStats;
+  final AsyncValue<List<WardrobeEntry>> wardrobeStats;
+  @override
+  @JsonKey()
+  final AsyncValue<WeatherEntity?> currentWeather;
+  @override
+  @JsonKey()
+  final AsyncValue<OutfitEntity?> currentOutfit;
   @override
   @JsonKey()
   final bool isLoading;
@@ -162,7 +197,7 @@ class _$HomeStateImpl extends _HomeState {
 
   @override
   String toString() {
-    return 'HomeState(todayRecommendations: $todayRecommendations, wardrobeStats: $wardrobeStats, isLoading: $isLoading, error: $error)';
+    return 'HomeState(todayRecommendations: $todayRecommendations, wardrobeStats: $wardrobeStats, currentWeather: $currentWeather, currentOutfit: $currentOutfit, isLoading: $isLoading, error: $error)';
   }
 
   @override
@@ -174,14 +209,18 @@ class _$HomeStateImpl extends _HomeState {
                 other.todayRecommendations == todayRecommendations) &&
             (identical(other.wardrobeStats, wardrobeStats) ||
                 other.wardrobeStats == wardrobeStats) &&
+            (identical(other.currentWeather, currentWeather) ||
+                other.currentWeather == currentWeather) &&
+            (identical(other.currentOutfit, currentOutfit) ||
+                other.currentOutfit == currentOutfit) &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, todayRecommendations, wardrobeStats, isLoading, error);
+  int get hashCode => Object.hash(runtimeType, todayRecommendations,
+      wardrobeStats, currentWeather, currentOutfit, isLoading, error);
 
   /// Create a copy of HomeState
   /// with the given fields replaced by the non-null parameter values.
@@ -194,16 +233,22 @@ class _$HomeStateImpl extends _HomeState {
 
 abstract class _HomeState extends HomeState {
   const factory _HomeState(
-      {final AsyncState<List<RecommendationRow>> todayRecommendations,
-      final AsyncState<List<WardrobeEntry>> wardrobeStats,
+      {final AsyncValue<List<RecommendationRow>> todayRecommendations,
+      final AsyncValue<List<WardrobeEntry>> wardrobeStats,
+      final AsyncValue<WeatherEntity?> currentWeather,
+      final AsyncValue<OutfitEntity?> currentOutfit,
       final bool isLoading,
       final String? error}) = _$HomeStateImpl;
   const _HomeState._() : super._();
 
   @override
-  AsyncState<List<RecommendationRow>> get todayRecommendations;
+  AsyncValue<List<RecommendationRow>> get todayRecommendations;
   @override
-  AsyncState<List<WardrobeEntry>> get wardrobeStats;
+  AsyncValue<List<WardrobeEntry>> get wardrobeStats;
+  @override
+  AsyncValue<WeatherEntity?> get currentWeather;
+  @override
+  AsyncValue<OutfitEntity?> get currentOutfit;
   @override
   bool get isLoading;
   @override

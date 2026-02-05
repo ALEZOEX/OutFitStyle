@@ -3,14 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:outfitstyle_client/app/di.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
 import 'package:outfitstyle_client/data/repositories/wardrobe_repository.dart';
-import 'package:outfitstyle_client/domain/states/async_state.dart' as app_state;
-import 'package:outfitstyle_client/features/wardrobe/presentation/wardrobe_controller.dart';
 
 class MockWardrobeRepository extends Mock implements WardrobeRepository {}
 
-class FakeWardrobeEntry extends Fake implements WardrobeEntry {}
+class FakeWardrobeEntry extends Fake implements domain.WardrobeEntry {}
 
 void main() {
   late ProviderContainer container;
@@ -40,7 +38,7 @@ void main() {
 
   test('wardrobeControllerProvider: initial state is loading', () {
     final state = container.read(wardrobeControllerProvider);
-    expect(state, isA<app_state.AsyncLoading<List<WardrobeEntry>>>());
+    expect(state.wardrobeItems, const AsyncValue<List<domain.WardrobeEntry>>.loading());
   });
 
   test('wardrobeStreamProvider: emits items from repository', () async {
@@ -65,31 +63,31 @@ void main() {
     );
   });
 
-  test('toggleFavorite delegates to repository', () async {
+  test('toggleFavorite updates item in repository', () async {
     final e = _entry('1');
-    when(() => repo.toggleFavorite(any())).thenAnswer((_) async {});
+    when(() => repo.updateOne(any())).thenAnswer((_) async {});
 
     await container.read(wardrobeControllerProvider.notifier).toggleFavorite(e);
 
-    verify(() => repo.toggleFavorite(e)).called(1);
+    verify(() => repo.updateOne(any())).called(1);
   });
 
-  test('toggleArchived delegates to repository', () async {
+  test('toggleArchived updates item in repository', () async {
     final e = _entry('1');
-    when(() => repo.toggleArchived(any())).thenAnswer((_) async {});
+    when(() => repo.updateOne(any())).thenAnswer((_) async {});
 
     await container.read(wardrobeControllerProvider.notifier).toggleArchived(e);
 
-    verify(() => repo.toggleArchived(e)).called(1);
+    verify(() => repo.updateOne(any())).called(1);
   });
 
-  test('markWorn delegates to repository', () async {
+  test('markWorn updates item in repository', () async {
     final e = _entry('1');
-    when(() => repo.markWorn(any())).thenAnswer((_) async {});
+    when(() => repo.updateOne(any())).thenAnswer((_) async {});
 
     await container.read(wardrobeControllerProvider.notifier).markWorn(e);
 
-    verify(() => repo.markWorn(e)).called(1);
+    verify(() => repo.updateOne(any())).called(1);
   });
 
   test('prefetchImages calls repo.prefetchMissingImages(limit: 40)', () async {
@@ -102,7 +100,7 @@ void main() {
   });
 }
 
-WardrobeEntry _entry(String id) => WardrobeEntry(
+domain.WardrobeEntry _entry(String id) => domain.WardrobeEntry(
       id: id,
       name: 'Item $id',
       category: 'tops',

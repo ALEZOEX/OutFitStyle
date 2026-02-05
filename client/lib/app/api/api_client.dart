@@ -34,6 +34,46 @@ class ApiClient {
 
   Dio get raw => _dio;
 
+  // GET-запрос
+  Future<Response> get(String path, {Map<String, dynamic>? params}) async {
+    try {
+      final response = await _dio.get(path, queryParameters: params);
+      return response;
+    } on DioException catch (e) {
+      throw mapError(e);
+    }
+  }
+
+  // POST-запрос
+  Future<Response> post(String path, {dynamic data}) async {
+    try {
+      final response = await _dio.post(path, data: data);
+      return response;
+    } on DioException catch (e) {
+      throw mapError(e);
+    }
+  }
+
+  // PUT-запрос
+  Future<Response> put(String path, {dynamic data}) async {
+    try {
+      final response = await _dio.put(path, data: data);
+      return response;
+    } on DioException catch (e) {
+      throw mapError(e);
+    }
+  }
+
+  // DELETE-запрос
+  Future<Response> delete(String path) async {
+    try {
+      final response = await _dio.delete(path);
+      return response;
+    } on DioException catch (e) {
+      throw mapError(e);
+    }
+  }
+
   Object mapError(Object e) {
     if (e is DioException) {
       if (e.type == DioExceptionType.connectionTimeout ||

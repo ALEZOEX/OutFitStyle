@@ -1,14 +1,18 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/di.dart';
-import '../../../ui/atoms/haptics.dart';
-import '../../../ui/atoms/outfit_app_bar.dart';
-import '../../../ui/atoms/skeleton.dart';
-import '../../../domain/entities/recommendation_entity.dart';
-import '../../../domain/entities/wardrobe_entity.dart';
-import '../recommendations_controller.dart';
-import '../wardrobe/wardrobe_controller.dart';
+import 'package:outfitstyle_client/app/di.dart';
+import 'package:outfitstyle_client/ui/atoms/haptics.dart';
+import 'package:outfitstyle_client/ui/atoms/outfit_app_bar.dart';
+import 'package:outfitstyle_client/domain/entities/recommendation_entity.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+
+final recommendationByIdProvider =
+    StreamProvider.autoDispose.family<RecommendationRow, String>((ref, id) {
+  final repo = ref.watch(recommendationsRepositoryProvider);
+  return repo.watchById(id).map((event) => event!);
+});
 
 class RecommendationWardrobeIntegrationScreen extends ConsumerWidget {
   final String recommendationId;
@@ -26,7 +30,7 @@ class RecommendationWardrobeIntegrationScreen extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: OutfitAppBar(title: const Text('Интеграция')),
+        appBar: OutfitAppBar(title: 'Интеграция'),
         body: Center(child: Text('Ошибка: $e')),
       ),
       data: (recommendation) {
@@ -35,7 +39,7 @@ class RecommendationWardrobeIntegrationScreen extends ConsumerWidget {
             body: Center(child: CircularProgressIndicator()),
           ),
           error: (e, _) => Scaffold(
-            appBar: OutfitAppBar(title: const Text('Интеграция')),
+            appBar: OutfitAppBar(title: 'Интеграция'),
             body: Center(child: Text('Ошибка гардероба: $e')),
           ),
           data: (wardrobe) {
@@ -52,7 +56,7 @@ class RecommendationWardrobeIntegrationScreen extends ConsumerWidget {
 
 class _IntegrationContent extends ConsumerStatefulWidget {
   final RecommendationRow recommendation;
-  final List<WardrobeEntry> wardrobe;
+  final List<domain.WardrobeEntry> wardrobe;
   const _IntegrationContent(
       {required this.recommendation, required this.wardrobe});
 
@@ -62,7 +66,7 @@ class _IntegrationContent extends ConsumerStatefulWidget {
 }
 
 class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
-  final Map<String, WardrobeEntry?> _replacements = {};
+  final Map<String, domain.WardrobeEntry?> _replacements = {};
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +84,7 @@ class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
     }
 
     // Группируем вещи из гардероба по категориям
-    final wardrobeByCategory = <String, List<WardrobeEntry>>{};
+    final wardrobeByCategory = <String, List<domain.WardrobeEntry>>{};
     for (final item in wardrobe.where((w) => !w.isArchived)) {
       wardrobeByCategory.putIfAbsent(item.category, () => []).add(item);
     }
@@ -307,8 +311,8 @@ class _OutfitPreview extends StatelessWidget {
 class _CategoryReplacementSection extends StatelessWidget {
   final String category;
   final List<Map<String, dynamic>> originalItems;
-  final List<WardrobeEntry> wardrobeItems;
-  final void Function(WardrobeEntry? replacement) onReplace;
+  final List<domain.WardrobeEntry> wardrobeItems;
+  final void Function(domain.WardrobeEntry? replacement) onReplace;
   const _CategoryReplacementSection({
     required this.category,
     required this.originalItems,
@@ -433,7 +437,7 @@ class _WardrobeItemChip extends StatelessWidget {
 
 class _CombinedOutfitPreview extends ConsumerWidget {
   final List<Map<String, dynamic>> originalLines;
-  final Map<String, WardrobeEntry?> replacements;
+  final Map<String, domain.WardrobeEntry?> replacements;
   const _CombinedOutfitPreview(
       {required this.originalLines, required this.replacements});
 

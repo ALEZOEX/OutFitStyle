@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../data/local/app_database.dart';
 import '../../../../domain/entities/recommendation_entity.dart';
 import 'outfit_collage_interactive.dart';
 

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'di.dart';
+import '../core/sync/sync_manager.dart';
 
 class SyncBootstrapper extends ConsumerWidget {
   final Widget child;
@@ -9,13 +10,23 @@ class SyncBootstrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Запускаем синхронизацию при инициализации
-    useEffect(() {
-      // Запускаем синхронизацию при запуске приложения
-      ref.read(syncWorkerProvider).startSync();
+    // Инициализирует SyncManager с необходимыми зависимостями
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final syncWorker = ref.read(syncWorkerProvider);
+      final profileRepository = ref.read(profileRepositoryProvider);
+      final wardrobeRepository = ref.read(wardrobeRepositoryProvider);
+      final recommendationsRepository = ref.read(recommendationsRepositoryProvider);
 
-      return null;
-    }, const []);
+      await SyncManager().initialize(
+        syncWorker: syncWorker,
+        profileRepository: profileRepository,
+        wardrobeRepository: wardrobeRepository,
+        recommendationsRepository: recommendationsRepository,
+      );
+
+      // Запускает начальную синхронизацию
+      syncWorker.startSync();
+    });
 
     return child;
   }

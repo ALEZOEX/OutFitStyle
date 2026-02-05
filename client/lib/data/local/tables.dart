@@ -65,9 +65,6 @@ class SyncOutbox extends Table {
   TextColumn get payload => text()();
   DateTimeColumn get createdAt => dateTime()();
   BoolColumn get synced => boolean()();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }
 
 // Таблица для хранения настроек
