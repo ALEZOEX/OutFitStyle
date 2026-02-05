@@ -1,15 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/di.dart';
-import '../../../ui/atoms/haptics.dart';
-import '../../../ui/atoms/outfit_app_bar.dart';
-import '../../../ui/atoms/skeleton.dart';
-import 'wardrobe_controller.dart';
+import 'package:outfitstyle_client/app/di.dart';
+import 'package:outfitstyle_client/ui/atoms/haptics.dart';
+import 'package:outfitstyle_client/ui/atoms/outfit_app_bar.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+import 'package:cached_network_image/cached_network_image.dart';
 
 final wardrobeItemByIdProvider =
-    StreamProvider.autoDispose.family<WardrobeEntry?, String>((ref, id) {
+    StreamProvider.autoDispose.family<domain.WardrobeEntry?, String>((ref, id) {
   final repo = ref.watch(wardrobeRepositoryProvider);
   return repo.watchById(id);
 });
@@ -25,11 +26,11 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
 
     return itemAsync.when(
       loading: () => Scaffold(
-        appBar: OutfitAppBar(title: const Text('Вещь')),
+        appBar: OutfitAppBar(title: 'Вещь'),
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: OutfitAppBar(title: const Text('Вещь')),
+        appBar: OutfitAppBar(title: 'Вещь'),
         body: Center(child: Text('Ошибка: $e')),
       ),
       data: (item) {
@@ -66,25 +67,31 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                   height: 200,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    image: item.localImagePath != null
-                        ? DecorationImage(
-                            image: FileImage(File(item.localImagePath!)),
-                            fit: BoxFit.cover,
-                          )
-                        : item.imageUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(item.imageUrl!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
                     color:
                         Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
-                  child: item.localImagePath == null && item.imageUrl == null
-                      ? Center(
+                  child: item.localImagePath != null
+                      ? Image.file(
+                          File(item.localImagePath!),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        )
+                      : item.imageUrl != null
+                          ? CachedNetworkImage(
+                              imageUrl: item.imageUrl!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              placeholder: (context, url) =>
+                                const Center(child: CircularProgressIndicator()),
+                              errorWidget: (context, url, error) =>
+                                Center(child: Text(item.iconEmoji,
+                                    style: const TextStyle(fontSize: 64))),
+                            )
+                      : Center(
                           child: Text(item.iconEmoji,
-                              style: const TextStyle(fontSize: 64)))
-                      : null,
+                              style: const TextStyle(fontSize: 64))),
                 )
               else
                 Container(
@@ -125,10 +132,10 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
                 title: 'Основная информация',
                 children: [
                   _InfoRow(label: 'Стиль', value: item.style),
-                  _InfoRow(label: 'Сезон', value: item.season),
-                  _InfoRow(label: 'Пол', value: item.gender),
-                  _InfoRow(label: 'Посадка', value: item.fit),
-                  _InfoRow(label: 'Узор', value: item.pattern),
+                  _InfoRow(label: 'Сезон', value: item.season ?? ''),
+                  _InfoRow(label: 'Пол', value: item.gender ?? ''),
+                  _InfoRow(label: 'Посадка', value: item.fit ?? ''),
+                  _InfoRow(label: 'Узор', value: item.pattern ?? ''),
                 ],
               ),
               const SizedBox(height: 16),
@@ -175,22 +182,24 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
               _InfoCard(
                 title: 'Назначение и материалы',
                 children: [
-                  if (item.usage.isNotEmpty)
+                  if (item.usage != null && item.usage!.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Wrap(
                         spacing: 8,
-                        children: item.usage
+                        children: item.usage!
+                            .split(',')
                             .map((u) => Chip(label: Text(_translateUsage(u))))
                             .toList(),
                       ),
                     ),
-                  if (item.materials.isNotEmpty)
+                  if (item.materials != null && item.materials!.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Wrap(
                         spacing: 8,
-                        children: item.materials
+                        children: item.materials!
+                            .split(',')
                             .map(
                                 (m) => Chip(label: Text(_translateMaterial(m))))
                             .toList(),

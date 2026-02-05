@@ -16,7 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$WardrobeState {
-  AsyncState<List<WardrobeEntry>> get wardrobeItems =>
+  AsyncValue<List<WardrobeEntry>> get wardrobeItems =>
       throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
@@ -35,7 +35,7 @@ abstract class $WardrobeStateCopyWith<$Res> {
       _$WardrobeStateCopyWithImpl<$Res, WardrobeState>;
   @useResult
   $Res call(
-      {AsyncState<List<WardrobeEntry>> wardrobeItems,
+      {AsyncValue<List<WardrobeEntry>> wardrobeItems,
       bool isLoading,
       String? error});
 }
@@ -63,7 +63,7 @@ class _$WardrobeStateCopyWithImpl<$Res, $Val extends WardrobeState>
       wardrobeItems: null == wardrobeItems
           ? _value.wardrobeItems
           : wardrobeItems // ignore: cast_nullable_to_non_nullable
-              as AsyncState<List<WardrobeEntry>>,
+              as AsyncValue<List<WardrobeEntry>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -85,7 +85,7 @@ abstract class _$$WardrobeStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {AsyncState<List<WardrobeEntry>> wardrobeItems,
+      {AsyncValue<List<WardrobeEntry>> wardrobeItems,
       bool isLoading,
       String? error});
 }
@@ -111,7 +111,7 @@ class __$$WardrobeStateImplCopyWithImpl<$Res>
       wardrobeItems: null == wardrobeItems
           ? _value.wardrobeItems
           : wardrobeItems // ignore: cast_nullable_to_non_nullable
-              as AsyncState<List<WardrobeEntry>>,
+              as AsyncValue<List<WardrobeEntry>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -128,14 +128,14 @@ class __$$WardrobeStateImplCopyWithImpl<$Res>
 
 class _$WardrobeStateImpl extends _WardrobeState {
   const _$WardrobeStateImpl(
-      {this.wardrobeItems = const AsyncLoading<List<WardrobeEntry>>(),
+      {this.wardrobeItems = const AsyncValue.loading(),
       this.isLoading = false,
       this.error})
       : super._();
 
   @override
   @JsonKey()
-  final AsyncState<List<WardrobeEntry>> wardrobeItems;
+  final AsyncValue<List<WardrobeEntry>> wardrobeItems;
   @override
   @JsonKey()
   final bool isLoading;
@@ -173,13 +173,13 @@ class _$WardrobeStateImpl extends _WardrobeState {
 
 abstract class _WardrobeState extends WardrobeState {
   const factory _WardrobeState(
-      {final AsyncState<List<WardrobeEntry>> wardrobeItems,
+      {final AsyncValue<List<WardrobeEntry>> wardrobeItems,
       final bool isLoading,
       final String? error}) = _$WardrobeStateImpl;
   const _WardrobeState._() : super._();
 
   @override
-  AsyncState<List<WardrobeEntry>> get wardrobeItems;
+  AsyncValue<List<WardrobeEntry>> get wardrobeItems;
   @override
   bool get isLoading;
   @override

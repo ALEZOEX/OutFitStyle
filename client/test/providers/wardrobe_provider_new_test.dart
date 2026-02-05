@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:outfitstyle_client/data/repositories/wardrobe_repository.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart';
-import 'package:outfitstyle_client/features/wardrobe/presentation/wardrobe_controller.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
 import 'package:outfitstyle_client/app/di.dart';
-import 'package:outfitstyle_client/domain/states/async_state.dart' as app_state;
 
 class MockWardrobeRepository extends Mock implements WardrobeRepository {}
 
@@ -23,7 +21,7 @@ void main() {
 
     when(() => mockRepository.watchWardrobe(
             includeArchived: any(named: 'includeArchived')))
-        .thenAnswer((_) => Stream.value(<WardrobeEntry>[]));
+        .thenAnswer((_) => Stream.value(<domain.WardrobeEntry>[]));
 
     container = ProviderContainer(
       overrides: [
@@ -39,7 +37,7 @@ void main() {
   group('WardrobeController', () {
     test('initial state is AsyncLoading', () {
       final state = container.read(wardrobeControllerProvider);
-      expect(state, isA<app_state.AsyncLoading>());
+      expect(state.wardrobeItems, const AsyncValue<List<domain.WardrobeEntry>>.loading());
     });
 
     test('sync calls syncFromServer', () async {
@@ -50,35 +48,35 @@ void main() {
       verify(() => mockRepository.syncFromServer()).called(1);
     });
 
-    test('toggleFavorite delegates to repository', () async {
+    test('toggleFavorite updates item in repository', () async {
       final item = _entry('1');
-      when(() => mockRepository.toggleFavorite(any())).thenAnswer((_) async {});
+      when(() => mockRepository.updateOne(any())).thenAnswer((_) async {});
 
       await container
           .read(wardrobeControllerProvider.notifier)
           .toggleFavorite(item);
 
-      verify(() => mockRepository.toggleFavorite(item)).called(1);
+      verify(() => mockRepository.updateOne(any())).called(1);
     });
 
-    test('toggleArchived delegates to repository', () async {
+    test('toggleArchived updates item in repository', () async {
       final item = _entry('1');
-      when(() => mockRepository.toggleArchived(any())).thenAnswer((_) async {});
+      when(() => mockRepository.updateOne(any())).thenAnswer((_) async {});
 
       await container
           .read(wardrobeControllerProvider.notifier)
           .toggleArchived(item);
 
-      verify(() => mockRepository.toggleArchived(item)).called(1);
+      verify(() => mockRepository.updateOne(any())).called(1);
     });
 
-    test('markWorn delegates to repository', () async {
+    test('markWorn updates item in repository', () async {
       final item = _entry('1');
-      when(() => mockRepository.markWorn(any())).thenAnswer((_) async {});
+      when(() => mockRepository.updateOne(any())).thenAnswer((_) async {});
 
       await container.read(wardrobeControllerProvider.notifier).markWorn(item);
 
-      verify(() => mockRepository.markWorn(item)).called(1);
+      verify(() => mockRepository.updateOne(any())).called(1);
     });
 
     test('prefetchImages calls with limit 40', () async {
@@ -116,12 +114,12 @@ void main() {
   });
 }
 
-WardrobeEntry _entry(
+domain.WardrobeEntry _entry(
   String id, {
   String category = 'tops',
   bool isFavorite = false,
 }) {
-  return WardrobeEntry(
+  return domain.WardrobeEntry(
     id: id,
     name: 'Item $id',
     category: category,

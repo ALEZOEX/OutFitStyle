@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../../data/local/app_database.dart';
+import '../../../../domain/entities/wardrobe_entity.dart' as domain;
 import '../../../../ui/atoms/haptics.dart';
 
 class CategorySwipeReplacer extends StatefulWidget {
   final String category;
   final Map<String, dynamic> original;
-  final List<WardrobeEntry> alternatives;
+  final List<domain.WardrobeEntry> alternatives;
 
-  final WardrobeEntry? selected;
-  final void Function(WardrobeEntry? picked) onSelected;
+  final domain.WardrobeEntry? selected;
+  final void Function(domain.WardrobeEntry? picked) onSelected;
 
   const CategorySwipeReplacer({
     super.key,
@@ -137,12 +137,12 @@ class _CategorySwipeReplacerState extends State<CategorySwipeReplacer> {
 class _PickPage {
   final String icon;
   final String name;
-  final WardrobeEntry? alt;
+  final domain.WardrobeEntry? alt;
 
   _PickPage._(this.icon, this.name, this.alt);
 
   factory _PickPage.original({required String icon, required String name}) =>
       _PickPage._(icon, name, null);
 
-  factory _PickPage.alt(WardrobeEntry w) => _PickPage._(w.iconEmoji, w.name, w);
+  factory _PickPage.alt(domain.WardrobeEntry w) => _PickPage._(w.iconEmoji, w.name, w);
 }

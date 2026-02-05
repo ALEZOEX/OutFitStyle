@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +30,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final todayRecAsync = ref.watch(homeTodayRecProvider);
-    final error = ref.watch(homeControllerProvider);
 
     return Scaffold(
       appBar: OutfitAppBar(
@@ -48,25 +48,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
         children: [
-          if (error != null) ...[
-            Text(
-              'Ошибка синхронизации: $error',
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-            const SizedBox(height: 8),
-          ],
 
           // Погода
           todayRecAsync.when(
             loading: () =>
                 const SkeletonBox(width: double.infinity, height: 110),
             error: (e, _) => _InlineError(text: e.toString()),
-            data: (rec) {
-              if (rec == null)
+            data: (recList) {
+              if (recList.isEmpty) {
                 return const SkeletonBox(width: double.infinity, height: 110);
+              }
+
               final ctl = ref.read(homeControllerProvider.notifier);
-              final weather = ctl.parseWeather(rec);
-              return WeatherCard(weather: weather);
+              ctl.handleNewRecommendation(recList.first);
+
+              final weather = ctl.currentWeather;
+              if (weather != null) {
+                return WeatherCard(weather: weather.toJson());
+              } else {
+                return const SkeletonBox(width: double.infinity, height: 110);
+              }
             },
           ),
 
@@ -79,22 +80,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               loading: () => const SkeletonBox(
                   width: double.infinity, height: double.infinity),
               error: (e, _) => _InlineError(text: e.toString()),
-              data: (rec) {
-                if (rec == null) {
+              data: (recList) {
+                if (recList.isEmpty) {
                   return const SkeletonBox(
                       width: double.infinity, height: double.infinity);
                 }
-                final ctl = ref.read(homeControllerProvider.notifier);
-                final outfit = ctl.parseOutfit(rec);
 
-                return OutfitOfDayCard(
-                  recommendation: rec,
-                  outfitData: outfit,
-                  onLike: () async {
-                    Haptics.selection();
-                    await ctl.toggleFavorite(rec);
-                  },
-                );
+                final ctl = ref.read(homeControllerProvider.notifier);
+                ctl.handleNewRecommendation(recList.first);
+
+                final outfitData = ctl.currentOutfit;
+                if (outfitData != null) {
+                  return OutfitOfDayCard(
+                    recommendation: recList.first,
+                    outfitData: jsonDecode(recList.first.outfitDataJson) as Map<String, dynamic>,
+                    onLike: () async {
+                      Haptics.selection();
+                      await ctl.toggleFavorite(recList.first.id);
+                    },
+                  );
+                } else {
+                  return const SkeletonBox(
+                      width: double.infinity, height: double.infinity);
+                }
               },
             ),
           ),

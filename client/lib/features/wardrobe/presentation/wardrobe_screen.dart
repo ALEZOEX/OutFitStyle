@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
 import '../../../ui/atoms/skeleton.dart';
-import 'wardrobe_controller.dart';
 import 'widgets/wardrobe_grid_item.dart';
 
 class WardrobeScreen extends ConsumerStatefulWidget {
@@ -21,9 +21,12 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(wardrobeControllerProvider.notifier).sync();
+
       // Загружаем изображения для кэширования
+      // Получаем список элементов гардероба и передаем его в prefetchImages
       // ignore: discarded_futures
-      ref.read(wardrobeControllerProvider.notifier).prefetchImages();
+      final items = await ref.read(wardrobeRepositoryProvider).getAll();
+      ref.read(wardrobeControllerProvider.notifier).prefetchImages(items);
     });
   }
 

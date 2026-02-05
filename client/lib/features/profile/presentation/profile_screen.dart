@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../app/di.dart';
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
-import '../../../ui/atoms/skeleton.dart';
-import 'profile_controller.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/di.dart';
-import '../../../ui/atoms/haptics.dart';
-import '../../../ui/atoms/outfit_app_bar.dart';
-import '../../../ui/design_system/outfit_style_components.dart';
+import 'package:outfitstyle_client/app/di.dart';
+import 'package:outfitstyle_client/ui/atoms/haptics.dart';
+import 'package:outfitstyle_client/ui/atoms/outfit_app_bar.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe_request_entities.dart';
 
 class AddWardrobeItemScreen extends ConsumerStatefulWidget {
   const AddWardrobeItemScreen({super.key});
@@ -26,7 +26,6 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   String _gender = 'unisex';
   String _fit = 'regular';
   String _pattern = 'solid';
-  String? _baseColour;
   int? _formalityLevel;
   int? _warmthLevel;
   int? _minTemp;
@@ -36,8 +35,8 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   bool _snowOk = false;
   bool _windOk = false;
 
-  List<String> _usage = [];
-  List<String> _materials = [];
+  final List<String> _usage = [];
+  final List<String> _materials = [];
 
   @override
   void dispose() {
@@ -322,7 +321,7 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
           labelText: 'Цвет',
           prefixIcon: Icon(Icons.palette_rounded),
         ),
-        onChanged: (value) => _baseColour = value,
+        onChanged: (value) {},
       ),
     );
   }
@@ -618,21 +617,24 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
         category: _category,
         subcategory: _subcategory,
         style: _style,
+        iconEmoji: '👕', // Default icon, could be made configurable
         season: _season,
         gender: _gender,
-        baseColour: _baseColour,
-        formalityLevel: _formalityLevel,
-        warmthLevel: _warmthLevel,
-        minTemp: _minTemp,
-        maxTemp: _maxTemp,
         rainOk: _rainOk,
         snowOk: _snowOk,
         windOk: _windOk,
-        usage: _usage,
-        materials: _materials,
+        minTemp: _minTemp,
+        maxTemp: _maxTemp,
+        warmthLevel: _warmthLevel,
+        usage: _usage.join(','), // Convert list to comma-separated string
+        materials: _materials.join(','), // Convert list to comma-separated string
+        isFavorite: false,
+        isArchived: false,
         fit: _fit,
         pattern: _pattern,
-        notes: _notesController.text,
+        localImagePath: null, // Could be added later if image selection is implemented
+        imageUrl: null, // Could be added later if image selection is implemented
+        blurHash: null, // Could be added later if image selection is implemented
       );
 
       final repo = ref.read(wardrobeRepositoryProvider);

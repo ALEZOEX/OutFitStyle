@@ -5,14 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/di.dart';
 import '../../../../ui/atoms/haptics.dart';
 import '../../../../ui/atoms/outfit_app_bar.dart';
-import '../../../../domain/entities/wardrobe_entity.dart';
+import '../../../../domain/entities/wardrobe_entity.dart' as domain;
 import '../../../../domain/entities/recommendation_entity.dart';
 
 final _wardrobeByCategoryProvider =
-    FutureProvider<Map<String, List<WardrobeEntry>>>((ref) async {
+    FutureProvider<Map<String, List<domain.WardrobeEntry>>>((ref) async {
   final repo = ref.watch(wardrobeRepositoryProvider);
   final items = await repo.watchWardrobe(includeArchived: false).first;
-  final byCat = <String, List<WardrobeEntry>>{};
+  final byCat = <String, List<domain.WardrobeEntry>>{};
 
   for (final item in items) {
     byCat.putIfAbsent(item.category, () => []).add(item);
@@ -47,10 +47,11 @@ class WardrobeRecommendationIntegration extends ConsumerWidget {
               // Сохранить рекомендацию как избранную
               final row = RecommendationRow(
                 id: recommendationId,
-                createdAt: DateTime.now(),
-                isFavorite: true,
+                origin: 'local',
                 outfitDataJson: jsonEncode(outfitData),
                 weatherDataJson: jsonEncode(weatherData),
+                isFavorite: true,
+                createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
                 dirty: false,
                 lastSyncedAt: DateTime.now(),
@@ -100,13 +101,16 @@ class WardrobeRecommendationIntegration extends ConsumerWidget {
                     'outfit': finalLines,
                   };
 
-                  final newId = await ref
+                  final newRow = await ref
                       .read(recommendationsRepositoryProvider)
                       .saveLocalOutfit(
                         outfitData: finalOutfit,
                         weatherData: weatherData,
-                        favorite: true,
                       );
+                  final newId = newRow.id;
+
+                  // Set as favorite after saving
+                  await ref.read(recommendationsRepositoryProvider).setFavorite(newId, true);
 
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -179,7 +183,7 @@ class _WeatherCard extends StatelessWidget {
 
 class _RecommendationComposition extends StatelessWidget {
   final List<Map<String, dynamic>> lines;
-  final Map<String, List<WardrobeEntry>> wardrobeByCategory;
+  final Map<String, List<domain.WardrobeEntry>> wardrobeByCategory;
 
   const _RecommendationComposition({
     required this.lines,
@@ -203,7 +207,6 @@ class _RecommendationComposition extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ...lines.asMap().entries.map((entry) {
-              final index = entry.key;
               final item = entry.value;
               final category = (item['category'] ?? '').toString();
               final alternatives = wardrobeByCategory[category] ?? [];
@@ -284,7 +287,7 @@ class _RecommendationComposition extends StatelessWidget {
 
 class _WardrobeIntegrationSection extends StatefulWidget {
   final List<Map<String, dynamic>> lines;
-  final Map<String, List<WardrobeEntry>> wardrobeByCategory;
+  final Map<String, List<domain.WardrobeEntry>> wardrobeByCategory;
   final Function(List<Map<String, dynamic>>) onSave;
 
   const _WardrobeIntegrationSection({
@@ -300,7 +303,7 @@ class _WardrobeIntegrationSection extends StatefulWidget {
 
 class _WardrobeIntegrationSectionState
     extends State<_WardrobeIntegrationSection> {
-  final Map<String, WardrobeEntry?> _selections = {};
+  final Map<String, domain.WardrobeEntry?> _selections = {};
 
   @override
   void initState() {
@@ -350,7 +353,7 @@ class _WardrobeIntegrationSectionState
                     Row(
                       children: [
                         Expanded(
-                          child: SegmentedButton<WardrobeEntry?>(
+                          child: SegmentedButton<domain.WardrobeEntry?>(
                             segments: [
                               ButtonSegment(
                                 value: null,

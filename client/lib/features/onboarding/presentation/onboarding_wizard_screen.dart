@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/di.dart';
+import '../../../app/di.dart' hide onboardingStorageProvider, onboardingDoneProvider;
 import '../../../app/onboarding/onboarding_providers.dart';
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/design_system/outfit_style_components.dart';

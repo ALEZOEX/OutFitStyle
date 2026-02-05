@@ -1,18 +1,16 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
 import '../../../domain/entities/recommendation_entity.dart';
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
-import '../../../ui/atoms/skeleton.dart';
-import 'recommendations_controller.dart';
 
 final recommendationByIdProvider =
     StreamProvider.autoDispose.family<RecommendationRow?, String>((ref, id) {
-  final repo = ref.watch(recommendationsRepositoryProvider);
-  return repo.watchById(id);
+  final service = ref.watch(recommendationsDomainServiceProvider);
+  return service.watchById(id);
 });
 
 class RecommendationDetailScreen extends ConsumerWidget {
@@ -23,15 +21,15 @@ class RecommendationDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recommendationAsync =
         ref.watch(recommendationByIdProvider(recommendationId));
-    final controller = ref.read(recommendationsControllerProvider.notifier);
+    final service = ref.read(recommendationsDomainServiceProvider);
 
     return recommendationAsync.when(
       loading: () => Scaffold(
-        appBar: OutfitAppBar(title: const Text('Рекомендация')),
+        appBar: OutfitAppBar(title: 'Рекомендация'),
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: OutfitAppBar(title: const Text('Рекомендация')),
+        appBar: OutfitAppBar(title: 'Рекомендация'),
         body: Center(child: Text('Ошибка: $e')),
       ),
       data: (recommendation) {
@@ -48,7 +46,7 @@ class RecommendationDetailScreen extends ConsumerWidget {
               IconButton(
                 onPressed: () async {
                   Haptics.selection();
-                  await controller.toggleFavorite(recommendation);
+                  await service.toggleFavorite(recommendation);
                 },
                 icon: Icon(
                   recommendation.isFavorite

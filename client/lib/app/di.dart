@@ -1,14 +1,13 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
 import '../services/auth_storage.dart';
-import '../services/wardrobe_service.dart';
-import '../services/recommendation_service.dart';
 import '../domain/services/recommendations_domain_service.dart';
-import '../domain/services/wardrobe_service.dart'; // Обновленный импорт
+import '../domain/services/wardrobe_domain_service.dart'; // Обновленный импорт
 import '../domain/entities/recommendation_entity.dart';
 import '../domain/entities/wardrobe_entity.dart' as domain;
 import 'env.dart';
@@ -25,23 +24,17 @@ import '../data/repositories/auth_repository.dart';
 import '../data/repositories/profile_repository.dart';
 import '../data/image_store.dart';
 import '../features/recommendations/presentation/recommendations_controller.dart';
-import '../features/recommendations/presentation/recommendations_screen.dart';
-import '../features/recommendations/presentation/screens/recommendation_detail_screen.dart';
 import '../features/wardrobe/presentation/wardrobe_controller.dart';
-import '../features/wardrobe/presentation/wardrobe_screen.dart';
 import '../features/admin/presentation/admin_controller.dart';
-import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/profile/presentation/profile_controller.dart';
 import '../features/generator/presentation/generator_controller.dart';
 import '../domain/states/generator_state.dart';
-import '../features/home/presentation/home_controller.dart';
 import '../features/settings/presentation/settings_controller.dart';
 import '../features/auth/presentation/auth_controller.dart';
 import '../features/onboarding/presentation/onboarding_controller.dart';
 import '../storage/local_storage.dart';
 import '../domain/states/recommendations_state.dart';
 import '../domain/states/wardrobe_state.dart';
-import '../domain/states/home_state.dart';
 import '../domain/states/settings_state.dart';
 import '../domain/states/auth_state.dart';
 import '../domain/states/onboarding_state.dart';
@@ -74,22 +67,14 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 //   return AdminService(cfg, auth, http.Client());
 // });
 
-final wardrobeServiceProvider = Provider<WardrobeService>((ref) {
-  return WardrobeService(
-    apiConfig: ref.watch(apiConfigProvider),
-    authStorage: ref.watch(authStorageProvider),
-    httpClient: http.Client(),
-  );
-});
-
 final wardrobeRemoteDsProvider = Provider<WardrobeRemoteDataSource>((ref) {
-  return WardrobeRemoteDataSource(ref.watch(wardrobeServiceProvider));
+  return WardrobeRemoteDataSource(ref.watch(apiClientProvider));
 });
 
 final recommendationsRemoteDsProvider =
     Provider<RecommendationsRemoteDataSource>((ref) {
   return RecommendationsRemoteDataSource(
-      ref.watch(apiClientProvider), ref.watch(wardrobeRemoteDsProvider));
+      ref.watch(apiClientProvider));
 });
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -102,7 +87,6 @@ final wardrobeRepositoryProvider = Provider<WardrobeRepository>((ref) {
   return WardrobeRepository(
     ref.watch(appDatabaseProvider),
     ref.watch(wardrobeRemoteDsProvider),
-    ref.watch(imageStoreProvider),
   );
 });
 
@@ -118,7 +102,6 @@ final recommendationsDomainServiceProvider =
     Provider<RecommendationsDomainService>((ref) {
   return RecommendationsDomainService(
     ref.watch(recommendationsRepositoryProvider),
-    ref.watch(wardrobeRepositoryProvider),
   );
 });
 
@@ -184,10 +167,6 @@ final wardrobeControllerProvider =
   return WardrobeController(ref);
 });
 
-final homeControllerProvider =
-    StateNotifierProvider<HomeController, HomeState>((ref) {
-  return HomeController();
-});
 
 final settingsControllerProvider =
     StateNotifierProvider<SettingsController, SettingsState>((ref) {
@@ -222,6 +201,73 @@ final adminControllerProvider =
     StateNotifierProvider<AdminController, AdminState>((ref) {
   return AdminController();
 });
+
+// Добавляем недостающие провайдеры
+
+// Провайдер для сегодняшних рекомендаций
+final homeTodayRecProvider = StreamProvider<List<RecommendationRow>>((ref) {
+  final repo = ref.watch(recommendationsRepositoryProvider);
+  return repo.watchTodayLatest().map((rec) {
+    if (rec != null) {
+      return [rec];
+    } else {
+      // Если нет сегодняшней рекомендации, возвращаем пустой список
+      return [];
+    }
+  });
+});
+
+// Провайдер для потока рекомендаций
+final recommendationsStreamProvider = StreamProvider<List<RecommendationRow>>((ref) {
+  final repo = ref.watch(recommendationsRepositoryProvider);
+  return repo.watchHistory(limit: 50); // Ограничиваем количество для производительности
+});
+
+// Провайдеры для профиля пользователя
+final meProvider = FutureProvider.autoDispose((ref) async {
+  final repo = ref.watch(profileRepositoryProvider);
+  try {
+    return await repo.getMe();
+  } catch (e) {
+    // Возвращаем null или заглушку в случае ошибки
+    return null;
+  }
+});
+
+final isAdminProvider = FutureProvider.autoDispose((ref) async {
+  final user = await ref.watch(meProvider.future);
+  // В реальном приложении проверка админских прав будет зависеть от структуры пользователя
+  // Здесь используем простую проверку - если email содержит 'admin'
+  return user != null && (user['role'] == 'admin' || user['email']?.contains('admin') == true);
+});
+
+// Провайдер для управления темой
+final themeModeProvider = StateProvider((ref) => ThemeMode.system);
+
+// Провайдеры для онбординга
+final onboardingStorageProvider = Provider((ref) => LocalStorage.prefs);
+
+final onboardingDoneProvider = StateProvider<bool>((ref) {
+  // Получаем значение из хранилища
+  final storage = ref.watch(onboardingStorageProvider);
+  return storage.getBool('onboarding_done') ?? false;
+});
+
+// Административные провайдеры
+final adminStatsProvider = FutureProvider.autoDispose((ref) async {
+  final controller = ref.watch(adminControllerProvider.notifier);
+  // Вызываем метод контроллера для получения статистики
+  return await controller.getStats();
+});
+
+final adminUsersProvider = FutureProvider.autoDispose((ref) async {
+  final controller = ref.watch(adminControllerProvider.notifier);
+  // Вызываем метод контроллера для получения пользователей
+  return await controller.getUsers();
+});
+
+// Провайдер для генератора образов
+final generatorDeckProvider = StateProvider<List<RecommendationRow>>((ref) => []);
 
 final sessionProvider =
     NotifierProvider<SessionController, SessionStatus>(SessionController.new);

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../app/di.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../domain/states/auth_state.dart';
 
@@ -16,18 +17,11 @@ class AuthController extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final success = await _authRepository.login(email, password);
-      if (success) {
-        state = state.copyWith(
-          isLoading: false,
-          isAuthenticated: true,
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Invalid credentials',
-        );
-      }
+      await _authRepository.login(email: email, password: password);
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: true,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
