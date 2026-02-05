@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
 import '../../../domain/entities/recommendation_entity.dart';
@@ -7,7 +9,6 @@ import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
 import '../../../ui/atoms/skeleton.dart';
 import '../../../ui/atoms/like_burst.dart';
-import 'generator_controller.dart';
 import 'widgets/tinder_swipe_card.dart';
 import 'widgets/tinder_deck.dart';
 
@@ -101,10 +102,10 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen> {
                             if (decision == SwipeDecision.like) {
                               Haptics.success();
                               _burst.play();
-                              await controller.like(row);
+                              await controller.like(row.id);
                             } else {
                               Haptics.light();
-                              controller.dislike(row);
+                              controller.dislike(row.id);
                             }
                           },
                           cardBuilder: (row) => _OutfitCard(
@@ -245,15 +246,22 @@ class _OutfitCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final lines = _decode(row.outfitDataJson);
-    final weather = _decode(row.weatherDataJson);
+    final lines = _decodeOutfit(row.outfitDataJson);
+    final weather = _decodeWeather(row.weatherDataJson);
 
-    final temp = (weather['temp'] ?? weather['temperature'] ?? '').toString();
-    final cond = (weather['condition'] ??
+    final tempValue = weather['temp'] ?? weather['temperature'] ?? 0;
+    final temp = tempValue is int
+        ? tempValue
+        : (tempValue is String
+            ? int.tryParse(tempValue) ?? 0
+            : tempValue is double
+                ? tempValue.toInt()
+                : 0);
+    final condValue = (weather['condition'] ??
             weather['description'] ??
             weather['weather'] ??
-            '')
-        .toString();
+            '');
+    final cond = condValue.toString();
 
     return Hero(
       tag: heroTag,
@@ -288,7 +296,7 @@ class _OutfitCard extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    if (temp.isNotEmpty)
+                    if (temp != 0)
                       Text('$temp°',
                           style: const TextStyle(fontWeight: FontWeight.w800)),
                     const SizedBox(width: 10),
@@ -321,7 +329,19 @@ class _OutfitCard extends ConsumerWidget {
     );
   }
 
-  List<Map<String, dynamic>> _decode(String jsonStr) {
+  Map<String, dynamic> _decodeWeather(String jsonStr) {
+    try {
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  List<Map<String, dynamic>> _decodeOutfit(String jsonStr) {
     try {
       final decoded = jsonDecode(jsonStr);
       if (decoded is Map<String, dynamic>) {

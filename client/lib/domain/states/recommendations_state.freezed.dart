@@ -16,7 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$RecommendationsState {
-  AsyncState<List<RecommendationRow>> get recommendations =>
+  AsyncValue<List<RecommendationRow>> get recommendations =>
       throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
@@ -35,7 +35,7 @@ abstract class $RecommendationsStateCopyWith<$Res> {
       _$RecommendationsStateCopyWithImpl<$Res, RecommendationsState>;
   @useResult
   $Res call(
-      {AsyncState<List<RecommendationRow>> recommendations,
+      {AsyncValue<List<RecommendationRow>> recommendations,
       bool isLoading,
       String? error});
 }
@@ -64,7 +64,7 @@ class _$RecommendationsStateCopyWithImpl<$Res,
       recommendations: null == recommendations
           ? _value.recommendations
           : recommendations // ignore: cast_nullable_to_non_nullable
-              as AsyncState<List<RecommendationRow>>,
+              as AsyncValue<List<RecommendationRow>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -86,7 +86,7 @@ abstract class _$$RecommendationsStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {AsyncState<List<RecommendationRow>> recommendations,
+      {AsyncValue<List<RecommendationRow>> recommendations,
       bool isLoading,
       String? error});
 }
@@ -112,7 +112,7 @@ class __$$RecommendationsStateImplCopyWithImpl<$Res>
       recommendations: null == recommendations
           ? _value.recommendations
           : recommendations // ignore: cast_nullable_to_non_nullable
-              as AsyncState<List<RecommendationRow>>,
+              as AsyncValue<List<RecommendationRow>>,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -129,14 +129,14 @@ class __$$RecommendationsStateImplCopyWithImpl<$Res>
 
 class _$RecommendationsStateImpl extends _RecommendationsState {
   const _$RecommendationsStateImpl(
-      {this.recommendations = const AsyncLoading<List<RecommendationRow>>(),
+      {this.recommendations = const AsyncValue.loading(),
       this.isLoading = false,
       this.error})
       : super._();
 
   @override
   @JsonKey()
-  final AsyncState<List<RecommendationRow>> recommendations;
+  final AsyncValue<List<RecommendationRow>> recommendations;
   @override
   @JsonKey()
   final bool isLoading;
@@ -177,13 +177,13 @@ class _$RecommendationsStateImpl extends _RecommendationsState {
 
 abstract class _RecommendationsState extends RecommendationsState {
   const factory _RecommendationsState(
-      {final AsyncState<List<RecommendationRow>> recommendations,
+      {final AsyncValue<List<RecommendationRow>> recommendations,
       final bool isLoading,
       final String? error}) = _$RecommendationsStateImpl;
   const _RecommendationsState._() : super._();
 
   @override
-  AsyncState<List<RecommendationRow>> get recommendations;
+  AsyncValue<List<RecommendationRow>> get recommendations;
   @override
   bool get isLoading;
   @override

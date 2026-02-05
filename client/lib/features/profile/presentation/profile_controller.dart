@@ -16,12 +16,12 @@ class ProfileController extends StateNotifier<ProfileState> {
       // Load profile data from repository
       state = state.copyWith(
         isLoading: false,
-        profileData: const AsyncSuccess({}),
+        profileData: const AsyncValue.data(<String, dynamic>{}),
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: e.toString(),
+        profileData: AsyncValue.error(e, StackTrace.current),
       );
     }
   }

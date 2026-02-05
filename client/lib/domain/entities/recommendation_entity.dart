@@ -20,6 +20,7 @@ class Recommendations extends Table {
 }
 
 // Вспомогательные классы для работы с рекомендациями
+/// Сущность строки рекомендации, содержащая информацию об outfits и соответствующих данных
 class RecommendationRow {
   final String id;
   final String? serverId;

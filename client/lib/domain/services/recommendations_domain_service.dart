@@ -1,17 +1,14 @@
 import 'package:flutter/foundation.dart';
 
 import '../../data/repositories/recommendations_repository.dart';
-import '../../data/repositories/wardrobe_repository.dart';
 import '../entities/recommendation_entity.dart';
-import '../entities/wardrobe_entity.dart';
+import '../entities/wardrobe_entity.dart' as domain;
 
 class RecommendationsDomainService {
   final RecommendationsRepository _recommendationsRepository;
-  final WardrobeRepository _wardrobeRepository;
 
   RecommendationsDomainService(
     this._recommendationsRepository,
-    this._wardrobeRepository,
   );
 
   // Методы для работы с рекомендациями
@@ -49,7 +46,6 @@ class RecommendationsDomainService {
       {required String occasion}) async {
     // В реальной реализации вызываем API для генерации рекомендации
     // Здесь временная реализация
-    final now = DateTime.now();
     return await _recommendationsRepository.createLocal(
       outfitData: {"occasion": occasion},
       weatherData: {},
@@ -57,7 +53,7 @@ class RecommendationsDomainService {
   }
 
   Future<RecommendationRow> generateRecommendationWithItem({
-    required WardrobeEntry item,
+    required domain.WardrobeEntry item,
     required String occasion,
     bool includeWeather = true,
   }) async {

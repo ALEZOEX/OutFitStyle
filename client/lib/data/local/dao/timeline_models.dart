@@ -1,4 +1,3 @@
-import '../../../domain/entities/timeline_entity.dart';
 import '../../../domain/entities/recommendation_entity.dart';
 
 // Вспомогательный класс для DAO

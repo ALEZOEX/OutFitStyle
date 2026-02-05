@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/di.dart';
-import '../../../ui/atoms/haptics.dart';
-import '../../../ui/atoms/outfit_app_bar.dart';
-import '../../../ui/atoms/skeleton.dart';
-import '../../../domain/entities/wardrobe_entity.dart';
-import '../../../domain/entities/recommendation_entity.dart';
-import '../wardrobe/wardrobe_controller.dart';
-import '../recommendations/recommendations_controller.dart';
+import 'package:outfitstyle_client/app/di.dart';
+import 'package:outfitstyle_client/ui/atoms/haptics.dart';
+import 'package:outfitstyle_client/ui/atoms/outfit_app_bar.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+import 'package:outfitstyle_client/domain/services/recommendations_domain_service.dart';
 
 final wardrobeItemForRecommendationProvider =
-    FutureProvider.autoDispose.family<WardrobeEntry?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<domain.WardrobeEntry?, String>((ref, id) async {
   final service = ref.watch(wardrobeDomainServiceProvider);
   return await service.getById(id);
 });
@@ -29,17 +26,17 @@ class UseWardrobeItemInRecommendationScreen extends ConsumerWidget {
 
     return itemAsync.when(
       loading: () => Scaffold(
-        appBar: OutfitAppBar(title: const Text('Использовать в образе')),
+        appBar: OutfitAppBar(title: 'Использовать в образе'),
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: OutfitAppBar(title: const Text('Использовать в образе')),
+        appBar: OutfitAppBar(title: 'Использовать в образе'),
         body: Center(child: Text('Ошибка: $e')),
       ),
       data: (item) {
         if (item == null) {
           return Scaffold(
-            appBar: OutfitAppBar(title: const Text('Использовать в образе')),
+            appBar: OutfitAppBar(title: 'Использовать в образе'),
             body: const Center(child: Text('Вещь не найдена')),
           );
         }
@@ -50,7 +47,7 @@ class UseWardrobeItemInRecommendationScreen extends ConsumerWidget {
 }
 
 class _UseWardrobeItemContent extends ConsumerStatefulWidget {
-  final WardrobeEntry item;
+  final domain.WardrobeEntry item;
   final RecommendationsDomainService service;
   const _UseWardrobeItemContent({required this.item, required this.service});
 

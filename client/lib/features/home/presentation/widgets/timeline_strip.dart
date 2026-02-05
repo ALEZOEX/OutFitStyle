@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../app/di.dart';
-import '../../../ui/atoms/haptics.dart';
+import 'package:outfitstyle_client/app/di.dart';
+import 'package:outfitstyle_client/domain/entities/timeline_entity.dart';
+import 'package:outfitstyle_client/ui/atoms/haptics.dart';
+
+final selectedDayProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
 final timelineDaysProvider =
     StreamProvider.autoDispose<List<TimelineDay>>((ref) {
@@ -31,6 +34,7 @@ class TimelineStrip extends ConsumerWidget {
           itemBuilder: (_, i) {
             final day = days[i];
             final isToday = _isSameDay(day.date, DateTime.now());
+            final selectedDay = ref.watch(selectedDayProvider);
             final isSelected = _isSameDay(day.date, selectedDay);
 
             return TimelineDayCard(

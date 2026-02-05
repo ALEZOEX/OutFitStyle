@@ -5,12 +5,13 @@ import 'tables.dart';
 import 'dao/wardrobe_dao.dart';
 import 'dao/recommendation_dao.dart';
 import 'dao/sync_outbox_dao.dart';
+import 'dao/settings_dao.dart';
 
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [WardrobeEntries, Recommendations, SyncOutbox],
-  daos: [WardrobeDao, RecommendationDao, SyncOutboxDao],
+  tables: [WardrobeEntries, Recommendations, SyncOutbox, Settings],
+  daos: [WardrobeDao, RecommendationDao, SyncOutboxDao, SettingsDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'outfitstyle_db'));
