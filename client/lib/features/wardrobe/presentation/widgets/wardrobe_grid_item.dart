@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:outfitstyle_client/app/di.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe.dart';
 import 'package:outfitstyle_client/ui/atoms/haptics.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class WardrobeGridItem extends ConsumerWidget {
-  final WardrobeEntry entry;
+  final WardrobeItem entry;
   final VoidCallback? onFavorite;
   final VoidCallback? onArchive;
   final VoidCallback? onWorn;

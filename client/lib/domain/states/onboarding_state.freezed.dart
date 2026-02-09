@@ -1,5 +1,5 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,364 +9,447 @@ part of 'onboarding_state.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$OnboardingState {
-  int get currentStep;
-  bool get isComplete;
-  bool get isLoading;
-  String? get error;
-
-  /// Create a copy of OnboardingState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $OnboardingStateCopyWith<OnboardingState> get copyWith =>
-      _$OnboardingStateCopyWithImpl<OnboardingState>(
-          this as OnboardingState, _$identity);
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is OnboardingState &&
-            (identical(other.currentStep, currentStep) ||
-                other.currentStep == currentStep) &&
-            (identical(other.isComplete, isComplete) ||
-                other.isComplete == isComplete) &&
-            (identical(other.isLoading, isLoading) ||
-                other.isLoading == isLoading) &&
-            (identical(other.error, error) || other.error == error));
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, currentStep, isComplete, isLoading, error);
-
-  @override
-  String toString() {
-    return 'OnboardingState(currentStep: $currentStep, isComplete: $isComplete, isLoading: $isLoading, error: $error)';
-  }
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function(int step) inProgress,
+    required TResult Function() complete,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function(int step)? inProgress,
+    TResult? Function()? complete,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function(int step)? inProgress,
+    TResult Function()? complete,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(OnboardingInitial value) initial,
+    required TResult Function(OnboardingInProgress value) inProgress,
+    required TResult Function(OnboardingComplete value) complete,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OnboardingInitial value)? initial,
+    TResult? Function(OnboardingInProgress value)? inProgress,
+    TResult? Function(OnboardingComplete value)? complete,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(OnboardingInitial value)? initial,
+    TResult Function(OnboardingInProgress value)? inProgress,
+    TResult Function(OnboardingComplete value)? complete,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract mixin class $OnboardingStateCopyWith<$Res> {
+abstract class $OnboardingStateCopyWith<$Res> {
   factory $OnboardingStateCopyWith(
-          OnboardingState value, $Res Function(OnboardingState) _then) =
-      _$OnboardingStateCopyWithImpl;
-  @useResult
-  $Res call({int currentStep, bool isComplete, bool isLoading, String? error});
+          OnboardingState value, $Res Function(OnboardingState) then) =
+      _$OnboardingStateCopyWithImpl<$Res, OnboardingState>;
 }
 
 /// @nodoc
-class _$OnboardingStateCopyWithImpl<$Res>
+class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
     implements $OnboardingStateCopyWith<$Res> {
-  _$OnboardingStateCopyWithImpl(this._self, this._then);
+  _$OnboardingStateCopyWithImpl(this._value, this._then);
 
-  final OnboardingState _self;
-  final $Res Function(OnboardingState) _then;
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OnboardingState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+abstract class _$$OnboardingInitialImplCopyWith<$Res> {
+  factory _$$OnboardingInitialImplCopyWith(_$OnboardingInitialImpl value,
+          $Res Function(_$OnboardingInitialImpl) then) =
+      __$$OnboardingInitialImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$OnboardingInitialImplCopyWithImpl<$Res>
+    extends _$OnboardingStateCopyWithImpl<$Res, _$OnboardingInitialImpl>
+    implements _$$OnboardingInitialImplCopyWith<$Res> {
+  __$$OnboardingInitialImplCopyWithImpl(_$OnboardingInitialImpl _value,
+      $Res Function(_$OnboardingInitialImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OnboardingState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$OnboardingInitialImpl implements OnboardingInitial {
+  const _$OnboardingInitialImpl();
+
+  @override
+  String toString() {
+    return 'OnboardingState.initial()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$OnboardingInitialImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function(int step) inProgress,
+    required TResult Function() complete,
+  }) {
+    return initial();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function(int step)? inProgress,
+    TResult? Function()? complete,
+  }) {
+    return initial?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function(int step)? inProgress,
+    TResult Function()? complete,
+    required TResult orElse(),
+  }) {
+    if (initial != null) {
+      return initial();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(OnboardingInitial value) initial,
+    required TResult Function(OnboardingInProgress value) inProgress,
+    required TResult Function(OnboardingComplete value) complete,
+  }) {
+    return initial(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OnboardingInitial value)? initial,
+    TResult? Function(OnboardingInProgress value)? inProgress,
+    TResult? Function(OnboardingComplete value)? complete,
+  }) {
+    return initial?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(OnboardingInitial value)? initial,
+    TResult Function(OnboardingInProgress value)? inProgress,
+    TResult Function(OnboardingComplete value)? complete,
+    required TResult orElse(),
+  }) {
+    if (initial != null) {
+      return initial(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class OnboardingInitial implements OnboardingState {
+  const factory OnboardingInitial() = _$OnboardingInitialImpl;
+}
+
+/// @nodoc
+abstract class _$$OnboardingInProgressImplCopyWith<$Res> {
+  factory _$$OnboardingInProgressImplCopyWith(_$OnboardingInProgressImpl value,
+          $Res Function(_$OnboardingInProgressImpl) then) =
+      __$$OnboardingInProgressImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({int step});
+}
+
+/// @nodoc
+class __$$OnboardingInProgressImplCopyWithImpl<$Res>
+    extends _$OnboardingStateCopyWithImpl<$Res, _$OnboardingInProgressImpl>
+    implements _$$OnboardingInProgressImplCopyWith<$Res> {
+  __$$OnboardingInProgressImplCopyWithImpl(_$OnboardingInProgressImpl _value,
+      $Res Function(_$OnboardingInProgressImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of OnboardingState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentStep = null,
-    Object? isComplete = null,
-    Object? isLoading = null,
-    Object? error = freezed,
+    Object? step = null,
   }) {
-    return _then(_self.copyWith(
-      currentStep: null == currentStep
-          ? _self.currentStep
-          : currentStep // ignore: cast_nullable_to_non_nullable
+    return _then(_$OnboardingInProgressImpl(
+      step: null == step
+          ? _value.step
+          : step // ignore: cast_nullable_to_non_nullable
               as int,
-      isComplete: null == isComplete
-          ? _self.isComplete
-          : isComplete // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isLoading: null == isLoading
-          ? _self.isLoading
-          : isLoading // ignore: cast_nullable_to_non_nullable
-              as bool,
-      error: freezed == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as String?,
     ));
-  }
-}
-
-/// Adds pattern-matching-related methods to [OnboardingState].
-extension OnboardingStatePatterns on OnboardingState {
-  /// A variant of `map` that fallback to returning `orElse`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_OnboardingState value)? $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _OnboardingState() when $default != null:
-        return $default(_that);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// Callbacks receives the raw object, upcasted.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case final Subclass2 value:
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_OnboardingState value) $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _OnboardingState():
-        return $default(_that);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `map` that fallback to returning `null`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_OnboardingState value)? $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _OnboardingState() when $default != null:
-        return $default(_that);
-      case _:
-        return null;
-    }
-  }
-
-  /// A variant of `when` that fallback to an `orElse` callback.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(
-            int currentStep, bool isComplete, bool isLoading, String? error)?
-        $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _OnboardingState() when $default != null:
-        return $default(
-            _that.currentStep, _that.isComplete, _that.isLoading, _that.error);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// As opposed to `map`, this offers destructuring.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case Subclass2(:final field2):
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(
-            int currentStep, bool isComplete, bool isLoading, String? error)
-        $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _OnboardingState():
-        return $default(
-            _that.currentStep, _that.isComplete, _that.isLoading, _that.error);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `when` that fallback to returning `null`
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            int currentStep, bool isComplete, bool isLoading, String? error)?
-        $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _OnboardingState() when $default != null:
-        return $default(
-            _that.currentStep, _that.isComplete, _that.isLoading, _that.error);
-      case _:
-        return null;
-    }
   }
 }
 
 /// @nodoc
 
-class _OnboardingState extends OnboardingState {
-  const _OnboardingState(
-      {this.currentStep = 0,
-      this.isComplete = false,
-      this.isLoading = false,
-      this.error})
-      : super._();
+class _$OnboardingInProgressImpl implements OnboardingInProgress {
+  const _$OnboardingInProgressImpl({required this.step});
 
   @override
-  @JsonKey()
-  final int currentStep;
-  @override
-  @JsonKey()
-  final bool isComplete;
-  @override
-  @JsonKey()
-  final bool isLoading;
-  @override
-  final String? error;
+  final int step;
 
-  /// Create a copy of OnboardingState
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$OnboardingStateCopyWith<_OnboardingState> get copyWith =>
-      __$OnboardingStateCopyWithImpl<_OnboardingState>(this, _$identity);
+  String toString() {
+    return 'OnboardingState.inProgress(step: $step)';
+  }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _OnboardingState &&
-            (identical(other.currentStep, currentStep) ||
-                other.currentStep == currentStep) &&
-            (identical(other.isComplete, isComplete) ||
-                other.isComplete == isComplete) &&
-            (identical(other.isLoading, isLoading) ||
-                other.isLoading == isLoading) &&
-            (identical(other.error, error) || other.error == error));
+            other is _$OnboardingInProgressImpl &&
+            (identical(other.step, step) || other.step == step));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, currentStep, isComplete, isLoading, error);
-
-  @override
-  String toString() {
-    return 'OnboardingState(currentStep: $currentStep, isComplete: $isComplete, isLoading: $isLoading, error: $error)';
-  }
-}
-
-/// @nodoc
-abstract mixin class _$OnboardingStateCopyWith<$Res>
-    implements $OnboardingStateCopyWith<$Res> {
-  factory _$OnboardingStateCopyWith(
-          _OnboardingState value, $Res Function(_OnboardingState) _then) =
-      __$OnboardingStateCopyWithImpl;
-  @override
-  @useResult
-  $Res call({int currentStep, bool isComplete, bool isLoading, String? error});
-}
-
-/// @nodoc
-class __$OnboardingStateCopyWithImpl<$Res>
-    implements _$OnboardingStateCopyWith<$Res> {
-  __$OnboardingStateCopyWithImpl(this._self, this._then);
-
-  final _OnboardingState _self;
-  final $Res Function(_OnboardingState) _then;
+  int get hashCode => Object.hash(runtimeType, step);
 
   /// Create a copy of OnboardingState
   /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? currentStep = null,
-    Object? isComplete = null,
-    Object? isLoading = null,
-    Object? error = freezed,
+  _$$OnboardingInProgressImplCopyWith<_$OnboardingInProgressImpl>
+      get copyWith =>
+          __$$OnboardingInProgressImplCopyWithImpl<_$OnboardingInProgressImpl>(
+              this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function(int step) inProgress,
+    required TResult Function() complete,
   }) {
-    return _then(_OnboardingState(
-      currentStep: null == currentStep
-          ? _self.currentStep
-          : currentStep // ignore: cast_nullable_to_non_nullable
-              as int,
-      isComplete: null == isComplete
-          ? _self.isComplete
-          : isComplete // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isLoading: null == isLoading
-          ? _self.isLoading
-          : isLoading // ignore: cast_nullable_to_non_nullable
-              as bool,
-      error: freezed == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return inProgress(step);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function(int step)? inProgress,
+    TResult? Function()? complete,
+  }) {
+    return inProgress?.call(step);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function(int step)? inProgress,
+    TResult Function()? complete,
+    required TResult orElse(),
+  }) {
+    if (inProgress != null) {
+      return inProgress(step);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(OnboardingInitial value) initial,
+    required TResult Function(OnboardingInProgress value) inProgress,
+    required TResult Function(OnboardingComplete value) complete,
+  }) {
+    return inProgress(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OnboardingInitial value)? initial,
+    TResult? Function(OnboardingInProgress value)? inProgress,
+    TResult? Function(OnboardingComplete value)? complete,
+  }) {
+    return inProgress?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(OnboardingInitial value)? initial,
+    TResult Function(OnboardingInProgress value)? inProgress,
+    TResult Function(OnboardingComplete value)? complete,
+    required TResult orElse(),
+  }) {
+    if (inProgress != null) {
+      return inProgress(this);
+    }
+    return orElse();
   }
 }
 
-// dart format on
+abstract class OnboardingInProgress implements OnboardingState {
+  const factory OnboardingInProgress({required final int step}) =
+      _$OnboardingInProgressImpl;
+
+  int get step;
+
+  /// Create a copy of OnboardingState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OnboardingInProgressImplCopyWith<_$OnboardingInProgressImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$OnboardingCompleteImplCopyWith<$Res> {
+  factory _$$OnboardingCompleteImplCopyWith(_$OnboardingCompleteImpl value,
+          $Res Function(_$OnboardingCompleteImpl) then) =
+      __$$OnboardingCompleteImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$OnboardingCompleteImplCopyWithImpl<$Res>
+    extends _$OnboardingStateCopyWithImpl<$Res, _$OnboardingCompleteImpl>
+    implements _$$OnboardingCompleteImplCopyWith<$Res> {
+  __$$OnboardingCompleteImplCopyWithImpl(_$OnboardingCompleteImpl _value,
+      $Res Function(_$OnboardingCompleteImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OnboardingState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$OnboardingCompleteImpl implements OnboardingComplete {
+  const _$OnboardingCompleteImpl();
+
+  @override
+  String toString() {
+    return 'OnboardingState.complete()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$OnboardingCompleteImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function(int step) inProgress,
+    required TResult Function() complete,
+  }) {
+    return complete();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function(int step)? inProgress,
+    TResult? Function()? complete,
+  }) {
+    return complete?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function(int step)? inProgress,
+    TResult Function()? complete,
+    required TResult orElse(),
+  }) {
+    if (complete != null) {
+      return complete();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(OnboardingInitial value) initial,
+    required TResult Function(OnboardingInProgress value) inProgress,
+    required TResult Function(OnboardingComplete value) complete,
+  }) {
+    return complete(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(OnboardingInitial value)? initial,
+    TResult? Function(OnboardingInProgress value)? inProgress,
+    TResult? Function(OnboardingComplete value)? complete,
+  }) {
+    return complete?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(OnboardingInitial value)? initial,
+    TResult Function(OnboardingInProgress value)? inProgress,
+    TResult Function(OnboardingComplete value)? complete,
+    required TResult orElse(),
+  }) {
+    if (complete != null) {
+      return complete(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class OnboardingComplete implements OnboardingState {
+  const factory OnboardingComplete() = _$OnboardingCompleteImpl;
+}

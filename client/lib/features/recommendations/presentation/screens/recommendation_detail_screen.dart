@@ -7,7 +7,7 @@ import 'package:outfitstyle_client/app/di.dart';
 import 'package:outfitstyle_client/ui/atoms/haptics.dart';
 import 'package:outfitstyle_client/ui/atoms/outfit_app_bar.dart';
 import 'package:outfitstyle_client/domain/entities/recommendation_entity.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+import 'package:outfitstyle_client/domain/entities/wardrobe.dart' as domain;
 
 final recommendationByIdProvider =
     StreamProvider.autoDispose.family<RecommendationRow?, String>((ref, id) {
@@ -27,7 +27,7 @@ class RecommendationDetailScreen extends ConsumerStatefulWidget {
 class _RecommendationDetailScreenState
     extends ConsumerState<RecommendationDetailScreen> {
   // локальные замены (не сохраняем на сервер)
-  final Map<String, domain.WardrobeEntry> _overrideByCategory = {};
+  final Map<String, domain.WardrobeItem> _overrideByCategory = {};
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +117,7 @@ class _RecommendationDetailScreenState
                         child: Center(child: CircularProgressIndicator())),
                     error: (e, _) => Text('Ошибка гардероба: $e'),
                     data: (wardrobe) {
-                      final byCat = <String, List<domain.WardrobeEntry>>{};
+                      final byCat = <String, List<domain.WardrobeItem>>{};
                       for (final w in wardrobe.where((w) => !w.isArchived)) {
                         byCat.putIfAbsent(w.category, () => []).add(w);
                       }
@@ -298,7 +298,7 @@ class _RecommendationDetailScreenState
 
   List<Map<String, dynamic>> _buildFinalLines({
     required List<Map<String, dynamic>> originalLines,
-    required Map<String, domain.WardrobeEntry> overridesByCategory,
+    required Map<String, domain.WardrobeItem> overridesByCategory,
   }) {
     final out = <Map<String, dynamic>>[];
 
@@ -307,7 +307,7 @@ class _RecommendationDetailScreenState
       final override = overridesByCategory[cat];
 
       if (override != null) {
-        out.add(_mapWardrobeEntryToOutfitLine(override));
+        out.add(_mapWardrobeItemToOutfitLine(override));
       } else {
         out.add(Map<String, dynamic>.from(line));
       }
@@ -317,7 +317,7 @@ class _RecommendationDetailScreenState
     for (final kv in overridesByCategory.entries) {
       final cat = kv.key;
       final exists = out.any((e) => (e['category'] ?? '').toString() == cat);
-      if (!exists) out.add(_mapWardrobeEntryToOutfitLine(kv.value));
+      if (!exists) out.add(_mapWardrobeItemToOutfitLine(kv.value));
     }
 
     return out;
@@ -331,7 +331,7 @@ class _RecommendationDetailScreenState
     };
   }
 
-  Map<String, dynamic> _mapWardrobeEntryToOutfitLine(domain.WardrobeEntry w) {
+  Map<String, dynamic> _mapWardrobeItemToOutfitLine(domain.WardrobeItem w) {
     return <String, dynamic>{
       'id': w.id,
       'name': w.name,
@@ -426,9 +426,9 @@ class _LineTile extends StatelessWidget {
 class CategoryReplacementWidget extends StatefulWidget {
   final String category;
   final Map<String, dynamic> original;
-  final List<domain.WardrobeEntry> alternatives;
-  final domain.WardrobeEntry? selected;
-  final void Function(domain.WardrobeEntry? picked) onSelected;
+  final List<domain.WardrobeItem> alternatives;
+  final domain.WardrobeItem? selected;
+  final void Function(domain.WardrobeItem? picked) onSelected;
 
   const CategoryReplacementWidget({
     super.key,
@@ -557,12 +557,12 @@ class _CategoryReplacementWidgetState extends State<CategoryReplacementWidget> {
 class _PickPage {
   final String icon;
   final String name;
-  final domain.WardrobeEntry? alt;
+  final domain.WardrobeItem? alt;
 
   _PickPage._(this.icon, this.name, this.alt);
 
   factory _PickPage.original({required String icon, required String name}) =>
       _PickPage._(icon, name, null);
 
-  factory _PickPage.alt(domain.WardrobeEntry w) => _PickPage._(w.iconEmoji, w.name, w);
+  factory _PickPage.alt(domain.WardrobeItem w) => _PickPage._(w.iconEmoji, w.name, w);
 }

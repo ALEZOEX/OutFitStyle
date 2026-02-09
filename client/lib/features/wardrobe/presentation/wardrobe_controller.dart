@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../domain/entities/wardrobe_entity.dart' as domain;
+import '../../../domain/entities/wardrobe.dart';
 import '../../../domain/states/wardrobe_state.dart';
 import '../../../app/di.dart';
 
@@ -37,12 +37,12 @@ class WardrobeController extends StateNotifier<WardrobeState> {
     }
   }
 
-  Future<void> prefetchImages(List<domain.WardrobeEntry> items) async {
+  Future<void> prefetchImages(List<WardrobeItem> items) async {
     final imageStore = _ref.read(imageStoreProvider);
     await imageStore.prefetchImages(items);
   }
 
-  Future<void> toggleFavorite(domain.WardrobeEntry item) async {
+  Future<void> toggleFavorite(WardrobeItem item) async {
     try {
       final repo = _ref.read(wardrobeRepositoryProvider);
       final updatedItem = item.copyWith(isFavorite: !item.isFavorite);
@@ -66,7 +66,7 @@ class WardrobeController extends StateNotifier<WardrobeState> {
     }
   }
 
-  Future<void> toggleArchived(domain.WardrobeEntry item) async {
+  Future<void> toggleArchived(WardrobeItem item) async {
     try {
       final repo = _ref.read(wardrobeRepositoryProvider);
       final updatedItem = item.copyWith(isArchived: !item.isArchived);
@@ -90,7 +90,7 @@ class WardrobeController extends StateNotifier<WardrobeState> {
     }
   }
 
-  Future<void> markWorn(domain.WardrobeEntry item) async {
+  Future<void> markWorn(WardrobeItem item) async {
     try {
       final repo = _ref.read(wardrobeRepositoryProvider);
       final updatedItem = item.copyWith(

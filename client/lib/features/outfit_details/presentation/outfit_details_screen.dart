@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
 import '../../../domain/entities/recommendation_entity.dart';
-import '../../../domain/entities/wardrobe_entity.dart' as domain;
+import '../../../domain/entities/wardrobe.dart' as domain;
 import '../../../ui/atoms/haptics.dart';
 import '../../../ui/atoms/outfit_app_bar.dart';
 import '../../../domain/outfit/outfit_builder.dart';
@@ -31,7 +31,7 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
   final _shareKey = GlobalKey();
 
   // локальные замены (не сохраняем на сервер)
-  final Map<String, domain.WardrobeEntry> _overrideByCategory = {};
+  final Map<String, domain.WardrobeItem> _overrideByCategory = {};
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +134,7 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
                           child: Center(child: CircularProgressIndicator())),
                       error: (e, _) => Text('Wardrobe error: $e'),
                       data: (wardrobe) {
-                        final byCat = <String, List<domain.WardrobeEntry>>{};
+                        final byCat = <String, List<domain.WardrobeItem>>{};
                         for (final w in wardrobe.where((w) => !w.isArchived)) {
                           byCat.putIfAbsent(w.category, () => []).add(w);
                         }

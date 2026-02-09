@@ -6,11 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:outfitstyle_client/app/di.dart';
 import 'package:outfitstyle_client/ui/atoms/haptics.dart';
 import 'package:outfitstyle_client/ui/atoms/outfit_app_bar.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+import 'package:outfitstyle_client/domain/entities/wardrobe.dart' as domain;
 import 'package:cached_network_image/cached_network_image.dart';
 
 final wardrobeItemByIdProvider =
-    StreamProvider.autoDispose.family<domain.WardrobeEntry?, String>((ref, id) {
+    StreamProvider.autoDispose.family<domain.WardrobeItem?, String>((ref, id) {
   final repo = ref.watch(wardrobeRepositoryProvider);
   return repo.watchById(id);
 });

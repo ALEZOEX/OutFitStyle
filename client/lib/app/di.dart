@@ -3,45 +3,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
 
-import '../services/auth_service.dart';
-import '../services/auth_storage.dart';
+import '../core/services/auth_service.dart';
+import '../core/services/auth_storage.dart';
 import '../domain/services/recommendations_domain_service.dart';
-import '../domain/services/wardrobe_domain_service.dart'; // Обновленный импорт
-import '../domain/entities/recommendation_entity.dart';
-import '../domain/entities/wardrobe_entity.dart' as domain;
+import '../domain/services/wardrobe_domain_service.dart';
+import '../domain/entities/outfit_recommendation.dart';
+import '../domain/entities/wardrobe.dart';
+import '../domain/repositories/i_wardrobe_repository.dart';
+import '../domain/repositories/i_recommendations_repository.dart';
+import '../domain/repositories/i_auth_repository.dart';
+import '../domain/repositories/i_weather_repository.dart';
 import 'env.dart';
-import 'api/api_client.dart';
+import 'api/api_config.dart'; // Updated import
+import '../data/remote/api_client.dart' hide ApiConfig;
 import 'session.dart';
 
 import '../data/local/app_database.dart';
-import '../data/remote/wardrobe_remote_ds.dart';
-import '../data/remote/recommendations_remote_ds.dart';
+import '../data/datasources/remote/wardrobe_remote_datasource.dart';
+import '../data/datasources/remote/recommendations_remote_datasource.dart';
+import '../data/datasources/remote/weather_remote_datasource.dart';
 import '../data/repositories/wardrobe_repository.dart';
-import '../data/repositories/recommendations_repository.dart'; // Обновленный импорт
+import '../data/repositories/recommendations_repository.dart';
+import '../data/repositories/weather_repository.dart';
 import '../data/sync/sync_worker.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/profile_repository.dart';
-import '../data/image_store.dart';
-import '../features/recommendations/presentation/recommendations_controller.dart';
-import '../features/wardrobe/presentation/wardrobe_controller.dart';
-import '../features/admin/presentation/admin_controller.dart';
-import '../features/profile/presentation/profile_controller.dart';
-import '../features/generator/presentation/generator_controller.dart';
+import '../core/services/image_store.dart';
+import '../features/recommendations/presentation/controllers/recommendations_controller.dart';
+import '../features/wardrobe/presentation/controllers/wardrobe_controller.dart';
+import '../features/admin/presentation/controllers/admin_controller.dart';
+import '../features/profile/presentation/controllers/profile_controller.dart';
+import '../features/generator/presentation/controllers/generator_controller.dart';
 import '../domain/states/generator_state.dart';
-import '../features/settings/presentation/settings_controller.dart';
-import '../features/auth/presentation/auth_controller.dart';
-import '../features/onboarding/presentation/onboarding_controller.dart';
-import '../storage/local_storage.dart';
+import '../features/settings/presentation/controllers/settings_controller.dart';
+import '../features/auth/presentation/controllers/auth_controller.dart';
+import '../features/onboarding/presentation/controllers/onboarding_controller.dart';
+import '../core/storage/local_storage.dart';
 import '../domain/states/recommendations_state.dart';
 import '../domain/states/wardrobe_state.dart';
 import '../domain/states/settings_state.dart';
 import '../domain/states/auth_state.dart';
 import '../domain/states/onboarding_state.dart';
 import '../domain/states/profile_state.dart';
-import '../domain/states/ui_states.dart'; // Contains AdminState
+import '../domain/states/admin_state.dart';
 
-final apiConfigProvider = Provider((ref) => Env.apiConfig());
+final apiConfigProvider = Provider<ApiConfig>((ref) => Env.apiConfig());
+
+final loggerProvider = Provider((ref) => Logger());
 
 final authStorageProvider = Provider<AuthStorage>((ref) => AuthStorage());
 
@@ -60,19 +70,17 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(config: cfg, storage: storage);
 });
 
-// AdminService is not defined, commenting out for now
-// final adminServiceProvider = Provider<AdminService>((ref) {
-//   final cfg = ref.watch(apiConfigProvider);
-//   final auth = ref.watch(authStorageProvider);
-//   return AdminService(cfg, auth, http.Client());
-// });
+final weatherRemoteDsProvider = Provider<IWeatherRemoteDataSource>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return WeatherRemoteDataSource(apiClient);
+});
 
-final wardrobeRemoteDsProvider = Provider<WardrobeRemoteDataSource>((ref) {
+final wardrobeRemoteDsProvider = Provider<IWardrobeRemoteDataSource>((ref) {
   return WardrobeRemoteDataSource(ref.watch(apiClientProvider));
 });
 
 final recommendationsRemoteDsProvider =
-    Provider<RecommendationsRemoteDataSource>((ref) {
+    Provider<IRecommendationsRemoteDataSource>((ref) {
   return RecommendationsRemoteDataSource(
       ref.watch(apiClientProvider));
 });
@@ -83,18 +91,23 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-final wardrobeRepositoryProvider = Provider<WardrobeRepository>((ref) {
+final weatherRepositoryProvider = Provider<IWeatherRepository>((ref) {
+  return WeatherRepository(
+    apiClient: ref.watch(apiClientProvider),
+    sharedPreferences: ref.watch(sharedPreferencesProvider.future),
+  );
+});
+
+final wardrobeRepositoryProvider = Provider<IWardrobeRepository>((ref) {
   return WardrobeRepository(
-    ref.watch(appDatabaseProvider),
-    ref.watch(wardrobeRemoteDsProvider),
+    apiClient: ref.watch(apiClientProvider),
   );
 });
 
 final recommendationsRepositoryProvider =
-    Provider<RecommendationsRepository>((ref) {
+    Provider<IRecommendationsRepository>((ref) {
   return RecommendationsRepository(
-    ref.watch(appDatabaseProvider),
-    ref.watch(recommendationsRemoteDsProvider),
+    apiClient: ref.watch(apiClientProvider),
   );
 });
 
@@ -121,14 +134,14 @@ final syncWorkerProvider = Provider<SyncWorker>((ref) {
   );
 });
 
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
+final authRepositoryProvider = Provider<IAuthRepository>((ref) {
   final repo = AuthRepository(
     ref.watch(apiConfigProvider),
     ref.watch(authStorageProvider),
     http.Client(),
   );
 
-  ref.onDispose(() => repo.dispose());
+  ref.onDispose(() => (repo as AuthRepository).dispose());
 
   return repo;
 });
@@ -145,11 +158,6 @@ final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   return repo;
 });
 
-final outboxPendingCountProvider = StreamProvider<int>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.syncOutboxDao.watchPendingCount();
-});
-
 // Добавляем недостающие провайдеры для контроллеров
 final recommendationsControllerProvider =
     StateNotifierProvider<RecommendationsController, RecommendationsState>(
@@ -157,7 +165,7 @@ final recommendationsControllerProvider =
   return RecommendationsController(ref);
 });
 
-final wardrobeStreamProvider = StreamProvider<List<domain.WardrobeEntry>>((ref) {
+final wardrobeStreamProvider = StreamProvider<List<WardrobeItem>>((ref) {
   final repo = ref.watch(wardrobeRepositoryProvider);
   return repo.watchWardrobe(); // По умолчанию не включает архивные элементы
 });
@@ -178,7 +186,8 @@ final authControllerProvider =
   return AuthController(ref.watch(authRepositoryProvider));
 });
 
-final localStorageProvider = Provider((ref) {
+final localStorageProvider = Provider((ref) async {
+  await LocalStorage.init(); // Initialize LocalStorage
   return LocalStorage.prefs;
 });
 
@@ -200,27 +209,6 @@ final generatorControllerProvider =
 final adminControllerProvider =
     StateNotifierProvider<AdminController, AdminState>((ref) {
   return AdminController();
-});
-
-// Добавляем недостающие провайдеры
-
-// Провайдер для сегодняшних рекомендаций
-final homeTodayRecProvider = StreamProvider<List<RecommendationRow>>((ref) {
-  final repo = ref.watch(recommendationsRepositoryProvider);
-  return repo.watchTodayLatest().map((rec) {
-    if (rec != null) {
-      return [rec];
-    } else {
-      // Если нет сегодняшней рекомендации, возвращаем пустой список
-      return [];
-    }
-  });
-});
-
-// Провайдер для потока рекомендаций
-final recommendationsStreamProvider = StreamProvider<List<RecommendationRow>>((ref) {
-  final repo = ref.watch(recommendationsRepositoryProvider);
-  return repo.watchHistory(limit: 50); // Ограничиваем количество для производительности
 });
 
 // Провайдеры для профиля пользователя
@@ -245,7 +233,10 @@ final isAdminProvider = FutureProvider.autoDispose((ref) async {
 final themeModeProvider = StateProvider((ref) => ThemeMode.system);
 
 // Провайдеры для онбординга
-final onboardingStorageProvider = Provider((ref) => LocalStorage.prefs);
+final onboardingStorageProvider = Provider((ref) async {
+  await LocalStorage.init(); // Initialize LocalStorage
+  return LocalStorage.prefs;
+});
 
 final onboardingDoneProvider = StateProvider<bool>((ref) {
   // Получаем значение из хранилища
@@ -265,9 +256,6 @@ final adminUsersProvider = FutureProvider.autoDispose((ref) async {
   // Вызываем метод контроллера для получения пользователей
   return await controller.getUsers();
 });
-
-// Провайдер для генератора образов
-final generatorDeckProvider = StateProvider<List<RecommendationRow>>((ref) => []);
 
 final sessionProvider =
     NotifierProvider<SessionController, SessionStatus>(SessionController.new);

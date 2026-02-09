@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di.dart';
-import '../../../../domain/entities/wardrobe_entity.dart' as domain;
+import '../../../../domain/entities/wardrobe.dart' as domain;
 import '../../../../ui/atoms/haptics.dart';
 
 class OutfitCollageInteractive extends ConsumerStatefulWidget {
@@ -24,9 +24,9 @@ class _OutfitCollageInteractiveState
   @override
   Widget build(BuildContext context) {
     final wardrobe = ref.watch(wardrobeStreamProvider).valueOrNull ??
-        const <domain.WardrobeEntry>[];
+        const <domain.WardrobeItem>[];
 
-    final byCat = <String, List<domain.WardrobeEntry>>{};
+    final byCat = <String, List<domain.WardrobeItem>>{};
     for (final w in wardrobe.where((w) => !w.isArchived)) {
       byCat.putIfAbsent(w.category, () => []).add(w);
     }
@@ -61,7 +61,7 @@ class _OutfitCollageInteractiveState
                     original: show[i],
                     alternatives:
                         byCat[(show[i]['category'] ?? '').toString()] ??
-                            const <domain.WardrobeEntry>[],
+                            const <domain.WardrobeItem>[],
                     idx: _idxByCategory[
                             (show[i]['category'] ?? '').toString()] ??
                         0,
@@ -81,7 +81,7 @@ class _OutfitCollageInteractiveState
 class _SwipeCycleCard extends StatelessWidget {
   final String category;
   final Map<String, dynamic> original;
-  final List<domain.WardrobeEntry> alternatives;
+  final List<domain.WardrobeItem> alternatives;
 
   final int idx;
   final void Function(String category, int idx) onIdxChanged;
@@ -272,7 +272,7 @@ class _Choice {
         localPath: null,
       );
 
-  factory _Choice.alt(domain.WardrobeEntry w) => _Choice._(
+  factory _Choice.alt(domain.WardrobeItem w) => _Choice._(
         key: 'alt:${w.id}',
         name: w.name,
         iconEmoji: w.iconEmoji,

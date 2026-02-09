@@ -6,7 +6,7 @@ import 'package:outfitstyle_client/app/di.dart';
 import 'package:outfitstyle_client/ui/atoms/haptics.dart';
 import 'package:outfitstyle_client/ui/atoms/outfit_app_bar.dart';
 import 'package:outfitstyle_client/domain/entities/recommendation_entity.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+import 'package:outfitstyle_client/domain/entities/wardrobe.dart' as domain;
 
 final recommendationByIdProvider =
     StreamProvider.autoDispose.family<RecommendationRow, String>((ref, id) {
@@ -56,7 +56,7 @@ class RecommendationWardrobeIntegrationScreen extends ConsumerWidget {
 
 class _IntegrationContent extends ConsumerStatefulWidget {
   final RecommendationRow recommendation;
-  final List<domain.WardrobeEntry> wardrobe;
+  final List<domain.WardrobeItem> wardrobe;
   const _IntegrationContent(
       {required this.recommendation, required this.wardrobe});
 
@@ -66,7 +66,7 @@ class _IntegrationContent extends ConsumerStatefulWidget {
 }
 
 class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
-  final Map<String, domain.WardrobeEntry?> _replacements = {};
+  final Map<String, domain.WardrobeItem?> _replacements = {};
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +84,7 @@ class _IntegrationContentState extends ConsumerState<_IntegrationContent> {
     }
 
     // Группируем вещи из гардероба по категориям
-    final wardrobeByCategory = <String, List<domain.WardrobeEntry>>{};
+    final wardrobeByCategory = <String, List<domain.WardrobeItem>>{};
     for (final item in wardrobe.where((w) => !w.isArchived)) {
       wardrobeByCategory.putIfAbsent(item.category, () => []).add(item);
     }
@@ -311,8 +311,8 @@ class _OutfitPreview extends StatelessWidget {
 class _CategoryReplacementSection extends StatelessWidget {
   final String category;
   final List<Map<String, dynamic>> originalItems;
-  final List<domain.WardrobeEntry> wardrobeItems;
-  final void Function(domain.WardrobeEntry? replacement) onReplace;
+  final List<domain.WardrobeItem> wardrobeItems;
+  final void Function(domain.WardrobeItem? replacement) onReplace;
   const _CategoryReplacementSection({
     required this.category,
     required this.originalItems,
@@ -437,7 +437,7 @@ class _WardrobeItemChip extends StatelessWidget {
 
 class _CombinedOutfitPreview extends ConsumerWidget {
   final List<Map<String, dynamic>> originalLines;
-  final Map<String, domain.WardrobeEntry?> replacements;
+  final Map<String, domain.WardrobeItem?> replacements;
   const _CombinedOutfitPreview(
       {required this.originalLines, required this.replacements});
 
