@@ -1,5 +1,5 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,378 +9,624 @@ part of 'generator_state.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$GeneratorState {
-  String get occasion;
-  Set<String> get dismissed;
-  bool get isGenerating;
-  String? get error;
-
-  /// Create a copy of GeneratorState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $GeneratorStateCopyWith<GeneratorState> get copyWith =>
-      _$GeneratorStateCopyWithImpl<GeneratorState>(
-          this as GeneratorState, _$identity);
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is GeneratorState &&
-            (identical(other.occasion, occasion) ||
-                other.occasion == occasion) &&
-            const DeepCollectionEquality().equals(other.dismissed, dismissed) &&
-            (identical(other.isGenerating, isGenerating) ||
-                other.isGenerating == isGenerating) &&
-            (identical(other.error, error) || other.error == error));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, occasion,
-      const DeepCollectionEquality().hash(dismissed), isGenerating, error);
-
-  @override
-  String toString() {
-    return 'GeneratorState(occasion: $occasion, dismissed: $dismissed, isGenerating: $isGenerating, error: $error)';
-  }
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(OutfitRecommendation recommendation) success,
+    required TResult Function(String error) error,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(OutfitRecommendation recommendation)? success,
+    TResult? Function(String error)? error,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(OutfitRecommendation recommendation)? success,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(GeneratorInitial value) initial,
+    required TResult Function(GeneratorLoading value) loading,
+    required TResult Function(GeneratorSuccess value) success,
+    required TResult Function(GeneratorError value) error,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(GeneratorInitial value)? initial,
+    TResult? Function(GeneratorLoading value)? loading,
+    TResult? Function(GeneratorSuccess value)? success,
+    TResult? Function(GeneratorError value)? error,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(GeneratorInitial value)? initial,
+    TResult Function(GeneratorLoading value)? loading,
+    TResult Function(GeneratorSuccess value)? success,
+    TResult Function(GeneratorError value)? error,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract mixin class $GeneratorStateCopyWith<$Res> {
+abstract class $GeneratorStateCopyWith<$Res> {
   factory $GeneratorStateCopyWith(
-          GeneratorState value, $Res Function(GeneratorState) _then) =
-      _$GeneratorStateCopyWithImpl;
-  @useResult
-  $Res call(
-      {String occasion,
-      Set<String> dismissed,
-      bool isGenerating,
-      String? error});
+          GeneratorState value, $Res Function(GeneratorState) then) =
+      _$GeneratorStateCopyWithImpl<$Res, GeneratorState>;
 }
 
 /// @nodoc
-class _$GeneratorStateCopyWithImpl<$Res>
+class _$GeneratorStateCopyWithImpl<$Res, $Val extends GeneratorState>
     implements $GeneratorStateCopyWith<$Res> {
-  _$GeneratorStateCopyWithImpl(this._self, this._then);
+  _$GeneratorStateCopyWithImpl(this._value, this._then);
 
-  final GeneratorState _self;
-  final $Res Function(GeneratorState) _then;
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of GeneratorState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+abstract class _$$GeneratorInitialImplCopyWith<$Res> {
+  factory _$$GeneratorInitialImplCopyWith(_$GeneratorInitialImpl value,
+          $Res Function(_$GeneratorInitialImpl) then) =
+      __$$GeneratorInitialImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$GeneratorInitialImplCopyWithImpl<$Res>
+    extends _$GeneratorStateCopyWithImpl<$Res, _$GeneratorInitialImpl>
+    implements _$$GeneratorInitialImplCopyWith<$Res> {
+  __$$GeneratorInitialImplCopyWithImpl(_$GeneratorInitialImpl _value,
+      $Res Function(_$GeneratorInitialImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of GeneratorState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$GeneratorInitialImpl implements GeneratorInitial {
+  const _$GeneratorInitialImpl();
+
+  @override
+  String toString() {
+    return 'GeneratorState.initial()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$GeneratorInitialImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(OutfitRecommendation recommendation) success,
+    required TResult Function(String error) error,
+  }) {
+    return initial();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(OutfitRecommendation recommendation)? success,
+    TResult? Function(String error)? error,
+  }) {
+    return initial?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(OutfitRecommendation recommendation)? success,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (initial != null) {
+      return initial();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(GeneratorInitial value) initial,
+    required TResult Function(GeneratorLoading value) loading,
+    required TResult Function(GeneratorSuccess value) success,
+    required TResult Function(GeneratorError value) error,
+  }) {
+    return initial(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(GeneratorInitial value)? initial,
+    TResult? Function(GeneratorLoading value)? loading,
+    TResult? Function(GeneratorSuccess value)? success,
+    TResult? Function(GeneratorError value)? error,
+  }) {
+    return initial?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(GeneratorInitial value)? initial,
+    TResult Function(GeneratorLoading value)? loading,
+    TResult Function(GeneratorSuccess value)? success,
+    TResult Function(GeneratorError value)? error,
+    required TResult orElse(),
+  }) {
+    if (initial != null) {
+      return initial(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class GeneratorInitial implements GeneratorState {
+  const factory GeneratorInitial() = _$GeneratorInitialImpl;
+}
+
+/// @nodoc
+abstract class _$$GeneratorLoadingImplCopyWith<$Res> {
+  factory _$$GeneratorLoadingImplCopyWith(_$GeneratorLoadingImpl value,
+          $Res Function(_$GeneratorLoadingImpl) then) =
+      __$$GeneratorLoadingImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$GeneratorLoadingImplCopyWithImpl<$Res>
+    extends _$GeneratorStateCopyWithImpl<$Res, _$GeneratorLoadingImpl>
+    implements _$$GeneratorLoadingImplCopyWith<$Res> {
+  __$$GeneratorLoadingImplCopyWithImpl(_$GeneratorLoadingImpl _value,
+      $Res Function(_$GeneratorLoadingImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of GeneratorState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$GeneratorLoadingImpl implements GeneratorLoading {
+  const _$GeneratorLoadingImpl();
+
+  @override
+  String toString() {
+    return 'GeneratorState.loading()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$GeneratorLoadingImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(OutfitRecommendation recommendation) success,
+    required TResult Function(String error) error,
+  }) {
+    return loading();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(OutfitRecommendation recommendation)? success,
+    TResult? Function(String error)? error,
+  }) {
+    return loading?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(OutfitRecommendation recommendation)? success,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (loading != null) {
+      return loading();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(GeneratorInitial value) initial,
+    required TResult Function(GeneratorLoading value) loading,
+    required TResult Function(GeneratorSuccess value) success,
+    required TResult Function(GeneratorError value) error,
+  }) {
+    return loading(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(GeneratorInitial value)? initial,
+    TResult? Function(GeneratorLoading value)? loading,
+    TResult? Function(GeneratorSuccess value)? success,
+    TResult? Function(GeneratorError value)? error,
+  }) {
+    return loading?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(GeneratorInitial value)? initial,
+    TResult Function(GeneratorLoading value)? loading,
+    TResult Function(GeneratorSuccess value)? success,
+    TResult Function(GeneratorError value)? error,
+    required TResult orElse(),
+  }) {
+    if (loading != null) {
+      return loading(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class GeneratorLoading implements GeneratorState {
+  const factory GeneratorLoading() = _$GeneratorLoadingImpl;
+}
+
+/// @nodoc
+abstract class _$$GeneratorSuccessImplCopyWith<$Res> {
+  factory _$$GeneratorSuccessImplCopyWith(_$GeneratorSuccessImpl value,
+          $Res Function(_$GeneratorSuccessImpl) then) =
+      __$$GeneratorSuccessImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({OutfitRecommendation recommendation});
+}
+
+/// @nodoc
+class __$$GeneratorSuccessImplCopyWithImpl<$Res>
+    extends _$GeneratorStateCopyWithImpl<$Res, _$GeneratorSuccessImpl>
+    implements _$$GeneratorSuccessImplCopyWith<$Res> {
+  __$$GeneratorSuccessImplCopyWithImpl(_$GeneratorSuccessImpl _value,
+      $Res Function(_$GeneratorSuccessImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GeneratorState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? occasion = null,
-    Object? dismissed = null,
-    Object? isGenerating = null,
-    Object? error = freezed,
+    Object? recommendation = null,
   }) {
-    return _then(_self.copyWith(
-      occasion: null == occasion
-          ? _self.occasion
-          : occasion // ignore: cast_nullable_to_non_nullable
-              as String,
-      dismissed: null == dismissed
-          ? _self.dismissed
-          : dismissed // ignore: cast_nullable_to_non_nullable
-              as Set<String>,
-      isGenerating: null == isGenerating
-          ? _self.isGenerating
-          : isGenerating // ignore: cast_nullable_to_non_nullable
-              as bool,
-      error: freezed == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as String?,
+    return _then(_$GeneratorSuccessImpl(
+      null == recommendation
+          ? _value.recommendation
+          : recommendation // ignore: cast_nullable_to_non_nullable
+              as OutfitRecommendation,
     ));
-  }
-}
-
-/// Adds pattern-matching-related methods to [GeneratorState].
-extension GeneratorStatePatterns on GeneratorState {
-  /// A variant of `map` that fallback to returning `orElse`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_GeneratorState value)? $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _GeneratorState() when $default != null:
-        return $default(_that);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// Callbacks receives the raw object, upcasted.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case final Subclass2 value:
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_GeneratorState value) $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _GeneratorState():
-        return $default(_that);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `map` that fallback to returning `null`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_GeneratorState value)? $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _GeneratorState() when $default != null:
-        return $default(_that);
-      case _:
-        return null;
-    }
-  }
-
-  /// A variant of `when` that fallback to an `orElse` callback.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String occasion, Set<String> dismissed, bool isGenerating,
-            String? error)?
-        $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _GeneratorState() when $default != null:
-        return $default(
-            _that.occasion, _that.dismissed, _that.isGenerating, _that.error);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// As opposed to `map`, this offers destructuring.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case Subclass2(:final field2):
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(String occasion, Set<String> dismissed, bool isGenerating,
-            String? error)
-        $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _GeneratorState():
-        return $default(
-            _that.occasion, _that.dismissed, _that.isGenerating, _that.error);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `when` that fallback to returning `null`
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String occasion, Set<String> dismissed, bool isGenerating,
-            String? error)?
-        $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _GeneratorState() when $default != null:
-        return $default(
-            _that.occasion, _that.dismissed, _that.isGenerating, _that.error);
-      case _:
-        return null;
-    }
   }
 }
 
 /// @nodoc
 
-class _GeneratorState extends GeneratorState {
-  const _GeneratorState(
-      {this.occasion = 'casual',
-      final Set<String> dismissed = const <String>{},
-      this.isGenerating = false,
-      this.error})
-      : _dismissed = dismissed,
-        super._();
+class _$GeneratorSuccessImpl implements GeneratorSuccess {
+  const _$GeneratorSuccessImpl(this.recommendation);
 
   @override
-  @JsonKey()
-  final String occasion;
-  final Set<String> _dismissed;
+  final OutfitRecommendation recommendation;
+
   @override
-  @JsonKey()
-  Set<String> get dismissed {
-    if (_dismissed is EqualUnmodifiableSetView) return _dismissed;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableSetView(_dismissed);
+  String toString() {
+    return 'GeneratorState.success(recommendation: $recommendation)';
   }
-
-  @override
-  @JsonKey()
-  final bool isGenerating;
-  @override
-  final String? error;
-
-  /// Create a copy of GeneratorState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$GeneratorStateCopyWith<_GeneratorState> get copyWith =>
-      __$GeneratorStateCopyWithImpl<_GeneratorState>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _GeneratorState &&
-            (identical(other.occasion, occasion) ||
-                other.occasion == occasion) &&
-            const DeepCollectionEquality()
-                .equals(other._dismissed, _dismissed) &&
-            (identical(other.isGenerating, isGenerating) ||
-                other.isGenerating == isGenerating) &&
-            (identical(other.error, error) || other.error == error));
+            other is _$GeneratorSuccessImpl &&
+            (identical(other.recommendation, recommendation) ||
+                other.recommendation == recommendation));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, occasion,
-      const DeepCollectionEquality().hash(_dismissed), isGenerating, error);
-
-  @override
-  String toString() {
-    return 'GeneratorState(occasion: $occasion, dismissed: $dismissed, isGenerating: $isGenerating, error: $error)';
-  }
-}
-
-/// @nodoc
-abstract mixin class _$GeneratorStateCopyWith<$Res>
-    implements $GeneratorStateCopyWith<$Res> {
-  factory _$GeneratorStateCopyWith(
-          _GeneratorState value, $Res Function(_GeneratorState) _then) =
-      __$GeneratorStateCopyWithImpl;
-  @override
-  @useResult
-  $Res call(
-      {String occasion,
-      Set<String> dismissed,
-      bool isGenerating,
-      String? error});
-}
-
-/// @nodoc
-class __$GeneratorStateCopyWithImpl<$Res>
-    implements _$GeneratorStateCopyWith<$Res> {
-  __$GeneratorStateCopyWithImpl(this._self, this._then);
-
-  final _GeneratorState _self;
-  final $Res Function(_GeneratorState) _then;
+  int get hashCode => Object.hash(runtimeType, recommendation);
 
   /// Create a copy of GeneratorState
   /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? occasion = null,
-    Object? dismissed = null,
-    Object? isGenerating = null,
-    Object? error = freezed,
+  _$$GeneratorSuccessImplCopyWith<_$GeneratorSuccessImpl> get copyWith =>
+      __$$GeneratorSuccessImplCopyWithImpl<_$GeneratorSuccessImpl>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(OutfitRecommendation recommendation) success,
+    required TResult Function(String error) error,
   }) {
-    return _then(_GeneratorState(
-      occasion: null == occasion
-          ? _self.occasion
-          : occasion // ignore: cast_nullable_to_non_nullable
-              as String,
-      dismissed: null == dismissed
-          ? _self._dismissed
-          : dismissed // ignore: cast_nullable_to_non_nullable
-              as Set<String>,
-      isGenerating: null == isGenerating
-          ? _self.isGenerating
-          : isGenerating // ignore: cast_nullable_to_non_nullable
-              as bool,
-      error: freezed == error
-          ? _self.error
+    return success(recommendation);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(OutfitRecommendation recommendation)? success,
+    TResult? Function(String error)? error,
+  }) {
+    return success?.call(recommendation);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(OutfitRecommendation recommendation)? success,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (success != null) {
+      return success(recommendation);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(GeneratorInitial value) initial,
+    required TResult Function(GeneratorLoading value) loading,
+    required TResult Function(GeneratorSuccess value) success,
+    required TResult Function(GeneratorError value) error,
+  }) {
+    return success(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(GeneratorInitial value)? initial,
+    TResult? Function(GeneratorLoading value)? loading,
+    TResult? Function(GeneratorSuccess value)? success,
+    TResult? Function(GeneratorError value)? error,
+  }) {
+    return success?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(GeneratorInitial value)? initial,
+    TResult Function(GeneratorLoading value)? loading,
+    TResult Function(GeneratorSuccess value)? success,
+    TResult Function(GeneratorError value)? error,
+    required TResult orElse(),
+  }) {
+    if (success != null) {
+      return success(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class GeneratorSuccess implements GeneratorState {
+  const factory GeneratorSuccess(final OutfitRecommendation recommendation) =
+      _$GeneratorSuccessImpl;
+
+  OutfitRecommendation get recommendation;
+
+  /// Create a copy of GeneratorState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$GeneratorSuccessImplCopyWith<_$GeneratorSuccessImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$GeneratorErrorImplCopyWith<$Res> {
+  factory _$$GeneratorErrorImplCopyWith(_$GeneratorErrorImpl value,
+          $Res Function(_$GeneratorErrorImpl) then) =
+      __$$GeneratorErrorImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({String error});
+}
+
+/// @nodoc
+class __$$GeneratorErrorImplCopyWithImpl<$Res>
+    extends _$GeneratorStateCopyWithImpl<$Res, _$GeneratorErrorImpl>
+    implements _$$GeneratorErrorImplCopyWith<$Res> {
+  __$$GeneratorErrorImplCopyWithImpl(
+      _$GeneratorErrorImpl _value, $Res Function(_$GeneratorErrorImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of GeneratorState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? error = null,
+  }) {
+    return _then(_$GeneratorErrorImpl(
+      null == error
+          ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
     ));
   }
 }
 
-// dart format on
+/// @nodoc
+
+class _$GeneratorErrorImpl implements GeneratorError {
+  const _$GeneratorErrorImpl(this.error);
+
+  @override
+  final String error;
+
+  @override
+  String toString() {
+    return 'GeneratorState.error(error: $error)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$GeneratorErrorImpl &&
+            (identical(other.error, error) || other.error == error));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, error);
+
+  /// Create a copy of GeneratorState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$GeneratorErrorImplCopyWith<_$GeneratorErrorImpl> get copyWith =>
+      __$$GeneratorErrorImplCopyWithImpl<_$GeneratorErrorImpl>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(OutfitRecommendation recommendation) success,
+    required TResult Function(String error) error,
+  }) {
+    return error(this.error);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(OutfitRecommendation recommendation)? success,
+    TResult? Function(String error)? error,
+  }) {
+    return error?.call(this.error);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(OutfitRecommendation recommendation)? success,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (error != null) {
+      return error(this.error);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(GeneratorInitial value) initial,
+    required TResult Function(GeneratorLoading value) loading,
+    required TResult Function(GeneratorSuccess value) success,
+    required TResult Function(GeneratorError value) error,
+  }) {
+    return error(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(GeneratorInitial value)? initial,
+    TResult? Function(GeneratorLoading value)? loading,
+    TResult? Function(GeneratorSuccess value)? success,
+    TResult? Function(GeneratorError value)? error,
+  }) {
+    return error?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(GeneratorInitial value)? initial,
+    TResult Function(GeneratorLoading value)? loading,
+    TResult Function(GeneratorSuccess value)? success,
+    TResult Function(GeneratorError value)? error,
+    required TResult orElse(),
+  }) {
+    if (error != null) {
+      return error(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class GeneratorError implements GeneratorState {
+  const factory GeneratorError(final String error) = _$GeneratorErrorImpl;
+
+  String get error;
+
+  /// Create a copy of GeneratorState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$GeneratorErrorImplCopyWith<_$GeneratorErrorImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}

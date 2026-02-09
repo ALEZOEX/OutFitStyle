@@ -5,11 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:outfitstyle_client/app/di.dart';
 import 'package:outfitstyle_client/ui/atoms/haptics.dart';
 import 'package:outfitstyle_client/ui/atoms/outfit_app_bar.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+import 'package:outfitstyle_client/domain/entities/wardrobe.dart' as domain;
 import 'package:outfitstyle_client/domain/services/recommendations_domain_service.dart';
 
 final wardrobeItemForRecommendationProvider =
-    FutureProvider.autoDispose.family<domain.WardrobeEntry?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<domain.WardrobeItem?, String>((ref, id) async {
   final service = ref.watch(wardrobeDomainServiceProvider);
   return await service.getById(id);
 });
@@ -47,7 +47,7 @@ class UseWardrobeItemInRecommendationScreen extends ConsumerWidget {
 }
 
 class _UseWardrobeItemContent extends ConsumerStatefulWidget {
-  final domain.WardrobeEntry item;
+  final domain.WardrobeItem item;
   final RecommendationsDomainService service;
   const _UseWardrobeItemContent({required this.item, required this.service});
 

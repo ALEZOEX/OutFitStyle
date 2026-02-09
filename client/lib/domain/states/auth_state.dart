@@ -4,11 +4,8 @@ part 'auth_state.freezed.dart';
 
 @freezed
 class AuthState with _$AuthState {
-  const factory AuthState({
-    @Default(false) bool isLoading,
-    @Default(false) bool isAuthenticated,
-    String? error,
-  }) = _AuthState;
-
-  const AuthState._();
+  const factory AuthState.initial() = AuthInitial;
+  const factory AuthState.loading() = AuthLoading;
+  const factory AuthState.success(Map<String, dynamic> user) = AuthSuccess;
+  const factory AuthState.failure(String error) = AuthFailure;
 }

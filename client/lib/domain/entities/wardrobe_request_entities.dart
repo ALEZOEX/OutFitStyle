@@ -22,6 +22,15 @@ class WardrobeItemCreateRequest {
   final String? fit;
   final String? pattern;
   final String? localImagePath;
+  final String? customName;
+  final String? notes;
+  final List<String> tags;
+  final DateTime? purchaseDate;
+  final double? purchasePrice;
+  final String? purchaseCurrency;
+  final String condition;
+  final String userId;
+  final String clothingItemId;
 
   WardrobeItemCreateRequest({
     required this.name,
@@ -46,6 +55,15 @@ class WardrobeItemCreateRequest {
     this.fit,
     this.pattern,
     this.localImagePath,
+    this.customName,
+    this.notes,
+    this.tags = const [],
+    this.purchaseDate,
+    this.purchasePrice,
+    this.purchaseCurrency,
+    this.condition = 'good',
+    required this.userId,
+    required this.clothingItemId,
   });
 
   Map<String, dynamic> toJson() {
@@ -72,6 +90,15 @@ class WardrobeItemCreateRequest {
       'fit': fit,
       'pattern': pattern,
       'local_image_path': localImagePath,
+      'custom_name': customName,
+      'notes': notes,
+      'tags': tags,
+      'purchase_date': purchaseDate?.toIso8601String(),
+      'purchase_price': purchasePrice,
+      'purchase_currency': purchaseCurrency,
+      'condition': condition,
+      'user_id': userId,
+      'clothing_item_id': clothingItemId,
     };
   }
 }
@@ -99,6 +126,13 @@ class WardrobeItemUpdateRequest {
   final String? fit;
   final String? pattern;
   final String? localImagePath;
+  final String? customName;
+  final String? notes;
+  final List<String>? tags;
+  final DateTime? purchaseDate;
+  final double? purchasePrice;
+  final String? purchaseCurrency;
+  final String? condition;
 
   WardrobeItemUpdateRequest({
     this.name,
@@ -123,6 +157,13 @@ class WardrobeItemUpdateRequest {
     this.fit,
     this.pattern,
     this.localImagePath,
+    this.customName,
+    this.notes,
+    this.tags,
+    this.purchaseDate,
+    this.purchasePrice,
+    this.purchaseCurrency,
+    this.condition,
   });
 
   Map<String, dynamic> toJson() {
@@ -149,6 +190,13 @@ class WardrobeItemUpdateRequest {
     if (fit != null) json['fit'] = fit;
     if (pattern != null) json['pattern'] = pattern;
     if (localImagePath != null) json['local_image_path'] = localImagePath;
+    if (customName != null) json['custom_name'] = customName;
+    if (notes != null) json['notes'] = notes;
+    if (tags != null) json['tags'] = tags;
+    if (purchaseDate != null) json['purchase_date'] = purchaseDate!.toIso8601String();
+    if (purchasePrice != null) json['purchase_price'] = purchasePrice;
+    if (purchaseCurrency != null) json['purchase_currency'] = purchaseCurrency;
+    if (condition != null) json['condition'] = condition;
     return json;
   }
 }

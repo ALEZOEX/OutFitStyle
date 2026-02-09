@@ -5,14 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/di.dart';
 import '../../../../ui/atoms/haptics.dart';
 import '../../../../ui/atoms/outfit_app_bar.dart';
-import '../../../../domain/entities/wardrobe_entity.dart' as domain;
+import '../../../../domain/entities/wardrobe.dart' as domain;
 import '../../../../domain/entities/recommendation_entity.dart';
 
 final _wardrobeByCategoryProvider =
-    FutureProvider<Map<String, List<domain.WardrobeEntry>>>((ref) async {
+    FutureProvider<Map<String, List<domain.WardrobeItem>>>((ref) async {
   final repo = ref.watch(wardrobeRepositoryProvider);
   final items = await repo.watchWardrobe(includeArchived: false).first;
-  final byCat = <String, List<domain.WardrobeEntry>>{};
+  final byCat = <String, List<domain.WardrobeItem>>{};
 
   for (final item in items) {
     byCat.putIfAbsent(item.category, () => []).add(item);
@@ -183,7 +183,7 @@ class _WeatherCard extends StatelessWidget {
 
 class _RecommendationComposition extends StatelessWidget {
   final List<Map<String, dynamic>> lines;
-  final Map<String, List<domain.WardrobeEntry>> wardrobeByCategory;
+  final Map<String, List<domain.WardrobeItem>> wardrobeByCategory;
 
   const _RecommendationComposition({
     required this.lines,
@@ -287,7 +287,7 @@ class _RecommendationComposition extends StatelessWidget {
 
 class _WardrobeIntegrationSection extends StatefulWidget {
   final List<Map<String, dynamic>> lines;
-  final Map<String, List<domain.WardrobeEntry>> wardrobeByCategory;
+  final Map<String, List<domain.WardrobeItem>> wardrobeByCategory;
   final Function(List<Map<String, dynamic>>) onSave;
 
   const _WardrobeIntegrationSection({
@@ -303,7 +303,7 @@ class _WardrobeIntegrationSection extends StatefulWidget {
 
 class _WardrobeIntegrationSectionState
     extends State<_WardrobeIntegrationSection> {
-  final Map<String, domain.WardrobeEntry?> _selections = {};
+  final Map<String, domain.WardrobeItem?> _selections = {};
 
   @override
   void initState() {
@@ -353,7 +353,7 @@ class _WardrobeIntegrationSectionState
                     Row(
                       children: [
                         Expanded(
-                          child: SegmentedButton<domain.WardrobeEntry?>(
+                          child: SegmentedButton<domain.WardrobeItem?>(
                             segments: [
                               ButtonSegment(
                                 value: null,

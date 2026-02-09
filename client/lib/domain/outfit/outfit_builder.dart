@@ -1,12 +1,12 @@
-import '../entities/wardrobe_entity.dart' as domain;
+import '../entities/wardrobe.dart' as domain;
 
 class OutfitBuilder {
   /// Собираем финальный список линий образа:
-  /// - если по category есть override (WardrobeEntry) — подставляем его
+  /// - если по category есть override (WardrobeItem) — подставляем его
   /// - иначе оставляем оригинал из recommendation outfit_data
   static List<Map<String, dynamic>> buildFinalLines({
     required List<Map<String, dynamic>> originalLines,
-    required Map<String, domain.WardrobeEntry> overridesByCategory,
+    required Map<String, domain.WardrobeItem> overridesByCategory,
   }) {
     final out = <Map<String, dynamic>>[];
 
@@ -15,7 +15,7 @@ class OutfitBuilder {
       final override = overridesByCategory[cat];
 
       if (override != null) {
-        out.add(_mapWardrobeEntryToOutfitLine(override));
+        out.add(_mapWardrobeItemToOutfitLine(override));
       } else {
         out.add(Map<String, dynamic>.from(line));
       }
@@ -25,7 +25,7 @@ class OutfitBuilder {
     for (final kv in overridesByCategory.entries) {
       final cat = kv.key;
       final exists = out.any((e) => (e['category'] ?? '').toString() == cat);
-      if (!exists) out.add(_mapWardrobeEntryToOutfitLine(kv.value));
+      if (!exists) out.add(_mapWardrobeItemToOutfitLine(kv.value));
     }
 
     return out;
@@ -39,7 +39,7 @@ class OutfitBuilder {
     };
   }
 
-  static Map<String, dynamic> _mapWardrobeEntryToOutfitLine(domain.WardrobeEntry w) {
+  static Map<String, dynamic> _mapWardrobeItemToOutfitLine(domain.WardrobeItem w) {
     return <String, dynamic>{
       'id': w.id,
       'name': w.name,

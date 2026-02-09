@@ -6,8 +6,9 @@ part of 'achievement_progress.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_AchievementProgress _$AchievementProgressFromJson(Map<String, dynamic> json) =>
-    _AchievementProgress(
+_$AchievementProgressImpl _$$AchievementProgressImplFromJson(
+        Map<String, dynamic> json) =>
+    _$AchievementProgressImpl(
       achievementId: json['achievementId'] as String,
       currentProgress: (json['currentProgress'] as num).toInt(),
       maxProgress: (json['maxProgress'] as num).toInt(),
@@ -17,8 +18,8 @@ _AchievementProgress _$AchievementProgressFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['completedAt'] as String),
     );
 
-Map<String, dynamic> _$AchievementProgressToJson(
-        _AchievementProgress instance) =>
+Map<String, dynamic> _$$AchievementProgressImplToJson(
+        _$AchievementProgressImpl instance) =>
     <String, dynamic>{
       'achievementId': instance.achievementId,
       'currentProgress': instance.currentProgress,
