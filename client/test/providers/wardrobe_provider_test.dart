@@ -3,19 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:outfitstyle_client/app/di.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+import 'package:outfitstyle_client/domain/entities/wardrobe.dart' as domain;
 import 'package:outfitstyle_client/data/repositories/wardrobe_repository.dart';
 
 class MockWardrobeRepository extends Mock implements WardrobeRepository {}
 
-class FakeWardrobeEntry extends Fake implements domain.WardrobeEntry {}
+class FakeWardrobeItem extends Fake implements domain.WardrobeItem {}
 
 void main() {
   late ProviderContainer container;
   late MockWardrobeRepository repo;
 
   setUpAll(() {
-    registerFallbackValue(FakeWardrobeEntry());
+    registerFallbackValue(FakeWardrobeItem());
   });
 
   setUp(() {
@@ -38,7 +38,7 @@ void main() {
 
   test('wardrobeControllerProvider: initial state is loading', () {
     final state = container.read(wardrobeControllerProvider);
-    expect(state.wardrobeItems, const AsyncValue<List<domain.WardrobeEntry>>.loading());
+    expect(state.wardrobeItems, const AsyncValue<List<domain.WardrobeItem>>.loading());
   });
 
   test('wardrobeStreamProvider: emits items from repository', () async {
@@ -100,24 +100,44 @@ void main() {
   });
 }
 
-domain.WardrobeEntry _entry(String id) => domain.WardrobeEntry(
+domain.WardrobeItem _entry(String id) => domain.WardrobeItem(
       id: id,
+      userId: 'test_user',
+      clothingItemId: 'test_clothing_item',
+      wearCount: 0,
+      isFavorite: false,
+      isArchived: false,
+      condition: 'good',
+      rainOk: false,
+      snowOk: false,
+      windOk: false,
       name: 'Item $id',
       category: 'tops',
       subcategory: 'shirts',
       style: '',
       iconEmoji: '👕',
-      isFavorite: false,
-      isArchived: false,
-      wearCount: 0,
+      createdAt: DateTime(2024, 1, 1),
       updatedAt: DateTime(2024, 1, 1),
       dirty: false,
-      lastSyncedAt: null,
+      tags: [],
+      purchaseDate: null,
+      purchasePrice: null,
+      purchaseCurrency: null,
+      lastWornAt: null,
+      minTemp: null,
+      maxTemp: null,
+      warmthLevel: null,
       imageUrl: null,
-      localImagePath: null,
       blurHash: null,
-      rainOk: false,
-      snowOk: false,
-      windOk: false,
-      createdAt: DateTime(2024, 1, 1),
+      usage: null,
+      materials: null,
+      season: null,
+      gender: null,
+      fit: null,
+      pattern: null,
+      localImagePath: null,
+      lastSyncedAt: null,
+      customName: null,
+      notes: null,
+      serverId: null,
     );

@@ -1,69 +1,114 @@
-import 'package:flutter/foundation.dart';
-
-import '../../data/repositories/wardrobe_repository.dart';
-import '../entities/wardrobe_entity.dart' as domain;
-import '../entities/wardrobe_request_entities.dart';
+import 'package:outfitstyle_client/domain/entities/wardrobe_item.dart';
+import 'package:outfitstyle_client/domain/repositories/i_wardrobe_repository.dart';
 
 class WardrobeDomainService {
-  final WardrobeRepository _wardrobeRepository;
+  final IWardrobeRepository _repository;
 
-  WardrobeDomainService(this._wardrobeRepository);
+  WardrobeDomainService(this._repository);
 
-  Stream<List<domain.WardrobeEntry>> watchWardrobe({required bool includeArchived}) {
-    return _wardrobeRepository.watchAll(includeArchived: includeArchived);
+  Stream<List<WardrobeItem>> watchWardrobe({bool includeArchived = false}) {
+    return _repository.watchWardrobe(includeArchived: includeArchived);
   }
 
-  Future<domain.WardrobeEntry?> getById(String id) async {
-    return await _wardrobeRepository.getById(id);
+  Stream<WardrobeItem?> watchById(String id) {
+    return _repository.watchById(id);
   }
 
-  Stream<domain.WardrobeEntry?> watchById(String id) {
-    return _wardrobeRepository.watchById(id);
+  Future<List<WardrobeItem>> getAllWardrobeItems({String? userId}) async {
+    return await _repository.getAllWardrobeItems(userId: userId);
   }
 
-  Future<void> toggleFavorite(domain.WardrobeEntry e) async {
-    await _wardrobeRepository.setFavorite(e.id, !e.isFavorite);
+  Future<WardrobeItem?> getWardrobeItemById(String id) async {
+    return await _repository.getWardrobeItemById(id);
   }
 
-  Future<void> toggleArchived(domain.WardrobeEntry e) async {
-    await _wardrobeRepository.setArchived(e.id, !e.isArchived);
+  Future<WardrobeItem> addWardrobeItem(WardrobeItem item) async {
+    return await _repository.addWardrobeItem(item);
   }
 
-  Future<void> markWorn(domain.WardrobeEntry e) async {
-    await _wardrobeRepository.incrementWearCount(e.id);
+  Future<WardrobeItem> updateWardrobeItem(WardrobeItem item) async {
+    return await _repository.updateWardrobeItem(item);
   }
 
-  Future<void> syncFromServer() async {
-    try {
-      await _wardrobeRepository.syncFromServer();
-    } catch (e) {
-      debugPrint('Wardrobe sync error: $e');
-      rethrow;
+  Future<void> deleteWardrobeItem(String id) async {
+    return await _repository.deleteWardrobeItem(id);
+  }
+
+  Future<List<WardrobeItem>> filterWardrobeItems({
+    String? category,
+    String? subcategory,
+    String? color,
+    String? brand,
+    String? name,
+    bool? isFavorite,
+    bool? isArchived,
+    String? userId,
+    String? season,
+    String? style,
+    List<String>? occasions,
+  }) async {
+    return await _repository.filterWardrobeItems(
+      category: category,
+      subcategory: subcategory,
+      color: color,
+      brand: brand,
+      name: name,
+      isFavorite: isFavorite,
+      isArchived: isArchived,
+      userId: userId,
+      season: season,
+      style: style,
+      occasions: occasions,
+    );
+  }
+
+  // Business logic methods
+  List<WardrobeItem> getRecommendedItemsForWeather(double temperature, String weatherCondition) {
+    // This would typically call a repository method that filters items based on weather compatibility
+    // For now, we'll return an empty list and implement the logic later
+    return [];
+  }
+
+  List<WardrobeItem> getSeasonalItems(String season) {
+    // This would typically call a repository method that filters items based on season
+    // For now, we'll return an empty list and implement the logic later
+    return [];
+  }
+
+  List<WardrobeItem> getItemsByTemperatureRange(double minTemp, double maxTemp) {
+    // This would typically call a repository method that filters items based on temperature range
+    // For now, we'll return an empty list and implement the logic later
+    return [];
+  }
+
+  List<WardrobeItem> searchItems(String query) {
+    // This would typically call a repository method that searches items by name, tags, etc.
+    // For now, we'll return an empty list and implement the logic later
+    return [];
+  }
+
+  Future<void> updateLastWorn(String id, DateTime lastWorn) async {
+    // Get the current item
+    final currentItem = await getWardrobeItemById(id);
+    if (currentItem != null) {
+      // Update the last worn date
+      final updatedItem = currentItem.copyWith(
+        lastWornAt: lastWorn,
+        wearCount: currentItem.wearCount + 1, // Increment wear count
+      );
+      await updateWardrobeItem(updatedItem);
     }
   }
 
-  Future<void> prefetchMissingImages({required int limit}) async {
-    await _wardrobeRepository.prefetchMissingImages(limit: limit);
-  }
-
-  // CRUD операции для гардероба
-  Future<domain.WardrobeEntry> createItem(WardrobeItemCreateRequest request) async {
-    return await _wardrobeRepository.createItem(request);
-  }
-
-  Future<void> deleteItem(String id) async {
-    await _wardrobeRepository.deleteById(id);
-  }
-
-  Future<List<domain.WardrobeEntry>> getItemsForRecommendation({
-    String? category,
-    String? season,
-    String? weather,
-  }) async {
-    return await _wardrobeRepository.getForRecommendations(
-      category: category,
-      season: season,
-      weather: weather,
-    );
+  Future<void> incrementWearCount(String id) async {
+    // Get the current item
+    final currentItem = await getWardrobeItemById(id);
+    if (currentItem != null) {
+      // Increment the wear count
+      final updatedItem = currentItem.copyWith(
+        wearCount: currentItem.wearCount + 1,
+      );
+      await updateWardrobeItem(updatedItem);
+    }
   }
 }

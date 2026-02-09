@@ -4,10 +4,6 @@ part 'settings_state.freezed.dart';
 
 @freezed
 class SettingsState with _$SettingsState {
-  const factory SettingsState({
-    @Default(false) bool isLoading,
-    String? error,
-  }) = _SettingsState;
-
-  const SettingsState._();
+  const factory SettingsState.initial() = SettingsInitial;
+  const factory SettingsState.updated(Map<String, dynamic> settings) = SettingsUpdated;
 }

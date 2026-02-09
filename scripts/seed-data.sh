@@ -14,8 +14,11 @@ echo "Ensuring database schema is up to date..."
 cd server && go run cmd/migrate/main.go up && cd ..
 
 # Import basic catalog data
-if [ -f "basic_catalog.ndjson" ]; then
+if [ -f "data/basic_catalog.ndjson" ]; then
     echo "Importing basic catalog data..."
+    cd server && go run cmd/import_catalog/main.go ../data/basic_catalog.ndjson && cd ..
+elif [ -f "basic_catalog.ndjson" ]; then
+    echo "Importing basic catalog data from legacy location..."
     cd server && go run cmd/import_catalog/main.go ../basic_catalog.ndjson && cd ..
 else
     echo "basic_catalog.ndjson file not found, skipping catalog import."

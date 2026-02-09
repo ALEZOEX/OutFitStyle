@@ -1,99 +1,98 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:outfitstyle_client/core/services/auth_service.dart';
+import 'package:outfitstyle_client/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/app/api/api_config.dart';
 
-import '../../app/api/api_config.dart';
-import '../../models/token_pair.dart';
-import '../../services/auth_storage.dart';
-import '../../services/auth_service.dart';
+class AuthRepository implements IAuthRepository {
+  final ApiConfig config;
+  final AuthStorage authStorage;
+  final http.Client httpClient;
 
-class AuthRepository {
-  final ApiConfig _config;
-  final AuthStorage _storage;
-  final http.Client _httpClient;
-  final bool _shouldDispose;
+  AuthRepository(this.config, this.authStorage, this.httpClient);
 
-  AuthRepository(this._config, this._storage, [http.Client? httpClient])
-      : _httpClient = httpClient ?? http.Client(),
-        _shouldDispose = httpClient == null;
-
-  Future<void> login({required String email, required String password}) async {
-    try {
-      final response = await _httpClient.post(
-        Uri.parse('${_config.apiBase}/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final pair = _parseTokenPair(data);
-        await _storage.writeTokenPair(pair);
-      } else {
-        throw Exception('Login failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Login error: $e');
-    }
-  }
-
-  Future<void> register(
-      {required String name,
-      required String email,
-      required String password}) async {
-    try {
-      final response = await _httpClient.post(
-        Uri.parse('${_config.apiBase}/auth/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'name': name, 'email': email, 'password': password}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final pair = _parseTokenPair(data);
-        await _storage.writeTokenPair(pair);
-      } else {
-        throw Exception('Registration failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Registration error: $e');
-    }
-  }
-
-  // Вспомогательная функция для обработки токенов с возможной оберткой
-  TokenPair _parseTokenPair(Map<String, dynamic> data) {
-    if (data.containsKey('tokens')) {
-      // Если обертка 'tokens' существует, используем её
-      return TokenPair.fromJson(data['tokens']);
-    } else {
-      // Иначе используем сам объект
-      return TokenPair.fromJson(data);
-    }
-  }
-
-  Future<void> loginWithGoogle() async {
-    final authService = AuthService(
-        apiBase: _config.apiBase,
-        authStorage: _storage,
-        httpClient: _httpClient);
-    await authService.loginWithGoogle();
-  }
-
-  Future<void> logout({bool allDevices = false}) async {
-    final authService = AuthService(
-        apiBase: _config.apiBase,
-        authStorage: _storage,
-        httpClient: _httpClient);
-    await authService.logout(allDevices: allDevices);
-  }
-
+  @override
   Future<bool> isAuthed() async {
-    final token = await _storage.readAccessToken();
+    final token = await authStorage.getAccessToken();
     return token != null && token.isNotEmpty;
   }
 
+  @override
+  Future<void> logout() async {
+    final authService = AuthService(
+      apiBase: config.apiBase,
+      authStorage: authStorage,
+      httpClient: httpClient,
+    );
+    await authService.logout();
+  }
+
+  @override
+  Future<void> login(String email, String password) async {
+    final authService = AuthService(
+      apiBase: config.apiBase,
+      authStorage: authStorage,
+      httpClient: httpClient,
+    );
+    await authService.login(email, password);
+  }
+
+  @override
+  Future<void> register(String email, String password, String name) async {
+    final authService = AuthService(
+      apiBase: config.apiBase,
+      authStorage: authStorage,
+      httpClient: httpClient,
+    );
+    await authService.register(email, password, name);
+  }
+
+  @override
+  Future<void> forgotPassword(String email) async {
+    final authService = AuthService(
+      apiBase: config.apiBase,
+      authStorage: authStorage,
+      httpClient: httpClient,
+    );
+    await authService.forgotPassword(email);
+  }
+
+  @override
+  Future<String?> getAuthToken() async {
+    return await authStorage.getAccessToken();
+  }
+
+  @override
+  Future<void> refreshToken() async {
+    final authService = AuthService(
+      apiBase: config.apiBase,
+      authStorage: authStorage,
+      httpClient: httpClient,
+    );
+    await authService.refreshToken();
+  }
+
+  @override
+  Future<void> updateProfile(Map<String, dynamic> profileData) async {
+    final authService = AuthService(
+      apiBase: config.apiBase,
+      authStorage: authStorage,
+      httpClient: httpClient,
+    );
+    await authService.updateProfile(profileData);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getProfile() async {
+    final authService = AuthService(
+      apiBase: config.apiBase,
+      authStorage: authStorage,
+      httpClient: httpClient,
+    );
+    return await authService.getUserProfile();
+  }
+
   void dispose() {
-    if (_shouldDispose) {
-      _httpClient.close();
-    }
+    httpClient.close();
   }
 }

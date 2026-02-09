@@ -1,5 +1,0 @@
-[build]
-builder = "docker"
-
-[deploy]
-startCommand = "nginx -g 'daemon off;'"

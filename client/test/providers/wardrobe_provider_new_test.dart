@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:outfitstyle_client/data/repositories/wardrobe_repository.dart';
-import 'package:outfitstyle_client/domain/entities/wardrobe_entity.dart' as domain;
+import 'package:outfitstyle_client/domain/entities/wardrobe.dart' as domain;
 import 'package:outfitstyle_client/app/di.dart';
 
 class MockWardrobeRepository extends Mock implements WardrobeRepository {}
@@ -21,7 +21,7 @@ void main() {
 
     when(() => mockRepository.watchWardrobe(
             includeArchived: any(named: 'includeArchived')))
-        .thenAnswer((_) => Stream.value(<domain.WardrobeEntry>[]));
+        .thenAnswer((_) => Stream.value(<domain.WardrobeItem>[]));
 
     container = ProviderContainer(
       overrides: [
@@ -37,7 +37,7 @@ void main() {
   group('WardrobeController', () {
     test('initial state is AsyncLoading', () {
       final state = container.read(wardrobeControllerProvider);
-      expect(state.wardrobeItems, const AsyncValue<List<domain.WardrobeEntry>>.loading());
+      expect(state.wardrobeItems, const AsyncValue<List<domain.WardrobeItem>>.loading());
     });
 
     test('sync calls syncFromServer', () async {
@@ -114,30 +114,50 @@ void main() {
   });
 }
 
-domain.WardrobeEntry _entry(
+domain.WardrobeItem _entry(
   String id, {
   String category = 'tops',
   bool isFavorite = false,
 }) {
-  return domain.WardrobeEntry(
+  return domain.WardrobeItem(
     id: id,
+    userId: 'test_user',
+    clothingItemId: 'test_clothing_item',
+    wearCount: 0,
+    isFavorite: isFavorite,
+    isArchived: false,
+    condition: 'good',
+    rainOk: false,
+    snowOk: false,
+    windOk: false,
     name: 'Item $id',
     category: category,
     subcategory: 'shirts',
     style: '',
     iconEmoji: '👕',
-    isFavorite: isFavorite,
-    isArchived: false,
-    wearCount: 0,
+    createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
     dirty: false,
-    lastSyncedAt: null,
+    tags: [],
+    purchaseDate: null,
+    purchasePrice: null,
+    purchaseCurrency: null,
+    lastWornAt: null,
+    minTemp: null,
+    maxTemp: null,
+    warmthLevel: null,
     imageUrl: null,
-    localImagePath: null,
     blurHash: null,
-    rainOk: false,
-    snowOk: false,
-    windOk: false,
-    createdAt: DateTime.now(),
+    usage: null,
+    materials: null,
+    season: null,
+    gender: null,
+    fit: null,
+    pattern: null,
+    localImagePath: null,
+    lastSyncedAt: null,
+    customName: null,
+    notes: null,
+    serverId: null,
   );
 }

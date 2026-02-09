@@ -1,77 +1,37 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
-import '../../app/api/api_config.dart';
-import '../../services/auth_storage.dart';
-import '../../services/http_client.dart';
+import 'package:outfitstyle_client/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/app/api/api_config.dart';
 
 class ProfileRepository {
-  final ApiConfig _config;
-  final AuthStorage _auth;
-  final http.Client _httpClient;
-  final bool _shouldDispose;
+  final ApiConfig config;
+  final AuthStorage authStorage;
+  final http.Client httpClient;
 
-  ProfileRepository(this._config, this._auth, [http.Client? httpClient])
-      : _httpClient = httpClient ?? http.Client(),
-        _shouldDispose = httpClient == null;
+  ProfileRepository(this.config, this.authStorage, this.httpClient);
 
   Future<Map<String, dynamic>> getMe() async {
-    try {
-      final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
-      final response = await client.get(
-        Uri.parse('${_config.apiBase}/me'),
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Get profile failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Get profile error: $e');
+    final token = await authStorage.getAccessToken();
+    if (token == null) {
+      throw Exception('Not authenticated');
     }
-  }
 
-  Future<Map<String, dynamic>> updatePreferences(
-      Map<String, dynamic> patch) async {
-    try {
-      final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
-      final response = await client.put(
-        Uri.parse('${_config.apiBase}/user/preferences'),
-        body: jsonEncode(patch),
-      );
+    final response = await httpClient.get(
+      Uri.parse('${config.apiBase}/users/me'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Update preferences failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Update preferences error: $e');
-    }
-  }
-
-  Future<Map<String, dynamic>> updateBody(Map<String, dynamic> patch) async {
-    try {
-      final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
-      final response = await client.put(
-        Uri.parse('${_config.apiBase}/user/body'),
-        body: jsonEncode(patch),
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Update body failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Update body error: $e');
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load user profile');
     }
   }
 
   void dispose() {
-    if (_shouldDispose) {
-      _httpClient.close();
-    }
+    httpClient.close();
   }
 }

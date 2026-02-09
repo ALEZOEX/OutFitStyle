@@ -1,15 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:outfitstyle_client/domain/entities/outfit_recommendation.dart';
 
 part 'generator_state.freezed.dart';
 
 @freezed
 class GeneratorState with _$GeneratorState {
-  const factory GeneratorState({
-    @Default('casual') String occasion,
-    @Default(<String>{}) Set<String> dismissed,
-    @Default(false) bool isGenerating,
-    String? error,
-  }) = _GeneratorState;
-
-  const GeneratorState._(); // Добавляем приватный конструктор для доступа к полям
+  const factory GeneratorState.initial() = GeneratorInitial;
+  const factory GeneratorState.loading() = GeneratorLoading;
+  const factory GeneratorState.success(OutfitRecommendation recommendation) = GeneratorSuccess;
+  const factory GeneratorState.error(String error) = GeneratorError;
 }

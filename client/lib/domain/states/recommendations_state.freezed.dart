@@ -1,5 +1,5 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,349 +9,847 @@ part of 'recommendations_state.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$RecommendationsState {
-  AsyncValue<List<RecommendationRow>> get recommendations;
-  bool get isLoading;
-  String? get error;
-
-  /// Create a copy of RecommendationsState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $RecommendationsStateCopyWith<RecommendationsState> get copyWith =>
-      _$RecommendationsStateCopyWithImpl<RecommendationsState>(
-          this as RecommendationsState, _$identity);
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is RecommendationsState &&
-            (identical(other.recommendations, recommendations) ||
-                other.recommendations == recommendations) &&
-            (identical(other.isLoading, isLoading) ||
-                other.isLoading == isLoading) &&
-            (identical(other.error, error) || other.error == error));
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, recommendations, isLoading, error);
-
-  @override
-  String toString() {
-    return 'RecommendationsState(recommendations: $recommendations, isLoading: $isLoading, error: $error)';
-  }
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(List<OutfitRecommendation> recommendations)
+        loaded,
+    required TResult Function(OutfitRecommendation recommendation) generated,
+    required TResult Function(String error) error,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult? Function(OutfitRecommendation recommendation)? generated,
+    TResult? Function(String error)? error,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult Function(OutfitRecommendation recommendation)? generated,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(RecommendationsInitial value) initial,
+    required TResult Function(RecommendationsLoading value) loading,
+    required TResult Function(RecommendationsLoaded value) loaded,
+    required TResult Function(RecommendationsGenerated value) generated,
+    required TResult Function(RecommendationsError value) error,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(RecommendationsInitial value)? initial,
+    TResult? Function(RecommendationsLoading value)? loading,
+    TResult? Function(RecommendationsLoaded value)? loaded,
+    TResult? Function(RecommendationsGenerated value)? generated,
+    TResult? Function(RecommendationsError value)? error,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(RecommendationsInitial value)? initial,
+    TResult Function(RecommendationsLoading value)? loading,
+    TResult Function(RecommendationsLoaded value)? loaded,
+    TResult Function(RecommendationsGenerated value)? generated,
+    TResult Function(RecommendationsError value)? error,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract mixin class $RecommendationsStateCopyWith<$Res> {
+abstract class $RecommendationsStateCopyWith<$Res> {
   factory $RecommendationsStateCopyWith(RecommendationsState value,
-          $Res Function(RecommendationsState) _then) =
-      _$RecommendationsStateCopyWithImpl;
-  @useResult
-  $Res call(
-      {AsyncValue<List<RecommendationRow>> recommendations,
-      bool isLoading,
-      String? error});
+          $Res Function(RecommendationsState) then) =
+      _$RecommendationsStateCopyWithImpl<$Res, RecommendationsState>;
 }
 
 /// @nodoc
-class _$RecommendationsStateCopyWithImpl<$Res>
+class _$RecommendationsStateCopyWithImpl<$Res,
+        $Val extends RecommendationsState>
     implements $RecommendationsStateCopyWith<$Res> {
-  _$RecommendationsStateCopyWithImpl(this._self, this._then);
+  _$RecommendationsStateCopyWithImpl(this._value, this._then);
 
-  final RecommendationsState _self;
-  final $Res Function(RecommendationsState) _then;
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
   /// Create a copy of RecommendationsState
   /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? recommendations = null,
-    Object? isLoading = null,
-    Object? error = freezed,
-  }) {
-    return _then(_self.copyWith(
-      recommendations: null == recommendations
-          ? _self.recommendations
-          : recommendations // ignore: cast_nullable_to_non_nullable
-              as AsyncValue<List<RecommendationRow>>,
-      isLoading: null == isLoading
-          ? _self.isLoading
-          : isLoading // ignore: cast_nullable_to_non_nullable
-              as bool,
-      error: freezed == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
-  }
 }
 
-/// Adds pattern-matching-related methods to [RecommendationsState].
-extension RecommendationsStatePatterns on RecommendationsState {
-  /// A variant of `map` that fallback to returning `orElse`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
+/// @nodoc
+abstract class _$$RecommendationsInitialImplCopyWith<$Res> {
+  factory _$$RecommendationsInitialImplCopyWith(
+          _$RecommendationsInitialImpl value,
+          $Res Function(_$RecommendationsInitialImpl) then) =
+      __$$RecommendationsInitialImplCopyWithImpl<$Res>;
+}
 
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_RecommendationsState value)? $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _RecommendationsState() when $default != null:
-        return $default(_that);
-      case _:
-        return orElse();
-    }
-  }
+/// @nodoc
+class __$$RecommendationsInitialImplCopyWithImpl<$Res>
+    extends _$RecommendationsStateCopyWithImpl<$Res,
+        _$RecommendationsInitialImpl>
+    implements _$$RecommendationsInitialImplCopyWith<$Res> {
+  __$$RecommendationsInitialImplCopyWithImpl(
+      _$RecommendationsInitialImpl _value,
+      $Res Function(_$RecommendationsInitialImpl) _then)
+      : super(_value, _then);
 
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// Callbacks receives the raw object, upcasted.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case final Subclass2 value:
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_RecommendationsState value) $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _RecommendationsState():
-        return $default(_that);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `map` that fallback to returning `null`.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case final Subclass value:
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_RecommendationsState value)? $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _RecommendationsState() when $default != null:
-        return $default(_that);
-      case _:
-        return null;
-    }
-  }
-
-  /// A variant of `when` that fallback to an `orElse` callback.
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return orElse();
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(AsyncValue<List<RecommendationRow>> recommendations,
-            bool isLoading, String? error)?
-        $default, {
-    required TResult orElse(),
-  }) {
-    final _that = this;
-    switch (_that) {
-      case _RecommendationsState() when $default != null:
-        return $default(_that.recommendations, _that.isLoading, _that.error);
-      case _:
-        return orElse();
-    }
-  }
-
-  /// A `switch`-like method, using callbacks.
-  ///
-  /// As opposed to `map`, this offers destructuring.
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case Subclass2(:final field2):
-  ///     return ...;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(AsyncValue<List<RecommendationRow>> recommendations,
-            bool isLoading, String? error)
-        $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _RecommendationsState():
-        return $default(_that.recommendations, _that.isLoading, _that.error);
-      case _:
-        throw StateError('Unexpected subclass');
-    }
-  }
-
-  /// A variant of `when` that fallback to returning `null`
-  ///
-  /// It is equivalent to doing:
-  /// ```dart
-  /// switch (sealedClass) {
-  ///   case Subclass(:final field):
-  ///     return ...;
-  ///   case _:
-  ///     return null;
-  /// }
-  /// ```
-
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(AsyncValue<List<RecommendationRow>> recommendations,
-            bool isLoading, String? error)?
-        $default,
-  ) {
-    final _that = this;
-    switch (_that) {
-      case _RecommendationsState() when $default != null:
-        return $default(_that.recommendations, _that.isLoading, _that.error);
-      case _:
-        return null;
-    }
-  }
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 
-class _RecommendationsState extends RecommendationsState {
-  const _RecommendationsState(
-      {this.recommendations = const AsyncValue.loading(),
-      this.isLoading = false,
-      this.error})
-      : super._();
+class _$RecommendationsInitialImpl implements RecommendationsInitial {
+  const _$RecommendationsInitialImpl();
 
   @override
-  @JsonKey()
-  final AsyncValue<List<RecommendationRow>> recommendations;
-  @override
-  @JsonKey()
-  final bool isLoading;
-  @override
-  final String? error;
-
-  /// Create a copy of RecommendationsState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$RecommendationsStateCopyWith<_RecommendationsState> get copyWith =>
-      __$RecommendationsStateCopyWithImpl<_RecommendationsState>(
-          this, _$identity);
+  String toString() {
+    return 'RecommendationsState.initial()';
+  }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _RecommendationsState &&
-            (identical(other.recommendations, recommendations) ||
-                other.recommendations == recommendations) &&
-            (identical(other.isLoading, isLoading) ||
-                other.isLoading == isLoading) &&
-            (identical(other.error, error) || other.error == error));
+            other is _$RecommendationsInitialImpl);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, recommendations, isLoading, error);
+  int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() {
-    return 'RecommendationsState(recommendations: $recommendations, isLoading: $isLoading, error: $error)';
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(List<OutfitRecommendation> recommendations)
+        loaded,
+    required TResult Function(OutfitRecommendation recommendation) generated,
+    required TResult Function(String error) error,
+  }) {
+    return initial();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult? Function(OutfitRecommendation recommendation)? generated,
+    TResult? Function(String error)? error,
+  }) {
+    return initial?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult Function(OutfitRecommendation recommendation)? generated,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (initial != null) {
+      return initial();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(RecommendationsInitial value) initial,
+    required TResult Function(RecommendationsLoading value) loading,
+    required TResult Function(RecommendationsLoaded value) loaded,
+    required TResult Function(RecommendationsGenerated value) generated,
+    required TResult Function(RecommendationsError value) error,
+  }) {
+    return initial(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(RecommendationsInitial value)? initial,
+    TResult? Function(RecommendationsLoading value)? loading,
+    TResult? Function(RecommendationsLoaded value)? loaded,
+    TResult? Function(RecommendationsGenerated value)? generated,
+    TResult? Function(RecommendationsError value)? error,
+  }) {
+    return initial?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(RecommendationsInitial value)? initial,
+    TResult Function(RecommendationsLoading value)? loading,
+    TResult Function(RecommendationsLoaded value)? loaded,
+    TResult Function(RecommendationsGenerated value)? generated,
+    TResult Function(RecommendationsError value)? error,
+    required TResult orElse(),
+  }) {
+    if (initial != null) {
+      return initial(this);
+    }
+    return orElse();
   }
 }
 
-/// @nodoc
-abstract mixin class _$RecommendationsStateCopyWith<$Res>
-    implements $RecommendationsStateCopyWith<$Res> {
-  factory _$RecommendationsStateCopyWith(_RecommendationsState value,
-          $Res Function(_RecommendationsState) _then) =
-      __$RecommendationsStateCopyWithImpl;
-  @override
-  @useResult
-  $Res call(
-      {AsyncValue<List<RecommendationRow>> recommendations,
-      bool isLoading,
-      String? error});
+abstract class RecommendationsInitial implements RecommendationsState {
+  const factory RecommendationsInitial() = _$RecommendationsInitialImpl;
 }
 
 /// @nodoc
-class __$RecommendationsStateCopyWithImpl<$Res>
-    implements _$RecommendationsStateCopyWith<$Res> {
-  __$RecommendationsStateCopyWithImpl(this._self, this._then);
+abstract class _$$RecommendationsLoadingImplCopyWith<$Res> {
+  factory _$$RecommendationsLoadingImplCopyWith(
+          _$RecommendationsLoadingImpl value,
+          $Res Function(_$RecommendationsLoadingImpl) then) =
+      __$$RecommendationsLoadingImplCopyWithImpl<$Res>;
+}
 
-  final _RecommendationsState _self;
-  final $Res Function(_RecommendationsState) _then;
+/// @nodoc
+class __$$RecommendationsLoadingImplCopyWithImpl<$Res>
+    extends _$RecommendationsStateCopyWithImpl<$Res,
+        _$RecommendationsLoadingImpl>
+    implements _$$RecommendationsLoadingImplCopyWith<$Res> {
+  __$$RecommendationsLoadingImplCopyWithImpl(
+      _$RecommendationsLoadingImpl _value,
+      $Res Function(_$RecommendationsLoadingImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of RecommendationsState
   /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$RecommendationsLoadingImpl implements RecommendationsLoading {
+  const _$RecommendationsLoadingImpl();
+
   @override
+  String toString() {
+    return 'RecommendationsState.loading()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RecommendationsLoadingImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(List<OutfitRecommendation> recommendations)
+        loaded,
+    required TResult Function(OutfitRecommendation recommendation) generated,
+    required TResult Function(String error) error,
+  }) {
+    return loading();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult? Function(OutfitRecommendation recommendation)? generated,
+    TResult? Function(String error)? error,
+  }) {
+    return loading?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult Function(OutfitRecommendation recommendation)? generated,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (loading != null) {
+      return loading();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(RecommendationsInitial value) initial,
+    required TResult Function(RecommendationsLoading value) loading,
+    required TResult Function(RecommendationsLoaded value) loaded,
+    required TResult Function(RecommendationsGenerated value) generated,
+    required TResult Function(RecommendationsError value) error,
+  }) {
+    return loading(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(RecommendationsInitial value)? initial,
+    TResult? Function(RecommendationsLoading value)? loading,
+    TResult? Function(RecommendationsLoaded value)? loaded,
+    TResult? Function(RecommendationsGenerated value)? generated,
+    TResult? Function(RecommendationsError value)? error,
+  }) {
+    return loading?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(RecommendationsInitial value)? initial,
+    TResult Function(RecommendationsLoading value)? loading,
+    TResult Function(RecommendationsLoaded value)? loaded,
+    TResult Function(RecommendationsGenerated value)? generated,
+    TResult Function(RecommendationsError value)? error,
+    required TResult orElse(),
+  }) {
+    if (loading != null) {
+      return loading(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class RecommendationsLoading implements RecommendationsState {
+  const factory RecommendationsLoading() = _$RecommendationsLoadingImpl;
+}
+
+/// @nodoc
+abstract class _$$RecommendationsLoadedImplCopyWith<$Res> {
+  factory _$$RecommendationsLoadedImplCopyWith(
+          _$RecommendationsLoadedImpl value,
+          $Res Function(_$RecommendationsLoadedImpl) then) =
+      __$$RecommendationsLoadedImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({List<OutfitRecommendation> recommendations});
+}
+
+/// @nodoc
+class __$$RecommendationsLoadedImplCopyWithImpl<$Res>
+    extends _$RecommendationsStateCopyWithImpl<$Res,
+        _$RecommendationsLoadedImpl>
+    implements _$$RecommendationsLoadedImplCopyWith<$Res> {
+  __$$RecommendationsLoadedImplCopyWithImpl(_$RecommendationsLoadedImpl _value,
+      $Res Function(_$RecommendationsLoadedImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
+  @override
   $Res call({
     Object? recommendations = null,
-    Object? isLoading = null,
-    Object? error = freezed,
   }) {
-    return _then(_RecommendationsState(
-      recommendations: null == recommendations
-          ? _self.recommendations
+    return _then(_$RecommendationsLoadedImpl(
+      null == recommendations
+          ? _value._recommendations
           : recommendations // ignore: cast_nullable_to_non_nullable
-              as AsyncValue<List<RecommendationRow>>,
-      isLoading: null == isLoading
-          ? _self.isLoading
-          : isLoading // ignore: cast_nullable_to_non_nullable
-              as bool,
-      error: freezed == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as List<OutfitRecommendation>,
     ));
   }
 }
 
-// dart format on
+/// @nodoc
+
+class _$RecommendationsLoadedImpl implements RecommendationsLoaded {
+  const _$RecommendationsLoadedImpl(
+      final List<OutfitRecommendation> recommendations)
+      : _recommendations = recommendations;
+
+  final List<OutfitRecommendation> _recommendations;
+  @override
+  List<OutfitRecommendation> get recommendations {
+    if (_recommendations is EqualUnmodifiableListView) return _recommendations;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_recommendations);
+  }
+
+  @override
+  String toString() {
+    return 'RecommendationsState.loaded(recommendations: $recommendations)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RecommendationsLoadedImpl &&
+            const DeepCollectionEquality()
+                .equals(other._recommendations, _recommendations));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, const DeepCollectionEquality().hash(_recommendations));
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RecommendationsLoadedImplCopyWith<_$RecommendationsLoadedImpl>
+      get copyWith => __$$RecommendationsLoadedImplCopyWithImpl<
+          _$RecommendationsLoadedImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(List<OutfitRecommendation> recommendations)
+        loaded,
+    required TResult Function(OutfitRecommendation recommendation) generated,
+    required TResult Function(String error) error,
+  }) {
+    return loaded(recommendations);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult? Function(OutfitRecommendation recommendation)? generated,
+    TResult? Function(String error)? error,
+  }) {
+    return loaded?.call(recommendations);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult Function(OutfitRecommendation recommendation)? generated,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (loaded != null) {
+      return loaded(recommendations);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(RecommendationsInitial value) initial,
+    required TResult Function(RecommendationsLoading value) loading,
+    required TResult Function(RecommendationsLoaded value) loaded,
+    required TResult Function(RecommendationsGenerated value) generated,
+    required TResult Function(RecommendationsError value) error,
+  }) {
+    return loaded(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(RecommendationsInitial value)? initial,
+    TResult? Function(RecommendationsLoading value)? loading,
+    TResult? Function(RecommendationsLoaded value)? loaded,
+    TResult? Function(RecommendationsGenerated value)? generated,
+    TResult? Function(RecommendationsError value)? error,
+  }) {
+    return loaded?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(RecommendationsInitial value)? initial,
+    TResult Function(RecommendationsLoading value)? loading,
+    TResult Function(RecommendationsLoaded value)? loaded,
+    TResult Function(RecommendationsGenerated value)? generated,
+    TResult Function(RecommendationsError value)? error,
+    required TResult orElse(),
+  }) {
+    if (loaded != null) {
+      return loaded(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class RecommendationsLoaded implements RecommendationsState {
+  const factory RecommendationsLoaded(
+          final List<OutfitRecommendation> recommendations) =
+      _$RecommendationsLoadedImpl;
+
+  List<OutfitRecommendation> get recommendations;
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$RecommendationsLoadedImplCopyWith<_$RecommendationsLoadedImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$RecommendationsGeneratedImplCopyWith<$Res> {
+  factory _$$RecommendationsGeneratedImplCopyWith(
+          _$RecommendationsGeneratedImpl value,
+          $Res Function(_$RecommendationsGeneratedImpl) then) =
+      __$$RecommendationsGeneratedImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({OutfitRecommendation recommendation});
+}
+
+/// @nodoc
+class __$$RecommendationsGeneratedImplCopyWithImpl<$Res>
+    extends _$RecommendationsStateCopyWithImpl<$Res,
+        _$RecommendationsGeneratedImpl>
+    implements _$$RecommendationsGeneratedImplCopyWith<$Res> {
+  __$$RecommendationsGeneratedImplCopyWithImpl(
+      _$RecommendationsGeneratedImpl _value,
+      $Res Function(_$RecommendationsGeneratedImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? recommendation = null,
+  }) {
+    return _then(_$RecommendationsGeneratedImpl(
+      null == recommendation
+          ? _value.recommendation
+          : recommendation // ignore: cast_nullable_to_non_nullable
+              as OutfitRecommendation,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$RecommendationsGeneratedImpl implements RecommendationsGenerated {
+  const _$RecommendationsGeneratedImpl(this.recommendation);
+
+  @override
+  final OutfitRecommendation recommendation;
+
+  @override
+  String toString() {
+    return 'RecommendationsState.generated(recommendation: $recommendation)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RecommendationsGeneratedImpl &&
+            (identical(other.recommendation, recommendation) ||
+                other.recommendation == recommendation));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, recommendation);
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RecommendationsGeneratedImplCopyWith<_$RecommendationsGeneratedImpl>
+      get copyWith => __$$RecommendationsGeneratedImplCopyWithImpl<
+          _$RecommendationsGeneratedImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(List<OutfitRecommendation> recommendations)
+        loaded,
+    required TResult Function(OutfitRecommendation recommendation) generated,
+    required TResult Function(String error) error,
+  }) {
+    return generated(recommendation);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult? Function(OutfitRecommendation recommendation)? generated,
+    TResult? Function(String error)? error,
+  }) {
+    return generated?.call(recommendation);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult Function(OutfitRecommendation recommendation)? generated,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (generated != null) {
+      return generated(recommendation);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(RecommendationsInitial value) initial,
+    required TResult Function(RecommendationsLoading value) loading,
+    required TResult Function(RecommendationsLoaded value) loaded,
+    required TResult Function(RecommendationsGenerated value) generated,
+    required TResult Function(RecommendationsError value) error,
+  }) {
+    return generated(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(RecommendationsInitial value)? initial,
+    TResult? Function(RecommendationsLoading value)? loading,
+    TResult? Function(RecommendationsLoaded value)? loaded,
+    TResult? Function(RecommendationsGenerated value)? generated,
+    TResult? Function(RecommendationsError value)? error,
+  }) {
+    return generated?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(RecommendationsInitial value)? initial,
+    TResult Function(RecommendationsLoading value)? loading,
+    TResult Function(RecommendationsLoaded value)? loaded,
+    TResult Function(RecommendationsGenerated value)? generated,
+    TResult Function(RecommendationsError value)? error,
+    required TResult orElse(),
+  }) {
+    if (generated != null) {
+      return generated(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class RecommendationsGenerated implements RecommendationsState {
+  const factory RecommendationsGenerated(
+          final OutfitRecommendation recommendation) =
+      _$RecommendationsGeneratedImpl;
+
+  OutfitRecommendation get recommendation;
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$RecommendationsGeneratedImplCopyWith<_$RecommendationsGeneratedImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$RecommendationsErrorImplCopyWith<$Res> {
+  factory _$$RecommendationsErrorImplCopyWith(_$RecommendationsErrorImpl value,
+          $Res Function(_$RecommendationsErrorImpl) then) =
+      __$$RecommendationsErrorImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({String error});
+}
+
+/// @nodoc
+class __$$RecommendationsErrorImplCopyWithImpl<$Res>
+    extends _$RecommendationsStateCopyWithImpl<$Res, _$RecommendationsErrorImpl>
+    implements _$$RecommendationsErrorImplCopyWith<$Res> {
+  __$$RecommendationsErrorImplCopyWithImpl(_$RecommendationsErrorImpl _value,
+      $Res Function(_$RecommendationsErrorImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? error = null,
+  }) {
+    return _then(_$RecommendationsErrorImpl(
+      null == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$RecommendationsErrorImpl implements RecommendationsError {
+  const _$RecommendationsErrorImpl(this.error);
+
+  @override
+  final String error;
+
+  @override
+  String toString() {
+    return 'RecommendationsState.error(error: $error)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RecommendationsErrorImpl &&
+            (identical(other.error, error) || other.error == error));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, error);
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RecommendationsErrorImplCopyWith<_$RecommendationsErrorImpl>
+      get copyWith =>
+          __$$RecommendationsErrorImplCopyWithImpl<_$RecommendationsErrorImpl>(
+              this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(List<OutfitRecommendation> recommendations)
+        loaded,
+    required TResult Function(OutfitRecommendation recommendation) generated,
+    required TResult Function(String error) error,
+  }) {
+    return error(this.error);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult? Function(OutfitRecommendation recommendation)? generated,
+    TResult? Function(String error)? error,
+  }) {
+    return error?.call(this.error);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<OutfitRecommendation> recommendations)? loaded,
+    TResult Function(OutfitRecommendation recommendation)? generated,
+    TResult Function(String error)? error,
+    required TResult orElse(),
+  }) {
+    if (error != null) {
+      return error(this.error);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(RecommendationsInitial value) initial,
+    required TResult Function(RecommendationsLoading value) loading,
+    required TResult Function(RecommendationsLoaded value) loaded,
+    required TResult Function(RecommendationsGenerated value) generated,
+    required TResult Function(RecommendationsError value) error,
+  }) {
+    return error(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(RecommendationsInitial value)? initial,
+    TResult? Function(RecommendationsLoading value)? loading,
+    TResult? Function(RecommendationsLoaded value)? loaded,
+    TResult? Function(RecommendationsGenerated value)? generated,
+    TResult? Function(RecommendationsError value)? error,
+  }) {
+    return error?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(RecommendationsInitial value)? initial,
+    TResult Function(RecommendationsLoading value)? loading,
+    TResult Function(RecommendationsLoaded value)? loaded,
+    TResult Function(RecommendationsGenerated value)? generated,
+    TResult Function(RecommendationsError value)? error,
+    required TResult orElse(),
+  }) {
+    if (error != null) {
+      return error(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class RecommendationsError implements RecommendationsState {
+  const factory RecommendationsError(final String error) =
+      _$RecommendationsErrorImpl;
+
+  String get error;
+
+  /// Create a copy of RecommendationsState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$RecommendationsErrorImplCopyWith<_$RecommendationsErrorImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}

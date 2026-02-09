@@ -7,7 +7,7 @@ import '../../data/repositories/profile_repository.dart';
 import '../../data/repositories/wardrobe_repository.dart';
 import '../../data/repositories/recommendations_repository.dart';
 import '../../data/sync/sync_worker.dart';
-import '../../domain/entities/wardrobe_entity.dart' as domain;
+import '../../domain/entities/wardrobe.dart' as domain;
 import '../../domain/entities/recommendation_entity.dart';
 import '../../domain/entities/wardrobe_request_entities.dart';
 
@@ -240,7 +240,7 @@ class SyncManager {
   }
 
   /// Синхронизирует один элемент гардероба
-  Future<void> _syncWardrobeItem(domain.WardrobeEntry item) async {
+  Future<void> _syncWardrobeItem(domain.WardrobeItem item) async {
     try {
       if (item.serverId == null) {
         // New item - create on server
@@ -258,7 +258,7 @@ class SyncManager {
   }
 
   /// Создает элемент гардероба на сервере
-  Future<domain.WardrobeEntry> _createWardrobeItem(domain.WardrobeEntry item) async {
+  Future<domain.WardrobeItem> _createWardrobeItem(domain.WardrobeItem item) async {
     // Convert domain entity to request object
     final request = WardrobeItemCreateRequest(
       name: item.name,
@@ -293,7 +293,7 @@ class SyncManager {
   }
 
   /// Обновляет элемент гардероба на сервере
-  Future<void> _updateWardrobeItem(domain.WardrobeEntry item) async {
+  Future<void> _updateWardrobeItem(domain.WardrobeItem item) async {
     // This would typically call the remote data source to update the item
     // For now, we'll just log the operation
     _logFine('Updating wardrobe item ${item.id} on server');
