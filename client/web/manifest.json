@@ -1,6 +1,6 @@
 {
-    "name": "client",
-    "short_name": "client",
+    "name": "outfitstyle_client",
+    "short_name": "outfitstyle_client",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
