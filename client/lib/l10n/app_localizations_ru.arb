@@ -1,0 +1,78 @@
+{
+  "appName": "OutfitStyle",
+  "@appName": {
+    "description": "Название приложения"
+  },
+  "welcomeMessage": "Добро пожаловать в OutfitStyle!",
+  "@welcomeMessage": {
+    "description": "Приветственное сообщение, отображаемое пользователю"
+  },
+  "loading": "Загрузка...",
+  "@loading": {
+    "description": "Текст индикатора загрузки"
+  },
+  "error": "Ошибка",
+  "@error": {
+    "description": "Общий текст ошибки"
+  },
+  "retry": "Повторить",
+  "@retry": {
+    "description": "Текст кнопки повтора"
+  },
+  "recommendations": "Рекомендации",
+  "@recommendations": {
+    "description": "Заголовок вкладки рекомендаций"
+  },
+  "saved": "Сохраненные",
+  "@saved": {
+    "description": "Заголовок вкладки сохраненных рекомендаций"
+  },
+  "history": "История",
+  "@history": {
+    "description": "Заголовок вкладки истории"
+  },
+  "weather": "Погода",
+  "@weather": {
+    "description": "Текст, связанный с погодой"
+  },
+  "outfit": "Настрой",
+  "@outfit": {
+    "description": "Текст, связанный с нарядом"
+  },
+  "profile": "Профиль",
+  "@profile": {
+    "description": "Текст, связанный с профилем"
+  },
+  "settings": "Настройки",
+  "@settings": {
+    "description": "Текст, связанный с настройками"
+  },
+  "login": "Вход",
+  "@login": {
+    "description": "Текст кнопки входа"
+  },
+  "logout": "Выход",
+  "@logout": {
+    "description": "Текст кнопки выхода"
+  },
+  "email": "Электронная почта",
+  "@email": {
+    "description": "Метка поля электронной почты"
+  },
+  "password": "Пароль",
+  "@password": {
+    "description": "Метка поля пароля"
+  },
+  "signInWithGoogle": "Войти через Google",
+  "@signInWithGoogle": {
+    "description": "Текст кнопки входа через Google"
+  },
+  "noInternetConnection": "Нет подключения к интернету",
+  "@noInternetConnection": {
+    "description": "Сообщение, отображаемое при отсутствии подключения к интернету"
+  },
+  "somethingWentWrong": "Что-то пошло не так",
+  "@somethingWentWrong": {
+    "description": "Общее сообщение об ошибке"
+  }
+}
