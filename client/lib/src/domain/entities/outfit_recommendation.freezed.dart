@@ -14,19 +14,23 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
+OutfitRecommendation _$OutfitRecommendationFromJson(Map<String, dynamic> json) {
+  return _OutfitRecommendation.fromJson(json);
+}
+
 /// @nodoc
 mixin _$OutfitRecommendation {
-  String get id => throw _privateConstructorUsedError;
-  String get userId => throw _privateConstructorUsedError;
-  String get weatherCondition => throw _privateConstructorUsedError;
-  double get temperature => throw _privateConstructorUsedError;
-  List<String> get clothingItems => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  double get confidenceScore => throw _privateConstructorUsedError;
-  String? get feedback => throw _privateConstructorUsedError;
-  bool? get isLiked => throw _privateConstructorUsedError;
-  bool? get isSaved => throw _privateConstructorUsedError;
-  Map<String, dynamic>? get metadata => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
+  String? get title => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
+  String? get imageUrl => throw _privateConstructorUsedError;
+  List<String>? get recommendedItems => throw _privateConstructorUsedError;
+  double? get temperature => throw _privateConstructorUsedError;
+  String? get weatherCondition => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+
+  /// Serializes this OutfitRecommendation to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of OutfitRecommendation
   /// with the given fields replaced by the non-null parameter values.
@@ -42,17 +46,14 @@ abstract class $OutfitRecommendationCopyWith<$Res> {
       _$OutfitRecommendationCopyWithImpl<$Res, OutfitRecommendation>;
   @useResult
   $Res call(
-      {String id,
-      String userId,
-      String weatherCondition,
-      double temperature,
-      List<String> clothingItems,
-      DateTime createdAt,
-      double confidenceScore,
-      String? feedback,
-      bool? isLiked,
-      bool? isSaved,
-      Map<String, dynamic>? metadata});
+      {String? id,
+      String? title,
+      String? description,
+      String? imageUrl,
+      List<String>? recommendedItems,
+      double? temperature,
+      String? weatherCondition,
+      DateTime? createdAt});
 }
 
 /// @nodoc
@@ -71,63 +72,48 @@ class _$OutfitRecommendationCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? userId = null,
-    Object? weatherCondition = null,
-    Object? temperature = null,
-    Object? clothingItems = null,
-    Object? createdAt = null,
-    Object? confidenceScore = null,
-    Object? feedback = freezed,
-    Object? isLiked = freezed,
-    Object? isSaved = freezed,
-    Object? metadata = freezed,
+    Object? id = freezed,
+    Object? title = freezed,
+    Object? description = freezed,
+    Object? imageUrl = freezed,
+    Object? recommendedItems = freezed,
+    Object? temperature = freezed,
+    Object? weatherCondition = freezed,
+    Object? createdAt = freezed,
   }) {
     return _then(_value.copyWith(
-      id: null == id
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      weatherCondition: null == weatherCondition
-          ? _value.weatherCondition
-          : weatherCondition // ignore: cast_nullable_to_non_nullable
-              as String,
-      temperature: null == temperature
+              as String?,
+      title: freezed == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String?,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      recommendedItems: freezed == recommendedItems
+          ? _value.recommendedItems
+          : recommendedItems // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+      temperature: freezed == temperature
           ? _value.temperature
           : temperature // ignore: cast_nullable_to_non_nullable
-              as double,
-      clothingItems: null == clothingItems
-          ? _value.clothingItems
-          : clothingItems // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      createdAt: null == createdAt
+              as double?,
+      weatherCondition: freezed == weatherCondition
+          ? _value.weatherCondition
+          : weatherCondition // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      confidenceScore: null == confidenceScore
-          ? _value.confidenceScore
-          : confidenceScore // ignore: cast_nullable_to_non_nullable
-              as double,
-      feedback: freezed == feedback
-          ? _value.feedback
-          : feedback // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isLiked: freezed == isLiked
-          ? _value.isLiked
-          : isLiked // ignore: cast_nullable_to_non_nullable
-              as bool?,
-      isSaved: freezed == isSaved
-          ? _value.isSaved
-          : isSaved // ignore: cast_nullable_to_non_nullable
-              as bool?,
-      metadata: freezed == metadata
-          ? _value.metadata
-          : metadata // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -141,17 +127,14 @@ abstract class _$$OutfitRecommendationImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String id,
-      String userId,
-      String weatherCondition,
-      double temperature,
-      List<String> clothingItems,
-      DateTime createdAt,
-      double confidenceScore,
-      String? feedback,
-      bool? isLiked,
-      bool? isSaved,
-      Map<String, dynamic>? metadata});
+      {String? id,
+      String? title,
+      String? description,
+      String? imageUrl,
+      List<String>? recommendedItems,
+      double? temperature,
+      String? weatherCondition,
+      DateTime? createdAt});
 }
 
 /// @nodoc
@@ -167,124 +150,98 @@ class __$$OutfitRecommendationImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? userId = null,
-    Object? weatherCondition = null,
-    Object? temperature = null,
-    Object? clothingItems = null,
-    Object? createdAt = null,
-    Object? confidenceScore = null,
-    Object? feedback = freezed,
-    Object? isLiked = freezed,
-    Object? isSaved = freezed,
-    Object? metadata = freezed,
+    Object? id = freezed,
+    Object? title = freezed,
+    Object? description = freezed,
+    Object? imageUrl = freezed,
+    Object? recommendedItems = freezed,
+    Object? temperature = freezed,
+    Object? weatherCondition = freezed,
+    Object? createdAt = freezed,
   }) {
     return _then(_$OutfitRecommendationImpl(
-      id: null == id
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      weatherCondition: null == weatherCondition
-          ? _value.weatherCondition
-          : weatherCondition // ignore: cast_nullable_to_non_nullable
-              as String,
-      temperature: null == temperature
+              as String?,
+      title: freezed == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String?,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      recommendedItems: freezed == recommendedItems
+          ? _value._recommendedItems
+          : recommendedItems // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+      temperature: freezed == temperature
           ? _value.temperature
           : temperature // ignore: cast_nullable_to_non_nullable
-              as double,
-      clothingItems: null == clothingItems
-          ? _value._clothingItems
-          : clothingItems // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      createdAt: null == createdAt
+              as double?,
+      weatherCondition: freezed == weatherCondition
+          ? _value.weatherCondition
+          : weatherCondition // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      confidenceScore: null == confidenceScore
-          ? _value.confidenceScore
-          : confidenceScore // ignore: cast_nullable_to_non_nullable
-              as double,
-      feedback: freezed == feedback
-          ? _value.feedback
-          : feedback // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isLiked: freezed == isLiked
-          ? _value.isLiked
-          : isLiked // ignore: cast_nullable_to_non_nullable
-              as bool?,
-      isSaved: freezed == isSaved
-          ? _value.isSaved
-          : isSaved // ignore: cast_nullable_to_non_nullable
-              as bool?,
-      metadata: freezed == metadata
-          ? _value._metadata
-          : metadata // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
+              as DateTime?,
     ));
   }
 }
 
 /// @nodoc
-
+@JsonSerializable()
 class _$OutfitRecommendationImpl implements _OutfitRecommendation {
   const _$OutfitRecommendationImpl(
-      {required this.id,
-      required this.userId,
-      required this.weatherCondition,
-      required this.temperature,
-      required final List<String> clothingItems,
-      required this.createdAt,
-      required this.confidenceScore,
-      this.feedback,
-      this.isLiked,
-      this.isSaved,
-      final Map<String, dynamic>? metadata})
-      : _clothingItems = clothingItems,
-        _metadata = metadata;
+      {this.id,
+      this.title,
+      this.description,
+      this.imageUrl,
+      final List<String>? recommendedItems,
+      this.temperature,
+      this.weatherCondition,
+      this.createdAt})
+      : _recommendedItems = recommendedItems;
+
+  factory _$OutfitRecommendationImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OutfitRecommendationImplFromJson(json);
 
   @override
-  final String id;
+  final String? id;
   @override
-  final String userId;
+  final String? title;
   @override
-  final String weatherCondition;
+  final String? description;
   @override
-  final double temperature;
-  final List<String> _clothingItems;
+  final String? imageUrl;
+  final List<String>? _recommendedItems;
   @override
-  List<String> get clothingItems {
-    if (_clothingItems is EqualUnmodifiableListView) return _clothingItems;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_clothingItems);
-  }
-
-  @override
-  final DateTime createdAt;
-  @override
-  final double confidenceScore;
-  @override
-  final String? feedback;
-  @override
-  final bool? isLiked;
-  @override
-  final bool? isSaved;
-  final Map<String, dynamic>? _metadata;
-  @override
-  Map<String, dynamic>? get metadata {
-    final value = _metadata;
+  List<String>? get recommendedItems {
+    final value = _recommendedItems;
     if (value == null) return null;
-    if (_metadata is EqualUnmodifiableMapView) return _metadata;
+    if (_recommendedItems is EqualUnmodifiableListView)
+      return _recommendedItems;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
+    return EqualUnmodifiableListView(value);
   }
+
+  @override
+  final double? temperature;
+  @override
+  final String? weatherCondition;
+  @override
+  final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'OutfitRecommendation(id: $id, userId: $userId, weatherCondition: $weatherCondition, temperature: $temperature, clothingItems: $clothingItems, createdAt: $createdAt, confidenceScore: $confidenceScore, feedback: $feedback, isLiked: $isLiked, isSaved: $isSaved, metadata: $metadata)';
+    return 'OutfitRecommendation(id: $id, title: $title, description: $description, imageUrl: $imageUrl, recommendedItems: $recommendedItems, temperature: $temperature, weatherCondition: $weatherCondition, createdAt: $createdAt)';
   }
 
   @override
@@ -293,38 +250,33 @@ class _$OutfitRecommendationImpl implements _OutfitRecommendation {
         (other.runtimeType == runtimeType &&
             other is _$OutfitRecommendationImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
-            (identical(other.weatherCondition, weatherCondition) ||
-                other.weatherCondition == weatherCondition) &&
+            (identical(other.title, title) || other.title == title) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl) &&
+            const DeepCollectionEquality()
+                .equals(other._recommendedItems, _recommendedItems) &&
             (identical(other.temperature, temperature) ||
                 other.temperature == temperature) &&
-            const DeepCollectionEquality()
-                .equals(other._clothingItems, _clothingItems) &&
+            (identical(other.weatherCondition, weatherCondition) ||
+                other.weatherCondition == weatherCondition) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.confidenceScore, confidenceScore) ||
-                other.confidenceScore == confidenceScore) &&
-            (identical(other.feedback, feedback) ||
-                other.feedback == feedback) &&
-            (identical(other.isLiked, isLiked) || other.isLiked == isLiked) &&
-            (identical(other.isSaved, isSaved) || other.isSaved == isSaved) &&
-            const DeepCollectionEquality().equals(other._metadata, _metadata));
+                other.createdAt == createdAt));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
       id,
-      userId,
-      weatherCondition,
+      title,
+      description,
+      imageUrl,
+      const DeepCollectionEquality().hash(_recommendedItems),
       temperature,
-      const DeepCollectionEquality().hash(_clothingItems),
-      createdAt,
-      confidenceScore,
-      feedback,
-      isLiked,
-      isSaved,
-      const DeepCollectionEquality().hash(_metadata));
+      weatherCondition,
+      createdAt);
 
   /// Create a copy of OutfitRecommendation
   /// with the given fields replaced by the non-null parameter values.
@@ -335,44 +287,45 @@ class _$OutfitRecommendationImpl implements _OutfitRecommendation {
       get copyWith =>
           __$$OutfitRecommendationImplCopyWithImpl<_$OutfitRecommendationImpl>(
               this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OutfitRecommendationImplToJson(
+      this,
+    );
+  }
 }
 
 abstract class _OutfitRecommendation implements OutfitRecommendation {
   const factory _OutfitRecommendation(
-      {required final String id,
-      required final String userId,
-      required final String weatherCondition,
-      required final double temperature,
-      required final List<String> clothingItems,
-      required final DateTime createdAt,
-      required final double confidenceScore,
-      final String? feedback,
-      final bool? isLiked,
-      final bool? isSaved,
-      final Map<String, dynamic>? metadata}) = _$OutfitRecommendationImpl;
+      {final String? id,
+      final String? title,
+      final String? description,
+      final String? imageUrl,
+      final List<String>? recommendedItems,
+      final double? temperature,
+      final String? weatherCondition,
+      final DateTime? createdAt}) = _$OutfitRecommendationImpl;
+
+  factory _OutfitRecommendation.fromJson(Map<String, dynamic> json) =
+      _$OutfitRecommendationImpl.fromJson;
 
   @override
-  String get id;
+  String? get id;
   @override
-  String get userId;
+  String? get title;
   @override
-  String get weatherCondition;
+  String? get description;
   @override
-  double get temperature;
+  String? get imageUrl;
   @override
-  List<String> get clothingItems;
+  List<String>? get recommendedItems;
   @override
-  DateTime get createdAt;
+  double? get temperature;
   @override
-  double get confidenceScore;
+  String? get weatherCondition;
   @override
-  String? get feedback;
-  @override
-  bool? get isLiked;
-  @override
-  bool? get isSaved;
-  @override
-  Map<String, dynamic>? get metadata;
+  DateTime? get createdAt;
 
   /// Create a copy of OutfitRecommendation
   /// with the given fields replaced by the non-null parameter values.

@@ -1,20 +1,21 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'outfit_recommendation.freezed.dart';
+part 'outfit_recommendation.g.dart';
 
 @freezed
 class OutfitRecommendation with _$OutfitRecommendation {
   const factory OutfitRecommendation({
-    required String id,
-    required String userId,
-    required String weatherCondition,
-    required double temperature,
-    required List<String> clothingItems,
-    required DateTime createdAt,
-    required double confidenceScore,
-    String? feedback,
-    bool? isLiked,
-    bool? isSaved,
-    Map<String, dynamic>? metadata,
+    String? id,
+    String? title,
+    String? description,
+    String? imageUrl,
+    List<String>? recommendedItems,
+    double? temperature,
+    String? weatherCondition,
+    DateTime? createdAt,
   }) = _OutfitRecommendation;
+
+  factory OutfitRecommendation.fromJson(Map<String, dynamic> json) =>
+      _$OutfitRecommendationFromJson(json);
 }
