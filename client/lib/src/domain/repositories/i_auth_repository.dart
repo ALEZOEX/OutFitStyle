@@ -1,5 +1,7 @@
 abstract class IAuthRepository {
-  Future<bool> isAuthed();
+  Future<bool> login(String email, String password);
+  Future<bool> register(String email, String password, String name);
   Future<void> logout();
-  Future<Map<String, dynamic>?> getCurrentUser();
+  Future<bool> isLoggedIn();
+  Future<String?> getUserId();
 }

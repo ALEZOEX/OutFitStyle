@@ -1,16 +1,15 @@
 import 'package:dio/dio.dart';
-import 'api_config.dart';
+import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import '../../services/auth_storage.dart';
 
 class ApiClient {
-  final ApiConfig config;
   final AuthStorage storage;
 
   late final Dio _dio;
 
-  ApiClient({required this.config, required this.storage}) {
+  ApiClient({required this.storage}) {
     _dio = Dio(BaseOptions(
-      baseUrl: config.apiBase,
+      baseUrl: ApiConfig.baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json'},
