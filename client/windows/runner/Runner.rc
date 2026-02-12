@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "client" "\0"
+            VALUE "FileDescription", "outfitstyle_client" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "client" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "client.exe" "\0"
-            VALUE "ProductName", "client" "\0"
+            VALUE "InternalName", "outfitstyle_client" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "OriginalFilename", "outfitstyle_client.exe" "\0"
+            VALUE "ProductName", "outfitstyle_client" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
