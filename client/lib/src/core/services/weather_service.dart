@@ -38,13 +38,11 @@ class WeatherService {
         humidity: data['main']['humidity'],
         windSpeed: (data['wind']['speed'] as num).toDouble(),
         condition: _getWeatherCondition(data['weather'][0]['main']),
-        iconCode: data['weather'][0]['icon'],
-        timestamp: DateTime.now(),
+        description: data['weather'][0]['description'],
         latitude: lat,
         longitude: lon,
         locationName: data['name'],
-        hourlyForecast: [], // Will be populated by repository with forecast API
-        dailyForecast: [], // Will be populated by repository with forecast API
+        iconUrl: 'https://openweathermap.org/img/w/${data['weather'][0]['icon']}.png',
       );
     } catch (e) {
       throw Exception('Failed to fetch weather data: $e');
