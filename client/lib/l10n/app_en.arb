@@ -1,0 +1,78 @@
+{
+  "appName": "OutfitStyle",
+  "@appName": {
+    "description": "The name of the application"
+  },
+  "welcomeMessage": "Welcome to OutfitStyle!",
+  "@welcomeMessage": {
+    "description": "Welcome message displayed to the user"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading indicator text"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Generic error text"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "recommendations": "Recommendations",
+  "@recommendations": {
+    "description": "Recommendations tab title"
+  },
+  "saved": "Saved",
+  "@saved": {
+    "description": "Saved recommendations tab title"
+  },
+  "history": "History",
+  "@history": {
+    "description": "History tab title"
+  },
+  "weather": "Weather",
+  "@weather": {
+    "description": "Weather related text"
+  },
+  "outfit": "Outfit",
+  "@outfit": {
+    "description": "Outfit related text"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile related text"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings related text"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "signInWithGoogle": "Sign in with Google",
+  "@signInWithGoogle": {
+    "description": "Google sign in button text"
+  },
+  "noInternetConnection": "No internet connection",
+  "@noInternetConnection": {
+    "description": "Message displayed when no internet connection"
+  },
+  "somethingWentWrong": "Something went wrong",
+  "@somethingWentWrong": {
+    "description": "Generic error message"
+  }
+}
