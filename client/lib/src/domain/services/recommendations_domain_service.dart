@@ -1,6 +1,7 @@
 import '../entities/outfit_recommendation.dart';
 import '../repositories/i_recommendations_repository.dart';
 
+/// Доменный сервис для работы с рекомендациями
 class RecommendationsDomainService {
   final IRecommendationsRepository _repository;
 

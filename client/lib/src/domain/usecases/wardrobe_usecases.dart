@@ -1,8 +1,8 @@
-import 'package:outfitstyle_client/domain/entities/wardrobe.dart';
-import 'package:outfitstyle_client/domain/repositories/i_wardrobe_repository.dart';
+import '../entities/wardrobe_item.dart';
+import '../repositories/i_wardrobe_repository.dart';
 
 abstract class GetWardrobeItemsUsecase {
-  Future<List<WardrobeItem>> call({String? userId});
+  Future<List<WardrobeItem>> call();
 }
 
 class GetWardrobeItemsUsecaseImpl implements GetWardrobeItemsUsecase {
@@ -11,8 +11,8 @@ class GetWardrobeItemsUsecaseImpl implements GetWardrobeItemsUsecase {
   GetWardrobeItemsUsecaseImpl(this._repository);
 
   @override
-  Future<List<WardrobeItem>> call({String? userId}) async {
-    return await _repository.getAllWardrobeItems(userId: userId);
+  Future<List<WardrobeItem>> call() async {
+    return await _repository.getAllWardrobeItems();
   }
 }
 
@@ -32,7 +32,7 @@ class GetWardrobeItemByIdUsecaseImpl implements GetWardrobeItemByIdUsecase {
 }
 
 abstract class AddWardrobeItemUsecase {
-  Future<WardrobeItem> call(WardrobeItem item);
+  Future<void> call(WardrobeItem item);
 }
 
 class AddWardrobeItemUsecaseImpl implements AddWardrobeItemUsecase {
@@ -41,13 +41,13 @@ class AddWardrobeItemUsecaseImpl implements AddWardrobeItemUsecase {
   AddWardrobeItemUsecaseImpl(this._repository);
 
   @override
-  Future<WardrobeItem> call(WardrobeItem item) async {
+  Future<void> call(WardrobeItem item) async {
     return await _repository.addWardrobeItem(item);
   }
 }
 
 abstract class UpdateWardrobeItemUsecase {
-  Future<WardrobeItem> call(WardrobeItem item);
+  Future<void> call(WardrobeItem item);
 }
 
 class UpdateWardrobeItemUsecaseImpl implements UpdateWardrobeItemUsecase {
@@ -56,7 +56,7 @@ class UpdateWardrobeItemUsecaseImpl implements UpdateWardrobeItemUsecase {
   UpdateWardrobeItemUsecaseImpl(this._repository);
 
   @override
-  Future<WardrobeItem> call(WardrobeItem item) async {
+  Future<void> call(WardrobeItem item) async {
     return await _repository.updateWardrobeItem(item);
   }
 }
@@ -73,56 +73,5 @@ class DeleteWardrobeItemUsecaseImpl implements DeleteWardrobeItemUsecase {
   @override
   Future<void> call(String id) async {
     return await _repository.deleteWardrobeItem(id);
-  }
-}
-
-abstract class FilterWardrobeItemsUsecase {
-  Future<List<WardrobeItem>> call({
-    String? category,
-    String? subcategory,
-    String? color,
-    String? brand,
-    String? name,
-    bool? isFavorite,
-    bool? isArchived,
-    String? userId,
-    String? season,
-    String? style,
-    List<String>? occasions,
-  });
-}
-
-class FilterWardrobeItemsUsecaseImpl implements FilterWardrobeItemsUsecase {
-  final IWardrobeRepository _repository;
-
-  FilterWardrobeItemsUsecaseImpl(this._repository);
-
-  @override
-  Future<List<WardrobeItem>> call({
-    String? category,
-    String? subcategory,
-    String? color,
-    String? brand,
-    String? name,
-    bool? isFavorite,
-    bool? isArchived,
-    String? userId,
-    String? season,
-    String? style,
-    List<String>? occasions,
-  }) async {
-    return await _repository.filterWardrobeItems(
-      category: category,
-      subcategory: subcategory,
-      color: color,
-      brand: brand,
-      name: name,
-      isFavorite: isFavorite,
-      isArchived: isArchived,
-      userId: userId,
-      season: season,
-      style: style,
-      occasions: occasions,
-    );
   }
 }

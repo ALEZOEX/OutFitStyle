@@ -2,13 +2,15 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'analytics_event.dart';
+import 'analytics_service.dart';
 import 'local_analytics_database.dart';
 
 /// Сервис для локального логирования аналитических событий и их отправки при восстановлении соединения
-class LocalAnalyticsService {
+class LocalAnalyticsService implements IAnalyticsService {
   final LocalAnalyticsStorage _storage;
   final Dio _dio;
   final Connectivity _connectivity;
+  String? _userId;
 
   LocalAnalyticsService({
     LocalAnalyticsStorage? storage,
@@ -18,20 +20,117 @@ class LocalAnalyticsService {
         _dio = dio,
         _connectivity = connectivity ?? Connectivity();
 
-  /// Сохранить событие в локальное хранилище
+  @override
   Future<void> logEvent(AnalyticsEvent event) async {
     try {
       await _storage.addEvent(
         eventType: event.type.value,
         properties: event.properties,
         timestamp: event.timestamp ?? DateTime.now(),
-        userId: event.userId,
+        userId: event.userId ?? _userId,
       );
       // Проверяем подключение и пробуем отправить события
       await _trySendStoredEvents();
     } catch (e) {
       debugPrint('Local Analytics Service Error: ${e.toString()}');
     }
+  }
+
+  @override
+  Future<void> logEventSimple(String eventName,
+      {Map<String, dynamic>? parameters}) async {
+    final event = AnalyticsEvent(
+      type: AnalyticsEventType.values.firstWhere(
+        (element) => element.value == eventName,
+        orElse: () => AnalyticsEventType.settingsUpdate,
+      ),
+      properties: parameters ?? {},
+      userId: _userId,
+      timestamp: DateTime.now(),
+    );
+    await logEvent(event);
+  }
+
+  @override
+  Future<void> logScreenView(String screenName) async {
+    final event = AnalyticsEvent(
+      type: AnalyticsEventType.settingsUpdate,
+      properties: {'screen_name': screenName},
+      userId: _userId,
+      timestamp: DateTime.now(),
+    );
+    await logEvent(event);
+  }
+
+  @override
+  Future<void> logError(String error, {String? stackTrace}) async {
+    final event = AnalyticsEvent(
+      type: AnalyticsEventType.settingsUpdate,
+      properties: {
+        'error': error,
+        if (stackTrace != null) 'stack_trace': stackTrace,
+      },
+      userId: _userId,
+      timestamp: DateTime.now(),
+    );
+    await logEvent(event);
+  }
+
+  @override
+  Future<void> logException(Exception exception, {String? stackTrace}) async {
+    final event = AnalyticsEvent(
+      type: AnalyticsEventType.settingsUpdate,
+      properties: {
+        'exception_type': exception.runtimeType.toString(),
+        'exception_message': exception.toString(),
+        if (stackTrace != null) 'stack_trace': stackTrace,
+      },
+      userId: _userId,
+      timestamp: DateTime.now(),
+    );
+    await logEvent(event);
+  }
+
+  @override
+  Future<void> logPurchase({
+    required double amount,
+    required String currency,
+    String? itemId,
+    String? itemName,
+  }) async {
+    final event = AnalyticsEvent(
+      type: AnalyticsEventType.settingsUpdate,
+      properties: {
+        'amount': amount,
+        'currency': currency,
+        if (itemId != null) 'item_id': itemId,
+        if (itemName != null) 'item_name': itemName,
+      },
+      userId: _userId,
+      timestamp: DateTime.now(),
+    );
+    await logEvent(event);
+  }
+
+  @override
+  Future<void> setUserId(String? userId) async {
+    _userId = userId;
+  }
+
+  @override
+  String? getUserId() {
+    return _userId;
+  }
+
+  @override
+  Future<void> setUserProperty(String name, String value) async {
+    // Local analytics не поддерживает свойства пользователя
+    // Можно сохранить в хранилище при необходимости
+  }
+
+  @override
+  Future<void> dispose() async {
+    // Освобождение ресурсов при необходимости
   }
 
   /// Попробовать отправить сохраненные события при наличии подключения

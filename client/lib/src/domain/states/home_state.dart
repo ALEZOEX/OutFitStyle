@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../entities/recommendation_entity.dart';
-import '../entities/wardrobe.dart' as domain;
+import '../entities/wardrobe_item.dart';
 import '../entities/weather_entity.dart';
 import '../entities/outfit_entity.dart';
 
@@ -13,7 +13,7 @@ class HomeState with _$HomeState {
     @Default(AsyncValue.loading())
     AsyncValue<List<RecommendationRow>> todayRecommendations,
     @Default(AsyncValue.loading())
-    AsyncValue<List<domain.WardrobeItem>> wardrobeStats,
+    AsyncValue<List<WardrobeItem>> wardrobeStats,
     @Default(AsyncValue.data(null))
     AsyncValue<WeatherEntity?> currentWeather,
     @Default(AsyncValue.data(null))

@@ -4,7 +4,7 @@ import 'analytics_event.dart';
 import 'analytics_service.dart';
 
 /// Реализация сервиса аналитики с использованием Firebase Analytics
-class FirebaseAnalyticsService implements AnalyticsService {
+class FirebaseAnalyticsService implements IAnalyticsService {
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   String? _userId;
 

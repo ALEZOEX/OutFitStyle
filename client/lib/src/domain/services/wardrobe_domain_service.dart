@@ -1,6 +1,7 @@
-import '../entities/wardrobe.dart';
+import '../entities/wardrobe_item.dart';
 import '../repositories/i_wardrobe_repository.dart';
 
+/// Доменный сервис для работы с гардеробом
 class WardrobeDomainService {
   final IWardrobeRepository _repository;
 

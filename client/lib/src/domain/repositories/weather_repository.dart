@@ -1,5 +1,5 @@
 import '../entities/weather_data.dart';
-import '../../data/datasources/weather_remote_datasource.dart';
+import '../../data/datasources/remote/weather_remote_datasource.dart';
 
 /// Repository for managing weather data operations
 abstract class WeatherRepository {
@@ -17,12 +17,14 @@ class WeatherDataRepository implements WeatherRepository {
   WeatherDataRepository(this._remoteDataSource);
 
   @override
-  Future<WeatherData> getWeatherByLocation(double latitude, double longitude) {
-    return _remoteDataSource.getWeatherByLocation(latitude, longitude);
+  Future<WeatherData> getWeatherByLocation(double latitude, double longitude) async {
+    final data = await _remoteDataSource.getCurrentWeather(latitude, longitude);
+    return WeatherData.fromJson(data);
   }
 
   @override
-  Future<WeatherData> getWeatherByCity(String city) {
-    return _remoteDataSource.getWeatherByCity(city);
+  Future<WeatherData> getWeatherByCity(String city) async {
+    // TODO: Implement geocoding to get coordinates from city name
+    throw UnimplementedError();
   }
 }

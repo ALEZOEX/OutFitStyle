@@ -1,18 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/states/admin_state.dart';
+import '../../../../domain/states/admin_state.dart';
 
+/// Контроллер административной панели
 class AdminController extends StateNotifier<AdminState> {
-  final Ref _ref;
-
-  AdminController(this._ref) : super(const AdminState.initial());
+  AdminController() : super(const AdminState());
 
   Future<Map<String, dynamic>> getStats() async {
-    // TODO: Implement stats retrieval
-    throw UnimplementedError();
+    state = state.copyWith(isLoading: true);
+    try {
+      // TODO: Implement stats retrieval
+      throw UnimplementedError();
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   Future<List<Map<String, dynamic>>> getUsers() async {
-    // TODO: Implement users retrieval
-    throw UnimplementedError();
+    state = state.copyWith(isLoading: true);
+    try {
+      // TODO: Implement users retrieval
+      throw UnimplementedError();
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
   }
 }

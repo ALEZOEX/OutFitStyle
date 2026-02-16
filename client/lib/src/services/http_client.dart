@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../app/api/api_config.dart';
+import '../core/api/api_config.dart';
 import '../models/token_pair.dart';
 import 'auth_storage.dart';
 

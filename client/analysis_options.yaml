@@ -19,6 +19,11 @@ analyzer:
     - lib/src/screens/**
     - lib/src/ui/**
     - lib/src/config/**
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+  errors:
+    # Ignore unused field warnings in generated files
+    unused_field: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the
