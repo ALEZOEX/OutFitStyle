@@ -17,91 +17,50 @@ import (
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
+// SubscriptionBillingHandler устаревший обработчик (для обратной совместимости)
+// Рекомендуется использовать SubscriptionHandler и PaymentHandler
 type SubscriptionBillingHandler struct {
 	billing *services.BillingService
 	log     *zap.Logger
 }
 
+// NewSubscriptionBillingHandler создаёт обработчик (для обратной совместимости)
 func NewSubscriptionBillingHandler(b *services.BillingService, log *zap.Logger) *SubscriptionBillingHandler {
 	return &SubscriptionBillingHandler{billing: b, log: log}
 }
 
+// RegisterProtected регистрирует защищённые маршруты (для обратной совместимости)
 func (h *SubscriptionBillingHandler) RegisterProtected(r *mux.Router) {
-	r.HandleFunc("/subscribe", h.Subscribe).Methods(http.MethodPost)
-	r.HandleFunc("/cancel", h.Cancel).Methods(http.MethodPost)
-	r.HandleFunc("/reactivate", h.Reactivate).Methods(http.MethodPost)
+	// Маршруты теперь обрабатываются в SubscriptionHandler
+	// Эти заглушки для обратной совместимости
+	r.HandleFunc("/subscribe", h.SubscribeDeprecated).Methods(http.MethodPost)
+	r.HandleFunc("/cancel", h.CancelDeprecated).Methods(http.MethodPost)
+	r.HandleFunc("/reactivate", h.ReactivateDeprecated).Methods(http.MethodPost)
 	r.HandleFunc("/promo", h.Promo).Methods(http.MethodPost)
 	r.HandleFunc("/payments", h.Payments).Methods(http.MethodGet)
 }
 
+// RegisterWebhook регистрирует webhook маршруты
 func (h *SubscriptionBillingHandler) RegisterWebhook(r *mux.Router) {
-	// public: /subscription/webhook/{provider}
 	r.HandleFunc("/webhook/{provider}", h.Webhook).Methods(http.MethodPost)
 }
 
-func (h *SubscriptionBillingHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.GetUserIDFromContext(r.Context())
-	if !ok {
-		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
-		return
-	}
-	defer r.Body.Close()
-
-	var req domain.SubscribeRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
-		return
-	}
-
-	out, err := h.billing.Subscribe(r.Context(), userID, req)
-	if err != nil {
-		resp.Error(w, http.StatusBadRequest, err)
-		return
-	}
-	resp.Success(w, out)
+// SubscribeDeprecated устаревший метод (для обратной совместимости)
+func (h *SubscriptionBillingHandler) SubscribeDeprecated(w http.ResponseWriter, r *http.Request) {
+	resp.Error(w, http.StatusNotImplemented, errors.New("use /api/v1/subscription/subscribe instead"))
 }
 
-func (h *SubscriptionBillingHandler) Cancel(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.GetUserIDFromContext(r.Context())
-	if !ok {
-		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
-		return
-	}
-	defer r.Body.Close()
-
-	var req domain.CancelSubscriptionRequest
-	_ = json.NewDecoder(r.Body).Decode(&req)
-
-	immediate := false
-	if req.Immediate != nil {
-		immediate = *req.Immediate
-	}
-
-	if err := h.billing.Cancel(r.Context(), userID, immediate); err != nil {
-		if errors.Is(err, services.ErrUnauthorized) {
-			resp.Error(w, http.StatusUnauthorized, err)
-			return
-		}
-		resp.Error(w, http.StatusBadRequest, err)
-		return
-	}
-	resp.Success(w, map[string]any{"success": true})
+// CancelDeprecated устаревший метод (для обратной совместимости)
+func (h *SubscriptionBillingHandler) CancelDeprecated(w http.ResponseWriter, r *http.Request) {
+	resp.Error(w, http.StatusNotImplemented, errors.New("use /api/v1/subscription/cancel instead"))
 }
 
-func (h *SubscriptionBillingHandler) Reactivate(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.GetUserIDFromContext(r.Context())
-	if !ok {
-		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
-		return
-	}
-
-	if err := h.billing.Reactivate(r.Context(), userID); err != nil {
-		resp.Error(w, http.StatusBadRequest, err)
-		return
-	}
-	resp.Success(w, map[string]any{"success": true})
+// ReactivateDeprecated устаревший метод (для обратной совместимости)
+func (h *SubscriptionBillingHandler) ReactivateDeprecated(w http.ResponseWriter, r *http.Request) {
+	resp.Error(w, http.StatusNotImplemented, errors.New("use PaymentService instead"))
 }
 
+// Promo проверяет промокод
 func (h *SubscriptionBillingHandler) Promo(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -120,6 +79,7 @@ func (h *SubscriptionBillingHandler) Promo(w http.ResponseWriter, r *http.Reques
 	resp.Success(w, map[string]any{"promo": promo})
 }
 
+// Payments возвращает список платежей
 func (h *SubscriptionBillingHandler) Payments(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -143,6 +103,7 @@ func (h *SubscriptionBillingHandler) Payments(w http.ResponseWriter, r *http.Req
 	})
 }
 
+// Webhook обрабатывает webhook от платежного провайдера
 func (h *SubscriptionBillingHandler) Webhook(w http.ResponseWriter, r *http.Request) {
 	provider := strings.ToLower(mux.Vars(r)["provider"])
 	if provider == "" {

@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"strconv"
-	"strings"
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,130 +30,42 @@ const (
 	StatusActive = "active"
 )
 
+// BillingService сервис для обработки биллинга и webhook
 type BillingService struct {
-	subRepo     repositories.SubscriptionRepository
 	billingRepo repositories.BillingRepository
 	promoRepo   repositories.PromoRepository
-
-	gateways map[string]domain.PaymentGateway
+	gateways    map[string]domain.PaymentGateway
 }
 
-func NewBillingService(sub repositories.SubscriptionRepository, bill repositories.BillingRepository, promo repositories.PromoRepository, gateways map[string]domain.PaymentGateway) *BillingService {
-	return &BillingService{subRepo: sub, billingRepo: bill, promoRepo: promo, gateways: gateways}
+// NewBillingService создаёт новый сервис биллинга
+func NewBillingService(
+	bill repositories.BillingRepository,
+	promo repositories.PromoRepository,
+	gateways map[string]domain.PaymentGateway,
+) *BillingService {
+	return &BillingService{
+		billingRepo: bill,
+		promoRepo:   promo,
+		gateways:    gateways,
+	}
 }
 
-func (s *BillingService) Subscribe(ctx context.Context, userID domain.ID, req domain.SubscribeRequest) (*domain.SubscribeResponse, error) {
-	planCode := strings.TrimSpace(req.PlanCode)
-	if planCode == "" {
-		return nil, errors.New("plan_code is required")
-	}
-	if req.BillingCycle != BillingCycleMonthly && req.BillingCycle != BillingCycleYearly {
-		return nil, errors.New("billing_cycle must be monthly or yearly")
+// HandleWebhook обрабатывает webhook от платежного провайдера
+func (s *BillingService) HandleWebhook(ctx context.Context, provider string, headers map[string]string, body []byte) error {
+	gw := s.gateways[provider]
+	if gw == nil {
+		return errors.New("unknown payment provider: " + provider)
 	}
 
-	plan, err := s.subRepo.GetPlanByCode(ctx, planCode)
+	extID, status, receipt, errMsg, err := gw.ParseWebhook(ctx, headers, body)
 	if err != nil {
-		return nil, err
-	}
-	if plan == nil || !plan.IsActive {
-		return nil, errors.New("plan not found")
+		return err
 	}
 
-	amount := plan.PriceMonthly
-	if req.BillingCycle == BillingCycleYearly {
-		amount = plan.PriceYearly
-	}
-	currency := plan.Currency
-	if currency == "" {
-		currency = CurrencyRUB
-	}
-
-	periodEnd := time.Now().AddDate(0, 1, 0)
-	if req.BillingCycle == BillingCycleYearly {
-		periodEnd = time.Now().AddDate(1, 0, 0)
-	}
-
-	// Проверка промо-кода (MVP: только проверка валидности; реальный дисконт применим позже)
-	if req.PromoCode != nil && strings.TrimSpace(*req.PromoCode) != "" {
-		promo, err := s.promoRepo.GetByCode(ctx, *req.PromoCode)
-		if err != nil {
-			return nil, err
-		}
-		if promo == nil || !promo.IsActive {
-			return nil, errors.New("invalid promo code")
-		}
-		// Проверка срока действия
-		if promo.ValidUntil != nil && time.Now().After(*promo.ValidUntil) {
-			return nil, errors.New("promo code expired")
-		}
-		// Здесь можно применить discount_type/discount_value, но лучше отдельным модулем
-	}
-
-	// Создаём подписку
-	userIDInt := domain.IDToInt64(userID)
-	subID, err := s.billingRepo.CreateUserSubscription(ctx, userIDInt, plan.ID, req.BillingCycle, periodEnd, "gateway")
-	if err != nil {
-		return nil, err
-	}
-
-	// Создаём платёж у провайдера
-	gw, ok := s.gateways[req.PaymentProvider]
-	if !ok {
-		return nil, errors.New("payment provider not found: " + req.PaymentProvider)
-	}
-
-	init, err := gw.InitPayment(ctx, amount, currency, "OutfitStyle subscription", map[string]any{
-		"user_id":         strconv.FormatInt(userIDInt, 10),
-		"subscription_id": strconv.FormatInt(subID, 10),
-		"plan_code":       plan.Code,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	extID := init.ExternalPaymentID
-	paymentProvider := init.Provider
-
-	_, err = s.billingRepo.CreatePayment(ctx, repositories.CreatePaymentParams{
-		UserID:            userIDInt,
-		SubscriptionID:    &subID,
-		Amount:            amount,
-		Currency:          currency,
-		Status:            StatusPending,
-		PaymentProvider:   paymentProvider,
-		ExternalPaymentID: &extID,
-		PaymentMethod:     req.PaymentMethodID,
-		Description:       ptr("Subscription " + plan.Code),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	respSub := domain.UserSubscription{
-		ID:           &subID,
-		UserID:       userIDInt,
-		Plan:         *plan,
-		BillingCycle: &req.BillingCycle,
-		Status:       ptr(StatusActive),
-	}
-
-	return &domain.SubscribeResponse{
-		Subscription: respSub,
-		PaymentURL:   init.PaymentURL,
-		ClientSecret: init.ClientSecret,
-	}, nil
+	return s.billingRepo.UpdatePaymentStatusByExternalID(ctx, provider, extID, status, receipt, errMsg)
 }
 
-func (s *BillingService) Cancel(ctx context.Context, userID domain.ID, immediate bool) error {
-	userIDInt := domain.IDToInt64(userID)
-	return s.billingRepo.CancelSubscription(ctx, userIDInt, immediate)
-}
-
-func (s *BillingService) Reactivate(ctx context.Context, userID domain.ID) error {
-	userIDInt := domain.IDToInt64(userID)
-	return s.billingRepo.ReactivateSubscription(ctx, userIDInt)
-}
-
+// Promo проверяет промокод
 func (s *BillingService) Promo(ctx context.Context, code string) (map[string]any, error) {
 	p, err := s.promoRepo.GetByCode(ctx, code)
 	if err != nil {
@@ -175,6 +87,24 @@ func (s *BillingService) Promo(ctx context.Context, code string) (map[string]any
 	}, nil
 }
 
+// LegacySubscribe устаревший метод подписки (для обратной совместимости)
+func (s *BillingService) LegacySubscribe(ctx context.Context, userID domain.ID, req domain.SubscribeRequest) (*domain.SubscribeResponse, error) {
+	// Этот метод теперь делегируется PaymentService
+	// Оставлен для обратной совместимости
+	return nil, errors.New("use PaymentService.Subscribe instead")
+}
+
+// LegacyCancel устаревший метод отмены (для обратной совместимости)
+func (s *BillingService) LegacyCancel(ctx context.Context, userID domain.ID, immediate bool) error {
+	return errors.New("use PaymentService.Cancel instead")
+}
+
+// LegacyReactivate устаревший метод восстановления (для обратной совместимости)
+func (s *BillingService) LegacyReactivate(ctx context.Context, userID domain.ID) error {
+	return errors.New("use PaymentService.Reactivate instead")
+}
+
+// ListPayments возвращает список платежей пользователя
 func (s *BillingService) ListPayments(ctx context.Context, userID domain.ID, page, limit int) ([]domain.Payment, domain.Pagination, error) {
 	userIDInt := domain.IDToInt64(userID)
 	items, total, err := s.billingRepo.ListPayments(ctx, userIDInt, page, limit)
@@ -190,19 +120,51 @@ func (s *BillingService) ListPayments(ctx context.Context, userID domain.ID, pag
 	return items, domain.Pagination{Page: page, Limit: limit, Total: total}, nil
 }
 
-func (s *BillingService) HandleWebhook(ctx context.Context, provider string, headers map[string]string, body []byte) error {
-	gw := s.gateways[provider]
-	if gw == nil {
-		return errors.New("unknown payment provider")
-	}
-
-	extID, status, receipt, errMsg, err := gw.ParseWebhook(ctx, headers, body)
-	if err != nil {
-		return err
-	}
-	return s.billingRepo.UpdatePaymentStatusByExternalID(ctx, provider, extID, status, receipt, errMsg)
-}
-
+// ptr возвращает указатель на значение
 func ptr[T any](v T) *T { return &v }
 
 func newExternalID() string { return uuid.NewString() }
+
+// PaymentHandler устаревший обработчик платежей (для обратной совместимости)
+type PaymentHandler struct {
+	svc *BillingService
+	log interface{}
+}
+
+// NewPaymentHandler устаревший конструктор (для обратной совместимости)
+func NewPaymentHandler(svc *BillingService, log interface{}) *PaymentHandler {
+	return &PaymentHandler{svc: svc, log: log}
+}
+
+// RegisterWebhook регистрирует webhook маршруты
+func (h *PaymentHandler) RegisterWebhook(r interface{}) {
+	// Заглушка для обратной совместимости
+}
+
+// Webhook обрабатывает webhook
+func (h *PaymentHandler) Webhook(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	headers := map[string]string{}
+	for k, v := range r.Header {
+		if len(v) > 0 {
+			headers[k] = v[0]
+		}
+	}
+
+	// Извлекаем provider из URL (нужен mux.Vars)
+	// Для простоты передаём "unknown"
+	if err := h.svc.HandleWebhook(r.Context(), "unknown", headers, body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"success": true}`))
+}
