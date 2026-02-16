@@ -27,8 +27,11 @@ Godeps/
 .pub/
 flutter_*.png
 pubspec.lock
-*.g.dart
-*.drift
+
+# Drift generated files (keep .drift source files)
+**/*.g.dart
+**/*.freezed.dart
+**/*.drift.g.dart
 
 # Flutter build artifacts
 /build/
