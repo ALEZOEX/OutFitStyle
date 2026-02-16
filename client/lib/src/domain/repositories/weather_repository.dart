@@ -1,3 +1,5 @@
+import 'package:geocoding/geocoding.dart';
+
 import '../entities/weather_data.dart';
 import '../../data/datasources/remote/weather_remote_datasource.dart';
 
@@ -24,7 +26,23 @@ class WeatherDataRepository implements WeatherRepository {
 
   @override
   Future<WeatherData> getWeatherByCity(String city) async {
-    // TODO: Implement geocoding to get coordinates from city name
-    throw UnimplementedError();
+    // Используем geocoding для получения координат из названия города
+    final locations = await locationFromAddress(city);
+
+    if (locations.isEmpty) {
+      throw WeatherGeocodingException('Город не найден: $city');
+    }
+
+    final location = locations.first;
+    return getWeatherByLocation(location.latitude, location.longitude);
   }
+}
+
+/// Исключение при ошибке геосодинга
+class WeatherGeocodingException implements Exception {
+  final String message;
+  const WeatherGeocodingException(this.message);
+
+  @override
+  String toString() => 'WeatherGeocodingException: $message';
 }
