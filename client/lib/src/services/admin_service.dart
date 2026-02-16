@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../app/api/api_config.dart';
-import '../services/auth_storage.dart';
-import '../services/http_client.dart';
+import '../core/api/api_config.dart';
+import 'auth_storage.dart';
+import 'http_client.dart';
 
 class AdminService {
   final ApiConfig _config;

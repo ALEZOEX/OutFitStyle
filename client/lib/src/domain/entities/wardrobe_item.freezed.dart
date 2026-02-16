@@ -43,6 +43,9 @@ mixin _$WardrobeItem {
   String? get pattern => throw _privateConstructorUsedError;
   String? get localImagePath => throw _privateConstructorUsedError;
   String? get style => throw _privateConstructorUsedError;
+  bool? get isFavorite => throw _privateConstructorUsedError;
+  bool? get isArchived => throw _privateConstructorUsedError;
+  String? get season => throw _privateConstructorUsedError;
   String? get serverId => throw _privateConstructorUsedError;
   bool? get dirty => throw _privateConstructorUsedError;
   DateTime? get lastSyncedAt => throw _privateConstructorUsedError;
@@ -87,6 +90,9 @@ abstract class $WardrobeItemCopyWith<$Res> {
       String? pattern,
       String? localImagePath,
       String? style,
+      bool? isFavorite,
+      bool? isArchived,
+      String? season,
       String? serverId,
       bool? dirty,
       DateTime? lastSyncedAt});
@@ -130,6 +136,9 @@ class _$WardrobeItemCopyWithImpl<$Res, $Val extends WardrobeItem>
     Object? pattern = freezed,
     Object? localImagePath = freezed,
     Object? style = freezed,
+    Object? isFavorite = freezed,
+    Object? isArchived = freezed,
+    Object? season = freezed,
     Object? serverId = freezed,
     Object? dirty = freezed,
     Object? lastSyncedAt = freezed,
@@ -227,6 +236,18 @@ class _$WardrobeItemCopyWithImpl<$Res, $Val extends WardrobeItem>
           ? _value.style
           : style // ignore: cast_nullable_to_non_nullable
               as String?,
+      isFavorite: freezed == isFavorite
+          ? _value.isFavorite
+          : isFavorite // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      isArchived: freezed == isArchived
+          ? _value.isArchived
+          : isArchived // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      season: freezed == season
+          ? _value.season
+          : season // ignore: cast_nullable_to_non_nullable
+              as String?,
       serverId: freezed == serverId
           ? _value.serverId
           : serverId // ignore: cast_nullable_to_non_nullable
@@ -275,6 +296,9 @@ abstract class _$$WardrobeItemImplCopyWith<$Res>
       String? pattern,
       String? localImagePath,
       String? style,
+      bool? isFavorite,
+      bool? isArchived,
+      String? season,
       String? serverId,
       bool? dirty,
       DateTime? lastSyncedAt});
@@ -316,6 +340,9 @@ class __$$WardrobeItemImplCopyWithImpl<$Res>
     Object? pattern = freezed,
     Object? localImagePath = freezed,
     Object? style = freezed,
+    Object? isFavorite = freezed,
+    Object? isArchived = freezed,
+    Object? season = freezed,
     Object? serverId = freezed,
     Object? dirty = freezed,
     Object? lastSyncedAt = freezed,
@@ -413,6 +440,18 @@ class __$$WardrobeItemImplCopyWithImpl<$Res>
           ? _value.style
           : style // ignore: cast_nullable_to_non_nullable
               as String?,
+      isFavorite: freezed == isFavorite
+          ? _value.isFavorite
+          : isFavorite // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      isArchived: freezed == isArchived
+          ? _value.isArchived
+          : isArchived // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      season: freezed == season
+          ? _value.season
+          : season // ignore: cast_nullable_to_non_nullable
+              as String?,
       serverId: freezed == serverId
           ? _value.serverId
           : serverId // ignore: cast_nullable_to_non_nullable
@@ -456,6 +495,9 @@ class _$WardrobeItemImpl implements _WardrobeItem {
       this.pattern,
       this.localImagePath,
       this.style,
+      this.isFavorite,
+      this.isArchived,
+      this.season,
       this.serverId,
       this.dirty,
       this.lastSyncedAt})
@@ -519,6 +561,12 @@ class _$WardrobeItemImpl implements _WardrobeItem {
   @override
   final String? style;
   @override
+  final bool? isFavorite;
+  @override
+  final bool? isArchived;
+  @override
+  final String? season;
+  @override
   final String? serverId;
   @override
   final bool? dirty;
@@ -527,7 +575,7 @@ class _$WardrobeItemImpl implements _WardrobeItem {
 
   @override
   String toString() {
-    return 'WardrobeItem(id: $id, name: $name, category: $category, subcategory: $subcategory, brand: $brand, color: $color, size: $size, imageUrl: $imageUrl, iconEmoji: $iconEmoji, blurHash: $blurHash, minTemp: $minTemp, maxTemp: $maxTemp, warmthLevel: $warmthLevel, rainOk: $rainOk, snowOk: $snowOk, windOk: $windOk, usage: $usage, materials: $materials, gender: $gender, fit: $fit, pattern: $pattern, localImagePath: $localImagePath, style: $style, serverId: $serverId, dirty: $dirty, lastSyncedAt: $lastSyncedAt)';
+    return 'WardrobeItem(id: $id, name: $name, category: $category, subcategory: $subcategory, brand: $brand, color: $color, size: $size, imageUrl: $imageUrl, iconEmoji: $iconEmoji, blurHash: $blurHash, minTemp: $minTemp, maxTemp: $maxTemp, warmthLevel: $warmthLevel, rainOk: $rainOk, snowOk: $snowOk, windOk: $windOk, usage: $usage, materials: $materials, gender: $gender, fit: $fit, pattern: $pattern, localImagePath: $localImagePath, style: $style, isFavorite: $isFavorite, isArchived: $isArchived, season: $season, serverId: $serverId, dirty: $dirty, lastSyncedAt: $lastSyncedAt)';
   }
 
   @override
@@ -566,6 +614,11 @@ class _$WardrobeItemImpl implements _WardrobeItem {
             (identical(other.localImagePath, localImagePath) ||
                 other.localImagePath == localImagePath) &&
             (identical(other.style, style) || other.style == style) &&
+            (identical(other.isFavorite, isFavorite) ||
+                other.isFavorite == isFavorite) &&
+            (identical(other.isArchived, isArchived) ||
+                other.isArchived == isArchived) &&
+            (identical(other.season, season) || other.season == season) &&
             (identical(other.serverId, serverId) ||
                 other.serverId == serverId) &&
             (identical(other.dirty, dirty) || other.dirty == dirty) &&
@@ -600,6 +653,9 @@ class _$WardrobeItemImpl implements _WardrobeItem {
         pattern,
         localImagePath,
         style,
+        isFavorite,
+        isArchived,
+        season,
         serverId,
         dirty,
         lastSyncedAt
@@ -646,6 +702,9 @@ abstract class _WardrobeItem implements WardrobeItem {
       final String? pattern,
       final String? localImagePath,
       final String? style,
+      final bool? isFavorite,
+      final bool? isArchived,
+      final String? season,
       final String? serverId,
       final bool? dirty,
       final DateTime? lastSyncedAt}) = _$WardrobeItemImpl;
@@ -699,6 +758,12 @@ abstract class _WardrobeItem implements WardrobeItem {
   String? get localImagePath;
   @override
   String? get style;
+  @override
+  bool? get isFavorite;
+  @override
+  bool? get isArchived;
+  @override
+  String? get season;
   @override
   String? get serverId;
   @override

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../ui/atoms/haptics.dart';
+import '../atoms/haptics.dart';
 
 class TabSwipeContainer extends StatefulWidget {
   final StatefulNavigationShell navigationShell;

@@ -2,9 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../domain/repositories/recommendation_repository.dart';
-import '../../domain/repositories/wardrobe_repository.dart';
-import '../../domain/repositories/achievement_repository.dart';
+import '../../domain/entities/wardrobe_item.dart';
 
 final sharedPreferencesProvider =
     FutureProvider<SharedPreferences>((ref) async {
@@ -19,15 +17,7 @@ final dioProvider = Provider<Dio>((ref) {
   ));
 });
 
-// TODO: проверить конструкторы Impl классов и исправить параметры
-final recommendationRepositoryProvider = Provider<RecommendationRepository>(
-  (ref) => throw UnimplementedError('Fix constructor'),
-);
-
-final wardrobeRepositoryProvider = Provider<WardrobeRepository>(
-  (ref) => throw UnimplementedError('Fix constructor'),
-);
-
-final achievementRepositoryProvider = Provider<AchievementRepository>(
-  (ref) => throw UnimplementedError('Fix constructor'),
+// Provider для WardrobeItem (заглушка)
+final wardrobeItemProvider = Provider<List<WardrobeItem>>(
+  (ref) => const [],
 );

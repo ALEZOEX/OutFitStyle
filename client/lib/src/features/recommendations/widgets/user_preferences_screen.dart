@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/domain_exports.dart';
+import '../../../domain/entities/user_preference.dart';
 import '../../../presentation/providers/presentation_providers_exports.dart';
+import '../presentation/controllers/recommendation_state_notifier.dart';
 
 class UserPreferencesScreen extends ConsumerWidget {
   const UserPreferencesScreen({super.key});
@@ -35,14 +36,14 @@ class UserPreferencesScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildSectionTitle('Цвета'),
-                      _buildColorChips(state.userPreferences.preferredColors),
+                      _buildColorChips(state.preferences.preferredColors),
                       const SizedBox(height: 24),
                       _buildSectionTitle('Стили'),
-                      _buildStyleChips(state.userPreferences.preferredStyles),
+                      _buildStyleChips(state.preferences.preferredStyles),
                       const SizedBox(height: 24),
                       _buildSectionTitle('Поводы'),
                       _buildOccasionChips(
-                          state.userPreferences.occasionsOfInterest),
+                          state.preferences.occasionsOfInterest),
                       const SizedBox(height: 24),
                       _buildSectionTitle('Предпочтения по материалам'),
                       Wrap(
@@ -50,18 +51,18 @@ class UserPreferencesScreen extends ConsumerWidget {
                         children: [
                           _buildPreferenceChip(
                             'Натуральные материалы',
-                            state.userPreferences.prefersNaturalMaterials,
+                            state.preferences.prefersNaturalMaterials,
                           ),
                           _buildPreferenceChip(
                             'Синтетические материалы',
-                            state.userPreferences.prefersSyntheticMaterials,
+                            state.preferences.prefersSyntheticMaterials,
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
                       _buildSectionTitle('Бюджет'),
                       Text(
-                        'Максимальный бюджет: ${(state.userPreferences.maxBudget ?? 0) > 0 ? '${state.userPreferences.maxBudget} руб.' : 'Не указан'}',
+                        'Максимальный бюджет: ${(state.preferences.maxBudget ?? 0) > 0 ? '${state.preferences.maxBudget} руб.' : 'Не указан'}',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 24),
@@ -71,18 +72,18 @@ class UserPreferencesScreen extends ConsumerWidget {
                         children: [
                           _buildPreferenceChip(
                             'Натуральные материалы',
-                            state.userPreferences.prefersNaturalMaterials,
+                            state.preferences.prefersNaturalMaterials,
                           ),
                           _buildPreferenceChip(
                             'Синтетические материалы',
-                            state.userPreferences.prefersSyntheticMaterials,
+                            state.preferences.prefersSyntheticMaterials,
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
                       _buildSectionTitle('Размер'),
                       Text(
-                        'Предпочтение по фасону: ${(state.userPreferences.fitPreference?.isNotEmpty ?? false) ? state.userPreferences.fitPreference : 'Не указано'}',
+                        'Предпочтение по фасону: ${(state.preferences.fitPreference?.isNotEmpty ?? false) ? state.preferences.fitPreference : 'Не указано'}',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 24),
@@ -90,7 +91,7 @@ class UserPreferencesScreen extends ConsumerWidget {
                         onPressed: () {
                           // Navigate to edit preferences
                           _showEditPreferencesDialog(
-                              context, ref, state.userPreferences);
+                              context, ref, state.preferences);
                         },
                         child: const Text('Редактировать предпочтения'),
                       ),

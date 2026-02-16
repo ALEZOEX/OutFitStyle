@@ -1,29 +1,16 @@
 // ignore_for_file: dead_null_aware_expression
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../presentation/notifiers/recommendation_state_notifier.dart';
 
-class RecommendationStatsCard extends ConsumerWidget {
+class RecommendationStatsCard extends StatelessWidget {
   const RecommendationStatsCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final recommendationState = ref.watch(recommendationStateNotifierProvider);
-
-    // Calculate stats
-    final totalRecommendations = recommendationState.recommendations.length;
-    final likedCount = recommendationState.recommendations
-        .where((r) => r.isLiked != null ? r.isLiked! : false)
-        .length;
-    final savedCount = recommendationState.recommendations
-        .where((r) => r.isSaved ?? false)
-        .length;
-    final avgConfidence = totalRecommendations > 0
-        ? (recommendationState.recommendations.fold<double>(
-                    0, (sum, r) => sum + (r.confidenceScore ?? 0)) /
-                totalRecommendations)
-            .round()
-        : 0;
+  Widget build(BuildContext context) {
+    // Placeholder stats
+    const totalRecommendations = 0;
+    const likedCount = 0;
+    const savedCount = 0;
+    const avgConfidence = 0;
 
     return Card(
       margin: const EdgeInsets.all(8),

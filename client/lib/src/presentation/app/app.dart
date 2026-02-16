@@ -27,8 +27,8 @@ class OutfitStyleApp extends ConsumerWidget {
       child: MaterialApp.router(
         title: 'OutfitStyle',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
+        theme: AppThemes.lightTheme,
+        darkTheme: AppThemes.darkTheme,
         themeMode: themeMode,
         routerConfig: router,
         localizationsDelegates: const [

@@ -5,7 +5,6 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:logger/logger.dart';
 import 'package:crypto/crypto.dart';
-import 'package:synchronized/synchronized.dart';
 import 'dart:convert';
 import 'package:drift/native.dart' as native;
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../presentation/providers/presentation_providers_exports.dart';
+import 'presentation/controllers/recommendation_state_notifier.dart';
 import 'widgets/recommendation_card.dart';
 import 'widgets/recommendation_filter_sheet.dart';
 import 'widgets/saved_recommendations_screen.dart';
@@ -19,13 +20,17 @@ class RecommendationsScreen extends ConsumerWidget {
     // Load recommendations when weather data is available
     ref.listen(weatherProvider, (previous, next) {
       if (next != null && userId.isNotEmpty) {
-        ref
-            .read(recommendationStateNotifierProvider.notifier)
-            .fetchRecommendations(
-              userId: userId,
-              latitude: next.latitude,
-              longitude: next.longitude,
-            );
+        final latitude = next.latitude;
+        final longitude = next.longitude;
+        if (latitude != null && longitude != null) {
+          ref
+              .read(recommendationStateNotifierProvider.notifier)
+              .fetchRecommendations(
+                userId: userId,
+                latitude: latitude,
+                longitude: longitude,
+              );
+        }
       }
     });
 
@@ -39,13 +44,17 @@ class RecommendationsScreen extends ConsumerWidget {
               icon: const Icon(Icons.refresh),
               onPressed: () {
                 if (userId.isNotEmpty && weatherAsyncValue != null) {
-                  ref
-                      .read(recommendationStateNotifierProvider.notifier)
-                      .fetchRecommendations(
-                        userId: userId,
-                        latitude: weatherAsyncValue.latitude,
-                        longitude: weatherAsyncValue.longitude,
-                      );
+                  final latitude = weatherAsyncValue.latitude;
+                  final longitude = weatherAsyncValue.longitude;
+                  if (latitude != null && longitude != null) {
+                    ref
+                        .read(recommendationStateNotifierProvider.notifier)
+                        .fetchRecommendations(
+                          userId: userId,
+                          latitude: latitude,
+                          longitude: longitude,
+                        );
+                  }
                 }
               },
             ),
@@ -60,13 +69,17 @@ class RecommendationsScreen extends ConsumerWidget {
                       // Apply filter logic here
                       // For now, just refresh the recommendations
                       if (userId.isNotEmpty && weatherAsyncValue != null) {
-                        ref
-                            .read(recommendationStateNotifierProvider.notifier)
-                            .fetchRecommendations(
-                              userId: userId,
-                              latitude: weatherAsyncValue.latitude,
-                              longitude: weatherAsyncValue.longitude,
-                            );
+                        final latitude = weatherAsyncValue.latitude;
+                        final longitude = weatherAsyncValue.longitude;
+                        if (latitude != null && longitude != null) {
+                          ref
+                              .read(recommendationStateNotifierProvider.notifier)
+                              .fetchRecommendations(
+                                userId: userId,
+                                latitude: latitude,
+                                longitude: longitude,
+                              );
+                        }
                       }
                     },
                   ),
@@ -152,57 +165,93 @@ class RecommendationsScreen extends ConsumerWidget {
                                     'Ошибка: ${recommendationState.errorMessage}'),
                                 ElevatedButton(
                                   onPressed: () {
-                                    ref
-                                        .read(
-                                            recommendationStateNotifierProvider
-                                                .notifier)
-                                        .fetchRecommendations(
-                                          userId: userId,
-                                          latitude: weatherAsyncValue.latitude,
-                                          longitude:
-                                              weatherAsyncValue.longitude,
-                                        );
+                                    final latitude = weatherAsyncValue.latitude;
+                                    final longitude = weatherAsyncValue.longitude;
+                                    if (latitude != null && longitude != null) {
+                                      ref
+                                          .read(
+                                              recommendationStateNotifierProvider
+                                                  .notifier)
+                                          .fetchRecommendations(
+                                            userId: userId,
+                                            latitude: latitude,
+                                            longitude: longitude,
+                                          );
+                                    }
                                   },
                                   child: const Text('Повторить'),
                                 ),
                               ],
                             ),
                           )
-                        : RefreshIndicator(
-                            onRefresh: () async {
-                              ref
-                                  .read(recommendationStateNotifierProvider
-                                      .notifier)
-                                  .fetchRecommendations(
-                                    userId: userId,
-                                    latitude: weatherAsyncValue.latitude,
-                                    longitude: weatherAsyncValue.longitude,
-                                  );
-                            },
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount:
-                                  recommendationState.recommendations.length,
-                              itemBuilder: (context, index) {
-                                final recommendation =
-                                    recommendationState.recommendations[index];
-                                return RecommendationCard(
-                                  recommendation: recommendation,
-                                  userId: userId,
-                                  onDetailsPressed: () {
-                                    context.push('/recommendations/detail',
-                                        extra: recommendation);
-                                  },
-                                  onSharePressed: () {
-                                    // Share functionality would go here
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Функция поделиться скоро будет доступна')),
+                        : recommendationState.recommendations.when(
+                            data: (recommendations) {
+                              return RefreshIndicator(
+                                onRefresh: () async {
+                                  final latitude = weatherAsyncValue.latitude;
+                                  final longitude = weatherAsyncValue.longitude;
+                                  if (latitude != null && longitude != null) {
+                                    await ref
+                                        .read(recommendationStateNotifierProvider
+                                            .notifier)
+                                        .fetchRecommendations(
+                                          userId: userId,
+                                          latitude: latitude,
+                                          longitude: longitude,
+                                        );
+                                  }
+                                },
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.all(16),
+                                  itemCount: recommendations.length,
+                                  itemBuilder: (context, index) {
+                                    final recommendation = recommendations[index];
+                                    return RecommendationCard(
+                                      recommendation: recommendation,
+                                      userId: userId,
+                                      onDetailsPressed: () {
+                                        context.push('/recommendations/detail',
+                                            extra: recommendation);
+                                      },
+                                      onSharePressed: () {
+                                        // Share functionality would go here
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Функция поделиться скоро будет доступна')),
+                                        );
+                                      },
                                     );
                                   },
-                                );
-                              },
+                                ),
+                              );
+                            },
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                            error: (error, stack) => Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.error, size: 64, color: Colors.red),
+                                  const SizedBox(height: 16),
+                                  Text('Ошибка: $error'),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      final latitude = weatherAsyncValue.latitude;
+                                      final longitude = weatherAsyncValue.longitude;
+                                      if (latitude != null && longitude != null) {
+                                        ref
+                                            .read(recommendationStateNotifierProvider.notifier)
+                                            .fetchRecommendations(
+                                              userId: userId,
+                                              latitude: latitude,
+                                              longitude: longitude,
+                                            );
+                                      }
+                                    },
+                                    child: const Text('Повторить'),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
             // Saved recommendations tab

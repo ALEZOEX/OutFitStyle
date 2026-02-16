@@ -1,7 +1,8 @@
 import 'package:http/http.dart' as http;
-import '../models/token_pair.dart';
-import '../storage/auth_storage.dart';
+import '../../models/token_pair.dart';
+import '../../services/auth_storage.dart';
 
+/// Сервис аутентификации (обертка над AuthStorage для совместимости)
 class AuthService {
   final String apiBase;
   final AuthStorage authStorage;

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../domain/entities/recommendation.dart';
-import '../../../presentation/providers/presentation_providers_exports.dart';
-import '../../../presentation/providers/recommendation_state_provider.dart';
+import '../presentation/controllers/recommendation_state_notifier.dart';
 import 'recommendation_feedback_dialog.dart';
 
 class RecommendationCard extends ConsumerWidget {

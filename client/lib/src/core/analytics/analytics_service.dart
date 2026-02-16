@@ -1,70 +1,59 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'analytics_event.dart';
 
+/// Абстрактный интерфейс сервиса аналитики
+abstract class IAnalyticsService {
+  /// Логирование события аналитики
+  Future<void> logEvent(AnalyticsEvent event);
+
+  /// Логирование простого события по имени
+  Future<void> logEventSimple(String eventName,
+      {Map<String, dynamic>? parameters});
+
+  /// Логирование просмотра экрана
+  Future<void> logScreenView(String screenName);
+
+  /// Логирование ошибки
+  Future<void> logError(String error, {String? stackTrace});
+
+  /// Логирование исключения
+  Future<void> logException(Exception exception, {String? stackTrace});
+
+  /// Логирование покупки
+  Future<void> logPurchase({
+    required double amount,
+    required String currency,
+    String? itemId,
+    String? itemName,
+  });
+
+  /// Установка userId
+  Future<void> setUserId(String? userId);
+
+  /// Установка свойства пользователя
+  Future<void> setUserProperty(String name, String value);
+
+  /// Получение текущего userId
+  String? getUserId();
+
+  /// Освобождение ресурсов
+  Future<void> dispose();
+}
+
+/// Статический класс-обёртка для обратной совместимости
 class AnalyticsService {
-  static final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+  static IAnalyticsService? _instance;
 
-  static Future<void> logEvent(String name,
-      {Map<String, Object>? parameters}) async {
-    await _analytics.logEvent(name: name, parameters: parameters);
+  /// Установить экземпляр сервиса аналитики
+  static void setInstance(IAnalyticsService instance) {
+    _instance = instance;
   }
 
-  static Future<void> logScreenView({
-    required String screenName,
-    String? screenClass,
-  }) async {
-    await _analytics.logScreenView(
-      screenName: screenName,
-      screenClass: screenClass,
-    );
-  }
-
-  static Future<void> logLogin(String loginMethod) async {
-    await _analytics.logLogin(loginMethod: loginMethod);
-  }
-
-  static Future<void> logSignUp(String signUpMethod) async {
-    await _analytics.logSignUp(signUpMethod: signUpMethod);
-  }
-
-  static Future<void> logSelectContent({
-    required String contentType,
-    required String itemId,
-  }) async {
-    await _analytics.logSelectContent(
-      contentType: contentType,
-      itemId: itemId,
-    );
-  }
-
-  static Future<void> logShare({
-    required String contentType,
-    required String itemId,
-    required String method,
-  }) async {
-    await _analytics.logShare(
-      contentType: contentType,
-      itemId: itemId,
-      method: method,
-    );
-  }
-
-  static Future<void> setUserProperty(String name, String value) async {
-    await _analytics.setUserProperty(name: name, value: value);
-  }
-
-  static Future<void> setUserId(String id) async {
-    await _analytics.setUserId(id: id);
-  }
-
-  static Future<void> setCurrentScreen({
-    String? screenName,
-    String? screenClassOverride,
-  }) async {
-    if (screenName != null) {
-      await _analytics.logScreenView(
-        screenName: screenName,
-        screenClass: screenClassOverride,
-      );
+  /// Получить экземпляр сервиса аналитики
+  static IAnalyticsService get instance {
+    if (_instance == null) {
+      throw StateError('AnalyticsService instance not initialized. '
+          'Call AnalyticsService.setInstance() first.');
     }
+    return _instance!;
   }
 }

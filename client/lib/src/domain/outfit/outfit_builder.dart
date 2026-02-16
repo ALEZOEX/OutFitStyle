@@ -1,4 +1,4 @@
-import '../entities/wardrobe.dart' as domain;
+import '../entities/wardrobe_item.dart' as domain;
 
 class OutfitBuilder {
   /// Собираем финальный список линий образа:

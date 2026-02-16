@@ -1,7 +1,6 @@
-// Repository Exports
-export 'auth_repository.dart';
-export 'wardrobe_repository.dart';
-export 'recommendation_repository.dart';
-export 'weather_repository.dart';
-export 'achievement_repository.dart';
-export 'profile_repository.dart';
+// Repository Exports - interfaces
+// Note: IAuthRepository is excluded to avoid ambiguous export with data layer
+export 'i_wardrobe_repository.dart';
+export 'i_recommendations_repository.dart';
+export 'i_weather_repository.dart';
+export 'profile_repository_interface.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../theme/theme_controller.dart';
+import '../../theme/theme_controller.dart';
 import '../design_system/outfit_style_components.dart';
 
 class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {

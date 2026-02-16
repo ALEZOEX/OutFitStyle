@@ -4,7 +4,7 @@ import 'firebase_analytics_service.dart';
 import 'local_analytics_service.dart';
 
 /// Комбинированный сервис аналитики, который использует Firebase Analytics и локальное хранилище
-class CombinedAnalyticsService implements AnalyticsService {
+class CombinedAnalyticsService implements IAnalyticsService {
   final FirebaseAnalyticsService _firebaseService;
   final LocalAnalyticsService _localService;
 
