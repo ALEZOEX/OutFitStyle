@@ -1,0 +1,96 @@
+-- Drift schema for OutfitStyle wardrobe database
+-- Version: 1
+
+-- Таблица элементов одежды
+CREATE TABLE clothing_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  external_id TEXT,
+  name TEXT NOT NULL,
+  description TEXT,
+  image_url TEXT,
+  category TEXT NOT NULL,
+  tags TEXT NOT NULL DEFAULT '[]',
+  color TEXT,
+  brand TEXT,
+  material TEXT,
+  seasons TEXT NOT NULL DEFAULT '[]',
+  weather_conditions TEXT NOT NULL DEFAULT '[]',
+  occasions TEXT NOT NULL DEFAULT '[]',
+  is_favorite INTEGER NOT NULL DEFAULT 0,
+  is_archived INTEGER NOT NULL DEFAULT 0,
+  times_worn INTEGER NOT NULL DEFAULT 0,
+  comfort_rating REAL NOT NULL DEFAULT 0.0,
+  added_date INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  last_worn_date INTEGER,
+  price REAL,
+  size TEXT,
+  usage_count INTEGER NOT NULL DEFAULT 0,
+  -- Sync fields
+  server_id TEXT,
+  dirty INTEGER NOT NULL DEFAULT 0,
+  last_synced_at INTEGER
+);
+
+-- Индексы для clothing_items
+CREATE INDEX idx_clothing_items_category ON clothing_items(category);
+CREATE INDEX idx_clothing_items_is_favorite ON clothing_items(is_favorite);
+CREATE INDEX idx_clothing_items_is_archived ON clothing_items(is_archived);
+CREATE INDEX idx_clothing_items_external_id ON clothing_items(external_id);
+CREATE INDEX idx_clothing_items_server_id ON clothing_items(server_id);
+CREATE INDEX idx_clothing_items_dirty ON clothing_items(dirty);
+CREATE INDEX idx_clothing_items_added_date ON clothing_items(added_date);
+
+-- Таблица образов (outfits)
+CREATE TABLE outfits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  external_id TEXT,
+  name TEXT NOT NULL,
+  description TEXT,
+  image_url TEXT,
+  clothing_item_ids TEXT NOT NULL DEFAULT '[]',
+  is_favorite INTEGER NOT NULL DEFAULT 0,
+  times_worn INTEGER NOT NULL DEFAULT 0,
+  comfort_rating REAL NOT NULL DEFAULT 0.0,
+  tags TEXT NOT NULL DEFAULT '[]',
+  occasions TEXT NOT NULL DEFAULT '[]',
+  weather_conditions TEXT NOT NULL DEFAULT '[]',
+  seasons TEXT NOT NULL DEFAULT '[]',
+  added_date INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  -- Sync fields
+  server_id TEXT,
+  dirty INTEGER NOT NULL DEFAULT 0,
+  last_synced_at INTEGER
+);
+
+-- Индексы для outfits
+CREATE INDEX idx_outfits_is_favorite ON outfits(is_favorite);
+CREATE INDEX idx_outfits_external_id ON outfits(external_id);
+CREATE INDEX idx_outfits_server_id ON outfits(server_id);
+CREATE INDEX idx_outfits_dirty ON outfits(dirty);
+CREATE INDEX idx_outfits_added_date ON outfits(added_date);
+
+-- Таблица связи образов и одежды (многие-ко-многим)
+CREATE TABLE outfit_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  outfit_id INTEGER NOT NULL,
+  clothing_item_id INTEGER NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_primary INTEGER NOT NULL DEFAULT 0,
+  metadata TEXT NOT NULL DEFAULT '{}',
+  FOREIGN KEY (outfit_id) REFERENCES outfits(id) ON DELETE CASCADE,
+  FOREIGN KEY (clothing_item_id) REFERENCES clothing_items(id) ON DELETE CASCADE
+);
+
+-- Индексы для outfit_items
+CREATE INDEX idx_outfit_items_outfit_id ON outfit_items(outfit_id);
+CREATE INDEX idx_outfit_items_clothing_item_id ON outfit_items(clothing_item_id);
+CREATE UNIQUE INDEX idx_outfit_items_unique ON outfit_items(outfit_id, clothing_item_id);
+
+-- Таблица версий схемы для миграций
+CREATE TABLE schema_version (
+  version INTEGER PRIMARY KEY NOT NULL
+);
