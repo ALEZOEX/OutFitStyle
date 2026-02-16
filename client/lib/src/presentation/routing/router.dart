@@ -15,19 +15,52 @@ import '../../features/onboarding/presentation/onboarding_wizard_screen.dart';
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
 import '../../features/outfit_details/presentation/outfit_details_screen.dart';
-import '../../features/onboarding/onboarding.dart';
+import '../../features/onboarding/onboarding_providers.dart' as onboarding_prov;
+import '../../data/repositories/auth_repository.dart';
+import '../../core/api/api_client.dart';
+import '../../core/api/api_config.dart';
+import '../../services/auth_storage.dart';
+
+/// Провайдер для AuthRepository
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  final authStorage = AuthStorage();
+  final apiClient = ApiClient(storage: authStorage);
+  final config = ApiConfig(apiBase: ApiConfig.baseUrl);
+  return AuthRepository(config, authStorage, apiClient);
+});
+
+/// Провайдер для получения userId пользователя
+final userIdProvider = FutureProvider<String?>((ref) async {
+  final authRepo = ref.read(authRepositoryProvider);
+  return authRepo.getUserId();
+});
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/home',
     redirect: (BuildContext context, GoRouterState state) async {
-      // Проверяем статус сессии и перенаправляем при необходимости
-      // TODO: Implement session checking when ready
-      final onboardingDone = ref.read(onboardingDoneProvider);
+      // Получаем статус онбординга через FutureProvider
+      final onboardingDone = await ref.read(onboarding_prov.onboardingDoneProvider.future);
+
+      // Если онбординг не пройден, перенаправляем на него
       if (!onboardingDone &&
           !state.uri.toString().startsWith('/onboarding') &&
           !state.uri.toString().startsWith('/auth')) {
         return '/onboarding';
+      }
+
+      // Проверяем сессию пользователя
+      final userId = await ref.read(userIdProvider.future);
+      final isAuthPath = state.uri.toString().startsWith('/auth');
+
+      // Если нет сессии и пользователь пытается войти в защищённый раздел
+      if (userId == null && !isAuthPath && onboardingDone) {
+        return '/auth';
+      }
+
+      // Если пользователь авторизован и пытается войти на страницу авторизации
+      if (userId != null && isAuthPath && onboardingDone) {
+        return '/home';
       }
 
       return null; // Не перенаправляем, если все условия соблюдены
