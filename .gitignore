@@ -127,17 +127,19 @@ app.dill
 libflutter.so
 flutter*.dll
 
-# ML Models and datasets
+# ML Models and datasets (binary trained models only)
 *.pkl
 *.h5
 *.pt
 *.onnx
 *.joblib
 *.pickle
-data/
+data/raw/
+data/processed/
 datasets/
-models/
-server/ml-service/models/
+server/ml-service/models/*.pkl
+server/ml-service/models/*.cbm
+server/ml-service/models/*.joblib
 
 # Архивы
 *.zip
