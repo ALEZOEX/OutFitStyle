@@ -27,6 +27,8 @@ Godeps/
 .pub/
 flutter_*.png
 pubspec.lock
+*.g.dart
+*.drift
 
 # Flutter build artifacts
 /build/
