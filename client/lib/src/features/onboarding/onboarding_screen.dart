@@ -110,6 +110,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   Widget _buildPage(OnboardingPage page) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDarkMode
+        ? const Color(0xFF6B8DFF) // Яркий синий для тёмной темы
+        : const Color(0xFF4A6CF7); // Оригинальный синий для светлой
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -121,12 +124,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             height: 120,
             decoration: BoxDecoration(
               color: isDarkMode
-                  ? Theme.of(context).primaryColor.withValues(alpha: 0.2)
-                  : Theme.of(context).primaryColor.withOpacity(0.1),
+                  ? const Color(0xFF6B8DFF).withOpacity(0.2)
+                  : const Color(0xFF4A6CF7).withOpacity(0.1),
               borderRadius: BorderRadius.circular(60),
               border: isDarkMode
                   ? Border.all(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                      color: const Color(0xFF6B8DFF).withOpacity(0.4),
                       width: 2,
                     )
                   : null,
@@ -134,9 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             child: Icon(
               page.icon,
               size: 60,
-              color: isDarkMode
-                  ? Theme.of(context).primaryColor.withValues(alpha: 0.9)
-                  : Theme.of(context).primaryColor,
+              color: iconColor,
             ),
           ),
           const SizedBox(height: 32),
@@ -162,6 +163,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   Widget _buildPageIndicator() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final inactiveColor = isDarkMode
+        ? const Color(0xFF4B5563) // Светло-серый для тёмной темы
+        : Colors.grey[300]!; // Оригинальный для светлой
+    final activeColor = isDarkMode
+        ? const Color(0xFF6B8DFF) // Яркий синий для тёмной
+        : Theme.of(context).primaryColor; // Оригинальный для светлой
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -174,19 +181,25 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           width: _currentPage == index ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: _currentPage == index
-                ? Theme.of(context).primaryColor
-                : (isDarkMode ? const Color(0xFF6B7280) : Colors.grey[300]),
+            color: _currentPage == index ? activeColor : inactiveColor,
             borderRadius: BorderRadius.circular(4),
-            boxShadow: _currentPage == index
+            boxShadow: _currentPage == index && isDarkMode
                 ? [
                     BoxShadow(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                      color: const Color(0xFF6B8DFF).withOpacity(0.5),
                       blurRadius: 8,
                       spreadRadius: 1,
                     ),
                   ]
-                : null,
+                : (_currentPage == index
+                    ? [
+                        BoxShadow(
+                          color: Theme.of(context).primaryColor.withOpacity(0.4),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null),
           ),
         ),
       ),
