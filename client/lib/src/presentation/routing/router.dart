@@ -40,7 +40,6 @@ final userIdProvider = FutureProvider<String?>((ref) async {
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/onboarding', // Начинаем с онбординга
-    // redirect временно отключен для отладки
     // redirect: (BuildContext context, GoRouterState state) async {
     //   // Получаем статус онбординга через FutureProvider
     //   final onboardingDone = await ref.read(onboarding_prov.onboardingDoneProvider.future);
@@ -69,6 +68,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     //   return null; // Не перенаправляем, если все условия соблюдены
     // },
     routes: [
+      // Корневой маршрут перенаправляет на онбординг
       GoRoute(
         path: '/',
         redirect: (context, state) => '/onboarding',
