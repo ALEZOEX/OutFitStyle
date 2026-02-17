@@ -48,6 +48,7 @@ dependencies:
   # Location
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+  permission_handler: ^11.3.0
 
   # Additional dependencies
   confetti: ^0.7.0
