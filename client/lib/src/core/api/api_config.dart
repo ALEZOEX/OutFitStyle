@@ -11,7 +11,13 @@ class ApiConfig {
   });
 
   /// Статические значения по умолчанию
-  static const String baseUrl = 'https://api.outfitstyle.com';
+  /// Для локальной разработки: http://localhost:8080
+  /// Для Android эмулятора: http://10.0.2.2:8080
+  /// Для production: https://api.outfitstyle.com
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:8080',
+  );
   static const Duration defaultConnectTimeout = Duration(seconds: 10);
   static const Duration defaultReceiveTimeout = Duration(seconds: 10);
 

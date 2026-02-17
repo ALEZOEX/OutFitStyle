@@ -17,7 +17,7 @@ class DatasetPreparer:
         """
         Генерирует разнообразные погодные условия
         """
-        print("📊 Generating weather data...")
+        print("Generating weather data...")
         
         np.random.seed(42)
         
@@ -70,14 +70,14 @@ class DatasetPreparer:
             data['season'].append(season)
         
         df = pd.DataFrame(data)
-        print(f"✅ Generated {len(df)} weather samples")
+        print(f"Generated {len(df)} weather samples")
         return df
     
     def generate_user_preferences(self, num_users=100):
         """
         Генерирует профили пользователей с разными предпочтениями
         """
-        print("👤 Generating user preferences...")
+        print("Generating user preferences...")
         
         np.random.seed(42)
         
@@ -102,14 +102,14 @@ class DatasetPreparer:
             data['formality_preference'].append(np.random.choice(formality))
         
         df = pd.DataFrame(data)
-        print(f"✅ Generated {len(df)} user profiles")
+        print(f"Generated {len(df)} user profiles")
         return df
     
     def create_clothing_dataset(self):
         """
         Создает датасет одежды с характеристиками
         """
-        print("👕 Creating clothing dataset...")
+        print("Creating clothing dataset...")
         
         clothing_data = [
             # Winter (very cold: -30 to 0)
@@ -166,22 +166,22 @@ class DatasetPreparer:
         ]
         
         df = pd.DataFrame(clothing_data)
-        print(f"✅ Created {len(df)} clothing items")
+        print(f"Created {len(df)} clothing items")
         return df
     
     def generate_training_data(self, num_samples=10000):
         """
         Генерирует полный датасет для обучения
         """
-        print("\n🎯 Generating complete training dataset...")
+        print("\nGenerating complete training dataset...")
         
         weather_df = self.generate_weather_data(num_samples)
         users_df = self.generate_user_preferences(100)
         clothing_df = self.create_clothing_dataset()
         
         training_data = []
-        
-        print("🔄 Creating training samples...")
+
+        print("Creating training samples...")
         for idx in range(num_samples):
             user = users_df.sample(1).iloc[0]
             weather = weather_df.iloc[idx]
@@ -235,7 +235,7 @@ class DatasetPreparer:
             negative.sample(n_samples, random_state=42)
         ]).sample(frac=1, random_state=42).reset_index(drop=True)
         
-        print(f"\n✅ Generated {len(balanced_df)} balanced training samples")
+        print(f"\nGenerated {len(balanced_df)} balanced training samples")
         print(f"   Positive: {sum(balanced_df['is_recommended'])} ({sum(balanced_df['is_recommended'])/len(balanced_df)*100:.1f}%)")
         print(f"   Negative: {len(balanced_df) - sum(balanced_df['is_recommended'])} ({(len(balanced_df) - sum(balanced_df['is_recommended']))/len(balanced_df)*100:.1f}%)")
         
@@ -299,27 +299,27 @@ class DatasetPreparer:
         os.makedirs('data', exist_ok=True)
         filepath = f'data/{filename}'
         df.to_csv(filepath, index=False)
-        print(f"\n💾 Dataset saved to {filepath}")
+        print(f"\nDataset saved to {filepath}")
         print(f"   Size: {len(df)} samples")
         return filepath
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("🚀 OutfitStyle ML Dataset Preparation")
+    print("OutfitStyle ML Dataset Preparation")
     print("=" * 60)
     
     preparer = DatasetPreparer()
     
     df = preparer.generate_training_data(num_samples=5000)
     
-    print("\n📊 Dataset Statistics:")
+    print("\nDataset Statistics:")
     print(f"   Total samples: {len(df)}")
     print(f"   Features: {len(df.columns)}")
     print(f"\n   Categories distribution:")
     print(df['category'].value_counts())
-    print(f"\n   Temperature range: {df['temperature'].min():.1f}°C to {df['temperature'].max():.1f}°C")
-    
+    print(f"\n   Temperature range: {df['temperature'].min():.1f}C to {df['temperature'].max():.1f}C")
+
     filepath = preparer.save_dataset(df)
-    
-    print("\n✅ Dataset preparation complete!")
+
+    print("\nDataset preparation complete!")
     print(f"   Use this file to train your ML model: {filepath}")
