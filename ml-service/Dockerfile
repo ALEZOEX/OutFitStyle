@@ -31,6 +31,8 @@ WORKDIR /app
 
 # Копируем код приложения
 COPY --from=builder /app /app
+# ⬇️ Копируем модель если существует
+COPY models/ /app/models/
 # ⬅️ ВАЖНО: копируем установленные пакеты Python
 COPY --from=builder /usr/local /usr/local
 
