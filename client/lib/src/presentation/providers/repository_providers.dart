@@ -11,13 +11,33 @@ final sharedPreferencesProvider =
 
 final dioProvider = Provider<Dio>((ref) {
   return Dio(BaseOptions(
-    baseUrl: 'https://api.outfitstyle.com',
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
+    baseUrl: 'http://localhost:8080',
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
   ));
 });
 
-// Provider для WardrobeItem (заглушка)
-final wardrobeItemProvider = Provider<List<WardrobeItem>>(
-  (ref) => const [],
-);
+// Provider для списка WardrobeItem
+final wardrobeItemProvider = StateNotifierProvider<WardrobeItemListNotifier, List<WardrobeItem>>((ref) {
+  return WardrobeItemListNotifier();
+});
+
+class WardrobeItemListNotifier extends StateNotifier<List<WardrobeItem>> {
+  WardrobeItemListNotifier() : super([]);
+
+  void setItems(List<WardrobeItem> items) {
+    state = items;
+  }
+
+  void addItem(WardrobeItem item) {
+    state = [...state, item];
+  }
+
+  void removeItem(String id) {
+    state = state.where((item) => item.id != id).toList();
+  }
+
+  void updateItem(WardrobeItem item) {
+    state = state.map((i) => i.id == item.id ? item : i).toList();
+  }
+}

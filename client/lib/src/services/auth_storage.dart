@@ -46,8 +46,7 @@ class AuthStorage {
     return TokenPair(
       accessToken: access,
       refreshToken: refresh,
-      expiresAt: expiresAt ??
-          DateTime.now().add(const Duration(hours: 24)), // заглушка
+      expiresAt: expiresAt ?? DateTime.now().add(const Duration(minutes: 15)),
     );
   }
 
