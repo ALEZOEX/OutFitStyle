@@ -51,18 +51,18 @@ func NewDB(connectionString string, logger *zap.Logger) (*DB, error) {
 		return nil, fmt.Errorf("failed to parse connection string: %w", err)
 	}
 
-	// Configure pool settings with production-safe limits
-	poolConfig.MaxConns = 20                               // Production-safe limit to prevent overwhelming DB
-	poolConfig.MinConns = 3                                // Minimum connections to keep alive
-	poolConfig.MaxConnLifetime = 30 * time.Minute          // Prevent stale connections
-	poolConfig.MaxConnIdleTime = 10 * time.Minute          // Clean up idle connections
-	poolConfig.HealthCheckPeriod = 30 * time.Second        // Health check period
+	// Production-оптимизированные настройки connection pool
+	// Формула: max_connections = ((core_count * 2) + effective_spindle_count)
+	// Для VPS с 2-4 ядрами: 20-50 подключений оптимально
+	poolConfig.MaxConns = 50                               // Увеличено с 20 для production нагрузки
+	poolConfig.MinConns = 10                               // Увеличено с 3 для быстрого старта
+	poolConfig.MaxConnLifetime = 60 * time.Minute          // Увеличено для стабильности
+	poolConfig.MaxConnLifetimeJitter = 5 * time.Minute     // Добавлен jitter для предотвращения thundering herd
+	poolConfig.MaxConnIdleTime = 15 * time.Minute          // Увеличено idle время
+	poolConfig.HealthCheckPeriod = 1 * time.Minute         // Более частый health check
 	poolConfig.ConnConfig.ConnectTimeout = 5 * time.Second // Connection timeout
-
-	if poolConfig.ConnConfig.RuntimeParams == nil {
-		poolConfig.ConnConfig.RuntimeParams = make(map[string]string)
-	}
 	poolConfig.ConnConfig.RuntimeParams["application_name"] = "outfitstyle-api"
+	poolConfig.ConnConfig.RuntimeParams["search_path"] = "public"
 
 	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
