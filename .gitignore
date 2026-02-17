@@ -203,3 +203,4 @@ cleanup.*
 *_REPORT.docx
 .qwen/
 gha-creds-*.json
+"client/build/"  
