@@ -14,8 +14,14 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Initialize Firebase (safely, without crashing if not configured)
+  try {
+    await Firebase.initializeApp();
+    debugPrint('✅ Firebase initialized');
+  } catch (e) {
+    debugPrint('⚠️ Firebase not configured: $e');
+    debugPrint('📝 Running without Firebase (some features may be limited)');
+  }
 
   // Initialize error handler
   await ErrorHandler.init();
