@@ -109,6 +109,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Widget _buildPage(OnboardingPage page) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -118,13 +120,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: isDarkMode
+                  ? Theme.of(context).primaryColor.withValues(alpha: 0.2)
+                  : Theme.of(context).primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(60),
+              border: isDarkMode
+                  ? Border.all(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                      width: 2,
+                    )
+                  : null,
             ),
             child: Icon(
               page.icon,
               size: 60,
-              color: Theme.of(context).primaryColor,
+              color: isDarkMode
+                  ? Theme.of(context).primaryColor.withValues(alpha: 0.9)
+                  : Theme.of(context).primaryColor,
             ),
           ),
           const SizedBox(height: 32),
@@ -149,6 +161,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Widget _buildPageIndicator() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
@@ -162,8 +176,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           decoration: BoxDecoration(
             color: _currentPage == index
                 ? Theme.of(context).primaryColor
-                : Colors.grey[300],
+                : (isDarkMode ? const Color(0xFF6B7280) : Colors.grey[300]),
             borderRadius: BorderRadius.circular(4),
+            boxShadow: _currentPage == index
+                ? [
+                    BoxShadow(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
           ),
         ),
       ),
