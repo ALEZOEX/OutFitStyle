@@ -198,7 +198,9 @@ class AppThemes {
         onSecondary: Colors.white,
         onTertiary: Colors.white,
         onSurface: AppColors.textPrimaryDark,
+        onSurfaceVariant: AppColors.textSecondaryDark,
         onError: Colors.white,
+        surfaceContainerHighest: Color(0xFF2D2D2D), // Более светлая поверхность для карточек
       ),
       scaffoldBackgroundColor: AppColors.backgroundDark,
       appBarTheme: const AppBarTheme(
