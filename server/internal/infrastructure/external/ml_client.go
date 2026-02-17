@@ -9,11 +9,14 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+
+	"outfitstyle/server/internal/pkg/circuitbreaker"
 )
 
 type MLClient struct {
 	baseURL string
 	http    *http.Client
+	cb      *circuitbreaker.CircuitBreaker
 }
 
 func NewMLClient(baseURL string, timeout time.Duration) *MLClient {
@@ -25,13 +28,27 @@ func NewMLClient(baseURL string, timeout time.Duration) *MLClient {
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
 
+	// Circuit breaker для защиты от сбоев ML сервиса
+	cb := circuitbreaker.New(circuitbreaker.Config{
+		MaxFailures:       5,
+		ResetTimeout:      30 * time.Second,
+		Timeout:           timeout,
+		HalfOpenSuccesses: 3,
+	})
+
 	return &MLClient{
 		baseURL: baseURL,
 		http: &http.Client{
 			Timeout:   timeout,
 			Transport: transport,
 		},
+		cb: cb,
 	}
+}
+
+// GetCircuitBreaker возвращает circuit breaker для мониторинга
+func (c *MLClient) GetCircuitBreaker() *circuitbreaker.CircuitBreaker {
+	return c.cb
 }
 
 func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankResponse, error) {
@@ -44,65 +61,61 @@ func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankRespo
 
 	u := fmt.Sprintf("%s/api/v1/rank", c.baseURL)
 
-	// Retry mechanism with exponential backoff
-	maxRetries := 3
-	var lastErr error
+	// Circuit breaker обёртка
+	err = c.cb.Execute(ctx, func() error {
+		// Retry mechanism with exponential backoff
+		maxRetries := 3
+		var lastErr error
 
-	for attempt := 0; attempt <= maxRetries; attempt++ {
-		httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(body))
-		if err != nil {
-			return out, errors.Wrap(err, "new request")
-		}
-		httpReq.Header.Set("Content-Type", "application/json")
+		for attempt := 0; attempt <= maxRetries; attempt++ {
+			httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(body))
+			if err != nil {
+				return errors.Wrap(err, "new request")
+			}
+			httpReq.Header.Set("Content-Type", "application/json")
 
-		// Пробрасываем request_id в заголовке (он также есть в теле запроса)
-		httpReq.Header.Set("X-Request-Id", req.RequestID)
-		httpReq.Header.Set("X-User-Id", req.UserID.String())
+			// Пробрасываем request_id в заголовке
+			httpReq.Header.Set("X-Request-Id", req.RequestID)
+			httpReq.Header.Set("X-User-Id", req.UserID.String())
 
-		res, err := c.http.Do(httpReq)
-		if err != nil {
-			lastErr = errors.Wrap(err, "do request")
-
-			// If this was the last attempt, return the error
-			if attempt == maxRetries {
-				return out, lastErr
+			res, err := c.http.Do(httpReq)
+			if err != nil {
+				lastErr = errors.Wrap(err, "do request")
+				if attempt == maxRetries {
+					return lastErr
+				}
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case <-time.After(time.Duration(attempt+1) * 500 * time.Millisecond):
+					continue
+				}
 			}
 
-			// Wait before retry with exponential backoff
-			select {
-			case <-ctx.Done():
-				return out, ctx.Err()
-			case <-time.After(time.Duration(attempt+1) * 500 * time.Millisecond):
-				continue
-			}
-		}
+			defer res.Body.Close()
 
-		defer res.Body.Close()
-
-		if res.StatusCode/100 != 2 {
-			lastErr = errors.Errorf("ml bad status: %d", res.StatusCode)
-
-			// If this was the last attempt, return the error
-			if attempt == maxRetries {
-				return out, lastErr
+			if res.StatusCode/100 != 2 {
+				lastErr = errors.Errorf("ml bad status: %d", res.StatusCode)
+				if attempt == maxRetries {
+					return lastErr
+				}
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case <-time.After(time.Duration(attempt+1) * 500 * time.Millisecond):
+					continue
+				}
 			}
 
-			// Wait before retry with exponential backoff
-			select {
-			case <-ctx.Done():
-				return out, ctx.Err()
-			case <-time.After(time.Duration(attempt+1) * 500 * time.Millisecond):
-				continue
+			if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
+				return errors.Wrap(err, "decode response")
 			}
+			return nil
 		}
+		return lastErr
+	})
 
-		if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
-			return out, errors.Wrap(err, "decode response")
-		}
-		return out, nil
-	}
-
-	return out, lastErr
+	return out, err
 }
 
 // ActionRequest представляет запрос для отправки действия пользователя
