@@ -4,6 +4,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -18,14 +19,15 @@ import (
 )
 
 // AuthHandler структура обработчика аутентификации
-// Содержит зависимости для обработки запросов, связанных с аутентификацией
+// Содержит зависимости для обработки запросов аутентификации
 type AuthHandler struct {
-	auth *services.AuthService // Сервис аутентификации для выполнения бизнес-логики
+	auth       *services.AuthService // Сервис аутентификации для выполнения бизнес-логики
+	lockout    *middleware.AccountLockout // Защита от brute-force атак
 }
 
 // NewAuthHandler создает новый экземпляр обработчика аутентификации
-func NewAuthHandler(auth *services.AuthService) *AuthHandler {
-	return &AuthHandler{auth: auth}
+func NewAuthHandler(auth *services.AuthService, lockout *middleware.AccountLockout) *AuthHandler {
+	return &AuthHandler{auth: auth, lockout: lockout}
 }
 
 // RegisterRoutes регистрирует маршруты для обработчика аутентификации
@@ -113,6 +115,27 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Проверяем, не заблокирован ли аккаунт (защита от brute-force)
+	email := strings.TrimSpace(strings.ToLower(req.Email))
+	allowed, remaining, lockedUntil, err := h.lockout.CheckLoginAttempt(r.Context(), email)
+
+	// Добавляем заголовки с информацией о попытках
+	w.Header().Set("X-Login-Attempts-Remaining", fmt.Sprintf("%d", remaining))
+
+	if !allowed {
+		if lockedUntil != nil {
+			retryAfter := int(lockedUntil.Seconds())
+			w.Header().Set("Retry-After", fmt.Sprintf("%d", retryAfter))
+		}
+		resp.Error(w, http.StatusTooManyRequests, errors.New("Too many failed login attempts. Please try again later."))
+		return
+	}
+
+	if err != nil {
+		// Логгируем ошибку, но не блокируем вход (graceful degradation)
+		// h.logger.Error("Account lockout check error", zap.Error(err))
+	}
+
 	device := services.DeviceInfo{
 		DeviceID:   req.DeviceID,
 		DeviceName: req.DeviceName,
@@ -125,9 +148,15 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	out, err := h.auth.Login(r.Context(), req, device)
 	if err != nil {
+		// Записываем неудачную попытку
+		_ = h.lockout.RecordFailedAttempt(r.Context(), email)
+
 		resp.Error(w, http.StatusUnauthorized, services.ErrInvalidCredentials)
 		return
 	}
+
+	// Успешный вход — сбрасываем счётчик попыток
+	_ = h.lockout.Reset(r.Context(), email)
 
 	resp.Success(w, out)
 }

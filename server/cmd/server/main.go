@@ -135,6 +135,16 @@ func main() {
 	// ---------- Rate limiter ----------
 	limiter := middleware.NewRedisRateLimiter(redisClient, rateLimitRepo)
 
+	// ---------- Account Lockout (защита от brute-force) ----------
+	// Блокировка после 5 неудачных попыток на 15 минут
+	accountLockout := middleware.NewAccountLockout(
+		redisClient,
+		logger,
+		5,              // max attempts
+		15*time.Minute, // lockout duration
+		15*time.Minute, // window duration
+	)
+
 	// ---------- Queue client ----------
 	var qClient *queue.Client
 	redisOpt, err := queue.ParseRedisURLToAsynqOpt(cfg.Queue.RedisURL)
@@ -252,7 +262,7 @@ func main() {
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, accountLockout)
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)
 	subHandler := handlers.NewSubscriptionHandler(subService, logger)
