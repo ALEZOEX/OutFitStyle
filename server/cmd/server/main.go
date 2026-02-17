@@ -125,7 +125,27 @@ func main() {
 	// Пока не создаем ML клиент, передаем nil для него
 	// var clothingItemService *services.ClothingItemService
 	// clothingItemService = nil
-	tokenSvc := services.NewTokenService(cfg.Security.JWTSecret, cfg.Security.AccessTokenTTL, cfg.Security.RefreshTokenTTL)
+
+	// ---------- Token Service с поддержкой RS256 ----------
+	tokenConfig := services.TokenServiceConfig{
+		JWTSecret:          cfg.Security.JWTSecret,
+		JWTPrivateKeyPath:  cfg.Security.JWTPrivateKeyPath,
+		JWTPublicKeyPath:   cfg.Security.JWTPublicKeyPath,
+		UseRS256:           cfg.Security.UseRS256,
+		AccessTTL:          cfg.Security.AccessTokenTTL,
+		RefreshTTL:         cfg.Security.RefreshTokenTTL,
+	}
+	tokenSvc, err := services.NewTokenService(tokenConfig)
+	if err != nil {
+		logger.Fatal("Failed to initialize token service", zap.Error(err))
+	}
+
+	if cfg.Security.UseRS256 {
+		logger.Info("✅ JWT RS256 signing enabled")
+	} else {
+		logger.Info("ℹ️  JWT HS256 signing enabled (legacy)")
+	}
+
 	googleClient := ext.NewGoogleAuthClient(cfg.Security.GoogleClientID)
 	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient)
 

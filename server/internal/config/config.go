@@ -34,6 +34,9 @@ type RedisConfig struct {
 
 type SecurityConfig struct {
 	JWTSecret          string
+	JWTPrivateKeyPath  string
+	JWTPublicKeyPath   string
+	UseRS256           bool
 	AccessTokenTTL     time.Duration
 	RefreshTokenTTL    time.Duration
 	CORSAllowedOrigins []string
@@ -180,6 +183,9 @@ func Load() (*AppConfig, error) {
 		},
 		Security: SecurityConfig{
 			JWTSecret:          getEnvFirst([]string{"JWT_SECRET"}, ""),
+			JWTPrivateKeyPath:  getEnvFirst([]string{"JWT_PRIVATE_KEY_PATH"}, "config/jwt/private.pem"),
+			JWTPublicKeyPath:   getEnvFirst([]string{"JWT_PUBLIC_KEY_PATH"}, "config/jwt/public.pem"),
+			UseRS256:           getEnvBool("JWT_USE_RS256", false),
 			AccessTokenTTL:     getEnvDurationFirst([]string{"JWT_ACCESS_TOKEN_TTL"}, 15*time.Minute),
 			RefreshTokenTTL:    getEnvDurationFirst([]string{"JWT_REFRESH_TOKEN_TTL"}, 720*time.Hour),
 			CORSAllowedOrigins: splitCSV(getEnvFirst([]string{"CORS_ALLOWED_ORIGINS", "CORS_ALLOWED_ORIGIN"}, "")),
