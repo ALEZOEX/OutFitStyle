@@ -55,17 +55,23 @@ def prepare_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray, list]:
     # Определяем категориальные колонки на основе датасета training_data.csv
     categorical_columns = [
         'weather_condition', 'season', 'age_range', 'style_preference',
-        'temperature_sensitivity', 'formality_preference', 'category',
-        'item_style', 'gender'
+        'temperature_sensitivity', 'formality_preference', 'item_name',
+        'category', 'subcategory', 'style', 'usage', 'base_colour',
+        'fit', 'pattern'
     ]
 
     # Проверяем, какие из этих колонок существуют в датасете
     existing_categorical = [col for col in categorical_columns if col in df.columns]
 
     # Выделение признаков и целевой переменной
-    feature_columns = [col for col in df.columns if col != 'target']
+    feature_columns = [col for col in df.columns if col != 'target' and col != 'is_recommended']
     X = df[feature_columns].copy()
     y = df['target'].values
+
+    # Конвертируем категориальные признаки в строки
+    for col in existing_categorical:
+        if col in X.columns:
+            X[col] = X[col].astype(str)
 
     # Получаем индексы категориальных признаков
     categorical_features_indices = [i for i, col in enumerate(feature_columns) if col in existing_categorical]
@@ -204,7 +210,7 @@ def main():
     print("Сохранение артефактов...")
     save_artifacts(artifacts, args.output_dir)
 
-    print("✅ Обучение модели завершено!")
+    print("Model training complete!")
 
 
 if __name__ == "__main__":

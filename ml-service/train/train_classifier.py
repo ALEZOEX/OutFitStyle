@@ -12,8 +12,8 @@ from catboost import CatBoostClassifier
 CAT_FEATURES = [
     "weather_condition", "season", "age_range", "style_preference",
     "temperature_sensitivity", "formality_preference",
-    "item_name", "category", "subcategory", "gender", "item_style",
-    "base_colour", "pattern", "fit", "source", "user_gender"
+    "item_name", "category", "subcategory", "style",
+    "base_colour", "pattern", "fit", "usage"
 ]
 
 def main():
@@ -23,17 +23,22 @@ def main():
     args = ap.parse_args()
 
     df = pd.read_csv(args.data_path, on_bad_lines="skip")
-    if "is_recommended" in df.columns:
-        df = df.rename(columns={"is_recommended": "target"})
-    assert "target" in df.columns, "need target or is_recommended"
 
-    y = df["target"].astype(int).values
-    X = df.drop(columns=["target"])
+    # Определяем целевую колонку
+    if "is_recommended" in df.columns:
+        df['target'] = df["is_recommended"].astype(int)
+    elif "target" in df.columns:
+        df['target'] = df["target"].astype(int)
+    else:
+        raise ValueError("No target column found (need 'is_recommended' or 'target')")
+
+    y = df["target"].values
+    X = df.drop(columns=["target", "is_recommended"], errors='ignore')
 
     # сохраняем список колонок, на которых обучалась модель
     feature_columns = list(X.columns)
 
-    # приводим к строкам категориальные (иначе могут быть NaN/числа)
+    # приводим к строкам категориальные
     for c in CAT_FEATURES:
         if c in X.columns:
             X[c] = X[c].astype(str)
