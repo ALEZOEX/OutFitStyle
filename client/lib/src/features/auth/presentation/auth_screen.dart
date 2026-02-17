@@ -48,16 +48,31 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         String errorMessage;
         final errorStr = e.toString();
 
+        // Логгируем ошибку для отладки
+        print('Google Sign-In error: $errorStr');
+
         if (errorStr.contains('отменен пользователем') ||
-            errorStr.contains('cancelled')) {
+            errorStr.contains('cancelled') ||
+            errorStr.contains('canceled')) {
           // Пользователь отменил вход - не показываем ошибку
+          ref.read(authLoadingProvider.notifier).state = false;
           return;
-        } else if (errorStr.contains('NETWORK')) {
+        } else if (errorStr.contains('NETWORK') ||
+                   errorStr.contains('SocketException') ||
+                   errorStr.contains('Error on Internet')) {
           errorMessage = 'Ошибка сети. Проверьте подключение.';
         } else if (errorStr.contains('ID Token')) {
           errorMessage = 'Не удалось получить данные Google.';
+        } else if (errorStr.contains('401') || errorStr.contains('Unauthorized')) {
+          errorMessage = 'Ошибка аутентификации. Попробуйте другой аккаунт.';
+        } else if (errorStr.contains('503') || errorStr.contains('Service Unavailable')) {
+          errorMessage = 'Сервис временно недоступен.';
+        } else if (errorStr.contains('null')) {
+          errorMessage = 'Неизвестная ошибка. Попробуйте позже.';
         } else {
-          errorMessage = errorStr.replaceAll('Exception: ', '');
+          errorMessage = errorStr
+              .replaceAll('Exception: ', '')
+              .replaceAll('Error: ', '');
         }
 
         ref.read(authErrorProvider.notifier).state = errorMessage;
