@@ -115,6 +115,7 @@ Thumbs.db
 # Firebase configuration (contains sensitive API keys)
 **/google-services.json
 **/GoogleService-Info.plist
+**/firebase_app_id_file.json
 
 # Большие файлы, не подходящие для Git
 full_server_code*.txt
