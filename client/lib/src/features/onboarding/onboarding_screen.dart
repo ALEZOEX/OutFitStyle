@@ -19,8 +19,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late PageController _pageController;
   late ConfettiController _confettiController;
   int _currentPage = 0;
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
 
   final List<OnboardingPage> _pages = [
     OnboardingPage(
@@ -48,20 +46,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _pageController = PageController();
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 1));
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
-    );
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     _confettiController.dispose();
-    _animationController.dispose();
     super.dispose();
   }
 
@@ -77,16 +67,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 setState(() {
                   _currentPage = index;
                 });
-                _animationController.forward().then((_) {
-                  _animationController.reset();
-                });
               },
               itemCount: _pages.length,
               itemBuilder: (context, index) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: _buildPage(_pages[index]),
-                );
+                return _buildPage(_pages[index]);
               },
             ),
 
@@ -130,26 +114,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: 1.0 + (_animationController.value * 0.2),
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(60),
-                  ),
-                  child: Icon(
-                    page.icon,
-                    size: 60,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              );
-            },
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(60),
+            ),
+            child: Icon(
+              page.icon,
+              size: 60,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
           const SizedBox(height: 32),
           Text(
@@ -177,7 +153,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
         _pages.length,
-        (index) => Container(
+        (index) => AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
           margin: const EdgeInsets.symmetric(horizontal: 4),
           width: _currentPage == index ? 24 : 8,
           height: 8,
