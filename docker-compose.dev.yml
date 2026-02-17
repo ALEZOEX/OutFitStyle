@@ -112,6 +112,8 @@ services:
       context: .
       dockerfile: ./server/Dockerfile
     command: /app/server
+    ports:
+      - "8080:8080"
     environment:
       - RUN_IN_DOCKER=1
       - SERVER_HOST=0.0.0.0
