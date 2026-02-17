@@ -112,6 +112,10 @@ Thumbs.db
 .env.test
 .env.production
 
+# Firebase configuration (contains sensitive API keys)
+**/google-services.json
+**/GoogleService-Info.plist
+
 # Большие файлы, не подходящие для Git
 full_server_code*.txt
 *.apks
