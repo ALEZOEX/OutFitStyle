@@ -18,7 +18,7 @@ Future<void> main() async {
   bool firebaseInitialized = false;
   try {
     await Firebase.initializeApp();
-    debugPrint('✅ Firebase initialized');
+    debugPrint('✅ Firebase initialized successfully');
     firebaseInitialized = true;
   } catch (e) {
     debugPrint('⚠️ Firebase not configured: $e');
@@ -28,6 +28,7 @@ Future<void> main() async {
   // Initialize error handler (only if Firebase is available)
   if (firebaseInitialized) {
     await ErrorHandler.init();
+    debugPrint('✅ Crashlytics enabled');
   } else {
     debugPrint('⚠️ Crashlytics disabled (Firebase not available)');
   }
