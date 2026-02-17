@@ -15,16 +15,22 @@ Future<void> main() async {
   ]);
 
   // Initialize Firebase (safely, without crashing if not configured)
+  bool firebaseInitialized = false;
   try {
     await Firebase.initializeApp();
     debugPrint('✅ Firebase initialized');
+    firebaseInitialized = true;
   } catch (e) {
     debugPrint('⚠️ Firebase not configured: $e');
     debugPrint('📝 Running without Firebase (some features may be limited)');
   }
 
-  // Initialize error handler
-  await ErrorHandler.init();
+  // Initialize error handler (only if Firebase is available)
+  if (firebaseInitialized) {
+    await ErrorHandler.init();
+  } else {
+    debugPrint('⚠️ Crashlytics disabled (Firebase not available)');
+  }
 
   runApp(
     ProviderScope(
