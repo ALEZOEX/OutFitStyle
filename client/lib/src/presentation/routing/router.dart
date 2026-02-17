@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,11 +12,9 @@ import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/onboarding/onboarding_storage.dart' as onboarding_storage;
-import '../../features/onboarding/presentation/onboarding_wizard_screen.dart';
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
 import '../../features/outfit_details/presentation/outfit_details_screen.dart';
-import '../../features/onboarding/onboarding_providers.dart' as onboarding_prov;
 import '../../data/repositories/auth_repository.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_config.dart';
@@ -165,11 +162,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/auth',
         name: 'auth',
         builder: (context, state) => const AuthScreen(),
-      ),
-      GoRoute(
-        path: '/onboarding',
-        name: 'onboarding',
-        builder: (context, state) => const OnboardingWizardScreen(),
       ),
     ],
   );
