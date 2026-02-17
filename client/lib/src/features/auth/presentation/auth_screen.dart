@@ -315,16 +315,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 // Кнопка Google
                 OutlinedButton.icon(
                   onPressed: isLoading ? null : () => _signInWithGoogle(),
-                  icon: Image.asset(
-                    'assets/icons/google_logo.png',
-                    height: 24,
+                  icon: Icon(
+                    Icons.g_mobiledata,
+                    size: 28,
+                    color: theme.colorScheme.primary,
                   ),
                   label: const Text('Продолжить с Google'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    minimumSize: const Size(double.infinity, 50),
                   ),
                 ),
               ],
