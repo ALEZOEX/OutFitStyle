@@ -36,34 +36,33 @@ final userIdProvider = FutureProvider<String?>((ref) async {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/onboarding', // Начинаем с онбординга
-    // redirect: (BuildContext context, GoRouterState state) async {
-    //   // Получаем статус онбординга через FutureProvider
-    //   final onboardingDone = await ref.read(onboarding_prov.onboardingDoneProvider.future);
+    initialLocation: '/onboarding',
+    redirect: (BuildContext context, GoRouterState state) async {
+      final path = state.uri.toString();
 
-    //   // Если онбординг не пройден, перенаправляем на него
-    //   if (!onboardingDone &&
-    //       !state.uri.toString().startsWith('/onboarding') &&
-    //       !state.uri.toString().startsWith('/auth')) {
-    //     return '/onboarding';
-    //   }
+      // Онбординг и авторизация всегда доступны
+      if (path.startsWith('/onboarding') || path.startsWith('/auth')) {
+        return null;
+      }
 
-    //   // Проверяем сессию пользователя
-    //   final userId = await ref.read(userIdProvider.future);
-    //   final isAuthPath = state.uri.toString().startsWith('/auth');
+      // Проверяем онбординг
+      final onboardingStorage = onboarding_storage.OnboardingStorage();
+      final onboardingDone = await onboardingStorage.isDone();
 
-    //   // Если нет сессии и пользователь пытается войти в защищённый раздел
-    //   if (userId == null && !isAuthPath && onboardingDone) {
-    //     return '/auth';
-    //   }
+      if (!onboardingDone) {
+        return '/onboarding';
+      }
 
-    //   // Если пользователь авторизован и пытается войти на страницу авторизации
-    //   if (userId != null && isAuthPath && onboardingDone) {
-    //     return '/home';
-    //   }
+      // Проверяем авторизацию
+      final authStorage = AuthStorage();
+      final accessToken = await authStorage.readAccessToken();
 
-    //   return null; // Не перенаправляем, если все условия соблюдены
-    // },
+      if (accessToken == null) {
+        return '/auth';
+      }
+
+      return null;
+    },
     routes: [
       // Корневой маршрут перенаправляет на онбординг
       GoRoute(
