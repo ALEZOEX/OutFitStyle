@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">242419520610</string>
+    <string name="google_api_key" translatable="false">AIzaSyDk6XX38RSZb9VOVrUE8ynnocEqOWcw3JE</string>
+    <string name="google_app_id" translatable="false">1:242419520610:android:ca7c9f3eb239ecb7cc2d3b</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDk6XX38RSZb9VOVrUE8ynnocEqOWcw3JE</string>
+    <string name="google_storage_bucket" translatable="false">outfitstyle-ce15f.firebasestorage.app</string>
+    <string name="project_id" translatable="false">outfitstyle-ce15f</string>
+</resources>
