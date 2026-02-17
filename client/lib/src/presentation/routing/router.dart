@@ -11,6 +11,8 @@ import '../../features/generator/presentation/generator_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/auth/presentation/auth_screen.dart';
+import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/onboarding/onboarding_storage.dart' as onboarding_storage;
 import '../../features/onboarding/presentation/onboarding_wizard_screen.dart';
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
@@ -37,38 +39,53 @@ final userIdProvider = FutureProvider<String?>((ref) async {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/home',
-    redirect: (BuildContext context, GoRouterState state) async {
-      // Получаем статус онбординга через FutureProvider
-      final onboardingDone = await ref.read(onboarding_prov.onboardingDoneProvider.future);
+    initialLocation: '/onboarding', // Начинаем с онбординга
+    // redirect временно отключен для отладки
+    // redirect: (BuildContext context, GoRouterState state) async {
+    //   // Получаем статус онбординга через FutureProvider
+    //   final onboardingDone = await ref.read(onboarding_prov.onboardingDoneProvider.future);
 
-      // Если онбординг не пройден, перенаправляем на него
-      if (!onboardingDone &&
-          !state.uri.toString().startsWith('/onboarding') &&
-          !state.uri.toString().startsWith('/auth')) {
-        return '/onboarding';
-      }
+    //   // Если онбординг не пройден, перенаправляем на него
+    //   if (!onboardingDone &&
+    //       !state.uri.toString().startsWith('/onboarding') &&
+    //       !state.uri.toString().startsWith('/auth')) {
+    //     return '/onboarding';
+    //   }
 
-      // Проверяем сессию пользователя
-      final userId = await ref.read(userIdProvider.future);
-      final isAuthPath = state.uri.toString().startsWith('/auth');
+    //   // Проверяем сессию пользователя
+    //   final userId = await ref.read(userIdProvider.future);
+    //   final isAuthPath = state.uri.toString().startsWith('/auth');
 
-      // Если нет сессии и пользователь пытается войти в защищённый раздел
-      if (userId == null && !isAuthPath && onboardingDone) {
-        return '/auth';
-      }
+    //   // Если нет сессии и пользователь пытается войти в защищённый раздел
+    //   if (userId == null && !isAuthPath && onboardingDone) {
+    //     return '/auth';
+    //   }
 
-      // Если пользователь авторизован и пытается войти на страницу авторизации
-      if (userId != null && isAuthPath && onboardingDone) {
-        return '/home';
-      }
+    //   // Если пользователь авторизован и пытается войти на страницу авторизации
+    //   if (userId != null && isAuthPath && onboardingDone) {
+    //     return '/home';
+    //   }
 
-      return null; // Не перенаправляем, если все условия соблюдены
-    },
+    //   return null; // Не перенаправляем, если все условия соблюдены
+    // },
     routes: [
       GoRoute(
         path: '/',
-        redirect: (context, state) => '/home',
+        redirect: (context, state) => '/onboarding',
+      ),
+      GoRoute(
+        path: '/onboarding',
+        name: 'onboarding',
+        builder: (context, state) {
+          final onboardingStorage = onboarding_storage.OnboardingStorage();
+          return OnboardingScreen(
+            onComplete: () async {
+              await onboardingStorage.setDone();
+              if (!context.mounted) return;
+              context.go('/home');
+            },
+          );
+        },
       ),
       GoRoute(
         path: '/home',

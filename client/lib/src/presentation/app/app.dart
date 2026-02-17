@@ -31,12 +31,16 @@ class OutfitStyleApp extends ConsumerWidget {
         darkTheme: AppThemes.darkTheme,
         themeMode: themeMode,
         routerConfig: router,
+        locale: const Locale('ru'), // Принудительно русский язык
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [Locale('ru'), Locale('en')],
+        supportedLocales: const [
+          Locale('ru'), // Русский
+          Locale('en'), // Английский
+        ],
       ),
     );
   }
