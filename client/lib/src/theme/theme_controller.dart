@@ -14,9 +14,9 @@ final themeModeProvider =
 /// - Ключ: 'theme_mode'
 /// - Значения: 'dark', 'light', 'system'
 ///
-/// Тема по умолчанию: тёмная (Brightness.dark)
+/// Тема по умолчанию: системная (автоматически от настроек устройства)
 class ThemeModeController extends StateNotifier<ThemeMode> {
-  ThemeModeController() : super(ThemeMode.dark) {
+  ThemeModeController() : super(ThemeMode.system) {
     _load();
   }
 
@@ -32,15 +32,15 @@ class ThemeModeController extends StateNotifier<ThemeMode> {
       final value = prefs.getString(_kThemeMode);
 
       if (value == null) {
-        // Если значение не сохранено, используем тему по умолчанию (тёмная)
-        state = ThemeMode.dark;
+        // Если значение не сохранено, используем системную тему
+        state = ThemeMode.system;
         return;
       }
 
       state = _parseThemeMode(value);
     } catch (e) {
-      // При ошибке загрузки используем тему по умолчанию
-      state = ThemeMode.dark;
+      // При ошибке загрузки используем системную тему
+      state = ThemeMode.system;
     }
   }
 

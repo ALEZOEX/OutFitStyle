@@ -287,7 +287,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return switch (themeMode) {
       ThemeMode.light => 'Светлая тема всегда активна',
       ThemeMode.dark => 'Тёмная тема всегда активна',
-      ThemeMode.system => 'Тема зависит от настроек системы',
+      ThemeMode.system => 'Тема автоматически подстраивается под настройки системы',
     };
   }
 }
