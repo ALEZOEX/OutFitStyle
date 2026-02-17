@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 /// Custom avatar widget
 class AppAvatar extends StatelessWidget {
@@ -101,16 +102,12 @@ class AppAvatar extends StatelessWidget {
       return placeholderWidget!;
     }
 
-    String displayText = placeholderText ?? _getInitials(name ?? '');
-    return Center(
-      child: Text(
-        displayText.toUpperCase(),
-        style: theme.textTheme.bodyLarge?.copyWith(
-          color: fgColor,
-          fontWeight: FontWeight.w600,
-          fontSize: radius * 0.5,
-        ),
-      ),
+    // Используем SVG placeholder вместо текста
+    return SvgPicture.asset(
+      'assets/icons/avatar_placeholder.svg',
+      width: radius * 2,
+      height: radius * 2,
+      fit: BoxFit.cover,
     );
   }
 
