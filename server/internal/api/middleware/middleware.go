@@ -58,7 +58,7 @@ func CORSMiddleware(allowedOrigins []string) mux.MiddlewareFunc {
 	}
 }
 
-// LoggerMiddleware logs request details
+// LoggerMiddleware logs request details with PII masking
 func LoggerMiddleware(logger *zap.Logger) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -69,15 +69,40 @@ func LoggerMiddleware(logger *zap.Logger) mux.MiddlewareFunc {
 
 			next.ServeHTTP(rw, r)
 
+			// Маскируем чувствительные данные
+			remoteAddr := maskIP(r.RemoteAddr)
+
 			logger.Info("HTTP Request",
 				zap.String("method", r.Method),
 				zap.String("path", r.URL.Path),
 				zap.Int("status", rw.statusCode),
 				zap.Duration("duration", time.Since(start)),
-				zap.String("remote_addr", r.RemoteAddr),
+				zap.String("remote_addr", remoteAddr),
 			)
 		})
 	}
+}
+
+// maskIP маскирует IP адрес для логирования
+func maskIP(ip string) string {
+	if ip == "" {
+		return "***"
+	}
+
+	// Находим последнюю точку
+	lastDot := -1
+	for i := len(ip) - 1; i >= 0; i-- {
+		if ip[i] == '.' {
+			lastDot = i
+			break
+		}
+	}
+
+	if lastDot < 0 {
+		return "***"
+	}
+
+	return "***.***.***" + ip[lastDot:]
 }
 
 // RateLimiter структура для ограничения частоты запросов

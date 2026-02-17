@@ -95,7 +95,9 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 		return nil, repositories.ErrEmailAlreadyExists
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	// Усиленная защита пароля: bcrypt cost 12 вместо DefaultCost (10)
+	// Защита от brute-force атак на GPU
+	hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), 12)
 	if err != nil {
 		return nil, err
 	}

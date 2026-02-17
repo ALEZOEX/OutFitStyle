@@ -268,7 +268,7 @@ func TestAuthService_Login_Success(t *testing.T) {
 
 	// Тестовые данные
 	password := "password123"
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		t.Fatalf("Failed to generate password hash: %v", err)
 	}

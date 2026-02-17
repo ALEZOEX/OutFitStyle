@@ -99,3 +99,99 @@ func Fatal(ctx context.Context, msg string, fields ...zap.Field) {
 func Sugar() *zap.SugaredLogger {
 	return globalLogger.Sugar()
 }
+
+// =============================================================================
+// PII MASKING - Маскирование персональных данных
+// =============================================================================
+
+// MaskEmail маскирует email адрес, оставляя первые 2 и последние 4 символа
+// Пример: user@example.com → us**@example.com
+func MaskEmail(email string) string {
+	if len(email) < 6 {
+		return "***"
+	}
+
+	atIndex := -1
+	for i, c := range email {
+		if c == '@' {
+			atIndex = i
+			break
+		}
+	}
+
+	if atIndex <= 0 || atIndex >= len(email)-1 {
+		return "***"
+	}
+
+	// Оставляем первые 2 символа имени и домен полностью
+	if atIndex <= 2 {
+		return email[:atIndex] + email[atIndex:]
+	}
+
+	return email[:2] + "***" + email[atIndex:]
+}
+
+// MaskToken маскирует токен (JWT, API key), показывая только первые 8 и последние 4 символа
+// Пример: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... → eyJhbGc***...***xyz123
+func MaskToken(token string) string {
+	if len(token) < 16 {
+		return "***"
+	}
+	if len(token) < 32 {
+		return token[:4] + "***" + token[len(token)-4:]
+	}
+	return token[:8] + "***...***" + token[len(token)-4:]
+}
+
+// MaskUserID маскирует ID пользователя, оставляя только последние 4 символа
+// Пример: 550e8400-e29b-41d4-a716-446655440000 → ***40000
+func MaskUserID(id string) string {
+	if len(id) < 4 {
+		return "***"
+	}
+	return "***" + id[len(id)-4:]
+}
+
+// MaskIP маскирует IP адрес, оставляя только последнюю часть
+// Пример: 192.168.1.100 → ***.***.***.100
+func MaskIP(ip string) string {
+	if ip == "" {
+		return "***"
+	}
+
+	// Находим последнюю точку
+	lastDot := -1
+	for i := len(ip) - 1; i >= 0; i-- {
+		if ip[i] == '.' {
+			lastDot = i
+			break
+		}
+	}
+
+	if lastDot < 0 {
+		return "***"
+	}
+
+	return "***.***.***" + ip[lastDot:]
+}
+
+// MaskPassword возвращает заглушку вместо пароля
+// Пароли никогда не должны логироваться даже в маскированном виде
+func MaskPassword() string {
+	return "[REDACTED]"
+}
+
+// SafeField создаёт поле zap.String с маскированием чувствительных данных
+func SafeField(key, value string, sensitive bool) zap.Field {
+	if sensitive {
+		return zap.String(key, "***"+value[len(value)-min(4, len(value)):]+"***")
+	}
+	return zap.String(key, value)
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}

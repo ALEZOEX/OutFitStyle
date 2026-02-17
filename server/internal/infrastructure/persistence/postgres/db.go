@@ -36,11 +36,13 @@ func NewDB(connectionString string, logger *zap.Logger) (*DB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// SSL mode по умолчанию для безопасности
+	// Для локальной разработки можно переопределить в .env (sslmode=disable)
 	if !strings.Contains(connectionString, "sslmode=") {
 		if strings.Contains(connectionString, "?") {
-			connectionString += "&sslmode=disable"
+			connectionString += "&sslmode=require"
 		} else {
-			connectionString += "?sslmode=disable"
+			connectionString += "?sslmode=require"
 		}
 	}
 
