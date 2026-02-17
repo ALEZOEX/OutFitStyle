@@ -1,14 +1,113 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../theme/theme_controller.dart';
 
+/// Провайдер для состояния разрешений
+class PermissionState extends StateNotifier<Map<String, bool>> {
+  PermissionState() : super({});
+
+  void updatePermission(String permission, bool granted) {
+    state = {...state, permission: granted};
+  }
+}
+
+final permissionStateProvider = StateNotifierProvider<PermissionState, Map<String, bool>>((ref) {
+  return PermissionState();
+});
+
 /// Экран настроек приложения
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _notificationsEnabled = false;
+  bool _locationEnabled = false;
+  String? _locationError;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermissions();
+  }
+
+  Future<void> _checkPermissions() async {
+    // Проверка уведомлений
+    final notificationStatus = await Permission.notification.status;
+    setState(() {
+      _notificationsEnabled = notificationStatus.isGranted;
+    });
+
+    // Проверка геолокации
+    final locationStatus = await Permission.location.status;
+    setState(() {
+      _locationEnabled = locationStatus.isGranted;
+    });
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    final status = await Permission.notification.request();
+    setState(() {
+      _notificationsEnabled = status.isGranted;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(status.isGranted
+            ? '✅ Уведомления включены'
+            : '❌ Уведомления отклонены'),
+          backgroundColor: status.isGranted ? Colors.green : Colors.orange,
+        ),
+      );
+    }
+  }
+
+  Future<void> _requestLocationPermission() async {
+    try {
+      final status = await Permission.location.request();
+
+      if (status.isGranted) {
+        final position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+          ),
+        );
+        setState(() {
+          _locationEnabled = true;
+          _locationError = null;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Геолокация: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        setState(() {
+          _locationEnabled = false;
+          _locationError = 'Разрешение отклонено';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _locationEnabled = false;
+        _locationError = 'Ошибка: $e';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final themeController = ref.read(themeModeProvider.notifier);
 
@@ -29,31 +128,67 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // Секция уведомлений (заглушка для будущей реализации)
+          // Секция уведомлений
           _buildSection(
             context,
             title: 'Уведомления',
             children: [
-              _buildListTile(
-                icon: Icons.notifications_outlined,
-                title: 'Уведомления',
-                subtitle: 'Будет доступно в следующей версии',
-                enabled: false,
+              ListTile(
+                leading: Icon(
+                  _notificationsEnabled
+                    ? Icons.notifications
+                    : Icons.notifications_off_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: const Text('Уведомления'),
+                subtitle: Text(
+                  _notificationsEnabled
+                    ? 'Включены'
+                    : 'Нажмите для включения',
+                ),
+                trailing: Switch(
+                  value: _notificationsEnabled,
+                  onChanged: (_) => _requestNotificationPermission(),
+                ),
+                onTap: _requestNotificationPermission,
               ),
             ],
           ),
           const SizedBox(height: 16),
-          // Секция локации (заглушка для будущей реализации)
+          // Секция геолокации
           _buildSection(
             context,
             title: 'Местоположение',
             children: [
-              _buildListTile(
-                icon: Icons.location_on_outlined,
-                title: 'Геолокация',
-                subtitle: 'Будет доступно в следующей версии',
-                enabled: false,
+              ListTile(
+                leading: Icon(
+                  _locationEnabled
+                    ? Icons.location_on
+                    : Icons.location_off_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: const Text('Геолокация'),
+                subtitle: Text(
+                  _locationEnabled
+                    ? 'Разрешено'
+                    : (_locationError ?? 'Нажмите для включения'),
+                ),
+                trailing: Switch(
+                  value: _locationEnabled,
+                  onChanged: (_) => _requestLocationPermission(),
+                ),
+                onTap: _requestLocationPermission,
               ),
+              if (_locationEnabled)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    'Используется для погодных рекомендаций',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
             ],
           ),
         ],
@@ -154,41 +289,5 @@ class SettingsScreen extends ConsumerWidget {
       ThemeMode.dark => 'Тёмная тема всегда активна',
       ThemeMode.system => 'Тема зависит от настроек системы',
     };
-  }
-
-  /// Элемент списка настроек
-  Widget _buildListTile({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    bool enabled = true,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: enabled ? null : Colors.grey),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: enabled ? null : Colors.grey,
-        ),
-      ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: TextStyle(
-                color: enabled ? null : Colors.grey,
-                fontSize: 12,
-              ),
-            )
-          : null,
-      trailing: enabled
-          ? Icon(
-              Icons.chevron_right,
-              color: enabled ? null : Colors.grey,
-            )
-          : null,
-      enabled: enabled,
-      onTap: onTap,
-    );
   }
 }
