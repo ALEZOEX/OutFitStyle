@@ -70,7 +70,7 @@ func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
 		}
 	}
 
-	// Проверка ML-сервиса
+	// Проверка ML-сервиса (опционально, не влияет на общий статус)
 	{
 		mlCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
@@ -86,13 +86,11 @@ func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
 		}
 	}
 
-	// Определение общего статуса
+	// Определение общего статуса (только критичные зависимости: БД)
+	// ML service не влияет на общий статус - это опциональная зависимость
 	overall := "healthy"
-	for _, c := range checks {
-		if c.Status == "unhealthy" {
-			overall = "unhealthy"
-			break
-		}
+	if dbCheck, ok := checks["database"]; ok && dbCheck.Status == "unhealthy" {
+		overall = "unhealthy"
 	}
 
 	return HealthStatus{
