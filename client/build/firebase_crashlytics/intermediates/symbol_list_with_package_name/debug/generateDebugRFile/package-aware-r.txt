@@ -1,0 +1,2 @@
+io.flutter.plugins.firebase.crashlytics
+bool com_crashlytics_RequireBuildId
