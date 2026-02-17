@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -18,16 +19,39 @@ import (
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
+// sanitizeRegistrationRequest применяет санитизацию к данным регистрации
+func sanitizeRegistrationRequest(req *domain.UserRegistration) {
+	if req.Email != "" {
+		req.Email = validation.SanitizeEmail(req.Email)
+	}
+	if req.DisplayName != nil && *req.DisplayName != "" {
+		sanitized := validation.SanitizeDisplayName(*req.DisplayName)
+		req.DisplayName = &sanitized
+	}
+	if req.Password != "" {
+		// Пароль не санизируем, чтобы не изменить его
+		// Но проверяем на опасные паттерны
+		if validation.ContainsDangerousPattern(req.Password) {
+			req.Password = "" // Очищаем если есть опасные паттерны
+		}
+	}
+}
+
 // AuthHandler структура обработчика аутентификации
 // Содержит зависимости для обработки запросов аутентификации
 type AuthHandler struct {
-	auth       *services.AuthService // Сервис аутентификации для выполнения бизнес-логики
-	lockout    *middleware.AccountLockout // Защита от brute-force атак
+	auth            *services.AuthService                // Сервис аутентификации для выполнения бизнес-логики
+	lockout         *middleware.AccountLockout           // Защита от brute-force атак
+	lockoutDuration time.Duration                        // Длительность блокировки
 }
 
 // NewAuthHandler создает новый экземпляр обработчика аутентификации
-func NewAuthHandler(auth *services.AuthService, lockout *middleware.AccountLockout) *AuthHandler {
-	return &AuthHandler{auth: auth, lockout: lockout}
+func NewAuthHandler(auth *services.AuthService, lockout *middleware.AccountLockout, lockoutDuration time.Duration) *AuthHandler {
+	return &AuthHandler{
+		auth:            auth,
+		lockout:         lockout,
+		lockoutDuration: lockoutDuration,
+	}
 }
 
 // RegisterRoutes регистрирует маршруты для обработчика аутентификации
@@ -52,6 +76,9 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
 		return
 	}
+
+	// Санитизация входных данных (защита от XSS)
+	sanitizeRegistrationRequest(&req)
 
 	// Validate input data
 	v := validation.NewValidator()
@@ -124,7 +151,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if !allowed {
 		if lockedUntil != nil {
-			retryAfter := int(lockedUntil.Seconds())
+			retryAfter := int(time.Until(*lockedUntil).Seconds())
+			if retryAfter < 0 {
+				retryAfter = int(h.lockoutDuration.Seconds())
+			}
 			w.Header().Set("Retry-After", fmt.Sprintf("%d", retryAfter))
 		}
 		resp.Error(w, http.StatusTooManyRequests, errors.New("Too many failed login attempts. Please try again later."))

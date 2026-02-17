@@ -15,7 +15,33 @@ import (
 	"github.com/google/uuid"
 
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/validation/sanitization"
 )
+
+// SanitizeEmail очищает email адрес
+func SanitizeEmail(email string) string {
+	return sanitization.SanitizeEmail(email)
+}
+
+// SanitizeDisplayName очищает отображаемое имя
+func SanitizeDisplayName(name string) string {
+	return sanitization.SanitizeDisplayName(name)
+}
+
+// SanitizeUsername очищает имя пользователя
+func SanitizeUsername(username string) string {
+	return sanitization.SanitizeUsername(username)
+}
+
+// SanitizeString очищает строку от потенциально опасных HTML/JS вставок
+func SanitizeString(input string) string {
+	return sanitization.SanitizeString(input)
+}
+
+// ContainsDangerousPattern проверяет, содержит ли строка опасные паттерны
+func ContainsDangerousPattern(input string) bool {
+	return sanitization.ContainsDangerousPattern(input)
+}
 
 // Validator структура для хранения ошибок валидации
 type Validator struct {
