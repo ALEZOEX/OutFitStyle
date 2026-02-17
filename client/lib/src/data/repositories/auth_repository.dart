@@ -2,6 +2,7 @@ import 'dart:convert';
 import '../../core/api/api_config.dart';
 import '../../core/api/api_client.dart';
 import '../../services/auth_storage.dart';
+import '../../services/auth_service.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../../models/token_pair.dart';
 
@@ -10,8 +11,14 @@ class AuthRepository implements IAuthRepository {
   final ApiConfig config;
   final AuthStorage authStorage;
   final ApiClient apiClient;
+  final AuthService _authService;
 
-  AuthRepository(this.config, this.authStorage, this.apiClient);
+  AuthRepository(this.config, this.authStorage, this.apiClient)
+      : _authService = AuthService(
+          apiBase: ApiConfig.baseUrl,
+          authStorage: authStorage,
+          dio: apiClient.raw,
+        );
 
   @override
   Future<bool> login(String email, String password) async {
@@ -57,6 +64,21 @@ class AuthRepository implements IAuthRepository {
       return false;
     } catch (e) {
       return false;
+    }
+  }
+
+  @override
+  Future<bool> signInWithGoogle() async {
+    try {
+      // Используем AuthService для Google Sign-In
+      await _authService.loginWithGoogle();
+      return true;
+    } on Exception {
+      // Пробрасываем исключения для обработки в UI
+      rethrow;
+    } catch (e) {
+      // Оборачиваем неизвестные ошибки в Exception
+      throw Exception('Ошибка Google Sign-In: ${e.toString()}');
     }
   }
 
