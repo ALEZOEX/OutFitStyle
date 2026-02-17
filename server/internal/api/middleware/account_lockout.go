@@ -161,13 +161,13 @@ func (l *AccountLockout) checkMemory(identifier string) (bool, int, *time.Time, 
 		l.mu.Unlock()
 		return true, l.maxAttempts, nil, nil
 	}
-	
+
 	// Проверяем активную блокировку
 	if !info.lockedUntil.IsZero() && now.Before(info.lockedUntil) {
-		remaining := info.lockedUntil.Sub(now)
-		return false, 0, &remaining, nil
+		until := info.lockedUntil
+		return false, 0, &until, nil
 	}
-	
+
 	// Блокировка истекла, сбрасываем
 	if !info.lockedUntil.IsZero() && now.After(info.lockedUntil) {
 		l.mu.Lock()
@@ -175,12 +175,12 @@ func (l *AccountLockout) checkMemory(identifier string) (bool, int, *time.Time, 
 		l.mu.Unlock()
 		return true, l.maxAttempts, nil, nil
 	}
-	
+
 	remaining := l.maxAttempts - info.count
 	if remaining < 0 {
 		remaining = 0
 	}
-	
+
 	return true, remaining, nil, nil
 }
 
@@ -288,23 +288,23 @@ func (l *AccountLockout) Middleware() func(http.Handler) http.Handler {
 				// Это упрощённая версия, в production лучше парсить body заранее
 				identifier = r.RemoteAddr
 			}
-			
-			allowed, remaining, lockedUntil, err := l.CheckLoginAttempt(r.Context(), identifier)
-			
+
+			allowed, remaining, _, err := l.CheckLoginAttempt(r.Context(), identifier)
+
 			// Добавляем заголовки с информацией о rate limit
 			w.Header().Set("X-Login-Attempts-Remaining", fmt.Sprintf("%d", remaining))
-			
+
 			if !allowed {
 				w.Header().Set("Retry-After", fmt.Sprintf("%d", int(l.lockoutDuration.Seconds())))
 				http.Error(w, "Too many failed login attempts. Please try again later.", http.StatusTooManyRequests)
 				return
 			}
-			
+
 			if err != nil {
 				l.logger.Error("Account lockout check error", zap.Error(err))
 				// Не блокируем вход при ошибке проверки (graceful degradation)
 			}
-			
+
 			next.ServeHTTP(w, r)
 		})
 	}

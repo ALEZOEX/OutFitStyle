@@ -137,12 +137,13 @@ func main() {
 
 	// ---------- Account Lockout (защита от brute-force) ----------
 	// Блокировка после 5 неудачных попыток на 15 минут
+	lockoutDuration := 15 * time.Minute
 	accountLockout := middleware.NewAccountLockout(
 		redisClient,
 		logger,
-		5,              // max attempts
-		15*time.Minute, // lockout duration
-		15*time.Minute, // window duration
+		5,                // max attempts
+		lockoutDuration,  // lockout duration
+		15*time.Minute,   // window duration
 	)
 
 	// ---------- Queue client ----------
@@ -262,7 +263,7 @@ func main() {
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
-	authHandler := handlers.NewAuthHandler(authService, accountLockout)
+	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration)
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)
 	subHandler := handlers.NewSubscriptionHandler(subService, logger)
