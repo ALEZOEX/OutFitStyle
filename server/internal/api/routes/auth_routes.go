@@ -21,5 +21,6 @@ func RegisterAuthRoutes(router *mux.Router, authHandler *handlers.AuthHandler) {
 	auth.HandleFunc("/forgot-password", authHandler.ForgotPassword).Methods("POST")
 	auth.HandleFunc("/reset-password", authHandler.ResetPassword).Methods("POST")
 
-	auth.HandleFunc("/google", authHandler.GoogleLogin).Methods("POST")
+	// Google Sign-In - использует рабочую реализацию GoogleSignIn
+	auth.HandleFunc("/google", authHandler.GoogleSignIn).Methods("POST")
 }

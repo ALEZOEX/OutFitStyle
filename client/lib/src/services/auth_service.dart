@@ -1,26 +1,46 @@
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'dart:io' show Platform;
 
 import '../models/token_pair.dart';
 import 'auth_storage.dart';
 
+/// Сервис аутентификации с поддержкой Google Sign-In
 class AuthService {
   final String apiBase;
   final AuthStorage authStorage;
-  final http.Client httpClient;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'profile',
-    ],
-  );
+  final Dio _dio;
+  final GoogleSignIn _googleSignIn;
 
   AuthService({
     required this.apiBase,
     required this.authStorage,
-    http.Client? httpClient,
-  }) : httpClient = httpClient ?? http.Client();
+    Dio? dio,
+  }) : _dio = dio ?? Dio(BaseOptions(
+         baseUrl: apiBase,
+         connectTimeout: const Duration(seconds: 15),
+         receiveTimeout: const Duration(seconds: 30),
+         headers: {'Content-Type': 'application/json'},
+       )),
+       _googleSignIn = GoogleSignIn(
+         scopes: ['email', 'profile'],
+         // Web client ID для серверной верификации (из .env или конфига)
+         // Для Android: используем web client ID из google-services.json (client_type: 3)
+         // Для iOS: используем iOS OAuth client ID из GoogleService-Info.plist
+         serverClientId: _getServerClientId(),
+       );
+
+  /// Получает server client ID в зависимости от платформы
+  static String? _getServerClientId() {
+    if (Platform.isAndroid) {
+      // Web client ID для Android (из google-services.json, client_type: 3)
+      return '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com';
+    } else if (Platform.isIOS) {
+      // iOS OAuth client ID (из GoogleService-Info.plist)
+      return '242419520610-aqko3ms0jvdsj3t2t8sahqkaqaut21ct.apps.googleusercontent.com';
+    }
+    return null;
+  }
 
   Future<TokenPair> loginWithGoogle() async {
     try {
@@ -42,18 +62,17 @@ class AuthService {
       }
 
       // 3. Отправляем idToken на наш Go-бэкенд
-      final response = await httpClient.post(
-        Uri.parse('$apiBase/auth/google'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'id_token': idToken}),
+      final response = await _dio.post(
+        '/auth/google',
+        data: {'id_token': idToken},
       );
 
       if (response.statusCode != 200) {
         throw Exception(
-            'Ошибка Google Sign-In: ${response.statusCode} - ${response.body}');
+            'Ошибка Google Sign-In: ${response.statusCode} - ${response.data}');
       }
 
-      final data = jsonDecode(response.body);
+      final data = response.data as Map<String, dynamic>;
 
       // Проверяем, что 'tokens' существует и является Map
       if (data['tokens'] != null && data['tokens'] is Map<String, dynamic>) {
@@ -83,9 +102,9 @@ class AuthService {
     }
 
     // Проверяем валидность токена через наш эндпоинт
-    final response = await httpClient.post(
-      Uri.parse('$apiBase/auth/validate'),
-      headers: {'Authorization': 'Bearer $token'},
+    final response = await _dio.post(
+      '/auth/validate',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     if (response.statusCode != 200) {
@@ -103,20 +122,17 @@ class AuthService {
     );
   }
 
-  // Обнови метод logout
+  /// Выход из системы
   Future<void> logout({bool allDevices = false}) async {
-    await _googleSignIn.signOut(); // Важно добавить это
+    await _googleSignIn.signOut();
     // Дополнительно можно вызвать logout на бэкенде
     final currentToken = await authStorage.readAccessToken();
     if (currentToken != null) {
       try {
-        await httpClient.post(
-          Uri.parse('$apiBase/auth/logout'),
-          headers: {
-            'Authorization': 'Bearer $currentToken',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({'all_devices': allDevices}),
+        await _dio.post(
+          '/auth/logout',
+          data: {'all_devices': allDevices},
+          options: Options(headers: {'Authorization': 'Bearer $currentToken'}),
         );
       } catch (e) {
         // Игнорируем ошибки при logout

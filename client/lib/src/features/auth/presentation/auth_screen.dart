@@ -30,6 +30,45 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.dispose();
   }
 
+  /// Обработчик входа через Google
+  Future<void> _signInWithGoogle() async {
+    ref.read(authLoadingProvider.notifier).state = true;
+    ref.read(authErrorProvider.notifier).state = null;
+
+    try {
+      final authRepo = ref.read(authRepositoryProvider);
+      await authRepo.signInWithGoogle();
+
+      if (mounted) {
+        context.go('/home');
+      }
+    } catch (e) {
+      if (mounted) {
+        // Обрабатываем различные типы ошибок
+        String errorMessage;
+        final errorStr = e.toString();
+
+        if (errorStr.contains('отменен пользователем') ||
+            errorStr.contains('cancelled')) {
+          // Пользователь отменил вход - не показываем ошибку
+          return;
+        } else if (errorStr.contains('NETWORK')) {
+          errorMessage = 'Ошибка сети. Проверьте подключение.';
+        } else if (errorStr.contains('ID Token')) {
+          errorMessage = 'Не удалось получить данные Google.';
+        } else {
+          errorMessage = errorStr.replaceAll('Exception: ', '');
+        }
+
+        ref.read(authErrorProvider.notifier).state = errorMessage;
+      }
+    } finally {
+      if (mounted) {
+        ref.read(authLoadingProvider.notifier).state = false;
+      }
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -275,14 +314,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
                 // Кнопка Google
                 OutlinedButton.icon(
-                  onPressed: isLoading ? null : () {
-                    // TODO: Реализовать Google Sign-In
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Google Sign-In в разработке'),
-                      ),
-                    );
-                  },
+                  onPressed: isLoading ? null : () => _signInWithGoogle(),
                   icon: Image.asset(
                     'assets/icons/google_logo.png',
                     height: 24,
