@@ -3,18 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/home/presentation/home_screen.dart';
-import '../../features/wardrobe/presentation/wardrobe_screen.dart';
-import '../../features/recommendations/presentation/recommendations_screen.dart';
 import '../../features/recommendations/presentation/screens/recommendation_detail_screen.dart';
 import '../../features/wardrobe/presentation/screens/wardrobe_item_detail_screen.dart';
+import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
 import '../../features/generator/presentation/generator_screen.dart';
-import '../../features/profile/presentation/profile_screen.dart';
-import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/settings/presentation/screens/profile_settings_screen.dart';
+import '../../features/settings/presentation/screens/preferences_screen.dart';
+import '../../features/settings/presentation/screens/subscription_screen.dart';
+import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/onboarding/onboarding_storage.dart' as onboarding_storage;
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
-import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
 import '../../features/outfit_details/presentation/outfit_details_screen.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../core/api/api_client.dart';
@@ -137,6 +137,69 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      // Гардероб
+      GoRoute(
+        path: '/wardrobe/add',
+        name: 'wardrobe_add',
+        builder: (context, state) => const AddWardrobeItemScreen(),
+      ),
+      GoRoute(
+        path: '/wardrobe/item/:id',
+        name: 'wardrobe_item_detail',
+        builder: (context, state) => WardrobeItemDetailScreen(
+          itemId: state.pathParameters['id']!,
+        ),
+      ),
+      // Рекомендации
+      GoRoute(
+        path: '/recommendations/:id',
+        name: 'recommendation_detail',
+        builder: (context, state) => RecommendationDetailScreen(
+          recommendationId: state.pathParameters['id']!,
+        ),
+      ),
+      // Настройки
+      GoRoute(
+        path: '/settings/profile',
+        name: 'profile_settings',
+        builder: (context, state) => const ProfileSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/settings/preferences',
+        name: 'preferences',
+        builder: (context, state) => const PreferencesScreen(),
+      ),
+      GoRoute(
+        path: '/settings/subscription',
+        name: 'subscription',
+        builder: (context, state) => const SubscriptionScreen(),
+      ),
+      // Достижения
+      GoRoute(
+        path: '/achievements',
+        name: 'achievements',
+        builder: (context, state) => const AchievementsPage(),
+      ),
+      // Generator
+      GoRoute(
+        path: '/generator',
+        name: 'generator',
+        builder: (context, state) => const GeneratorScreen(),
+      ),
+      // Outfit details
+      GoRoute(
+        path: '/outfit/:id',
+        name: 'outfit_detail',
+        builder: (context, state) => OutfitDetailsScreen(
+          outfitId: state.pathParameters['id']!,
+        ),
+      ),
+      // Admin
+      GoRoute(
+        path: '/admin',
+        name: 'admin',
+        builder: (context, state) => const AdminDashboardScreen(),
       ),
     ],
   );
