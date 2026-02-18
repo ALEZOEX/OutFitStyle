@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/theme_controller.dart';
 import '../routing/router.dart';
-import '../../core/sync/sync_bootstrapper.dart';
 
 /// Виджет для инициализации состояния авторизации
 class AuthInitializer extends ConsumerStatefulWidget {
@@ -50,26 +49,24 @@ class OutfitStyleApp extends ConsumerWidget {
       ),
     );
 
-    return SyncBootstrapper(
-      child: AuthInitializer(
-        child: MaterialApp.router(
-          title: 'OutfitStyle',
-          debugShowCheckedModeBanner: false,
-          theme: AppThemes.lightTheme,
-          darkTheme: AppThemes.darkTheme,
-          themeMode: themeMode,
-          routerConfig: router,
-          locale: const Locale('ru'), // Принудительно русский язык
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('ru'), // Русский
-            Locale('en'), // Английский
-          ],
-        ),
+    return AuthInitializer(
+      child: MaterialApp.router(
+        title: 'OutfitStyle',
+        debugShowCheckedModeBanner: false,
+        theme: AppThemes.lightTheme,
+        darkTheme: AppThemes.darkTheme,
+        themeMode: themeMode,
+        routerConfig: router,
+        locale: const Locale('ru'), // Принудительно русский язык
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('ru'), // Русский
+          Locale('en'), // Английский
+        ],
       ),
     );
   }

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/presentation/app/app.dart';
 import 'src/core/error/error_handler.dart';
-import 'src/presentation/routing/router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,16 +35,7 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      // DI живёт через providers в lib/app/di.dart
-      child: Consumer(
-        builder: (context, ref, child) {
-          // Инициализируем проверку авторизации при старте
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(authStateProvider.notifier).checkAuth();
-          });
-          return const OutfitStyleApp();
-        },
-      ),
+      child: const OutfitStyleApp(),
     ),
   );
 }
