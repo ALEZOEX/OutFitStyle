@@ -1,8 +1,8 @@
-import '../../../core/api/api_client.dart';
-import '../../entities/user_preference.dart';
+import '../../../../core/api/api_client.dart';
+import 'package:dio/dio.dart';
 
 /// Репозиторий для работы с предпочтениями пользователя
-/// 
+///
 /// Взаимодействует с API эндпоинтами:
 /// - GET /api/v1/users/preferences - получение предпочтений
 /// - PUT /api/v1/users/preferences - обновление предпочтений
@@ -14,21 +14,22 @@ class PreferencesRepository {
   }) : _apiClient = apiClient;
 
   /// Получить предпочтения пользователя
-  /// 
+  ///
   /// Endpoint: GET /api/v1/users/preferences
-  Future<UserPreference> getPreferences() async {
+  Future<Map<String, dynamic>> getPreferences() async {
     try {
       final response = await _apiClient.get('/api/v1/users/preferences');
-      
+
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
-        return UserPreference.fromJson(prefData);
+        return prefData;
       } else {
         throw PreferencesException('Ошибка получения предпочтений: ${response.statusCode}');
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is PreferencesException) rethrow;
       throw PreferencesException('Ошибка получения предпочтений: $e');
@@ -36,14 +37,14 @@ class PreferencesRepository {
   }
 
   /// Обновить предпочтения пользователя
-  /// 
+  ///
   /// [preferences] - новые предпочтения
-  /// 
+  ///
   /// Endpoint: PUT /api/v1/users/preferences
-  Future<UserPreference> updatePreferences(UserPreference preferences) async {
+  Future<Map<String, dynamic>> updatePreferences(Map<String, dynamic> preferences) async {
     try {
       final body = _preparePreferencesBody(preferences);
-      
+
       final response = await _apiClient.put(
         '/api/v1/users/preferences',
         data: body,
@@ -52,12 +53,13 @@ class PreferencesRepository {
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
-        return UserPreference.fromJson(prefData);
+        return prefData;
       } else {
         throw PreferencesException('Ошибка обновления предпочтений: ${response.statusCode}');
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is PreferencesException) rethrow;
       throw PreferencesException('Ошибка обновления предпочтений: $e');
@@ -65,47 +67,61 @@ class PreferencesRepository {
   }
 
   /// Подготовить тело запроса для обновления предпочтений
-  Map<String, dynamic> _preparePreferencesBody(UserPreference preferences) {
+  Map<String, dynamic> _preparePreferencesBody(Map<String, dynamic> preferences) {
     final body = <String, dynamic>{};
-    
-    // Поля из UserPreference
-    if (preferences.preferredTemperature.isNotEmpty) {
-      body['preferred_temperature'] = preferences.preferredTemperature;
+
+    // Поля из preferences
+    if (preferences.containsKey('preferred_temperature') &&
+        (preferences['preferred_temperature'] as String).isNotEmpty) {
+      body['preferred_temperature'] = preferences['preferred_temperature'];
     }
-    
-    if (preferences.preferredColors.isNotEmpty) {
-      body['preferred_colors'] = preferences.preferredColors;
+
+    if (preferences.containsKey('preferred_colors') &&
+        (preferences['preferred_colors'] as List).isNotEmpty) {
+      body['preferred_colors'] = preferences['preferred_colors'];
     }
-    
-    if (preferences.preferredStyles.isNotEmpty) {
-      body['preferred_styles'] = preferences.preferredStyles;
+
+    if (preferences.containsKey('preferred_styles') &&
+        (preferences['preferred_styles'] as List).isNotEmpty) {
+      body['preferred_styles'] = preferences['preferred_styles'];
     }
-    
-    if (preferences.preferredBrands.isNotEmpty) {
-      body['preferred_brands'] = preferences.preferredBrands;
+
+    if (preferences.containsKey('preferred_brands') &&
+        (preferences['preferred_brands'] as List).isNotEmpty) {
+      body['preferred_brands'] = preferences['preferred_brands'];
     }
-    
-    if (preferences.excludedItems.isNotEmpty) {
-      body['excluded_items'] = preferences.excludedItems;
+
+    if (preferences.containsKey('excluded_items') &&
+        (preferences['excluded_items'] as List).isNotEmpty) {
+      body['excluded_items'] = preferences['excluded_items'];
     }
-    
-    body['prefers_natural_materials'] = preferences.prefersNaturalMaterials;
-    body['prefers_synthetic_materials'] = preferences.prefersSyntheticMaterials;
-    body['sensitive_to_cold'] = preferences.sensitiveToCold;
-    body['sensitive_to_heat'] = preferences.sensitiveToHeat;
-    
-    if (preferences.occasionsOfInterest.isNotEmpty) {
-      body['occasions_of_interest'] = preferences.occasionsOfInterest;
+
+    if (preferences.containsKey('prefers_natural_materials')) {
+      body['prefers_natural_materials'] = preferences['prefers_natural_materials'];
     }
-    
-    if (preferences.maxBudget != null) {
-      body['max_budget'] = preferences.maxBudget;
+    if (preferences.containsKey('prefers_synthetic_materials')) {
+      body['prefers_synthetic_materials'] = preferences['prefers_synthetic_materials'];
     }
-    
-    if (preferences.fitPreference != null) {
-      body['fit_preference'] = preferences.fitPreference;
+    if (preferences.containsKey('sensitive_to_cold')) {
+      body['sensitive_to_cold'] = preferences['sensitive_to_cold'];
     }
-    
+    if (preferences.containsKey('sensitive_to_heat')) {
+      body['sensitive_to_heat'] = preferences['sensitive_to_heat'];
+    }
+
+    if (preferences.containsKey('occasions_of_interest') &&
+        (preferences['occasions_of_interest'] as List).isNotEmpty) {
+      body['occasions_of_interest'] = preferences['occasions_of_interest'];
+    }
+
+    if (preferences.containsKey('max_budget') && preferences['max_budget'] != null) {
+      body['max_budget'] = preferences['max_budget'];
+    }
+
+    if (preferences.containsKey('fit_preference') && preferences['fit_preference'] != null) {
+      body['fit_preference'] = preferences['fit_preference'];
+    }
+
     return body;
   }
 

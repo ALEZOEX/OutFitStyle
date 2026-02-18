@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/api/api_client.dart';
-import '../../../../services/auth_storage.dart';
 import '../../data/repositories/daily_recommendations_repository.dart';
+import '../../../../domain/entities/outfit_recommendation.dart';
 
 /// Провайдер для ApiClient
 final _apiClientProvider = Provider<ApiClient>((ref) {
@@ -22,7 +22,7 @@ final dailyRecommendationProvider = FutureProvider.autoDispose((ref) async {
 });
 
 /// Провайдер для загрузки альтернативных рекомендаций
-final alternativeRecommendationsProvider = FutureProvider.autoDispose.family<List<Recommendation>, int>((ref, limit) async {
+final alternativeRecommendationsProvider = FutureProvider.autoDispose.family<List<OutfitRecommendation>, int>((ref, limit) async {
   final repository = ref.watch(dailyRecommendationsRepositoryProvider);
   return repository.getAlternativeRecommendations(limit: limit);
 });

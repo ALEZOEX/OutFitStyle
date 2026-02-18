@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../api/api_client.dart';
 
@@ -168,16 +167,16 @@ class WeatherService {
     return forecast;
   }
 
-  void _handleDioError(DioException e) {
+  Never _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
       throw WeatherException('Превышено время ожидания. Проверьте соединение.');
     }
-    
+
     if (e.type == DioExceptionType.connectionError) {
       throw WeatherException('Нет соединения с интернетом.');
     }
-    
+
     throw WeatherException('Ошибка сети: ${e.message}');
   }
 
