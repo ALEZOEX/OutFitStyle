@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../domain/entities/wardrobe_item.dart';
+import '../../../domain/entities/wardrobe_item.dart';
 
 /// Состояние формы добавления элемента
 class AddItemState {
