@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../wardrobe/presentation/wardrobe_screen.dart';
+import '../../recommendations/presentation/recommendations_screen.dart';
+import '../../settings/presentation/settings_screen.dart';
+
 /// Провайдер для отслеживания состояния авторизации
 final authStateProvider = StateProvider<bool>((ref) => false);
 
@@ -101,23 +105,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  final List<Widget> _screens = const [
-    _HomeContent(),
-    _PlaceholderContent(
-      icon: Icons.checkroom,
-      title: 'Гардероб',
-      message: 'Здесь будет ваш гардероб',
-    ),
-    _PlaceholderContent(
-      icon: Icons.auto_awesome,
-      title: 'Рекомендации',
-      message: 'Персональные рекомендации одежды',
-    ),
-    _PlaceholderContent(
-      icon: Icons.settings,
-      title: 'Настройки',
-      message: 'Настройки приложения',
-    ),
+  final List<Widget> _screens = [
+    const _HomeContent(),
+    const WardrobeScreen(),
+    const RecommendationsScreen(),
+    const SettingsScreen(),
   ];
 
   final List<String> _titles = [
@@ -182,73 +174,6 @@ class _HomeContent extends StatelessWidget {
                     color: isDarkMode
                         ? theme.colorScheme.onSurfaceVariant
                         : theme.colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Контент для остальных вкладок
-class _PlaceholderContent extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
-
-  const _PlaceholderContent({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: isDarkMode
-                  ? theme.colorScheme.primaryContainer.withOpacity(0.2)
-                  : theme.colorScheme.primaryContainer.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(60),
-              border: isDarkMode
-                  ? Border.all(
-                      color: theme.colorScheme.primary.withOpacity(0.3),
-                      width: 2,
-                    )
-                  : null,
-            ),
-            child: Icon(
-              icon,
-              size: 60,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            title,
-            style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
                   ),
             ),
           ),
