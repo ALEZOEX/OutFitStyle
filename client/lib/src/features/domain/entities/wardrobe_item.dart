@@ -18,6 +18,7 @@ class WardrobeItem with _$WardrobeItem {
     @Default(null) String? color,
     @Default(null) String? size,
     @Default(null) int? minTemp,
+    @Default(null) int? maxTemp,
     @Default(null) List<String>? seasons,
     @Default(null) DateTime? createdAt,
     @Default(null) DateTime? updatedAt,
