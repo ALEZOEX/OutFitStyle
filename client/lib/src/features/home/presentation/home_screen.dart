@@ -364,7 +364,7 @@ class _HomeContentState extends ConsumerState<_HomeContent>
                   children: [
                     _buildWeatherDetail(
                       context,
-                      icon: Icons.thermometer_outlined,
+                      icon: Icons.water_drop_outlined,
                       label: 'Ощущается',
                       value: '${weatherData?.feelsLike?.round() ?? 16}°C',
                     ),
