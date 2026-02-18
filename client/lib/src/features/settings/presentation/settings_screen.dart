@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/notification_dialog.dart';
+import 'screens/profile_settings_screen.dart';
+import 'screens/preferences_screen.dart';
+import 'screens/subscription_screen.dart';
+import '../../achievements/presentation/pages/achievements_page.dart';
 
 /// Провайдер для состояния разрешений
 class PermissionState extends StateNotifier<Map<String, bool>> {
@@ -31,12 +36,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _notificationsEnabled = false;
   bool _locationEnabled = false;
   String? _locationError;
-  bool _showNotificationDialog = true;
+  bool _notificationDialogShown = false;
 
   @override
   void initState() {
     super.initState();
+    _loadNotificationDialogFlag();
     _checkPermissions();
+  }
+
+  Future<void> _loadNotificationDialogFlag() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notificationDialogShown = prefs.getBool('notificationDialogShown') ?? false;
+    });
+  }
+
+  Future<void> _saveNotificationDialogFlag() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notificationDialogShown', true);
   }
 
   Future<void> _checkPermissions() async {
@@ -61,14 +79,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (context) => NotificationPermissionDialog(
         onEnable: () async {
           Navigator.of(context).pop();
+          await _saveNotificationDialogFlag();
           await _requestNotificationPermission();
         },
         onLater: () {
           Navigator.of(context).pop();
-          setState(() {
-            _showNotificationDialog = false;
-          });
-          // Показываем Snackbar с информацией
+          _saveNotificationDialogFlag();
           NotificationSnackbar.show(
             context: context,
             title: 'Уведомления отложены',
@@ -97,7 +113,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           backgroundColor: Theme.of(context).colorScheme.primary,
         );
       } else if (status.isPermanentlyDenied) {
-        // Показываем диалог с предложением открыть настройки
         _showSettingsDialog();
       } else {
         NotificationSnackbar.show(
@@ -191,9 +206,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Показываем диалог при первом запуске если уведомления не включены
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_notificationsEnabled && _showNotificationDialog && mounted) {
+      if (!_notificationsEnabled && !_notificationDialogShown && mounted) {
         _showNotificationPermissionDialog();
       }
     });
@@ -205,119 +219,231 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final themeController = ref.read(themeModeProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Настройки'),
-        centerTitle: true,
-        actions: [
-          if (!_notificationsEnabled)
-            IconButton(
-              icon: Badge(
-                child: Icon(Icons.notifications_none),
-              ),
-              onPressed: _showNotificationPermissionDialog,
-              tooltip: 'Включить уведомления',
-            ),
+      body: CustomScrollView(
+        slivers: [
+          // Заголовок
+          SliverToBoxAdapter(
+            child: _buildHeader(context),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          // Профиль
+          SliverToBoxAdapter(
+            child: _buildProfileCard(context),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          // Основные настройки
+          SliverToBoxAdapter(
+            child: _buildMainSettings(context),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          // Уведомления
+          SliverToBoxAdapter(
+            child: _buildNotificationsSection(context),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          // Геолокация
+          SliverToBoxAdapter(
+            child: _buildLocationSection(context),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          // Тема
+          SliverToBoxAdapter(
+            child: _buildThemeSection(context, themeMode, themeController),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Секция темы
-          _buildSection(
-            context,
-            title: 'Внешний вид',
-            children: [
-              _buildThemeSelector(context, themeMode, themeController),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      child: Text(
+        'Настройки',
+        style: theme.textTheme.headlineMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileCard(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileSettingsScreen()),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              theme.colorScheme.primaryContainer,
+              theme.colorScheme.secondaryContainer.withOpacity(0.5),
             ],
           ),
-          const SizedBox(height: 16),
-          // Секция уведомлений
-          _buildSection(
-            context,
-            title: 'Уведомления',
-            children: [
-              _buildNotificationTile(context),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Секция геолокации
-          _buildSection(
-            context,
-            title: 'Местоположение',
-            children: [
-              ListTile(
-                leading: Icon(
-                  _locationEnabled
-                    ? Icons.location_on
-                    : Icons.location_off_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: const Text('Геолокация'),
-                subtitle: Text(
-                  _locationEnabled
-                    ? 'Разрешено'
-                    : (_locationError ?? 'Нажмите для включения'),
-                ),
-                trailing: Switch(
-                  value: _locationEnabled,
-                  onChanged: (_) => _requestLocationPermission(),
-                ),
-                onTap: _requestLocationPermission,
-              ),
-              if (_locationEnabled)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Text(
-                    'Используется для погодных рекомендаций',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 32,
+              backgroundColor: theme.colorScheme.primary,
+              child: Icon(Icons.person, color: theme.colorScheme.onPrimary, size: 32),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Профиль',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-            ],
-          ),
-        ],
+                  Text(
+                    'Управление аккаунтом',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 18,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  /// Построение секции настроек
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required List<Widget> children,
-  }) {
+  Widget _buildMainSettings(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
+          _buildSettingTile(
+            context,
+            icon: Icons.style,
+            title: 'Предпочтения',
+            subtitle: 'Размер, стили, бренды',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PreferencesScreen()),
+              );
+            },
           ),
-          ...children,
+          Divider(
+            height: 1,
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          ),
+          _buildSettingTile(
+            context,
+            icon: Icons.emoji_events,
+            title: 'Достижения',
+            subtitle: 'Ваши награды',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AchievementsPage()),
+              );
+            },
+          ),
+          Divider(
+            height: 1,
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          ),
+          _buildSettingTile(
+            context,
+            icon: Icons.workspace_premium,
+            title: 'Подписка',
+            subtitle: 'Premium функции',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+              );
+            },
+          ),
+          Divider(
+            height: 1,
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          ),
+          _buildSettingTile(
+            context,
+            icon: Icons.shield_outlined,
+            title: 'Конфиденциальность',
+            subtitle: 'Настройки приватности',
+            onTap: () {
+              // TODO: Навигация на экран конфиденциальности
+            },
+          ),
         ],
       ),
     );
   }
 
-  /// Красивая плитка уведомлений
-  Widget _buildNotificationTile(BuildContext context) {
+  Widget _buildSettingTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    VoidCallback? onTap,
+  }) {
     final theme = Theme.of(context);
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: theme.colorScheme.primary, size: 22),
+      ),
+      title: Text(
+        title,
+        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      trailing: Icon(
+        Icons.arrow_forward_ios,
+        color: theme.colorScheme.onSurfaceVariant,
+        size: 16,
+      ),
+      onTap: onTap,
+    );
+  }
 
+  Widget _buildNotificationsSection(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -337,61 +463,166 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           color: _notificationsEnabled
               ? theme.colorScheme.primary.withOpacity(0.3)
               : theme.colorScheme.outline.withOpacity(0.2),
-          width: 1,
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: _notificationsEnabled
+                        ? [theme.colorScheme.primary, theme.colorScheme.secondary]
+                        : [Colors.grey.shade400, Colors.grey.shade600],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  _notificationsEnabled
+                      ? Icons.notifications_active
+                      : Icons.notifications_none,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Уведомления',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      _notificationsEnabled
+                          ? 'Включены'
+                          : 'Отключены',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: _notificationsEnabled,
+                onChanged: (_) => _requestNotificationPermission(),
+                activeColor: theme.colorScheme.primary,
+              ),
+            ],
+          ),
+          if (_notificationsEnabled) ...[
+            const SizedBox(height: 16),
+            Divider(color: theme.colorScheme.outline.withOpacity(0.2)),
+            const SizedBox(height: 12),
+            _buildNotificationTypeToggle(
+              context,
+              icon: Icons.cloud,
+              title: 'Погода',
+              subtitle: 'Рекомендации по погоде',
+            ),
+            const SizedBox(height: 8),
+            _buildNotificationTypeToggle(
+              context,
+              icon: Icons.new_releases,
+              title: 'Новые поступления',
+              subtitle: 'Обновления гардероба',
+            ),
+            const SizedBox(height: 8),
+            _buildNotificationTypeToggle(
+              context,
+              icon: Icons.auto_awesome,
+              title: 'Рекомендации',
+              subtitle: 'Персональные подборки',
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationTypeToggle(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    final theme = Theme.of(context);
+    return ListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+      title: Text(
+        title,
+        style: theme.textTheme.bodyMedium,
+      ),
+      subtitle: Text(
+        subtitle,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      trailing: Switch(
+        value: true, // TODO: Реализовать состояние
+        onChanged: (value) {
+          // TODO: Сохранить настройку
+        },
+        activeTrackColor: theme.colorScheme.primary.withOpacity(0.5),
+        activeColor: theme.colorScheme.primary,
+      ),
+    );
+  }
+
+  Widget _buildLocationSection(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          // Иконка
           Container(
-            width: 56,
-            height: 56,
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: _notificationsEnabled
-                    ? [theme.colorScheme.primary, theme.colorScheme.secondary]
-                    : [Colors.grey.shade400, Colors.grey.shade600],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: (_notificationsEnabled
-                          ? theme.colorScheme.primary
-                          : Colors.grey)
-                      .withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              color: _locationEnabled
+                  ? theme.colorScheme.primary.withOpacity(0.2)
+                  : theme.colorScheme.error.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              _notificationsEnabled
-                  ? Icons.notifications_active
-                  : Icons.notifications_none,
-              color: Colors.white,
-              size: 28,
+              _locationEnabled
+                  ? Icons.location_on
+                  : Icons.location_off_outlined,
+              color: _locationEnabled
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.error,
+              size: 24,
             ),
           ),
-          const SizedBox(width: 16),
-          // Текст
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Уведомления',
+                  'Геолокация',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 4),
                 Text(
-                  _notificationsEnabled
-                      ? 'Включены • Получайте рекомендации'
-                      : 'Отключены • Нажмите для включения',
+                  _locationEnabled
+                      ? 'Используется для погодных рекомендаций'
+                      : (_locationError ?? 'Отключено'),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -399,10 +630,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
           ),
-          // Переключатель
           Switch(
-            value: _notificationsEnabled,
-            onChanged: (_) => _requestNotificationPermission(),
+            value: _locationEnabled,
+            onChanged: (_) => _requestLocationPermission(),
             activeColor: theme.colorScheme.primary,
           ),
         ],
@@ -410,24 +640,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  /// Переключатель темы
-  Widget _buildThemeSelector(
+  Widget _buildThemeSection(
     BuildContext context,
     ThemeMode themeMode,
     ThemeModeController controller,
   ) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Тема оформления',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
+          Row(
+            children: [
+              Icon(Icons.palette, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Тема оформления',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           SegmentedButton<ThemeMode>(
             segments: const [
               ButtonSegment<ThemeMode>(
@@ -457,16 +698,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           Text(
             _getThemeDescription(themeMode),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
     );
   }
 
-  /// Описание выбранной темы
   String _getThemeDescription(ThemeMode themeMode) {
     return switch (themeMode) {
       ThemeMode.light => 'Светлая тема всегда активна',
