@@ -16,7 +16,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
+    scopes: const [
       'email',
       'profile',
     ],

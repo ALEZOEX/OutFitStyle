@@ -4,7 +4,7 @@ part 'weather_data.freezed.dart';
 part 'weather_data.g.dart';
 
 @freezed
-class WeatherData with _$WeatherData {
+abstract class WeatherData with _$WeatherData {
   const factory WeatherData({
     double? latitude,
     double? longitude,

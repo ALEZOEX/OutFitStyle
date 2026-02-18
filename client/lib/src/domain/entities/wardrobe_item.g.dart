@@ -6,8 +6,8 @@ part of 'wardrobe_item.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$WardrobeItemImpl _$$WardrobeItemImplFromJson(Map<String, dynamic> json) =>
-    _$WardrobeItemImpl(
+_WardrobeItem _$WardrobeItemFromJson(Map<String, dynamic> json) =>
+    _WardrobeItem(
       id: json['id'] as String?,
       name: json['name'] as String?,
       category: json['category'] as String?,
@@ -43,7 +43,7 @@ _$WardrobeItemImpl _$$WardrobeItemImplFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['lastSyncedAt'] as String),
     );
 
-Map<String, dynamic> _$$WardrobeItemImplToJson(_$WardrobeItemImpl instance) =>
+Map<String, dynamic> _$WardrobeItemToJson(_WardrobeItem instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,

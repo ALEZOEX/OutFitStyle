@@ -9,7 +9,7 @@ part 'recommendation_state_notifier.freezed.dart';
 
 /// Состояние рекомендательной системы
 @freezed
-class RecommendationState with _$RecommendationState {
+abstract class RecommendationState with _$RecommendationState {
   const factory RecommendationState({
     @Default(AsyncValue.loading())
     AsyncValue<List<Recommendation>> recommendations,

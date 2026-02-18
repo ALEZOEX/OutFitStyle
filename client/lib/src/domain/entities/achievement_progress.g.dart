@@ -6,9 +6,8 @@ part of 'achievement_progress.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$AchievementProgressImpl _$$AchievementProgressImplFromJson(
-        Map<String, dynamic> json) =>
-    _$AchievementProgressImpl(
+_AchievementProgress _$AchievementProgressFromJson(Map<String, dynamic> json) =>
+    _AchievementProgress(
       achievementId: json['achievementId'] as String,
       userId: json['userId'] as String,
       currentProgress: (json['currentProgress'] as num).toInt(),
@@ -21,15 +20,15 @@ _$AchievementProgressImpl _$$AchievementProgressImplFromJson(
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$$AchievementProgressImplToJson(
-        _$AchievementProgressImpl instance) =>
-    <String, dynamic>{
-      'achievementId': instance.achievementId,
-      'userId': instance.userId,
-      'currentProgress': instance.currentProgress,
-      'targetProgress': instance.targetProgress,
-      'isCompleted': instance.isCompleted,
-      'completedAt': instance.completedAt?.toIso8601String(),
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
-    };
+Map<String, dynamic> _$AchievementProgressToJson(
+  _AchievementProgress instance,
+) => <String, dynamic>{
+  'achievementId': instance.achievementId,
+  'userId': instance.userId,
+  'currentProgress': instance.currentProgress,
+  'targetProgress': instance.targetProgress,
+  'isCompleted': instance.isCompleted,
+  'completedAt': instance.completedAt?.toIso8601String(),
+  'createdAt': instance.createdAt.toIso8601String(),
+  'updatedAt': instance.updatedAt.toIso8601String(),
+};

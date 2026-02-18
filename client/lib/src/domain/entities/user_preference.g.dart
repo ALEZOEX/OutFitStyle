@@ -6,23 +6,27 @@ part of 'user_preference.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$UserPreferenceImpl _$$UserPreferenceImplFromJson(Map<String, dynamic> json) =>
-    _$UserPreferenceImpl(
+_UserPreference _$UserPreferenceFromJson(Map<String, dynamic> json) =>
+    _UserPreference(
       preferredTemperature:
           json['preferred_temperature'] as String? ?? 'comfortable',
-      preferredColors: (json['preferred_colors'] as List<dynamic>?)
+      preferredColors:
+          (json['preferred_colors'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      preferredStyles: (json['preferred_styles'] as List<dynamic>?)
+      preferredStyles:
+          (json['preferred_styles'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      preferredBrands: (json['preferred_brands'] as List<dynamic>?)
+      preferredBrands:
+          (json['preferred_brands'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      excludedItems: (json['excluded_items'] as List<dynamic>?)
+      excludedItems:
+          (json['excluded_items'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
@@ -32,7 +36,8 @@ _$UserPreferenceImpl _$$UserPreferenceImplFromJson(Map<String, dynamic> json) =>
           json['prefers_synthetic_materials'] as bool? ?? false,
       sensitiveToCold: json['sensitive_to_cold'] as bool? ?? false,
       sensitiveToHeat: json['sensitive_to_heat'] as bool? ?? false,
-      occasionsOfInterest: (json['occasions_of_interest'] as List<dynamic>?)
+      occasionsOfInterest:
+          (json['occasions_of_interest'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
@@ -40,8 +45,7 @@ _$UserPreferenceImpl _$$UserPreferenceImplFromJson(Map<String, dynamic> json) =>
       fitPreference: json['fit_preference'] as String?,
     );
 
-Map<String, dynamic> _$$UserPreferenceImplToJson(
-        _$UserPreferenceImpl instance) =>
+Map<String, dynamic> _$UserPreferenceToJson(_UserPreference instance) =>
     <String, dynamic>{
       'preferred_temperature': instance.preferredTemperature,
       'preferred_colors': instance.preferredColors,

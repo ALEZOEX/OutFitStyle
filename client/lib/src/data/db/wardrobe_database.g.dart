@@ -12,225 +12,348 @@ class $ClothingItemsTable extends ClothingItems
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _externalIdMeta =
-      const VerificationMeta('externalId');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _externalIdMeta = const VerificationMeta(
+    'externalId',
+  );
   @override
   late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
-      'external_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'external_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _imageUrlMeta =
-      const VerificationMeta('imageUrl');
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
   @override
   late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
-      'image_url', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _categoryMeta =
-      const VerificationMeta('category');
+    'image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
   @override
   late final GeneratedColumn<String> category = GeneratedColumn<String>(
-      'category', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
   @override
   late final GeneratedColumn<String> tags = GeneratedColumn<String>(
-      'tags', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
+    'tags',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
   static const VerificationMeta _colorMeta = const VerificationMeta('color');
   @override
   late final GeneratedColumn<String> color = GeneratedColumn<String>(
-      'color', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _brandMeta = const VerificationMeta('brand');
   @override
   late final GeneratedColumn<String> brand = GeneratedColumn<String>(
-      'brand', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _materialMeta =
-      const VerificationMeta('material');
+    'brand',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _materialMeta = const VerificationMeta(
+    'material',
+  );
   @override
   late final GeneratedColumn<String> material = GeneratedColumn<String>(
-      'material', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _seasonsMeta =
-      const VerificationMeta('seasons');
+    'material',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seasonsMeta = const VerificationMeta(
+    'seasons',
+  );
   @override
   late final GeneratedColumn<String> seasons = GeneratedColumn<String>(
-      'seasons', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
-  static const VerificationMeta _weatherConditionsMeta =
-      const VerificationMeta('weatherConditions');
+    'seasons',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _weatherConditionsMeta = const VerificationMeta(
+    'weatherConditions',
+  );
   @override
   late final GeneratedColumn<String> weatherConditions =
-      GeneratedColumn<String>('weather_conditions', aliasedName, false,
-          type: DriftSqlType.string,
-          requiredDuringInsert: false,
-          defaultValue: const Constant('[]'));
-  static const VerificationMeta _occasionsMeta =
-      const VerificationMeta('occasions');
+      GeneratedColumn<String>(
+        'weather_conditions',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _occasionsMeta = const VerificationMeta(
+    'occasions',
+  );
   @override
   late final GeneratedColumn<String> occasions = GeneratedColumn<String>(
-      'occasions', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
-  static const VerificationMeta _isFavoriteMeta =
-      const VerificationMeta('isFavorite');
+    'occasions',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
   @override
   late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
-      'is_favorite', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _isArchivedMeta =
-      const VerificationMeta('isArchived');
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
+    'isArchived',
+  );
   @override
   late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
-      'is_archived', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_archived" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _timesWornMeta =
-      const VerificationMeta('timesWorn');
+    'is_archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_archived" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _timesWornMeta = const VerificationMeta(
+    'timesWorn',
+  );
   @override
   late final GeneratedColumn<int> timesWorn = GeneratedColumn<int>(
-      'times_worn', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _comfortRatingMeta =
-      const VerificationMeta('comfortRating');
+    'times_worn',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _comfortRatingMeta = const VerificationMeta(
+    'comfortRating',
+  );
   @override
   late final GeneratedColumn<double> comfortRating = GeneratedColumn<double>(
-      'comfort_rating', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0.0));
-  static const VerificationMeta _addedDateMeta =
-      const VerificationMeta('addedDate');
+    'comfort_rating',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _addedDateMeta = const VerificationMeta(
+    'addedDate',
+  );
   @override
   late final GeneratedColumn<int> addedDate = GeneratedColumn<int>(
-      'added_date', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+    'added_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _updatedAtMeta =
-      const VerificationMeta('updatedAt');
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _lastWornDateMeta =
-      const VerificationMeta('lastWornDate');
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastWornDateMeta = const VerificationMeta(
+    'lastWornDate',
+  );
   @override
   late final GeneratedColumn<int> lastWornDate = GeneratedColumn<int>(
-      'last_worn_date', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'last_worn_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _priceMeta = const VerificationMeta('price');
   @override
   late final GeneratedColumn<double> price = GeneratedColumn<double>(
-      'price', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
+    'price',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sizeMeta = const VerificationMeta('size');
   @override
   late final GeneratedColumn<String> size = GeneratedColumn<String>(
-      'size', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _usageCountMeta =
-      const VerificationMeta('usageCount');
+    'size',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _usageCountMeta = const VerificationMeta(
+    'usageCount',
+  );
   @override
   late final GeneratedColumn<int> usageCount = GeneratedColumn<int>(
-      'usage_count', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _serverIdMeta =
-      const VerificationMeta('serverId');
+    'usage_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
   @override
   late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-      'server_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'server_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
   @override
   late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
-      'dirty', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("dirty" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _lastSyncedAtMeta =
-      const VerificationMeta('lastSyncedAt');
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
   @override
   late final GeneratedColumn<int> lastSyncedAt = GeneratedColumn<int>(
-      'last_synced_at', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        externalId,
-        name,
-        description,
-        imageUrl,
-        category,
-        tags,
-        color,
-        brand,
-        material,
-        seasons,
-        weatherConditions,
-        occasions,
-        isFavorite,
-        isArchived,
-        timesWorn,
-        comfortRating,
-        addedDate,
-        createdAt,
-        updatedAt,
-        lastWornDate,
-        price,
-        size,
-        usageCount,
-        serverId,
-        dirty,
-        lastSyncedAt
-      ];
+    id,
+    externalId,
+    name,
+    description,
+    imageUrl,
+    category,
+    tags,
+    color,
+    brand,
+    material,
+    seasons,
+    weatherConditions,
+    occasions,
+    isFavorite,
+    isArchived,
+    timesWorn,
+    comfortRating,
+    addedDate,
+    createdAt,
+    updatedAt,
+    lastWornDate,
+    price,
+    size,
+    usageCount,
+    serverId,
+    dirty,
+    lastSyncedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'clothing_items';
   @override
-  VerificationContext validateIntegrity(Insertable<DbClothingItem> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<DbClothingItem> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -238,135 +361,184 @@ class $ClothingItemsTable extends ClothingItems
     }
     if (data.containsKey('external_id')) {
       context.handle(
-          _externalIdMeta,
-          externalId.isAcceptableOrUnknown(
-              data['external_id']!, _externalIdMeta));
+        _externalIdMeta,
+        externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
+      );
     }
     if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     }
     if (data.containsKey('image_url')) {
-      context.handle(_imageUrlMeta,
-          imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta));
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
     }
     if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
     } else if (isInserting) {
       context.missing(_categoryMeta);
     }
     if (data.containsKey('tags')) {
       context.handle(
-          _tagsMeta, tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta));
+        _tagsMeta,
+        tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta),
+      );
     }
     if (data.containsKey('color')) {
       context.handle(
-          _colorMeta, color.isAcceptableOrUnknown(data['color']!, _colorMeta));
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
     }
     if (data.containsKey('brand')) {
       context.handle(
-          _brandMeta, brand.isAcceptableOrUnknown(data['brand']!, _brandMeta));
+        _brandMeta,
+        brand.isAcceptableOrUnknown(data['brand']!, _brandMeta),
+      );
     }
     if (data.containsKey('material')) {
-      context.handle(_materialMeta,
-          material.isAcceptableOrUnknown(data['material']!, _materialMeta));
+      context.handle(
+        _materialMeta,
+        material.isAcceptableOrUnknown(data['material']!, _materialMeta),
+      );
     }
     if (data.containsKey('seasons')) {
-      context.handle(_seasonsMeta,
-          seasons.isAcceptableOrUnknown(data['seasons']!, _seasonsMeta));
+      context.handle(
+        _seasonsMeta,
+        seasons.isAcceptableOrUnknown(data['seasons']!, _seasonsMeta),
+      );
     }
     if (data.containsKey('weather_conditions')) {
       context.handle(
+        _weatherConditionsMeta,
+        weatherConditions.isAcceptableOrUnknown(
+          data['weather_conditions']!,
           _weatherConditionsMeta,
-          weatherConditions.isAcceptableOrUnknown(
-              data['weather_conditions']!, _weatherConditionsMeta));
+        ),
+      );
     }
     if (data.containsKey('occasions')) {
-      context.handle(_occasionsMeta,
-          occasions.isAcceptableOrUnknown(data['occasions']!, _occasionsMeta));
+      context.handle(
+        _occasionsMeta,
+        occasions.isAcceptableOrUnknown(data['occasions']!, _occasionsMeta),
+      );
     }
     if (data.containsKey('is_favorite')) {
       context.handle(
-          _isFavoriteMeta,
-          isFavorite.isAcceptableOrUnknown(
-              data['is_favorite']!, _isFavoriteMeta));
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
     }
     if (data.containsKey('is_archived')) {
       context.handle(
-          _isArchivedMeta,
-          isArchived.isAcceptableOrUnknown(
-              data['is_archived']!, _isArchivedMeta));
+        _isArchivedMeta,
+        isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
+      );
     }
     if (data.containsKey('times_worn')) {
-      context.handle(_timesWornMeta,
-          timesWorn.isAcceptableOrUnknown(data['times_worn']!, _timesWornMeta));
+      context.handle(
+        _timesWornMeta,
+        timesWorn.isAcceptableOrUnknown(data['times_worn']!, _timesWornMeta),
+      );
     }
     if (data.containsKey('comfort_rating')) {
       context.handle(
+        _comfortRatingMeta,
+        comfortRating.isAcceptableOrUnknown(
+          data['comfort_rating']!,
           _comfortRatingMeta,
-          comfortRating.isAcceptableOrUnknown(
-              data['comfort_rating']!, _comfortRatingMeta));
+        ),
+      );
     }
     if (data.containsKey('added_date')) {
-      context.handle(_addedDateMeta,
-          addedDate.isAcceptableOrUnknown(data['added_date']!, _addedDateMeta));
+      context.handle(
+        _addedDateMeta,
+        addedDate.isAcceptableOrUnknown(data['added_date']!, _addedDateMeta),
+      );
     } else if (isInserting) {
       context.missing(_addedDateMeta);
     }
     if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
     if (data.containsKey('last_worn_date')) {
       context.handle(
+        _lastWornDateMeta,
+        lastWornDate.isAcceptableOrUnknown(
+          data['last_worn_date']!,
           _lastWornDateMeta,
-          lastWornDate.isAcceptableOrUnknown(
-              data['last_worn_date']!, _lastWornDateMeta));
+        ),
+      );
     }
     if (data.containsKey('price')) {
       context.handle(
-          _priceMeta, price.isAcceptableOrUnknown(data['price']!, _priceMeta));
+        _priceMeta,
+        price.isAcceptableOrUnknown(data['price']!, _priceMeta),
+      );
     }
     if (data.containsKey('size')) {
       context.handle(
-          _sizeMeta, size.isAcceptableOrUnknown(data['size']!, _sizeMeta));
+        _sizeMeta,
+        size.isAcceptableOrUnknown(data['size']!, _sizeMeta),
+      );
     }
     if (data.containsKey('usage_count')) {
       context.handle(
-          _usageCountMeta,
-          usageCount.isAcceptableOrUnknown(
-              data['usage_count']!, _usageCountMeta));
+        _usageCountMeta,
+        usageCount.isAcceptableOrUnknown(data['usage_count']!, _usageCountMeta),
+      );
     }
     if (data.containsKey('server_id')) {
-      context.handle(_serverIdMeta,
-          serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta));
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
     }
     if (data.containsKey('dirty')) {
       context.handle(
-          _dirtyMeta, dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta));
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
     }
     if (data.containsKey('last_synced_at')) {
       context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
           _lastSyncedAtMeta,
-          lastSyncedAt.isAcceptableOrUnknown(
-              data['last_synced_at']!, _lastSyncedAtMeta));
+        ),
+      );
     }
     return context;
   }
@@ -377,60 +549,114 @@ class $ClothingItemsTable extends ClothingItems
   DbClothingItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbClothingItem(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      externalId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}external_id']),
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description']),
-      imageUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}image_url']),
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
-      tags: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}tags'])!,
-      color: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}color']),
-      brand: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}brand']),
-      material: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}material']),
-      seasons: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}seasons'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      ),
+      brand: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}brand'],
+      ),
+      material: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}material'],
+      ),
+      seasons: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seasons'],
+      )!,
       weatherConditions: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}weather_conditions'])!,
-      occasions: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}occasions'])!,
-      isFavorite: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
-      isArchived: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_archived'])!,
-      timesWorn: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}times_worn'])!,
-      comfortRating: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}comfort_rating'])!,
-      addedDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}added_date'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!,
-      lastWornDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_worn_date']),
-      price: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}price']),
-      size: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}size']),
-      usageCount: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}usage_count'])!,
-      serverId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}server_id']),
-      dirty: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}dirty'])!,
-      lastSyncedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_synced_at']),
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_conditions'],
+      )!,
+      occasions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occasions'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_archived'],
+      )!,
+      timesWorn: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}times_worn'],
+      )!,
+      comfortRating: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}comfort_rating'],
+      )!,
+      addedDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}added_date'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      lastWornDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_worn_date'],
+      ),
+      price: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}price'],
+      ),
+      size: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}size'],
+      ),
+      usageCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}usage_count'],
+      )!,
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_id'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_synced_at'],
+      ),
     );
   }
 
@@ -468,34 +694,35 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
   final String? serverId;
   final bool dirty;
   final int? lastSyncedAt;
-  const DbClothingItem(
-      {required this.id,
-      this.externalId,
-      required this.name,
-      this.description,
-      this.imageUrl,
-      required this.category,
-      required this.tags,
-      this.color,
-      this.brand,
-      this.material,
-      required this.seasons,
-      required this.weatherConditions,
-      required this.occasions,
-      required this.isFavorite,
-      required this.isArchived,
-      required this.timesWorn,
-      required this.comfortRating,
-      required this.addedDate,
-      required this.createdAt,
-      required this.updatedAt,
-      this.lastWornDate,
-      this.price,
-      this.size,
-      required this.usageCount,
-      this.serverId,
-      required this.dirty,
-      this.lastSyncedAt});
+  const DbClothingItem({
+    required this.id,
+    this.externalId,
+    required this.name,
+    this.description,
+    this.imageUrl,
+    required this.category,
+    required this.tags,
+    this.color,
+    this.brand,
+    this.material,
+    required this.seasons,
+    required this.weatherConditions,
+    required this.occasions,
+    required this.isFavorite,
+    required this.isArchived,
+    required this.timesWorn,
+    required this.comfortRating,
+    required this.addedDate,
+    required this.createdAt,
+    required this.updatedAt,
+    this.lastWornDate,
+    this.price,
+    this.size,
+    required this.usageCount,
+    this.serverId,
+    required this.dirty,
+    this.lastSyncedAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -566,10 +793,12 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
           : Value(imageUrl),
       category: Value(category),
       tags: Value(tags),
-      color:
-          color == null && nullToAbsent ? const Value.absent() : Value(color),
-      brand:
-          brand == null && nullToAbsent ? const Value.absent() : Value(brand),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
+      brand: brand == null && nullToAbsent
+          ? const Value.absent()
+          : Value(brand),
       material: material == null && nullToAbsent
           ? const Value.absent()
           : Value(material),
@@ -586,8 +815,9 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
       lastWornDate: lastWornDate == null && nullToAbsent
           ? const Value.absent()
           : Value(lastWornDate),
-      price:
-          price == null && nullToAbsent ? const Value.absent() : Value(price),
+      price: price == null && nullToAbsent
+          ? const Value.absent()
+          : Value(price),
       size: size == null && nullToAbsent ? const Value.absent() : Value(size),
       usageCount: Value(usageCount),
       serverId: serverId == null && nullToAbsent
@@ -600,8 +830,10 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
     );
   }
 
-  factory DbClothingItem.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory DbClothingItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DbClothingItem(
       id: serializer.fromJson<int>(json['id']),
@@ -667,73 +899,73 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
     };
   }
 
-  DbClothingItem copyWith(
-          {int? id,
-          Value<String?> externalId = const Value.absent(),
-          String? name,
-          Value<String?> description = const Value.absent(),
-          Value<String?> imageUrl = const Value.absent(),
-          String? category,
-          String? tags,
-          Value<String?> color = const Value.absent(),
-          Value<String?> brand = const Value.absent(),
-          Value<String?> material = const Value.absent(),
-          String? seasons,
-          String? weatherConditions,
-          String? occasions,
-          bool? isFavorite,
-          bool? isArchived,
-          int? timesWorn,
-          double? comfortRating,
-          int? addedDate,
-          int? createdAt,
-          int? updatedAt,
-          Value<int?> lastWornDate = const Value.absent(),
-          Value<double?> price = const Value.absent(),
-          Value<String?> size = const Value.absent(),
-          int? usageCount,
-          Value<String?> serverId = const Value.absent(),
-          bool? dirty,
-          Value<int?> lastSyncedAt = const Value.absent()}) =>
-      DbClothingItem(
-        id: id ?? this.id,
-        externalId: externalId.present ? externalId.value : this.externalId,
-        name: name ?? this.name,
-        description: description.present ? description.value : this.description,
-        imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
-        category: category ?? this.category,
-        tags: tags ?? this.tags,
-        color: color.present ? color.value : this.color,
-        brand: brand.present ? brand.value : this.brand,
-        material: material.present ? material.value : this.material,
-        seasons: seasons ?? this.seasons,
-        weatherConditions: weatherConditions ?? this.weatherConditions,
-        occasions: occasions ?? this.occasions,
-        isFavorite: isFavorite ?? this.isFavorite,
-        isArchived: isArchived ?? this.isArchived,
-        timesWorn: timesWorn ?? this.timesWorn,
-        comfortRating: comfortRating ?? this.comfortRating,
-        addedDate: addedDate ?? this.addedDate,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        lastWornDate:
-            lastWornDate.present ? lastWornDate.value : this.lastWornDate,
-        price: price.present ? price.value : this.price,
-        size: size.present ? size.value : this.size,
-        usageCount: usageCount ?? this.usageCount,
-        serverId: serverId.present ? serverId.value : this.serverId,
-        dirty: dirty ?? this.dirty,
-        lastSyncedAt:
-            lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
-      );
+  DbClothingItem copyWith({
+    int? id,
+    Value<String?> externalId = const Value.absent(),
+    String? name,
+    Value<String?> description = const Value.absent(),
+    Value<String?> imageUrl = const Value.absent(),
+    String? category,
+    String? tags,
+    Value<String?> color = const Value.absent(),
+    Value<String?> brand = const Value.absent(),
+    Value<String?> material = const Value.absent(),
+    String? seasons,
+    String? weatherConditions,
+    String? occasions,
+    bool? isFavorite,
+    bool? isArchived,
+    int? timesWorn,
+    double? comfortRating,
+    int? addedDate,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> lastWornDate = const Value.absent(),
+    Value<double?> price = const Value.absent(),
+    Value<String?> size = const Value.absent(),
+    int? usageCount,
+    Value<String?> serverId = const Value.absent(),
+    bool? dirty,
+    Value<int?> lastSyncedAt = const Value.absent(),
+  }) => DbClothingItem(
+    id: id ?? this.id,
+    externalId: externalId.present ? externalId.value : this.externalId,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+    category: category ?? this.category,
+    tags: tags ?? this.tags,
+    color: color.present ? color.value : this.color,
+    brand: brand.present ? brand.value : this.brand,
+    material: material.present ? material.value : this.material,
+    seasons: seasons ?? this.seasons,
+    weatherConditions: weatherConditions ?? this.weatherConditions,
+    occasions: occasions ?? this.occasions,
+    isFavorite: isFavorite ?? this.isFavorite,
+    isArchived: isArchived ?? this.isArchived,
+    timesWorn: timesWorn ?? this.timesWorn,
+    comfortRating: comfortRating ?? this.comfortRating,
+    addedDate: addedDate ?? this.addedDate,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    lastWornDate: lastWornDate.present ? lastWornDate.value : this.lastWornDate,
+    price: price.present ? price.value : this.price,
+    size: size.present ? size.value : this.size,
+    usageCount: usageCount ?? this.usageCount,
+    serverId: serverId.present ? serverId.value : this.serverId,
+    dirty: dirty ?? this.dirty,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+  );
   DbClothingItem copyWithCompanion(ClothingItemsCompanion data) {
     return DbClothingItem(
       id: data.id.present ? data.id.value : this.id,
-      externalId:
-          data.externalId.present ? data.externalId.value : this.externalId,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
       name: data.name.present ? data.name.value : this.name,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       category: data.category.present ? data.category.value : this.category,
       tags: data.tags.present ? data.tags.value : this.tags,
@@ -745,10 +977,12 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
           ? data.weatherConditions.value
           : this.weatherConditions,
       occasions: data.occasions.present ? data.occasions.value : this.occasions,
-      isFavorite:
-          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
-      isArchived:
-          data.isArchived.present ? data.isArchived.value : this.isArchived,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
       timesWorn: data.timesWorn.present ? data.timesWorn.value : this.timesWorn,
       comfortRating: data.comfortRating.present
           ? data.comfortRating.value
@@ -761,8 +995,9 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
           : this.lastWornDate,
       price: data.price.present ? data.price.value : this.price,
       size: data.size.present ? data.size.value : this.size,
-      usageCount:
-          data.usageCount.present ? data.usageCount.value : this.usageCount,
+      usageCount: data.usageCount.present
+          ? data.usageCount.value
+          : this.usageCount,
       serverId: data.serverId.present ? data.serverId.value : this.serverId,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
       lastSyncedAt: data.lastSyncedAt.present
@@ -807,34 +1042,34 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
 
   @override
   int get hashCode => Object.hashAll([
-        id,
-        externalId,
-        name,
-        description,
-        imageUrl,
-        category,
-        tags,
-        color,
-        brand,
-        material,
-        seasons,
-        weatherConditions,
-        occasions,
-        isFavorite,
-        isArchived,
-        timesWorn,
-        comfortRating,
-        addedDate,
-        createdAt,
-        updatedAt,
-        lastWornDate,
-        price,
-        size,
-        usageCount,
-        serverId,
-        dirty,
-        lastSyncedAt
-      ]);
+    id,
+    externalId,
+    name,
+    description,
+    imageUrl,
+    category,
+    tags,
+    color,
+    brand,
+    material,
+    seasons,
+    weatherConditions,
+    occasions,
+    isFavorite,
+    isArchived,
+    timesWorn,
+    comfortRating,
+    addedDate,
+    createdAt,
+    updatedAt,
+    lastWornDate,
+    price,
+    size,
+    usageCount,
+    serverId,
+    dirty,
+    lastSyncedAt,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -953,11 +1188,11 @@ class ClothingItemsCompanion extends UpdateCompanion<DbClothingItem> {
     this.serverId = const Value.absent(),
     this.dirty = const Value.absent(),
     this.lastSyncedAt = const Value.absent(),
-  })  : name = Value(name),
-        category = Value(category),
-        addedDate = Value(addedDate),
-        createdAt = Value(createdAt),
-        updatedAt = Value(updatedAt);
+  }) : name = Value(name),
+       category = Value(category),
+       addedDate = Value(addedDate),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
   static Insertable<DbClothingItem> custom({
     Expression<int>? id,
     Expression<String>? externalId,
@@ -1018,34 +1253,35 @@ class ClothingItemsCompanion extends UpdateCompanion<DbClothingItem> {
     });
   }
 
-  ClothingItemsCompanion copyWith(
-      {Value<int>? id,
-      Value<String?>? externalId,
-      Value<String>? name,
-      Value<String?>? description,
-      Value<String?>? imageUrl,
-      Value<String>? category,
-      Value<String>? tags,
-      Value<String?>? color,
-      Value<String?>? brand,
-      Value<String?>? material,
-      Value<String>? seasons,
-      Value<String>? weatherConditions,
-      Value<String>? occasions,
-      Value<bool>? isFavorite,
-      Value<bool>? isArchived,
-      Value<int>? timesWorn,
-      Value<double>? comfortRating,
-      Value<int>? addedDate,
-      Value<int>? createdAt,
-      Value<int>? updatedAt,
-      Value<int?>? lastWornDate,
-      Value<double?>? price,
-      Value<String?>? size,
-      Value<int>? usageCount,
-      Value<String?>? serverId,
-      Value<bool>? dirty,
-      Value<int?>? lastSyncedAt}) {
+  ClothingItemsCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? externalId,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<String?>? imageUrl,
+    Value<String>? category,
+    Value<String>? tags,
+    Value<String?>? color,
+    Value<String?>? brand,
+    Value<String?>? material,
+    Value<String>? seasons,
+    Value<String>? weatherConditions,
+    Value<String>? occasions,
+    Value<bool>? isFavorite,
+    Value<bool>? isArchived,
+    Value<int>? timesWorn,
+    Value<double>? comfortRating,
+    Value<int>? addedDate,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? lastWornDate,
+    Value<double?>? price,
+    Value<String?>? size,
+    Value<int>? usageCount,
+    Value<String?>? serverId,
+    Value<bool>? dirty,
+    Value<int?>? lastSyncedAt,
+  }) {
     return ClothingItemsCompanion(
       id: id ?? this.id,
       externalId: externalId ?? this.externalId,
@@ -1207,169 +1443,256 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _externalIdMeta =
-      const VerificationMeta('externalId');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _externalIdMeta = const VerificationMeta(
+    'externalId',
+  );
   @override
   late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
-      'external_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'external_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _imageUrlMeta =
-      const VerificationMeta('imageUrl');
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
   @override
   late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
-      'image_url', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _clothingItemIdsMeta =
-      const VerificationMeta('clothingItemIds');
+    'image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _clothingItemIdsMeta = const VerificationMeta(
+    'clothingItemIds',
+  );
   @override
   late final GeneratedColumn<String> clothingItemIds = GeneratedColumn<String>(
-      'clothing_item_ids', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
-  static const VerificationMeta _isFavoriteMeta =
-      const VerificationMeta('isFavorite');
+    'clothing_item_ids',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
   @override
   late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
-      'is_favorite', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _timesWornMeta =
-      const VerificationMeta('timesWorn');
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _timesWornMeta = const VerificationMeta(
+    'timesWorn',
+  );
   @override
   late final GeneratedColumn<int> timesWorn = GeneratedColumn<int>(
-      'times_worn', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _comfortRatingMeta =
-      const VerificationMeta('comfortRating');
+    'times_worn',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _comfortRatingMeta = const VerificationMeta(
+    'comfortRating',
+  );
   @override
   late final GeneratedColumn<double> comfortRating = GeneratedColumn<double>(
-      'comfort_rating', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0.0));
+    'comfort_rating',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
   @override
   late final GeneratedColumn<String> tags = GeneratedColumn<String>(
-      'tags', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
-  static const VerificationMeta _occasionsMeta =
-      const VerificationMeta('occasions');
+    'tags',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _occasionsMeta = const VerificationMeta(
+    'occasions',
+  );
   @override
   late final GeneratedColumn<String> occasions = GeneratedColumn<String>(
-      'occasions', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
-  static const VerificationMeta _weatherConditionsMeta =
-      const VerificationMeta('weatherConditions');
+    'occasions',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _weatherConditionsMeta = const VerificationMeta(
+    'weatherConditions',
+  );
   @override
   late final GeneratedColumn<String> weatherConditions =
-      GeneratedColumn<String>('weather_conditions', aliasedName, false,
-          type: DriftSqlType.string,
-          requiredDuringInsert: false,
-          defaultValue: const Constant('[]'));
-  static const VerificationMeta _seasonsMeta =
-      const VerificationMeta('seasons');
+      GeneratedColumn<String>(
+        'weather_conditions',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _seasonsMeta = const VerificationMeta(
+    'seasons',
+  );
   @override
   late final GeneratedColumn<String> seasons = GeneratedColumn<String>(
-      'seasons', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
-  static const VerificationMeta _addedDateMeta =
-      const VerificationMeta('addedDate');
+    'seasons',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _addedDateMeta = const VerificationMeta(
+    'addedDate',
+  );
   @override
   late final GeneratedColumn<int> addedDate = GeneratedColumn<int>(
-      'added_date', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+    'added_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _updatedAtMeta =
-      const VerificationMeta('updatedAt');
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _serverIdMeta =
-      const VerificationMeta('serverId');
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
   @override
   late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-      'server_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'server_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
   @override
   late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
-      'dirty', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("dirty" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _lastSyncedAtMeta =
-      const VerificationMeta('lastSyncedAt');
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
   @override
   late final GeneratedColumn<int> lastSyncedAt = GeneratedColumn<int>(
-      'last_synced_at', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        externalId,
-        name,
-        description,
-        imageUrl,
-        clothingItemIds,
-        isFavorite,
-        timesWorn,
-        comfortRating,
-        tags,
-        occasions,
-        weatherConditions,
-        seasons,
-        addedDate,
-        createdAt,
-        updatedAt,
-        serverId,
-        dirty,
-        lastSyncedAt
-      ];
+    id,
+    externalId,
+    name,
+    description,
+    imageUrl,
+    clothingItemIds,
+    isFavorite,
+    timesWorn,
+    comfortRating,
+    tags,
+    occasions,
+    weatherConditions,
+    seasons,
+    addedDate,
+    createdAt,
+    updatedAt,
+    serverId,
+    dirty,
+    lastSyncedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'outfits';
   @override
-  VerificationContext validateIntegrity(Insertable<DbOutfit> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<DbOutfit> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -1377,97 +1700,134 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
     }
     if (data.containsKey('external_id')) {
       context.handle(
-          _externalIdMeta,
-          externalId.isAcceptableOrUnknown(
-              data['external_id']!, _externalIdMeta));
+        _externalIdMeta,
+        externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
+      );
     }
     if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     }
     if (data.containsKey('image_url')) {
-      context.handle(_imageUrlMeta,
-          imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta));
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
     }
     if (data.containsKey('clothing_item_ids')) {
       context.handle(
+        _clothingItemIdsMeta,
+        clothingItemIds.isAcceptableOrUnknown(
+          data['clothing_item_ids']!,
           _clothingItemIdsMeta,
-          clothingItemIds.isAcceptableOrUnknown(
-              data['clothing_item_ids']!, _clothingItemIdsMeta));
+        ),
+      );
     }
     if (data.containsKey('is_favorite')) {
       context.handle(
-          _isFavoriteMeta,
-          isFavorite.isAcceptableOrUnknown(
-              data['is_favorite']!, _isFavoriteMeta));
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
     }
     if (data.containsKey('times_worn')) {
-      context.handle(_timesWornMeta,
-          timesWorn.isAcceptableOrUnknown(data['times_worn']!, _timesWornMeta));
+      context.handle(
+        _timesWornMeta,
+        timesWorn.isAcceptableOrUnknown(data['times_worn']!, _timesWornMeta),
+      );
     }
     if (data.containsKey('comfort_rating')) {
       context.handle(
+        _comfortRatingMeta,
+        comfortRating.isAcceptableOrUnknown(
+          data['comfort_rating']!,
           _comfortRatingMeta,
-          comfortRating.isAcceptableOrUnknown(
-              data['comfort_rating']!, _comfortRatingMeta));
+        ),
+      );
     }
     if (data.containsKey('tags')) {
       context.handle(
-          _tagsMeta, tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta));
+        _tagsMeta,
+        tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta),
+      );
     }
     if (data.containsKey('occasions')) {
-      context.handle(_occasionsMeta,
-          occasions.isAcceptableOrUnknown(data['occasions']!, _occasionsMeta));
+      context.handle(
+        _occasionsMeta,
+        occasions.isAcceptableOrUnknown(data['occasions']!, _occasionsMeta),
+      );
     }
     if (data.containsKey('weather_conditions')) {
       context.handle(
+        _weatherConditionsMeta,
+        weatherConditions.isAcceptableOrUnknown(
+          data['weather_conditions']!,
           _weatherConditionsMeta,
-          weatherConditions.isAcceptableOrUnknown(
-              data['weather_conditions']!, _weatherConditionsMeta));
+        ),
+      );
     }
     if (data.containsKey('seasons')) {
-      context.handle(_seasonsMeta,
-          seasons.isAcceptableOrUnknown(data['seasons']!, _seasonsMeta));
+      context.handle(
+        _seasonsMeta,
+        seasons.isAcceptableOrUnknown(data['seasons']!, _seasonsMeta),
+      );
     }
     if (data.containsKey('added_date')) {
-      context.handle(_addedDateMeta,
-          addedDate.isAcceptableOrUnknown(data['added_date']!, _addedDateMeta));
+      context.handle(
+        _addedDateMeta,
+        addedDate.isAcceptableOrUnknown(data['added_date']!, _addedDateMeta),
+      );
     } else if (isInserting) {
       context.missing(_addedDateMeta);
     }
     if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
     if (data.containsKey('server_id')) {
-      context.handle(_serverIdMeta,
-          serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta));
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
     }
     if (data.containsKey('dirty')) {
       context.handle(
-          _dirtyMeta, dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta));
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
     }
     if (data.containsKey('last_synced_at')) {
       context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
           _lastSyncedAtMeta,
-          lastSyncedAt.isAcceptableOrUnknown(
-              data['last_synced_at']!, _lastSyncedAtMeta));
+        ),
+      );
     }
     return context;
   }
@@ -1478,44 +1838,82 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
   DbOutfit map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbOutfit(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      externalId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}external_id']),
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description']),
-      imageUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}image_url']),
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      ),
       clothingItemIds: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}clothing_item_ids'])!,
-      isFavorite: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
-      timesWorn: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}times_worn'])!,
-      comfortRating: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}comfort_rating'])!,
-      tags: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}tags'])!,
-      occasions: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}occasions'])!,
+        DriftSqlType.string,
+        data['${effectivePrefix}clothing_item_ids'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      timesWorn: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}times_worn'],
+      )!,
+      comfortRating: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}comfort_rating'],
+      )!,
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      )!,
+      occasions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occasions'],
+      )!,
       weatherConditions: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}weather_conditions'])!,
-      seasons: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}seasons'])!,
-      addedDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}added_date'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!,
-      serverId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}server_id']),
-      dirty: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}dirty'])!,
-      lastSyncedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_synced_at']),
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_conditions'],
+      )!,
+      seasons: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seasons'],
+      )!,
+      addedDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}added_date'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_id'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_synced_at'],
+      ),
     );
   }
 
@@ -1545,26 +1943,27 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
   final String? serverId;
   final bool dirty;
   final int? lastSyncedAt;
-  const DbOutfit(
-      {required this.id,
-      this.externalId,
-      required this.name,
-      this.description,
-      this.imageUrl,
-      required this.clothingItemIds,
-      required this.isFavorite,
-      required this.timesWorn,
-      required this.comfortRating,
-      required this.tags,
-      required this.occasions,
-      required this.weatherConditions,
-      required this.seasons,
-      required this.addedDate,
-      required this.createdAt,
-      required this.updatedAt,
-      this.serverId,
-      required this.dirty,
-      this.lastSyncedAt});
+  const DbOutfit({
+    required this.id,
+    this.externalId,
+    required this.name,
+    this.description,
+    this.imageUrl,
+    required this.clothingItemIds,
+    required this.isFavorite,
+    required this.timesWorn,
+    required this.comfortRating,
+    required this.tags,
+    required this.occasions,
+    required this.weatherConditions,
+    required this.seasons,
+    required this.addedDate,
+    required this.createdAt,
+    required this.updatedAt,
+    this.serverId,
+    required this.dirty,
+    this.lastSyncedAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1634,8 +2033,10 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
     );
   }
 
-  factory DbOutfit.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory DbOutfit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DbOutfit(
       id: serializer.fromJson<int>(json['id']),
@@ -1685,62 +2086,64 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
     };
   }
 
-  DbOutfit copyWith(
-          {int? id,
-          Value<String?> externalId = const Value.absent(),
-          String? name,
-          Value<String?> description = const Value.absent(),
-          Value<String?> imageUrl = const Value.absent(),
-          String? clothingItemIds,
-          bool? isFavorite,
-          int? timesWorn,
-          double? comfortRating,
-          String? tags,
-          String? occasions,
-          String? weatherConditions,
-          String? seasons,
-          int? addedDate,
-          int? createdAt,
-          int? updatedAt,
-          Value<String?> serverId = const Value.absent(),
-          bool? dirty,
-          Value<int?> lastSyncedAt = const Value.absent()}) =>
-      DbOutfit(
-        id: id ?? this.id,
-        externalId: externalId.present ? externalId.value : this.externalId,
-        name: name ?? this.name,
-        description: description.present ? description.value : this.description,
-        imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
-        clothingItemIds: clothingItemIds ?? this.clothingItemIds,
-        isFavorite: isFavorite ?? this.isFavorite,
-        timesWorn: timesWorn ?? this.timesWorn,
-        comfortRating: comfortRating ?? this.comfortRating,
-        tags: tags ?? this.tags,
-        occasions: occasions ?? this.occasions,
-        weatherConditions: weatherConditions ?? this.weatherConditions,
-        seasons: seasons ?? this.seasons,
-        addedDate: addedDate ?? this.addedDate,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        serverId: serverId.present ? serverId.value : this.serverId,
-        dirty: dirty ?? this.dirty,
-        lastSyncedAt:
-            lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
-      );
+  DbOutfit copyWith({
+    int? id,
+    Value<String?> externalId = const Value.absent(),
+    String? name,
+    Value<String?> description = const Value.absent(),
+    Value<String?> imageUrl = const Value.absent(),
+    String? clothingItemIds,
+    bool? isFavorite,
+    int? timesWorn,
+    double? comfortRating,
+    String? tags,
+    String? occasions,
+    String? weatherConditions,
+    String? seasons,
+    int? addedDate,
+    int? createdAt,
+    int? updatedAt,
+    Value<String?> serverId = const Value.absent(),
+    bool? dirty,
+    Value<int?> lastSyncedAt = const Value.absent(),
+  }) => DbOutfit(
+    id: id ?? this.id,
+    externalId: externalId.present ? externalId.value : this.externalId,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+    clothingItemIds: clothingItemIds ?? this.clothingItemIds,
+    isFavorite: isFavorite ?? this.isFavorite,
+    timesWorn: timesWorn ?? this.timesWorn,
+    comfortRating: comfortRating ?? this.comfortRating,
+    tags: tags ?? this.tags,
+    occasions: occasions ?? this.occasions,
+    weatherConditions: weatherConditions ?? this.weatherConditions,
+    seasons: seasons ?? this.seasons,
+    addedDate: addedDate ?? this.addedDate,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    serverId: serverId.present ? serverId.value : this.serverId,
+    dirty: dirty ?? this.dirty,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+  );
   DbOutfit copyWithCompanion(OutfitsCompanion data) {
     return DbOutfit(
       id: data.id.present ? data.id.value : this.id,
-      externalId:
-          data.externalId.present ? data.externalId.value : this.externalId,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
       name: data.name.present ? data.name.value : this.name,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       clothingItemIds: data.clothingItemIds.present
           ? data.clothingItemIds.value
           : this.clothingItemIds,
-      isFavorite:
-          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
       timesWorn: data.timesWorn.present ? data.timesWorn.value : this.timesWorn,
       comfortRating: data.comfortRating.present
           ? data.comfortRating.value
@@ -1790,25 +2193,26 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
 
   @override
   int get hashCode => Object.hash(
-      id,
-      externalId,
-      name,
-      description,
-      imageUrl,
-      clothingItemIds,
-      isFavorite,
-      timesWorn,
-      comfortRating,
-      tags,
-      occasions,
-      weatherConditions,
-      seasons,
-      addedDate,
-      createdAt,
-      updatedAt,
-      serverId,
-      dirty,
-      lastSyncedAt);
+    id,
+    externalId,
+    name,
+    description,
+    imageUrl,
+    clothingItemIds,
+    isFavorite,
+    timesWorn,
+    comfortRating,
+    tags,
+    occasions,
+    weatherConditions,
+    seasons,
+    addedDate,
+    createdAt,
+    updatedAt,
+    serverId,
+    dirty,
+    lastSyncedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1895,10 +2299,10 @@ class OutfitsCompanion extends UpdateCompanion<DbOutfit> {
     this.serverId = const Value.absent(),
     this.dirty = const Value.absent(),
     this.lastSyncedAt = const Value.absent(),
-  })  : name = Value(name),
-        addedDate = Value(addedDate),
-        createdAt = Value(createdAt),
-        updatedAt = Value(updatedAt);
+  }) : name = Value(name),
+       addedDate = Value(addedDate),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
   static Insertable<DbOutfit> custom({
     Expression<int>? id,
     Expression<String>? externalId,
@@ -1943,26 +2347,27 @@ class OutfitsCompanion extends UpdateCompanion<DbOutfit> {
     });
   }
 
-  OutfitsCompanion copyWith(
-      {Value<int>? id,
-      Value<String?>? externalId,
-      Value<String>? name,
-      Value<String?>? description,
-      Value<String?>? imageUrl,
-      Value<String>? clothingItemIds,
-      Value<bool>? isFavorite,
-      Value<int>? timesWorn,
-      Value<double>? comfortRating,
-      Value<String>? tags,
-      Value<String>? occasions,
-      Value<String>? weatherConditions,
-      Value<String>? seasons,
-      Value<int>? addedDate,
-      Value<int>? createdAt,
-      Value<int>? updatedAt,
-      Value<String?>? serverId,
-      Value<bool>? dirty,
-      Value<int?>? lastSyncedAt}) {
+  OutfitsCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? externalId,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<String?>? imageUrl,
+    Value<String>? clothingItemIds,
+    Value<bool>? isFavorite,
+    Value<int>? timesWorn,
+    Value<double>? comfortRating,
+    Value<String>? tags,
+    Value<String>? occasions,
+    Value<String>? weatherConditions,
+    Value<String>? seasons,
+    Value<int>? addedDate,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<String?>? serverId,
+    Value<bool>? dirty,
+    Value<int?>? lastSyncedAt,
+  }) {
     return OutfitsCompanion(
       id: id ?? this.id,
       externalId: externalId ?? this.externalId,
@@ -2085,91 +2490,137 @@ class $OutfitItemsTable extends OutfitItems
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _outfitIdMeta =
-      const VerificationMeta('outfitId');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _outfitIdMeta = const VerificationMeta(
+    'outfitId',
+  );
   @override
   late final GeneratedColumn<int> outfitId = GeneratedColumn<int>(
-      'outfit_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _clothingItemIdMeta =
-      const VerificationMeta('clothingItemId');
+    'outfit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _clothingItemIdMeta = const VerificationMeta(
+    'clothingItemId',
+  );
   @override
   late final GeneratedColumn<int> clothingItemId = GeneratedColumn<int>(
-      'clothing_item_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _sortOrderMeta =
-      const VerificationMeta('sortOrder');
+    'clothing_item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
   @override
   late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
-      'sort_order', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _isPrimaryMeta =
-      const VerificationMeta('isPrimary');
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isPrimaryMeta = const VerificationMeta(
+    'isPrimary',
+  );
   @override
   late final GeneratedColumn<bool> isPrimary = GeneratedColumn<bool>(
-      'is_primary', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_primary" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _metadataMeta =
-      const VerificationMeta('metadata');
+    'is_primary',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_primary" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _metadataMeta = const VerificationMeta(
+    'metadata',
+  );
   @override
   late final GeneratedColumn<String> metadata = GeneratedColumn<String>(
-      'metadata', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('{}'));
+    'metadata',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, outfitId, clothingItemId, sortOrder, isPrimary, metadata];
+  List<GeneratedColumn> get $columns => [
+    id,
+    outfitId,
+    clothingItemId,
+    sortOrder,
+    isPrimary,
+    metadata,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'outfit_items';
   @override
-  VerificationContext validateIntegrity(Insertable<DbOutfitItem> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<DbOutfitItem> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('outfit_id')) {
-      context.handle(_outfitIdMeta,
-          outfitId.isAcceptableOrUnknown(data['outfit_id']!, _outfitIdMeta));
+      context.handle(
+        _outfitIdMeta,
+        outfitId.isAcceptableOrUnknown(data['outfit_id']!, _outfitIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_outfitIdMeta);
     }
     if (data.containsKey('clothing_item_id')) {
       context.handle(
+        _clothingItemIdMeta,
+        clothingItemId.isAcceptableOrUnknown(
+          data['clothing_item_id']!,
           _clothingItemIdMeta,
-          clothingItemId.isAcceptableOrUnknown(
-              data['clothing_item_id']!, _clothingItemIdMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_clothingItemIdMeta);
     }
     if (data.containsKey('sort_order')) {
-      context.handle(_sortOrderMeta,
-          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
     }
     if (data.containsKey('is_primary')) {
-      context.handle(_isPrimaryMeta,
-          isPrimary.isAcceptableOrUnknown(data['is_primary']!, _isPrimaryMeta));
+      context.handle(
+        _isPrimaryMeta,
+        isPrimary.isAcceptableOrUnknown(data['is_primary']!, _isPrimaryMeta),
+      );
     }
     if (data.containsKey('metadata')) {
-      context.handle(_metadataMeta,
-          metadata.isAcceptableOrUnknown(data['metadata']!, _metadataMeta));
+      context.handle(
+        _metadataMeta,
+        metadata.isAcceptableOrUnknown(data['metadata']!, _metadataMeta),
+      );
     }
     return context;
   }
@@ -2180,18 +2631,30 @@ class $OutfitItemsTable extends OutfitItems
   DbOutfitItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbOutfitItem(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      outfitId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}outfit_id'])!,
-      clothingItemId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}clothing_item_id'])!,
-      sortOrder: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
-      isPrimary: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_primary'])!,
-      metadata: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}metadata'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      outfitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}outfit_id'],
+      )!,
+      clothingItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}clothing_item_id'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      isPrimary: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_primary'],
+      )!,
+      metadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata'],
+      )!,
     );
   }
 
@@ -2208,13 +2671,14 @@ class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
   final int sortOrder;
   final bool isPrimary;
   final String metadata;
-  const DbOutfitItem(
-      {required this.id,
-      required this.outfitId,
-      required this.clothingItemId,
-      required this.sortOrder,
-      required this.isPrimary,
-      required this.metadata});
+  const DbOutfitItem({
+    required this.id,
+    required this.outfitId,
+    required this.clothingItemId,
+    required this.sortOrder,
+    required this.isPrimary,
+    required this.metadata,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2238,8 +2702,10 @@ class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
     );
   }
 
-  factory DbOutfitItem.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory DbOutfitItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DbOutfitItem(
       id: serializer.fromJson<int>(json['id']),
@@ -2263,21 +2729,21 @@ class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
     };
   }
 
-  DbOutfitItem copyWith(
-          {int? id,
-          int? outfitId,
-          int? clothingItemId,
-          int? sortOrder,
-          bool? isPrimary,
-          String? metadata}) =>
-      DbOutfitItem(
-        id: id ?? this.id,
-        outfitId: outfitId ?? this.outfitId,
-        clothingItemId: clothingItemId ?? this.clothingItemId,
-        sortOrder: sortOrder ?? this.sortOrder,
-        isPrimary: isPrimary ?? this.isPrimary,
-        metadata: metadata ?? this.metadata,
-      );
+  DbOutfitItem copyWith({
+    int? id,
+    int? outfitId,
+    int? clothingItemId,
+    int? sortOrder,
+    bool? isPrimary,
+    String? metadata,
+  }) => DbOutfitItem(
+    id: id ?? this.id,
+    outfitId: outfitId ?? this.outfitId,
+    clothingItemId: clothingItemId ?? this.clothingItemId,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isPrimary: isPrimary ?? this.isPrimary,
+    metadata: metadata ?? this.metadata,
+  );
   DbOutfitItem copyWithCompanion(OutfitItemsCompanion data) {
     return DbOutfitItem(
       id: data.id.present ? data.id.value : this.id,
@@ -2341,8 +2807,8 @@ class OutfitItemsCompanion extends UpdateCompanion<DbOutfitItem> {
     this.sortOrder = const Value.absent(),
     this.isPrimary = const Value.absent(),
     this.metadata = const Value.absent(),
-  })  : outfitId = Value(outfitId),
-        clothingItemId = Value(clothingItemId);
+  }) : outfitId = Value(outfitId),
+       clothingItemId = Value(clothingItemId);
   static Insertable<DbOutfitItem> custom({
     Expression<int>? id,
     Expression<int>? outfitId,
@@ -2361,13 +2827,14 @@ class OutfitItemsCompanion extends UpdateCompanion<DbOutfitItem> {
     });
   }
 
-  OutfitItemsCompanion copyWith(
-      {Value<int>? id,
-      Value<int>? outfitId,
-      Value<int>? clothingItemId,
-      Value<int>? sortOrder,
-      Value<bool>? isPrimary,
-      Value<String>? metadata}) {
+  OutfitItemsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? outfitId,
+    Value<int>? clothingItemId,
+    Value<int>? sortOrder,
+    Value<bool>? isPrimary,
+    Value<String>? metadata,
+  }) {
     return OutfitItemsCompanion(
       id: id ?? this.id,
       outfitId: outfitId ?? this.outfitId,
@@ -2426,70 +2893,73 @@ abstract class _$WardrobeDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [clothingItems, outfits, outfitItems];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    clothingItems,
+    outfits,
+    outfitItems,
+  ];
 }
 
-typedef $$ClothingItemsTableCreateCompanionBuilder = ClothingItemsCompanion
-    Function({
-  Value<int> id,
-  Value<String?> externalId,
-  required String name,
-  Value<String?> description,
-  Value<String?> imageUrl,
-  required String category,
-  Value<String> tags,
-  Value<String?> color,
-  Value<String?> brand,
-  Value<String?> material,
-  Value<String> seasons,
-  Value<String> weatherConditions,
-  Value<String> occasions,
-  Value<bool> isFavorite,
-  Value<bool> isArchived,
-  Value<int> timesWorn,
-  Value<double> comfortRating,
-  required int addedDate,
-  required int createdAt,
-  required int updatedAt,
-  Value<int?> lastWornDate,
-  Value<double?> price,
-  Value<String?> size,
-  Value<int> usageCount,
-  Value<String?> serverId,
-  Value<bool> dirty,
-  Value<int?> lastSyncedAt,
-});
-typedef $$ClothingItemsTableUpdateCompanionBuilder = ClothingItemsCompanion
-    Function({
-  Value<int> id,
-  Value<String?> externalId,
-  Value<String> name,
-  Value<String?> description,
-  Value<String?> imageUrl,
-  Value<String> category,
-  Value<String> tags,
-  Value<String?> color,
-  Value<String?> brand,
-  Value<String?> material,
-  Value<String> seasons,
-  Value<String> weatherConditions,
-  Value<String> occasions,
-  Value<bool> isFavorite,
-  Value<bool> isArchived,
-  Value<int> timesWorn,
-  Value<double> comfortRating,
-  Value<int> addedDate,
-  Value<int> createdAt,
-  Value<int> updatedAt,
-  Value<int?> lastWornDate,
-  Value<double?> price,
-  Value<String?> size,
-  Value<int> usageCount,
-  Value<String?> serverId,
-  Value<bool> dirty,
-  Value<int?> lastSyncedAt,
-});
+typedef $$ClothingItemsTableCreateCompanionBuilder =
+    ClothingItemsCompanion Function({
+      Value<int> id,
+      Value<String?> externalId,
+      required String name,
+      Value<String?> description,
+      Value<String?> imageUrl,
+      required String category,
+      Value<String> tags,
+      Value<String?> color,
+      Value<String?> brand,
+      Value<String?> material,
+      Value<String> seasons,
+      Value<String> weatherConditions,
+      Value<String> occasions,
+      Value<bool> isFavorite,
+      Value<bool> isArchived,
+      Value<int> timesWorn,
+      Value<double> comfortRating,
+      required int addedDate,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> lastWornDate,
+      Value<double?> price,
+      Value<String?> size,
+      Value<int> usageCount,
+      Value<String?> serverId,
+      Value<bool> dirty,
+      Value<int?> lastSyncedAt,
+    });
+typedef $$ClothingItemsTableUpdateCompanionBuilder =
+    ClothingItemsCompanion Function({
+      Value<int> id,
+      Value<String?> externalId,
+      Value<String> name,
+      Value<String?> description,
+      Value<String?> imageUrl,
+      Value<String> category,
+      Value<String> tags,
+      Value<String?> color,
+      Value<String?> brand,
+      Value<String?> material,
+      Value<String> seasons,
+      Value<String> weatherConditions,
+      Value<String> occasions,
+      Value<bool> isFavorite,
+      Value<bool> isArchived,
+      Value<int> timesWorn,
+      Value<double> comfortRating,
+      Value<int> addedDate,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> lastWornDate,
+      Value<double?> price,
+      Value<String?> size,
+      Value<int> usageCount,
+      Value<String?> serverId,
+      Value<bool> dirty,
+      Value<int?> lastSyncedAt,
+    });
 
 class $$ClothingItemsTableFilterComposer
     extends Composer<_$WardrobeDatabase, $ClothingItemsTable> {
@@ -2501,86 +2971,139 @@ class $$ClothingItemsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => ColumnFilters(column));
+    column: $table.externalId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get imageUrl => $composableBuilder(
-      column: $table.imageUrl, builder: (column) => ColumnFilters(column));
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get category => $composableBuilder(
-      column: $table.category, builder: (column) => ColumnFilters(column));
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get tags => $composableBuilder(
-      column: $table.tags, builder: (column) => ColumnFilters(column));
+    column: $table.tags,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get color => $composableBuilder(
-      column: $table.color, builder: (column) => ColumnFilters(column));
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get brand => $composableBuilder(
-      column: $table.brand, builder: (column) => ColumnFilters(column));
+    column: $table.brand,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get material => $composableBuilder(
-      column: $table.material, builder: (column) => ColumnFilters(column));
+    column: $table.material,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get seasons => $composableBuilder(
-      column: $table.seasons, builder: (column) => ColumnFilters(column));
+    column: $table.seasons,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get weatherConditions => $composableBuilder(
-      column: $table.weatherConditions,
-      builder: (column) => ColumnFilters(column));
+    column: $table.weatherConditions,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get occasions => $composableBuilder(
-      column: $table.occasions, builder: (column) => ColumnFilters(column));
+    column: $table.occasions,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isArchived => $composableBuilder(
-      column: $table.isArchived, builder: (column) => ColumnFilters(column));
+    column: $table.isArchived,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get timesWorn => $composableBuilder(
-      column: $table.timesWorn, builder: (column) => ColumnFilters(column));
+    column: $table.timesWorn,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get comfortRating => $composableBuilder(
-      column: $table.comfortRating, builder: (column) => ColumnFilters(column));
+    column: $table.comfortRating,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get addedDate => $composableBuilder(
-      column: $table.addedDate, builder: (column) => ColumnFilters(column));
+    column: $table.addedDate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get lastWornDate => $composableBuilder(
-      column: $table.lastWornDate, builder: (column) => ColumnFilters(column));
+    column: $table.lastWornDate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get price => $composableBuilder(
-      column: $table.price, builder: (column) => ColumnFilters(column));
+    column: $table.price,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get size => $composableBuilder(
-      column: $table.size, builder: (column) => ColumnFilters(column));
+    column: $table.size,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get usageCount => $composableBuilder(
-      column: $table.usageCount, builder: (column) => ColumnFilters(column));
+    column: $table.usageCount,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get serverId => $composableBuilder(
-      column: $table.serverId, builder: (column) => ColumnFilters(column));
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get dirty => $composableBuilder(
-      column: $table.dirty, builder: (column) => ColumnFilters(column));
+    column: $table.dirty,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ClothingItemsTableOrderingComposer
@@ -2593,89 +3116,139 @@ class $$ClothingItemsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => ColumnOrderings(column));
+    column: $table.externalId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get imageUrl => $composableBuilder(
-      column: $table.imageUrl, builder: (column) => ColumnOrderings(column));
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get category => $composableBuilder(
-      column: $table.category, builder: (column) => ColumnOrderings(column));
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get tags => $composableBuilder(
-      column: $table.tags, builder: (column) => ColumnOrderings(column));
+    column: $table.tags,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get color => $composableBuilder(
-      column: $table.color, builder: (column) => ColumnOrderings(column));
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get brand => $composableBuilder(
-      column: $table.brand, builder: (column) => ColumnOrderings(column));
+    column: $table.brand,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get material => $composableBuilder(
-      column: $table.material, builder: (column) => ColumnOrderings(column));
+    column: $table.material,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get seasons => $composableBuilder(
-      column: $table.seasons, builder: (column) => ColumnOrderings(column));
+    column: $table.seasons,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get weatherConditions => $composableBuilder(
-      column: $table.weatherConditions,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.weatherConditions,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get occasions => $composableBuilder(
-      column: $table.occasions, builder: (column) => ColumnOrderings(column));
+    column: $table.occasions,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isArchived => $composableBuilder(
-      column: $table.isArchived, builder: (column) => ColumnOrderings(column));
+    column: $table.isArchived,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get timesWorn => $composableBuilder(
-      column: $table.timesWorn, builder: (column) => ColumnOrderings(column));
+    column: $table.timesWorn,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get comfortRating => $composableBuilder(
-      column: $table.comfortRating,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.comfortRating,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get addedDate => $composableBuilder(
-      column: $table.addedDate, builder: (column) => ColumnOrderings(column));
+    column: $table.addedDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get lastWornDate => $composableBuilder(
-      column: $table.lastWornDate,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.lastWornDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get price => $composableBuilder(
-      column: $table.price, builder: (column) => ColumnOrderings(column));
+    column: $table.price,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get size => $composableBuilder(
-      column: $table.size, builder: (column) => ColumnOrderings(column));
+    column: $table.size,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get usageCount => $composableBuilder(
-      column: $table.usageCount, builder: (column) => ColumnOrderings(column));
+    column: $table.usageCount,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get serverId => $composableBuilder(
-      column: $table.serverId, builder: (column) => ColumnOrderings(column));
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get dirty => $composableBuilder(
-      column: $table.dirty, builder: (column) => ColumnOrderings(column));
+    column: $table.dirty,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ClothingItemsTableAnnotationComposer
@@ -2691,13 +3264,17 @@ class $$ClothingItemsTableAnnotationComposer
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => column);
+    column: $table.externalId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get imageUrl =>
       $composableBuilder(column: $table.imageUrl, builder: (column) => column);
@@ -2721,22 +3298,30 @@ class $$ClothingItemsTableAnnotationComposer
       $composableBuilder(column: $table.seasons, builder: (column) => column);
 
   GeneratedColumn<String> get weatherConditions => $composableBuilder(
-      column: $table.weatherConditions, builder: (column) => column);
+    column: $table.weatherConditions,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get occasions =>
       $composableBuilder(column: $table.occasions, builder: (column) => column);
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => column);
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isArchived => $composableBuilder(
-      column: $table.isArchived, builder: (column) => column);
+    column: $table.isArchived,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get timesWorn =>
       $composableBuilder(column: $table.timesWorn, builder: (column) => column);
 
   GeneratedColumn<double> get comfortRating => $composableBuilder(
-      column: $table.comfortRating, builder: (column) => column);
+    column: $table.comfortRating,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get addedDate =>
       $composableBuilder(column: $table.addedDate, builder: (column) => column);
@@ -2748,7 +3333,9 @@ class $$ClothingItemsTableAnnotationComposer
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<int> get lastWornDate => $composableBuilder(
-      column: $table.lastWornDate, builder: (column) => column);
+    column: $table.lastWornDate,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get price =>
       $composableBuilder(column: $table.price, builder: (column) => column);
@@ -2757,7 +3344,9 @@ class $$ClothingItemsTableAnnotationComposer
       $composableBuilder(column: $table.size, builder: (column) => column);
 
   GeneratedColumn<int> get usageCount => $composableBuilder(
-      column: $table.usageCount, builder: (column) => column);
+    column: $table.usageCount,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get serverId =>
       $composableBuilder(column: $table.serverId, builder: (column) => column);
@@ -2766,27 +3355,38 @@ class $$ClothingItemsTableAnnotationComposer
       $composableBuilder(column: $table.dirty, builder: (column) => column);
 
   GeneratedColumn<int> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt, builder: (column) => column);
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
 }
 
-class $$ClothingItemsTableTableManager extends RootTableManager<
-    _$WardrobeDatabase,
-    $ClothingItemsTable,
-    DbClothingItem,
-    $$ClothingItemsTableFilterComposer,
-    $$ClothingItemsTableOrderingComposer,
-    $$ClothingItemsTableAnnotationComposer,
-    $$ClothingItemsTableCreateCompanionBuilder,
-    $$ClothingItemsTableUpdateCompanionBuilder,
-    (
-      DbClothingItem,
-      BaseReferences<_$WardrobeDatabase, $ClothingItemsTable, DbClothingItem>
-    ),
-    DbClothingItem,
-    PrefetchHooks Function()> {
+class $$ClothingItemsTableTableManager
+    extends
+        RootTableManager<
+          _$WardrobeDatabase,
+          $ClothingItemsTable,
+          DbClothingItem,
+          $$ClothingItemsTableFilterComposer,
+          $$ClothingItemsTableOrderingComposer,
+          $$ClothingItemsTableAnnotationComposer,
+          $$ClothingItemsTableCreateCompanionBuilder,
+          $$ClothingItemsTableUpdateCompanionBuilder,
+          (
+            DbClothingItem,
+            BaseReferences<
+              _$WardrobeDatabase,
+              $ClothingItemsTable,
+              DbClothingItem
+            >,
+          ),
+          DbClothingItem,
+          PrefetchHooks Function()
+        > {
   $$ClothingItemsTableTableManager(
-      _$WardrobeDatabase db, $ClothingItemsTable table)
-      : super(TableManagerState(
+    _$WardrobeDatabase db,
+    $ClothingItemsTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -2795,186 +3395,191 @@ class $$ClothingItemsTableTableManager extends RootTableManager<
               $$ClothingItemsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$ClothingItemsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String?> externalId = const Value.absent(),
-            Value<String> name = const Value.absent(),
-            Value<String?> description = const Value.absent(),
-            Value<String?> imageUrl = const Value.absent(),
-            Value<String> category = const Value.absent(),
-            Value<String> tags = const Value.absent(),
-            Value<String?> color = const Value.absent(),
-            Value<String?> brand = const Value.absent(),
-            Value<String?> material = const Value.absent(),
-            Value<String> seasons = const Value.absent(),
-            Value<String> weatherConditions = const Value.absent(),
-            Value<String> occasions = const Value.absent(),
-            Value<bool> isFavorite = const Value.absent(),
-            Value<bool> isArchived = const Value.absent(),
-            Value<int> timesWorn = const Value.absent(),
-            Value<double> comfortRating = const Value.absent(),
-            Value<int> addedDate = const Value.absent(),
-            Value<int> createdAt = const Value.absent(),
-            Value<int> updatedAt = const Value.absent(),
-            Value<int?> lastWornDate = const Value.absent(),
-            Value<double?> price = const Value.absent(),
-            Value<String?> size = const Value.absent(),
-            Value<int> usageCount = const Value.absent(),
-            Value<String?> serverId = const Value.absent(),
-            Value<bool> dirty = const Value.absent(),
-            Value<int?> lastSyncedAt = const Value.absent(),
-          }) =>
-              ClothingItemsCompanion(
-            id: id,
-            externalId: externalId,
-            name: name,
-            description: description,
-            imageUrl: imageUrl,
-            category: category,
-            tags: tags,
-            color: color,
-            brand: brand,
-            material: material,
-            seasons: seasons,
-            weatherConditions: weatherConditions,
-            occasions: occasions,
-            isFavorite: isFavorite,
-            isArchived: isArchived,
-            timesWorn: timesWorn,
-            comfortRating: comfortRating,
-            addedDate: addedDate,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-            lastWornDate: lastWornDate,
-            price: price,
-            size: size,
-            usageCount: usageCount,
-            serverId: serverId,
-            dirty: dirty,
-            lastSyncedAt: lastSyncedAt,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String?> externalId = const Value.absent(),
-            required String name,
-            Value<String?> description = const Value.absent(),
-            Value<String?> imageUrl = const Value.absent(),
-            required String category,
-            Value<String> tags = const Value.absent(),
-            Value<String?> color = const Value.absent(),
-            Value<String?> brand = const Value.absent(),
-            Value<String?> material = const Value.absent(),
-            Value<String> seasons = const Value.absent(),
-            Value<String> weatherConditions = const Value.absent(),
-            Value<String> occasions = const Value.absent(),
-            Value<bool> isFavorite = const Value.absent(),
-            Value<bool> isArchived = const Value.absent(),
-            Value<int> timesWorn = const Value.absent(),
-            Value<double> comfortRating = const Value.absent(),
-            required int addedDate,
-            required int createdAt,
-            required int updatedAt,
-            Value<int?> lastWornDate = const Value.absent(),
-            Value<double?> price = const Value.absent(),
-            Value<String?> size = const Value.absent(),
-            Value<int> usageCount = const Value.absent(),
-            Value<String?> serverId = const Value.absent(),
-            Value<bool> dirty = const Value.absent(),
-            Value<int?> lastSyncedAt = const Value.absent(),
-          }) =>
-              ClothingItemsCompanion.insert(
-            id: id,
-            externalId: externalId,
-            name: name,
-            description: description,
-            imageUrl: imageUrl,
-            category: category,
-            tags: tags,
-            color: color,
-            brand: brand,
-            material: material,
-            seasons: seasons,
-            weatherConditions: weatherConditions,
-            occasions: occasions,
-            isFavorite: isFavorite,
-            isArchived: isArchived,
-            timesWorn: timesWorn,
-            comfortRating: comfortRating,
-            addedDate: addedDate,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-            lastWornDate: lastWornDate,
-            price: price,
-            size: size,
-            usageCount: usageCount,
-            serverId: serverId,
-            dirty: dirty,
-            lastSyncedAt: lastSyncedAt,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> externalId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> tags = const Value.absent(),
+                Value<String?> color = const Value.absent(),
+                Value<String?> brand = const Value.absent(),
+                Value<String?> material = const Value.absent(),
+                Value<String> seasons = const Value.absent(),
+                Value<String> weatherConditions = const Value.absent(),
+                Value<String> occasions = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<bool> isArchived = const Value.absent(),
+                Value<int> timesWorn = const Value.absent(),
+                Value<double> comfortRating = const Value.absent(),
+                Value<int> addedDate = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> lastWornDate = const Value.absent(),
+                Value<double?> price = const Value.absent(),
+                Value<String?> size = const Value.absent(),
+                Value<int> usageCount = const Value.absent(),
+                Value<String?> serverId = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int?> lastSyncedAt = const Value.absent(),
+              }) => ClothingItemsCompanion(
+                id: id,
+                externalId: externalId,
+                name: name,
+                description: description,
+                imageUrl: imageUrl,
+                category: category,
+                tags: tags,
+                color: color,
+                brand: brand,
+                material: material,
+                seasons: seasons,
+                weatherConditions: weatherConditions,
+                occasions: occasions,
+                isFavorite: isFavorite,
+                isArchived: isArchived,
+                timesWorn: timesWorn,
+                comfortRating: comfortRating,
+                addedDate: addedDate,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                lastWornDate: lastWornDate,
+                price: price,
+                size: size,
+                usageCount: usageCount,
+                serverId: serverId,
+                dirty: dirty,
+                lastSyncedAt: lastSyncedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> externalId = const Value.absent(),
+                required String name,
+                Value<String?> description = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                required String category,
+                Value<String> tags = const Value.absent(),
+                Value<String?> color = const Value.absent(),
+                Value<String?> brand = const Value.absent(),
+                Value<String?> material = const Value.absent(),
+                Value<String> seasons = const Value.absent(),
+                Value<String> weatherConditions = const Value.absent(),
+                Value<String> occasions = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<bool> isArchived = const Value.absent(),
+                Value<int> timesWorn = const Value.absent(),
+                Value<double> comfortRating = const Value.absent(),
+                required int addedDate,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> lastWornDate = const Value.absent(),
+                Value<double?> price = const Value.absent(),
+                Value<String?> size = const Value.absent(),
+                Value<int> usageCount = const Value.absent(),
+                Value<String?> serverId = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int?> lastSyncedAt = const Value.absent(),
+              }) => ClothingItemsCompanion.insert(
+                id: id,
+                externalId: externalId,
+                name: name,
+                description: description,
+                imageUrl: imageUrl,
+                category: category,
+                tags: tags,
+                color: color,
+                brand: brand,
+                material: material,
+                seasons: seasons,
+                weatherConditions: weatherConditions,
+                occasions: occasions,
+                isFavorite: isFavorite,
+                isArchived: isArchived,
+                timesWorn: timesWorn,
+                comfortRating: comfortRating,
+                addedDate: addedDate,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                lastWornDate: lastWornDate,
+                price: price,
+                size: size,
+                usageCount: usageCount,
+                serverId: serverId,
+                dirty: dirty,
+                lastSyncedAt: lastSyncedAt,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$ClothingItemsTableProcessedTableManager = ProcessedTableManager<
-    _$WardrobeDatabase,
-    $ClothingItemsTable,
-    DbClothingItem,
-    $$ClothingItemsTableFilterComposer,
-    $$ClothingItemsTableOrderingComposer,
-    $$ClothingItemsTableAnnotationComposer,
-    $$ClothingItemsTableCreateCompanionBuilder,
-    $$ClothingItemsTableUpdateCompanionBuilder,
-    (
+typedef $$ClothingItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$WardrobeDatabase,
+      $ClothingItemsTable,
       DbClothingItem,
-      BaseReferences<_$WardrobeDatabase, $ClothingItemsTable, DbClothingItem>
-    ),
-    DbClothingItem,
-    PrefetchHooks Function()>;
-typedef $$OutfitsTableCreateCompanionBuilder = OutfitsCompanion Function({
-  Value<int> id,
-  Value<String?> externalId,
-  required String name,
-  Value<String?> description,
-  Value<String?> imageUrl,
-  Value<String> clothingItemIds,
-  Value<bool> isFavorite,
-  Value<int> timesWorn,
-  Value<double> comfortRating,
-  Value<String> tags,
-  Value<String> occasions,
-  Value<String> weatherConditions,
-  Value<String> seasons,
-  required int addedDate,
-  required int createdAt,
-  required int updatedAt,
-  Value<String?> serverId,
-  Value<bool> dirty,
-  Value<int?> lastSyncedAt,
-});
-typedef $$OutfitsTableUpdateCompanionBuilder = OutfitsCompanion Function({
-  Value<int> id,
-  Value<String?> externalId,
-  Value<String> name,
-  Value<String?> description,
-  Value<String?> imageUrl,
-  Value<String> clothingItemIds,
-  Value<bool> isFavorite,
-  Value<int> timesWorn,
-  Value<double> comfortRating,
-  Value<String> tags,
-  Value<String> occasions,
-  Value<String> weatherConditions,
-  Value<String> seasons,
-  Value<int> addedDate,
-  Value<int> createdAt,
-  Value<int> updatedAt,
-  Value<String?> serverId,
-  Value<bool> dirty,
-  Value<int?> lastSyncedAt,
-});
+      $$ClothingItemsTableFilterComposer,
+      $$ClothingItemsTableOrderingComposer,
+      $$ClothingItemsTableAnnotationComposer,
+      $$ClothingItemsTableCreateCompanionBuilder,
+      $$ClothingItemsTableUpdateCompanionBuilder,
+      (
+        DbClothingItem,
+        BaseReferences<_$WardrobeDatabase, $ClothingItemsTable, DbClothingItem>,
+      ),
+      DbClothingItem,
+      PrefetchHooks Function()
+    >;
+typedef $$OutfitsTableCreateCompanionBuilder =
+    OutfitsCompanion Function({
+      Value<int> id,
+      Value<String?> externalId,
+      required String name,
+      Value<String?> description,
+      Value<String?> imageUrl,
+      Value<String> clothingItemIds,
+      Value<bool> isFavorite,
+      Value<int> timesWorn,
+      Value<double> comfortRating,
+      Value<String> tags,
+      Value<String> occasions,
+      Value<String> weatherConditions,
+      Value<String> seasons,
+      required int addedDate,
+      required int createdAt,
+      required int updatedAt,
+      Value<String?> serverId,
+      Value<bool> dirty,
+      Value<int?> lastSyncedAt,
+    });
+typedef $$OutfitsTableUpdateCompanionBuilder =
+    OutfitsCompanion Function({
+      Value<int> id,
+      Value<String?> externalId,
+      Value<String> name,
+      Value<String?> description,
+      Value<String?> imageUrl,
+      Value<String> clothingItemIds,
+      Value<bool> isFavorite,
+      Value<int> timesWorn,
+      Value<double> comfortRating,
+      Value<String> tags,
+      Value<String> occasions,
+      Value<String> weatherConditions,
+      Value<String> seasons,
+      Value<int> addedDate,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<String?> serverId,
+      Value<bool> dirty,
+      Value<int?> lastSyncedAt,
+    });
 
 class $$OutfitsTableFilterComposer
     extends Composer<_$WardrobeDatabase, $OutfitsTable> {
@@ -2986,63 +3591,99 @@ class $$OutfitsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => ColumnFilters(column));
+    column: $table.externalId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get imageUrl => $composableBuilder(
-      column: $table.imageUrl, builder: (column) => ColumnFilters(column));
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get clothingItemIds => $composableBuilder(
-      column: $table.clothingItemIds,
-      builder: (column) => ColumnFilters(column));
+    column: $table.clothingItemIds,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get timesWorn => $composableBuilder(
-      column: $table.timesWorn, builder: (column) => ColumnFilters(column));
+    column: $table.timesWorn,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get comfortRating => $composableBuilder(
-      column: $table.comfortRating, builder: (column) => ColumnFilters(column));
+    column: $table.comfortRating,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get tags => $composableBuilder(
-      column: $table.tags, builder: (column) => ColumnFilters(column));
+    column: $table.tags,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get occasions => $composableBuilder(
-      column: $table.occasions, builder: (column) => ColumnFilters(column));
+    column: $table.occasions,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get weatherConditions => $composableBuilder(
-      column: $table.weatherConditions,
-      builder: (column) => ColumnFilters(column));
+    column: $table.weatherConditions,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get seasons => $composableBuilder(
-      column: $table.seasons, builder: (column) => ColumnFilters(column));
+    column: $table.seasons,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get addedDate => $composableBuilder(
-      column: $table.addedDate, builder: (column) => ColumnFilters(column));
+    column: $table.addedDate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get serverId => $composableBuilder(
-      column: $table.serverId, builder: (column) => ColumnFilters(column));
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get dirty => $composableBuilder(
-      column: $table.dirty, builder: (column) => ColumnFilters(column));
+    column: $table.dirty,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$OutfitsTableOrderingComposer
@@ -3055,65 +3696,99 @@ class $$OutfitsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => ColumnOrderings(column));
+    column: $table.externalId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get imageUrl => $composableBuilder(
-      column: $table.imageUrl, builder: (column) => ColumnOrderings(column));
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get clothingItemIds => $composableBuilder(
-      column: $table.clothingItemIds,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.clothingItemIds,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get timesWorn => $composableBuilder(
-      column: $table.timesWorn, builder: (column) => ColumnOrderings(column));
+    column: $table.timesWorn,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get comfortRating => $composableBuilder(
-      column: $table.comfortRating,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.comfortRating,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get tags => $composableBuilder(
-      column: $table.tags, builder: (column) => ColumnOrderings(column));
+    column: $table.tags,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get occasions => $composableBuilder(
-      column: $table.occasions, builder: (column) => ColumnOrderings(column));
+    column: $table.occasions,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get weatherConditions => $composableBuilder(
-      column: $table.weatherConditions,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.weatherConditions,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get seasons => $composableBuilder(
-      column: $table.seasons, builder: (column) => ColumnOrderings(column));
+    column: $table.seasons,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get addedDate => $composableBuilder(
-      column: $table.addedDate, builder: (column) => ColumnOrderings(column));
+    column: $table.addedDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get serverId => $composableBuilder(
-      column: $table.serverId, builder: (column) => ColumnOrderings(column));
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get dirty => $composableBuilder(
-      column: $table.dirty, builder: (column) => ColumnOrderings(column));
+    column: $table.dirty,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OutfitsTableAnnotationComposer
@@ -3129,28 +3804,38 @@ class $$OutfitsTableAnnotationComposer
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => column);
+    column: $table.externalId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get imageUrl =>
       $composableBuilder(column: $table.imageUrl, builder: (column) => column);
 
   GeneratedColumn<String> get clothingItemIds => $composableBuilder(
-      column: $table.clothingItemIds, builder: (column) => column);
+    column: $table.clothingItemIds,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => column);
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get timesWorn =>
       $composableBuilder(column: $table.timesWorn, builder: (column) => column);
 
   GeneratedColumn<double> get comfortRating => $composableBuilder(
-      column: $table.comfortRating, builder: (column) => column);
+    column: $table.comfortRating,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get tags =>
       $composableBuilder(column: $table.tags, builder: (column) => column);
@@ -3159,7 +3844,9 @@ class $$OutfitsTableAnnotationComposer
       $composableBuilder(column: $table.occasions, builder: (column) => column);
 
   GeneratedColumn<String> get weatherConditions => $composableBuilder(
-      column: $table.weatherConditions, builder: (column) => column);
+    column: $table.weatherConditions,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get seasons =>
       $composableBuilder(column: $table.seasons, builder: (column) => column);
@@ -3180,23 +3867,32 @@ class $$OutfitsTableAnnotationComposer
       $composableBuilder(column: $table.dirty, builder: (column) => column);
 
   GeneratedColumn<int> get lastSyncedAt => $composableBuilder(
-      column: $table.lastSyncedAt, builder: (column) => column);
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
 }
 
-class $$OutfitsTableTableManager extends RootTableManager<
-    _$WardrobeDatabase,
-    $OutfitsTable,
-    DbOutfit,
-    $$OutfitsTableFilterComposer,
-    $$OutfitsTableOrderingComposer,
-    $$OutfitsTableAnnotationComposer,
-    $$OutfitsTableCreateCompanionBuilder,
-    $$OutfitsTableUpdateCompanionBuilder,
-    (DbOutfit, BaseReferences<_$WardrobeDatabase, $OutfitsTable, DbOutfit>),
-    DbOutfit,
-    PrefetchHooks Function()> {
+class $$OutfitsTableTableManager
+    extends
+        RootTableManager<
+          _$WardrobeDatabase,
+          $OutfitsTable,
+          DbOutfit,
+          $$OutfitsTableFilterComposer,
+          $$OutfitsTableOrderingComposer,
+          $$OutfitsTableAnnotationComposer,
+          $$OutfitsTableCreateCompanionBuilder,
+          $$OutfitsTableUpdateCompanionBuilder,
+          (
+            DbOutfit,
+            BaseReferences<_$WardrobeDatabase, $OutfitsTable, DbOutfit>,
+          ),
+          DbOutfit,
+          PrefetchHooks Function()
+        > {
   $$OutfitsTableTableManager(_$WardrobeDatabase db, $OutfitsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3205,127 +3901,130 @@ class $$OutfitsTableTableManager extends RootTableManager<
               $$OutfitsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$OutfitsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String?> externalId = const Value.absent(),
-            Value<String> name = const Value.absent(),
-            Value<String?> description = const Value.absent(),
-            Value<String?> imageUrl = const Value.absent(),
-            Value<String> clothingItemIds = const Value.absent(),
-            Value<bool> isFavorite = const Value.absent(),
-            Value<int> timesWorn = const Value.absent(),
-            Value<double> comfortRating = const Value.absent(),
-            Value<String> tags = const Value.absent(),
-            Value<String> occasions = const Value.absent(),
-            Value<String> weatherConditions = const Value.absent(),
-            Value<String> seasons = const Value.absent(),
-            Value<int> addedDate = const Value.absent(),
-            Value<int> createdAt = const Value.absent(),
-            Value<int> updatedAt = const Value.absent(),
-            Value<String?> serverId = const Value.absent(),
-            Value<bool> dirty = const Value.absent(),
-            Value<int?> lastSyncedAt = const Value.absent(),
-          }) =>
-              OutfitsCompanion(
-            id: id,
-            externalId: externalId,
-            name: name,
-            description: description,
-            imageUrl: imageUrl,
-            clothingItemIds: clothingItemIds,
-            isFavorite: isFavorite,
-            timesWorn: timesWorn,
-            comfortRating: comfortRating,
-            tags: tags,
-            occasions: occasions,
-            weatherConditions: weatherConditions,
-            seasons: seasons,
-            addedDate: addedDate,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-            serverId: serverId,
-            dirty: dirty,
-            lastSyncedAt: lastSyncedAt,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String?> externalId = const Value.absent(),
-            required String name,
-            Value<String?> description = const Value.absent(),
-            Value<String?> imageUrl = const Value.absent(),
-            Value<String> clothingItemIds = const Value.absent(),
-            Value<bool> isFavorite = const Value.absent(),
-            Value<int> timesWorn = const Value.absent(),
-            Value<double> comfortRating = const Value.absent(),
-            Value<String> tags = const Value.absent(),
-            Value<String> occasions = const Value.absent(),
-            Value<String> weatherConditions = const Value.absent(),
-            Value<String> seasons = const Value.absent(),
-            required int addedDate,
-            required int createdAt,
-            required int updatedAt,
-            Value<String?> serverId = const Value.absent(),
-            Value<bool> dirty = const Value.absent(),
-            Value<int?> lastSyncedAt = const Value.absent(),
-          }) =>
-              OutfitsCompanion.insert(
-            id: id,
-            externalId: externalId,
-            name: name,
-            description: description,
-            imageUrl: imageUrl,
-            clothingItemIds: clothingItemIds,
-            isFavorite: isFavorite,
-            timesWorn: timesWorn,
-            comfortRating: comfortRating,
-            tags: tags,
-            occasions: occasions,
-            weatherConditions: weatherConditions,
-            seasons: seasons,
-            addedDate: addedDate,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-            serverId: serverId,
-            dirty: dirty,
-            lastSyncedAt: lastSyncedAt,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> externalId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<String> clothingItemIds = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<int> timesWorn = const Value.absent(),
+                Value<double> comfortRating = const Value.absent(),
+                Value<String> tags = const Value.absent(),
+                Value<String> occasions = const Value.absent(),
+                Value<String> weatherConditions = const Value.absent(),
+                Value<String> seasons = const Value.absent(),
+                Value<int> addedDate = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<String?> serverId = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int?> lastSyncedAt = const Value.absent(),
+              }) => OutfitsCompanion(
+                id: id,
+                externalId: externalId,
+                name: name,
+                description: description,
+                imageUrl: imageUrl,
+                clothingItemIds: clothingItemIds,
+                isFavorite: isFavorite,
+                timesWorn: timesWorn,
+                comfortRating: comfortRating,
+                tags: tags,
+                occasions: occasions,
+                weatherConditions: weatherConditions,
+                seasons: seasons,
+                addedDate: addedDate,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                serverId: serverId,
+                dirty: dirty,
+                lastSyncedAt: lastSyncedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> externalId = const Value.absent(),
+                required String name,
+                Value<String?> description = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<String> clothingItemIds = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<int> timesWorn = const Value.absent(),
+                Value<double> comfortRating = const Value.absent(),
+                Value<String> tags = const Value.absent(),
+                Value<String> occasions = const Value.absent(),
+                Value<String> weatherConditions = const Value.absent(),
+                Value<String> seasons = const Value.absent(),
+                required int addedDate,
+                required int createdAt,
+                required int updatedAt,
+                Value<String?> serverId = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int?> lastSyncedAt = const Value.absent(),
+              }) => OutfitsCompanion.insert(
+                id: id,
+                externalId: externalId,
+                name: name,
+                description: description,
+                imageUrl: imageUrl,
+                clothingItemIds: clothingItemIds,
+                isFavorite: isFavorite,
+                timesWorn: timesWorn,
+                comfortRating: comfortRating,
+                tags: tags,
+                occasions: occasions,
+                weatherConditions: weatherConditions,
+                seasons: seasons,
+                addedDate: addedDate,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                serverId: serverId,
+                dirty: dirty,
+                lastSyncedAt: lastSyncedAt,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$OutfitsTableProcessedTableManager = ProcessedTableManager<
-    _$WardrobeDatabase,
-    $OutfitsTable,
-    DbOutfit,
-    $$OutfitsTableFilterComposer,
-    $$OutfitsTableOrderingComposer,
-    $$OutfitsTableAnnotationComposer,
-    $$OutfitsTableCreateCompanionBuilder,
-    $$OutfitsTableUpdateCompanionBuilder,
-    (DbOutfit, BaseReferences<_$WardrobeDatabase, $OutfitsTable, DbOutfit>),
-    DbOutfit,
-    PrefetchHooks Function()>;
-typedef $$OutfitItemsTableCreateCompanionBuilder = OutfitItemsCompanion
-    Function({
-  Value<int> id,
-  required int outfitId,
-  required int clothingItemId,
-  Value<int> sortOrder,
-  Value<bool> isPrimary,
-  Value<String> metadata,
-});
-typedef $$OutfitItemsTableUpdateCompanionBuilder = OutfitItemsCompanion
-    Function({
-  Value<int> id,
-  Value<int> outfitId,
-  Value<int> clothingItemId,
-  Value<int> sortOrder,
-  Value<bool> isPrimary,
-  Value<String> metadata,
-});
+typedef $$OutfitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$WardrobeDatabase,
+      $OutfitsTable,
+      DbOutfit,
+      $$OutfitsTableFilterComposer,
+      $$OutfitsTableOrderingComposer,
+      $$OutfitsTableAnnotationComposer,
+      $$OutfitsTableCreateCompanionBuilder,
+      $$OutfitsTableUpdateCompanionBuilder,
+      (DbOutfit, BaseReferences<_$WardrobeDatabase, $OutfitsTable, DbOutfit>),
+      DbOutfit,
+      PrefetchHooks Function()
+    >;
+typedef $$OutfitItemsTableCreateCompanionBuilder =
+    OutfitItemsCompanion Function({
+      Value<int> id,
+      required int outfitId,
+      required int clothingItemId,
+      Value<int> sortOrder,
+      Value<bool> isPrimary,
+      Value<String> metadata,
+    });
+typedef $$OutfitItemsTableUpdateCompanionBuilder =
+    OutfitItemsCompanion Function({
+      Value<int> id,
+      Value<int> outfitId,
+      Value<int> clothingItemId,
+      Value<int> sortOrder,
+      Value<bool> isPrimary,
+      Value<String> metadata,
+    });
 
 class $$OutfitItemsTableFilterComposer
     extends Composer<_$WardrobeDatabase, $OutfitItemsTable> {
@@ -3337,23 +4036,34 @@ class $$OutfitItemsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get outfitId => $composableBuilder(
-      column: $table.outfitId, builder: (column) => ColumnFilters(column));
+    column: $table.outfitId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get clothingItemId => $composableBuilder(
-      column: $table.clothingItemId,
-      builder: (column) => ColumnFilters(column));
+    column: $table.clothingItemId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
-      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isPrimary => $composableBuilder(
-      column: $table.isPrimary, builder: (column) => ColumnFilters(column));
+    column: $table.isPrimary,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get metadata => $composableBuilder(
-      column: $table.metadata, builder: (column) => ColumnFilters(column));
+    column: $table.metadata,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$OutfitItemsTableOrderingComposer
@@ -3366,23 +4076,34 @@ class $$OutfitItemsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get outfitId => $composableBuilder(
-      column: $table.outfitId, builder: (column) => ColumnOrderings(column));
+    column: $table.outfitId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get clothingItemId => $composableBuilder(
-      column: $table.clothingItemId,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.clothingItemId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get sortOrder => $composableBuilder(
-      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isPrimary => $composableBuilder(
-      column: $table.isPrimary, builder: (column) => ColumnOrderings(column));
+    column: $table.isPrimary,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get metadata => $composableBuilder(
-      column: $table.metadata, builder: (column) => ColumnOrderings(column));
+    column: $table.metadata,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OutfitItemsTableAnnotationComposer
@@ -3401,7 +4122,9 @@ class $$OutfitItemsTableAnnotationComposer
       $composableBuilder(column: $table.outfitId, builder: (column) => column);
 
   GeneratedColumn<int> get clothingItemId => $composableBuilder(
-      column: $table.clothingItemId, builder: (column) => column);
+    column: $table.clothingItemId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
@@ -3413,23 +4136,27 @@ class $$OutfitItemsTableAnnotationComposer
       $composableBuilder(column: $table.metadata, builder: (column) => column);
 }
 
-class $$OutfitItemsTableTableManager extends RootTableManager<
-    _$WardrobeDatabase,
-    $OutfitItemsTable,
-    DbOutfitItem,
-    $$OutfitItemsTableFilterComposer,
-    $$OutfitItemsTableOrderingComposer,
-    $$OutfitItemsTableAnnotationComposer,
-    $$OutfitItemsTableCreateCompanionBuilder,
-    $$OutfitItemsTableUpdateCompanionBuilder,
-    (
-      DbOutfitItem,
-      BaseReferences<_$WardrobeDatabase, $OutfitItemsTable, DbOutfitItem>
-    ),
-    DbOutfitItem,
-    PrefetchHooks Function()> {
+class $$OutfitItemsTableTableManager
+    extends
+        RootTableManager<
+          _$WardrobeDatabase,
+          $OutfitItemsTable,
+          DbOutfitItem,
+          $$OutfitItemsTableFilterComposer,
+          $$OutfitItemsTableOrderingComposer,
+          $$OutfitItemsTableAnnotationComposer,
+          $$OutfitItemsTableCreateCompanionBuilder,
+          $$OutfitItemsTableUpdateCompanionBuilder,
+          (
+            DbOutfitItem,
+            BaseReferences<_$WardrobeDatabase, $OutfitItemsTable, DbOutfitItem>,
+          ),
+          DbOutfitItem,
+          PrefetchHooks Function()
+        > {
   $$OutfitItemsTableTableManager(_$WardrobeDatabase db, $OutfitItemsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3438,60 +4165,63 @@ class $$OutfitItemsTableTableManager extends RootTableManager<
               $$OutfitItemsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$OutfitItemsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<int> outfitId = const Value.absent(),
-            Value<int> clothingItemId = const Value.absent(),
-            Value<int> sortOrder = const Value.absent(),
-            Value<bool> isPrimary = const Value.absent(),
-            Value<String> metadata = const Value.absent(),
-          }) =>
-              OutfitItemsCompanion(
-            id: id,
-            outfitId: outfitId,
-            clothingItemId: clothingItemId,
-            sortOrder: sortOrder,
-            isPrimary: isPrimary,
-            metadata: metadata,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required int outfitId,
-            required int clothingItemId,
-            Value<int> sortOrder = const Value.absent(),
-            Value<bool> isPrimary = const Value.absent(),
-            Value<String> metadata = const Value.absent(),
-          }) =>
-              OutfitItemsCompanion.insert(
-            id: id,
-            outfitId: outfitId,
-            clothingItemId: clothingItemId,
-            sortOrder: sortOrder,
-            isPrimary: isPrimary,
-            metadata: metadata,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> outfitId = const Value.absent(),
+                Value<int> clothingItemId = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isPrimary = const Value.absent(),
+                Value<String> metadata = const Value.absent(),
+              }) => OutfitItemsCompanion(
+                id: id,
+                outfitId: outfitId,
+                clothingItemId: clothingItemId,
+                sortOrder: sortOrder,
+                isPrimary: isPrimary,
+                metadata: metadata,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int outfitId,
+                required int clothingItemId,
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isPrimary = const Value.absent(),
+                Value<String> metadata = const Value.absent(),
+              }) => OutfitItemsCompanion.insert(
+                id: id,
+                outfitId: outfitId,
+                clothingItemId: clothingItemId,
+                sortOrder: sortOrder,
+                isPrimary: isPrimary,
+                metadata: metadata,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$OutfitItemsTableProcessedTableManager = ProcessedTableManager<
-    _$WardrobeDatabase,
-    $OutfitItemsTable,
-    DbOutfitItem,
-    $$OutfitItemsTableFilterComposer,
-    $$OutfitItemsTableOrderingComposer,
-    $$OutfitItemsTableAnnotationComposer,
-    $$OutfitItemsTableCreateCompanionBuilder,
-    $$OutfitItemsTableUpdateCompanionBuilder,
-    (
+typedef $$OutfitItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$WardrobeDatabase,
+      $OutfitItemsTable,
       DbOutfitItem,
-      BaseReferences<_$WardrobeDatabase, $OutfitItemsTable, DbOutfitItem>
-    ),
-    DbOutfitItem,
-    PrefetchHooks Function()>;
+      $$OutfitItemsTableFilterComposer,
+      $$OutfitItemsTableOrderingComposer,
+      $$OutfitItemsTableAnnotationComposer,
+      $$OutfitItemsTableCreateCompanionBuilder,
+      $$OutfitItemsTableUpdateCompanionBuilder,
+      (
+        DbOutfitItem,
+        BaseReferences<_$WardrobeDatabase, $OutfitItemsTable, DbOutfitItem>,
+      ),
+      DbOutfitItem,
+      PrefetchHooks Function()
+    >;
 
 class $WardrobeDatabaseManager {
   final _$WardrobeDatabase _db;

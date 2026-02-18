@@ -4,7 +4,7 @@ part 'achievement.freezed.dart';
 part 'achievement.g.dart';
 
 @freezed
-class Achievement with _$Achievement {
+abstract class Achievement with _$Achievement {
   const factory Achievement({
     required String id,
     required String title,

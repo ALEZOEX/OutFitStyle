@@ -5,7 +5,7 @@ part 'user_preference.freezed.dart';
 part 'user_preference.g.dart';
 
 @freezed
-class UserPreference with _$UserPreference {
+abstract class UserPreference with _$UserPreference {
   const factory UserPreference({
     @Default('comfortable')
     @JsonKey(name: 'preferred_temperature')

@@ -5,7 +5,7 @@ part 'recommendation_feedback.freezed.dart';
 part 'recommendation_feedback.g.dart';
 
 @freezed
-class RecommendationFeedback with _$RecommendationFeedback {
+abstract class RecommendationFeedback with _$RecommendationFeedback {
   const factory RecommendationFeedback({
     @Default('') String id,
     @Default('') String userId,

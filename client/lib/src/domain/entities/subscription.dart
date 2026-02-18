@@ -4,7 +4,7 @@ part 'subscription.freezed.dart';
 part 'subscription.g.dart';
 
 @freezed
-class SubscriptionPlan with _$SubscriptionPlan {
+abstract class SubscriptionPlan with _$SubscriptionPlan {
   const factory SubscriptionPlan({
     required String id,
     required String name,
@@ -23,7 +23,7 @@ class SubscriptionPlan with _$SubscriptionPlan {
 }
 
 @freezed
-class UserSubscription with _$UserSubscription {
+abstract class UserSubscription with _$UserSubscription {
   const factory UserSubscription({
     required String id,
     required String userId,
@@ -42,7 +42,7 @@ class UserSubscription with _$UserSubscription {
 }
 
 @freezed
-class PaymentMethod with _$PaymentMethod {
+abstract class PaymentMethod with _$PaymentMethod {
   const factory PaymentMethod({
     required String id,
     required String userId,
@@ -62,7 +62,7 @@ class PaymentMethod with _$PaymentMethod {
 }
 
 @freezed
-class Purchase with _$Purchase {
+abstract class Purchase with _$Purchase {
   const factory Purchase({
     required String id,
     required String userId,
@@ -81,7 +81,7 @@ class Purchase with _$Purchase {
 }
 
 @freezed
-class PaymentRecord with _$PaymentRecord {
+abstract class PaymentRecord with _$PaymentRecord {
   const factory PaymentRecord({
     required String id,
     required String userId,

@@ -6,28 +6,27 @@ part of 'achievement.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$AchievementImpl _$$AchievementImplFromJson(Map<String, dynamic> json) =>
-    _$AchievementImpl(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      icon: json['icon'] as String,
-      category: json['category'] as String,
-      points: (json['points'] as num).toInt(),
-      isCompleted: json['isCompleted'] as bool,
-      completedAt: json['completedAt'] == null
-          ? null
-          : DateTime.parse(json['completedAt'] as String),
-      progress: (json['progress'] as num).toInt(),
-      target: (json['target'] as num).toInt(),
-      reward: json['reward'] as String,
-      isVisible: json['isVisible'] as bool,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      userId: json['userId'] as String,
-    );
+_Achievement _$AchievementFromJson(Map<String, dynamic> json) => _Achievement(
+  id: json['id'] as String,
+  title: json['title'] as String,
+  description: json['description'] as String,
+  icon: json['icon'] as String,
+  category: json['category'] as String,
+  points: (json['points'] as num).toInt(),
+  isCompleted: json['isCompleted'] as bool,
+  completedAt: json['completedAt'] == null
+      ? null
+      : DateTime.parse(json['completedAt'] as String),
+  progress: (json['progress'] as num).toInt(),
+  target: (json['target'] as num).toInt(),
+  reward: json['reward'] as String,
+  isVisible: json['isVisible'] as bool,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  userId: json['userId'] as String,
+);
 
-Map<String, dynamic> _$$AchievementImplToJson(_$AchievementImpl instance) =>
+Map<String, dynamic> _$AchievementToJson(_Achievement instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,

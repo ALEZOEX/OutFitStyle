@@ -4,7 +4,7 @@ import 'clothing_item.dart';
 part 'outfit_item.freezed.dart';
 
 @freezed
-class OutfitItem with _$OutfitItem {
+abstract class OutfitItem with _$OutfitItem {
   const factory OutfitItem({
     int? id,
     int? outfitId,

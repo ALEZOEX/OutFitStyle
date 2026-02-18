@@ -4,7 +4,7 @@ part 'app_settings.freezed.dart';
 part 'app_settings.g.dart';
 
 @freezed
-class AppSettings with _$AppSettings {
+abstract class AppSettings with _$AppSettings {
   const factory AppSettings({
     @Default(true) bool notificationsEnabled,
     @Default(true) bool locationEnabled,
