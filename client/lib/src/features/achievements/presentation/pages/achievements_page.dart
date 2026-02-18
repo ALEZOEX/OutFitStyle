@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../domain/entities/achievement.dart';
 import '../providers/achievements_providers.dart';
 import '../widgets/achievement_card.dart';
 
@@ -29,6 +28,11 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
       curve: Curves.easeInOut,
     );
     _animationController.forward();
+    
+    // Загружаем достижения при открытии
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(achievementsNotifierProvider.notifier).loadAllAchievements();
+    });
   }
 
   @override
@@ -40,15 +44,7 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(achievementsNotifierProvider);
-    final notifier = ref.read(achievementsNotifierProvider.notifier);
     final theme = Theme.of(context);
-
-    // Загружаем ачивки при первом открытии страницы
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (state.status == AchievementStatus.initial) {
-        notifier.loadAllAchievements();
-      }
-    });
 
     return Scaffold(
       body: CustomScrollView(
@@ -58,32 +54,16 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
             child: _buildHeader(context),
           ),
           // Контент
-          switch (state.status) {
-            AchievementStatus.initial ||
-            AchievementStatus.loading =>
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            AchievementStatus.loaded => state.achievements != null
-                ? _buildAchievementsList(context, state.achievements!)
-                : SliverFillRemaining(
-                    child: _buildErrorState(context, 'Данные недоступны'),
-                  ),
-            AchievementStatus.userLoaded => state.userProgress != null
-                ? _buildAchievementsList(
-                    context,
-                    _mapUserProgressToAchievements(
-                      state.achievements ?? [],
-                      state.userProgress!,
-                    ),
-                  )
-                : SliverFillRemaining(
-                    child: _buildErrorState(context, 'Данные недоступны'),
-                  ),
-            AchievementStatus.error => SliverFillRemaining(
-                child: _buildErrorState(context, state.errorMessage ?? 'Произошла ошибка'),
-              ),
-          },
+          if (state.isLoading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (state.error != null)
+            SliverFillRemaining(
+              child: _buildErrorState(context, state.error!),
+            )
+          else
+            _buildAchievementsList(context, state.achievements),
         ],
       ),
     );
@@ -111,7 +91,7 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.emoji_events,
                 color: Colors.white,
                 size: 32,
@@ -148,88 +128,27 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
     );
   }
 
-  Widget _buildAchievementsList(BuildContext context, List<Achievement> achievements) {
-    final unlockedCount = achievements.where((a) => a.isUnlocked == true).length;
-    final totalCount = achievements.length;
-    final totalProgress = totalCount > 0 ? unlockedCount / totalCount : 0.0;
+  Widget _buildAchievementsList(BuildContext context, List<dynamic> achievements) {
     final theme = Theme.of(context);
 
     return SliverPadding(
       padding: const EdgeInsets.all(16),
       sliver: SliverList(
-        delegate: SliverChildListDelegate([
-          // Общий прогресс
-          FadeTransition(
-            opacity: _fadeAnimation,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primaryContainer,
-                    theme.colorScheme.secondaryContainer,
-                  ],
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final achievement = achievements[index];
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: AchievementCard(
+                  achievement: achievement,
                 ),
-                borderRadius: BorderRadius.circular(20),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Общий прогресс',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '$unlockedCount/$totalCount',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: totalProgress,
-                      backgroundColor: theme.colorScheme.outline.withOpacity(0.3),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        theme.colorScheme.primary,
-                      ),
-                      minHeight: 10,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${(totalProgress * 100).toInt()}% разблокировано',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          // Список достижений
-          ...achievements.map((achievement) => FadeTransition(
-            opacity: _fadeAnimation,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: AchievementCard(
-                achievement: achievement,
-              ),
-            ),
-          )),
-          const SizedBox(height: 80),
-        ]),
+            );
+          },
+          childCount: achievements.length,
+        ),
       ),
     );
   }
@@ -266,22 +185,5 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
         ),
       ),
     );
-  }
-
-  List<Achievement> _mapUserProgressToAchievements(
-    List<Achievement> allAchievements,
-    AchievementProgress userProgress,
-  ) {
-    return allAchievements.map((achievement) {
-      final userStatus = userProgress.achievements[achievement.id];
-      if (userStatus != null) {
-        return achievement.copyWith(
-          currentProgress: userStatus.currentProgress,
-          isUnlocked: userStatus.isUnlocked,
-          unlockedAt: userStatus.unlockedAt,
-        );
-      }
-      return achievement;
-    }).toList();
   }
 }
