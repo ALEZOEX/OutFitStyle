@@ -132,10 +132,7 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
       brand: state.brand?.trim().isEmpty == true ? null : state.brand,
       color: state.color,
       size: state.size,
-      imageUrl: state.imageUrl,
-      localImagePath: state.localImagePath,
-      dirty: true,
-      lastSyncedAt: null,
+      imageUrl: state.imageUrl ?? '',
     );
   }
 }
