@@ -63,7 +63,7 @@ class AuthService {
 
       // 3. Отправляем idToken на наш Go-бэкенд
       final response = await _dio.post(
-        '/auth/google',
+        '/api/v1/auth/google',
         data: {'id_token': idToken},
       );
 
