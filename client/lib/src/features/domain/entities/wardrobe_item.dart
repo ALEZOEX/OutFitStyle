@@ -17,6 +17,7 @@ class WardrobeItem with _$WardrobeItem {
     @Default(null) String? brand,
     @Default(null) String? color,
     @Default(null) String? size,
+    @Default(null) int? minTemp,
     @Default(null) List<String>? seasons,
     @Default(null) DateTime? createdAt,
     @Default(null) DateTime? updatedAt,
