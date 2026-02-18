@@ -1,9 +1,9 @@
-import '../../../core/api/api_client.dart';
-import '../../entities/recommendation.dart';
-import '../../entities/outfit_recommendation.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../domain/entities/outfit_recommendation.dart';
+import 'package:dio/dio.dart';
 
 /// Репозиторий для работы с ежедневными рекомендациями
-/// 
+///
 /// Взаимодействует с API эндпоинтами:
 /// - GET /api/v1/recommendations/daily - ежедневная рекомендация
 /// - GET /api/v1/recommendations/alternatives - альтернативные варианты
@@ -16,21 +16,22 @@ class DailyRecommendationsRepository {
   }) : _apiClient = apiClient;
 
   /// Получить ежедневную рекомендацию
-  /// 
+  ///
   /// Endpoint: GET /api/v1/recommendations/daily
-  Future<Recommendation> getDailyRecommendation() async {
+  Future<OutfitRecommendation> getDailyRecommendation() async {
     try {
       final response = await _apiClient.get('/api/v1/recommendations/daily');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final recData = data['recommendation'] as Map<String, dynamic>? ?? data;
-        return Recommendation.fromJson(recData);
+        return OutfitRecommendation.fromJson(recData);
       } else {
         throw RecommendationsException('Ошибка получения рекомендации: ${response.statusCode}');
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is RecommendationsException) rethrow;
       throw RecommendationsException('Ошибка получения рекомендации: $e');
@@ -38,11 +39,11 @@ class DailyRecommendationsRepository {
   }
 
   /// Получить альтернативные рекомендации
-  /// 
+  ///
   /// [limit] - количество рекомендаций (по умолчанию 3)
-  /// 
+  ///
   /// Endpoint: GET /api/v1/recommendations/alternatives
-  Future<List<Recommendation>> getAlternativeRecommendations({int limit = 3}) async {
+  Future<List<OutfitRecommendation>> getAlternativeRecommendations({int limit = 3}) async {
     try {
       final response = await _apiClient.get(
         '/api/v1/recommendations/alternatives',
@@ -51,18 +52,19 @@ class DailyRecommendationsRepository {
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final recsData = data['recommendations'] as List<dynamic>? ?? 
-                         data['alternatives'] as List<dynamic>? ?? 
+        final recsData = data['recommendations'] as List<dynamic>? ??
+                         data['alternatives'] as List<dynamic>? ??
                          [];
-        
+
         return recsData
-            .map((item) => Recommendation.fromJson(item as Map<String, dynamic>))
+            .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
             .toList();
       } else {
         throw RecommendationsException('Ошибка получения рекомендаций: ${response.statusCode}');
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is RecommendationsException) rethrow;
       throw RecommendationsException('Ошибка получения рекомендаций: $e');
@@ -70,9 +72,9 @@ class DailyRecommendationsRepository {
   }
 
   /// Получить советы дня
-  /// 
+  ///
   /// [limit] - количество советов (по умолчанию 4)
-  /// 
+  ///
   /// Endpoint: GET /api/v1/tips/daily
   Future<List<Tip>> getDailyTips({int limit = 4}) async {
     try {
@@ -84,7 +86,7 @@ class DailyRecommendationsRepository {
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final tipsData = data['tips'] as List<dynamic>? ?? [];
-        
+
         return tipsData
             .map((item) => Tip.fromJson(item as Map<String, dynamic>))
             .toList();
@@ -93,6 +95,7 @@ class DailyRecommendationsRepository {
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is RecommendationsException) rethrow;
       throw RecommendationsException('Ошибка получения советов: $e');
@@ -100,13 +103,13 @@ class DailyRecommendationsRepository {
   }
 
   /// Создать новую рекомендацию
-  /// 
+  ///
   /// [latitude] - широта
   /// [longitude] - долгота
   /// [occasion] - повод
-  /// 
+  ///
   /// Endpoint: POST /api/v1/recommendations
-  Future<Recommendation> createRecommendation({
+  Future<OutfitRecommendation> createRecommendation({
     double? latitude,
     double? longitude,
     String? occasion,
@@ -114,7 +117,7 @@ class DailyRecommendationsRepository {
   }) async {
     try {
       final body = <String, dynamic>{};
-      
+
       if (latitude != null) body['latitude'] = latitude;
       if (longitude != null) body['longitude'] = longitude;
       if (occasion != null) body['occasion'] = occasion;
@@ -125,12 +128,13 @@ class DailyRecommendationsRepository {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data as Map<String, dynamic>;
         final recData = data['recommendation'] as Map<String, dynamic>? ?? data;
-        return Recommendation.fromJson(recData);
+        return OutfitRecommendation.fromJson(recData);
       } else {
         throw RecommendationsException('Ошибка создания рекомендации: ${response.statusCode}');
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is RecommendationsException) rethrow;
       throw RecommendationsException('Ошибка создания рекомендации: $e');
@@ -138,10 +142,10 @@ class DailyRecommendationsRepository {
   }
 
   /// Оценить рекомендацию
-  /// 
+  ///
   /// [id] - ID рекомендации
   /// [rating] - оценка (1-5)
-  /// 
+  ///
   /// Endpoint: POST /api/v1/recommendations/{id}/rate
   Future<void> rateRecommendation(String id, double rating) async {
     try {
@@ -155,6 +159,7 @@ class DailyRecommendationsRepository {
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is RecommendationsException) rethrow;
       throw RecommendationsException('Ошибка оценки рекомендации: $e');
@@ -162,23 +167,24 @@ class DailyRecommendationsRepository {
   }
 
   /// Добавить рекомендацию в избранное
-  /// 
+  ///
   /// [id] - ID рекомендации
-  /// 
+  ///
   /// Endpoint: POST /api/v1/recommendations/{id}/favorite
-  Future<Recommendation> toggleFavorite(String id) async {
+  Future<OutfitRecommendation> toggleFavorite(String id) async {
     try {
       final response = await _apiClient.post('/api/v1/recommendations/$id/favorite');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final recData = data['recommendation'] as Map<String, dynamic>? ?? data;
-        return Recommendation.fromJson(recData);
+        return OutfitRecommendation.fromJson(recData);
       } else {
         throw RecommendationsException('Ошибка обновления избранного: ${response.statusCode}');
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is RecommendationsException) rethrow;
       throw RecommendationsException('Ошибка обновления избранного: $e');
@@ -186,23 +192,24 @@ class DailyRecommendationsRepository {
   }
 
   /// Сохранить рекомендацию
-  /// 
+  ///
   /// [id] - ID рекомендации
-  /// 
+  ///
   /// Endpoint: POST /api/v1/recommendations/{id}/save
-  Future<Recommendation> saveRecommendation(String id) async {
+  Future<OutfitRecommendation> saveRecommendation(String id) async {
     try {
       final response = await _apiClient.post('/api/v1/recommendations/$id/save');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final recData = data['recommendation'] as Map<String, dynamic>? ?? data;
-        return Recommendation.fromJson(recData);
+        return OutfitRecommendation.fromJson(recData);
       } else {
         throw RecommendationsException('Ошибка сохранения рекомендации: ${response.statusCode}');
       }
     } on DioException catch (e) {
       _handleDioError(e);
+      rethrow;
     } catch (e) {
       if (e is RecommendationsException) rethrow;
       throw RecommendationsException('Ошибка сохранения рекомендации: $e');

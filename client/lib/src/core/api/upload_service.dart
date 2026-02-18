@@ -35,12 +35,12 @@ class UploadService {
   }
 
   /// Загружает изображение на сервер
-  /// 
+  ///
   /// [imageFile] - файл изображения для загрузки
   /// [onProgress] - callback для отслеживания прогресса (0.0 - 1.0)
-  /// 
+  ///
   /// Возвращает URL загруженного изображения
-  /// 
+  ///
   /// Endpoint: POST /api/v1/upload/image
   Future<String> uploadImage(
     File imageFile, {
@@ -48,8 +48,7 @@ class UploadService {
   }) async {
     try {
       final fileName = path.basename(imageFile.path);
-      final fileSize = await imageFile.length();
-      
+
       // Создаем FormData для multipart запроса
       final formData = FormData.fromMap({
         'image': await MultipartFile.fromFile(
@@ -136,15 +135,15 @@ class UploadService {
     }
   }
 
-  void _handleDioError(DioException e) {
+  Never _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.sendTimeout) {
       throw UploadException('Превышено время загрузки. Проверьте соединение.');
     }
-    
+
     final statusCode = e.response?.statusCode;
     final errorMessage = _extractErrorMessage(e.response?.data);
-    
+
     switch (statusCode) {
       case 401:
         throw UploadException('Требуется авторизация');

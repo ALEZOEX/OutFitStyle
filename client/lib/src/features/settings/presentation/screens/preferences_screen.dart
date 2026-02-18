@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../services/auth_storage.dart';
 import '../../data/repositories/preferences_repository.dart';
-import '../../../../domain/entities/user_preference.dart';
 
 /// Модели предпочтений (UI enum)
 enum ClothingSizeUI {
@@ -100,28 +99,28 @@ class PreferencesState {
       isSaving: isSaving ?? this.isSaving,
     );
   }
-  
-  /// Конвертировать в UserPreference для отправки на сервер
-  UserPreference toUserPreference() {
-    return UserPreference(
-      preferredTemperature: 'comfortable',
-      preferredColors: colors,
-      preferredStyles: StylePreferenceUI.toStyleList(styles),
-      preferredBrands: brands,
-      maxBudget: maxBudget.toDouble(),
-      fitPreference: size?.label.toLowerCase(),
-    );
+
+  /// Конвертировать в Map<String, dynamic> для отправки на сервер
+  Map<String, dynamic> toPreferencesMap() {
+    return <String, dynamic>{
+      'preferred_temperature': 'comfortable',
+      'preferred_colors': colors,
+      'preferred_styles': StylePreferenceUI.toStyleList(styles),
+      'preferred_brands': brands,
+      'max_budget': maxBudget.toDouble(),
+      'fit_preference': size?.label.toLowerCase(),
+    };
   }
-  
-  /// Создать из UserPreference
-  factory PreferencesState.fromUserPreference(UserPreference pref) {
+
+  /// Создать из Map<String, dynamic>
+  factory PreferencesState.fromPreferencesMap(Map<String, dynamic> pref) {
     return PreferencesState(
-      colors: pref.preferredColors,
-      styles: StylePreferenceUI.fromStyleList(pref.preferredStyles),
-      brands: pref.preferredBrands,
-      minBudget: (pref.maxBudget ?? 50000) ~/ 2,
-      maxBudget: (pref.maxBudget ?? 50000).round(),
-      size: ClothingSizeUI.fromString(pref.fitPreference),
+      colors: List<String>.from(pref['preferred_colors'] ?? []),
+      styles: StylePreferenceUI.fromStyleList(List<String>.from(pref['preferred_styles'] ?? [])),
+      brands: List<String>.from(pref['preferred_brands'] ?? []),
+      minBudget: ((pref['max_budget'] as num?) ?? 50000) ~/ 2,
+      maxBudget: ((pref['max_budget'] as num?) ?? 50000).round(),
+      size: ClothingSizeUI.fromString(pref['fit_preference'] as String?),
     );
   }
 }
@@ -131,7 +130,8 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
 
   PreferencesNotifier({
     required PreferencesRepository repository,
-  }) : _repository = repository {
+  }) : _repository = repository,
+       super(const PreferencesState()) {
     _loadPreferences();
   }
 
@@ -140,7 +140,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final pref = await _repository.getPreferences();
-      state = PreferencesState.fromUserPreference(pref).copyWith(isLoading: false);
+      state = PreferencesState.fromPreferencesMap(pref).copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -153,8 +153,8 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
   Future<bool> savePreferences() async {
     state = state.copyWith(isSaving: true, error: null);
     try {
-      final userPref = state.toUserPreference();
-      await _repository.updatePreferences(userPref);
+      final preferencesMap = state.toPreferencesMap();
+      await _repository.updatePreferences(preferencesMap);
       state = state.copyWith(isSaving: false);
       return true;
     } catch (e) {

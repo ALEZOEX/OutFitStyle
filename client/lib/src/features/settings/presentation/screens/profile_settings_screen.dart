@@ -9,7 +9,6 @@ import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
 import '../../../../services/auth_storage.dart';
 import '../../data/repositories/profile_repository.dart';
-import '../../../../domain/entities/user.dart';
 
 /// Провайдер для состояния профиля
 class ProfileState {
@@ -43,7 +42,17 @@ class ProfileState {
       email: email ?? this.email,
       userId: userId ?? this.userId,
       isLoading: isLoading ?? this.isLoading,
-      error: error, // Сбрасываем ошибку при обновлении
+      error: error,
+    );
+  }
+
+  /// Создать из Map<String, dynamic>
+  factory ProfileState.fromMap(Map<String, dynamic> data) {
+    return ProfileState(
+      name: data['name'] as String? ?? '',
+      email: data['email'] as String? ?? '',
+      avatarUrl: data['avatar_url'] as String?,
+      userId: data['id'] as String? ?? '',
     );
   }
 }
@@ -56,7 +65,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     required ProfileRepository repository,
     required UploadService uploadService,
   })  : _repository = repository,
-        _uploadService = uploadService {
+        _uploadService = uploadService,
+        super(const ProfileState()) {
     _loadProfile();
   }
 
@@ -64,14 +74,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<void> _loadProfile() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _repository.getProfile();
-      state = state.copyWith(
-        isLoading: false,
-        name: user.name,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-        userId: user.id,
-      );
+      final userData = await _repository.getProfile();
+      state = ProfileState.fromMap(userData).copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -88,12 +92,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       final imageUrl = await _uploadService.uploadImage(imageFile);
 
       // Обновляем профиль с новым URL
-      final user = await _repository.uploadAvatar(imageUrl);
+      final userData = await _repository.uploadAvatar(imageUrl);
 
-      state = state.copyWith(
-        isLoading: false,
-        avatarUrl: user.avatarUrl,
-      );
+      state = ProfileState.fromMap(userData).copyWith(isLoading: false);
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -108,11 +109,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<bool> updateName(String name) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _repository.updateProfile(name: name);
-      state = state.copyWith(
-        isLoading: false,
-        name: user.name,
-      );
+      final userData = await _repository.updateProfile(name: name);
+      state = ProfileState.fromMap(userData).copyWith(isLoading: false);
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -127,11 +125,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<bool> updateEmail(String email) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _repository.updateProfile(email: email);
-      state = state.copyWith(
-        isLoading: false,
-        email: user.email,
-      );
+      final userData = await _repository.updateProfile(email: email);
+      state = ProfileState.fromMap(userData).copyWith(isLoading: false);
       return true;
     } catch (e) {
       state = state.copyWith(
