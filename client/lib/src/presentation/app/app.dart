@@ -8,6 +8,33 @@ import '../../theme/theme_controller.dart';
 import '../routing/router.dart';
 import '../../core/sync/sync_bootstrapper.dart';
 
+/// Виджет для инициализации состояния авторизации
+class AuthInitializer extends ConsumerStatefulWidget {
+  final Widget child;
+
+  const AuthInitializer({super.key, required this.child});
+
+  @override
+  ConsumerState<AuthInitializer> createState() => _AuthInitializerState();
+}
+
+class _AuthInitializerState extends ConsumerState<AuthInitializer> {
+  @override
+  void initState() {
+    super.initState();
+    // Инициализируем состояние авторизации при запуске
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authStateNotifier = ref.read(authStateProvider.notifier);
+      authStateNotifier.checkAuth();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
 class OutfitStyleApp extends ConsumerWidget {
   const OutfitStyleApp({super.key});
 
@@ -24,23 +51,25 @@ class OutfitStyleApp extends ConsumerWidget {
     );
 
     return SyncBootstrapper(
-      child: MaterialApp.router(
-        title: 'OutfitStyle',
-        debugShowCheckedModeBanner: false,
-        theme: AppThemes.lightTheme,
-        darkTheme: AppThemes.darkTheme,
-        themeMode: themeMode,
-        routerConfig: router,
-        locale: const Locale('ru'), // Принудительно русский язык
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('ru'), // Русский
-          Locale('en'), // Английский
-        ],
+      child: AuthInitializer(
+        child: MaterialApp.router(
+          title: 'OutfitStyle',
+          debugShowCheckedModeBanner: false,
+          theme: AppThemes.lightTheme,
+          darkTheme: AppThemes.darkTheme,
+          themeMode: themeMode,
+          routerConfig: router,
+          locale: const Locale('ru'), // Принудительно русский язык
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('ru'), // Русский
+            Locale('en'), // Английский
+          ],
+        ),
       ),
     );
   }

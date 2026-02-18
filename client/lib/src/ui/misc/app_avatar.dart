@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
 /// Custom avatar widget
@@ -102,13 +103,45 @@ class AppAvatar extends StatelessWidget {
       return placeholderWidget!;
     }
 
-    // Используем SVG placeholder вместо текста
-    return SvgPicture.asset(
-      'assets/icons/avatar_placeholder.svg',
-      width: radius * 2,
-      height: radius * 2,
-      fit: BoxFit.cover,
+    // Пробуем использовать SVG placeholder, с fallback на текст
+    return FutureBuilder<bool>(
+      future: _svgAssetExists('assets/icons/avatar_placeholder.svg'),
+      builder: (context, snapshot) {
+        if (snapshot.data == true) {
+          return SvgPicture.asset(
+            'assets/icons/avatar_placeholder.svg',
+            width: radius * 2,
+            height: radius * 2,
+            fit: BoxFit.cover,
+          );
+        }
+        // Fallback на текстовый placeholder
+        return Container(
+          width: radius * 2,
+          height: radius * 2,
+          color: bgColor,
+          child: Center(
+            child: Text(
+              placeholderText ?? '?',
+              style: TextStyle(
+                color: fgColor,
+                fontSize: radius,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      },
     );
+  }
+
+  Future<bool> _svgAssetExists(String assetPath) async {
+    try {
+      await rootBundle.load(assetPath);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   String _getInitials(String name) {
