@@ -70,35 +70,58 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshStream = ref.watch(goRouterRefreshProvider);
 
   return GoRouter(
-    initialLocation: '/onboarding',
+    initialLocation: '/',
     refreshListenable: refreshStream,
     redirect: (BuildContext context, GoRouterState state) async {
       final path = state.uri.toString();
       final authState = ref.read(authStateProvider);
 
-      // Онбординг и авторизация всегда доступны
-      if (path.startsWith('/onboarding') || path.startsWith('/auth')) {
-        // Если уже авторизован, не пускаем на auth
-        if (path.startsWith('/auth') && authState.isAuthenticated) {
+      // Корневой маршрут
+      if (path == '/') {
+        // Если загрузка, ждём
+        if (authState.isLoading) {
+          return null;
+        }
+
+        // Проверяем онбординг
+        final onboardingStorage = onboarding_storage.OnboardingStorage();
+        final onboardingDone = await onboardingStorage.isDone();
+
+        if (!onboardingDone) {
+          return '/onboarding';
+        }
+
+        // Проверяем авторизацию
+        if (!authState.isAuthenticated) {
+          return '/auth';
+        }
+
+        // Всё ок - идём на home
+        return '/home';
+      }
+
+      // Онбординг
+      if (path.startsWith('/onboarding')) {
+        // Если уже прошли онбординг и авторизованы - на home
+        final onboardingStorage = onboarding_storage.OnboardingStorage();
+        final onboardingDone = await onboardingStorage.isDone();
+
+        if (onboardingDone && authState.isAuthenticated) {
           return '/home';
         }
         return null;
       }
 
-      // Если загрузка состояния, показываем loading
-      if (authState.isLoading) {
+      // Авторизация
+      if (path.startsWith('/auth')) {
+        // Если уже авторизован - на home
+        if (authState.isAuthenticated) {
+          return '/home';
+        }
         return null;
       }
 
-      // Проверяем онбординг
-      final onboardingStorage = onboarding_storage.OnboardingStorage();
-      final onboardingDone = await onboardingStorage.isDone();
-
-      if (!onboardingDone) {
-        return '/onboarding';
-      }
-
-      // Проверяем авторизацию
+      // Для всех остальных маршрутов проверяем авторизацию
       if (!authState.isAuthenticated) {
         return '/auth';
       }
@@ -106,10 +129,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      // Корневой маршрут перенаправляет на онбординг
+      // Корневой маршрут - теперь redirect обрабатывает логику
       GoRoute(
         path: '/',
-        redirect: (context, state) => '/onboarding',
+        redirect: (context, state) => null, // redirect выше обрабатывает
       ),
       GoRoute(
         path: '/onboarding',
