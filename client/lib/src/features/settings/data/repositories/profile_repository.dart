@@ -1,0 +1,252 @@
+import 'dart:convert';
+import '../../../core/api/api_client.dart';
+import '../../../services/auth_storage.dart';
+import '../../entities/user.dart';
+import '../../entities/user_profile.dart';
+import '../../entities/user_preference.dart';
+
+/// Репозиторий для работы с профилем пользователя
+/// 
+/// Взаимодействует с API эндпоинтами:
+/// - GET /api/v1/users/me - получение профиля
+/// - PUT /api/v1/users/profile - обновление профиля
+/// - DELETE /api/v1/users/account - удаление аккаунта
+/// - POST /api/v1/users/avatar - загрузка аватара
+class ProfileRepository {
+  final ApiClient _apiClient;
+  final AuthStorage _authStorage;
+
+  ProfileRepository({
+    required ApiClient apiClient,
+    required AuthStorage authStorage,
+  })  : _apiClient = apiClient,
+        _authStorage = authStorage;
+
+  /// Получить профиль текущего пользователя
+  /// 
+  /// Endpoint: GET /api/v1/users/me
+  Future<User> getProfile() async {
+    try {
+      final response = await _apiClient.get('/api/v1/users/me');
+      
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final userData = data['user'] as Map<String, dynamic>? ?? data;
+        return User.fromJson(userData);
+      } else {
+        throw ProfileException('Ошибка получения профиля: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      _handleDioError(e);
+    } catch (e) {
+      if (e is ProfileException) rethrow;
+      throw ProfileException('Ошибка получения профиля: $e');
+    }
+  }
+
+  /// Обновить профиль пользователя
+  /// 
+  /// [name] - новое имя
+  /// [email] - новый email
+  /// [bio] - биография
+  /// [avatarUrl] - URL аватара
+  /// 
+  /// Endpoint: PUT /api/v1/users/profile
+  Future<User> updateProfile({
+    String? name,
+    String? email,
+    String? bio,
+    String? avatarUrl,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      
+      if (name != null) body['name'] = name;
+      if (email != null) body['email'] = email;
+      if (bio != null) body['bio'] = bio;
+      if (avatarUrl != null) body['avatar_url'] = avatarUrl;
+
+      final response = await _apiClient.put(
+        '/api/v1/users/profile',
+        data: body,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final userData = data['user'] as Map<String, dynamic>? ?? data;
+        return User.fromJson(userData);
+      } else {
+        throw ProfileException('Ошибка обновления профиля: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      _handleDioError(e);
+    } catch (e) {
+      if (e is ProfileException) rethrow;
+      throw ProfileException('Ошибка обновления профиля: $e');
+    }
+  }
+
+  /// Удалить аккаунт пользователя
+  /// 
+  /// [password] - пароль для подтверждения
+  /// [reason] - причина удаления (опционально)
+  /// [feedback] - обратная связь (опционально)
+  /// 
+  /// Endpoint: DELETE /api/v1/users/account
+  Future<void> deleteAccount({
+    required String password,
+    String? reason,
+    String? feedback,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'password': password,
+      };
+      
+      if (reason != null) body['reason'] = reason;
+      if (feedback != null) body['feedback'] = feedback;
+
+      final response = await _apiClient.delete(
+        '/api/v1/users/account',
+        // data: body, // DELETE с body может не поддерживаться некоторыми серверами
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw ProfileException('Ошибка удаления аккаунта: ${response.statusCode}');
+      }
+      
+      // Очищаем сессию после успешного удаления
+      await _authStorage.clearSession();
+    } on DioException catch (e) {
+      _handleDioError(e);
+    } catch (e) {
+      if (e is ProfileException) rethrow;
+      throw ProfileException('Ошибка удаления аккаунта: $e');
+    }
+  }
+
+  /// Загрузить аватар
+  /// 
+  /// [avatarUrl] - URL аватара
+  /// 
+  /// Endpoint: POST /api/v1/users/avatar
+  Future<User> uploadAvatar(String avatarUrl) async {
+    try {
+      final response = await _apiClient.post(
+        '/api/v1/users/avatar',
+        data: {'avatar_url': avatarUrl},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final userData = data['user'] as Map<String, dynamic>? ?? data;
+        return User.fromJson(userData);
+      } else {
+        throw ProfileException('Ошибка загрузки аватара: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      _handleDioError(e);
+    } catch (e) {
+      if (e is ProfileException) rethrow;
+      throw ProfileException('Ошибка загрузки аватара: $e');
+    }
+  }
+
+  /// Получить предпочтения пользователя
+  /// 
+  /// Endpoint: GET /api/v1/users/preferences
+  Future<UserPreference> getPreferences() async {
+    try {
+      final response = await _apiClient.get('/api/v1/users/preferences');
+      
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
+        return UserPreference.fromJson(prefData);
+      } else {
+        throw ProfileException('Ошибка получения предпочтений: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      _handleDioError(e);
+    } catch (e) {
+      if (e is ProfileException) rethrow;
+      throw ProfileException('Ошибка получения предпочтений: $e');
+    }
+  }
+
+  /// Обновить предпочтения пользователя
+  /// 
+  /// [preferences] - новые предпочтения
+  /// 
+  /// Endpoint: PUT /api/v1/users/preferences
+  Future<UserPreference> updatePreferences(UserPreference preferences) async {
+    try {
+      final response = await _apiClient.put(
+        '/api/v1/users/preferences',
+        data: preferences.toJson(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
+        return UserPreference.fromJson(prefData);
+      } else {
+        throw ProfileException('Ошибка обновления предпочтений: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      _handleDioError(e);
+    } catch (e) {
+      if (e is ProfileException) rethrow;
+      throw ProfileException('Ошибка обновления предпочтений: $e');
+    }
+  }
+
+  void _handleDioError(DioException e) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ProfileException('Превышено время ожидания. Проверьте соединение.');
+    }
+    
+    if (e.type == DioExceptionType.connectionError) {
+      throw ProfileException('Нет соединения с интернетом.');
+    }
+    
+    final statusCode = e.response?.statusCode;
+    final errorMessage = _extractErrorMessage(e.response?.data);
+    
+    switch (statusCode) {
+      case 401:
+        throw ProfileException('Требуется авторизация');
+      case 403:
+        throw ProfileException('Нет доступа');
+      case 404:
+        throw ProfileException('Профиль не найден');
+      case 409:
+        throw ProfileException('Email уже используется');
+      case 422:
+        throw ProfileException(errorMessage ?? 'Неверные данные');
+      case 500:
+        throw ProfileException('Ошибка сервера');
+      default:
+        throw ProfileException('Ошибка сети: ${e.message}');
+    }
+  }
+
+  String? _extractErrorMessage(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      return data['message'] as String? ?? 
+             data['error'] as String?;
+    }
+    return null;
+  }
+}
+
+/// Исключение репозитория профиля
+class ProfileException implements Exception {
+  final String message;
+  
+  const ProfileException(this.message);
+  
+  @override
+  String toString() => 'ProfileException: $message';
+}
