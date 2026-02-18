@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../domain/entities/achievement.dart';
-import '../providers/achievement_provider.dart';
+import '../providers/achievements_providers.dart';
 import '../widgets/achievement_card.dart';
 
 class AchievementsPage extends ConsumerStatefulWidget {
@@ -39,8 +39,8 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(achievementNotifierProvider);
-    final notifier = ref.read(achievementNotifierProvider.notifier);
+    final state = ref.watch(achievementsNotifierProvider);
+    final notifier = ref.read(achievementsNotifierProvider.notifier);
     final theme = Theme.of(context);
 
     // Загружаем ачивки при первом открытии страницы
@@ -139,7 +139,7 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
             ),
             IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: () => ref.read(achievementNotifierProvider.notifier).loadAllAchievements(),
+              onPressed: () => ref.read(achievementsNotifierProvider.notifier).loadAllAchievements(),
               tooltip: 'Обновить',
             ),
           ],
@@ -258,7 +258,7 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
             ),
             const SizedBox(height: 16),
             FilledButton.icon(
-              onPressed: () => ref.read(achievementNotifierProvider.notifier).loadAllAchievements(),
+              onPressed: () => ref.read(achievementsNotifierProvider.notifier).loadAllAchievements(),
               icon: const Icon(Icons.refresh),
               label: const Text('Повторить попытку'),
             ),

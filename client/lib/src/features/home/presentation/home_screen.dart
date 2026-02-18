@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:math' as math;
 
 import '../../wardrobe/presentation/wardrobe_screen.dart';
 import '../../recommendations/presentation/recommendations_screen.dart';
@@ -204,7 +205,7 @@ class DailyTipService {
 
     // Выбираем 3-5 случайных советов на день
     final seed = DateTime.now().day;
-    final shuffled = List<DailyTip>.from(allTips)..shuffle(Random(seed));
+    final shuffled = List<DailyTip>.from(allTips)..shuffle(math.Random(seed));
     return shuffled.take(4).toList();
   }
 }
@@ -1100,7 +1101,7 @@ class _HomeContentState extends ConsumerState<_HomeContent>
       'cloudy' || 'облачно' => Icons.cloud,
       'rainy' || 'дождь' => Icons.grain,
       'snowy' || 'снег' => Icons.ac_unit,
-      'partly_cloudy' || 'переменная облачность' => Icons.partly_cloudy_day,
+      'partly_cloudy' || 'переменная облачность' => Icons.partly_cloudy,
       _ => Icons.wb_sunny,
     };
   }
