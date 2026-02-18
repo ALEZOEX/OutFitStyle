@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Achievement {
 
- String get id; String get title; String get description; String get icon; String get category; int get points; bool get isCompleted; DateTime? get completedAt; int get progress; int get target; String get reward; bool get isVisible; DateTime get createdAt; DateTime get updatedAt; String? get userId; bool get isUnlocked; int get currentProgress; int get targetValue; DateTime? get unlockedAt; String? get type;
+ String get id; String get title; String get description; String get icon; String get category; int get points; bool get isCompleted; DateTime? get completedAt; int get progress; int get target; String get reward; bool get isVisible; DateTime? get createdAt; DateTime? get updatedAt; String? get userId; bool get isUnlocked; int get currentProgress; int get targetValue; DateTime? get unlockedAt; String? get type;
 /// Create a copy of Achievement
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $AchievementCopyWith<$Res>  {
   factory $AchievementCopyWith(Achievement value, $Res Function(Achievement) _then) = _$AchievementCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String description, String icon, String category, int points, bool isCompleted, DateTime? completedAt, int progress, int target, String reward, bool isVisible, DateTime createdAt, DateTime updatedAt, String? userId, bool isUnlocked, int currentProgress, int targetValue, DateTime? unlockedAt, String? type
+ String id, String title, String description, String icon, String category, int points, bool isCompleted, DateTime? completedAt, int progress, int target, String reward, bool isVisible, DateTime? createdAt, DateTime? updatedAt, String? userId, bool isUnlocked, int currentProgress, int targetValue, DateTime? unlockedAt, String? type
 });
 
 
@@ -65,7 +65,7 @@ class _$AchievementCopyWithImpl<$Res>
 
 /// Create a copy of Achievement
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = null,Object? icon = null,Object? category = null,Object? points = null,Object? isCompleted = null,Object? completedAt = freezed,Object? progress = null,Object? target = null,Object? reward = null,Object? isVisible = null,Object? createdAt = null,Object? updatedAt = null,Object? userId = freezed,Object? isUnlocked = null,Object? currentProgress = null,Object? targetValue = null,Object? unlockedAt = freezed,Object? type = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = null,Object? icon = null,Object? category = null,Object? points = null,Object? isCompleted = null,Object? completedAt = freezed,Object? progress = null,Object? target = null,Object? reward = null,Object? isVisible = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? userId = freezed,Object? isUnlocked = null,Object? currentProgress = null,Object? targetValue = null,Object? unlockedAt = freezed,Object? type = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -79,9 +79,9 @@ as DateTime?,progress: null == progress ? _self.progress : progress // ignore: c
 as int,target: null == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
 as int,reward: null == reward ? _self.reward : reward // ignore: cast_nullable_to_non_nullable
 as String,isVisible: null == isVisible ? _self.isVisible : isVisible // ignore: cast_nullable_to_non_nullable
-as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String?,isUnlocked: null == isUnlocked ? _self.isUnlocked : isUnlocked // ignore: cast_nullable_to_non_nullable
 as bool,currentProgress: null == currentProgress ? _self.currentProgress : currentProgress // ignore: cast_nullable_to_non_nullable
 as int,targetValue: null == targetValue ? _self.targetValue : targetValue // ignore: cast_nullable_to_non_nullable
@@ -172,7 +172,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String description,  String icon,  String category,  int points,  bool isCompleted,  DateTime? completedAt,  int progress,  int target,  String reward,  bool isVisible,  DateTime createdAt,  DateTime updatedAt,  String? userId,  bool isUnlocked,  int currentProgress,  int targetValue,  DateTime? unlockedAt,  String? type)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String description,  String icon,  String category,  int points,  bool isCompleted,  DateTime? completedAt,  int progress,  int target,  String reward,  bool isVisible,  DateTime? createdAt,  DateTime? updatedAt,  String? userId,  bool isUnlocked,  int currentProgress,  int targetValue,  DateTime? unlockedAt,  String? type)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Achievement() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.icon,_that.category,_that.points,_that.isCompleted,_that.completedAt,_that.progress,_that.target,_that.reward,_that.isVisible,_that.createdAt,_that.updatedAt,_that.userId,_that.isUnlocked,_that.currentProgress,_that.targetValue,_that.unlockedAt,_that.type);case _:
@@ -193,7 +193,7 @@ return $default(_that.id,_that.title,_that.description,_that.icon,_that.category
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String description,  String icon,  String category,  int points,  bool isCompleted,  DateTime? completedAt,  int progress,  int target,  String reward,  bool isVisible,  DateTime createdAt,  DateTime updatedAt,  String? userId,  bool isUnlocked,  int currentProgress,  int targetValue,  DateTime? unlockedAt,  String? type)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String description,  String icon,  String category,  int points,  bool isCompleted,  DateTime? completedAt,  int progress,  int target,  String reward,  bool isVisible,  DateTime? createdAt,  DateTime? updatedAt,  String? userId,  bool isUnlocked,  int currentProgress,  int targetValue,  DateTime? unlockedAt,  String? type)  $default,) {final _that = this;
 switch (_that) {
 case _Achievement():
 return $default(_that.id,_that.title,_that.description,_that.icon,_that.category,_that.points,_that.isCompleted,_that.completedAt,_that.progress,_that.target,_that.reward,_that.isVisible,_that.createdAt,_that.updatedAt,_that.userId,_that.isUnlocked,_that.currentProgress,_that.targetValue,_that.unlockedAt,_that.type);case _:
@@ -213,7 +213,7 @@ return $default(_that.id,_that.title,_that.description,_that.icon,_that.category
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String description,  String icon,  String category,  int points,  bool isCompleted,  DateTime? completedAt,  int progress,  int target,  String reward,  bool isVisible,  DateTime createdAt,  DateTime updatedAt,  String? userId,  bool isUnlocked,  int currentProgress,  int targetValue,  DateTime? unlockedAt,  String? type)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String description,  String icon,  String category,  int points,  bool isCompleted,  DateTime? completedAt,  int progress,  int target,  String reward,  bool isVisible,  DateTime? createdAt,  DateTime? updatedAt,  String? userId,  bool isUnlocked,  int currentProgress,  int targetValue,  DateTime? unlockedAt,  String? type)?  $default,) {final _that = this;
 switch (_that) {
 case _Achievement() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.icon,_that.category,_that.points,_that.isCompleted,_that.completedAt,_that.progress,_that.target,_that.reward,_that.isVisible,_that.createdAt,_that.updatedAt,_that.userId,_that.isUnlocked,_that.currentProgress,_that.targetValue,_that.unlockedAt,_that.type);case _:
@@ -228,7 +228,7 @@ return $default(_that.id,_that.title,_that.description,_that.icon,_that.category
 @JsonSerializable()
 
 class _Achievement implements Achievement {
-  const _Achievement({required this.id, required this.title, required this.description, required this.icon, required this.category, required this.points, this.isCompleted = false, this.completedAt, this.progress = 0, this.target = 1, this.reward = '', this.isVisible = true, required this.createdAt, required this.updatedAt, this.userId, this.isUnlocked = false, this.currentProgress = 0, this.targetValue = 1, this.unlockedAt, this.type});
+  const _Achievement({required this.id, required this.title, required this.description, required this.icon, required this.category, required this.points, this.isCompleted = false, this.completedAt, this.progress = 0, this.target = 1, this.reward = '', this.isVisible = true, this.createdAt, this.updatedAt, this.userId, this.isUnlocked = false, this.currentProgress = 0, this.targetValue = 1, this.unlockedAt, this.type});
   factory _Achievement.fromJson(Map<String, dynamic> json) => _$AchievementFromJson(json);
 
 @override final  String id;
@@ -243,8 +243,8 @@ class _Achievement implements Achievement {
 @override@JsonKey() final  int target;
 @override@JsonKey() final  String reward;
 @override@JsonKey() final  bool isVisible;
-@override final  DateTime createdAt;
-@override final  DateTime updatedAt;
+@override final  DateTime? createdAt;
+@override final  DateTime? updatedAt;
 @override final  String? userId;
 @override@JsonKey() final  bool isUnlocked;
 @override@JsonKey() final  int currentProgress;
@@ -285,7 +285,7 @@ abstract mixin class _$AchievementCopyWith<$Res> implements $AchievementCopyWith
   factory _$AchievementCopyWith(_Achievement value, $Res Function(_Achievement) _then) = __$AchievementCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String description, String icon, String category, int points, bool isCompleted, DateTime? completedAt, int progress, int target, String reward, bool isVisible, DateTime createdAt, DateTime updatedAt, String? userId, bool isUnlocked, int currentProgress, int targetValue, DateTime? unlockedAt, String? type
+ String id, String title, String description, String icon, String category, int points, bool isCompleted, DateTime? completedAt, int progress, int target, String reward, bool isVisible, DateTime? createdAt, DateTime? updatedAt, String? userId, bool isUnlocked, int currentProgress, int targetValue, DateTime? unlockedAt, String? type
 });
 
 
@@ -302,7 +302,7 @@ class __$AchievementCopyWithImpl<$Res>
 
 /// Create a copy of Achievement
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = null,Object? icon = null,Object? category = null,Object? points = null,Object? isCompleted = null,Object? completedAt = freezed,Object? progress = null,Object? target = null,Object? reward = null,Object? isVisible = null,Object? createdAt = null,Object? updatedAt = null,Object? userId = freezed,Object? isUnlocked = null,Object? currentProgress = null,Object? targetValue = null,Object? unlockedAt = freezed,Object? type = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = null,Object? icon = null,Object? category = null,Object? points = null,Object? isCompleted = null,Object? completedAt = freezed,Object? progress = null,Object? target = null,Object? reward = null,Object? isVisible = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? userId = freezed,Object? isUnlocked = null,Object? currentProgress = null,Object? targetValue = null,Object? unlockedAt = freezed,Object? type = freezed,}) {
   return _then(_Achievement(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -316,9 +316,9 @@ as DateTime?,progress: null == progress ? _self.progress : progress // ignore: c
 as int,target: null == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
 as int,reward: null == reward ? _self.reward : reward // ignore: cast_nullable_to_non_nullable
 as String,isVisible: null == isVisible ? _self.isVisible : isVisible // ignore: cast_nullable_to_non_nullable
-as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String?,isUnlocked: null == isUnlocked ? _self.isUnlocked : isUnlocked // ignore: cast_nullable_to_non_nullable
 as bool,currentProgress: null == currentProgress ? _self.currentProgress : currentProgress // ignore: cast_nullable_to_non_nullable
 as int,targetValue: null == targetValue ? _self.targetValue : targetValue // ignore: cast_nullable_to_non_nullable
