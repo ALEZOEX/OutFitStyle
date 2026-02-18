@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../theme/theme_controller.dart';
+import '../../../ui/widgets/notification_dialog.dart';
 
 /// Провайдер для состояния разрешений
 class PermissionState extends StateNotifier<Map<String, bool>> {
@@ -30,6 +31,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _notificationsEnabled = false;
   bool _locationEnabled = false;
   String? _locationError;
+  bool _showNotificationDialog = true;
 
   @override
   void initState() {
@@ -51,6 +53,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
   }
 
+  /// Показать красивый диалог запроса уведомлений
+  void _showNotificationPermissionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => NotificationPermissionDialog(
+        onEnable: () async {
+          Navigator.of(context).pop();
+          await _requestNotificationPermission();
+        },
+        onLater: () {
+          Navigator.of(context).pop();
+          setState(() {
+            _showNotificationDialog = false;
+          });
+          // Показываем Snackbar с информацией
+          NotificationSnackbar.show(
+            context: context,
+            title: 'Уведомления отложены',
+            message: 'Вы можете включить уведомления в любое время',
+            icon: Icons.notifications_none,
+            duration: const Duration(seconds: 3),
+          );
+        },
+      ),
+    );
+  }
+
   Future<void> _requestNotificationPermission() async {
     final status = await Permission.notification.request();
     setState(() {
@@ -58,15 +88,67 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(status.isGranted
-            ? '✅ Уведомления включены'
-            : '❌ Уведомления отклонены'),
-          backgroundColor: status.isGranted ? Colors.green : Colors.orange,
-        ),
-      );
+      if (status.isGranted) {
+        NotificationSnackbar.show(
+          context: context,
+          title: 'Уведомления включены',
+          message: 'Вы будете получать своевременные рекомендации',
+          icon: Icons.notifications_active,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        );
+      } else if (status.isPermanentlyDenied) {
+        // Показываем диалог с предложением открыть настройки
+        _showSettingsDialog();
+      } else {
+        NotificationSnackbar.show(
+          context: context,
+          title: 'Уведомления отклонены',
+          message: 'Вы можете включить их в настройках устройства',
+          icon: Icons.notifications_off,
+          backgroundColor: Theme.of(context).colorScheme.error,
+        );
+      }
     }
+  }
+
+  /// Диалог с предложением открыть настройки
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        icon: Icon(
+          Icons.settings_outlined,
+          size: 48,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: const Text(
+          'Открыть настройки?',
+          textAlign: TextAlign.center,
+        ),
+        content: const Text(
+          'Уведомления были отключены навсегда. '
+          'Откройте настройки приложения, чтобы включить их.',
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Отмена'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              openAppSettings();
+            },
+            child: const Text('Настройки'),
+          ),
+        ],
+        actionsPadding: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   Future<void> _requestLocationPermission() async {
@@ -107,6 +189,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Показываем диалог при первом запуске если уведомления не включены
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_notificationsEnabled && _showNotificationDialog && mounted) {
+        _showNotificationPermissionDialog();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final themeController = ref.read(themeModeProvider.notifier);
@@ -115,6 +208,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Настройки'),
         centerTitle: true,
+        actions: [
+          if (!_notificationsEnabled)
+            IconButton(
+              icon: Badge(
+                child: Icon(Icons.notifications_none),
+              ),
+              onPressed: _showNotificationPermissionDialog,
+              tooltip: 'Включить уведомления',
+            ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -133,25 +236,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             context,
             title: 'Уведомления',
             children: [
-              ListTile(
-                leading: Icon(
-                  _notificationsEnabled
-                    ? Icons.notifications
-                    : Icons.notifications_off_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: const Text('Уведомления'),
-                subtitle: Text(
-                  _notificationsEnabled
-                    ? 'Включены'
-                    : 'Нажмите для включения',
-                ),
-                trailing: Switch(
-                  value: _notificationsEnabled,
-                  onChanged: (_) => _requestNotificationPermission(),
-                ),
-                onTap: _requestNotificationPermission,
-              ),
+              _buildNotificationTile(context),
             ],
           ),
           const SizedBox(height: 16),
@@ -221,6 +306,105 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           ...children,
+        ],
+      ),
+    );
+  }
+
+  /// Красивая плитка уведомлений
+  Widget _buildNotificationTile(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: _notificationsEnabled
+              ? [
+                  theme.colorScheme.primary.withOpacity(0.2),
+                  theme.colorScheme.secondary.withOpacity(0.1),
+                ]
+              : [
+                  theme.colorScheme.surface,
+                  theme.colorScheme.surfaceContainerHighest,
+                ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _notificationsEnabled
+              ? theme.colorScheme.primary.withOpacity(0.3)
+              : theme.colorScheme.outline.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Иконка
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _notificationsEnabled
+                    ? [theme.colorScheme.primary, theme.colorScheme.secondary]
+                    : [Colors.grey.shade400, Colors.grey.shade600],
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: (_notificationsEnabled
+                          ? theme.colorScheme.primary
+                          : Colors.grey)
+                      .withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              _notificationsEnabled
+                  ? Icons.notifications_active
+                  : Icons.notifications_none,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Текст
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Уведомления',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _notificationsEnabled
+                      ? 'Включены • Получайте рекомендации'
+                      : 'Отключены • Нажмите для включения',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Переключатель
+          Switch(
+            value: _notificationsEnabled,
+            onChanged: (_) => _requestNotificationPermission(),
+            activeColor: theme.colorScheme.primary,
+          ),
         ],
       ),
     );
