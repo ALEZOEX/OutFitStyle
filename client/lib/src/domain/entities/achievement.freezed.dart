@@ -228,7 +228,7 @@ return $default(_that.id,_that.title,_that.description,_that.icon,_that.category
 @JsonSerializable()
 
 class _Achievement implements Achievement {
-  const _Achievement({required this.id, required this.title, required this.description, required this.icon, required this.category, required this.points, this.isCompleted = false, this.completedAt, this.progress = 0, this.target = 1, required this.reward, this.isVisible = true, required this.createdAt, required this.updatedAt, this.userId, this.isUnlocked = false, this.currentProgress = 0, this.targetValue = 1, this.unlockedAt, this.type});
+  const _Achievement({required this.id, required this.title, required this.description, required this.icon, required this.category, required this.points, this.isCompleted = false, this.completedAt, this.progress = 0, this.target = 1, this.reward = '', this.isVisible = true, required this.createdAt, required this.updatedAt, this.userId, this.isUnlocked = false, this.currentProgress = 0, this.targetValue = 1, this.unlockedAt, this.type});
   factory _Achievement.fromJson(Map<String, dynamic> json) => _$AchievementFromJson(json);
 
 @override final  String id;
@@ -241,7 +241,7 @@ class _Achievement implements Achievement {
 @override final  DateTime? completedAt;
 @override@JsonKey() final  int progress;
 @override@JsonKey() final  int target;
-@override final  String reward;
+@override@JsonKey() final  String reward;
 @override@JsonKey() final  bool isVisible;
 @override final  DateTime createdAt;
 @override final  DateTime updatedAt;

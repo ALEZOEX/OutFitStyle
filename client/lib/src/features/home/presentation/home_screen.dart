@@ -1101,7 +1101,7 @@ class _HomeContentState extends ConsumerState<_HomeContent>
       'cloudy' || 'облачно' => Icons.cloud,
       'rainy' || 'дождь' => Icons.grain,
       'snowy' || 'снег' => Icons.ac_unit,
-      'partly_cloudy' || 'переменная облачность' => Icons.partly_cloudy_outlined,
+      'partly_cloudy' || 'переменная облачность' => Icons.cloud_queue,
       _ => Icons.wb_sunny,
     };
   }

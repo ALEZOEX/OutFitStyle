@@ -16,7 +16,7 @@ abstract class Achievement with _$Achievement {
     DateTime? completedAt,
     @Default(0) int progress,
     @Default(1) int target,
-    required String reward,
+    @Default('') String reward,
     @Default(true) bool isVisible,
     required DateTime createdAt,
     required DateTime updatedAt,

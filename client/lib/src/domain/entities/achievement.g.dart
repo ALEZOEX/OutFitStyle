@@ -19,7 +19,7 @@ _Achievement _$AchievementFromJson(Map<String, dynamic> json) => _Achievement(
       : DateTime.parse(json['completedAt'] as String),
   progress: (json['progress'] as num?)?.toInt() ?? 0,
   target: (json['target'] as num?)?.toInt() ?? 1,
-  reward: json['reward'] as String,
+  reward: json['reward'] as String? ?? '',
   isVisible: json['isVisible'] as bool? ?? true,
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: DateTime.parse(json['updatedAt'] as String),
