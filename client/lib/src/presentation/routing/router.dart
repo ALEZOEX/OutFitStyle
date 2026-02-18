@@ -110,7 +110,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: '/'),
+      GoRoute(
+        path: '/',
+        redirect: (context, state) => '/auth',
+      ),
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
