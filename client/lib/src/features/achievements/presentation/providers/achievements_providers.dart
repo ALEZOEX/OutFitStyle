@@ -13,8 +13,6 @@ final mockAchievements = <Achievement>[
     isUnlocked: false,
     currentProgress: 0,
     targetValue: 1,
-    createdAt: DateTime(2024, 1, 1),
-    updatedAt: DateTime(2024, 1, 1),
   ),
   const Achievement(
     id: 'collector',
@@ -26,8 +24,6 @@ final mockAchievements = <Achievement>[
     isUnlocked: false,
     currentProgress: 0,
     targetValue: 10,
-    createdAt: DateTime(2024, 1, 1),
-    updatedAt: DateTime(2024, 1, 1),
   ),
   const Achievement(
     id: 'stylish',
@@ -39,8 +35,6 @@ final mockAchievements = <Achievement>[
     isUnlocked: false,
     currentProgress: 0,
     targetValue: 5,
-    createdAt: DateTime(2024, 1, 1),
-    updatedAt: DateTime(2024, 1, 1),
   ),
   const Achievement(
     id: 'active',
@@ -52,8 +46,6 @@ final mockAchievements = <Achievement>[
     isUnlocked: false,
     currentProgress: 0,
     targetValue: 7,
-    createdAt: DateTime(2024, 1, 1),
-    updatedAt: DateTime(2024, 1, 1),
   ),
   const Achievement(
     id: 'expert',
@@ -65,8 +57,6 @@ final mockAchievements = <Achievement>[
     isUnlocked: false,
     currentProgress: 0,
     targetValue: 50,
-    createdAt: DateTime(2024, 1, 1),
-    updatedAt: DateTime(2024, 1, 1),
   ),
 ];
 
