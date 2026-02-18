@@ -5,7 +5,7 @@ import '../enums/achievement_status.dart';
 part 'user_achievement_status.freezed.dart';
 
 @freezed
-class UserAchievementStatus with _$UserAchievementStatus {
+abstract class UserAchievementStatus with _$UserAchievementStatus {
   const factory UserAchievementStatus({
     int? id,
     @JsonKey(name: 'user_id') int? userId,

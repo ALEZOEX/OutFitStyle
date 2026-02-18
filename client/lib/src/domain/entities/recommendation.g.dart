@@ -6,21 +6,24 @@ part of 'recommendation.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$RecommendationImpl _$$RecommendationImplFromJson(Map<String, dynamic> json) =>
-    _$RecommendationImpl(
+_Recommendation _$RecommendationFromJson(Map<String, dynamic> json) =>
+    _Recommendation(
       id: (json['id'] as num?)?.toInt(),
       title: json['title'] as String?,
       description: json['description'] as String?,
       imageUrl: json['image_url'] as String?,
       type: $enumDecodeNullable(_$RecommendationTypeEnumMap, json['type']),
-      source:
-          $enumDecodeNullable(_$RecommendationSourceEnumMap, json['source']),
+      source: $enumDecodeNullable(
+        _$RecommendationSourceEnumMap,
+        json['source'],
+      ),
       confidenceScore: (json['confidence_score'] as num?)?.toDouble(),
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
-      outfit: const OutfitConverter()
-          .fromJson(json['outfit'] as Map<String, dynamic>?),
+      outfit: const OutfitConverter().fromJson(
+        json['outfit'] as Map<String, dynamic>?,
+      ),
       occasion: json['occasion'] as String?,
       activity: json['activity'] as String?,
       weather: json['weather'] as String?,
@@ -32,7 +35,7 @@ _$RecommendationImpl _$$RecommendationImplFromJson(Map<String, dynamic> json) =>
       recommendationReason: json['recommendation_reason'] as String?,
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-              const [],
+          const [],
       userId: (json['user_id'] as num?)?.toInt(),
       outfitId: (json['outfit_id'] as num?)?.toInt(),
       weatherCondition: json['weather_condition'] as String?,
@@ -44,8 +47,7 @@ _$RecommendationImpl _$$RecommendationImplFromJson(Map<String, dynamic> json) =>
       feedback: json['feedback'] as String?,
     );
 
-Map<String, dynamic> _$$RecommendationImplToJson(
-        _$RecommendationImpl instance) =>
+Map<String, dynamic> _$RecommendationToJson(_Recommendation instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,

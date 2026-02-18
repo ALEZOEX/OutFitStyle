@@ -5,7 +5,7 @@ part 'personalized_recommendation_algorithm.freezed.dart';
 part 'personalized_recommendation_algorithm.g.dart';
 
 @freezed
-class PersonalizedRecommendationAlgorithm
+abstract class PersonalizedRecommendationAlgorithm
     with _$PersonalizedRecommendationAlgorithm {
   const factory PersonalizedRecommendationAlgorithm({
     @Default('') String id,

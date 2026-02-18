@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 part 'ui_states.freezed.dart';
 
 @freezed
-class AdminState with _$AdminState {
+abstract class AdminState with _$AdminState {
   const factory AdminState({
     @Default(AsyncValue.loading())
     AsyncValue<Map<String, dynamic>> adminData,

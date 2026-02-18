@@ -4,7 +4,7 @@ part 'outfit_recommendation.freezed.dart';
 part 'outfit_recommendation.g.dart';
 
 @freezed
-class OutfitRecommendation with _$OutfitRecommendation {
+abstract class OutfitRecommendation with _$OutfitRecommendation {
   const factory OutfitRecommendation({
     String? id,
     String? title,

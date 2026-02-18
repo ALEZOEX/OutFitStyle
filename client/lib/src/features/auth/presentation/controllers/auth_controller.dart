@@ -16,7 +16,9 @@ class AuthController extends StateNotifier<AuthState> {
     GoogleSignIn? googleSignIn,
   })  : _authRepository = authRepository,
         _apiClient = apiClient,
-        _googleSignIn = googleSignIn ?? GoogleSignIn(),
+        _googleSignIn = googleSignIn ?? GoogleSignIn(
+          scopes: const ['email', 'profile'],
+        ),
         super(const AuthState());
 
   /// Вход с помощью Google

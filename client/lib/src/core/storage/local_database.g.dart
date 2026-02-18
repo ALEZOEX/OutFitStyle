@@ -12,77 +12,124 @@ class $RecommendationTableTable extends RecommendationTable
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _outfitItemsMeta =
-      const VerificationMeta('outfitItems');
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _outfitItemsMeta = const VerificationMeta(
+    'outfitItems',
+  );
   @override
   late final GeneratedColumn<String> outfitItems = GeneratedColumn<String>(
-      'outfit_items', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _temperatureMeta =
-      const VerificationMeta('temperature');
+    'outfit_items',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _temperatureMeta = const VerificationMeta(
+    'temperature',
+  );
   @override
   late final GeneratedColumn<double> temperature = GeneratedColumn<double>(
-      'temperature', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _weatherConditionMeta =
-      const VerificationMeta('weatherCondition');
+    'temperature',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _weatherConditionMeta = const VerificationMeta(
+    'weatherCondition',
+  );
   @override
   late final GeneratedColumn<String> weatherCondition = GeneratedColumn<String>(
-      'weather_condition', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _occasionMeta =
-      const VerificationMeta('occasion');
+    'weather_condition',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _occasionMeta = const VerificationMeta(
+    'occasion',
+  );
   @override
   late final GeneratedColumn<String> occasion = GeneratedColumn<String>(
-      'occasion', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
+    'occasion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
   @override
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
-      'timestamp', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _confidenceScoreMeta =
-      const VerificationMeta('confidenceScore');
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _confidenceScoreMeta = const VerificationMeta(
+    'confidenceScore',
+  );
   @override
   late final GeneratedColumn<double> confidenceScore = GeneratedColumn<double>(
-      'confidence_score', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _feedbackMeta =
-      const VerificationMeta('feedback');
+    'confidence_score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _feedbackMeta = const VerificationMeta(
+    'feedback',
+  );
   @override
   late final GeneratedColumn<String> feedback = GeneratedColumn<String>(
-      'feedback', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'feedback',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
   @override
   late final GeneratedColumn<int> rating = GeneratedColumn<int>(
-      'rating', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'rating',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        userId,
-        outfitItems,
-        temperature,
-        weatherCondition,
-        occasion,
-        timestamp,
-        confidenceScore,
-        feedback,
-        rating
-      ];
+    id,
+    userId,
+    outfitItems,
+    temperature,
+    weatherCondition,
+    occasion,
+    timestamp,
+    confidenceScore,
+    feedback,
+    rating,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -90,70 +137,93 @@ class $RecommendationTableTable extends RecommendationTable
   static const String $name = 'recommendation_table';
   @override
   VerificationContext validateIntegrity(
-      Insertable<RecommendationTableData> instance,
-      {bool isInserting = false}) {
+    Insertable<RecommendationTableData> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
     if (data.containsKey('outfit_items')) {
       context.handle(
+        _outfitItemsMeta,
+        outfitItems.isAcceptableOrUnknown(
+          data['outfit_items']!,
           _outfitItemsMeta,
-          outfitItems.isAcceptableOrUnknown(
-              data['outfit_items']!, _outfitItemsMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_outfitItemsMeta);
     }
     if (data.containsKey('temperature')) {
       context.handle(
+        _temperatureMeta,
+        temperature.isAcceptableOrUnknown(
+          data['temperature']!,
           _temperatureMeta,
-          temperature.isAcceptableOrUnknown(
-              data['temperature']!, _temperatureMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_temperatureMeta);
     }
     if (data.containsKey('weather_condition')) {
       context.handle(
+        _weatherConditionMeta,
+        weatherCondition.isAcceptableOrUnknown(
+          data['weather_condition']!,
           _weatherConditionMeta,
-          weatherCondition.isAcceptableOrUnknown(
-              data['weather_condition']!, _weatherConditionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_weatherConditionMeta);
     }
     if (data.containsKey('occasion')) {
-      context.handle(_occasionMeta,
-          occasion.isAcceptableOrUnknown(data['occasion']!, _occasionMeta));
+      context.handle(
+        _occasionMeta,
+        occasion.isAcceptableOrUnknown(data['occasion']!, _occasionMeta),
+      );
     } else if (isInserting) {
       context.missing(_occasionMeta);
     }
     if (data.containsKey('timestamp')) {
-      context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
     if (data.containsKey('confidence_score')) {
       context.handle(
+        _confidenceScoreMeta,
+        confidenceScore.isAcceptableOrUnknown(
+          data['confidence_score']!,
           _confidenceScoreMeta,
-          confidenceScore.isAcceptableOrUnknown(
-              data['confidence_score']!, _confidenceScoreMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_confidenceScoreMeta);
     }
     if (data.containsKey('feedback')) {
-      context.handle(_feedbackMeta,
-          feedback.isAcceptableOrUnknown(data['feedback']!, _feedbackMeta));
+      context.handle(
+        _feedbackMeta,
+        feedback.isAcceptableOrUnknown(data['feedback']!, _feedbackMeta),
+      );
     }
     if (data.containsKey('rating')) {
-      context.handle(_ratingMeta,
-          rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta));
+      context.handle(
+        _ratingMeta,
+        rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta),
+      );
     }
     return context;
   }
@@ -161,30 +231,52 @@ class $RecommendationTableTable extends RecommendationTable
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  RecommendationTableData map(Map<String, dynamic> data,
-      {String? tablePrefix}) {
+  RecommendationTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RecommendationTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
-      outfitItems: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}outfit_items'])!,
-      temperature: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}temperature'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      outfitItems: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outfit_items'],
+      )!,
+      temperature: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temperature'],
+      )!,
       weatherCondition: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}weather_condition'])!,
-      occasion: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}occasion'])!,
-      timestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_condition'],
+      )!,
+      occasion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occasion'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
       confidenceScore: attachedDatabase.typeMapping.read(
-          DriftSqlType.double, data['${effectivePrefix}confidence_score'])!,
-      feedback: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}feedback']),
-      rating: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}rating']),
+        DriftSqlType.double,
+        data['${effectivePrefix}confidence_score'],
+      )!,
+      feedback: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}feedback'],
+      ),
+      rating: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rating'],
+      ),
     );
   }
 
@@ -206,17 +298,18 @@ class RecommendationTableData extends DataClass
   final double confidenceScore;
   final String? feedback;
   final int? rating;
-  const RecommendationTableData(
-      {required this.id,
-      required this.userId,
-      required this.outfitItems,
-      required this.temperature,
-      required this.weatherCondition,
-      required this.occasion,
-      required this.timestamp,
-      required this.confidenceScore,
-      this.feedback,
-      this.rating});
+  const RecommendationTableData({
+    required this.id,
+    required this.userId,
+    required this.outfitItems,
+    required this.temperature,
+    required this.weatherCondition,
+    required this.occasion,
+    required this.timestamp,
+    required this.confidenceScore,
+    this.feedback,
+    this.rating,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -250,13 +343,16 @@ class RecommendationTableData extends DataClass
       feedback: feedback == null && nullToAbsent
           ? const Value.absent()
           : Value(feedback),
-      rating:
-          rating == null && nullToAbsent ? const Value.absent() : Value(rating),
+      rating: rating == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rating),
     );
   }
 
-  factory RecommendationTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory RecommendationTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RecommendationTableData(
       id: serializer.fromJson<int>(json['id']),
@@ -288,37 +384,39 @@ class RecommendationTableData extends DataClass
     };
   }
 
-  RecommendationTableData copyWith(
-          {int? id,
-          String? userId,
-          String? outfitItems,
-          double? temperature,
-          String? weatherCondition,
-          String? occasion,
-          int? timestamp,
-          double? confidenceScore,
-          Value<String?> feedback = const Value.absent(),
-          Value<int?> rating = const Value.absent()}) =>
-      RecommendationTableData(
-        id: id ?? this.id,
-        userId: userId ?? this.userId,
-        outfitItems: outfitItems ?? this.outfitItems,
-        temperature: temperature ?? this.temperature,
-        weatherCondition: weatherCondition ?? this.weatherCondition,
-        occasion: occasion ?? this.occasion,
-        timestamp: timestamp ?? this.timestamp,
-        confidenceScore: confidenceScore ?? this.confidenceScore,
-        feedback: feedback.present ? feedback.value : this.feedback,
-        rating: rating.present ? rating.value : this.rating,
-      );
+  RecommendationTableData copyWith({
+    int? id,
+    String? userId,
+    String? outfitItems,
+    double? temperature,
+    String? weatherCondition,
+    String? occasion,
+    int? timestamp,
+    double? confidenceScore,
+    Value<String?> feedback = const Value.absent(),
+    Value<int?> rating = const Value.absent(),
+  }) => RecommendationTableData(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    outfitItems: outfitItems ?? this.outfitItems,
+    temperature: temperature ?? this.temperature,
+    weatherCondition: weatherCondition ?? this.weatherCondition,
+    occasion: occasion ?? this.occasion,
+    timestamp: timestamp ?? this.timestamp,
+    confidenceScore: confidenceScore ?? this.confidenceScore,
+    feedback: feedback.present ? feedback.value : this.feedback,
+    rating: rating.present ? rating.value : this.rating,
+  );
   RecommendationTableData copyWithCompanion(RecommendationTableCompanion data) {
     return RecommendationTableData(
       id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
-      outfitItems:
-          data.outfitItems.present ? data.outfitItems.value : this.outfitItems,
-      temperature:
-          data.temperature.present ? data.temperature.value : this.temperature,
+      outfitItems: data.outfitItems.present
+          ? data.outfitItems.value
+          : this.outfitItems,
+      temperature: data.temperature.present
+          ? data.temperature.value
+          : this.temperature,
       weatherCondition: data.weatherCondition.present
           ? data.weatherCondition.value
           : this.weatherCondition,
@@ -350,8 +448,18 @@ class RecommendationTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, outfitItems, temperature,
-      weatherCondition, occasion, timestamp, confidenceScore, feedback, rating);
+  int get hashCode => Object.hash(
+    id,
+    userId,
+    outfitItems,
+    temperature,
+    weatherCondition,
+    occasion,
+    timestamp,
+    confidenceScore,
+    feedback,
+    rating,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -403,13 +511,13 @@ class RecommendationTableCompanion
     required double confidenceScore,
     this.feedback = const Value.absent(),
     this.rating = const Value.absent(),
-  })  : userId = Value(userId),
-        outfitItems = Value(outfitItems),
-        temperature = Value(temperature),
-        weatherCondition = Value(weatherCondition),
-        occasion = Value(occasion),
-        timestamp = Value(timestamp),
-        confidenceScore = Value(confidenceScore);
+  }) : userId = Value(userId),
+       outfitItems = Value(outfitItems),
+       temperature = Value(temperature),
+       weatherCondition = Value(weatherCondition),
+       occasion = Value(occasion),
+       timestamp = Value(timestamp),
+       confidenceScore = Value(confidenceScore);
   static Insertable<RecommendationTableData> custom({
     Expression<int>? id,
     Expression<String>? userId,
@@ -436,17 +544,18 @@ class RecommendationTableCompanion
     });
   }
 
-  RecommendationTableCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? userId,
-      Value<String>? outfitItems,
-      Value<double>? temperature,
-      Value<String>? weatherCondition,
-      Value<String>? occasion,
-      Value<int>? timestamp,
-      Value<double>? confidenceScore,
-      Value<String?>? feedback,
-      Value<int?>? rating}) {
+  RecommendationTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? userId,
+    Value<String>? outfitItems,
+    Value<double>? temperature,
+    Value<String>? weatherCondition,
+    Value<String>? occasion,
+    Value<int>? timestamp,
+    Value<double>? confidenceScore,
+    Value<String?>? feedback,
+    Value<int?>? rating,
+  }) {
     return RecommendationTableCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
@@ -524,155 +633,243 @@ class $WardrobeTableTable extends WardrobeTable
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _externalIdMeta =
-      const VerificationMeta('externalId');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _externalIdMeta = const VerificationMeta(
+    'externalId',
+  );
   @override
   late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
-      'external_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+    'external_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _imageUrlMeta =
-      const VerificationMeta('imageUrl');
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
   @override
   late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
-      'image_url', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _categoryMeta =
-      const VerificationMeta('category');
+    'image_url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
   @override
   late final GeneratedColumn<String> category = GeneratedColumn<String>(
-      'category', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _seasonMeta = const VerificationMeta('season');
   @override
   late final GeneratedColumn<String> season = GeneratedColumn<String>(
-      'season', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _weatherConditionMeta =
-      const VerificationMeta('weatherCondition');
+    'season',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _weatherConditionMeta = const VerificationMeta(
+    'weatherCondition',
+  );
   @override
   late final GeneratedColumn<String> weatherCondition = GeneratedColumn<String>(
-      'weather_condition', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _temperatureMinMeta =
-      const VerificationMeta('temperatureMin');
+    'weather_condition',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _temperatureMinMeta = const VerificationMeta(
+    'temperatureMin',
+  );
   @override
   late final GeneratedColumn<double> temperatureMin = GeneratedColumn<double>(
-      'temperature_min', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _temperatureMaxMeta =
-      const VerificationMeta('temperatureMax');
+    'temperature_min',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _temperatureMaxMeta = const VerificationMeta(
+    'temperatureMax',
+  );
   @override
   late final GeneratedColumn<double> temperatureMax = GeneratedColumn<double>(
-      'temperature_max', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _occasionsMeta =
-      const VerificationMeta('occasions');
+    'temperature_max',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _occasionsMeta = const VerificationMeta(
+    'occasions',
+  );
   @override
   late final GeneratedColumn<String> occasions = GeneratedColumn<String>(
-      'occasions', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _addedAtMeta =
-      const VerificationMeta('addedAt');
+    'occasions',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
   @override
   late final GeneratedColumn<int> addedAt = GeneratedColumn<int>(
-      'added_at', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _isActiveMeta =
-      const VerificationMeta('isActive');
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
   @override
   late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
-      'is_active', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_active" IN (0, 1))'));
-  static const VerificationMeta _isFavoriteMeta =
-      const VerificationMeta('isFavorite');
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
   @override
   late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
-      'is_favorite', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("is_favorite" IN (0, 1))'));
-  static const VerificationMeta _isArchivedMeta =
-      const VerificationMeta('isArchived');
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
+    'isArchived',
+  );
   @override
   late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
-      'is_archived', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("is_archived" IN (0, 1))'));
-  static const VerificationMeta _wearCountMeta =
-      const VerificationMeta('wearCount');
+    'is_archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_archived" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _wearCountMeta = const VerificationMeta(
+    'wearCount',
+  );
   @override
   late final GeneratedColumn<int> wearCount = GeneratedColumn<int>(
-      'wear_count', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _lastWornAtMeta =
-      const VerificationMeta('lastWornAt');
+    'wear_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastWornAtMeta = const VerificationMeta(
+    'lastWornAt',
+  );
   @override
   late final GeneratedColumn<int> lastWornAt = GeneratedColumn<int>(
-      'last_worn_at', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _isSyncedMeta =
-      const VerificationMeta('isSynced');
+    'last_worn_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
   @override
   late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
-      'is_synced', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_synced" IN (0, 1))'));
-  static const VerificationMeta _updatedAtMeta =
-      const VerificationMeta('updatedAt');
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
-      'updated_at', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        externalId,
-        name,
-        imageUrl,
-        category,
-        season,
-        weatherCondition,
-        temperatureMin,
-        temperatureMax,
-        occasions,
-        addedAt,
-        isActive,
-        isFavorite,
-        isArchived,
-        wearCount,
-        lastWornAt,
-        isSynced,
-        updatedAt
-      ];
+    id,
+    externalId,
+    name,
+    imageUrl,
+    category,
+    season,
+    weatherCondition,
+    temperatureMin,
+    temperatureMax,
+    occasions,
+    addedAt,
+    isActive,
+    isFavorite,
+    isArchived,
+    wearCount,
+    lastWornAt,
+    isSynced,
+    updatedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'wardrobe_table';
   @override
-  VerificationContext validateIntegrity(Insertable<WardrobeTableData> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<WardrobeTableData> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -680,115 +877,147 @@ class $WardrobeTableTable extends WardrobeTable
     }
     if (data.containsKey('external_id')) {
       context.handle(
-          _externalIdMeta,
-          externalId.isAcceptableOrUnknown(
-              data['external_id']!, _externalIdMeta));
+        _externalIdMeta,
+        externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_externalIdMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('image_url')) {
-      context.handle(_imageUrlMeta,
-          imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta));
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
     } else if (isInserting) {
       context.missing(_imageUrlMeta);
     }
     if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
     } else if (isInserting) {
       context.missing(_categoryMeta);
     }
     if (data.containsKey('season')) {
-      context.handle(_seasonMeta,
-          season.isAcceptableOrUnknown(data['season']!, _seasonMeta));
+      context.handle(
+        _seasonMeta,
+        season.isAcceptableOrUnknown(data['season']!, _seasonMeta),
+      );
     } else if (isInserting) {
       context.missing(_seasonMeta);
     }
     if (data.containsKey('weather_condition')) {
       context.handle(
+        _weatherConditionMeta,
+        weatherCondition.isAcceptableOrUnknown(
+          data['weather_condition']!,
           _weatherConditionMeta,
-          weatherCondition.isAcceptableOrUnknown(
-              data['weather_condition']!, _weatherConditionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_weatherConditionMeta);
     }
     if (data.containsKey('temperature_min')) {
       context.handle(
+        _temperatureMinMeta,
+        temperatureMin.isAcceptableOrUnknown(
+          data['temperature_min']!,
           _temperatureMinMeta,
-          temperatureMin.isAcceptableOrUnknown(
-              data['temperature_min']!, _temperatureMinMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_temperatureMinMeta);
     }
     if (data.containsKey('temperature_max')) {
       context.handle(
+        _temperatureMaxMeta,
+        temperatureMax.isAcceptableOrUnknown(
+          data['temperature_max']!,
           _temperatureMaxMeta,
-          temperatureMax.isAcceptableOrUnknown(
-              data['temperature_max']!, _temperatureMaxMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_temperatureMaxMeta);
     }
     if (data.containsKey('occasions')) {
-      context.handle(_occasionsMeta,
-          occasions.isAcceptableOrUnknown(data['occasions']!, _occasionsMeta));
+      context.handle(
+        _occasionsMeta,
+        occasions.isAcceptableOrUnknown(data['occasions']!, _occasionsMeta),
+      );
     } else if (isInserting) {
       context.missing(_occasionsMeta);
     }
     if (data.containsKey('added_at')) {
-      context.handle(_addedAtMeta,
-          addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta));
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_addedAtMeta);
     }
     if (data.containsKey('is_active')) {
-      context.handle(_isActiveMeta,
-          isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta));
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
     } else if (isInserting) {
       context.missing(_isActiveMeta);
     }
     if (data.containsKey('is_favorite')) {
       context.handle(
-          _isFavoriteMeta,
-          isFavorite.isAcceptableOrUnknown(
-              data['is_favorite']!, _isFavoriteMeta));
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
     } else if (isInserting) {
       context.missing(_isFavoriteMeta);
     }
     if (data.containsKey('is_archived')) {
       context.handle(
-          _isArchivedMeta,
-          isArchived.isAcceptableOrUnknown(
-              data['is_archived']!, _isArchivedMeta));
+        _isArchivedMeta,
+        isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
+      );
     } else if (isInserting) {
       context.missing(_isArchivedMeta);
     }
     if (data.containsKey('wear_count')) {
-      context.handle(_wearCountMeta,
-          wearCount.isAcceptableOrUnknown(data['wear_count']!, _wearCountMeta));
+      context.handle(
+        _wearCountMeta,
+        wearCount.isAcceptableOrUnknown(data['wear_count']!, _wearCountMeta),
+      );
     } else if (isInserting) {
       context.missing(_wearCountMeta);
     }
     if (data.containsKey('last_worn_at')) {
       context.handle(
+        _lastWornAtMeta,
+        lastWornAt.isAcceptableOrUnknown(
+          data['last_worn_at']!,
           _lastWornAtMeta,
-          lastWornAt.isAcceptableOrUnknown(
-              data['last_worn_at']!, _lastWornAtMeta));
+        ),
+      );
     }
     if (data.containsKey('is_synced')) {
-      context.handle(_isSyncedMeta,
-          isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta));
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
     } else if (isInserting) {
       context.missing(_isSyncedMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
@@ -801,42 +1030,78 @@ class $WardrobeTableTable extends WardrobeTable
   WardrobeTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return WardrobeTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      externalId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}external_id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      imageUrl: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}image_url'])!,
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
-      season: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}season'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      season: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}season'],
+      )!,
       weatherCondition: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}weather_condition'])!,
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_condition'],
+      )!,
       temperatureMin: attachedDatabase.typeMapping.read(
-          DriftSqlType.double, data['${effectivePrefix}temperature_min'])!,
+        DriftSqlType.double,
+        data['${effectivePrefix}temperature_min'],
+      )!,
       temperatureMax: attachedDatabase.typeMapping.read(
-          DriftSqlType.double, data['${effectivePrefix}temperature_max'])!,
-      occasions: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}occasions'])!,
-      addedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}added_at'])!,
-      isActive: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_active'])!,
-      isFavorite: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
-      isArchived: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_archived'])!,
-      wearCount: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}wear_count'])!,
-      lastWornAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_worn_at']),
-      isSynced: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_synced'])!,
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!,
+        DriftSqlType.double,
+        data['${effectivePrefix}temperature_max'],
+      )!,
+      occasions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occasions'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}added_at'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_archived'],
+      )!,
+      wearCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}wear_count'],
+      )!,
+      lastWornAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_worn_at'],
+      ),
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -866,25 +1131,26 @@ class WardrobeTableData extends DataClass
   final int? lastWornAt;
   final bool isSynced;
   final int updatedAt;
-  const WardrobeTableData(
-      {required this.id,
-      required this.externalId,
-      required this.name,
-      required this.imageUrl,
-      required this.category,
-      required this.season,
-      required this.weatherCondition,
-      required this.temperatureMin,
-      required this.temperatureMax,
-      required this.occasions,
-      required this.addedAt,
-      required this.isActive,
-      required this.isFavorite,
-      required this.isArchived,
-      required this.wearCount,
-      this.lastWornAt,
-      required this.isSynced,
-      required this.updatedAt});
+  const WardrobeTableData({
+    required this.id,
+    required this.externalId,
+    required this.name,
+    required this.imageUrl,
+    required this.category,
+    required this.season,
+    required this.weatherCondition,
+    required this.temperatureMin,
+    required this.temperatureMax,
+    required this.occasions,
+    required this.addedAt,
+    required this.isActive,
+    required this.isFavorite,
+    required this.isArchived,
+    required this.wearCount,
+    this.lastWornAt,
+    required this.isSynced,
+    required this.updatedAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -936,8 +1202,10 @@ class WardrobeTableData extends DataClass
     );
   }
 
-  factory WardrobeTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory WardrobeTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return WardrobeTableData(
       id: serializer.fromJson<int>(json['id']),
@@ -985,50 +1253,51 @@ class WardrobeTableData extends DataClass
     };
   }
 
-  WardrobeTableData copyWith(
-          {int? id,
-          String? externalId,
-          String? name,
-          String? imageUrl,
-          String? category,
-          String? season,
-          String? weatherCondition,
-          double? temperatureMin,
-          double? temperatureMax,
-          String? occasions,
-          int? addedAt,
-          bool? isActive,
-          bool? isFavorite,
-          bool? isArchived,
-          int? wearCount,
-          Value<int?> lastWornAt = const Value.absent(),
-          bool? isSynced,
-          int? updatedAt}) =>
-      WardrobeTableData(
-        id: id ?? this.id,
-        externalId: externalId ?? this.externalId,
-        name: name ?? this.name,
-        imageUrl: imageUrl ?? this.imageUrl,
-        category: category ?? this.category,
-        season: season ?? this.season,
-        weatherCondition: weatherCondition ?? this.weatherCondition,
-        temperatureMin: temperatureMin ?? this.temperatureMin,
-        temperatureMax: temperatureMax ?? this.temperatureMax,
-        occasions: occasions ?? this.occasions,
-        addedAt: addedAt ?? this.addedAt,
-        isActive: isActive ?? this.isActive,
-        isFavorite: isFavorite ?? this.isFavorite,
-        isArchived: isArchived ?? this.isArchived,
-        wearCount: wearCount ?? this.wearCount,
-        lastWornAt: lastWornAt.present ? lastWornAt.value : this.lastWornAt,
-        isSynced: isSynced ?? this.isSynced,
-        updatedAt: updatedAt ?? this.updatedAt,
-      );
+  WardrobeTableData copyWith({
+    int? id,
+    String? externalId,
+    String? name,
+    String? imageUrl,
+    String? category,
+    String? season,
+    String? weatherCondition,
+    double? temperatureMin,
+    double? temperatureMax,
+    String? occasions,
+    int? addedAt,
+    bool? isActive,
+    bool? isFavorite,
+    bool? isArchived,
+    int? wearCount,
+    Value<int?> lastWornAt = const Value.absent(),
+    bool? isSynced,
+    int? updatedAt,
+  }) => WardrobeTableData(
+    id: id ?? this.id,
+    externalId: externalId ?? this.externalId,
+    name: name ?? this.name,
+    imageUrl: imageUrl ?? this.imageUrl,
+    category: category ?? this.category,
+    season: season ?? this.season,
+    weatherCondition: weatherCondition ?? this.weatherCondition,
+    temperatureMin: temperatureMin ?? this.temperatureMin,
+    temperatureMax: temperatureMax ?? this.temperatureMax,
+    occasions: occasions ?? this.occasions,
+    addedAt: addedAt ?? this.addedAt,
+    isActive: isActive ?? this.isActive,
+    isFavorite: isFavorite ?? this.isFavorite,
+    isArchived: isArchived ?? this.isArchived,
+    wearCount: wearCount ?? this.wearCount,
+    lastWornAt: lastWornAt.present ? lastWornAt.value : this.lastWornAt,
+    isSynced: isSynced ?? this.isSynced,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
   WardrobeTableData copyWithCompanion(WardrobeTableCompanion data) {
     return WardrobeTableData(
       id: data.id.present ? data.id.value : this.id,
-      externalId:
-          data.externalId.present ? data.externalId.value : this.externalId,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
       name: data.name.present ? data.name.value : this.name,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       category: data.category.present ? data.category.value : this.category,
@@ -1045,13 +1314,16 @@ class WardrobeTableData extends DataClass
       occasions: data.occasions.present ? data.occasions.value : this.occasions,
       addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
-      isFavorite:
-          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
-      isArchived:
-          data.isArchived.present ? data.isArchived.value : this.isArchived,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
       wearCount: data.wearCount.present ? data.wearCount.value : this.wearCount,
-      lastWornAt:
-          data.lastWornAt.present ? data.lastWornAt.value : this.lastWornAt,
+      lastWornAt: data.lastWornAt.present
+          ? data.lastWornAt.value
+          : this.lastWornAt,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -1084,24 +1356,25 @@ class WardrobeTableData extends DataClass
 
   @override
   int get hashCode => Object.hash(
-      id,
-      externalId,
-      name,
-      imageUrl,
-      category,
-      season,
-      weatherCondition,
-      temperatureMin,
-      temperatureMax,
-      occasions,
-      addedAt,
-      isActive,
-      isFavorite,
-      isArchived,
-      wearCount,
-      lastWornAt,
-      isSynced,
-      updatedAt);
+    id,
+    externalId,
+    name,
+    imageUrl,
+    category,
+    season,
+    weatherCondition,
+    temperatureMin,
+    temperatureMax,
+    occasions,
+    addedAt,
+    isActive,
+    isFavorite,
+    isArchived,
+    wearCount,
+    lastWornAt,
+    isSynced,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1184,22 +1457,22 @@ class WardrobeTableCompanion extends UpdateCompanion<WardrobeTableData> {
     this.lastWornAt = const Value.absent(),
     required bool isSynced,
     required int updatedAt,
-  })  : externalId = Value(externalId),
-        name = Value(name),
-        imageUrl = Value(imageUrl),
-        category = Value(category),
-        season = Value(season),
-        weatherCondition = Value(weatherCondition),
-        temperatureMin = Value(temperatureMin),
-        temperatureMax = Value(temperatureMax),
-        occasions = Value(occasions),
-        addedAt = Value(addedAt),
-        isActive = Value(isActive),
-        isFavorite = Value(isFavorite),
-        isArchived = Value(isArchived),
-        wearCount = Value(wearCount),
-        isSynced = Value(isSynced),
-        updatedAt = Value(updatedAt);
+  }) : externalId = Value(externalId),
+       name = Value(name),
+       imageUrl = Value(imageUrl),
+       category = Value(category),
+       season = Value(season),
+       weatherCondition = Value(weatherCondition),
+       temperatureMin = Value(temperatureMin),
+       temperatureMax = Value(temperatureMax),
+       occasions = Value(occasions),
+       addedAt = Value(addedAt),
+       isActive = Value(isActive),
+       isFavorite = Value(isFavorite),
+       isArchived = Value(isArchived),
+       wearCount = Value(wearCount),
+       isSynced = Value(isSynced),
+       updatedAt = Value(updatedAt);
   static Insertable<WardrobeTableData> custom({
     Expression<int>? id,
     Expression<String>? externalId,
@@ -1242,25 +1515,26 @@ class WardrobeTableCompanion extends UpdateCompanion<WardrobeTableData> {
     });
   }
 
-  WardrobeTableCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? externalId,
-      Value<String>? name,
-      Value<String>? imageUrl,
-      Value<String>? category,
-      Value<String>? season,
-      Value<String>? weatherCondition,
-      Value<double>? temperatureMin,
-      Value<double>? temperatureMax,
-      Value<String>? occasions,
-      Value<int>? addedAt,
-      Value<bool>? isActive,
-      Value<bool>? isFavorite,
-      Value<bool>? isArchived,
-      Value<int>? wearCount,
-      Value<int?>? lastWornAt,
-      Value<bool>? isSynced,
-      Value<int>? updatedAt}) {
+  WardrobeTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? externalId,
+    Value<String>? name,
+    Value<String>? imageUrl,
+    Value<String>? category,
+    Value<String>? season,
+    Value<String>? weatherCondition,
+    Value<double>? temperatureMin,
+    Value<double>? temperatureMax,
+    Value<String>? occasions,
+    Value<int>? addedAt,
+    Value<bool>? isActive,
+    Value<bool>? isFavorite,
+    Value<bool>? isArchived,
+    Value<int>? wearCount,
+    Value<int?>? lastWornAt,
+    Value<bool>? isSynced,
+    Value<int>? updatedAt,
+  }) {
     return WardrobeTableCompanion(
       id: id ?? this.id,
       externalId: externalId ?? this.externalId,
@@ -1378,191 +1652,317 @@ class $WeatherDataTableTable extends WeatherDataTable
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _latitudeMeta =
-      const VerificationMeta('latitude');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
   @override
   late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
-      'latitude', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _longitudeMeta =
-      const VerificationMeta('longitude');
+    'latitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
   @override
   late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
-      'longitude', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _locationNameMeta =
-      const VerificationMeta('locationName');
+    'longitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _locationNameMeta = const VerificationMeta(
+    'locationName',
+  );
   @override
   late final GeneratedColumn<String> locationName = GeneratedColumn<String>(
-      'location_name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _temperatureMeta =
-      const VerificationMeta('temperature');
+    'location_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _temperatureMeta = const VerificationMeta(
+    'temperature',
+  );
   @override
   late final GeneratedColumn<double> temperature = GeneratedColumn<double>(
-      'temperature', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _feelsLikeMeta =
-      const VerificationMeta('feelsLike');
+    'temperature',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _feelsLikeMeta = const VerificationMeta(
+    'feelsLike',
+  );
   @override
   late final GeneratedColumn<double> feelsLike = GeneratedColumn<double>(
-      'feels_like', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _tempMinMeta =
-      const VerificationMeta('tempMin');
+    'feels_like',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tempMinMeta = const VerificationMeta(
+    'tempMin',
+  );
   @override
   late final GeneratedColumn<double> tempMin = GeneratedColumn<double>(
-      'temp_min', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _tempMaxMeta =
-      const VerificationMeta('tempMax');
+    'temp_min',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tempMaxMeta = const VerificationMeta(
+    'tempMax',
+  );
   @override
   late final GeneratedColumn<double> tempMax = GeneratedColumn<double>(
-      'temp_max', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _pressureMeta =
-      const VerificationMeta('pressure');
+    'temp_max',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pressureMeta = const VerificationMeta(
+    'pressure',
+  );
   @override
   late final GeneratedColumn<int> pressure = GeneratedColumn<int>(
-      'pressure', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _humidityMeta =
-      const VerificationMeta('humidity');
+    'pressure',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _humidityMeta = const VerificationMeta(
+    'humidity',
+  );
   @override
   late final GeneratedColumn<int> humidity = GeneratedColumn<int>(
-      'humidity', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _dewPointMeta =
-      const VerificationMeta('dewPoint');
+    'humidity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dewPointMeta = const VerificationMeta(
+    'dewPoint',
+  );
   @override
   late final GeneratedColumn<double> dewPoint = GeneratedColumn<double>(
-      'dew_point', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+    'dew_point',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _uviMeta = const VerificationMeta('uvi');
   @override
   late final GeneratedColumn<double> uvi = GeneratedColumn<double>(
-      'uvi', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+    'uvi',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _cloudsMeta = const VerificationMeta('clouds');
   @override
   late final GeneratedColumn<int> clouds = GeneratedColumn<int>(
-      'clouds', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _visibilityMeta =
-      const VerificationMeta('visibility');
+    'clouds',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
   @override
   late final GeneratedColumn<int> visibility = GeneratedColumn<int>(
-      'visibility', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _windSpeedMeta =
-      const VerificationMeta('windSpeed');
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _windSpeedMeta = const VerificationMeta(
+    'windSpeed',
+  );
   @override
   late final GeneratedColumn<double> windSpeed = GeneratedColumn<double>(
-      'wind_speed', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _windDegMeta =
-      const VerificationMeta('windDeg');
+    'wind_speed',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _windDegMeta = const VerificationMeta(
+    'windDeg',
+  );
   @override
   late final GeneratedColumn<int> windDeg = GeneratedColumn<int>(
-      'wind_deg', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _windGustMeta =
-      const VerificationMeta('windGust');
+    'wind_deg',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _windGustMeta = const VerificationMeta(
+    'windGust',
+  );
   @override
   late final GeneratedColumn<double> windGust = GeneratedColumn<double>(
-      'wind_gust', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
-  static const VerificationMeta _weatherMainMeta =
-      const VerificationMeta('weatherMain');
+    'wind_gust',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _weatherMainMeta = const VerificationMeta(
+    'weatherMain',
+  );
   @override
   late final GeneratedColumn<String> weatherMain = GeneratedColumn<String>(
-      'weather_main', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'weather_main',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _weatherDescriptionMeta =
       const VerificationMeta('weatherDescription');
   @override
   late final GeneratedColumn<String> weatherDescription =
-      GeneratedColumn<String>('weather_description', aliasedName, false,
-          type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _weatherIconMeta =
-      const VerificationMeta('weatherIcon');
+      GeneratedColumn<String>(
+        'weather_description',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _weatherIconMeta = const VerificationMeta(
+    'weatherIcon',
+  );
   @override
   late final GeneratedColumn<String> weatherIcon = GeneratedColumn<String>(
-      'weather_icon', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
+    'weather_icon',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
   @override
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
-      'timestamp', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _timezoneMeta =
-      const VerificationMeta('timezone');
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timezoneMeta = const VerificationMeta(
+    'timezone',
+  );
   @override
   late final GeneratedColumn<int> timezone = GeneratedColumn<int>(
-      'timezone', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _countryMeta =
-      const VerificationMeta('country');
+    'timezone',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countryMeta = const VerificationMeta(
+    'country',
+  );
   @override
   late final GeneratedColumn<String> country = GeneratedColumn<String>(
-      'country', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _sunriseMeta =
-      const VerificationMeta('sunrise');
+    'country',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sunriseMeta = const VerificationMeta(
+    'sunrise',
+  );
   @override
   late final GeneratedColumn<int> sunrise = GeneratedColumn<int>(
-      'sunrise', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'sunrise',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _sunsetMeta = const VerificationMeta('sunset');
   @override
   late final GeneratedColumn<int> sunset = GeneratedColumn<int>(
-      'sunset', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _isCurrentMeta =
-      const VerificationMeta('isCurrent');
+    'sunset',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isCurrentMeta = const VerificationMeta(
+    'isCurrent',
+  );
   @override
   late final GeneratedColumn<bool> isCurrent = GeneratedColumn<bool>(
-      'is_current', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("is_current" IN (0, 1))'));
+    'is_current',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_current" IN (0, 1))',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        latitude,
-        longitude,
-        locationName,
-        temperature,
-        feelsLike,
-        tempMin,
-        tempMax,
-        pressure,
-        humidity,
-        dewPoint,
-        uvi,
-        clouds,
-        visibility,
-        windSpeed,
-        windDeg,
-        windGust,
-        weatherMain,
-        weatherDescription,
-        weatherIcon,
-        timestamp,
-        timezone,
-        country,
-        sunrise,
-        sunset,
-        isCurrent
-      ];
+    id,
+    latitude,
+    longitude,
+    locationName,
+    temperature,
+    feelsLike,
+    tempMin,
+    tempMax,
+    pressure,
+    humidity,
+    dewPoint,
+    uvi,
+    clouds,
+    visibility,
+    windSpeed,
+    windDeg,
+    windGust,
+    weatherMain,
+    weatherDescription,
+    weatherIcon,
+    timestamp,
+    timezone,
+    country,
+    sunrise,
+    sunset,
+    isCurrent,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1570,170 +1970,224 @@ class $WeatherDataTableTable extends WeatherDataTable
   static const String $name = 'weather_data_table';
   @override
   VerificationContext validateIntegrity(
-      Insertable<WeatherDataTableData> instance,
-      {bool isInserting = false}) {
+    Insertable<WeatherDataTableData> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('latitude')) {
-      context.handle(_latitudeMeta,
-          latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta));
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
     } else if (isInserting) {
       context.missing(_latitudeMeta);
     }
     if (data.containsKey('longitude')) {
-      context.handle(_longitudeMeta,
-          longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta));
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
     } else if (isInserting) {
       context.missing(_longitudeMeta);
     }
     if (data.containsKey('location_name')) {
       context.handle(
+        _locationNameMeta,
+        locationName.isAcceptableOrUnknown(
+          data['location_name']!,
           _locationNameMeta,
-          locationName.isAcceptableOrUnknown(
-              data['location_name']!, _locationNameMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_locationNameMeta);
     }
     if (data.containsKey('temperature')) {
       context.handle(
+        _temperatureMeta,
+        temperature.isAcceptableOrUnknown(
+          data['temperature']!,
           _temperatureMeta,
-          temperature.isAcceptableOrUnknown(
-              data['temperature']!, _temperatureMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_temperatureMeta);
     }
     if (data.containsKey('feels_like')) {
-      context.handle(_feelsLikeMeta,
-          feelsLike.isAcceptableOrUnknown(data['feels_like']!, _feelsLikeMeta));
+      context.handle(
+        _feelsLikeMeta,
+        feelsLike.isAcceptableOrUnknown(data['feels_like']!, _feelsLikeMeta),
+      );
     } else if (isInserting) {
       context.missing(_feelsLikeMeta);
     }
     if (data.containsKey('temp_min')) {
-      context.handle(_tempMinMeta,
-          tempMin.isAcceptableOrUnknown(data['temp_min']!, _tempMinMeta));
+      context.handle(
+        _tempMinMeta,
+        tempMin.isAcceptableOrUnknown(data['temp_min']!, _tempMinMeta),
+      );
     } else if (isInserting) {
       context.missing(_tempMinMeta);
     }
     if (data.containsKey('temp_max')) {
-      context.handle(_tempMaxMeta,
-          tempMax.isAcceptableOrUnknown(data['temp_max']!, _tempMaxMeta));
+      context.handle(
+        _tempMaxMeta,
+        tempMax.isAcceptableOrUnknown(data['temp_max']!, _tempMaxMeta),
+      );
     } else if (isInserting) {
       context.missing(_tempMaxMeta);
     }
     if (data.containsKey('pressure')) {
-      context.handle(_pressureMeta,
-          pressure.isAcceptableOrUnknown(data['pressure']!, _pressureMeta));
+      context.handle(
+        _pressureMeta,
+        pressure.isAcceptableOrUnknown(data['pressure']!, _pressureMeta),
+      );
     } else if (isInserting) {
       context.missing(_pressureMeta);
     }
     if (data.containsKey('humidity')) {
-      context.handle(_humidityMeta,
-          humidity.isAcceptableOrUnknown(data['humidity']!, _humidityMeta));
+      context.handle(
+        _humidityMeta,
+        humidity.isAcceptableOrUnknown(data['humidity']!, _humidityMeta),
+      );
     } else if (isInserting) {
       context.missing(_humidityMeta);
     }
     if (data.containsKey('dew_point')) {
-      context.handle(_dewPointMeta,
-          dewPoint.isAcceptableOrUnknown(data['dew_point']!, _dewPointMeta));
+      context.handle(
+        _dewPointMeta,
+        dewPoint.isAcceptableOrUnknown(data['dew_point']!, _dewPointMeta),
+      );
     } else if (isInserting) {
       context.missing(_dewPointMeta);
     }
     if (data.containsKey('uvi')) {
       context.handle(
-          _uviMeta, uvi.isAcceptableOrUnknown(data['uvi']!, _uviMeta));
+        _uviMeta,
+        uvi.isAcceptableOrUnknown(data['uvi']!, _uviMeta),
+      );
     } else if (isInserting) {
       context.missing(_uviMeta);
     }
     if (data.containsKey('clouds')) {
-      context.handle(_cloudsMeta,
-          clouds.isAcceptableOrUnknown(data['clouds']!, _cloudsMeta));
+      context.handle(
+        _cloudsMeta,
+        clouds.isAcceptableOrUnknown(data['clouds']!, _cloudsMeta),
+      );
     } else if (isInserting) {
       context.missing(_cloudsMeta);
     }
     if (data.containsKey('visibility')) {
       context.handle(
-          _visibilityMeta,
-          visibility.isAcceptableOrUnknown(
-              data['visibility']!, _visibilityMeta));
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
     } else if (isInserting) {
       context.missing(_visibilityMeta);
     }
     if (data.containsKey('wind_speed')) {
-      context.handle(_windSpeedMeta,
-          windSpeed.isAcceptableOrUnknown(data['wind_speed']!, _windSpeedMeta));
+      context.handle(
+        _windSpeedMeta,
+        windSpeed.isAcceptableOrUnknown(data['wind_speed']!, _windSpeedMeta),
+      );
     } else if (isInserting) {
       context.missing(_windSpeedMeta);
     }
     if (data.containsKey('wind_deg')) {
-      context.handle(_windDegMeta,
-          windDeg.isAcceptableOrUnknown(data['wind_deg']!, _windDegMeta));
+      context.handle(
+        _windDegMeta,
+        windDeg.isAcceptableOrUnknown(data['wind_deg']!, _windDegMeta),
+      );
     } else if (isInserting) {
       context.missing(_windDegMeta);
     }
     if (data.containsKey('wind_gust')) {
-      context.handle(_windGustMeta,
-          windGust.isAcceptableOrUnknown(data['wind_gust']!, _windGustMeta));
+      context.handle(
+        _windGustMeta,
+        windGust.isAcceptableOrUnknown(data['wind_gust']!, _windGustMeta),
+      );
     }
     if (data.containsKey('weather_main')) {
       context.handle(
+        _weatherMainMeta,
+        weatherMain.isAcceptableOrUnknown(
+          data['weather_main']!,
           _weatherMainMeta,
-          weatherMain.isAcceptableOrUnknown(
-              data['weather_main']!, _weatherMainMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_weatherMainMeta);
     }
     if (data.containsKey('weather_description')) {
       context.handle(
+        _weatherDescriptionMeta,
+        weatherDescription.isAcceptableOrUnknown(
+          data['weather_description']!,
           _weatherDescriptionMeta,
-          weatherDescription.isAcceptableOrUnknown(
-              data['weather_description']!, _weatherDescriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_weatherDescriptionMeta);
     }
     if (data.containsKey('weather_icon')) {
       context.handle(
+        _weatherIconMeta,
+        weatherIcon.isAcceptableOrUnknown(
+          data['weather_icon']!,
           _weatherIconMeta,
-          weatherIcon.isAcceptableOrUnknown(
-              data['weather_icon']!, _weatherIconMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_weatherIconMeta);
     }
     if (data.containsKey('timestamp')) {
-      context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
     if (data.containsKey('timezone')) {
-      context.handle(_timezoneMeta,
-          timezone.isAcceptableOrUnknown(data['timezone']!, _timezoneMeta));
+      context.handle(
+        _timezoneMeta,
+        timezone.isAcceptableOrUnknown(data['timezone']!, _timezoneMeta),
+      );
     } else if (isInserting) {
       context.missing(_timezoneMeta);
     }
     if (data.containsKey('country')) {
-      context.handle(_countryMeta,
-          country.isAcceptableOrUnknown(data['country']!, _countryMeta));
+      context.handle(
+        _countryMeta,
+        country.isAcceptableOrUnknown(data['country']!, _countryMeta),
+      );
     } else if (isInserting) {
       context.missing(_countryMeta);
     }
     if (data.containsKey('sunrise')) {
-      context.handle(_sunriseMeta,
-          sunrise.isAcceptableOrUnknown(data['sunrise']!, _sunriseMeta));
+      context.handle(
+        _sunriseMeta,
+        sunrise.isAcceptableOrUnknown(data['sunrise']!, _sunriseMeta),
+      );
     } else if (isInserting) {
       context.missing(_sunriseMeta);
     }
     if (data.containsKey('sunset')) {
-      context.handle(_sunsetMeta,
-          sunset.isAcceptableOrUnknown(data['sunset']!, _sunsetMeta));
+      context.handle(
+        _sunsetMeta,
+        sunset.isAcceptableOrUnknown(data['sunset']!, _sunsetMeta),
+      );
     } else if (isInserting) {
       context.missing(_sunsetMeta);
     }
     if (data.containsKey('is_current')) {
-      context.handle(_isCurrentMeta,
-          isCurrent.isAcceptableOrUnknown(data['is_current']!, _isCurrentMeta));
+      context.handle(
+        _isCurrentMeta,
+        isCurrent.isAcceptableOrUnknown(data['is_current']!, _isCurrentMeta),
+      );
     } else if (isInserting) {
       context.missing(_isCurrentMeta);
     }
@@ -1746,58 +2200,110 @@ class $WeatherDataTableTable extends WeatherDataTable
   WeatherDataTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return WeatherDataTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      latitude: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}latitude'])!,
-      longitude: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}longitude'])!,
-      locationName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}location_name'])!,
-      temperature: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}temperature'])!,
-      feelsLike: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}feels_like'])!,
-      tempMin: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}temp_min'])!,
-      tempMax: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}temp_max'])!,
-      pressure: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}pressure'])!,
-      humidity: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}humidity'])!,
-      dewPoint: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}dew_point'])!,
-      uvi: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}uvi'])!,
-      clouds: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}clouds'])!,
-      visibility: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}visibility'])!,
-      windSpeed: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}wind_speed'])!,
-      windDeg: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}wind_deg'])!,
-      windGust: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}wind_gust']),
-      weatherMain: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}weather_main'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      )!,
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      )!,
+      locationName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location_name'],
+      )!,
+      temperature: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temperature'],
+      )!,
+      feelsLike: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}feels_like'],
+      )!,
+      tempMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temp_min'],
+      )!,
+      tempMax: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temp_max'],
+      )!,
+      pressure: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pressure'],
+      )!,
+      humidity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}humidity'],
+      )!,
+      dewPoint: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}dew_point'],
+      )!,
+      uvi: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}uvi'],
+      )!,
+      clouds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}clouds'],
+      )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}visibility'],
+      )!,
+      windSpeed: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}wind_speed'],
+      )!,
+      windDeg: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}wind_deg'],
+      )!,
+      windGust: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}wind_gust'],
+      ),
+      weatherMain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_main'],
+      )!,
       weatherDescription: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}weather_description'])!,
-      weatherIcon: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}weather_icon'])!,
-      timestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
-      timezone: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}timezone'])!,
-      country: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}country'])!,
-      sunrise: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}sunrise'])!,
-      sunset: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}sunset'])!,
-      isCurrent: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_current'])!,
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_description'],
+      )!,
+      weatherIcon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_icon'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      timezone: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timezone'],
+      )!,
+      country: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}country'],
+      )!,
+      sunrise: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sunrise'],
+      )!,
+      sunset: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sunset'],
+      )!,
+      isCurrent: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_current'],
+      )!,
     );
   }
 
@@ -1835,33 +2341,34 @@ class WeatherDataTableData extends DataClass
   final int sunrise;
   final int sunset;
   final bool isCurrent;
-  const WeatherDataTableData(
-      {required this.id,
-      required this.latitude,
-      required this.longitude,
-      required this.locationName,
-      required this.temperature,
-      required this.feelsLike,
-      required this.tempMin,
-      required this.tempMax,
-      required this.pressure,
-      required this.humidity,
-      required this.dewPoint,
-      required this.uvi,
-      required this.clouds,
-      required this.visibility,
-      required this.windSpeed,
-      required this.windDeg,
-      this.windGust,
-      required this.weatherMain,
-      required this.weatherDescription,
-      required this.weatherIcon,
-      required this.timestamp,
-      required this.timezone,
-      required this.country,
-      required this.sunrise,
-      required this.sunset,
-      required this.isCurrent});
+  const WeatherDataTableData({
+    required this.id,
+    required this.latitude,
+    required this.longitude,
+    required this.locationName,
+    required this.temperature,
+    required this.feelsLike,
+    required this.tempMin,
+    required this.tempMax,
+    required this.pressure,
+    required this.humidity,
+    required this.dewPoint,
+    required this.uvi,
+    required this.clouds,
+    required this.visibility,
+    required this.windSpeed,
+    required this.windDeg,
+    this.windGust,
+    required this.weatherMain,
+    required this.weatherDescription,
+    required this.weatherIcon,
+    required this.timestamp,
+    required this.timezone,
+    required this.country,
+    required this.sunrise,
+    required this.sunset,
+    required this.isCurrent,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1929,8 +2436,10 @@ class WeatherDataTableData extends DataClass
     );
   }
 
-  factory WeatherDataTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory WeatherDataTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return WeatherDataTableData(
       id: serializer.fromJson<int>(json['id']),
@@ -1951,8 +2460,9 @@ class WeatherDataTableData extends DataClass
       windDeg: serializer.fromJson<int>(json['windDeg']),
       windGust: serializer.fromJson<double?>(json['windGust']),
       weatherMain: serializer.fromJson<String>(json['weatherMain']),
-      weatherDescription:
-          serializer.fromJson<String>(json['weatherDescription']),
+      weatherDescription: serializer.fromJson<String>(
+        json['weatherDescription'],
+      ),
       weatherIcon: serializer.fromJson<String>(json['weatherIcon']),
       timestamp: serializer.fromJson<int>(json['timestamp']),
       timezone: serializer.fromJson<int>(json['timezone']),
@@ -1995,61 +2505,61 @@ class WeatherDataTableData extends DataClass
     };
   }
 
-  WeatherDataTableData copyWith(
-          {int? id,
-          double? latitude,
-          double? longitude,
-          String? locationName,
-          double? temperature,
-          double? feelsLike,
-          double? tempMin,
-          double? tempMax,
-          int? pressure,
-          int? humidity,
-          double? dewPoint,
-          double? uvi,
-          int? clouds,
-          int? visibility,
-          double? windSpeed,
-          int? windDeg,
-          Value<double?> windGust = const Value.absent(),
-          String? weatherMain,
-          String? weatherDescription,
-          String? weatherIcon,
-          int? timestamp,
-          int? timezone,
-          String? country,
-          int? sunrise,
-          int? sunset,
-          bool? isCurrent}) =>
-      WeatherDataTableData(
-        id: id ?? this.id,
-        latitude: latitude ?? this.latitude,
-        longitude: longitude ?? this.longitude,
-        locationName: locationName ?? this.locationName,
-        temperature: temperature ?? this.temperature,
-        feelsLike: feelsLike ?? this.feelsLike,
-        tempMin: tempMin ?? this.tempMin,
-        tempMax: tempMax ?? this.tempMax,
-        pressure: pressure ?? this.pressure,
-        humidity: humidity ?? this.humidity,
-        dewPoint: dewPoint ?? this.dewPoint,
-        uvi: uvi ?? this.uvi,
-        clouds: clouds ?? this.clouds,
-        visibility: visibility ?? this.visibility,
-        windSpeed: windSpeed ?? this.windSpeed,
-        windDeg: windDeg ?? this.windDeg,
-        windGust: windGust.present ? windGust.value : this.windGust,
-        weatherMain: weatherMain ?? this.weatherMain,
-        weatherDescription: weatherDescription ?? this.weatherDescription,
-        weatherIcon: weatherIcon ?? this.weatherIcon,
-        timestamp: timestamp ?? this.timestamp,
-        timezone: timezone ?? this.timezone,
-        country: country ?? this.country,
-        sunrise: sunrise ?? this.sunrise,
-        sunset: sunset ?? this.sunset,
-        isCurrent: isCurrent ?? this.isCurrent,
-      );
+  WeatherDataTableData copyWith({
+    int? id,
+    double? latitude,
+    double? longitude,
+    String? locationName,
+    double? temperature,
+    double? feelsLike,
+    double? tempMin,
+    double? tempMax,
+    int? pressure,
+    int? humidity,
+    double? dewPoint,
+    double? uvi,
+    int? clouds,
+    int? visibility,
+    double? windSpeed,
+    int? windDeg,
+    Value<double?> windGust = const Value.absent(),
+    String? weatherMain,
+    String? weatherDescription,
+    String? weatherIcon,
+    int? timestamp,
+    int? timezone,
+    String? country,
+    int? sunrise,
+    int? sunset,
+    bool? isCurrent,
+  }) => WeatherDataTableData(
+    id: id ?? this.id,
+    latitude: latitude ?? this.latitude,
+    longitude: longitude ?? this.longitude,
+    locationName: locationName ?? this.locationName,
+    temperature: temperature ?? this.temperature,
+    feelsLike: feelsLike ?? this.feelsLike,
+    tempMin: tempMin ?? this.tempMin,
+    tempMax: tempMax ?? this.tempMax,
+    pressure: pressure ?? this.pressure,
+    humidity: humidity ?? this.humidity,
+    dewPoint: dewPoint ?? this.dewPoint,
+    uvi: uvi ?? this.uvi,
+    clouds: clouds ?? this.clouds,
+    visibility: visibility ?? this.visibility,
+    windSpeed: windSpeed ?? this.windSpeed,
+    windDeg: windDeg ?? this.windDeg,
+    windGust: windGust.present ? windGust.value : this.windGust,
+    weatherMain: weatherMain ?? this.weatherMain,
+    weatherDescription: weatherDescription ?? this.weatherDescription,
+    weatherIcon: weatherIcon ?? this.weatherIcon,
+    timestamp: timestamp ?? this.timestamp,
+    timezone: timezone ?? this.timezone,
+    country: country ?? this.country,
+    sunrise: sunrise ?? this.sunrise,
+    sunset: sunset ?? this.sunset,
+    isCurrent: isCurrent ?? this.isCurrent,
+  );
   WeatherDataTableData copyWithCompanion(WeatherDataTableCompanion data) {
     return WeatherDataTableData(
       id: data.id.present ? data.id.value : this.id,
@@ -2058,8 +2568,9 @@ class WeatherDataTableData extends DataClass
       locationName: data.locationName.present
           ? data.locationName.value
           : this.locationName,
-      temperature:
-          data.temperature.present ? data.temperature.value : this.temperature,
+      temperature: data.temperature.present
+          ? data.temperature.value
+          : this.temperature,
       feelsLike: data.feelsLike.present ? data.feelsLike.value : this.feelsLike,
       tempMin: data.tempMin.present ? data.tempMin.value : this.tempMin,
       tempMax: data.tempMax.present ? data.tempMax.value : this.tempMax,
@@ -2068,18 +2579,21 @@ class WeatherDataTableData extends DataClass
       dewPoint: data.dewPoint.present ? data.dewPoint.value : this.dewPoint,
       uvi: data.uvi.present ? data.uvi.value : this.uvi,
       clouds: data.clouds.present ? data.clouds.value : this.clouds,
-      visibility:
-          data.visibility.present ? data.visibility.value : this.visibility,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
       windSpeed: data.windSpeed.present ? data.windSpeed.value : this.windSpeed,
       windDeg: data.windDeg.present ? data.windDeg.value : this.windDeg,
       windGust: data.windGust.present ? data.windGust.value : this.windGust,
-      weatherMain:
-          data.weatherMain.present ? data.weatherMain.value : this.weatherMain,
+      weatherMain: data.weatherMain.present
+          ? data.weatherMain.value
+          : this.weatherMain,
       weatherDescription: data.weatherDescription.present
           ? data.weatherDescription.value
           : this.weatherDescription,
-      weatherIcon:
-          data.weatherIcon.present ? data.weatherIcon.value : this.weatherIcon,
+      weatherIcon: data.weatherIcon.present
+          ? data.weatherIcon.value
+          : this.weatherIcon,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
       timezone: data.timezone.present ? data.timezone.value : this.timezone,
       country: data.country.present ? data.country.value : this.country,
@@ -2124,33 +2638,33 @@ class WeatherDataTableData extends DataClass
 
   @override
   int get hashCode => Object.hashAll([
-        id,
-        latitude,
-        longitude,
-        locationName,
-        temperature,
-        feelsLike,
-        tempMin,
-        tempMax,
-        pressure,
-        humidity,
-        dewPoint,
-        uvi,
-        clouds,
-        visibility,
-        windSpeed,
-        windDeg,
-        windGust,
-        weatherMain,
-        weatherDescription,
-        weatherIcon,
-        timestamp,
-        timezone,
-        country,
-        sunrise,
-        sunset,
-        isCurrent
-      ]);
+    id,
+    latitude,
+    longitude,
+    locationName,
+    temperature,
+    feelsLike,
+    tempMin,
+    tempMax,
+    pressure,
+    humidity,
+    dewPoint,
+    uvi,
+    clouds,
+    visibility,
+    windSpeed,
+    windDeg,
+    windGust,
+    weatherMain,
+    weatherDescription,
+    weatherIcon,
+    timestamp,
+    timezone,
+    country,
+    sunrise,
+    sunset,
+    isCurrent,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2265,30 +2779,30 @@ class WeatherDataTableCompanion extends UpdateCompanion<WeatherDataTableData> {
     required int sunrise,
     required int sunset,
     required bool isCurrent,
-  })  : latitude = Value(latitude),
-        longitude = Value(longitude),
-        locationName = Value(locationName),
-        temperature = Value(temperature),
-        feelsLike = Value(feelsLike),
-        tempMin = Value(tempMin),
-        tempMax = Value(tempMax),
-        pressure = Value(pressure),
-        humidity = Value(humidity),
-        dewPoint = Value(dewPoint),
-        uvi = Value(uvi),
-        clouds = Value(clouds),
-        visibility = Value(visibility),
-        windSpeed = Value(windSpeed),
-        windDeg = Value(windDeg),
-        weatherMain = Value(weatherMain),
-        weatherDescription = Value(weatherDescription),
-        weatherIcon = Value(weatherIcon),
-        timestamp = Value(timestamp),
-        timezone = Value(timezone),
-        country = Value(country),
-        sunrise = Value(sunrise),
-        sunset = Value(sunset),
-        isCurrent = Value(isCurrent);
+  }) : latitude = Value(latitude),
+       longitude = Value(longitude),
+       locationName = Value(locationName),
+       temperature = Value(temperature),
+       feelsLike = Value(feelsLike),
+       tempMin = Value(tempMin),
+       tempMax = Value(tempMax),
+       pressure = Value(pressure),
+       humidity = Value(humidity),
+       dewPoint = Value(dewPoint),
+       uvi = Value(uvi),
+       clouds = Value(clouds),
+       visibility = Value(visibility),
+       windSpeed = Value(windSpeed),
+       windDeg = Value(windDeg),
+       weatherMain = Value(weatherMain),
+       weatherDescription = Value(weatherDescription),
+       weatherIcon = Value(weatherIcon),
+       timestamp = Value(timestamp),
+       timezone = Value(timezone),
+       country = Value(country),
+       sunrise = Value(sunrise),
+       sunset = Value(sunset),
+       isCurrent = Value(isCurrent);
   static Insertable<WeatherDataTableData> custom({
     Expression<int>? id,
     Expression<double>? latitude,
@@ -2347,33 +2861,34 @@ class WeatherDataTableCompanion extends UpdateCompanion<WeatherDataTableData> {
     });
   }
 
-  WeatherDataTableCompanion copyWith(
-      {Value<int>? id,
-      Value<double>? latitude,
-      Value<double>? longitude,
-      Value<String>? locationName,
-      Value<double>? temperature,
-      Value<double>? feelsLike,
-      Value<double>? tempMin,
-      Value<double>? tempMax,
-      Value<int>? pressure,
-      Value<int>? humidity,
-      Value<double>? dewPoint,
-      Value<double>? uvi,
-      Value<int>? clouds,
-      Value<int>? visibility,
-      Value<double>? windSpeed,
-      Value<int>? windDeg,
-      Value<double?>? windGust,
-      Value<String>? weatherMain,
-      Value<String>? weatherDescription,
-      Value<String>? weatherIcon,
-      Value<int>? timestamp,
-      Value<int>? timezone,
-      Value<String>? country,
-      Value<int>? sunrise,
-      Value<int>? sunset,
-      Value<bool>? isCurrent}) {
+  WeatherDataTableCompanion copyWith({
+    Value<int>? id,
+    Value<double>? latitude,
+    Value<double>? longitude,
+    Value<String>? locationName,
+    Value<double>? temperature,
+    Value<double>? feelsLike,
+    Value<double>? tempMin,
+    Value<double>? tempMax,
+    Value<int>? pressure,
+    Value<int>? humidity,
+    Value<double>? dewPoint,
+    Value<double>? uvi,
+    Value<int>? clouds,
+    Value<int>? visibility,
+    Value<double>? windSpeed,
+    Value<int>? windDeg,
+    Value<double?>? windGust,
+    Value<String>? weatherMain,
+    Value<String>? weatherDescription,
+    Value<String>? weatherIcon,
+    Value<int>? timestamp,
+    Value<int>? timezone,
+    Value<String>? country,
+    Value<int>? sunrise,
+    Value<int>? sunset,
+    Value<bool>? isCurrent,
+  }) {
     return WeatherDataTableCompanion(
       id: id ?? this.id,
       latitude: latitude ?? this.latitude,
@@ -2528,42 +3043,46 @@ abstract class _$LocalDatabase extends GeneratedDatabase {
   late final $RecommendationTableTable recommendationTable =
       $RecommendationTableTable(this);
   late final $WardrobeTableTable wardrobeTable = $WardrobeTableTable(this);
-  late final $WeatherDataTableTable weatherDataTable =
-      $WeatherDataTableTable(this);
+  late final $WeatherDataTableTable weatherDataTable = $WeatherDataTableTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [recommendationTable, wardrobeTable, weatherDataTable];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    recommendationTable,
+    wardrobeTable,
+    weatherDataTable,
+  ];
 }
 
-typedef $$RecommendationTableTableCreateCompanionBuilder
-    = RecommendationTableCompanion Function({
-  Value<int> id,
-  required String userId,
-  required String outfitItems,
-  required double temperature,
-  required String weatherCondition,
-  required String occasion,
-  required int timestamp,
-  required double confidenceScore,
-  Value<String?> feedback,
-  Value<int?> rating,
-});
-typedef $$RecommendationTableTableUpdateCompanionBuilder
-    = RecommendationTableCompanion Function({
-  Value<int> id,
-  Value<String> userId,
-  Value<String> outfitItems,
-  Value<double> temperature,
-  Value<String> weatherCondition,
-  Value<String> occasion,
-  Value<int> timestamp,
-  Value<double> confidenceScore,
-  Value<String?> feedback,
-  Value<int?> rating,
-});
+typedef $$RecommendationTableTableCreateCompanionBuilder =
+    RecommendationTableCompanion Function({
+      Value<int> id,
+      required String userId,
+      required String outfitItems,
+      required double temperature,
+      required String weatherCondition,
+      required String occasion,
+      required int timestamp,
+      required double confidenceScore,
+      Value<String?> feedback,
+      Value<int?> rating,
+    });
+typedef $$RecommendationTableTableUpdateCompanionBuilder =
+    RecommendationTableCompanion Function({
+      Value<int> id,
+      Value<String> userId,
+      Value<String> outfitItems,
+      Value<double> temperature,
+      Value<String> weatherCondition,
+      Value<String> occasion,
+      Value<int> timestamp,
+      Value<double> confidenceScore,
+      Value<String?> feedback,
+      Value<int?> rating,
+    });
 
 class $$RecommendationTableTableFilterComposer
     extends Composer<_$LocalDatabase, $RecommendationTableTable> {
@@ -2575,36 +3094,54 @@ class $$RecommendationTableTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get userId => $composableBuilder(
-      column: $table.userId, builder: (column) => ColumnFilters(column));
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get outfitItems => $composableBuilder(
-      column: $table.outfitItems, builder: (column) => ColumnFilters(column));
+    column: $table.outfitItems,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get temperature => $composableBuilder(
-      column: $table.temperature, builder: (column) => ColumnFilters(column));
+    column: $table.temperature,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get weatherCondition => $composableBuilder(
-      column: $table.weatherCondition,
-      builder: (column) => ColumnFilters(column));
+    column: $table.weatherCondition,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get occasion => $composableBuilder(
-      column: $table.occasion, builder: (column) => ColumnFilters(column));
+    column: $table.occasion,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get confidenceScore => $composableBuilder(
-      column: $table.confidenceScore,
-      builder: (column) => ColumnFilters(column));
+    column: $table.confidenceScore,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get feedback => $composableBuilder(
-      column: $table.feedback, builder: (column) => ColumnFilters(column));
+    column: $table.feedback,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get rating => $composableBuilder(
-      column: $table.rating, builder: (column) => ColumnFilters(column));
+    column: $table.rating,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$RecommendationTableTableOrderingComposer
@@ -2617,36 +3154,54 @@ class $$RecommendationTableTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get userId => $composableBuilder(
-      column: $table.userId, builder: (column) => ColumnOrderings(column));
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get outfitItems => $composableBuilder(
-      column: $table.outfitItems, builder: (column) => ColumnOrderings(column));
+    column: $table.outfitItems,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get temperature => $composableBuilder(
-      column: $table.temperature, builder: (column) => ColumnOrderings(column));
+    column: $table.temperature,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get weatherCondition => $composableBuilder(
-      column: $table.weatherCondition,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.weatherCondition,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get occasion => $composableBuilder(
-      column: $table.occasion, builder: (column) => ColumnOrderings(column));
+    column: $table.occasion,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get confidenceScore => $composableBuilder(
-      column: $table.confidenceScore,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.confidenceScore,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get feedback => $composableBuilder(
-      column: $table.feedback, builder: (column) => ColumnOrderings(column));
+    column: $table.feedback,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get rating => $composableBuilder(
-      column: $table.rating, builder: (column) => ColumnOrderings(column));
+    column: $table.rating,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RecommendationTableTableAnnotationComposer
@@ -2665,13 +3220,19 @@ class $$RecommendationTableTableAnnotationComposer
       $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<String> get outfitItems => $composableBuilder(
-      column: $table.outfitItems, builder: (column) => column);
+    column: $table.outfitItems,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get temperature => $composableBuilder(
-      column: $table.temperature, builder: (column) => column);
+    column: $table.temperature,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get weatherCondition => $composableBuilder(
-      column: $table.weatherCondition, builder: (column) => column);
+    column: $table.weatherCondition,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get occasion =>
       $composableBuilder(column: $table.occasion, builder: (column) => column);
@@ -2680,7 +3241,9 @@ class $$RecommendationTableTableAnnotationComposer
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
 
   GeneratedColumn<double> get confidenceScore => $composableBuilder(
-      column: $table.confidenceScore, builder: (column) => column);
+    column: $table.confidenceScore,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get feedback =>
       $composableBuilder(column: $table.feedback, builder: (column) => column);
@@ -2689,148 +3252,166 @@ class $$RecommendationTableTableAnnotationComposer
       $composableBuilder(column: $table.rating, builder: (column) => column);
 }
 
-class $$RecommendationTableTableTableManager extends RootTableManager<
-    _$LocalDatabase,
-    $RecommendationTableTable,
-    RecommendationTableData,
-    $$RecommendationTableTableFilterComposer,
-    $$RecommendationTableTableOrderingComposer,
-    $$RecommendationTableTableAnnotationComposer,
-    $$RecommendationTableTableCreateCompanionBuilder,
-    $$RecommendationTableTableUpdateCompanionBuilder,
-    (
-      RecommendationTableData,
-      BaseReferences<_$LocalDatabase, $RecommendationTableTable,
-          RecommendationTableData>
-    ),
-    RecommendationTableData,
-    PrefetchHooks Function()> {
+class $$RecommendationTableTableTableManager
+    extends
+        RootTableManager<
+          _$LocalDatabase,
+          $RecommendationTableTable,
+          RecommendationTableData,
+          $$RecommendationTableTableFilterComposer,
+          $$RecommendationTableTableOrderingComposer,
+          $$RecommendationTableTableAnnotationComposer,
+          $$RecommendationTableTableCreateCompanionBuilder,
+          $$RecommendationTableTableUpdateCompanionBuilder,
+          (
+            RecommendationTableData,
+            BaseReferences<
+              _$LocalDatabase,
+              $RecommendationTableTable,
+              RecommendationTableData
+            >,
+          ),
+          RecommendationTableData,
+          PrefetchHooks Function()
+        > {
   $$RecommendationTableTableTableManager(
-      _$LocalDatabase db, $RecommendationTableTable table)
-      : super(TableManagerState(
+    _$LocalDatabase db,
+    $RecommendationTableTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
               $$RecommendationTableTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
               $$RecommendationTableTableOrderingComposer(
-                  $db: db, $table: table),
+                $db: db,
+                $table: table,
+              ),
           createComputedFieldComposer: () =>
               $$RecommendationTableTableAnnotationComposer(
-                  $db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> userId = const Value.absent(),
-            Value<String> outfitItems = const Value.absent(),
-            Value<double> temperature = const Value.absent(),
-            Value<String> weatherCondition = const Value.absent(),
-            Value<String> occasion = const Value.absent(),
-            Value<int> timestamp = const Value.absent(),
-            Value<double> confidenceScore = const Value.absent(),
-            Value<String?> feedback = const Value.absent(),
-            Value<int?> rating = const Value.absent(),
-          }) =>
-              RecommendationTableCompanion(
-            id: id,
-            userId: userId,
-            outfitItems: outfitItems,
-            temperature: temperature,
-            weatherCondition: weatherCondition,
-            occasion: occasion,
-            timestamp: timestamp,
-            confidenceScore: confidenceScore,
-            feedback: feedback,
-            rating: rating,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String userId,
-            required String outfitItems,
-            required double temperature,
-            required String weatherCondition,
-            required String occasion,
-            required int timestamp,
-            required double confidenceScore,
-            Value<String?> feedback = const Value.absent(),
-            Value<int?> rating = const Value.absent(),
-          }) =>
-              RecommendationTableCompanion.insert(
-            id: id,
-            userId: userId,
-            outfitItems: outfitItems,
-            temperature: temperature,
-            weatherCondition: weatherCondition,
-            occasion: occasion,
-            timestamp: timestamp,
-            confidenceScore: confidenceScore,
-            feedback: feedback,
-            rating: rating,
-          ),
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<String> outfitItems = const Value.absent(),
+                Value<double> temperature = const Value.absent(),
+                Value<String> weatherCondition = const Value.absent(),
+                Value<String> occasion = const Value.absent(),
+                Value<int> timestamp = const Value.absent(),
+                Value<double> confidenceScore = const Value.absent(),
+                Value<String?> feedback = const Value.absent(),
+                Value<int?> rating = const Value.absent(),
+              }) => RecommendationTableCompanion(
+                id: id,
+                userId: userId,
+                outfitItems: outfitItems,
+                temperature: temperature,
+                weatherCondition: weatherCondition,
+                occasion: occasion,
+                timestamp: timestamp,
+                confidenceScore: confidenceScore,
+                feedback: feedback,
+                rating: rating,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String userId,
+                required String outfitItems,
+                required double temperature,
+                required String weatherCondition,
+                required String occasion,
+                required int timestamp,
+                required double confidenceScore,
+                Value<String?> feedback = const Value.absent(),
+                Value<int?> rating = const Value.absent(),
+              }) => RecommendationTableCompanion.insert(
+                id: id,
+                userId: userId,
+                outfitItems: outfitItems,
+                temperature: temperature,
+                weatherCondition: weatherCondition,
+                occasion: occasion,
+                timestamp: timestamp,
+                confidenceScore: confidenceScore,
+                feedback: feedback,
+                rating: rating,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$RecommendationTableTableProcessedTableManager = ProcessedTableManager<
-    _$LocalDatabase,
-    $RecommendationTableTable,
-    RecommendationTableData,
-    $$RecommendationTableTableFilterComposer,
-    $$RecommendationTableTableOrderingComposer,
-    $$RecommendationTableTableAnnotationComposer,
-    $$RecommendationTableTableCreateCompanionBuilder,
-    $$RecommendationTableTableUpdateCompanionBuilder,
-    (
+typedef $$RecommendationTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$LocalDatabase,
+      $RecommendationTableTable,
       RecommendationTableData,
-      BaseReferences<_$LocalDatabase, $RecommendationTableTable,
-          RecommendationTableData>
-    ),
-    RecommendationTableData,
-    PrefetchHooks Function()>;
-typedef $$WardrobeTableTableCreateCompanionBuilder = WardrobeTableCompanion
-    Function({
-  Value<int> id,
-  required String externalId,
-  required String name,
-  required String imageUrl,
-  required String category,
-  required String season,
-  required String weatherCondition,
-  required double temperatureMin,
-  required double temperatureMax,
-  required String occasions,
-  required int addedAt,
-  required bool isActive,
-  required bool isFavorite,
-  required bool isArchived,
-  required int wearCount,
-  Value<int?> lastWornAt,
-  required bool isSynced,
-  required int updatedAt,
-});
-typedef $$WardrobeTableTableUpdateCompanionBuilder = WardrobeTableCompanion
-    Function({
-  Value<int> id,
-  Value<String> externalId,
-  Value<String> name,
-  Value<String> imageUrl,
-  Value<String> category,
-  Value<String> season,
-  Value<String> weatherCondition,
-  Value<double> temperatureMin,
-  Value<double> temperatureMax,
-  Value<String> occasions,
-  Value<int> addedAt,
-  Value<bool> isActive,
-  Value<bool> isFavorite,
-  Value<bool> isArchived,
-  Value<int> wearCount,
-  Value<int?> lastWornAt,
-  Value<bool> isSynced,
-  Value<int> updatedAt,
-});
+      $$RecommendationTableTableFilterComposer,
+      $$RecommendationTableTableOrderingComposer,
+      $$RecommendationTableTableAnnotationComposer,
+      $$RecommendationTableTableCreateCompanionBuilder,
+      $$RecommendationTableTableUpdateCompanionBuilder,
+      (
+        RecommendationTableData,
+        BaseReferences<
+          _$LocalDatabase,
+          $RecommendationTableTable,
+          RecommendationTableData
+        >,
+      ),
+      RecommendationTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$WardrobeTableTableCreateCompanionBuilder =
+    WardrobeTableCompanion Function({
+      Value<int> id,
+      required String externalId,
+      required String name,
+      required String imageUrl,
+      required String category,
+      required String season,
+      required String weatherCondition,
+      required double temperatureMin,
+      required double temperatureMax,
+      required String occasions,
+      required int addedAt,
+      required bool isActive,
+      required bool isFavorite,
+      required bool isArchived,
+      required int wearCount,
+      Value<int?> lastWornAt,
+      required bool isSynced,
+      required int updatedAt,
+    });
+typedef $$WardrobeTableTableUpdateCompanionBuilder =
+    WardrobeTableCompanion Function({
+      Value<int> id,
+      Value<String> externalId,
+      Value<String> name,
+      Value<String> imageUrl,
+      Value<String> category,
+      Value<String> season,
+      Value<String> weatherCondition,
+      Value<double> temperatureMin,
+      Value<double> temperatureMax,
+      Value<String> occasions,
+      Value<int> addedAt,
+      Value<bool> isActive,
+      Value<bool> isFavorite,
+      Value<bool> isArchived,
+      Value<int> wearCount,
+      Value<int?> lastWornAt,
+      Value<bool> isSynced,
+      Value<int> updatedAt,
+    });
 
 class $$WardrobeTableTableFilterComposer
     extends Composer<_$LocalDatabase, $WardrobeTableTable> {
@@ -2842,61 +3423,94 @@ class $$WardrobeTableTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => ColumnFilters(column));
+    column: $table.externalId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get imageUrl => $composableBuilder(
-      column: $table.imageUrl, builder: (column) => ColumnFilters(column));
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get category => $composableBuilder(
-      column: $table.category, builder: (column) => ColumnFilters(column));
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get season => $composableBuilder(
-      column: $table.season, builder: (column) => ColumnFilters(column));
+    column: $table.season,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get weatherCondition => $composableBuilder(
-      column: $table.weatherCondition,
-      builder: (column) => ColumnFilters(column));
+    column: $table.weatherCondition,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get temperatureMin => $composableBuilder(
-      column: $table.temperatureMin,
-      builder: (column) => ColumnFilters(column));
+    column: $table.temperatureMin,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get temperatureMax => $composableBuilder(
-      column: $table.temperatureMax,
-      builder: (column) => ColumnFilters(column));
+    column: $table.temperatureMax,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get occasions => $composableBuilder(
-      column: $table.occasions, builder: (column) => ColumnFilters(column));
+    column: $table.occasions,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get addedAt => $composableBuilder(
-      column: $table.addedAt, builder: (column) => ColumnFilters(column));
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isActive => $composableBuilder(
-      column: $table.isActive, builder: (column) => ColumnFilters(column));
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isArchived => $composableBuilder(
-      column: $table.isArchived, builder: (column) => ColumnFilters(column));
+    column: $table.isArchived,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get wearCount => $composableBuilder(
-      column: $table.wearCount, builder: (column) => ColumnFilters(column));
+    column: $table.wearCount,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get lastWornAt => $composableBuilder(
-      column: $table.lastWornAt, builder: (column) => ColumnFilters(column));
+    column: $table.lastWornAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isSynced => $composableBuilder(
-      column: $table.isSynced, builder: (column) => ColumnFilters(column));
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$WardrobeTableTableOrderingComposer
@@ -2909,61 +3523,94 @@ class $$WardrobeTableTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => ColumnOrderings(column));
+    column: $table.externalId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get imageUrl => $composableBuilder(
-      column: $table.imageUrl, builder: (column) => ColumnOrderings(column));
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get category => $composableBuilder(
-      column: $table.category, builder: (column) => ColumnOrderings(column));
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get season => $composableBuilder(
-      column: $table.season, builder: (column) => ColumnOrderings(column));
+    column: $table.season,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get weatherCondition => $composableBuilder(
-      column: $table.weatherCondition,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.weatherCondition,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get temperatureMin => $composableBuilder(
-      column: $table.temperatureMin,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.temperatureMin,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get temperatureMax => $composableBuilder(
-      column: $table.temperatureMax,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.temperatureMax,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get occasions => $composableBuilder(
-      column: $table.occasions, builder: (column) => ColumnOrderings(column));
+    column: $table.occasions,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get addedAt => $composableBuilder(
-      column: $table.addedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isActive => $composableBuilder(
-      column: $table.isActive, builder: (column) => ColumnOrderings(column));
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isArchived => $composableBuilder(
-      column: $table.isArchived, builder: (column) => ColumnOrderings(column));
+    column: $table.isArchived,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get wearCount => $composableBuilder(
-      column: $table.wearCount, builder: (column) => ColumnOrderings(column));
+    column: $table.wearCount,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get lastWornAt => $composableBuilder(
-      column: $table.lastWornAt, builder: (column) => ColumnOrderings(column));
+    column: $table.lastWornAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isSynced => $composableBuilder(
-      column: $table.isSynced, builder: (column) => ColumnOrderings(column));
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WardrobeTableTableAnnotationComposer
@@ -2979,7 +3626,9 @@ class $$WardrobeTableTableAnnotationComposer
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get externalId => $composableBuilder(
-      column: $table.externalId, builder: (column) => column);
+    column: $table.externalId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -2994,13 +3643,19 @@ class $$WardrobeTableTableAnnotationComposer
       $composableBuilder(column: $table.season, builder: (column) => column);
 
   GeneratedColumn<String> get weatherCondition => $composableBuilder(
-      column: $table.weatherCondition, builder: (column) => column);
+    column: $table.weatherCondition,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get temperatureMin => $composableBuilder(
-      column: $table.temperatureMin, builder: (column) => column);
+    column: $table.temperatureMin,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get temperatureMax => $composableBuilder(
-      column: $table.temperatureMax, builder: (column) => column);
+    column: $table.temperatureMax,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get occasions =>
       $composableBuilder(column: $table.occasions, builder: (column) => column);
@@ -3012,16 +3667,22 @@ class $$WardrobeTableTableAnnotationComposer
       $composableBuilder(column: $table.isActive, builder: (column) => column);
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
-      column: $table.isFavorite, builder: (column) => column);
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isArchived => $composableBuilder(
-      column: $table.isArchived, builder: (column) => column);
+    column: $table.isArchived,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get wearCount =>
       $composableBuilder(column: $table.wearCount, builder: (column) => column);
 
   GeneratedColumn<int> get lastWornAt => $composableBuilder(
-      column: $table.lastWornAt, builder: (column) => column);
+    column: $table.lastWornAt,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
@@ -3030,24 +3691,33 @@ class $$WardrobeTableTableAnnotationComposer
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
 
-class $$WardrobeTableTableTableManager extends RootTableManager<
-    _$LocalDatabase,
-    $WardrobeTableTable,
-    WardrobeTableData,
-    $$WardrobeTableTableFilterComposer,
-    $$WardrobeTableTableOrderingComposer,
-    $$WardrobeTableTableAnnotationComposer,
-    $$WardrobeTableTableCreateCompanionBuilder,
-    $$WardrobeTableTableUpdateCompanionBuilder,
-    (
-      WardrobeTableData,
-      BaseReferences<_$LocalDatabase, $WardrobeTableTable, WardrobeTableData>
-    ),
-    WardrobeTableData,
-    PrefetchHooks Function()> {
+class $$WardrobeTableTableTableManager
+    extends
+        RootTableManager<
+          _$LocalDatabase,
+          $WardrobeTableTable,
+          WardrobeTableData,
+          $$WardrobeTableTableFilterComposer,
+          $$WardrobeTableTableOrderingComposer,
+          $$WardrobeTableTableAnnotationComposer,
+          $$WardrobeTableTableCreateCompanionBuilder,
+          $$WardrobeTableTableUpdateCompanionBuilder,
+          (
+            WardrobeTableData,
+            BaseReferences<
+              _$LocalDatabase,
+              $WardrobeTableTable,
+              WardrobeTableData
+            >,
+          ),
+          WardrobeTableData,
+          PrefetchHooks Function()
+        > {
   $$WardrobeTableTableTableManager(
-      _$LocalDatabase db, $WardrobeTableTable table)
-      : super(TableManagerState(
+    _$LocalDatabase db,
+    $WardrobeTableTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3056,166 +3726,169 @@ class $$WardrobeTableTableTableManager extends RootTableManager<
               $$WardrobeTableTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$WardrobeTableTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> externalId = const Value.absent(),
-            Value<String> name = const Value.absent(),
-            Value<String> imageUrl = const Value.absent(),
-            Value<String> category = const Value.absent(),
-            Value<String> season = const Value.absent(),
-            Value<String> weatherCondition = const Value.absent(),
-            Value<double> temperatureMin = const Value.absent(),
-            Value<double> temperatureMax = const Value.absent(),
-            Value<String> occasions = const Value.absent(),
-            Value<int> addedAt = const Value.absent(),
-            Value<bool> isActive = const Value.absent(),
-            Value<bool> isFavorite = const Value.absent(),
-            Value<bool> isArchived = const Value.absent(),
-            Value<int> wearCount = const Value.absent(),
-            Value<int?> lastWornAt = const Value.absent(),
-            Value<bool> isSynced = const Value.absent(),
-            Value<int> updatedAt = const Value.absent(),
-          }) =>
-              WardrobeTableCompanion(
-            id: id,
-            externalId: externalId,
-            name: name,
-            imageUrl: imageUrl,
-            category: category,
-            season: season,
-            weatherCondition: weatherCondition,
-            temperatureMin: temperatureMin,
-            temperatureMax: temperatureMax,
-            occasions: occasions,
-            addedAt: addedAt,
-            isActive: isActive,
-            isFavorite: isFavorite,
-            isArchived: isArchived,
-            wearCount: wearCount,
-            lastWornAt: lastWornAt,
-            isSynced: isSynced,
-            updatedAt: updatedAt,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String externalId,
-            required String name,
-            required String imageUrl,
-            required String category,
-            required String season,
-            required String weatherCondition,
-            required double temperatureMin,
-            required double temperatureMax,
-            required String occasions,
-            required int addedAt,
-            required bool isActive,
-            required bool isFavorite,
-            required bool isArchived,
-            required int wearCount,
-            Value<int?> lastWornAt = const Value.absent(),
-            required bool isSynced,
-            required int updatedAt,
-          }) =>
-              WardrobeTableCompanion.insert(
-            id: id,
-            externalId: externalId,
-            name: name,
-            imageUrl: imageUrl,
-            category: category,
-            season: season,
-            weatherCondition: weatherCondition,
-            temperatureMin: temperatureMin,
-            temperatureMax: temperatureMax,
-            occasions: occasions,
-            addedAt: addedAt,
-            isActive: isActive,
-            isFavorite: isFavorite,
-            isArchived: isArchived,
-            wearCount: wearCount,
-            lastWornAt: lastWornAt,
-            isSynced: isSynced,
-            updatedAt: updatedAt,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> externalId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> imageUrl = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> season = const Value.absent(),
+                Value<String> weatherCondition = const Value.absent(),
+                Value<double> temperatureMin = const Value.absent(),
+                Value<double> temperatureMax = const Value.absent(),
+                Value<String> occasions = const Value.absent(),
+                Value<int> addedAt = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<bool> isArchived = const Value.absent(),
+                Value<int> wearCount = const Value.absent(),
+                Value<int?> lastWornAt = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+              }) => WardrobeTableCompanion(
+                id: id,
+                externalId: externalId,
+                name: name,
+                imageUrl: imageUrl,
+                category: category,
+                season: season,
+                weatherCondition: weatherCondition,
+                temperatureMin: temperatureMin,
+                temperatureMax: temperatureMax,
+                occasions: occasions,
+                addedAt: addedAt,
+                isActive: isActive,
+                isFavorite: isFavorite,
+                isArchived: isArchived,
+                wearCount: wearCount,
+                lastWornAt: lastWornAt,
+                isSynced: isSynced,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String externalId,
+                required String name,
+                required String imageUrl,
+                required String category,
+                required String season,
+                required String weatherCondition,
+                required double temperatureMin,
+                required double temperatureMax,
+                required String occasions,
+                required int addedAt,
+                required bool isActive,
+                required bool isFavorite,
+                required bool isArchived,
+                required int wearCount,
+                Value<int?> lastWornAt = const Value.absent(),
+                required bool isSynced,
+                required int updatedAt,
+              }) => WardrobeTableCompanion.insert(
+                id: id,
+                externalId: externalId,
+                name: name,
+                imageUrl: imageUrl,
+                category: category,
+                season: season,
+                weatherCondition: weatherCondition,
+                temperatureMin: temperatureMin,
+                temperatureMax: temperatureMax,
+                occasions: occasions,
+                addedAt: addedAt,
+                isActive: isActive,
+                isFavorite: isFavorite,
+                isArchived: isArchived,
+                wearCount: wearCount,
+                lastWornAt: lastWornAt,
+                isSynced: isSynced,
+                updatedAt: updatedAt,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$WardrobeTableTableProcessedTableManager = ProcessedTableManager<
-    _$LocalDatabase,
-    $WardrobeTableTable,
-    WardrobeTableData,
-    $$WardrobeTableTableFilterComposer,
-    $$WardrobeTableTableOrderingComposer,
-    $$WardrobeTableTableAnnotationComposer,
-    $$WardrobeTableTableCreateCompanionBuilder,
-    $$WardrobeTableTableUpdateCompanionBuilder,
-    (
+typedef $$WardrobeTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$LocalDatabase,
+      $WardrobeTableTable,
       WardrobeTableData,
-      BaseReferences<_$LocalDatabase, $WardrobeTableTable, WardrobeTableData>
-    ),
-    WardrobeTableData,
-    PrefetchHooks Function()>;
-typedef $$WeatherDataTableTableCreateCompanionBuilder
-    = WeatherDataTableCompanion Function({
-  Value<int> id,
-  required double latitude,
-  required double longitude,
-  required String locationName,
-  required double temperature,
-  required double feelsLike,
-  required double tempMin,
-  required double tempMax,
-  required int pressure,
-  required int humidity,
-  required double dewPoint,
-  required double uvi,
-  required int clouds,
-  required int visibility,
-  required double windSpeed,
-  required int windDeg,
-  Value<double?> windGust,
-  required String weatherMain,
-  required String weatherDescription,
-  required String weatherIcon,
-  required int timestamp,
-  required int timezone,
-  required String country,
-  required int sunrise,
-  required int sunset,
-  required bool isCurrent,
-});
-typedef $$WeatherDataTableTableUpdateCompanionBuilder
-    = WeatherDataTableCompanion Function({
-  Value<int> id,
-  Value<double> latitude,
-  Value<double> longitude,
-  Value<String> locationName,
-  Value<double> temperature,
-  Value<double> feelsLike,
-  Value<double> tempMin,
-  Value<double> tempMax,
-  Value<int> pressure,
-  Value<int> humidity,
-  Value<double> dewPoint,
-  Value<double> uvi,
-  Value<int> clouds,
-  Value<int> visibility,
-  Value<double> windSpeed,
-  Value<int> windDeg,
-  Value<double?> windGust,
-  Value<String> weatherMain,
-  Value<String> weatherDescription,
-  Value<String> weatherIcon,
-  Value<int> timestamp,
-  Value<int> timezone,
-  Value<String> country,
-  Value<int> sunrise,
-  Value<int> sunset,
-  Value<bool> isCurrent,
-});
+      $$WardrobeTableTableFilterComposer,
+      $$WardrobeTableTableOrderingComposer,
+      $$WardrobeTableTableAnnotationComposer,
+      $$WardrobeTableTableCreateCompanionBuilder,
+      $$WardrobeTableTableUpdateCompanionBuilder,
+      (
+        WardrobeTableData,
+        BaseReferences<_$LocalDatabase, $WardrobeTableTable, WardrobeTableData>,
+      ),
+      WardrobeTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$WeatherDataTableTableCreateCompanionBuilder =
+    WeatherDataTableCompanion Function({
+      Value<int> id,
+      required double latitude,
+      required double longitude,
+      required String locationName,
+      required double temperature,
+      required double feelsLike,
+      required double tempMin,
+      required double tempMax,
+      required int pressure,
+      required int humidity,
+      required double dewPoint,
+      required double uvi,
+      required int clouds,
+      required int visibility,
+      required double windSpeed,
+      required int windDeg,
+      Value<double?> windGust,
+      required String weatherMain,
+      required String weatherDescription,
+      required String weatherIcon,
+      required int timestamp,
+      required int timezone,
+      required String country,
+      required int sunrise,
+      required int sunset,
+      required bool isCurrent,
+    });
+typedef $$WeatherDataTableTableUpdateCompanionBuilder =
+    WeatherDataTableCompanion Function({
+      Value<int> id,
+      Value<double> latitude,
+      Value<double> longitude,
+      Value<String> locationName,
+      Value<double> temperature,
+      Value<double> feelsLike,
+      Value<double> tempMin,
+      Value<double> tempMax,
+      Value<int> pressure,
+      Value<int> humidity,
+      Value<double> dewPoint,
+      Value<double> uvi,
+      Value<int> clouds,
+      Value<int> visibility,
+      Value<double> windSpeed,
+      Value<int> windDeg,
+      Value<double?> windGust,
+      Value<String> weatherMain,
+      Value<String> weatherDescription,
+      Value<String> weatherIcon,
+      Value<int> timestamp,
+      Value<int> timezone,
+      Value<String> country,
+      Value<int> sunrise,
+      Value<int> sunset,
+      Value<bool> isCurrent,
+    });
 
 class $$WeatherDataTableTableFilterComposer
     extends Composer<_$LocalDatabase, $WeatherDataTableTable> {
@@ -3227,83 +3900,134 @@ class $$WeatherDataTableTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get latitude => $composableBuilder(
-      column: $table.latitude, builder: (column) => ColumnFilters(column));
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get longitude => $composableBuilder(
-      column: $table.longitude, builder: (column) => ColumnFilters(column));
+    column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get locationName => $composableBuilder(
-      column: $table.locationName, builder: (column) => ColumnFilters(column));
+    column: $table.locationName,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get temperature => $composableBuilder(
-      column: $table.temperature, builder: (column) => ColumnFilters(column));
+    column: $table.temperature,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get feelsLike => $composableBuilder(
-      column: $table.feelsLike, builder: (column) => ColumnFilters(column));
+    column: $table.feelsLike,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get tempMin => $composableBuilder(
-      column: $table.tempMin, builder: (column) => ColumnFilters(column));
+    column: $table.tempMin,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get tempMax => $composableBuilder(
-      column: $table.tempMax, builder: (column) => ColumnFilters(column));
+    column: $table.tempMax,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get pressure => $composableBuilder(
-      column: $table.pressure, builder: (column) => ColumnFilters(column));
+    column: $table.pressure,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get humidity => $composableBuilder(
-      column: $table.humidity, builder: (column) => ColumnFilters(column));
+    column: $table.humidity,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get dewPoint => $composableBuilder(
-      column: $table.dewPoint, builder: (column) => ColumnFilters(column));
+    column: $table.dewPoint,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get uvi => $composableBuilder(
-      column: $table.uvi, builder: (column) => ColumnFilters(column));
+    column: $table.uvi,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get clouds => $composableBuilder(
-      column: $table.clouds, builder: (column) => ColumnFilters(column));
+    column: $table.clouds,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get visibility => $composableBuilder(
-      column: $table.visibility, builder: (column) => ColumnFilters(column));
+    column: $table.visibility,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get windSpeed => $composableBuilder(
-      column: $table.windSpeed, builder: (column) => ColumnFilters(column));
+    column: $table.windSpeed,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get windDeg => $composableBuilder(
-      column: $table.windDeg, builder: (column) => ColumnFilters(column));
+    column: $table.windDeg,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get windGust => $composableBuilder(
-      column: $table.windGust, builder: (column) => ColumnFilters(column));
+    column: $table.windGust,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get weatherMain => $composableBuilder(
-      column: $table.weatherMain, builder: (column) => ColumnFilters(column));
+    column: $table.weatherMain,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get weatherDescription => $composableBuilder(
-      column: $table.weatherDescription,
-      builder: (column) => ColumnFilters(column));
+    column: $table.weatherDescription,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get weatherIcon => $composableBuilder(
-      column: $table.weatherIcon, builder: (column) => ColumnFilters(column));
+    column: $table.weatherIcon,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get timezone => $composableBuilder(
-      column: $table.timezone, builder: (column) => ColumnFilters(column));
+    column: $table.timezone,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get country => $composableBuilder(
-      column: $table.country, builder: (column) => ColumnFilters(column));
+    column: $table.country,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get sunrise => $composableBuilder(
-      column: $table.sunrise, builder: (column) => ColumnFilters(column));
+    column: $table.sunrise,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get sunset => $composableBuilder(
-      column: $table.sunset, builder: (column) => ColumnFilters(column));
+    column: $table.sunset,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isCurrent => $composableBuilder(
-      column: $table.isCurrent, builder: (column) => ColumnFilters(column));
+    column: $table.isCurrent,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$WeatherDataTableTableOrderingComposer
@@ -3316,84 +4040,134 @@ class $$WeatherDataTableTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get latitude => $composableBuilder(
-      column: $table.latitude, builder: (column) => ColumnOrderings(column));
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get longitude => $composableBuilder(
-      column: $table.longitude, builder: (column) => ColumnOrderings(column));
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get locationName => $composableBuilder(
-      column: $table.locationName,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.locationName,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get temperature => $composableBuilder(
-      column: $table.temperature, builder: (column) => ColumnOrderings(column));
+    column: $table.temperature,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get feelsLike => $composableBuilder(
-      column: $table.feelsLike, builder: (column) => ColumnOrderings(column));
+    column: $table.feelsLike,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get tempMin => $composableBuilder(
-      column: $table.tempMin, builder: (column) => ColumnOrderings(column));
+    column: $table.tempMin,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get tempMax => $composableBuilder(
-      column: $table.tempMax, builder: (column) => ColumnOrderings(column));
+    column: $table.tempMax,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get pressure => $composableBuilder(
-      column: $table.pressure, builder: (column) => ColumnOrderings(column));
+    column: $table.pressure,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get humidity => $composableBuilder(
-      column: $table.humidity, builder: (column) => ColumnOrderings(column));
+    column: $table.humidity,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get dewPoint => $composableBuilder(
-      column: $table.dewPoint, builder: (column) => ColumnOrderings(column));
+    column: $table.dewPoint,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get uvi => $composableBuilder(
-      column: $table.uvi, builder: (column) => ColumnOrderings(column));
+    column: $table.uvi,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get clouds => $composableBuilder(
-      column: $table.clouds, builder: (column) => ColumnOrderings(column));
+    column: $table.clouds,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get visibility => $composableBuilder(
-      column: $table.visibility, builder: (column) => ColumnOrderings(column));
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get windSpeed => $composableBuilder(
-      column: $table.windSpeed, builder: (column) => ColumnOrderings(column));
+    column: $table.windSpeed,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get windDeg => $composableBuilder(
-      column: $table.windDeg, builder: (column) => ColumnOrderings(column));
+    column: $table.windDeg,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get windGust => $composableBuilder(
-      column: $table.windGust, builder: (column) => ColumnOrderings(column));
+    column: $table.windGust,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get weatherMain => $composableBuilder(
-      column: $table.weatherMain, builder: (column) => ColumnOrderings(column));
+    column: $table.weatherMain,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get weatherDescription => $composableBuilder(
-      column: $table.weatherDescription,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.weatherDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get weatherIcon => $composableBuilder(
-      column: $table.weatherIcon, builder: (column) => ColumnOrderings(column));
+    column: $table.weatherIcon,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get timezone => $composableBuilder(
-      column: $table.timezone, builder: (column) => ColumnOrderings(column));
+    column: $table.timezone,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get country => $composableBuilder(
-      column: $table.country, builder: (column) => ColumnOrderings(column));
+    column: $table.country,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get sunrise => $composableBuilder(
-      column: $table.sunrise, builder: (column) => ColumnOrderings(column));
+    column: $table.sunrise,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get sunset => $composableBuilder(
-      column: $table.sunset, builder: (column) => ColumnOrderings(column));
+    column: $table.sunset,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isCurrent => $composableBuilder(
-      column: $table.isCurrent, builder: (column) => ColumnOrderings(column));
+    column: $table.isCurrent,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WeatherDataTableTableAnnotationComposer
@@ -3415,10 +4189,14 @@ class $$WeatherDataTableTableAnnotationComposer
       $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   GeneratedColumn<String> get locationName => $composableBuilder(
-      column: $table.locationName, builder: (column) => column);
+    column: $table.locationName,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get temperature => $composableBuilder(
-      column: $table.temperature, builder: (column) => column);
+    column: $table.temperature,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get feelsLike =>
       $composableBuilder(column: $table.feelsLike, builder: (column) => column);
@@ -3445,7 +4223,9 @@ class $$WeatherDataTableTableAnnotationComposer
       $composableBuilder(column: $table.clouds, builder: (column) => column);
 
   GeneratedColumn<int> get visibility => $composableBuilder(
-      column: $table.visibility, builder: (column) => column);
+    column: $table.visibility,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get windSpeed =>
       $composableBuilder(column: $table.windSpeed, builder: (column) => column);
@@ -3457,13 +4237,19 @@ class $$WeatherDataTableTableAnnotationComposer
       $composableBuilder(column: $table.windGust, builder: (column) => column);
 
   GeneratedColumn<String> get weatherMain => $composableBuilder(
-      column: $table.weatherMain, builder: (column) => column);
+    column: $table.weatherMain,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get weatherDescription => $composableBuilder(
-      column: $table.weatherDescription, builder: (column) => column);
+    column: $table.weatherDescription,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get weatherIcon => $composableBuilder(
-      column: $table.weatherIcon, builder: (column) => column);
+    column: $table.weatherIcon,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
@@ -3484,25 +4270,33 @@ class $$WeatherDataTableTableAnnotationComposer
       $composableBuilder(column: $table.isCurrent, builder: (column) => column);
 }
 
-class $$WeatherDataTableTableTableManager extends RootTableManager<
-    _$LocalDatabase,
-    $WeatherDataTableTable,
-    WeatherDataTableData,
-    $$WeatherDataTableTableFilterComposer,
-    $$WeatherDataTableTableOrderingComposer,
-    $$WeatherDataTableTableAnnotationComposer,
-    $$WeatherDataTableTableCreateCompanionBuilder,
-    $$WeatherDataTableTableUpdateCompanionBuilder,
-    (
-      WeatherDataTableData,
-      BaseReferences<_$LocalDatabase, $WeatherDataTableTable,
-          WeatherDataTableData>
-    ),
-    WeatherDataTableData,
-    PrefetchHooks Function()> {
+class $$WeatherDataTableTableTableManager
+    extends
+        RootTableManager<
+          _$LocalDatabase,
+          $WeatherDataTableTable,
+          WeatherDataTableData,
+          $$WeatherDataTableTableFilterComposer,
+          $$WeatherDataTableTableOrderingComposer,
+          $$WeatherDataTableTableAnnotationComposer,
+          $$WeatherDataTableTableCreateCompanionBuilder,
+          $$WeatherDataTableTableUpdateCompanionBuilder,
+          (
+            WeatherDataTableData,
+            BaseReferences<
+              _$LocalDatabase,
+              $WeatherDataTableTable,
+              WeatherDataTableData
+            >,
+          ),
+          WeatherDataTableData,
+          PrefetchHooks Function()
+        > {
   $$WeatherDataTableTableTableManager(
-      _$LocalDatabase db, $WeatherDataTableTable table)
-      : super(TableManagerState(
+    _$LocalDatabase db,
+    $WeatherDataTableTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3511,141 +4305,147 @@ class $$WeatherDataTableTableTableManager extends RootTableManager<
               $$WeatherDataTableTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$WeatherDataTableTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<double> latitude = const Value.absent(),
-            Value<double> longitude = const Value.absent(),
-            Value<String> locationName = const Value.absent(),
-            Value<double> temperature = const Value.absent(),
-            Value<double> feelsLike = const Value.absent(),
-            Value<double> tempMin = const Value.absent(),
-            Value<double> tempMax = const Value.absent(),
-            Value<int> pressure = const Value.absent(),
-            Value<int> humidity = const Value.absent(),
-            Value<double> dewPoint = const Value.absent(),
-            Value<double> uvi = const Value.absent(),
-            Value<int> clouds = const Value.absent(),
-            Value<int> visibility = const Value.absent(),
-            Value<double> windSpeed = const Value.absent(),
-            Value<int> windDeg = const Value.absent(),
-            Value<double?> windGust = const Value.absent(),
-            Value<String> weatherMain = const Value.absent(),
-            Value<String> weatherDescription = const Value.absent(),
-            Value<String> weatherIcon = const Value.absent(),
-            Value<int> timestamp = const Value.absent(),
-            Value<int> timezone = const Value.absent(),
-            Value<String> country = const Value.absent(),
-            Value<int> sunrise = const Value.absent(),
-            Value<int> sunset = const Value.absent(),
-            Value<bool> isCurrent = const Value.absent(),
-          }) =>
-              WeatherDataTableCompanion(
-            id: id,
-            latitude: latitude,
-            longitude: longitude,
-            locationName: locationName,
-            temperature: temperature,
-            feelsLike: feelsLike,
-            tempMin: tempMin,
-            tempMax: tempMax,
-            pressure: pressure,
-            humidity: humidity,
-            dewPoint: dewPoint,
-            uvi: uvi,
-            clouds: clouds,
-            visibility: visibility,
-            windSpeed: windSpeed,
-            windDeg: windDeg,
-            windGust: windGust,
-            weatherMain: weatherMain,
-            weatherDescription: weatherDescription,
-            weatherIcon: weatherIcon,
-            timestamp: timestamp,
-            timezone: timezone,
-            country: country,
-            sunrise: sunrise,
-            sunset: sunset,
-            isCurrent: isCurrent,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required double latitude,
-            required double longitude,
-            required String locationName,
-            required double temperature,
-            required double feelsLike,
-            required double tempMin,
-            required double tempMax,
-            required int pressure,
-            required int humidity,
-            required double dewPoint,
-            required double uvi,
-            required int clouds,
-            required int visibility,
-            required double windSpeed,
-            required int windDeg,
-            Value<double?> windGust = const Value.absent(),
-            required String weatherMain,
-            required String weatherDescription,
-            required String weatherIcon,
-            required int timestamp,
-            required int timezone,
-            required String country,
-            required int sunrise,
-            required int sunset,
-            required bool isCurrent,
-          }) =>
-              WeatherDataTableCompanion.insert(
-            id: id,
-            latitude: latitude,
-            longitude: longitude,
-            locationName: locationName,
-            temperature: temperature,
-            feelsLike: feelsLike,
-            tempMin: tempMin,
-            tempMax: tempMax,
-            pressure: pressure,
-            humidity: humidity,
-            dewPoint: dewPoint,
-            uvi: uvi,
-            clouds: clouds,
-            visibility: visibility,
-            windSpeed: windSpeed,
-            windDeg: windDeg,
-            windGust: windGust,
-            weatherMain: weatherMain,
-            weatherDescription: weatherDescription,
-            weatherIcon: weatherIcon,
-            timestamp: timestamp,
-            timezone: timezone,
-            country: country,
-            sunrise: sunrise,
-            sunset: sunset,
-            isCurrent: isCurrent,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<double> latitude = const Value.absent(),
+                Value<double> longitude = const Value.absent(),
+                Value<String> locationName = const Value.absent(),
+                Value<double> temperature = const Value.absent(),
+                Value<double> feelsLike = const Value.absent(),
+                Value<double> tempMin = const Value.absent(),
+                Value<double> tempMax = const Value.absent(),
+                Value<int> pressure = const Value.absent(),
+                Value<int> humidity = const Value.absent(),
+                Value<double> dewPoint = const Value.absent(),
+                Value<double> uvi = const Value.absent(),
+                Value<int> clouds = const Value.absent(),
+                Value<int> visibility = const Value.absent(),
+                Value<double> windSpeed = const Value.absent(),
+                Value<int> windDeg = const Value.absent(),
+                Value<double?> windGust = const Value.absent(),
+                Value<String> weatherMain = const Value.absent(),
+                Value<String> weatherDescription = const Value.absent(),
+                Value<String> weatherIcon = const Value.absent(),
+                Value<int> timestamp = const Value.absent(),
+                Value<int> timezone = const Value.absent(),
+                Value<String> country = const Value.absent(),
+                Value<int> sunrise = const Value.absent(),
+                Value<int> sunset = const Value.absent(),
+                Value<bool> isCurrent = const Value.absent(),
+              }) => WeatherDataTableCompanion(
+                id: id,
+                latitude: latitude,
+                longitude: longitude,
+                locationName: locationName,
+                temperature: temperature,
+                feelsLike: feelsLike,
+                tempMin: tempMin,
+                tempMax: tempMax,
+                pressure: pressure,
+                humidity: humidity,
+                dewPoint: dewPoint,
+                uvi: uvi,
+                clouds: clouds,
+                visibility: visibility,
+                windSpeed: windSpeed,
+                windDeg: windDeg,
+                windGust: windGust,
+                weatherMain: weatherMain,
+                weatherDescription: weatherDescription,
+                weatherIcon: weatherIcon,
+                timestamp: timestamp,
+                timezone: timezone,
+                country: country,
+                sunrise: sunrise,
+                sunset: sunset,
+                isCurrent: isCurrent,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required double latitude,
+                required double longitude,
+                required String locationName,
+                required double temperature,
+                required double feelsLike,
+                required double tempMin,
+                required double tempMax,
+                required int pressure,
+                required int humidity,
+                required double dewPoint,
+                required double uvi,
+                required int clouds,
+                required int visibility,
+                required double windSpeed,
+                required int windDeg,
+                Value<double?> windGust = const Value.absent(),
+                required String weatherMain,
+                required String weatherDescription,
+                required String weatherIcon,
+                required int timestamp,
+                required int timezone,
+                required String country,
+                required int sunrise,
+                required int sunset,
+                required bool isCurrent,
+              }) => WeatherDataTableCompanion.insert(
+                id: id,
+                latitude: latitude,
+                longitude: longitude,
+                locationName: locationName,
+                temperature: temperature,
+                feelsLike: feelsLike,
+                tempMin: tempMin,
+                tempMax: tempMax,
+                pressure: pressure,
+                humidity: humidity,
+                dewPoint: dewPoint,
+                uvi: uvi,
+                clouds: clouds,
+                visibility: visibility,
+                windSpeed: windSpeed,
+                windDeg: windDeg,
+                windGust: windGust,
+                weatherMain: weatherMain,
+                weatherDescription: weatherDescription,
+                weatherIcon: weatherIcon,
+                timestamp: timestamp,
+                timezone: timezone,
+                country: country,
+                sunrise: sunrise,
+                sunset: sunset,
+                isCurrent: isCurrent,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$WeatherDataTableTableProcessedTableManager = ProcessedTableManager<
-    _$LocalDatabase,
-    $WeatherDataTableTable,
-    WeatherDataTableData,
-    $$WeatherDataTableTableFilterComposer,
-    $$WeatherDataTableTableOrderingComposer,
-    $$WeatherDataTableTableAnnotationComposer,
-    $$WeatherDataTableTableCreateCompanionBuilder,
-    $$WeatherDataTableTableUpdateCompanionBuilder,
-    (
+typedef $$WeatherDataTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$LocalDatabase,
+      $WeatherDataTableTable,
       WeatherDataTableData,
-      BaseReferences<_$LocalDatabase, $WeatherDataTableTable,
-          WeatherDataTableData>
-    ),
-    WeatherDataTableData,
-    PrefetchHooks Function()>;
+      $$WeatherDataTableTableFilterComposer,
+      $$WeatherDataTableTableOrderingComposer,
+      $$WeatherDataTableTableAnnotationComposer,
+      $$WeatherDataTableTableCreateCompanionBuilder,
+      $$WeatherDataTableTableUpdateCompanionBuilder,
+      (
+        WeatherDataTableData,
+        BaseReferences<
+          _$LocalDatabase,
+          $WeatherDataTableTable,
+          WeatherDataTableData
+        >,
+      ),
+      WeatherDataTableData,
+      PrefetchHooks Function()
+    >;
 
 class $LocalDatabaseManager {
   final _$LocalDatabase _db;

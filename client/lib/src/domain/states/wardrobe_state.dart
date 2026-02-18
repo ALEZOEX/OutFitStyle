@@ -4,7 +4,7 @@ import '../entities/wardrobe.dart';
 part 'wardrobe_state.freezed.dart';
 
 @freezed
-class WardrobeState with _$WardrobeState {
+abstract class WardrobeState with _$WardrobeState {
   const factory WardrobeState.initial() = _Initial;
   const factory WardrobeState.loading() = _Loading;
   const factory WardrobeState.loaded({

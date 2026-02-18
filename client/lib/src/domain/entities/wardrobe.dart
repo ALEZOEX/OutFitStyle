@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'wardrobe.freezed.dart';
 
 @freezed
-class WardrobeItem with _$WardrobeItem {
+abstract class WardrobeItem with _$WardrobeItem {
   const factory WardrobeItem({
     required String id,
     required String userId,

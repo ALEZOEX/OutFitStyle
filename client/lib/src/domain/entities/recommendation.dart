@@ -20,7 +20,7 @@ class OutfitConverter implements JsonConverter<Outfit?, Map<String, dynamic>?> {
 }
 
 @freezed
-class Recommendation with _$Recommendation {
+abstract class Recommendation with _$Recommendation {
   const factory Recommendation({
     int? id,
     String? title,

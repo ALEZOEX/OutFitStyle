@@ -8,7 +8,7 @@ part 'outfit.freezed.dart';
 part 'outfit.g.dart';
 
 @freezed
-class Outfit with _$Outfit {
+abstract class Outfit with _$Outfit {
   const factory Outfit({
     int? id,
     String? name,

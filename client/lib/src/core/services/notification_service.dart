@@ -286,7 +286,7 @@ class FirebaseNotificationService extends NotificationService {
 
     await _localNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: _onSelectNotification,
+      onDidReceiveNotificationResponse: _onDidReceiveNotificationResponse,
     );
   }
 
@@ -389,10 +389,10 @@ class FirebaseNotificationService extends NotificationService {
   }
 
   /// Handle notification selection
-  void _onSelectNotification(NotificationResponse? response) async {
-    if (response?.payload != null) {
+  void _onDidReceiveNotificationResponse(NotificationResponse response) async {
+    if (response.payload != null) {
       try {
-        final notificationJson = jsonDecode(response!.payload!);
+        final notificationJson = jsonDecode(response.payload!);
         final notification = NotificationData.fromJson(notificationJson);
 
         // Mark as read
@@ -532,6 +532,7 @@ class FirebaseNotificationService extends NotificationService {
       'Время получить вашу персональную рекомендацию наряда!',
       _nextInstanceOfTime(time),
       platformChannelSpecifics,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,

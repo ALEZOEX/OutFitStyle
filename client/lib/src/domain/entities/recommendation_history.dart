@@ -26,7 +26,7 @@ class RecommendationConverter
 }
 
 @freezed
-class RecommendationHistory with _$RecommendationHistory {
+abstract class RecommendationHistory with _$RecommendationHistory {
   const factory RecommendationHistory({
     int? id,
     int? userId,
