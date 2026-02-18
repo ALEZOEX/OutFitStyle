@@ -1,75 +1,175 @@
 # Документация OutfitStyle
 
-## Содержание
-1. [Общее описание проекта](#общее-описание-проекта)
-2. [Архитектура](#архитектура)
-3. [Импорт данных Kaggle](#импорт-данных-kaggle)
-4. [API документация](#api-документация)
-5. [Развёртывание](#развёртывание)
-6. [Контрибьютинг](#контрибьютинг)
-7. [Кодекс поведения](#кодекс-поведения)
+> AI-powered платформа для умных рекомендаций одежды
 
-## Общее описание проекта
+## 📚 Структура документации
 
-OutfitStyle - это приложение для подбора рекомендаций одежды на основе погоды, личных предпочтений и гардероба пользователя. В проекте реализована продвинутая архитектура с единым каталогом вещей и многоуровневой системой рекомендаций.
+### [01. Быстрый старт](01-getting-started/)
+- [Quick Start](01-getting-started/quickstart.md) — краткое руководство по архитектуре
+- [Обзор проекта](01-getting-started/overview.md) — общая информация
 
-### Основные особенности:
-- Интеграция с погодным API для получения актуальных данных
-- ML-модель для подбора рекомендаций
-- Поддержка Google Sign In
-- Восстановление пароля
-- Персонализированные рекомендации
+### [02. Архитектура](02-architecture/)
+- [Детальная архитектура](02-architecture/detailed.md) — полное описание архитектуры
+- [Production V2](02-architecture/production-v2.md) — производственная архитектура
+- [База данных](02-architecture/database/)
+  - [Схема БД](02-architecture/database/schema.md)
+  - [ML структура](02-architecture/database/ml-structure.md)
 
-## Архитектура
+### [03. API](03-api/)
+- [API Reference](03-api/reference.md) — документация всех endpoints
 
-### Единая модель вещей
+### [04. Разработка](04-development/)
+- [Руководство разработчика](04-development/guide.md)
+- [Управление каталогом](04-development/catalog-management.md)
+- [Чек-лист реализации](04-development/implementation-checklist.md)
 
-Все вещи теперь хранятся в одной таблице `clothing_items` с расширенными атрибутами:
-- `gender` - пол (Men, Women, Unisex, Boys, Girls)
-- `master_category` - основная категория (Apparel, Accessory, Footwear и т.д.)
-- `subcategory` - подкатегория (Tshirts, Jeans, Dresses и т.д.)
-- `season` - сезон (Spring, Summer, Fall, Winter)
-- `base_colour` - базовый цвет
-- `usage` - использование (Casual, Formal, Sports и т.д.)
-- `source` - источник (wardrobe, catalog, kaggle_seed, marketplace)
-- `is_owned` - принадлежит ли пользователю
-- `owner_user_id` - ID владельца (для личных вещей)
+### [05. Развёртывание](05-deployment/)
+- [Руководство по деплою](05-deployment/guide.md) — локальное и production
 
-### Приоритеты источников данных
+### [06. Функции](06-features/)
+- [Система подписок](06-features/subscriptions.md)
 
-1. **Личный гардероб (wardrobe)** - вещи пользователя, если подходят по погоде
-2. **Реальные новые вещи (catalog/marketplace)** - реальные товары
-3. **Kaggle seed** - "образцовые" вещи из датасета для обучения
+### [07. Эксплуатация](07-operations/)
+- [Мониторинг](07-operations/monitoring.md)
+- [Troubleshooting](07-operations/troubleshooting/)
 
-Для получения подробной информации об архитектуре смотрите [architecture.md](architecture.md).
+### [08. Безопасность](08-security/)
+- [Руководство по безопасности](08-security/guide.md)
 
-## Импорт данных Kaggle
+### [09. Тестирование](09-testing/)
+- [Стратегия тестирования](09-testing/strategy.md)
 
-Для импорта датасета из Kaggle используется скрипт `scripts/import_kaggle_styles.py`, который:
+### [Archive](archive/)
+Устаревшая документация хранится для истории.
 
-1. Читает `styles.csv` с пропуском кривых строк
-2. Маппит категории в нашу систему
-3. Вставляет данные в `clothing_items` с `source='kaggle_seed'`
-4. Использует `ON CONFLICT (id) DO NOTHING` для предотвращения дубликатов
+---
 
-Для получения подробной информации о процессе импорта смотрите [import_guide.md](import_guide.md).
+## 🏗 Краткий обзор архитектуры
 
-## API документация
+```
+┌─────────────────────────────────────────────────────────┐
+│                  Flutter Client                          │
+│            (com.app.outfitstyle)                        │
+└────────────────────┬────────────────────────────────────┘
+                     │ HTTP/REST
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│              Go API Server (:8080)                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────────┐  │
+│  │  Auth    │  │ Wardrobe │  │   Recommendations    │  │
+│  │  Module  │  │  Module  │  │   (Retrieval+Rank)   │  │
+│  └──────────┘  └──────────┘  └──────────────────────┘  │
+└─────────┬─────────────┬──────────────────┬─────────────┘
+          │             │                  │
+          ▼             ▼                  ▼
+┌────────────────┐ ┌────────────────┐ ┌──────────────────┐
+│  PostgreSQL    │ │    Redis       │ │  Python ML       │
+│  (:5432)       │ │    (:6379)     │ │  Service (:8000) │
+│                │ │    Cache       │ │  CatBoost Model  │
+└────────────────┘ └────────────────┘ └──────────────────┘
+```
 
-API документация находится в файле [api_docs.md](api/README.md).
+### Компоненты:
 
-## Развёртывание
+| Компонент | Порт | Описание |
+|-----------|------|----------|
+| **Go API** | 8080 | REST API, аутентификация, бизнес-логика |
+| **PostgreSQL** | 5432 | Основное хранилище данных |
+| **Redis** | 6379 | Кэш, сессии, rate limiting |
+| **ML Service** | 8000 | Рекомендательная модель (CatBoost) |
 
-Проект разворачивается с помощью Docker и docker-compose. Файлы конфигурации находятся в корне проекта.
+### Технологический стек:
 
-Для производства используйте `docker-compose.prod.yml`.
+**Backend:**
+- Go 1.21+ (Chi Router, SQLC, Wire DI)
+- Python 3.11+ (FastAPI, CatBoost, Scikit-learn)
+- PostgreSQL 16 (Drift ORM)
+- Redis 7
 
-Для получения подробной информации о развёртывании смотрите [PRODUCTION_DEPLOYMENT.md](../PRODUCTION_DEPLOYMENT.md).
+**Mobile:**
+- Flutter 3.x (Riverpod, GoRouter, Freezed)
+- Package: `com.app.outfitstyle`
 
-## Контрибьютинг
+**Infrastructure:**
+- Docker & Docker Compose
+- Nginx (reverse proxy)
+- Let's Encrypt (SSL)
 
-Для участия в разработке следуйте руководству [CONTRIBUTING.md](../CONTRIBUTING.md).
+---
 
-## Кодекс поведения
+## 🚀 Быстрый старт
 
-Все участники проекта должны следовать [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md).
+### Запуск локально:
+
+```bash
+# Клонировать репозиторий
+git clone https://github.com/your-org/outfitstyle.git
+cd outfitstyle
+
+# Запустить Docker контейнеры
+docker-compose -f docker-compose.dev.yml up -d
+
+# Проверить статус
+docker-compose ps
+
+# Запустить Flutter клиент
+cd client
+flutter run --dart-define=API_BASE_URL=http://localhost:8080
+```
+
+### Проверка работы:
+
+- **API Health:** http://localhost:8080/api/health
+- **Swagger UI:** http://localhost:8080/swagger
+- **Flutter Client:** http://localhost:8080
+
+---
+
+## 📦 Основные возможности
+
+- ✅ **Google Sign-In** — аутентификация через Google
+- ✅ **Гардероб** — управление вещами (12 категорий)
+- ✅ **Рекомендации** — ML-based подбор outfit'ов
+- ✅ **Погода** — интеграция с погодными сервисами
+- ✅ **Подписки** — Premium/Premium Plus планы
+- ✅ **Уведомления** — push и email уведомления
+
+---
+
+## 🔗 Полезные ссылки
+
+- [GitHub Repository](https://github.com/your-org/outfitstyle)
+- [Firebase Console](https://console.firebase.google.com/project/outfitstyle-ce15f)
+- [Google Cloud Console](https://console.cloud.google.com/project/outfitstyle-ce15f)
+
+---
+
+## 📝 Статус документации
+
+| Раздел | Статус | Последнее обновление |
+|--------|--------|---------------------|
+| Быстрый старт | ✅ Актуально | Февраль 2026 |
+| Архитектура | ✅ Актуально | Февраль 2026 |
+| API | ✅ Актуально | Февраль 2026 |
+| Разработка | ⚠️ Требует обновления | Февраль 2026 |
+| Развёртывание | ✅ Актуально | Февраль 2026 |
+| Функции | ✅ Актуально | Февраль 2026 |
+| Эксплуатация | ⚠️ Требует обновления | Февраль 2026 |
+| Безопасность | ✅ Актуально | Февраль 2026 |
+| Тестирование | ❌ Не реализовано | — |
+
+---
+
+## 🤝 Вклад в документацию
+
+При внесении изменений в код, пожалуйста, обновляйте соответствующую документацию.
+
+**Перед коммитом:**
+1. Проверьте актуальность документации
+2. Обновите README если изменилась архитектура
+3. Добавьте примеры кода для новых функций
+
+---
+
+**Последнее обновление:** Февраль 2026  
+**Версия документации:** 2.0
