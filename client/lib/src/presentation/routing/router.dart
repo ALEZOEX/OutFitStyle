@@ -35,14 +35,58 @@ final userIdProvider = FutureProvider<String?>((ref) async {
   return authRepo.getUserId();
 });
 
+/// Провайдер состояния авторизации
+final authStateProvider = StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
+  return AuthStateNotifier(ref.read(authRepositoryProvider));
+});
+
+class AuthStateNotifier extends StateNotifier<AuthState> {
+  final AuthRepository _authRepository;
+
+  AuthStateNotifier(this._authRepository) : super(const AuthState.loading());
+
+  Future<void> checkAuth() async {
+    state = const AuthState.loading();
+    try {
+      final isLoggedIn = await _authRepository.isLoggedIn();
+      state = isLoggedIn ? const AuthState.authenticated() : const AuthState.unauthenticated();
+    } catch (e) {
+      state = const AuthState.unauthenticated();
+    }
+  }
+}
+
+class AuthState {
+  final bool isLoading;
+  final bool isAuthenticated;
+
+  const AuthState._({required this.isLoading, required this.isAuthenticated});
+  const AuthState.loading() : this._(isLoading: true, isAuthenticated: false);
+  const AuthState.authenticated() : this._(isLoading: false, isAuthenticated: true);
+  const AuthState.unauthenticated() : this._(isLoading: false, isAuthenticated: false);
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final refreshStream = ref.watch(goRouterRefreshProvider);
+
   return GoRouter(
     initialLocation: '/onboarding',
+    refreshListenable: refreshStream,
     redirect: (BuildContext context, GoRouterState state) async {
       final path = state.uri.toString();
+      final authState = ref.read(authStateProvider);
 
       // Онбординг и авторизация всегда доступны
       if (path.startsWith('/onboarding') || path.startsWith('/auth')) {
+        // Если уже авторизован, не пускаем на auth
+        if (path.startsWith('/auth') && authState.isAuthenticated) {
+          return '/home';
+        }
+        return null;
+      }
+
+      // Если загрузка состояния, показываем loading
+      if (authState.isLoading) {
         return null;
       }
 
@@ -55,10 +99,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Проверяем авторизацию
-      final authStorage = AuthStorage();
-      final accessToken = await authStorage.readAccessToken();
-
-      if (accessToken == null) {
+      if (!authState.isAuthenticated) {
         return '/auth';
       }
 
@@ -83,6 +124,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             },
           );
         },
+      ),
+      GoRoute(
+        path: '/auth',
+        name: 'auth',
+        builder: (context, state) => const AuthScreen(),
       ),
       GoRoute(
         path: '/home',
@@ -158,11 +204,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      GoRoute(
-        path: '/auth',
-        name: 'auth',
-        builder: (context, state) => const AuthScreen(),
-      ),
     ],
   );
 });
+
+/// Утилита для обновления роутера при изменении состояния авторизации
+/// Используется ChangeNotifierProvider для уведомления роутера
+final goRouterRefreshProvider = ChangeNotifierProvider((ref) {
+  return GoRouterRefreshStream();
+});
+
+class GoRouterRefreshStream extends ChangeNotifier {
+  void notifyAuthChanged() {
+    notifyListeners();
+  }
+}

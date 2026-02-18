@@ -23,6 +23,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _nameController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Проверяем, не авторизован ли уже пользователь
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = ref.read(authStateProvider);
+      if (authState.isAuthenticated) {
+        // Уже авторизован, переходим на home
+        if (mounted) {
+          context.go('/home');
+        }
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -37,10 +52,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     try {
       final authRepo = ref.read(authRepositoryProvider);
-      await authRepo.signInWithGoogle();
+      final success = await authRepo.signInWithGoogle();
 
-      if (mounted) {
-        context.go('/home');
+      if (success) {
+        print('✅ Google Sign-In успешен! Обновляем состояние авторизации...');
+
+        // Обновляем состояние авторизации в роутере
+        final authStateNotifier = ref.read(authStateProvider.notifier);
+        await authStateNotifier.checkAuth();
+
+        // Уведомляем роутер об изменении
+        final refreshStream = ref.read(goRouterRefreshProvider);
+        refreshStream.notifyAuthChanged();
+
+        if (mounted) {
+          print('✅ Выполняем навигацию на /home...');
+          context.go('/home');
+          print('✅ Навигация выполнена');
+        }
+      } else {
+        throw Exception('Google Sign-In не удался');
       }
     } catch (e) {
       if (mounted) {
@@ -106,6 +137,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       if (!success) {
         throw Exception('Не удалось выполнить операцию');
       }
+
+      // Обновляем состояние авторизации в роутере
+      final authStateNotifier = ref.read(authStateProvider.notifier);
+      await authStateNotifier.checkAuth();
+
+      // Уведомляем роутер об изменении
+      final refreshStream = ref.read(goRouterRefreshProvider);
+      refreshStream.notifyAuthChanged();
 
       if (mounted) {
         context.go('/home');
