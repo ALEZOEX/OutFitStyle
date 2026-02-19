@@ -476,12 +476,12 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
   String _selectedCategory = 'top';
 
   final _emojiCategories = {
-    'top': ['👕', '👚', '👔', '👗', '👘'],
-    'bottom': ['👖', '🩳', '👗', '👘'],
-    'shoes': ['👟', '👞', '👠', '👢', '🩴'],
-    'headwear': ['🧢', '👒', '🎩', '🎓', '🧕'],
-    'accessory': ['🧣', '👓', '🕶️', '💍', '⌚'],
-    'outerwear': ['🧥', '👘', '🦺', '👚'],
+    'top': ['👕', '👚', '👔', '👗', '👘', '🥻', '🥼', '🧥', '🦺', '👙', '🩱'],
+    'bottom': ['👖', '🩳', '👗', '👘', '🥻', '👙', '🩱', '🩲'],
+    'shoes': ['👟', '👞', '👠', '👡', '👢', '🥿', '🥾', '🩴'],
+    'outerwear': ['🧥', '🦺', '🥼', '👘', '🥻'],
+    'headwear': ['🧢', '👒', '🎩', '🎓', '🧕', '⛑️', '👑'],
+    'accessory': ['👜', '👛', '👝', '👓', '🕶️', '⌚', '💍', '🎒', '🎀', '🧣', '🧤', '🧦'],
   };
 
   final _categories = [
