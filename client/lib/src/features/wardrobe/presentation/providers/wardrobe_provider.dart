@@ -3,6 +3,7 @@ import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_config.dart';
 import '../../../../data/remote/wardrobe_api_service.dart';
 import '../../../../services/auth_storage.dart';
+import '../../../domain/entities/catalog_entity.dart';
 import '../../data/repositories/wardrobe_repository.dart';
 import '../../domain/entities/wardrobe_item.dart';
 import '../../domain/entities/wardrobe_request_entities.dart';
@@ -217,6 +218,60 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
   /// Перезагрузить данные
   Future<void> refresh() async {
     await _loadWardrobe();
+  }
+
+  /// Добавить вещь из каталога в гардероб
+  ///
+  /// Создает новую вещь в гардеробе на основе элемента каталога
+  Future<WardrobeItem?> addItemFromCatalog(CatalogEntity catalogItem) async {
+    state = state.copyWith(isAddingItem: true, error: null);
+
+    try {
+      // Получаем userId из хранилища
+      // В реальном приложении userId должен быть доступен из auth-сервиса
+      // Для упрощения используем заглушку - сервер сам определит пользователя по токену
+      final request = WardrobeItemCreateRequest(
+        name: catalogItem.name,
+        category: catalogItem.category,
+        subcategory: catalogItem.subcategory,
+        style: catalogItem.style,
+        iconEmoji: catalogItem.iconEmoji ?? catalogItem.categoryEmoji,
+        imageUrl: catalogItem.imageUrl,
+        minTemp: catalogItem.minTemp,
+        maxTemp: catalogItem.maxTemp,
+        warmthLevel: catalogItem.warmthLevel,
+        rainOk: catalogItem.rainOk,
+        snowOk: catalogItem.snowOk,
+        windOk: catalogItem.windOk,
+        isFavorite: false,
+        isArchived: false,
+        season: catalogItem.season,
+        gender: catalogItem.gender,
+        fit: catalogItem.fit,
+        pattern: catalogItem.pattern,
+        materials: catalogItem.materials.isNotEmpty ? catalogItem.materials.join(',') : null,
+        usage: catalogItem.usage.isNotEmpty ? catalogItem.usage.first : null,
+        userId: '', // Сервер определит по токену
+        clothingItemId: catalogItem.id,
+      );
+
+      final newItem = await _repository.createWardrobeItem(request);
+
+      // Добавляем в список
+      final items = List<WardrobeItem>.from(state.items)..add(newItem);
+      state = state.copyWith(
+        items: items,
+        isAddingItem: false,
+      );
+
+      return newItem;
+    } catch (e) {
+      state = state.copyWith(
+        isAddingItem: false,
+        error: e.toString(),
+      );
+      rethrow;
+    }
   }
 }
 
