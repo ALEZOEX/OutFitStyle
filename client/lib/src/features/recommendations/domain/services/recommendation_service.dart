@@ -70,16 +70,16 @@ class RecommendationService {
   List<WardrobeItem> _filterByWeather(List<WardrobeItem> items, WeatherData weather) {
     final temperature = weather.temperature ?? 20;
     final condition = weather.condition?.toLowerCase() ?? 'clear';
-    
+
     return items.where((item) {
-      // Проверка по температуре
-      final minTemp = item.minTemp ?? -100;
-      final maxTemp = item.maxTemp ?? 100;
-      
+      // Проверка по температуре с дефолтными значениями по категории
+      final minTemp = item.minTemp ?? _getDefaultMinTemp(item.category);
+      final maxTemp = item.maxTemp ?? _getDefaultMaxTemp(item.category);
+
       if (temperature < minTemp || temperature > maxTemp) {
         return false;
       }
-      
+
       // Проверка по осадкам
       if (condition == 'rainy' || condition == 'rain') {
         if (item.rainOk != true && item.category != 'top' && item.category != 'bottom') {
@@ -89,7 +89,7 @@ class RecommendationService {
           }
         }
       }
-      
+
       if (condition == 'snowy' || condition == 'snow') {
         if (item.snowOk != true && item.category != 'top' && item.category != 'bottom') {
           if (item.category == 'shoes' || item.category == 'outerwear') {
@@ -97,16 +97,44 @@ class RecommendationService {
           }
         }
       }
-      
+
       if (condition == 'windy' || condition == 'wind') {
         if (item.windOk != true && item.category == 'headwear') {
           // Для головных уборов проверяем защиту от ветра
           if (item.windOk != true) return false;
         }
       }
-      
+
       return true;
     }).toList();
+  }
+
+  /// Дефолтная минимальная температура по категории
+  int _getDefaultMinTemp(String category) {
+    return switch (category) {
+      'shorts' => 20,      // Шорты только в тепло
+      'tshirt' => 18,      // Футболки от 18°C
+      'shirt' => 15,       // Рубашки от 15°C
+      'jeans' => 10,       // Джинсы от 10°C
+      'dress' => 18,       // Платья от 18°C
+      'shoes' => 5,        // Обувь от 5°C
+      'outerwear' => -10,  // Верхняя одежда от -10°C
+      _ => -100,           // По умолчанию без ограничений
+    };
+  }
+
+  /// Дефолтная максимальная температура по категории
+  int _getDefaultMaxTemp(String category) {
+    return switch (category) {
+      'shorts' => 40,      // Шорты до 40°C
+      'tshirt' => 35,      // Футболки до 35°C
+      'shirt' => 30,       // Рубашки до 30°C
+      'jeans' => 35,       // Джинсы до 35°C
+      'dress' => 35,       // Платья до 35°C
+      'shoes' => 40,       // Обувь до 40°C
+      'outerwear' => 15,   // Верхняя одежда до 15°C
+      _ => 100,            // По умолчанию без ограничений
+    };
   }
 
   /// Применение предпочтений пользователя
