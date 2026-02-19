@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/wardrobe_item.dart';
+import '../../../domain/entities/wardrobe_request_entities.dart';
 import '../presentation/providers/wardrobe_provider.dart';
 import '../../../ui/widgets/wardrobe_item_card.dart';
 
@@ -474,6 +475,8 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
   final _nameController = TextEditingController();
   String _selectedEmoji = '👕';
   String _selectedCategory = 'top';
+  bool _isSubmitting = false;
+  String? _errorMessage;
 
   final _emojiCategories = {
     'top': ['👕', '👚', '👔', '👗', '👘', '🥻', '🥼', '🧥', '🦺', '👙', '🩱'],
@@ -499,48 +502,119 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
     super.dispose();
   }
 
-  void _saveItem() {
-    if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Введите название вещи'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+  Future<void> _saveItem() async {
+    // Валидация
+    final name = _nameController.text.trim();
+
+    if (name.isEmpty) {
+      setState(() {
+        _errorMessage = 'Введите название вещи';
+      });
       return;
     }
 
-    // Создаём элемент с эмодзи и названием
-    final newItem = WardrobeItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: '${_selectedEmoji} ${_nameController.text.trim()}',
-      category: _selectedCategory,
-      imageUrl: '', // Пустое изображение для кастомных вещей
-      isFavorite: false,
-    );
-
-    // Добавляем через провайдер
-    ref.read(wardrobeProvider.notifier).addItem(newItem);
-
-    widget.onItemAdded?.call();
-
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Text('Вещь "${newItem.name}" добавлена'),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+    if (name.length < 2) {
+      setState(() {
+        _errorMessage = 'Название должно быть не менее 2 символов';
+      });
+      return;
     }
+
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Создаём запрос на добавление вещи в формате API
+      final request = WardrobeItemCreateRequest(
+        name: '${_selectedEmoji} $name',
+        category: _selectedCategory,
+        subcategory: _getSubcategory(_selectedCategory),
+        style: 'casual',
+        iconEmoji: _selectedEmoji,
+        isFavorite: false,
+        isArchived: false,
+        rainOk: false,
+        snowOk: false,
+        windOk: false,
+        userId: 'current_user', // В реальном приложении брать из auth
+        clothingItemId: '', // Пусто для новых вещей
+      );
+
+      // Добавляем через провайдер с интеграцией API
+      await ref.read(wardrobeProvider.notifier).addItem(request);
+
+      widget.onItemAdded?.call();
+
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Text('Вещь "${request.name}" добавлена'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _errorMessage = _getErrorMessage(e);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text(_errorMessage!)),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Получить подкатегорию по категории
+  String _getSubcategory(String category) {
+    return switch (category) {
+      'top' => 'tshirt',
+      'bottom' => 'jeans',
+      'shoes' => 'sneakers',
+      'outerwear' => 'jacket',
+      'headwear' => 'cap',
+      'accessory' => 'belt',
+      _ => 'other',
+    };
+  }
+
+  /// Получить понятное сообщение об ошибке
+  String _getErrorMessage(dynamic error) {
+    final errorStr = error.toString();
+    if (errorStr.contains('Требуется авторизация')) {
+      return 'Требуется авторизация';
+    }
+    if (errorStr.contains('Нет соединения') || errorStr.contains('connection')) {
+      return 'Нет соединения с интернетом';
+    }
+    if (errorStr.contains('Ошибка сервера')) {
+      return 'Ошибка сервера. Попробуйте позже';
+    }
+    return 'Ошибка добавления: ${error.toString().replaceAll("WardrobeException: ", "")}';
   }
 
   @override
@@ -673,19 +747,45 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                 borderRadius: BorderRadius.circular(12),
               ),
               prefixText: '$_selectedEmoji  ',
+              errorText: _errorMessage != null && _nameController.text.trim().isEmpty
+                  ? _errorMessage
+                  : null,
             ),
             autofocus: true,
+            enabled: !_isSubmitting,
             onSubmitted: (_) => _saveItem(),
           ),
+          // Сообщение об ошибке
+          if (_errorMessage != null && _nameController.text.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                _errorMessage!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ),
           const SizedBox(height: 24),
-          // Кнопка сохранения
+          // Кнопка сохранения с индикатором загрузки
           SizedBox(
             width: double.infinity,
             height: 56,
             child: FilledButton.icon(
-              onPressed: _saveItem,
-              icon: const Icon(Icons.save),
-              label: const Text('Добавить в гардероб'),
+              onPressed: _isSubmitting ? null : _saveItem,
+              icon: _isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.save),
+              label: Text(
+                _isSubmitting ? 'Добавление...' : 'Добавить в гардероб',
+              ),
               style: FilledButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
