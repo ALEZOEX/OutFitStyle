@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/auth_repository.dart';
 import '../../../presentation/routing/router.dart';
+import '../../wardrobe/presentation/providers/wardrobe_provider.dart';
+import 'providers/profile_provider.dart';
 
 /// Экран профиля пользователя
 class ProfileScreen extends ConsumerWidget {
@@ -13,17 +15,19 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authRepository = ref.read(authRepositoryProvider);
     final theme = Theme.of(context);
+    final profileState = ref.watch(profileDataProvider);
+    final stats = ref.watch(profileStatsProvider);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           // Заголовок профиля
           SliverToBoxAdapter(
-            child: _buildProfileHeader(context, authRepository),
+            child: _buildProfileHeader(context, profileState),
           ),
           // Статистика
           SliverToBoxAdapter(
-            child: _buildStats(context),
+            child: _buildStats(context, stats, profileState),
           ),
           const SliverToBoxAdapter(
             child: SizedBox(height: 24),
@@ -52,25 +56,24 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Заголовок профиля
-  Widget _buildProfileHeader(BuildContext context, AuthRepository authRepository) {
+  Widget _buildProfileHeader(BuildContext context, AsyncValue<ProfileData> profileState) {
     final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          // Аватар
-          FutureBuilder<Map<String, dynamic>?>(
-            future: authRepository.getCurrentUser(),
-            builder: (context, snapshot) {
-              final user = snapshot.data;
-              final name = user?['name'] as String? ?? 'Пользователь';
-              final email = user?['email'] as String? ?? 'user@outfitstyle.com';
-              final avatarUrl = user?['avatar_url'] as String?;
-              final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+          // Аватар и данные пользователя
+          profileState.when(
+            data: (profile) {
+              final avatarUrl = profile.photoUrl;
+              final firstLetter = profile.firstLetter;
+              final displayName = profile.displayName;
+              final email = profile.email;
 
               return Column(
                 children: [
+                  // Аватар
                   Container(
                     width: 100,
                     height: 100,
@@ -108,6 +111,21 @@ class ProfileScreen extends ConsumerWidget {
                                   ),
                                 );
                               },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white.withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           )
                         : Center(
@@ -123,10 +141,11 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   // Имя пользователя
                   Text(
-                    name,
+                    displayName,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -134,37 +153,80 @@ class ProfileScreen extends ConsumerWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               );
             },
-          ),
-          const SizedBox(height: 16),
-          // Бейдж
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(20),
+            loading: () => const Column(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Загрузка профиля...'),
+              ],
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            error: (error, stack) => Column(
               children: [
                 Icon(
-                  Icons.workspace_premium,
-                  size: 18,
-                  color: theme.colorScheme.primary,
+                  Icons.error_outline,
+                  size: 48,
+                  color: theme.colorScheme.error,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'Free Plan',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
+                  'Ошибка загрузки профиля',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.error,
                   ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  error.toString(),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 16),
+          // Бейдж подписки
+          profileState.when(
+            data: (profile) {
+              final planName = profile.subscriptionPlan == 'premium' ? 'Pro Plan' : 'Free Plan';
+              final planColor = profile.subscriptionPlan == 'premium'
+                  ? theme.colorScheme.tertiary
+                  : theme.colorScheme.primary;
+
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.workspace_premium,
+                      size: 18,
+                      color: planColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      planName,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: planColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
           ),
         ],
       ),
@@ -172,13 +234,21 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Статистика пользователя
-  Widget _buildStats(BuildContext context) {
+  Widget _buildStats(BuildContext context, ProfileStats stats, AsyncValue<ProfileData> profileState) {
     final theme = Theme.of(context);
 
-    final stats = [
-      {'label': 'Вещей', 'value': '42', 'icon': Icons.checkroom},
-      {'label': 'Образов', 'value': '28', 'icon': Icons.auto_awesome},
-      {'label': 'Дней', 'value': '156', 'icon': Icons.calendar_today},
+    // Получаем количество дней в приложении из профиля
+    final daysInApp = profileState.when(
+      data: (profile) => profile.daysInApp,
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+
+    final statsData = [
+      {'label': 'Вещей', 'value': stats.totalCount.toString(), 'icon': Icons.checkroom},
+      {'label': 'Категорий', 'value': stats.categoriesCount.toString(), 'icon': Icons.category},
+      {'label': 'Избранное', 'value': stats.favoritesCount.toString(), 'icon': Icons.favorite},
+      {'label': 'Дней', 'value': daysInApp.toString(), 'icon': Icons.calendar_today},
     ];
 
     return Container(
@@ -188,41 +258,62 @@ class ProfileScreen extends ConsumerWidget {
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: stats.map((stat) {
-          return Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  stat['icon'] as IconData,
-                  color: theme.colorScheme.primary,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                stat['value'] as String,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              Text(
-                stat['label'] as String,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          );
-        }).toList(),
+      child: Column(
+        children: [
+          Text(
+            'Статистика',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            alignment: WrapAlignment.center,
+            children: statsData.map((stat) {
+              return _buildStatItem(context, stat);
+            }).toList(),
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Элемент статистики
+  Widget _buildStatItem(BuildContext context, Map<String, String> stat) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            stat['icon'] as IconData,
+            color: theme.colorScheme.primary,
+            size: 24,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          stat['value'] as String,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        Text(
+          stat['label'] as String,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 
