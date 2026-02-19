@@ -27,7 +27,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(weatherProvider);
-        ref.invalidate(dailyOutfitProvider);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

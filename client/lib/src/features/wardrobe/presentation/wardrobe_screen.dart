@@ -461,16 +461,16 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
 }
 
 /// Bottom sheet для добавления вещи
-class _AddItemSheet extends StatefulWidget {
+class _AddItemSheet extends ConsumerStatefulWidget {
   final VoidCallback? onItemAdded;
 
   const _AddItemSheet({this.onItemAdded});
 
   @override
-  State<_AddItemSheet> createState() => _AddItemSheetState();
+  ConsumerState<_AddItemSheet> createState() => _AddItemSheetState();
 }
 
-class _AddItemSheetState extends State<_AddItemSheet> {
+class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
   final _nameController = TextEditingController();
   String _selectedEmoji = '👕';
   String _selectedCategory = 'top';
