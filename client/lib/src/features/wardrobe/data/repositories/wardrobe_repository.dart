@@ -1,7 +1,7 @@
 import '../../../../core/api/api_client.dart';
 import '../../../../data/remote/wardrobe_api_service.dart';
-import '../../entities/wardrobe_item.dart';
-import '../../entities/wardrobe_request_entities.dart';
+import '../../../../domain/entities/wardrobe_item.dart';
+import '../../../../domain/entities/wardrobe_request_entities.dart';
 
 /// Репозиторий для работы с гардеробом пользователя
 ///
