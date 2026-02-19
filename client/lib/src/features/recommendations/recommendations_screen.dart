@@ -14,15 +14,15 @@ class RecommendationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userId = ref.watch(userIdProvider) ?? '';
-    final weatherAsyncValue = ref.watch(weatherProvider);
+    final weatherAsyncValue = ref.watch(weatherProvider((lat: 55.75, lon: 37.61)));
     final recommendationState = ref.watch(recommendationStateNotifierProvider);
 
     // Load recommendations when weather data is available
-    ref.listen(weatherProvider, (previous, next) {
-      if (next != null && userId.isNotEmpty) {
-        final latitude = next.latitude;
-        final longitude = next.longitude;
-        if (latitude != null && longitude != null) {
+    ref.listen(weatherProvider((lat: 55.75, lon: 37.61)), (previous, next) {
+      next.whenData((weather) {
+        if (userId.isNotEmpty) {
+          final latitude = weather.latitude ?? 55.75;
+          final longitude = weather.longitude ?? 37.61;
           ref
               .read(recommendationStateNotifierProvider.notifier)
               .fetchRecommendations(
@@ -31,7 +31,7 @@ class RecommendationsScreen extends ConsumerWidget {
                 longitude: longitude,
               );
         }
-      }
+      });
     });
 
     return DefaultTabController(
@@ -43,9 +43,9 @@ class RecommendationsScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () {
-                if (userId.isNotEmpty && weatherAsyncValue != null) {
-                  final latitude = weatherAsyncValue.latitude;
-                  final longitude = weatherAsyncValue.longitude;
+                if (userId.isNotEmpty && weatherAsyncValue.value != null) {
+                  final latitude = weatherAsyncValue.value?.latitude;
+                  final longitude = weatherAsyncValue.value?.longitude;
                   if (latitude != null && longitude != null) {
                     ref
                         .read(recommendationStateNotifierProvider.notifier)
@@ -68,9 +68,9 @@ class RecommendationsScreen extends ConsumerWidget {
                     onApply: (options) {
                       // Apply filter logic here
                       // For now, just refresh the recommendations
-                      if (userId.isNotEmpty && weatherAsyncValue != null) {
-                        final latitude = weatherAsyncValue.latitude;
-                        final longitude = weatherAsyncValue.longitude;
+                      if (userId.isNotEmpty && weatherAsyncValue.value != null) {
+                        final latitude = weatherAsyncValue.value?.latitude;
+                        final longitude = weatherAsyncValue.value?.longitude;
                         if (latitude != null && longitude != null) {
                           ref
                               .read(recommendationStateNotifierProvider.notifier)
@@ -140,7 +140,7 @@ class RecommendationsScreen extends ConsumerWidget {
         body: TabBarView(
           children: [
             // Main recommendations tab
-            weatherAsyncValue == null
+            weatherAsyncValue.value == null
                 ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -165,8 +165,8 @@ class RecommendationsScreen extends ConsumerWidget {
                                     'Ошибка: ${recommendationState.errorMessage}'),
                                 ElevatedButton(
                                   onPressed: () {
-                                    final latitude = weatherAsyncValue.latitude;
-                                    final longitude = weatherAsyncValue.longitude;
+                                    final latitude = weatherAsyncValue.value?.latitude;
+                                    final longitude = weatherAsyncValue.value?.longitude;
                                     if (latitude != null && longitude != null) {
                                       ref
                                           .read(
@@ -188,8 +188,8 @@ class RecommendationsScreen extends ConsumerWidget {
                             data: (recommendations) {
                               return RefreshIndicator(
                                 onRefresh: () async {
-                                  final latitude = weatherAsyncValue.latitude;
-                                  final longitude = weatherAsyncValue.longitude;
+                                  final latitude = weatherAsyncValue.value?.latitude;
+                                  final longitude = weatherAsyncValue.value?.longitude;
                                   if (latitude != null && longitude != null) {
                                     await ref
                                         .read(recommendationStateNotifierProvider
@@ -236,8 +236,8 @@ class RecommendationsScreen extends ConsumerWidget {
                                   Text('Ошибка: $error'),
                                   ElevatedButton(
                                     onPressed: () {
-                                      final latitude = weatherAsyncValue.latitude;
-                                      final longitude = weatherAsyncValue.longitude;
+                                      final latitude = weatherAsyncValue.value?.latitude;
+                                      final longitude = weatherAsyncValue.value?.longitude;
                                       if (latitude != null && longitude != null) {
                                         ref
                                             .read(recommendationStateNotifierProvider.notifier)

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/home/presentation/home_screen.dart';
+import '../../features/home/home_screen.dart';
 import '../../features/recommendations/presentation/screens/recommendation_detail_screen.dart';
 import '../../features/wardrobe/presentation/screens/wardrobe_item_detail_screen.dart';
 import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';

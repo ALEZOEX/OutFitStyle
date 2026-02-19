@@ -187,7 +187,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   'OutfitStyle',
                   style: theme.textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: theme.primaryColor,
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.white
+                        : theme.colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 8),

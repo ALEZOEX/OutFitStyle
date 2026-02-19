@@ -3,6 +3,10 @@
 ## Базовый URL
 
 ```
+# Development
+http://localhost:8080
+
+# Production
 https://api.outfitstyle.app
 ```
 
@@ -13,6 +17,11 @@ https://api.outfitstyle.app
 ```
 Authorization: Bearer <jwt_token>
 ```
+
+### Типы токенов
+
+- **Access Token** — короткоживущий токен (15 минут)
+- **Refresh Token** — долгоживущий токен (30 дней) для обновления access token
 
 ## Конечные точки
 
@@ -41,6 +50,39 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
+#### POST /api/v1/auth/refresh
+Обновление access токена
+
+**Тело запроса:**
+```json
+{
+  "refresh_token": "jwt_refresh_token"
+}
+```
+
+**Ответ:**
+```json
+{
+  "access_token": "new_jwt_access_token",
+  "refresh_token": "new_jwt_refresh_token"
+}
+```
+
+#### POST /api/v1/auth/logout
+Выход из системы
+
+**Заголовки:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Ответ:**
+```json
+{
+  "success": true
+}
+```
+
 ### Гардероб
 
 #### GET /api/v1/wardrobe
@@ -49,19 +91,23 @@ Authorization: Bearer <jwt_token>
 **Параметры запроса:**
 - `page` (необязательно): Номер страницы (по умолчанию: 1)
 - `limit` (необязательно): Элементов на странице (по умолчанию: 20, максимум: 100)
+- `category` (необязательно): Фильтр по категории
 
 **Ответ:**
 ```json
 {
   "items": [
     {
-      "id": "item_id",
+      "id": 123,
       "name": "Синяя футболка",
-      "category": "top",
+      "category": "upper",
+      "subcategory": "tshirt",
       "color": "blue",
       "warmth_level": 2,
-      "style": "casual",
       "formality_level": 2,
+      "season": "summer",
+      "source": "user",
+      "is_owned": true,
       "image_url": "https://example.com/image.jpg",
       "created_at": "2024-01-15T10:30:00Z"
     }
@@ -79,11 +125,12 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "name": "Синяя футболка",
-  "category": "top",
+  "category": "upper",
+  "subcategory": "tshirt",
   "color": "blue",
   "warmth_level": 2,
-  "style": "casual",
   "formality_level": 2,
+  "season": "summer",
   "image_url": "https://example.com/image.jpg"
 }
 ```
@@ -92,13 +139,16 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "item": {
-    "id": "item_id",
+    "id": 123,
     "name": "Синяя футболка",
-    "category": "top",
+    "category": "upper",
+    "subcategory": "tshirt",
     "color": "blue",
     "warmth_level": 2,
-    "style": "casual",
     "formality_level": 2,
+    "season": "summer",
+    "source": "user",
+    "is_owned": true,
     "image_url": "https://example.com/image.jpg",
     "created_at": "2024-01-15T10:30:00Z"
   }
@@ -130,11 +180,25 @@ Authorization: Bearer <jwt_token>
   "recommendations": [
     {
       "id": "rec_id",
-      "items": ["item_id_1", "item_id_2"],
-      "score": 0.95,
-      "reason": "Идеально для солнечной погоды",
-      "occasion": "daily",
-      "weather_condition": "sunny",
+      "items": [
+        {
+          "id": 123,
+          "name": "Футболка",
+          "category": "upper",
+          "score": 0.95
+        },
+        {
+          "id": 456,
+          "name": "Джинсы",
+          "category": "lower",
+          "score": 0.92
+        }
+      ],
+      "total_score": 0.93,
+      "weather": {
+        "temperature": 20,
+        "condition": "sunny"
+      },
       "created_at": "2024-01-15T10:30:00Z"
     }
   ],
@@ -144,15 +208,15 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-#### POST /api/v1/recommendations
+#### POST /api/v1/recommendations/generate
 Сгенерировать новые рекомендации
 
 **Тело запроса:**
 ```json
 {
-  "occasion": "daily",
   "latitude": 55.7558,
-  "longitude": 37.6176
+  "longitude": 37.6176,
+  "occasion": "daily"
 }
 ```
 
@@ -161,12 +225,71 @@ Authorization: Bearer <jwt_token>
 {
   "recommendation": {
     "id": "rec_id",
-    "items": ["item_id_1", "item_id_2"],
-    "score": 0.95,
-    "reason": "Идеально для солнечной погоды",
-    "occasion": "daily",
-    "weather_condition": "sunny",
+    "items": [
+      {
+        "id": 123,
+        "name": "Футболка",
+        "category": "upper",
+        "score": 0.95
+      }
+    ],
+    "total_score": 0.93,
+    "weather": {
+      "temperature": 20,
+      "condition": "sunny"
+    },
     "created_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### Подписки
+
+#### GET /api/v1/subscription/plans
+Получить список планов подписок
+
+**Ответ:**
+```json
+{
+  "plans": [
+    {
+      "id": "free",
+      "name": "Free",
+      "price_monthly": 0,
+      "price_yearly": 0,
+      "features": {
+        "recommendations_per_day": 3,
+        "wardrobe_items": 50,
+        "history_days": 7
+      }
+    },
+    {
+      "id": "premium",
+      "name": "Premium",
+      "price_monthly": 299,
+      "price_yearly": 2990,
+      "features": {
+        "recommendations_per_day": 20,
+        "wardrobe_items": 500,
+        "history_days": 90
+      }
+    }
+  ]
+}
+```
+
+#### GET /api/v1/subscription/current
+Получить текущую подписку пользователя
+
+**Ответ:**
+```json
+{
+  "subscription": {
+    "plan_id": "premium",
+    "status": "active",
+    "started_at": "2024-01-01T00:00:00Z",
+    "ends_at": "2024-02-01T00:00:00Z",
+    "trial_ends_at": null
   }
 }
 ```
@@ -184,7 +307,6 @@ Authorization: Bearer <jwt_token>
     "avoid_styles": ["formal"],
     "color_preferences": ["blue", "black"],
     "avoid_colors": ["orange"],
-    "preferred_categories": ["top", "bottom"],
     "temperature_sensitivity": 2
   }
 }
@@ -200,22 +322,28 @@ Authorization: Bearer <jwt_token>
   "avoid_styles": ["formal"],
   "color_preferences": ["blue", "black"],
   "avoid_colors": ["orange"],
-  "preferred_categories": ["top", "bottom"],
   "temperature_sensitivity": 2
 }
 ```
 
+### Погода
+
+#### GET /api/v1/weather/current
+Получить текущую погоду
+
+**Параметры запроса:**
+- `latitude`: Широта
+- `longitude`: Долгота
+
 **Ответ:**
 ```json
 {
-  "preferences": {
-    "preferred_styles": ["casual", "smart casual"],
-    "avoid_styles": ["formal"],
-    "color_preferences": ["blue", "black"],
-    "avoid_colors": ["orange"],
-    "preferred_categories": ["top", "bottom"],
-    "temperature_sensitivity": 2
-  }
+  "temperature": 20.5,
+  "feels_like": 19.2,
+  "condition": "sunny",
+  "humidity": 65,
+  "wind_speed": 3.5,
+  "updated_at": "2024-01-15T10:30:00Z"
 }
 ```
 
@@ -225,52 +353,69 @@ Authorization: Bearer <jwt_token>
 
 ```json
 {
-  "error": "error_message",
-  "details": "detailed_error_description"
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Человекочитаемое описание ошибки",
+    "details": {}
+  }
 }
 ```
 
-### Общие HTTP-статусы
+### Коды ошибок
 
-- `200 OK` - Запрос выполнен успешно
-- `400 Bad Request` - Неверный формат запроса
-- `401 Unauthorized` - Требуется аутентификация
-- `403 Forbidden` - Доступ запрещен
-- `404 Not Found` - Ресурс не найден
-- `429 Too Many Requests` - Превышено ограничение на количество запросов
-- `500 Internal Server Error` - Ошибка сервера
+| Код | HTTP статус | Описание |
+|-----|-------------|----------|
+| `INVALID_ARGUMENT` | 400 | Неверный формат запроса |
+| `UNAUTHENTICATED` | 401 | Требуется аутентификация |
+| `PERMISSION_DENIED` | 403 | Доступ запрещен |
+| `NOT_FOUND` | 404 | Ресурс не найден |
+| `ALREADY_EXISTS` | 409 | Ресурс уже существует |
+| `RESOURCE_EXHAUSTED` | 429 | Превышено ограничение на количество запросов |
+| `INTERNAL` | 500 | Внутренняя ошибка сервера |
+| `UNAVAILABLE` | 503 | Сервис недоступен |
 
-## Ограничение частоты запросов
+## Ограничение частоты запросов (Rate Limiting)
 
 Все аутентифицированные конечные точки имеют ограничение частоты:
 - 100 запросов в минуту на пользователя
 - 1000 запросов в минуту на IP-адрес (для неаутентифицированных)
 
+Заголовки rate limiting:
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1642234567
+```
+
 ## Проверка работоспособности
 
-#### GET /health
+#### GET /api/health
 Проверить работоспособность сервиса
 
 **Ответ:**
 ```json
 {
   "status": "healthy",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "timestamp": "2024-01-15T10:30:00Z",
   "checks": {
     "database": {
       "status": "healthy",
-      "latency": "10ms"
+      "latency_ms": 10
+    },
+    "redis": {
+      "status": "healthy",
+      "latency_ms": 2
     },
     "ml_service": {
       "status": "healthy",
-      "latency": "50ms"
+      "latency_ms": 50
     }
   }
 }
 ```
 
-#### GET /ready
+#### GET /api/ready
 Проверить готовность сервиса к работе
 
 **Ответ:**
@@ -287,3 +432,13 @@ Authorization: Bearer <jwt_token>
 Конечная точка метрик Prometheus
 
 Возвращает метрики в формате Prometheus для мониторинга и оповещения.
+
+## Swagger документация
+
+Интерактивная документация API доступна по адресу:
+- Development: http://localhost:8080/swagger
+- Production: https://api.outfitstyle.app/swagger
+
+---
+
+**Обновлено:** Февраль 2026

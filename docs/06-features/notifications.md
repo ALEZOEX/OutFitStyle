@@ -1,31 +1,31 @@
-# Notifications System
+# Система уведомлений OutfitStyle
 
-## Overview
+## Обзор
 
-The OutfitStyle notification system supports various types of notifications to keep users engaged and informed.
+Система уведомлений OutfitStyle поддерживает различные типы уведомлений для информирования и вовлечения пользователей.
 
-## Notification Types
+## Типы уведомлений
 
-### Weather-Based Notifications
-- Daily outfit recommendations based on weather
-- Weather change alerts
-- Seasonal clothing reminders
+### Уведомления на основе погоды
+- Ежедневные рекомендации нарядов на основе погоды
+- Предупреждения об изменении погоды
+- Сезонные напоминания об одежде
 
-### System Notifications
-- Subscription status updates
-- Trial period reminders
-- Feature announcements
+### Системные уведомления
+- Обновления статуса подписки
+- Напоминания о пробном периоде
+- Анонсы новых функций
 
-### Engagement Notifications
-- Style tips and suggestions
-- Wardrobe completion reminders
-- Personalized recommendations
+### Уведомления для вовлечения
+- Советы и рекомендации по стилю
+- Напоминания о заполнении гардероба
+- Персонализированные рекомендации
 
-## Architecture
+## Архитектура
 
-### Notification Structure
+### Структура уведомления
 
-The `CreateNotificationParams` structure includes:
+Структура `CreateNotificationParams` включает:
 
 ```go
 type CreateNotificationParams struct {
@@ -33,119 +33,167 @@ type CreateNotificationParams struct {
     Title     string
     Message   string
     Type      string
-    ImageURL  *string  // Optional image for rich notifications
+    ImageURL  *string  // Опционально: изображение для богатых уведомлений
     Metadata  json.RawMessage
 }
 ```
 
-### Current Implementation
+### Текущая реализация
 
-Currently, the system supports:
-- Emoji-based notifications
-- Text-only notifications
-- Basic push notifications
+В настоящее время система поддерживает:
+- Уведомления на основе emoji
+- Текстовые уведомления
+- Базовые push-уведомления
 
-## Image Support
+## Поддержка изображений
 
-### Current Status
+### Текущий статус
 
-The `ImageURL` field is available but the following is not yet implemented:
-- Image storage and delivery system
-- Image size, format, and quality requirements
-- Push notification image delivery testing
+Поле `ImageURL` доступно, но следующее ещё не реализовано:
+- Система хранения и доставки изображений
+- Требования к размеру, формату и качеству изображений
+- Тестирование доставки изображений в push-уведомлениях
 
-### Future Enhancements
+### Будущие улучшения
 
-#### 1. Image Storage System
-- S3-compatible storage integration
-- Automatic thumbnail generation
-- Image optimization for mobile devices
+#### 1. Система хранения изображений
+- Интеграция с S3-совместимым хранилищем
+- Автоматическая генерация миниатюр
+- Оптимизация изображений для мобильных устройств
 
-#### 2. Rich Notifications
-- Image support in push notifications
-- Fallback options for unsupported platforms
-- Notification image caching
+#### 2. Богатые уведомления
+- Поддержка изображений в push-уведомлениях
+- Резервные варианты для неподдерживаемых платформ
+- Кэширование изображений уведомлений
 
-#### 3. Other Application Areas
-- User profiles
-- Clothing items
-- Recommendations
-- Achievements
-- Catalogs
+#### 3. Другие области применения
+- Профили пользователей
+- Элементы одежды
+- Рекомендации
+- Достижения
+- Каталоги
 
-## Technical Requirements
+## Технические требования
 
-### Formats
-- Primary: JPEG, PNG
-- Icons: WebP, SVG
-- Animated: GIF (limited)
+### Форматы
+- Основные: JPEG, PNG
+- Иконки: WebP, SVG
+- Анимированные: GIF (ограниченно)
 
-### Sizes
-- Notifications: up to 250KB
-- Profiles: up to 2MB
-- Catalog: up to 5MB
+### Размеры
+- Уведомления: до 250 КБ
+- Профили: до 2 МБ
+- Каталог: до 5 МБ
 
-### Security
-- MIME type validation
-- Image sanitization
-- Antivirus scanning
+### Безопасность
+- Валидация MIME-типа
+- Санитизация изображений
+- Антивирусное сканирование
 
-## Implementation Plan
+## План реализации
 
-1. **Current**: Use emoji and text
-2. **Later**: Add basic image support
-3. **Future**: Full-featured media management system
+1. **Текущий**: Использование emoji и текста
+2. **Позже**: Добавление базовой поддержки изображений
+3. **Будущее**: Полнофункциональная система управления медиа
 
-## UX Considerations
+## Рекомендации по UX
 
-- Don't overload notifications with images
-- Ensure accessibility for users with disabilities
-- Provide options to disable images in notifications
-- Respect user preferences for notification content
+- Не перегружайте уведомления изображениями
+- Обеспечьте доступность для пользователей с ограниченными возможностями
+- Предоставьте возможность отключить изображения в уведомлениях
+- Уважайте предпочтения пользователей к содержанию уведомлений
 
-## Push Notification Integration
+## Интеграция с push-уведомлениями
 
 ### Firebase Cloud Messaging
 
-The app integrates with FCM for push notifications:
+Приложение интегрировано с FCM для push-уведомлений:
 
 ```dart
 class NotificationService {
-  // Handle foreground messages
+  // Обработка сообщений в переднем плане
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     _showLocalNotification(message);
   });
 
-  // Handle background messages
+  // Обработка сообщений в фоновом режиме
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     _handleNotificationTap(message);
   });
 }
 ```
 
-### Notification Types Supported
+### Поддерживаемые типы уведомлений
 
-- Daily outfit recommendations
-- Weather alerts
-- Re-engagement campaigns
-- Social sharing notifications
+- Ежедневные рекомендации нарядов
+- Предупреждения о погоде
+- Повторное вовлечение пользователей
+- Уведомления о социальном обмене
 
-## Best Practices
+## Лучшие практики
 
-### Content
-- Keep messages concise and relevant
-- Use personalization when possible
-- Include clear call-to-action
-- Respect user timezone
+### Содержание
+- Сообщения должны быть краткими и релевантными
+- Используйте персонализацию, когда это возможно
+- Включайте четкий призыв к действию
+- Учитывайте часовой пояс пользователя
 
-### Timing
-- Send notifications at appropriate times
-- Avoid late night/early morning notifications
-- Consider user activity patterns
-- Implement frequency capping
+### Время отправки
+- Отправляйте уведомления в подходящее время
+- Избегайте поздних вечерних/ранних утренних уведомлений
+- Учитывайте паттерны активности пользователей
+- Реализуйте ограничение частоты (frequency capping)
 
-### User Control
-- Allow users to customize notification preferences
-- Provide easy opt-out options
-- Respect Do Not Disturb settings
-- Honor platform notification settings
+### Контроль пользователя
+- Позвольте пользователям настраивать предпочтения уведомлений
+- Предоставьте простые варианты отказа
+- Уважайте режим "Не беспокоить"
+- Соблюдайте настройки уведомлений платформы
+
+## Интеграция с бэкендом
+
+### API эндпоинты
+
+```
+POST /api/v1/notifications/send
+- Отправка уведомления пользователю
+
+GET /api/v1/notifications
+- Получение списка уведомлений пользователя
+
+PUT /api/v1/notifications/{id}/read
+- Отметка уведомления как прочитанного
+
+DELETE /api/v1/notifications/{id}
+- Удаление уведомления
+```
+
+### Настройка на бэкенде
+
+```go
+// Пример создания уведомления
+notification := &Notification{
+    UserID:   userID,
+    Title:    "Новая рекомендация!",
+    Message:  "Погода изменилась. Посмотрите новые варианты нарядов.",
+    Type:     "weather_recommendation",
+    Metadata: json.RawMessage(`{"outfit_id": 123}`),
+}
+```
+
+## Мониторинг
+
+### Метрики
+- Количество отправленных уведомлений
+- Процент открытий (open rate)
+- Процент кликов (click-through rate)
+- Количество отписок
+
+### Логирование
+- Все отправленные уведомления логируются
+- Ошибки доставки отслеживаются
+- Статусы уведомлений сохраняются в БД
+
+---
+
+**Обновлено:** Февраль 2026

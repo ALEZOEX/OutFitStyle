@@ -1,0 +1,76 @@
+{
+  "version": "20260218_022319",
+  "created_at": "2026-02-18T02:23:19.401633",
+  "accuracy": 1.0,
+  "classification_report": {
+    "0": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 800.0
+    },
+    "1": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 800.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1600.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1600.0
+    }
+  },
+  "feature_columns": [
+    "temperature",
+    "feels_like",
+    "humidity",
+    "wind_speed",
+    "weather_condition",
+    "season",
+    "age_range",
+    "style_preference",
+    "temperature_sensitivity",
+    "formality_preference",
+    "item_name",
+    "category",
+    "subcategory",
+    "style",
+    "usage",
+    "base_colour",
+    "formality_level",
+    "warmth_level",
+    "min_temp",
+    "max_temp",
+    "fit",
+    "pattern",
+    "is_owned",
+    "source_priority"
+  ],
+  "categorical_features_indices": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    20,
+    21
+  ],
+  "cbm_model_path": "artifacts\\model_v20260218_022319.cbm",
+  "model_type": "CatBoostClassifier"
+}

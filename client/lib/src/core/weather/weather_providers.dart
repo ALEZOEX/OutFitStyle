@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/api_client.dart';
 import 'weather_service.dart';
+import '../../domain/entities/weather_data.dart';
 
 /// Провайдер для ApiClient
 final _apiClientProvider = Provider<ApiClient>((ref) {
