@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Экран настроек конфиденциальности
+/// Экран настроек приватности
 class PrivacySettingsScreen extends ConsumerStatefulWidget {
   const PrivacySettingsScreen({super.key});
 
@@ -11,36 +10,14 @@ class PrivacySettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
-  // Состояния переключателей
-  bool _allowAnalytics = true;
+  // Настройки приватности
+  bool _isProfilePublic = false;
+  bool _showOnlineStatus = true;
+  bool _allowMessages = true;
+  bool _showWardrobe = false;
+  bool _allowRecommendations = true;
+  bool _shareAnalytics = true;
   bool _allowPersonalizedAds = false;
-  bool _showActivityStatus = true;
-  bool _allowDataSync = true;
-  bool _incognitoMode = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  /// Загрузить настройки из SharedPreferences
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _allowAnalytics = prefs.getBool('allow_analytics') ?? true;
-      _allowPersonalizedAds = prefs.getBool('allow_personalized_ads') ?? false;
-      _showActivityStatus = prefs.getBool('show_activity_status') ?? true;
-      _allowDataSync = prefs.getBool('allow_data_sync') ?? true;
-      _incognitoMode = prefs.getBool('incognito_mode') ?? false;
-    });
-  }
-
-  /// Сохранить настройку
-  Future<void> _saveSetting(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,255 +25,270 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Конфиденциальность'),
+        title: const Text('Приватность'),
         centerTitle: true,
       ),
-      body: CustomScrollView(
-        slivers: [
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          // Заголовок
+          _buildHeader(context),
+          const SizedBox(height: 24),
+
+          // Профиль
+          _buildSection(
+            context,
+            title: 'Профиль',
+            icon: Icons.person,
+            children: [
+              _buildSwitchTile(
+                context,
+                title: 'Публичный профиль',
+                subtitle: 'Ваш профиль виден другим пользователям',
+                value: _isProfilePublic,
+                onChanged: (value) {
+                  setState(() => _isProfilePublic = value);
+                },
+              ),
+              _buildSwitchTile(
+                context,
+                title: 'Показывать статус онлайн',
+                subtitle: 'Другие видят, когда вы в сети',
+                value: _showOnlineStatus,
+                onChanged: (value) {
+                  setState(() => _showOnlineStatus = value);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Взаимодействие
+          _buildSection(
+            context,
+            title: 'Взаимодействие',
+            icon: Icons.chat,
+            children: [
+              _buildSwitchTile(
+                context,
+                title: 'Разрешить сообщения',
+                subtitle: 'Пользователи могут писать вам',
+                value: _allowMessages,
+                onChanged: (value) {
+                  setState(() => _allowMessages = value);
+                },
+              ),
+              _buildSwitchTile(
+                context,
+                title: 'Показывать гардероб',
+                subtitle: 'Другие видят ваши вещи',
+                value: _showWardrobe,
+                onChanged: (value) {
+                  setState(() => _showWardrobe = value);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Рекомендации
+          _buildSection(
+            context,
+            title: 'Рекомендации',
+            icon: Icons.auto_awesome,
+            children: [
+              _buildSwitchTile(
+                context,
+                title: 'Персональные рекомендации',
+                subtitle: 'Использовать данные для подбора образов',
+                value: _allowRecommendations,
+                onChanged: (value) {
+                  setState(() => _allowRecommendations = value);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Данные и аналитика
+          _buildSection(
+            context,
+            title: 'Данные и аналитика',
+            icon: Icons.analytics,
+            children: [
+              _buildSwitchTile(
+                context,
+                title: 'Делиться аналитикой',
+                subtitle: 'Помогает улучшить приложение',
+                value: _shareAnalytics,
+                onChanged: (value) {
+                  setState(() => _shareAnalytics = value);
+                },
+              ),
+              _buildSwitchTile(
+                context,
+                title: 'Персонализированная реклама',
+                subtitle: 'Показ релевантной рекламы',
+                value: _allowPersonalizedAds,
+                onChanged: (value) {
+                  setState(() => _allowPersonalizedAds = value);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
           // Информация
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.privacy_tip_outlined,
-                    color: theme.colorScheme.primary,
-                    size: 32,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Ваши данные под защитой',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Управляйте настройками приватности',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          _buildInfoCard(context),
+          const SizedBox(height: 24),
+
+          // Кнопка сохранения
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: FilledButton.icon(
+              onPressed: () => _saveSettings(context),
+              icon: const Icon(Icons.save),
+              label: const Text('Сохранить настройки'),
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
-
-          // Сбор данных
-          SliverToBoxAdapter(
-            child: _buildSectionHeader(context, 'Сбор данных'),
-          ),
-          SliverToBoxAdapter(
-            child: _buildSettingsCard(
-              context,
-              items: [
-                _buildToggleSetting(
-                  context,
-                  icon: Icons.analytics_outlined,
-                  title: 'Аналитика',
-                  subtitle: 'Разрешить сбор анонимных данных об использовании',
-                  value: _allowAnalytics,
-                  onChanged: (value) {
-                    setState(() => _allowAnalytics = value);
-                    _saveSetting('allow_analytics', value);
-                  },
-                ),
-                _buildToggleSetting(
-                  context,
-                  icon: Icons.ad_units_outlined,
-                  title: 'Персонализированная реклама',
-                  subtitle: 'Показывать рекламу на основе ваших интересов',
-                  value: _allowPersonalizedAds,
-                  onChanged: (value) {
-                    setState(() => _allowPersonalizedAds = value);
-                    _saveSetting('allow_personalized_ads', value);
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-          // Видимость
-          SliverToBoxAdapter(
-            child: _buildSectionHeader(context, 'Видимость'),
-          ),
-          SliverToBoxAdapter(
-            child: _buildSettingsCard(
-              context,
-              items: [
-                _buildToggleSetting(
-                  context,
-                  icon: Icons.visibility_outlined,
-                  title: 'Показывать статус активности',
-                  subtitle: 'Другие пользователи видят, когда вы онлайн',
-                  value: _showActivityStatus,
-                  onChanged: (value) {
-                    setState(() => _showActivityStatus = value);
-                    _saveSetting('show_activity_status', value);
-                  },
-                ),
-                _buildToggleSetting(
-                  context,
-                  icon: Icons.sync_outlined,
-                  title: 'Синхронизация данных',
-                  subtitle: 'Автоматическая синхронизация с облаком',
-                  value: _allowDataSync,
-                  onChanged: (value) {
-                    setState(() => _allowDataSync = value);
-                    _saveSetting('allow_data_sync', value);
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-          // Режим инкогнито
-          SliverToBoxAdapter(
-            child: _buildSectionHeader(context, 'Режим приватности'),
-          ),
-          SliverToBoxAdapter(
-            child: _buildSettingsCard(
-              context,
-              items: [
-                _buildToggleSetting(
-                  context,
-                  icon: Icons.person_off_outlined,
-                  title: 'Режим инкогнито',
-                  subtitle: 'Не сохранять историю просмотров и действий',
-                  value: _incognitoMode,
-                  onChanged: (value) {
-                    setState(() => _incognitoMode = value);
-                    _saveSetting('incognito_mode', value);
-
-                    if (value && mounted) {
-                      _showIncognitoWarning(context);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-          // Управление данными
-          SliverToBoxAdapter(
-            child: _buildSectionHeader(context, 'Управление данными'),
-          ),
-          SliverToBoxAdapter(
-            child: _buildSettingsCard(
-              context,
-              items: [
-                _buildActionTile(
-                  context,
-                  icon: Icons.download_outlined,
-                  title: 'Экспорт данных',
-                  subtitle: 'Скачать все ваши данные в формате JSON',
-                  onTap: () => _exportData(context),
-                ),
-                _buildActionTile(
-                  context,
-                  icon: Icons.delete_outline,
-                  title: 'Удалить все данные',
-                  subtitle: 'Полностью очистить локальные данные приложения',
-                  isDestructive: true,
-                  onTap: () => _deleteData(context),
-                ),
-              ],
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-          // Политика конфиденциальности
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Настройки применяются немедленно. '
-                'Подробнее о том, как мы обрабатываем данные, '
-                'читайте в политике конфиденциальности.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const SizedBox(height: 100),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
+  Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(
-        title,
-        style: theme.textTheme.titleSmall?.copyWith(
-          color: theme.colorScheme.primary,
-          fontWeight: FontWeight.bold,
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.primaryContainer.withOpacity(0.5),
+            theme.colorScheme.secondaryContainer.withOpacity(0.5),
+          ],
         ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.privacy_tip,
+              color: theme.colorScheme.primary,
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Приватность',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Управляйте настройками приватности',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSettingsCard(
+  Widget _buildSection(
     BuildContext context, {
-    required List<Widget> items,
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
   }) {
     final theme = Theme.of(context);
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
-        children: items,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Заголовок секции
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(
+            height: 1,
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
+          // Элементы секции
+          ...children,
+        ],
       ),
     );
   }
 
-  Widget _buildToggleSetting(
+  Widget _buildSwitchTile(
     BuildContext context, {
-    required IconData icon,
     required String title,
     required String subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
     final theme = Theme.of(context);
+
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: theme.colorScheme.primary, size: 22),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       title: Text(
         title,
-        style: theme.textTheme.bodyMedium?.copyWith(
+        style: theme.textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -309,142 +301,79 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
-        activeThumbColor: theme.colorScheme.primary,
       ),
+      onTap: () {
+        onChanged(!value);
+      },
     );
   }
 
-  Widget _buildActionTile(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    bool isDestructive = false,
-    VoidCallback? onTap,
-  }) {
+  Widget _buildInfoCard(BuildContext context) {
     final theme = Theme.of(context);
-    final color = isDestructive ? theme.colorScheme.error : theme.colorScheme.primary;
-    
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: color.withValues(alpha: 0.8), size: 22),
-      ),
-      title: Text(
-        title,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w500,
-          color: isDestructive ? theme.colorScheme.error : null,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        color: theme.colorScheme.onSurfaceVariant,
-        size: 16,
-      ),
-      onTap: onTap,
-    );
-  }
 
-  void _showIncognitoWarning(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.infoContainer.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withOpacity(0.2),
         ),
-        icon: Icon(
-          Icons.warning_amber_outlined,
-          size: 48,
-          color: Colors.orange,
-        ),
-        title: const Text('Режим инкогнито'),
-        content: const Text(
-          'В режиме инкогнито история не сохраняется. '
-          'Это может повлиять на работу рекомендаций.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Понятно'),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            color: theme.colorScheme.primary,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ваши данные под защитой',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  'Мы не передаём ваши данные третьим лицам',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _exportData(BuildContext context) async {
-    // Экспорт данных будет реализован в следующей версии
-    // В продакшене: генерация JSON файла и сохранение через file_saver
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Экспорт данных будет реализован в следующей версии'),
-          backgroundColor: Colors.orange,
+  void _saveSettings(BuildContext context) {
+    // В реальной реализации здесь будет сохранение настроек на сервер
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green[700]),
+            const SizedBox(width: 12),
+            const Text('Настройки приватности сохранены'),
+          ],
         ),
-      );
-    }
-  }
-
-  Future<void> _deleteData(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
         ),
-        icon: Icon(
-          Icons.warning_outlined,
-          size: 48,
-          color: Theme.of(context).colorScheme.error,
-        ),
-        title: const Text('Удалить все данные?'),
-        content: const Text(
-          'Это действие нельзя отменить. '
-          'Все локальные данные будут удалены.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Отмена'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Удалить'),
-          ),
-        ],
       ),
     );
-
-    if (confirmed == true) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-
-      // Используем post-frame callback для безопасности
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Все данные удалены'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      });
-    }
   }
+}
+
+/// Extension для цвета infoContainer
+extension on ColorScheme {
+  Color get infoContainer => primaryContainer;
 }

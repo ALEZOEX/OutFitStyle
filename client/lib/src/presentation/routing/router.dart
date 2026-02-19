@@ -13,6 +13,7 @@ import '../../features/generator/presentation/generator_screen.dart';
 import '../../features/settings/presentation/screens/profile_settings_screen.dart';
 import '../../features/settings/presentation/screens/preferences_screen.dart';
 import '../../features/settings/presentation/screens/subscription_screen.dart';
+import '../../features/settings/presentation/screens/privacy_settings_screen.dart';
 import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
@@ -195,6 +196,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings/subscription',
         name: 'subscription',
         builder: (context, state) => const SubscriptionScreen(),
+      ),
+      GoRoute(
+        path: '/settings/privacy',
+        name: 'privacy_settings',
+        builder: (context, state) => const PrivacySettingsScreen(),
       ),
       // Достижения
       GoRoute(
