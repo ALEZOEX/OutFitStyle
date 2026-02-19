@@ -21,8 +21,6 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Приватность'),
@@ -173,8 +171,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.colorScheme.primaryContainer.withOpacity(0.5),
-            theme.colorScheme.secondaryContainer.withOpacity(0.5),
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+            theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
@@ -184,7 +182,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withOpacity(0.8),
+              color: theme.colorScheme.surface.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -231,11 +229,11 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -266,7 +264,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
           ),
           Divider(
             height: 1,
-            color: theme.colorScheme.outline.withOpacity(0.1),
+            color: theme.colorScheme.outline.withValues(alpha: 0.1),
           ),
           // Элементы секции
           ...children,
@@ -314,10 +312,10 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.infoContainer.withOpacity(0.1),
+        color: theme.colorScheme.infoContainer.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.2),
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
