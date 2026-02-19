@@ -73,8 +73,8 @@ class RecommendationService {
 
     return items.where((item) {
       // Проверка по температуре с дефолтными значениями по категории
-      final minTemp = item.minTemp ?? _getDefaultMinTemp(item.category);
-      final maxTemp = item.maxTemp ?? _getDefaultMaxTemp(item.category);
+      final minTemp = item.minTemp ?? _getDefaultMinTemp(item.category ?? '');
+      final maxTemp = item.maxTemp ?? _getDefaultMaxTemp(item.category ?? '');
 
       if (temperature < minTemp || temperature > maxTemp) {
         return false;

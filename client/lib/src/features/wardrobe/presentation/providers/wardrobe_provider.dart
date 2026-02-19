@@ -1,7 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../domain/entities/wardrobe_item.dart';
-
-/// Пустой гардероб пользователя (изначально пуст)
+import '../../../../core/api/api_client.dart';
+import '../../../../core/api/api_config.dart';
+import '../../../../data/remote/wardrobe_api_service.dart';
+import '../../../../services/auth_storage.dart';
+import '../../data/repositories/wardrobe_repository.dart';
+import '../../domain/entities/wardrobe_item.dart';
+import '../../domain/entities/wardrobe_request_entities.dart';
 
 /// Состояние гардероба
 enum WardrobeLoadStatus {
@@ -17,12 +21,14 @@ class WardrobeState {
   final WardrobeLoadStatus status;
   final String? selectedCategory;
   final String? error;
+  final bool isAddingItem;
 
   const WardrobeState({
     this.items = const [],
     this.status = WardrobeLoadStatus.initial,
     this.selectedCategory,
     this.error,
+    this.isAddingItem = false,
   });
 
   WardrobeState copyWith({
@@ -30,12 +36,14 @@ class WardrobeState {
     WardrobeLoadStatus? status,
     String? selectedCategory,
     String? error,
+    bool? isAddingItem,
   }) {
     return WardrobeState(
       items: items ?? this.items,
       status: status ?? this.status,
       selectedCategory: selectedCategory ?? this.selectedCategory,
       error: error ?? this.error,
+      isAddingItem: isAddingItem ?? this.isAddingItem,
     );
   }
 
@@ -64,32 +72,59 @@ class WardrobeState {
   int get favoritesCount => items.where((item) => item.isFavorite == true).length;
 }
 
+/// Провайдер ApiClient
+final apiClientProvider = Provider<ApiClient>((ref) {
+  final storage = ref.watch(authStorageProvider);
+  return ApiClient(storage: storage);
+});
+
+/// Провайдер WardrobeApiService
+final wardrobeApiServiceProvider = Provider<WardrobeApiService>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return WardrobeApiService(apiClient: apiClient);
+});
+
+/// Провайдер WardrobeRepository
+final wardrobeRepositoryProvider = Provider<WardrobeRepository>((ref) {
+  final apiService = ref.watch(wardrobeApiServiceProvider);
+  return WardrobeRepository(apiService: apiService);
+});
+
 /// Провайдер гардероба
 final wardrobeProvider = StateNotifierProvider<WardrobeNotifier, WardrobeState>((ref) {
-  return WardrobeNotifier();
+  final repository = ref.watch(wardrobeRepositoryProvider);
+  return WardrobeNotifier(repository: repository);
 });
 
 class WardrobeNotifier extends StateNotifier<WardrobeState> {
-  WardrobeNotifier() : super(const WardrobeState()) {
+  final WardrobeRepository _repository;
+
+  WardrobeNotifier({required WardrobeRepository repository})
+      : _repository = repository,
+        super(const WardrobeState()) {
     _loadWardrobe();
   }
 
-  /// Загрузить гардероб (пустой изначально)
+  /// Загрузить гардероб с сервера
   Future<void> _loadWardrobe() async {
     state = state.copyWith(status: WardrobeLoadStatus.loading);
 
     try {
-      // Имитация задержки загрузки
-      await Future.delayed(const Duration(milliseconds: 500));
+      final result = await _repository.getWardrobeItems(
+        includeArchived: false,
+        page: 1,
+        limit: 100,
+      );
 
       state = state.copyWith(
-        items: [], // Пустой гардероб изначально
+        items: result.items,
         status: WardrobeLoadStatus.success,
+        error: null,
       );
     } catch (e) {
       state = state.copyWith(
         status: WardrobeLoadStatus.error,
-        error: 'Ошибка загрузки: $e',
+        error: e.toString(),
       );
     }
   }
@@ -100,38 +135,82 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
   }
 
   /// Переключить избранное
-  void toggleFavorite(String itemId) {
+  Future<void> toggleFavorite(String itemId) async {
     final items = List<WardrobeItem>.from(state.items);
     final index = items.indexWhere((item) => item.id == itemId);
-    
-    if (index != -1) {
-      items[index] = items[index].copyWith(
-        isFavorite: !(items[index].isFavorite ?? false),
-      );
+
+    if (index == -1) return;
+
+    final currentItem = items[index];
+    final newIsFavorite = !(currentItem.isFavorite ?? false);
+
+    // Оптимистичное обновление UI
+    items[index] = currentItem.copyWith(isFavorite: newIsFavorite);
+    state = state.copyWith(items: items);
+
+    try {
+      await _repository.toggleFavorite(itemId, newIsFavorite);
+    } catch (e) {
+      // Откат при ошибке
+      items[index] = currentItem;
       state = state.copyWith(items: items);
     }
   }
 
-  /// Добавить новый элемент
-  void addItem(WardrobeItem item) {
-    final items = List<WardrobeItem>.from(state.items)..add(item);
-    state = state.copyWith(items: items);
+  /// Добавить новый элемент через API
+  Future<WardrobeItem?> addItem(WardrobeItemCreateRequest request) async {
+    state = state.copyWith(isAddingItem: true, error: null);
+
+    try {
+      final newItem = await _repository.createWardrobeItem(request);
+
+      // Добавляем в список
+      final items = List<WardrobeItem>.from(state.items)..add(newItem);
+      state = state.copyWith(
+        items: items,
+        isAddingItem: false,
+      );
+
+      return newItem;
+    } catch (e) {
+      state = state.copyWith(
+        isAddingItem: false,
+        error: e.toString(),
+      );
+      rethrow;
+    }
   }
 
   /// Удалить элемент
-  void removeItem(String itemId) {
-    final items = List<WardrobeItem>.from(state.items)..removeWhere((item) => item.id == itemId);
-    state = state.copyWith(items: items);
+  Future<void> removeItem(String itemId) async {
+    try {
+      await _repository.deleteWardrobeItem(itemId);
+
+      // Удаляем из списка
+      final items = List<WardrobeItem>.from(state.items)
+        ..removeWhere((item) => item.id == itemId);
+      state = state.copyWith(items: items);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      rethrow;
+    }
   }
 
   /// Обновить элемент
-  void updateItem(WardrobeItem item) {
-    final items = List<WardrobeItem>.from(state.items);
-    final index = items.indexWhere((item) => item.id == item.id);
-    
-    if (index != -1) {
-      items[index] = item;
-      state = state.copyWith(items: items);
+  Future<void> updateItem(String itemId, WardrobeItemUpdateRequest request) async {
+    try {
+      final updatedItem = await _repository.updateWardrobeItem(itemId, request);
+
+      // Обновляем в списке
+      final items = List<WardrobeItem>.from(state.items);
+      final index = items.indexWhere((item) => item.id == itemId);
+      if (index != -1) {
+        items[index] = updatedItem;
+        state = state.copyWith(items: items);
+      }
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      rethrow;
     }
   }
 
@@ -154,4 +233,9 @@ final wardrobeCategoriesProvider = Provider<Map<String, int>>((ref) {
     'all': state.totalCount,
     ...state.categoryCounts,
   };
+});
+
+/// Провайдер хранилища авторизации
+final authStorageProvider = Provider<AuthStorage>((ref) {
+  return AuthStorage();
 });
