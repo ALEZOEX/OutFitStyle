@@ -60,57 +60,84 @@ class ProfileScreen extends ConsumerWidget {
       child: Column(
         children: [
           // Аватар
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.secondary,
-                ],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                'U',
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Имя пользователя
-          FutureBuilder<String?>(
-            future: authRepository.getUserId(),
+          FutureBuilder<Map<String, dynamic>?>(
+            future: authRepository.getCurrentUser(),
             builder: (context, snapshot) {
-              final userId = snapshot.data ?? 'User';
-              return Text(
-                userId,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              final user = snapshot.data;
+              final name = user?['name'] as String? ?? 'Пользователь';
+              final email = user?['email'] as String? ?? 'user@outfitstyle.com';
+              final avatarUrl = user?['avatar_url'] as String?;
+              final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+
+              return Column(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          theme.colorScheme.primary,
+                          theme.colorScheme.secondary,
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: avatarUrl != null && avatarUrl.isNotEmpty
+                        ? ClipOval(
+                            child: Image.network(
+                              avatarUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stack) {
+                                return Center(
+                                  child: Text(
+                                    firstLetter,
+                                    style: theme.textTheme.headlineLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                        : Center(
+                            child: Text(
+                              firstLetter,
+                              style: theme.textTheme.headlineLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Имя пользователя
+                  Text(
+                    name,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    email,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               );
             },
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'user@outfitstyle.com',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
           ),
           const SizedBox(height: 16),
           // Бейдж
@@ -158,7 +185,7 @@ class ProfileScreen extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -169,7 +196,7 @@ class ProfileScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -248,11 +275,11 @@ class ProfileScreen extends ConsumerWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -270,7 +297,7 @@ class ProfileScreen extends ConsumerWidget {
                   item['route'] == '/support') {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('${item['label']} в разработке'),
+                    content: Text('Раздел "${item['label']}" скоро будет доступен'),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -289,7 +316,7 @@ class ProfileScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: (item['color'] as Color).withOpacity(0.1),
+                      color: (item['color'] as Color).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -337,11 +364,11 @@ class ProfileScreen extends ConsumerWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -354,9 +381,10 @@ class ProfileScreen extends ConsumerWidget {
 
           return InkWell(
             onTap: () {
+              // Показываем сообщение о том, что раздел скоро будет доступен
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('${option['label']} в разработке'),
+                  content: Text('Раздел "${option['label']}" скоро будет доступен'),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -435,7 +463,7 @@ class ProfileScreen extends ConsumerWidget {
         icon: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
+            color: Colors.red.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
