@@ -195,10 +195,10 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -240,11 +240,11 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: isSelected
-                  ? color.withOpacity(0.15)
-                  : theme.colorScheme.surface.withOpacity(0.5),
+                  ? color.withValues(alpha: 0.15)
+                  : theme.colorScheme.surface.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isSelected ? color : theme.colorScheme.outline.withOpacity(0.2),
+                color: isSelected ? color : theme.colorScheme.outline.withValues(alpha: 0.2),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -254,7 +254,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? color.withOpacity(0.3)
+                        ? color.withValues(alpha: 0.3)
                         : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -319,7 +319,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
             side: BorderSide(
               color: isSelected
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withOpacity(0.3),
+                  : theme.colorScheme.outline.withValues(alpha: 0.3),
             ),
           ),
         );
@@ -357,9 +357,9 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           SliderTheme(
             data: SliderThemeData(
               activeTrackColor: theme.colorScheme.primary,
-              inactiveTrackColor: theme.colorScheme.primary.withOpacity(0.3),
+              inactiveTrackColor: theme.colorScheme.primary.withValues(alpha: 0.3),
               thumbColor: theme.colorScheme.primary,
-              overlayColor: theme.colorScheme.primary.withOpacity(0.2),
+              overlayColor: theme.colorScheme.primary.withValues(alpha: 0.2),
               trackHeight: 6,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
             ),
@@ -418,7 +418,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withOpacity(0.3),
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),

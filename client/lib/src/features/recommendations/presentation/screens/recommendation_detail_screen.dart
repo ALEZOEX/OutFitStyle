@@ -73,11 +73,11 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.9),
+                  color: theme.colorScheme.surface.withValues(alpha: 0.9),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                     ),
                   ],
@@ -95,12 +95,12 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isLiked
-                        ? Colors.red.withOpacity(0.2)
-                        : theme.colorScheme.surface.withOpacity(0.9),
+                        ? Colors.red.withValues(alpha: 0.2)
+                        : theme.colorScheme.surface.withValues(alpha: 0.9),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 8,
                       ),
                     ],
@@ -118,12 +118,12 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isSaved
-                        ? theme.colorScheme.primary.withOpacity(0.2)
-                        : theme.colorScheme.surface.withOpacity(0.9),
+                        ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                        : theme.colorScheme.surface.withValues(alpha: 0.9),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 8,
                       ),
                     ],
@@ -170,7 +170,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withValues(alpha: 0.7),
                           ],
                           stops: const [0.5, 1.0],
                         ),
@@ -235,7 +235,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
         child: Icon(
           Icons.auto_awesome,
           size: 80,
-          color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -270,7 +270,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    recommendation.title ?? 'Рекомендация',
+                    recommendation.title,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -289,7 +289,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
         ),
         const SizedBox(height: 16),
         Text(
-          recommendation.description ?? '',
+          recommendation.description,
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
             height: 1.5,
@@ -314,13 +314,13 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.colorScheme.primaryContainer.withOpacity(0.5),
-            theme.colorScheme.secondaryContainer.withOpacity(0.5),
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+            theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -379,7 +379,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withOpacity(0.8),
+            color: theme.colorScheme.surface.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -409,7 +409,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
     return Container(
       height: 60,
       width: 1,
-      color: Colors.grey.withOpacity(0.3),
+      color: Colors.grey.withValues(alpha: 0.3),
     );
   }
 
@@ -446,15 +446,15 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.1),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
                 ),
               ),
               child: Row(
@@ -567,7 +567,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                   icon: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
