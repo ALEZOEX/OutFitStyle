@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../features/domain/entities/wardrobe_item.dart';
+import '../../domain/entities/wardrobe_item.dart';
 
 /// Карточка элемента гардероба
 class WardrobeItemCard extends StatelessWidget {
