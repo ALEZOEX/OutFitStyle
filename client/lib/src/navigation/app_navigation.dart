@@ -9,7 +9,7 @@ import '../screens/onboarding_screen.dart';
 import '../screens/weather_outfit_screen.dart';
 import '../screens/settings_screen.dart';
 import '../utils/logger.dart';
-import '../features/recommendations/recommendations_screen.dart';
+import '../features/recommendations/presentation/recommendations_screen.dart';
 import '../features/recommendations/widgets/recommendation_detail_screen.dart';
 import '../domain/entities/recommendation.dart';
 

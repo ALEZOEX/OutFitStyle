@@ -20,8 +20,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     // Get weather data using Riverpod
     final weatherAsync = ref.watch(
-      weatherProvider(
-          const (lat: 55.7558, lon: 37.6173)), // Moscow coordinates as example
+      weatherProvider((lat: 55.7558, lon: 37.6173)), // Moscow coordinates
     );
 
     return Scaffold(
@@ -78,51 +77,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   data: (data) => data,
                   orElse: () => null,
                 ),
-                isLoading: weatherAsync.isLoading,
-                onRefresh: () {
+                onTap: () {
                   ref.invalidate(weatherProvider);
                 },
               ),
 
               // Quick actions
               QuickActions(
-                onAddOutfit: () {
-                  // Navigate to add outfit screen
-                },
-                onWeatherRefresh: () {
-                  ref.invalidate(weatherProvider);
-                },
-                onRecommendations: () {
-                  // Navigate to recommendations screen
-                },
-                onProfile: () {
-                  // Navigate to profile screen
-                },
-                onWardrobe: () {
-                  // Navigate to wardrobe screen
-                },
+                actions: [
+                  QuickActionItem(
+                    label: 'Добавить',
+                    icon: Icons.add,
+                    onPressed: () {
+                      // Navigate to add outfit screen
+                    },
+                  ),
+                  QuickActionItem(
+                    label: 'Погода',
+                    icon: Icons.refresh,
+                    onPressed: () {
+                      ref.invalidate(weatherProvider);
+                    },
+                  ),
+                  QuickActionItem(
+                    label: 'Советы',
+                    icon: Icons.lightbulb,
+                    onPressed: () {
+                      // Navigate to recommendations screen
+                    },
+                  ),
+                  QuickActionItem(
+                    label: 'Профиль',
+                    icon: Icons.person,
+                    onPressed: () {
+                      // Navigate to profile screen
+                    },
+                  ),
+                  QuickActionItem(
+                    label: 'Гардероб',
+                    icon: Icons.checkroom,
+                    onPressed: () {
+                      // Navigate to wardrobe screen
+                    },
+                  ),
+                ],
               ),
 
               // Wardrobe summary
               WardrobeSummary(
-                totalItems: 42,
-                topsCount: 15,
-                bottomsCount: 12,
-                shoesCount: 8,
-                accessoriesCount: 7,
-                outfitsCount: 12,
-                onTap: () {
-                  // Navigate to wardrobe screen
+                totalItemsCount: 42,
+                categoryCounts: {
+                  'Верх': 15,
+                  'Низ': 12,
+                  'Обувь': 8,
+                  'Аксессуары': 7,
                 },
+                recentItems: [],
               ),
 
               // Daily outfit recommendation
               DailyOutfitCard(
-                date: 'Сегодня',
-                weatherCondition: 'Облачно',
-                recommendedOutfit: 'Джинсы, свитер, куртка',
-                temperature: '12°C',
-                occasion: 'Работа',
+                outfit: null,
                 onTap: () {
                   // Navigate to detailed outfit view
                 },
@@ -141,27 +156,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 12),
               StyleTipsCarousel(
                 tips: [
-                  StyleTip(
-                    title: 'Слои для переменчивой погоды',
-                    description:
-                        'Носите одежду в несколько слоев, чтобы адаптироваться к изменению температуры в течение дня.',
-                    category: 'Сезон',
-                    imageUrl: 'https://example.com/style-tip-1.jpg',
-                  ),
-                  StyleTip(
-                    title: 'Цвета по сезону',
-                    description:
-                        'Выбирайте цвета, которые подходят текущему сезону и подчеркивают ваш тон кожи.',
-                    category: 'Стиль',
-                    imageUrl: 'https://example.com/style-tip-2.jpg',
-                  ),
-                  StyleTip(
-                    title: 'Универсальные вещи',
-                    description:
-                        'Инвестируйте в универсальные вещи, которые сочетаются с несколькими другими предметами.',
-                    category: 'Стиль',
-                    imageUrl: 'https://example.com/style-tip-3.jpg',
-                  ),
+                  'Слои для переменчивой погоды: носите одежду в несколько слоев, чтобы адаптироваться к изменению температуры.',
+                  'Цвета по сезону: выбирайте цвета, которые подходят текущему сезону и подчеркивают ваш тон кожи.',
+                  'Универсальные вещи: инвестируйте в базовые предметы, которые сочетаются с несколькими другими.',
                 ],
               ),
 

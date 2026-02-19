@@ -50,7 +50,7 @@ class FirebaseAnalyticsService implements IAnalyticsService {
         name: 'error',
         parameters: {
           'error_message': error,
-          if (stackTrace != null) 'stack_trace': stackTrace,
+          'stack_trace': stackTrace ?? '',
         },
       );
     } catch (e) {
@@ -66,7 +66,7 @@ class FirebaseAnalyticsService implements IAnalyticsService {
         parameters: {
           'exception_type': exception.runtimeType.toString(),
           'exception_message': exception.toString(),
-          if (stackTrace != null) 'stack_trace': stackTrace,
+          'stack_trace': stackTrace ?? '',
         },
       );
     } catch (e) {

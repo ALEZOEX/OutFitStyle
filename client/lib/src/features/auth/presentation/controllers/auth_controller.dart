@@ -53,8 +53,8 @@ class AuthController extends StateNotifier<AuthState> {
       final response = await _apiClient.post(
         '/auth/google',
         body: {
-          if (accessToken != null) 'access_token': accessToken,
-          if (idToken != null) 'id_token': idToken,
+          'access_token': accessToken,
+          'id_token': idToken,
         },
       );
 

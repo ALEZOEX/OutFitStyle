@@ -183,12 +183,6 @@ class WeatherService {
   void clearCache() {
     _cache.clear();
   }
-
-  /// Очистить просроченные записи кэша
-  void _cleanupCache() {
-    final now = DateTime.now();
-    _cache.removeWhere((_, entry) => now.isAfter(entry.expiresAt));
-  }
 }
 
 /// Исключение погодного сервиса
