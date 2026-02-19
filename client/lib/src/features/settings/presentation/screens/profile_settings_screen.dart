@@ -169,7 +169,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
 // Провайдеры для создания зависимостей
 final _authStorageProvider = Provider<AuthStorage>((ref) {
-  throw UnimplementedError('AuthStorage должен быть предоставлен');
+  return AuthStorage();
 });
 
 final _apiClientProvider = Provider<ApiClient>((ref) {
