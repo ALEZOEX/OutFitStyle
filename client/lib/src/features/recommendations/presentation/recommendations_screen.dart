@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../presentation/providers/recommendations_provider.dart';
 import '../../../ui/widgets/recommendation_card.dart';
 
-/// Экран рекомендаций
+/// Экран рекомендаций - лента как в соцсети
 class RecommendationsScreen extends ConsumerStatefulWidget {
   const RecommendationsScreen({super.key});
 
@@ -55,10 +56,9 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
             child: _buildFilters(context),
           ),
           // Кнопка генерации
-          if (!state.isGenerating)
-            SliverToBoxAdapter(
-              child: _buildGenerateCard(context, state),
-            ),
+          SliverToBoxAdapter(
+            child: _buildGenerateCard(context, state),
+          ),
           // Список рекомендаций
           _buildRecommendationsList(context, state),
         ],
@@ -103,7 +103,6 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                     ),
                   ],
                 ),
-                // Кнопка обновления
                 IconButton(
                   onPressed: () => ref.read(recommendationsProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh),
@@ -175,10 +174,10 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withValues(alpha: 0.2),
+          color: color.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -262,7 +261,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                 side: BorderSide(
                   color: isSelected
                       ? theme.colorScheme.primary
-                      : theme.colorScheme.outline.withValues(alpha: 0.3),
+                      : theme.colorScheme.outline.withOpacity(0.3),
                 ),
               ),
             );
@@ -283,7 +282,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
         child: Card(
           clipBehavior: Clip.antiAlias,
           elevation: 3,
-          shadowColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+          shadowColor: theme.colorScheme.primary.withOpacity(0.2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -295,7 +294,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    theme.colorScheme.primary.withValues(alpha: 0.8),
+                    theme.colorScheme.primary.withOpacity(0.8),
                     theme.colorScheme.secondary,
                   ],
                 ),
@@ -322,18 +321,18 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                               ? 'Подбираем идеальный outfit...'
                               : 'На основе погоды и предпочтений',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: Colors.white.withOpacity(0.9),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(width: 16),
                   Container(
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
                     child: state.isGenerating
@@ -435,7 +434,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                   recommendation: recommendation,
                   isLiked: state.isLiked(recommendation.id),
                   isSaved: state.isSaved(recommendation.id),
-                  onTap: () => _showRecommendationDetails(context, recommendation),
+                  onTap: () => context.push('/recommendations/${recommendation.id}'),
                   onLike: () => notifier.toggleLike(recommendation.id),
                   onSave: () => notifier.toggleSave(recommendation.id),
                 ),
@@ -451,24 +450,25 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
   /// Генерация рекомендации
   Future<void> _generateRecommendation(BuildContext context) async {
     final notifier = ref.read(recommendationsProvider.notifier);
+
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
     final result = await notifier.generateRecommendation(
       temperature: 15,
       weatherCondition: 'sunny',
       occasion: 'casual',
     );
 
-    if (!mounted) return;
-    // ignore: use_build_context_synchronously
-    final messenger = ScaffoldMessenger.of(context);
-    // ignore: use_build_context_synchronously
-    final colorScheme = Theme.of(context).colorScheme;
+    if (!context.mounted) return;
 
     if (result != null) {
       messenger.showSnackBar(
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.green),
+              Icon(Icons.check_circle, color: Colors.green[700]),
               const SizedBox(width: 12),
               const Text('Рекомендация сгенерирована!'),
             ],
@@ -481,176 +481,5 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
         ),
       );
     }
-  }
-
-  /// Детали рекомендации
-  void _showRecommendationDetails(BuildContext context, dynamic recommendation) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) => ListView(
-          controller: scrollController,
-          padding: const EdgeInsets.all(24),
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Заголовок
-            Text(
-              recommendation.title ?? 'Рекомендация',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            // Описание
-            Text(
-              recommendation.description ?? '',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.5,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            // Информация о погоде
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    _getWeatherIcon(recommendation.weatherCondition),
-                    size: 32,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Погода',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                      ),
-                      Text(
-                        '${recommendation.temperature?.round()}°C • ${_getWeatherName(recommendation.weatherCondition)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Рекомендуемые элементы
-            Text(
-              'Рекомендуемые вещи',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            if (recommendation.recommendedItems != null)
-              ...recommendation.recommendedItems!.map((item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.check,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          item,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  )),
-            const SizedBox(height: 32),
-            // Кнопки действий
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      ref.read(recommendationsProvider.notifier).toggleLike(recommendation.id!);
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(
-                      ref.watch(recommendationsProvider).isLiked(recommendation.id!)
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                    ),
-                    label: const Text('Лайк'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      ref.read(recommendationsProvider.notifier).toggleSave(recommendation.id!);
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(
-                      ref.watch(recommendationsProvider).isSaved(recommendation.id!)
-                          ? Icons.bookmark
-                          : Icons.bookmark_border,
-                    ),
-                    label: const Text('Сохранить'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  IconData _getWeatherIcon(String? condition) {
-    return switch (condition?.toLowerCase()) {
-      'sunny' || 'ясно' => Icons.wb_sunny,
-      'cloudy' || 'облачно' => Icons.cloud,
-      'rainy' || 'дождь' => Icons.grain,
-      'snowy' || 'снег' => Icons.ac_unit,
-      'partly_cloudy' || 'переменная облачность' => Icons.cloud_queue,
-      _ => Icons.wb_sunny,
-    };
-  }
-
-  String _getWeatherName(String? condition) {
-    return switch (condition?.toLowerCase()) {
-      'sunny' || 'ясно' => 'Ясно',
-      'cloudy' || 'облачно' => 'Облачно',
-      'rainy' || 'дождь' => 'Дождь',
-      'snowy' || 'снег' => 'Снег',
-      'partly_cloudy' || 'переменная облачность' => 'Переменная облачность',
-      _ => 'Ясно',
-    };
   }
 }

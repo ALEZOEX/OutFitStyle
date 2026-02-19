@@ -1,9 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../ui/misc/app_avatar.dart';
-import '../../ui/buttons/app_icon_button.dart';
 
-/// Shell layout for the home screen with app bar and navigation
+import '../../features/home/home_screen.dart';
+import '../../features/wardrobe/presentation/wardrobe_screen.dart';
+import '../../features/recommendations/presentation/recommendations_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
+
+/// Wrapper для главного экрана с навигацией
+class HomeShellWrapper extends StatefulWidget {
+  const HomeShellWrapper({super.key});
+
+  @override
+  State<HomeShellWrapper> createState() => _HomeShellWrapperState();
+}
+
+class _HomeShellWrapperState extends State<HomeShellWrapper> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    WardrobeScreen(),
+    RecommendationsScreen(),
+    ProfileScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeShell(
+      title: _getTitle(_currentIndex),
+      child: _screens[_currentIndex],
+      currentIndex: _currentIndex,
+      onNavigationDestinationSelected: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      showBottomNav: true,
+      showAppBar: true,
+    );
+  }
+
+  String _getTitle(int index) {
+    return switch (index) {
+      0 => 'Главная',
+      1 => 'Гардероб',
+      2 => 'Рекомендации',
+      3 => 'Профиль',
+      _ => 'OutfitStyle',
+    };
+  }
+}
+
+/// Shell layout для главного экрана с навигацией
 class HomeShell extends StatelessWidget {
   final String title;
   final Widget child;
@@ -12,7 +60,6 @@ class HomeShell extends StatelessWidget {
   final bool showBottomNav;
   final int currentIndex;
   final Function(int)? onNavigationDestinationSelected;
-  final List<NavigationDestination> navigationDestinations;
 
   const HomeShell({
     Key? key,
@@ -23,7 +70,6 @@ class HomeShell extends StatelessWidget {
     this.showBottomNav = true,
     this.currentIndex = 0,
     this.onNavigationDestinationSelected,
-    this.navigationDestinations = const [],
   }) : super(key: key);
 
   @override
@@ -33,12 +79,33 @@ class HomeShell extends StatelessWidget {
       child: showAppBar ? child : SingleChildScrollView(child: child),
     );
 
-    if (showBottomNav && navigationDestinations.isNotEmpty) {
+    if (showBottomNav) {
       body = Column(
         children: [
           Expanded(child: body),
           NavigationBar(
-            destinations: navigationDestinations,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: 'Главная',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.checkroom_outlined),
+                selectedIcon: Icon(Icons.checkroom),
+                label: 'Гардероб',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.auto_awesome_outlined),
+                selectedIcon: Icon(Icons.auto_awesome),
+                label: 'Рекомендации',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outlined),
+                selectedIcon: Icon(Icons.person),
+                label: 'Профиль',
+              ),
+            ],
             selectedIndex: currentIndex,
             onDestinationSelected: (int index) {
               onNavigationDestinationSelected?.call(index);
@@ -57,119 +124,19 @@ class HomeShell extends StatelessWidget {
               scrolledUnderElevation: 0,
               actions: actions ??
                   [
-                    AppIconButton(
-                      icon: Icons.notifications_outlined,
-                      onPressed: () {
-                        // Navigate to notifications
-                        context.push('/notifications');
-                      },
-                      tooltip: 'Уведомления',
-                    ),
-                    const SizedBox(width: 8.0),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: AppAvatar(
-                        name: 'User',
-                        radius: 16.0,
-                        onTap: () {
-                          // Navigate to profile
-                          context.push('/profile');
+                    // Кнопка настроек в профиле
+                    if (currentIndex == 3)
+                      IconButton(
+                        icon: const Icon(Icons.settings_outlined),
+                        onPressed: () {
+                          context.push('/settings/profile');
                         },
+                        tooltip: 'Настройки',
                       ),
-                    ),
                   ],
             )
           : null,
       body: body,
-    );
-  }
-}
-
-/// Specialized home shell for the outfit recommendation app
-class OutfitHomeShell extends StatelessWidget {
-  final String title;
-  final Widget child;
-  final int currentIndex;
-  final Function(int)? onNavigationDestinationSelected;
-  final bool showSearch;
-  final VoidCallback? onSearch;
-
-  const OutfitHomeShell({
-    Key? key,
-    required this.title,
-    required this.child,
-    this.currentIndex = 0,
-    this.onNavigationDestinationSelected,
-    this.showSearch = false,
-    this.onSearch,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return HomeShell(
-      title: title,
-      child: child,
-      showBottomNav: true,
-      currentIndex: currentIndex,
-      onNavigationDestinationSelected: onNavigationDestinationSelected,
-      navigationDestinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Главная',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.local_cafe_outlined),
-          selectedIcon: Icon(Icons.local_cafe),
-          label: 'Рекомендации',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.history_outlined),
-          selectedIcon: Icon(Icons.history),
-          label: 'История',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outlined),
-          selectedIcon: Icon(Icons.person),
-          label: 'Профиль',
-        ),
-      ],
-      actions: [
-        if (showSearch)
-          AppIconButton(
-            icon: Icons.search,
-            onPressed: onSearch,
-            tooltip: 'Поиск',
-          )
-        else
-          AppIconButton(
-            icon: Icons.tune_outlined,
-            onPressed: () {
-              // Navigate to filters/settings
-              context.push('/filters');
-            },
-            tooltip: 'Фильтры',
-          ),
-        const SizedBox(width: 8.0),
-        AppIconButton(
-          icon: Icons.notifications_outlined,
-          onPressed: () {
-            context.push('/notifications');
-          },
-          tooltip: 'Уведомления',
-        ),
-        const SizedBox(width: 8.0),
-        Padding(
-          padding: const EdgeInsets.only(right: 16.0),
-          child: AppAvatar(
-            name: 'User',
-            radius: 16.0,
-            onTap: () {
-              context.push('/profile');
-            },
-          ),
-        ),
-      ],
     );
   }
 }
