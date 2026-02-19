@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/home/home_screen.dart';
+import '../../features/home/home_shell.dart';
+import '../../features/wardrobe/presentation/wardrobe_screen.dart';
+import '../../features/recommendations/presentation/recommendations_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/recommendations/presentation/screens/recommendation_detail_screen.dart';
 import '../../features/wardrobe/presentation/screens/wardrobe_item_detail_screen.dart';
 import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
@@ -69,6 +72,7 @@ class AuthState {
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/auth',
+    refreshListenable: ref.read(goRouterRefreshProvider),
     redirect: (BuildContext context, GoRouterState state) {
       final path = state.uri.toString();
       final authState = ref.read(authStateProvider);
@@ -133,12 +137,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'auth',
         builder: (context, state) => const AuthScreen(),
       ),
+      // Главный экран с shell навигацией
       GoRoute(
         path: '/home',
         name: 'home',
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const HomeShellWrapper(),
       ),
       // Гардероб
+      GoRoute(
+        path: '/wardrobe',
+        name: 'wardrobe',
+        builder: (context, state) => const WardrobeScreen(),
+      ),
       GoRoute(
         path: '/wardrobe/add',
         name: 'wardrobe_add',
@@ -153,11 +163,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       // Рекомендации
       GoRoute(
+        path: '/recommendations',
+        name: 'recommendations',
+        builder: (context, state) => const RecommendationsScreen(),
+      ),
+      GoRoute(
         path: '/recommendations/:id',
         name: 'recommendation_detail',
         builder: (context, state) => RecommendationDetailScreen(
           recommendationId: state.pathParameters['id']!,
         ),
+      ),
+      // Профиль
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfileScreen(),
       ),
       // Настройки
       GoRoute(

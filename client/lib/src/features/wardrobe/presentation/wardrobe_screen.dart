@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/wardrobe_item.dart';
 import '../presentation/providers/wardrobe_provider.dart';
 import '../../../ui/widgets/wardrobe_item_card.dart';
 
-/// Экран гардероба
+/// Экран гардероба - личные вещи пользователя
 class WardrobeScreen extends ConsumerStatefulWidget {
   const WardrobeScreen({super.key});
 
@@ -16,6 +18,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  String? _selectedCategory;
 
   @override
   void initState() {
@@ -39,7 +42,6 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final wardrobeState = ref.watch(wardrobeProvider);
     final categories = ref.watch(wardrobeCategoriesProvider);
 
@@ -51,15 +53,16 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
             child: _buildHeader(context, wardrobeState),
           ),
           // Фильтры по категориям
-          SliverToBoxAdapter(
-            child: _buildCategoryFilters(context, categories),
-          ),
+          if (categories.isNotEmpty)
+            SliverToBoxAdapter(
+              child: _buildCategoryFilters(context, categories),
+            ),
           // Список элементов
           _buildWardrobeGrid(context, wardrobeState),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddItemDialog(context),
+        onPressed: () => _showAddItemBottomSheet(context),
         icon: const Icon(Icons.add),
         label: const Text('Добавить'),
       ),
@@ -92,14 +95,13 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${state.totalCount} вещей в гардеробе',
+                      '${state.totalCount} вещей',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
-                // Кнопка обновления
                 IconButton(
                   onPressed: () => ref.read(wardrobeProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh),
@@ -203,8 +205,6 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
   /// Фильтры по категориям
   Widget _buildCategoryFilters(BuildContext context, Map<String, int> categories) {
     final theme = Theme.of(context);
-    final selectedCategory = ref.watch(wardrobeProvider).selectedCategory;
-    final notifier = ref.read(wardrobeProvider.notifier);
 
     // Добавляем категорию "Все"
     final allCategories = {'all': categories.values.fold(0, (a, b) => a + b)}
@@ -223,12 +223,47 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
             final entry = allCategories.entries.elementAt(index);
             final category = entry.key == 'all' ? 'Все' : _getCategoryName(entry.key);
 
-            return CategoryFilterChip(
-              category: entry.key,
-              count: entry.value,
-              isSelected: selectedCategory == entry.key,
-              onTap: () => notifier.selectCategory(
-                entry.key == selectedCategory ? null : entry.key,
+            return FilterChip(
+              selected: _selectedCategory == entry.key,
+              onSelected: (_) {
+                setState(() {
+                  _selectedCategory = _selectedCategory == entry.key ? null : entry.key;
+                });
+              },
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_getCategoryEmoji(entry.key)),
+                  const SizedBox(width: 4),
+                  Text(category),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: _selectedCategory == entry.key
+                          ? theme.colorScheme.onPrimary.withOpacity(0.3)
+                          : theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${entry.value}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              selectedColor: theme.colorScheme.primaryContainer,
+              checkmarkColor: theme.colorScheme.onPrimaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: _selectedCategory == entry.key
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outline.withOpacity(0.3),
+                ),
               ),
             );
           },
@@ -240,7 +275,6 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
   /// Сетка элементов гардероба
   Widget _buildWardrobeGrid(BuildContext context, WardrobeState state) {
     final theme = Theme.of(context);
-    final items = state.filteredItems;
 
     if (state.status == WardrobeLoadStatus.loading) {
       return const SliverFillRemaining(
@@ -280,6 +314,12 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
       );
     }
 
+    // Фильтрация по категории
+    var items = state.items;
+    if (_selectedCategory != null && _selectedCategory != 'all') {
+      items = items.where((item) => item.category == _selectedCategory).toList();
+    }
+
     if (items.isEmpty) {
       return SliverFillRemaining(
         child: _buildEmptyState(context),
@@ -302,7 +342,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
               opacity: _fadeAnimation,
               child: WardrobeItemCard(
                 item: item,
-                onTap: () => _showItemDetails(context, item),
+                onTap: () => context.push('/wardrobe/item/${item.id}'),
                 onFavorite: () => ref.read(wardrobeProvider.notifier).toggleFavorite(item.id!),
               ),
             );
@@ -361,7 +401,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => _showAddItemDialog(context),
+              onPressed: () => _showAddItemBottomSheet(context),
               icon: const Icon(Icons.add),
               label: const Text('Добавить вещь'),
               style: ElevatedButton.styleFrom(
@@ -377,195 +417,18 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     );
   }
 
-  /// Диалог добавления элемента
-  void _showAddItemDialog(BuildContext context) {
+  /// Bottom sheet для добавления элемента
+  void _showAddItemBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Добавить вещь',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            // Здесь будет форма добавления
-            _buildQuickAddOptions(context),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Опции быстрого добавления
-  Widget _buildQuickAddOptions(BuildContext context) {
-    final theme = Theme.of(context);
-    final options = [
-      {'icon': Icons.photo_camera, 'label': 'Фото', 'color': Colors.blue},
-      {'icon': Icons.upload_file, 'label': 'Загрузить', 'color': Colors.green},
-      {'icon': Icons.style, 'label': 'Из каталога', 'color': Colors.purple},
-    ];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: options.map((option) {
-        return InkWell(
-          onTap: () {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Функция "${option['label']}" в разработке'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            width: 80,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              color: (option['color'] as Color).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  option['icon'] as IconData,
-                  size: 32,
-                  color: option['color'] as Color,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  option['label'] as String,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  /// Детали элемента
-  void _showItemDetails(BuildContext context, dynamic item) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => ListView(
-          controller: scrollController,
-          padding: const EdgeInsets.all(24),
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              item.name ?? 'Без названия',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            // Детали элемента
-            _buildDetailRow(context, 'Категория', _getCategoryName(item.category ?? '')),
-            if (item.brand != null) _buildDetailRow(context, 'Бренд', item.brand),
-            if (item.color != null) _buildDetailRow(context, 'Цвет', item.color),
-            if (item.size != null) _buildDetailRow(context, 'Размер', item.size),
-            if (item.style != null) _buildDetailRow(context, 'Стиль', item.style),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      ref.read(wardrobeProvider.notifier).toggleFavorite(item.id!);
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(item.isFavorite == true ? Icons.favorite : Icons.favorite_border),
-                    label: const Text('Избранное'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.edit),
-                    label: const Text('Изменить'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
+      builder: (context) => _AddItemSheet(
+        onItemAdded: () {
+          ref.read(wardrobeProvider.notifier).refresh();
+        },
       ),
     );
   }
@@ -581,5 +444,258 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
       'outerwear' => 'Верхняя одежда',
       _ => category,
     };
+  }
+
+  String _getCategoryEmoji(String category) {
+    return switch (category.toLowerCase()) {
+      'all' => '📋',
+      'top' => '👕',
+      'bottom' => '👖',
+      'shoes' => '👟',
+      'headwear' => '🧢',
+      'accessory' => '🧣',
+      'outerwear' => '🧥',
+      _ => '👔',
+    };
+  }
+}
+
+/// Bottom sheet для добавления вещи
+class _AddItemSheet extends StatefulWidget {
+  final VoidCallback? onItemAdded;
+
+  const _AddItemSheet({this.onItemAdded});
+
+  @override
+  State<_AddItemSheet> createState() => _AddItemSheetState();
+}
+
+class _AddItemSheetState extends State<_AddItemSheet> {
+  final _nameController = TextEditingController();
+  String _selectedEmoji = '👕';
+  String _selectedCategory = 'top';
+
+  final _emojiCategories = {
+    'top': ['👕', '👚', '👔', '👗', '👘'],
+    'bottom': ['👖', '🩳', '👗', '👘'],
+    'shoes': ['👟', '👞', '👠', '👢', '🩴'],
+    'headwear': ['🧢', '👒', '🎩', '🎓', '🧕'],
+    'accessory': ['🧣', '👓', '🕶️', '💍', '⌚'],
+    'outerwear': ['🧥', '👘', '🦺', '👚'],
+  };
+
+  final _categories = [
+    {'value': 'top', 'label': 'Верх', 'icon': Icons.checkroom},
+    {'value': 'bottom', 'label': 'Низ', 'icon': Icons.content_paste},
+    {'value': 'shoes', 'label': 'Обувь', 'icon': Icons.sports_soccer},
+    {'value': 'outerwear', 'label': 'Верхняя одежда', 'icon': Icons.ac_unit},
+    {'value': 'headwear', 'label': 'Головной убор', 'icon': Icons.face},
+    {'value': 'accessory', 'label': 'Аксессуар', 'icon': Icons.watch},
+  ];
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _saveItem() {
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Введите название вещи'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Создаём элемент с эмодзи и названием
+    final newItem = WardrobeItem(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: '${_selectedEmoji} ${_nameController.text.trim()}',
+      category: _selectedCategory,
+      imageUrl: '', // Пустое изображение для кастомных вещей
+      isFavorite: false,
+    );
+
+    // Добавляем через провайдер
+    ref.read(wardrobeProvider.notifier).addItem(newItem);
+
+    widget.onItemAdded?.call();
+
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Text('Вещь "${newItem.name}" добавлена'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 24,
+        right: 24,
+        top: 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Заголовок
+          Text(
+            'Добавить вещь',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Выберите эмодзи и введите название',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Выбор категории
+          Text(
+            'Категория',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _categories.map((cat) {
+              final isSelected = _selectedCategory == cat['value'];
+              return ChoiceChip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(cat['icon'] as IconData, size: 18),
+                    const SizedBox(width: 4),
+                    Text(cat['label'] as String),
+                  ],
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _selectedCategory = cat['value'] as String;
+                      _selectedEmoji = _emojiCategories[_selectedCategory]!.first;
+                    });
+                  }
+                },
+                selectedColor: theme.colorScheme.primaryContainer,
+                checkmarkColor: theme.colorScheme.onPrimaryContainer,
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+          // Выбор эмодзи
+          Text(
+            'Выберите эмодзи',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: _emojiCategories[_selectedCategory]!.map((emoji) {
+              final isSelected = _selectedEmoji == emoji;
+              return GestureDetector(
+                onTap: () => setState(() => _selectedEmoji = emoji),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? theme.colorScheme.primaryContainer
+                        : theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      emoji,
+                      style: const TextStyle(fontSize: 28),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+          // Название
+          TextField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              labelText: 'Название вещи',
+              hintText: 'Например: любимая футболка',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixText: '$_selectedEmoji  ',
+            ),
+            autofocus: true,
+            onSubmitted: (_) => _saveItem(),
+          ),
+          const SizedBox(height: 24),
+          // Кнопка сохранения
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: FilledButton.icon(
+              onPressed: _saveItem,
+              icon: const Icon(Icons.save),
+              label: const Text('Добавить в гардероб'),
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
   }
 }
