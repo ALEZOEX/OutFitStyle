@@ -109,56 +109,58 @@ class WardrobeItemCard extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name ?? 'Без названия',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name ?? 'Без названия',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            if (item.brand != null && item.brand!.isNotEmpty)
-                              Expanded(
-                                child: Text(
-                                  item.brand!,
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              if (item.brand != null && item.brand!.isNotEmpty)
+                                Expanded(
+                                  child: Text(
+                                    item.brand!,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              if (item.color != null && item.color!.isNotEmpty) ...[
+                                Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    color: _getColorFromString(item.color!),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: theme.colorScheme.outline.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  item.color!,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                            if (item.color != null && item.color!.isNotEmpty) ...[
-                              Container(
-                                width: 16,
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: _getColorFromString(item.color!),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: theme.colorScheme.outline.withOpacity(0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                item.color!,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
+                              ],
                             ],
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
