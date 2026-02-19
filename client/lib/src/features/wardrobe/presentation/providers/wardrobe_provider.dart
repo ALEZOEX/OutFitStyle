@@ -3,7 +3,7 @@ import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_config.dart';
 import '../../../../data/remote/wardrobe_api_service.dart';
 import '../../../../services/auth_storage.dart';
-import '../../../domain/entities/catalog_entity.dart';
+import '../../../../domain/entities/catalog_entity.dart';
 import '../../data/repositories/wardrobe_repository.dart';
 import '../../../../domain/entities/wardrobe_item.dart';
 import '../../../../domain/entities/wardrobe_request_entities.dart';

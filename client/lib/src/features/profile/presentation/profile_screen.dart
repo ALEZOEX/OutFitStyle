@@ -321,7 +321,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildSettingsMenu(BuildContext context) {
     final theme = Theme.of(context);
 
-    final menuItems = [
+    final menuItems = <Map<String, Object>>[
       {
         'icon': Icons.person_outline,
         'label': 'Профиль и аккаунт',
@@ -448,7 +448,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildAdditionalOptions(BuildContext context) {
     final theme = Theme.of(context);
 
-    final options = [
+    final options = <Map<String, Object>>[
       {'icon': Icons.security_outlined, 'label': 'Безопасность'},
       {'icon': Icons.language_outlined, 'label': 'Язык'},
       {'icon': Icons.info_outline, 'label': 'О приложении'},

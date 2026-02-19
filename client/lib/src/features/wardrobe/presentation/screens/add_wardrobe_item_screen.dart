@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../domain/entities/wardrobe_item.dart';
+import '../../../../domain/entities/wardrobe_request_entities.dart';
 import '../providers/wardrobe_provider.dart';
 
 /// Состояние формы добавления элемента
@@ -144,6 +145,35 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
       imageUrl: state.imageUrl ?? '',
     );
   }
+
+  /// Создать запрос на создание элемента гардероба
+  ///
+  /// Конвертирует текущее состояние формы в WardrobeItemCreateRequest
+  WardrobeItemCreateRequest toCreateRequest() {
+    const uuid = Uuid();
+    return WardrobeItemCreateRequest(
+      name: state.name.trim(),
+      category: state.category,
+      subcategory: state.category, // По умолчанию равно категории
+      style: 'casual', // Значение по умолчанию
+      iconEmoji: '👕', // Значение по умолчанию
+      imageUrl: state.imageUrl,
+      minTemp: null,
+      maxTemp: null,
+      warmthLevel: null,
+      rainOk: false,
+      snowOk: false,
+      windOk: false,
+      isFavorite: false,
+      isArchived: false,
+      userId: '', // Сервер определит по токену
+      clothingItemId: uuid.v4(), // Временный ID
+      brand: state.brand?.trim().isEmpty == true ? null : state.brand,
+      color: state.color,
+      size: state.size,
+      localImagePath: state.localImagePath,
+    );
+  }
 }
 
 final addItemProvider = StateNotifierProvider<AddItemNotifier, AddItemState>((ref) {
@@ -258,14 +288,13 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
       return;
     }
 
-    final item = ref.read(addItemProvider.notifier).toItem();
+    final request = ref.read(addItemProvider.notifier).toCreateRequest();
 
     // Сохраняем элемент через провайдер гардероба
-    // В реальной реализации здесь будет вызов wardrobeRepository.addWardrobeItem(item)
     try {
       // Получаем текущий notifier гардероба и добавляем элемент
       final wardrobeNotifier = ref.read(wardrobeProvider.notifier);
-      wardrobeNotifier.addItem(item);
+      wardrobeNotifier.addItem(request);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -274,7 +303,7 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context, item);
+        Navigator.pop(context, request);
       }
     } catch (e) {
       // Fallback: просто возвращаем элемент
