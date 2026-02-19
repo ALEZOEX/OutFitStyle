@@ -188,19 +188,32 @@ class WeatherCard extends StatelessWidget {
             ],
           ),
         ),
-        // Иконка погоды
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            _getWeatherIcon(weatherData!.description ?? ''),
-            color: Colors.white,
-            size: 56,
-          ),
+        // Иконка погоды с описанием
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getWeatherIcon(weatherData!.description ?? ''),
+                color: Colors.white,
+                size: 44,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _getWeatherDescription(weatherData!.description ?? ''),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: Colors.white.withOpacity(0.95),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -437,6 +450,38 @@ class WeatherCard extends StatelessWidget {
     }
 
     return Icons.wb_sunny;
+  }
+
+  /// Возвращает краткое понятное описание погоды
+  String _getWeatherDescription(String description) {
+    if (description.isEmpty) {
+      return 'Ясно';
+    }
+
+    final desc = description.toLowerCase();
+
+    if (desc.contains('ясно') || desc.contains('sunny') || desc.contains('clear')) {
+      return 'Ясно';
+    } else if (desc.contains('облач') || desc.contains('cloud')) {
+      if (desc.contains('перемен')) {
+        return 'Переменная облачность';
+      }
+      return 'Облачно';
+    } else if (desc.contains('дожд') || desc.contains('rain')) {
+      if (desc.contains('гром') || desc.contains('thunder')) {
+        return 'Гроза';
+      }
+      return 'Дождь';
+    } else if (desc.contains('снег') || desc.contains('snow')) {
+      return 'Снег';
+    } else if (desc.contains('туман') || desc.contains('fog')) {
+      return 'Туман';
+    } else if (desc.contains('ветр') || desc.contains('wind')) {
+      return 'Ветрено';
+    }
+
+    // Если описание не распознано — возвращаем оригинальное
+    return description;
   }
 
   Color _getGradientStartColor(WeatherData weather) {
