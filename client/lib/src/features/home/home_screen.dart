@@ -253,7 +253,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       runSpacing: 8,
                       children: recommendation.recommendedItems!
                           .take(3)
-                          .map((item) => Chip(
+                          .map<Widget>((item) => Chip(
                                 label: Text(
                                   item,
                                   style: const TextStyle(fontSize: 12),
