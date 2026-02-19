@@ -109,23 +109,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Погода',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () => ref.invalidate(weatherProvider),
-              tooltip: 'Обновить',
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
         weatherAsync.when(
           data: (weather) => WeatherCard(
             weatherData: weather,
