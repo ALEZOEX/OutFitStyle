@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entities/wardrobe_item.dart';
+import '../../../../domain/entities/wardrobe_item.dart';
 
 /// Mock данные для гардероба
 final mockWardrobeItems = <WardrobeItem>[
