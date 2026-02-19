@@ -129,7 +129,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         weatherAsync.when(
           data: (weather) => WeatherCard(
             weatherData: weather,
+            forecast: [], // Можно добавить прогноз через weatherForecastProvider
             onTap: () => ref.invalidate(weatherProvider),
+            onRefresh: () => ref.invalidate(weatherProvider),
           ),
           loading: () => _buildLoadingCard(),
           error: (error, stack) => _buildErrorCard(

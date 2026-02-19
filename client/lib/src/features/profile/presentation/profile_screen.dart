@@ -244,6 +244,12 @@ class ProfileScreen extends ConsumerWidget {
         'color': Colors.purple,
       },
       {
+        'icon': Icons.privacy_tip_outlined,
+        'label': 'Приватность',
+        'route': '/settings/privacy',
+        'color': Colors.teal,
+      },
+      {
         'icon': Icons.notifications_outlined,
         'label': 'Уведомления',
         'route': '/notifications',
@@ -352,7 +358,6 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     final options = [
-      {'icon': Icons.privacy_tip_outlined, 'label': 'Конфиденциальность'},
       {'icon': Icons.security_outlined, 'label': 'Безопасность'},
       {'icon': Icons.language_outlined, 'label': 'Язык'},
       {'icon': Icons.info_outline, 'label': 'О приложении'},
