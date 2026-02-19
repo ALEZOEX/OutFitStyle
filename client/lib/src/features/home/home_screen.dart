@@ -426,27 +426,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         icon: Icons.add,
         label: 'Добавить',
         color: Colors.blue,
-        route: '/wardrobe/add'
+        route: '/wardrobe/add',
       ),
       (
         icon: Icons.auto_awesome,
         label: 'Рекомендации',
         color: Colors.purple,
-        route: '/recommendations'
+        route: '/recommendations',
       ),
       (
         icon: Icons.checkroom,
         label: 'Гардероб',
         color: Colors.green,
-        route: '/wardrobe'
+        route: '/wardrobe',
       ),
       (
         icon: Icons.person,
         label: 'Профиль',
         color: Colors.pink,
-        route: '/profile'
+        route: '/profile',
       ),
-    ];
+    ].toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -607,7 +607,7 @@ class _QuickActionItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: 84,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
@@ -617,25 +617,28 @@ class _QuickActionItem extends StatelessWidget {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: color, size: 20),
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            const SizedBox(height: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
