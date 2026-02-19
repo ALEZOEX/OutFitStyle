@@ -178,85 +178,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => GoRouter.of(context).go('/home', extra: 2),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (recommendation.outfitImageUrls?.isNotEmpty == true)
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Image.network(
-                  recommendation.outfitImageUrls!.first,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stack) => Container(
-                    height: 150,
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.checkroom,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                recommendation.title ?? 'Ваш образ',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ),
-              )
-            else
-              Container(
-                height: 150,
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: Icon(
-                  Icons.checkroom,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    recommendation.title ?? 'Рекомендация',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (recommendation.description != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      recommendation.description!,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  if (recommendation.recommendedItems?.isNotEmpty == true) ...[
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: recommendation.recommendedItems!
-                          .take(3)
-                          .map<Widget>((item) => Chip(
-                                label: Text(
-                                  item,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                padding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                              ))
-                          .toList(),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
+              if (recommendation.description != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  recommendation.description!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              const SizedBox(height: 12),
+              if (recommendation.recommendedItems?.isNotEmpty == true) ...[
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: recommendation.recommendedItems!
+                      .map<Widget>((item) => _buildOutfitItem(item, context))
+                      .toList(),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildOutfitItem(String item, BuildContext context) {
+    final emoji = _getItemEmoji(item);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              item,
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getItemEmoji(String item) {
+    final itemLower = item.toLowerCase();
+    if (itemLower.contains('футболк')) return '👕';
+    if (itemLower.contains('рубашк')) return '👔';
+    if (itemLower.contains('джинс') || itemLower.contains('брюк')) return '👖';
+    if (itemLower.contains('шорт')) return '🩳';
+    if (itemLower.contains('плать')) return '👗';
+    if (itemLower.contains('пиджак') || itemLower.contains('жакет')) return '🧥';
+    if (itemLower.contains('пальт')) return '🧥';
+    if (itemLower.contains('курт')) return '🧥';
+    if (itemLower.contains('свитер') || itemLower.contains('кофт')) return '🧶';
+    if (itemLower.contains('обув') || itemLower.contains('ботинк') || itemLower.contains('кроссовк')) return '👟';
+    if (itemLower.contains('кепок') || itemLower.contains('шапк')) return '🧢';
+    if (itemLower.contains('сумк')) return '👜';
+    if (itemLower.contains('очк')) return '🕶️';
+    if (itemLower.contains('ремен')) return '👖';
+    return '👔';
   }
 
   /// Секция гардероба
