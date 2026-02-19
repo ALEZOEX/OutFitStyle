@@ -25,6 +25,18 @@ class _HomeShellWrapperState extends State<HomeShellWrapper> {
   ];
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Проверяем есть ли extra параметр с индексом вкладки
+    final args = GoRouterState.of(context).extra as int?;
+    if (args != null && args >= 0 && args < _screens.length) {
+      setState(() {
+        _currentIndex = args;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return HomeShell(
       title: _getTitle(_currentIndex),

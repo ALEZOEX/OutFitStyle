@@ -148,7 +148,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             if (hasRecommendations)
               TextButton(
-                onPressed: () => context.push('/recommendations'),
+                onPressed: () {
+                  // Переключаем на вкладку рекомендаций через HomeShellWrapper
+                  GoRouter.of(context).go('/home', extra: 2); // 2 - индекс рекомендаций
+                },
                 child: const Text('Все'),
               ),
           ],
@@ -160,7 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             title: 'Нет рекомендаций',
             subtitle: 'Получите персональные рекомендации на основе погоды и вашего гардероба',
             actionLabel: 'Получить рекомендацию',
-            onAction: () => context.push('/recommendations'),
+            onAction: () => GoRouter.of(context).go('/home', extra: 2),
           )
         else
           _buildRecommendationCard(context, recommendations.first),
@@ -174,7 +177,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () => context.push('/recommendations'),
+        onTap: () => GoRouter.of(context).go('/home', extra: 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
