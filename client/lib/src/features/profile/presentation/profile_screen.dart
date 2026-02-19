@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/auth_repository.dart';
+import '../../../presentation/routing/router.dart';
 
 /// Экран профиля пользователя
 class ProfileScreen extends ConsumerWidget {
