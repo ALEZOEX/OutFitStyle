@@ -302,50 +302,34 @@ python -m pytest tests/ -v
 
 Для получения поддержки, пожалуйста, откройте вопрос в репозитории GitHub или свяжитесь с нами по адресу [support@outfitstyle.app](mailto:support@outfitstyle.app).
 
-## 📘 Документация API
+## 📚 Документация
+
+Полная документация проекта находится в папке [docs/](docs/).
+
+### Основные разделы:
+
+| Раздел | Описание |
+|--------|----------|
+| [Быстрый старт](docs/01-getting-started/) | Настройка окружения и запуск |
+| [Архитектура](docs/02-architecture/) | Описание архитектуры системы |
+| [API Reference](docs/03-api/) | Документация API endpoints |
+| [Разработка](docs/04-development/) | Руководство для разработчиков |
+| [Развёртывание](docs/05-deployment/) | Деплой в production |
+| [Функции](docs/06-features/) | Описание возможностей |
+| [Эксплуатация](docs/07-operations/) | Мониторинг и troubleshooting |
+| [Безопасность](docs/08-security/) | Политики безопасности |
+| [Тестирование](docs/09-testing/) | Стратегия тестирования |
 
 ### Swagger UI
 
 Документация API доступна через Swagger UI при запуске сервера:
 
-1. Запустите сервер:
 ```bash
 cd server
 go run cmd/server/main.go
 ```
 
-2. Откройте в браузере:
-```
-http://localhost:8080/swagger/
-```
-
-Swagger UI предоставляет интерактивный интерфейс для тестирования API-методов, просмотра схем данных и примеров запросов/ответов.
-
-### Генерация документации
-
-Документация Swagger генерируется автоматически из комментариев в коде с помощью инструмента `swag`:
-
-```bash
-# Установка инструмента swag
-go install github.com/swaggo/swag/cmd/swag@latest
-
-# Генерация документации
-cd server
-swag init --parseDependency --parseInternal
-```
-
-Для добавления новых эндпоинтов в документацию, добавьте соответствующие комментарии в формате Swagger в обработчики:
-```go
-// @Summary Описание метода
-// @Description Полное описание метода
-// @Tags tag-name
-// @Accept json
-// @Produce json
-// @Param param_name body DataType true "Описание параметра"
-// @Success 200 {object} ResponseDataType
-// @Failure 400 {object} ErrorResponseType
-// @Router /endpoint [method]
-```
+Откройте в браузере: http://localhost:8080/swagger/
 
 ---
 

@@ -8,6 +8,22 @@ class AuthStorage {
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
+  Future<void> saveToken(TokenPair token) async {
+    await writeTokenPair(token);
+  }
+
+  Future<void> saveTokenPair(TokenPair pair) async {
+    await writeTokenPair(pair);
+  }
+
+  Future<TokenPair?> getToken() async {
+    return readTokenPair();
+  }
+
+  Future<void> clear() async {
+    await clearSession();
+  }
+
   Future<void> writeTokenPair(TokenPair pair) async {
     await _storage.write(key: _kAccessToken, value: pair.accessToken);
     await _storage.write(key: _kRefreshToken, value: pair.refreshToken);

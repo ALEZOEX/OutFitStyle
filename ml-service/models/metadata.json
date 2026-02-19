@@ -1,0 +1,53 @@
+{
+  "format": "catboost_cbm",
+  "model_kind": "classifier",
+  "cbm_path": "model.cbm",
+  "version": "20260218_021408",
+  "cat_features": [
+    "weather_condition",
+    "season",
+    "age_range",
+    "style_preference",
+    "temperature_sensitivity",
+    "formality_preference",
+    "item_name",
+    "category",
+    "subcategory",
+    "style",
+    "base_colour",
+    "pattern",
+    "fit",
+    "usage"
+  ],
+  "feature_columns": [
+    "temperature",
+    "feels_like",
+    "humidity",
+    "wind_speed",
+    "weather_condition",
+    "season",
+    "age_range",
+    "style_preference",
+    "temperature_sensitivity",
+    "formality_preference",
+    "item_name",
+    "category",
+    "subcategory",
+    "style",
+    "usage",
+    "base_colour",
+    "formality_level",
+    "warmth_level",
+    "min_temp",
+    "max_temp",
+    "fit",
+    "pattern",
+    "is_owned",
+    "source_priority"
+  ],
+  "metrics": {
+    "auc": 1.0,
+    "logloss": 0.09769899183721749
+  },
+  "created_at": "2026-02-18T02:14:08.167942"
+}

@@ -48,13 +48,13 @@ docker-compose ps
 - `outfitstyle-postgres` (:5432)
 - `outfitstyle-redis` (:6379)
 - `outfitstyle-api` (:8080)
-- `outfitstyle-ml-service` (:8000)
+- `outfitstyle-ml-service` (:5000)
 
 ### 2. Запуск API сервера (опционально)
 
 ```bash
 cd server
-go run cmd/main.go
+go run cmd/server/main.go
 ```
 
 ### 3. Запуск Flutter клиента
@@ -262,10 +262,10 @@ python inference/test.py
 ```bash
 # Debug логирование
 export LOG_LEVEL=debug
-go run cmd/main.go
+go run cmd/server/main.go
 
 # Delve debugger
-dlv debug cmd/main.go
+dlv debug cmd/server/main.go
 ```
 
 ### Flutter

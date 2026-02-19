@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import '../../services/auth_storage.dart';
+import '../../models/token_pair.dart';
 
 class ApiClient {
   final AuthStorage storage;
@@ -18,7 +19,8 @@ class ApiClient {
     // Interceptor для авторизации
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await storage.readAccessToken();
+        final tokenPair = await storage.getToken();
+        final token = tokenPair?.accessToken;
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
         }
@@ -30,6 +32,10 @@ class ApiClient {
       },
     ));
   }
+
+  /// Внутренний конструктор для использования с кастомным Dio
+  /// (например, для внешних API без авторизации)
+  ApiClient.internal(Dio dio) : _dio = dio, storage = _NoOpAuthStorage();
 
   Dio get raw => _dio;
 
@@ -100,4 +106,36 @@ class NetworkException extends ApiException {
 
 class UnauthorizedException extends ApiException {
   const UnauthorizedException(super.message);
+}
+
+/// Заглушка AuthStorage для случаев, когда авторизация не требуется
+class _NoOpAuthStorage extends AuthStorage {
+  _NoOpAuthStorage();
+
+  @override
+  Future<void> saveToken(TokenPair token) async {}
+
+  @override
+  Future<TokenPair?> getToken() async => null;
+
+  @override
+  Future<void> clear() async {}
+
+  @override
+  Future<void> clearSession() async {}
+
+  @override
+  Future<void> saveTokenPair(TokenPair pair) async {}
+
+  @override
+  Future<String?> readAccessToken() async => null;
+
+  @override
+  Future<String?> readRefreshToken() async => null;
+
+  @override
+  Future<TokenPair?> readTokenPair() async => null;
+
+  @override
+  Future<DateTime?> readExpiresAt() async => null;
 }

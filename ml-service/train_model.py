@@ -24,10 +24,10 @@ def clean_models_directory():
 def train_model():
     """Train the model using the updated train_ranker script"""
     print("Starting model training...")
-    
+
     # Import and run the training
     sys.path.insert(0, os.path.abspath("."))
-    
+
     from train.train_ranker import main as train_main
     train_main()
 
@@ -35,13 +35,13 @@ def main():
     print("="*60)
     print("OutfitStyle ML Model Training Script")
     print("="*60)
-    
+
     # Clean previous artifacts
     clean_models_directory()
-    
+
     # Train the model
     train_model()
-    
+
     print("\nModel training completed successfully!")
     print("Check the 'artifacts' directory for new model files")
 

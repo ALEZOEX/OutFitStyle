@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import '../api/api_client.dart';
+import '../../domain/entities/weather_data.dart';
 
 /// Сервис для получения данных о погоде
-/// 
+///
 /// Использует Open-Meteo API (бесплатный, не требует API ключа)
 /// или OpenWeatherMap API (требует API ключ)
-/// 
+///
 /// Кэширует данные на 30 минут для уменьшения количества запросов
 class WeatherService {
   final ApiClient _apiClient;
@@ -127,7 +128,7 @@ class WeatherService {
 
   WeatherData _parseOpenMeteoResponse(Map<String, dynamic> data) {
     final current = data['current_weather'] as Map<String, dynamic>;
-    
+
     return WeatherData(
       temperature: (current['temperature'] as num).toDouble(),
       feelsLike: (current['temperature'] as num).toDouble(), // Open-Meteo не предоставляет feels_like
@@ -136,7 +137,6 @@ class WeatherService {
       windSpeed: (current['windspeed'] as num).toDouble(),
       latitude: (data['latitude'] as num).toDouble(),
       longitude: (data['longitude'] as num).toDouble(),
-      time: DateTime.parse(current['time'] as String),
     );
   }
 
@@ -146,10 +146,10 @@ class WeatherService {
     final maxTemps = daily['temperature_2m_max'] as List;
     final minTemps = daily['temperature_2m_min'] as List;
     final weatherCodes = daily['weathercode'] as List;
-    
+
     final forecast = <WeatherData>[];
-    
-    for (var i = 0; i < times.length; i++) {
+
+    for (var i = 0; i < times.length && i < maxTemps.length && i < minTemps.length; i++) {
       forecast.add(
         WeatherData(
           temperature: ((maxTemps[i] as num) + (minTemps[i] as num)) / 2,
@@ -159,11 +159,10 @@ class WeatherService {
           windSpeed: 0,
           latitude: (data['latitude'] as num).toDouble(),
           longitude: (data['longitude'] as num).toDouble(),
-          time: DateTime.parse(times[i] as String),
         ),
       );
     }
-    
+
     return forecast;
   }
 
@@ -189,105 +188,6 @@ class WeatherService {
   void _cleanupCache() {
     final now = DateTime.now();
     _cache.removeWhere((_, entry) => now.isAfter(entry.expiresAt));
-  }
-}
-
-/// Данные о погоде
-class WeatherData {
-  final double temperature;
-  final double feelsLike;
-  final String condition; // clear, cloudy, rain, snow, thunderstorm, foggy
-  final int humidity;
-  final double windSpeed;
-  final double latitude;
-  final double longitude;
-  final DateTime time;
-
-  WeatherData({
-    required this.temperature,
-    required this.feelsLike,
-    required this.condition,
-    required this.humidity,
-    required this.windSpeed,
-    required this.latitude,
-    required this.longitude,
-    required this.time,
-  });
-
-  /// Получить иконку погоды для Material Icons
-  String get iconCode {
-    switch (condition.toLowerCase()) {
-      case 'clear':
-        return 'clear_day';
-      case 'partly_cloudy':
-        return 'partly_cloudy_day';
-      case 'cloudy':
-      case 'overcast':
-        return 'cloudy';
-      case 'rain':
-      case 'drizzle':
-        return 'rainy';
-      case 'snow':
-        return 'snowy';
-      case 'thunderstorm':
-        return 'thunderstorm';
-      case 'foggy':
-      case 'mist':
-        return 'foggy';
-      default:
-        return 'cloudy';
-    }
-  }
-
-  /// Получить эмодзи погоды
-  String get emoji {
-    switch (condition.toLowerCase()) {
-      case 'clear':
-        return '☀️';
-      case 'partly_cloudy':
-        return '⛅';
-      case 'cloudy':
-      case 'overcast':
-        return '☁️';
-      case 'rain':
-      case 'drizzle':
-        return '🌧️';
-      case 'snow':
-        return '❄️';
-      case 'thunderstorm':
-        return '⛈️';
-      case 'foggy':
-      case 'mist':
-        return '🌫️';
-      default:
-        return '🌤️';
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'temperature': temperature,
-      'feels_like': feelsLike,
-      'condition': condition,
-      'humidity': humidity,
-      'wind_speed': windSpeed,
-      'latitude': latitude,
-      'longitude': longitude,
-      'time': time.toIso8601String(),
-    };
-  }
-
-  factory WeatherData.fromJson(Map<String, dynamic> json) {
-    return WeatherData(
-      temperature: (json['temperature'] as num).toDouble(),
-      feelsLike: (json['feels_like'] as num).toDouble(),
-      condition: json['condition'] as String,
-      humidity: json['humidity'] as int,
-      windSpeed: (json['wind_speed'] as num).toDouble(),
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
-      time: DateTime.parse(json['time'] as String),
-    );
   }
 }
 
