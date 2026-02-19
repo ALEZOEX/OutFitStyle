@@ -46,7 +46,7 @@ class ProfileState {
     );
   }
 
-  /// Создать из Map<String, dynamic>
+  /// Создать из [Map<String, dynamic>]
   factory ProfileState.fromMap(Map<String, dynamic> data) {
     return ProfileState(
       name: data['name'] as String? ?? '',
@@ -460,11 +460,20 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
       return;
     }
 
+    // Сохраняем навигатор и мессенджер перед async операцией
+    // ignore: use_build_context_synchronously
+    final navigator = Navigator.of(context);
+    // ignore: use_build_context_synchronously
+    final messenger = ScaffoldMessenger.of(context);
+
     // Показываем индикатор загрузки
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+    navigator.push(
+      MaterialPageRoute(
+        builder: (dialogContext) => PopScope(
+          canPop: false,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+      ),
     );
 
     try {
@@ -473,41 +482,43 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         reason: 'Пользователь удалил аккаунт через приложение',
       );
 
-      if (mounted) {
-        Navigator.of(context).pop(); // Закрываем индикатор
-
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Аккаунт успешно удален'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Выходим из аккаунта и переходим на экран авторизации
-          // Это должно обрабатываться на уровне навигации
-          if (mounted) {
-            Navigator.of(context).pushNamedAndRemoveUntil('/auth', (route) => false);
-          }
-        } else {
-          final state = ref.read(profileProvider);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.error ?? 'Ошибка при удалении аккаунта'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      // Закрываем индикатор в том же контексте, где он был открыт
+      if (navigator.mounted) {
+        navigator.pop();
       }
-    } catch (e) {
-      if (mounted) {
-        Navigator.of(context).pop(); // Закрываем индикатор
-        ScaffoldMessenger.of(context).showSnackBar(
+
+      if (!mounted) return;
+
+      if (success) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Аккаунт успешно удален'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Выходим из аккаунта и переходим на экран авторизации
+        // Это должно обрабатываться на уровне навигации
+        if (mounted) {
+          navigator.pushNamedAndRemoveUntil('/auth', (route) => false);
+        }
+      } else {
+        final state = ref.read(profileProvider);
+        messenger.showSnackBar(
           SnackBar(
-            content: Text('Ошибка: $e'),
+            content: Text(state.error ?? 'Ошибка при удалении аккаунта'),
             backgroundColor: Colors.red,
           ),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      navigator.pop(); // Закрываем индикатор
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Ошибка: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -620,7 +631,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
                 // Разделитель
                 Divider(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
 
@@ -653,7 +664,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: theme.colorScheme.outline.withOpacity(0.3),
+            color: theme.colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -672,10 +683,10 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer.withOpacity(0.3),
+        color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.error.withOpacity(0.3),
+          color: theme.colorScheme.error.withValues(alpha: 0.3),
         ),
       ),
       padding: const EdgeInsets.all(16),
@@ -702,7 +713,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           Text(
             'Удаление аккаунта необратимо удалит все ваши данные',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onErrorContainer.withOpacity(0.8),
+              color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.8),
             ),
           ),
           const SizedBox(height: 16),

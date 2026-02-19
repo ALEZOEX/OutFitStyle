@@ -40,7 +40,6 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final state = ref.watch(recommendationsProvider);
     final stats = ref.watch(recommendationsStatsProvider);
 
@@ -176,10 +175,10 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: color.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -222,7 +221,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           scrollDirection: Axis.horizontal,
           itemCount: filters.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
           itemBuilder: (context, index) {
             final filter = filters[index];
             final isSelected = _selectedFilter == filter['id'];
@@ -263,7 +262,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                 side: BorderSide(
                   color: isSelected
                       ? theme.colorScheme.primary
-                      : theme.colorScheme.outline.withOpacity(0.3),
+                      : theme.colorScheme.outline.withValues(alpha: 0.3),
                 ),
               ),
             );
@@ -284,7 +283,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
         child: Card(
           clipBehavior: Clip.antiAlias,
           elevation: 3,
-          shadowColor: theme.colorScheme.primary.withOpacity(0.2),
+          shadowColor: theme.colorScheme.primary.withValues(alpha: 0.2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -296,7 +295,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    theme.colorScheme.primary.withOpacity(0.8),
+                    theme.colorScheme.primary.withValues(alpha: 0.8),
                     theme.colorScheme.secondary,
                   ],
                 ),
@@ -323,18 +322,18 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                               ? 'Подбираем идеальный outfit...'
                               : 'На основе погоды и предпочтений',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(height: 16),
                   Container(
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: state.isGenerating
@@ -434,11 +433,11 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                 padding: const EdgeInsets.only(bottom: 16),
                 child: RecommendationCard(
                   recommendation: recommendation,
-                  isLiked: state.isLiked(recommendation.id!),
-                  isSaved: state.isSaved(recommendation.id!),
+                  isLiked: state.isLiked(recommendation.id),
+                  isSaved: state.isSaved(recommendation.id),
                   onTap: () => _showRecommendationDetails(context, recommendation),
-                  onLike: () => notifier.toggleLike(recommendation.id!),
-                  onSave: () => notifier.toggleSave(recommendation.id!),
+                  onLike: () => notifier.toggleLike(recommendation.id),
+                  onSave: () => notifier.toggleSave(recommendation.id),
                 ),
               ),
             );
@@ -458,8 +457,14 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
       occasion: 'casual',
     );
 
-    if (result != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    if (!mounted) return;
+    // ignore: use_build_context_synchronously
+    final messenger = ScaffoldMessenger.of(context);
+    // ignore: use_build_context_synchronously
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (result != null) {
+      messenger.showSnackBar(
         SnackBar(
           content: Row(
             children: [
@@ -468,7 +473,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
               const Text('Рекомендация сгенерирована!'),
             ],
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: colorScheme.primary,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -500,7 +505,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

@@ -6,8 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/notification_dialog.dart';
-import 'screens/profile_settings_screen.dart';
 import 'screens/preferences_screen.dart';
+import 'screens/profile_settings_screen.dart';
+import 'screens/privacy_settings_screen.dart';
 import 'screens/subscription_screen.dart';
 import '../../achievements/presentation/pages/achievements_page.dart';
 
@@ -38,11 +39,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String? _locationError;
   bool _notificationDialogShown = false;
 
+  // Настройки типов уведомлений
+  bool _weatherNotifications = true;
+  bool _newArrivalsNotifications = true;
+  bool _recommendationNotifications = true;
+
   @override
   void initState() {
     super.initState();
     _loadNotificationDialogFlag();
     _checkPermissions();
+    _loadNotificationSettings();
+  }
+
+  /// Загрузить настройки типов уведомлений
+  Future<void> _loadNotificationSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _weatherNotifications = prefs.getBool('weather_notifications') ?? true;
+      _newArrivalsNotifications = prefs.getBool('new_arrivals_notifications') ?? true;
+      _recommendationNotifications = prefs.getBool('recommendation_notifications') ?? true;
+    });
   }
 
   Future<void> _loadNotificationDialogFlag() async {
@@ -55,6 +72,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _saveNotificationDialogFlag() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notificationDialogShown', true);
+  }
+
+  /// Сохранить настройку уведомления
+  Future<void> _saveNotificationSetting(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
   }
 
   Future<void> _checkPermissions() async {
@@ -289,7 +312,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             end: Alignment.bottomRight,
             colors: [
               theme.colorScheme.primaryContainer,
-              theme.colorScheme.secondaryContainer.withOpacity(0.5),
+              theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
@@ -355,7 +378,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           Divider(
             height: 1,
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
           ),
           _buildSettingTile(
             context,
@@ -371,7 +394,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           Divider(
             height: 1,
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
           ),
           _buildSettingTile(
             context,
@@ -387,7 +410,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           Divider(
             height: 1,
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
           ),
           _buildSettingTile(
             context,
@@ -395,7 +418,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: 'Конфиденциальность',
             subtitle: 'Настройки приватности',
             onTap: () {
-              // TODO: Навигация на экран конфиденциальности
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PrivacySettingsScreen()),
+              );
             },
           ),
         ],
@@ -415,7 +441,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: theme.colorScheme.primary.withOpacity(0.1),
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: theme.colorScheme.primary, size: 22),
@@ -450,8 +476,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           end: Alignment.bottomRight,
           colors: _notificationsEnabled
               ? [
-                  theme.colorScheme.primary.withOpacity(0.2),
-                  theme.colorScheme.secondary.withOpacity(0.1),
+                  theme.colorScheme.primary.withValues(alpha: 0.2),
+                  theme.colorScheme.secondary.withValues(alpha: 0.1),
                 ]
               : [
                   theme.colorScheme.surface,
@@ -461,8 +487,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _notificationsEnabled
-              ? theme.colorScheme.primary.withOpacity(0.3)
-              : theme.colorScheme.outline.withOpacity(0.2),
+              ? theme.colorScheme.primary.withValues(alpha: 0.3)
+              : theme.colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -513,19 +539,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Switch(
                 value: _notificationsEnabled,
                 onChanged: (_) => _requestNotificationPermission(),
-                activeColor: theme.colorScheme.primary,
+                activeThumbColor: theme.colorScheme.primary,
               ),
             ],
           ),
           if (_notificationsEnabled) ...[
             const SizedBox(height: 16),
-            Divider(color: theme.colorScheme.outline.withOpacity(0.2)),
+            Divider(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
             const SizedBox(height: 12),
             _buildNotificationTypeToggle(
               context,
               icon: Icons.cloud,
               title: 'Погода',
               subtitle: 'Рекомендации по погоде',
+              value: _weatherNotifications,
+              onChanged: (value) {
+                setState(() => _weatherNotifications = value);
+                _saveNotificationSetting('weather_notifications', value);
+              },
             ),
             const SizedBox(height: 8),
             _buildNotificationTypeToggle(
@@ -533,6 +564,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.new_releases,
               title: 'Новые поступления',
               subtitle: 'Обновления гардероба',
+              value: _newArrivalsNotifications,
+              onChanged: (value) {
+                setState(() => _newArrivalsNotifications = value);
+                _saveNotificationSetting('new_arrivals_notifications', value);
+              },
             ),
             const SizedBox(height: 8),
             _buildNotificationTypeToggle(
@@ -540,6 +576,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.auto_awesome,
               title: 'Рекомендации',
               subtitle: 'Персональные подборки',
+              value: _recommendationNotifications,
+              onChanged: (value) {
+                setState(() => _recommendationNotifications = value);
+                _saveNotificationSetting('recommendation_notifications', value);
+              },
             ),
           ],
         ],
@@ -552,6 +593,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required IconData icon,
     required String title,
     required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
   }) {
     final theme = Theme.of(context);
     return ListTile(
@@ -569,12 +612,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       ),
       trailing: Switch(
-        value: true, // TODO: Реализовать состояние
-        onChanged: (value) {
-          // TODO: Сохранить настройку
-        },
-        activeTrackColor: theme.colorScheme.primary.withOpacity(0.5),
-        activeColor: theme.colorScheme.primary,
+        value: value,
+        onChanged: onChanged,
+        activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
+        activeThumbColor: theme.colorScheme.primary,
       ),
     );
   }
@@ -594,8 +635,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: _locationEnabled
-                  ? theme.colorScheme.primary.withOpacity(0.2)
-                  : theme.colorScheme.error.withOpacity(0.1),
+                  ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                  : theme.colorScheme.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -633,7 +674,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Switch(
             value: _locationEnabled,
             onChanged: (_) => _requestLocationPermission(),
-            activeColor: theme.colorScheme.primary,
+            activeThumbColor: theme.colorScheme.primary,
           ),
         ],
       ),

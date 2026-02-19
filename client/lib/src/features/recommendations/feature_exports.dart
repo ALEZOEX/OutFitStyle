@@ -10,8 +10,11 @@ export '../../domain/usecases/get_recommendations_by_occasion.dart';
 export '../../domain/usecases/get_recommendations_by_weather.dart';
 export '../../domain/usecases/save_recommendation_usecase.dart';
 
-// Screens & Widgets
-export 'recommendations_screen.dart';
+// Presentation
+export 'presentation/recommendations_screen.dart';
+export 'presentation/providers/recommendations_provider.dart';
+
+// Widgets
 export 'widgets/recommendation_card.dart';
 export 'widgets/recommendation_detail_screen.dart';
 export 'widgets/recommendation_feedback_dialog.dart';

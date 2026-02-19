@@ -10,6 +10,9 @@ export '../../domain/enums/outfit_season.dart';
 export '../../domain/enums/outfit_weather.dart';
 export '../../domain/repositories/wardrobe_repository.dart';
 
-// Screens
-export 'wardrobe_screen.dart';
+// Presentation
+export 'presentation/wardrobe_screen.dart';
+export 'presentation/providers/wardrobe_provider.dart';
+
+// Widgets
 export 'widgets/wardrobe_widgets.dart';

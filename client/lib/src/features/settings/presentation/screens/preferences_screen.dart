@@ -100,7 +100,7 @@ class PreferencesState {
     );
   }
 
-  /// Конвертировать в Map<String, dynamic> для отправки на сервер
+  /// Конвертировать в [Map<String, dynamic>] для отправки на сервер
   Map<String, dynamic> toPreferencesMap() {
     return <String, dynamic>{
       'preferred_temperature': 'comfortable',
@@ -112,7 +112,7 @@ class PreferencesState {
     };
   }
 
-  /// Создать из Map<String, dynamic>
+  /// Создать из [Map<String, dynamic>]
   factory PreferencesState.fromPreferencesMap(Map<String, dynamic> pref) {
     return PreferencesState(
       colors: List<String>.from(pref['preferred_colors'] ?? []),
@@ -594,7 +594,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(

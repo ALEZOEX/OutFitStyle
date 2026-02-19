@@ -114,12 +114,12 @@ class RecommendationsState {
 
   /// Получить лайкнутые рекомендации
   List<OutfitRecommendation> getLiked() {
-    return recommendations.where((r) => likedIds.contains(r.id!)).toList();
+    return recommendations.where((r) => likedIds.contains(r.id)).toList();
   }
 
   /// Получить сохранённые рекомендации
   List<OutfitRecommendation> getSaved() {
-    return recommendations.where((r) => savedIds.contains(r.id!)).toList();
+    return recommendations.where((r) => savedIds.contains(r.id)).toList();
   }
 }
 

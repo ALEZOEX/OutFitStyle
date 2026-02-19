@@ -25,6 +25,11 @@ class ShareImage {
     final file = File('${dir.path}/$fileName');
     await file.writeAsBytes(bytes, flush: true);
 
-    await Share.shareXFiles([XFile(file.path)], text: text);
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        text: text,
+      ),
+    );
   }
 }

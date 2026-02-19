@@ -73,7 +73,7 @@ class CombinedAnalyticsService implements IAnalyticsService {
             .settingsUpdate, // используем подходящий тип для ошибки
         properties: {
           'error': error,
-          if (stackTrace != null) 'stack_trace': stackTrace,
+          'stack_trace': stackTrace,
         },
         userId: _currentUserId,
         timestamp: DateTime.now(),
@@ -93,7 +93,7 @@ class CombinedAnalyticsService implements IAnalyticsService {
         properties: {
           'exception_type': exception.runtimeType.toString(),
           'exception_message': exception.toString(),
-          if (stackTrace != null) 'stack_trace': stackTrace,
+          'stack_trace': stackTrace,
         },
         userId: _currentUserId,
         timestamp: DateTime.now(),
@@ -123,8 +123,8 @@ class CombinedAnalyticsService implements IAnalyticsService {
         properties: {
           'amount': amount,
           'currency': currency,
-          if (itemId != null) 'item_id': itemId,
-          if (itemName != null) 'item_name': itemName,
+          'item_id': itemId ?? '',
+          'item_name': itemName ?? '',
         },
         userId: _currentUserId,
         timestamp: DateTime.now(),

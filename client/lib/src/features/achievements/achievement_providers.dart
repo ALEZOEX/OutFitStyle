@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/repositories/achievement_repository.dart';
-import '../../presentation/providers/repository_providers.dart';
+import '../../core/di/di.dart';
 
 // UseCase провайдеры для achievements будут добавлены позже
 // Пока используем репозиторий напрямую

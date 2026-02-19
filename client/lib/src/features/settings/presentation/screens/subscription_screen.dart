@@ -190,7 +190,7 @@ class SubscriptionScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   Divider(
-                    color: theme.colorScheme.outline.withOpacity(0.3),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
                   _buildInfoRow(
@@ -243,15 +243,15 @@ class SubscriptionScreen extends ConsumerWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            plan.color.withOpacity(0.1),
-            plan.color.withOpacity(0.05),
+            plan.color.withValues(alpha: 0.1),
+            plan.color.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isPopular
-              ? plan.color.withOpacity(0.5)
-              : plan.color.withOpacity(0.2),
+              ? plan.color.withValues(alpha: 0.5)
+              : plan.color.withValues(alpha: 0.2),
           width: isPopular ? 2 : 1,
         ),
       ),
@@ -287,7 +287,7 @@ class SubscriptionScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: plan.color.withOpacity(0.2),
+                        color: plan.color.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -458,38 +458,161 @@ class SubscriptionScreen extends ConsumerWidget {
   }
 
   void _subscribe(BuildContext context, SubscriptionPlan plan) {
-    // TODO: Интеграция с платежной системой
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+      barrierDismissible: false,
+      builder: (context) => _PaymentDialog(plan: plan),
+    );
+  }
+}
+
+/// Диалог оплаты подписки
+class _PaymentDialog extends StatefulWidget {
+  final SubscriptionPlan plan;
+
+  const _PaymentDialog({required this.plan});
+
+  @override
+  State<_PaymentDialog> createState() => _PaymentDialogState();
+}
+
+class _PaymentDialogState extends State<_PaymentDialog> {
+  bool _isLoading = false;
+  String? _selectedPaymentMethod;
+
+  final List<Map<String, dynamic>> _paymentMethods = [
+    {'id': 'card', 'name': 'Банковская карта', 'icon': Icons.credit_card},
+    {'id': 'sbp', 'name': 'СБП', 'icon': Icons.qr_code_2},
+    {'id': 'yandex', 'name': 'Yandex Pay', 'icon': Icons.wallet},
+  ];
+
+  Future<void> _processPayment() async {
+    setState(() => _isLoading = true);
+
+    // Симуляция процесса оплаты
+    // В продакшене здесь будет интеграция с платежным шлюзом
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Симуляция успешной оплаты
+    if (mounted) {
+      Navigator.pop(context); // Закрыть диалог
+
+      // Обновить текущую подписку через GlobalKey
+      // В продакшене: использовать proper state management
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.plan.name} оформлен!'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
         ),
-        icon: Icon(
-          Icons.payment,
-          size: 48,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        title: Text('Оформление ${plan.name}'),
-        content: Text(
-          'Переход к оплате...\n\n${plan.price}₽/${plan.period}',
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: widget.plan.color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.payment,
+              size: 40,
+              color: widget.plan.color,
+            ),
           ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Симуляция успешной подписки
-              // TODO: Реальная интеграция с платежкой
-            },
-            child: const Text('Оплатить'),
-          ),
+          const SizedBox(height: 12),
+          Text('Оплата ${widget.plan.name}'),
         ],
       ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Сумма
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Сумма:',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  Text(
+                    '${widget.plan.price}₽/${widget.plan.period}',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: widget.plan.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Метод оплаты
+            Text(
+              'Способ оплаты:',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // ignore: deprecated_member_use
+            ..._paymentMethods.map((method) => RadioListTile<String>(
+              value: method['id'] as String,
+              // ignore: deprecated_member_use
+              groupValue: _selectedPaymentMethod,
+              // ignore: deprecated_member_use
+              onChanged: _isLoading ? null : (value) {
+                setState(() => _selectedPaymentMethod = value);
+              },
+              title: Row(
+                children: [
+                  Icon(method['icon'] as IconData, size: 20),
+                  const SizedBox(width: 8),
+                  Text(method['name'] as String),
+                ],
+              ),
+              contentPadding: EdgeInsets.zero,
+            )),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: const Text('Отмена'),
+        ),
+        FilledButton(
+          onPressed: _isLoading || _selectedPaymentMethod == null
+              ? null
+              : _processPayment,
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Оплатить'),
+        ),
+      ],
     );
   }
 }
