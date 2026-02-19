@@ -211,12 +211,11 @@ class WeatherCard extends StatelessWidget {
 
     final humidity = weatherData!.humidity;
     final windSpeed = weatherData!.windSpeed;
-    final pressure = weatherData!.pressure;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -234,13 +233,6 @@ class WeatherCard extends StatelessWidget {
             icon: Icons.air,
             value: windSpeed != null ? '${windSpeed.round()} м/с' : '—',
             label: 'Ветер',
-          ),
-          _buildDivider(),
-          _buildDetailItem(
-            context,
-            icon: Icons.gauge,
-            value: pressure != null ? '$pressure мм' : '—',
-            label: 'Давление',
           ),
         ],
       ),
@@ -307,7 +299,7 @@ class WeatherCard extends StatelessWidget {
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final day = forecast![index];
-              return _buildForecastItem(context, day);
+              return _buildForecastItem(context, day, index);
             },
           ),
         ),
@@ -315,7 +307,7 @@ class WeatherCard extends StatelessWidget {
     );
   }
 
-  Widget _buildForecastItem(BuildContext context, WeatherData day) {
+  Widget _buildForecastItem(BuildContext context, WeatherData day, int index) {
     final theme = Theme.of(context);
     final temp = day.temperature?.round() ?? 0;
 
@@ -323,14 +315,14 @@ class WeatherCard extends StatelessWidget {
       width: 70,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            _formatDayOfWeek(day.date),
+            'День ${index + 1}',
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -339,7 +331,7 @@ class WeatherCard extends StatelessWidget {
           const SizedBox(height: 4),
           Icon(
             _getWeatherIcon(day.description ?? ''),
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             size: 24,
           ),
           const SizedBox(height: 4),
