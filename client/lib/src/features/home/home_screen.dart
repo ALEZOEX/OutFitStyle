@@ -203,12 +203,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ],
               const SizedBox(height: 12),
+              Text(
+                'Вещи в образе',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+              ),
+              const SizedBox(height: 8),
               if (recommendation.recommendedItems?.isNotEmpty == true) ...[
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                Column(
                   children: recommendation.recommendedItems!
-                      .map<Widget>((item) => _buildOutfitItem(item, context))
+                      .map<Widget>((item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _buildOutfitItem(item, context),
+                          ))
                       .toList(),
                 ),
               ],
@@ -222,21 +231,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildOutfitItem(String item, BuildContext context) {
     final emoji = _getItemEmoji(item);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+        ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 16)),
-          const SizedBox(width: 6),
-          Flexible(
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Text(emoji, style: const TextStyle(fontSize: 20)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
             child: Text(
               item,
-              style: Theme.of(context).textTheme.bodySmall,
-              maxLines: 1,
+              style: Theme.of(context).textTheme.bodyMedium,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),
