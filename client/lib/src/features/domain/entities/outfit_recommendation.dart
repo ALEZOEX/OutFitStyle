@@ -15,8 +15,6 @@ abstract class OutfitRecommendation with _$OutfitRecommendation {
     @Default(null) String? weatherCondition,
     @Default(null) int? temperature,
     @Default(null) String? occasion,
-    @Default(false) bool isLiked,
-    @Default(false) bool isSaved,
     @Default(0.0) double? confidenceScore,
     @Default(null) DateTime? createdAt,
   }) = _OutfitRecommendation;

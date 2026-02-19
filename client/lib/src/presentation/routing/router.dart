@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../features/home/home_shell.dart';
 import '../../features/wardrobe/presentation/wardrobe_screen.dart';
 import '../../features/recommendations/presentation/recommendations_screen.dart';
-import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/recommendations/presentation/screens/outfit_planner_screen.dart';
+import '../../features/recommendations/presentation/screens/outfit_builder_screen.dart';
 import '../../features/recommendations/presentation/screens/recommendation_detail_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/wardrobe/presentation/screens/wardrobe_item_detail_screen.dart';
 import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.dart';
 import '../../features/generator/presentation/generator_screen.dart';
@@ -174,6 +176,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => RecommendationDetailScreen(
           recommendationId: state.pathParameters['id']!,
         ),
+      ),
+      // Планировщик образов
+      GoRoute(
+        path: '/recommendations/planner',
+        name: 'outfit_planner',
+        builder: (context, state) {
+          final recommendationId = state.extra as String?;
+          return OutfitPlannerScreen(
+            initialRecommendationId: recommendationId,
+          );
+        },
+      ),
+      // Конструктор образов
+      GoRoute(
+        path: '/recommendations/builder',
+        name: 'outfit_builder',
+        builder: (context, state) => const OutfitBuilderScreen(),
       ),
       // Профиль
       GoRoute(

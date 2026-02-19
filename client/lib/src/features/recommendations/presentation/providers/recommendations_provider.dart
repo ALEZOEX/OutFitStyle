@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entities/outfit_recommendation.dart';
+import '../../../../domain/entities/outfit_recommendation.dart';
 
 /// Mock данные для рекомендаций
 final mockRecommendations = <OutfitRecommendation>[
@@ -7,9 +7,9 @@ final mockRecommendations = <OutfitRecommendation>[
     id: '1',
     title: 'Повседневный образ для прохладной погоды',
     description: 'Комфортный outfit для прогулки в прохладный день. Сочетание стиля и практичности.',
-    outfitImageUrls: ['https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600'],
+    imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600',
     recommendedItems: ['Худи серое', 'Джинсы Slim Fit', 'Кроссовки белые'],
-    temperature: 12,
+    temperature: 12.0,
     weatherCondition: 'cloudy',
     createdAt: DateTime(2024, 2, 15),
   ),
@@ -17,9 +17,9 @@ final mockRecommendations = <OutfitRecommendation>[
     id: '2',
     title: 'Деловой стиль для офиса',
     description: 'Классический образ для рабочей встречи. Элегантность и профессионализм.',
-    outfitImageUrls: ['https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600'],
+    imageUrl: 'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600',
     recommendedItems: ['Рубашка оксфорд', 'Брюки классические', 'Ботинки кожаные'],
-    temperature: 18,
+    temperature: 18.0,
     weatherCondition: 'sunny',
     createdAt: DateTime(2024, 2, 14),
   ),
@@ -27,9 +27,9 @@ final mockRecommendations = <OutfitRecommendation>[
     id: '3',
     title: 'Зимний комплект',
     description: 'Тёплый и стильный образ для холодной зимней погоды.',
-    outfitImageUrls: ['https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=600'],
+    imageUrl: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=600',
     recommendedItems: ['Куртка зимняя', 'Пальто шерстяное', 'Шапка вязаная', 'Шарф шерстяной'],
-    temperature: -5,
+    temperature: -5.0,
     weatherCondition: 'snowy',
     createdAt: DateTime(2024, 2, 13),
   ),
@@ -37,9 +37,9 @@ final mockRecommendations = <OutfitRecommendation>[
     id: '4',
     title: 'Спортивный образ для выходного',
     description: 'Удобный outfit для активного отдыха на свежем воздухе.',
-    outfitImageUrls: ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600'],
+    imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600',
     recommendedItems: ['Белая футболка Basic', 'Шорты летние', 'Кроссовки белые', 'Кепка бейсбольная'],
-    temperature: 25,
+    temperature: 25.0,
     weatherCondition: 'sunny',
     createdAt: DateTime(2024, 2, 12),
   ),
@@ -47,9 +47,9 @@ final mockRecommendations = <OutfitRecommendation>[
     id: '5',
     title: 'Вечерний выход',
     description: 'Изысканный образ для особого случая. Будьте в центре внимания.',
-    outfitImageUrls: ['https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600'],
+    imageUrl: 'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600',
     recommendedItems: ['Рубашка оксфорд', 'Пальто шерстяное', 'Ботинки кожаные'],
-    temperature: 10,
+    temperature: 10.0,
     weatherCondition: 'partly_cloudy',
     createdAt: DateTime(2024, 2, 11),
   ),
@@ -57,15 +57,52 @@ final mockRecommendations = <OutfitRecommendation>[
     id: '6',
     title: 'Дождливый день',
     description: 'Практичный outfit для дождливой погоды. Оставайтесь сухим и стильным.',
-    outfitImageUrls: ['https://images.unsplash.com/photo-1512413914633-b5043f4041ea?w=600'],
+    imageUrl: 'https://images.unsplash.com/photo-1512413914633-b5043f4041ea?w=600',
     recommendedItems: ['Куртка зимняя', 'Джинсы Slim Fit', 'Ботинки кожаные'],
-    temperature: 8,
+    temperature: 8.0,
     weatherCondition: 'rainy',
     createdAt: DateTime(2024, 2, 10),
   ),
 ];
 
-/// Состояние загрузк и рекомендаций
+/// Запись запланированного образа
+class PlannedOutfit {
+  final String id;
+  final String recommendationId;
+  final DateTime date;
+  final String? title;
+  final String? description;
+  final List<String>? items;
+
+  const PlannedOutfit({
+    required this.id,
+    required this.recommendationId,
+    required this.date,
+    this.title,
+    this.description,
+    this.items,
+  });
+
+  PlannedOutfit copyWith({
+    String? id,
+    String? recommendationId,
+    DateTime? date,
+    String? title,
+    String? description,
+    List<String>? items,
+  }) {
+    return PlannedOutfit(
+      id: id ?? this.id,
+      recommendationId: recommendationId ?? this.recommendationId,
+      date: date ?? this.date,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      items: items ?? this.items,
+    );
+  }
+}
+
+/// Состояние загрузки и рекомендаций
 enum RecommendationsLoadStatus {
   initial,
   loading,
@@ -78,16 +115,16 @@ class RecommendationsState {
   final List<OutfitRecommendation> recommendations;
   final RecommendationsLoadStatus status;
   final String? error;
-  final Set<String> likedIds;
-  final Set<String> savedIds;
+  final Set<String> usedIds;
+  final Map<DateTime, PlannedOutfit> plannedOutfits;
   final bool isGenerating;
 
   const RecommendationsState({
     this.recommendations = const [],
     this.status = RecommendationsLoadStatus.initial,
     this.error,
-    this.likedIds = const {},
-    this.savedIds = const {},
+    this.usedIds = const {},
+    this.plannedOutfits = const {},
     this.isGenerating = false,
   });
 
@@ -95,31 +132,48 @@ class RecommendationsState {
     List<OutfitRecommendation>? recommendations,
     RecommendationsLoadStatus? status,
     String? error,
-    Set<String>? likedIds,
-    Set<String>? savedIds,
+    Set<String>? usedIds,
+    Map<DateTime, PlannedOutfit>? plannedOutfits,
     bool? isGenerating,
   }) {
     return RecommendationsState(
       recommendations: recommendations ?? this.recommendations,
       status: status ?? this.status,
       error: error ?? this.error,
-      likedIds: likedIds ?? this.likedIds,
-      savedIds: savedIds ?? this.savedIds,
+      usedIds: usedIds ?? this.usedIds,
+      plannedOutfits: plannedOutfits ?? this.plannedOutfits,
       isGenerating: isGenerating ?? this.isGenerating,
     );
   }
 
-  bool isLiked(String id) => likedIds.contains(id);
-  bool isSaved(String id) => savedIds.contains(id);
+  bool isUsed(String id) => usedIds.contains(id);
 
-  /// Получить лайкнутые рекомендации
-  List<OutfitRecommendation> getLiked() {
-    return recommendations.where((r) => likedIds.contains(r.id)).toList();
+  /// Получить использованные рекомендации
+  List<OutfitRecommendation> getUsed() {
+    return recommendations.where((r) => usedIds.contains(r.id)).toList();
   }
 
-  /// Получить сохранённые рекомендации
-  List<OutfitRecommendation> getSaved() {
-    return recommendations.where((r) => savedIds.contains(r.id)).toList();
+  /// Получить запланированные образы на дату
+  PlannedOutfit? getPlannedOutfit(DateTime date) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    return plannedOutfits[normalizedDate];
+  }
+
+  /// Получить все запланированные образы
+  List<PlannedOutfit> getAllPlannedOutfits() {
+    return plannedOutfits.values.toList();
+  }
+
+  /// Получить запланированные образы на неделю
+  List<PlannedOutfit> getPlannedForWeek(DateTime startDate) {
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    final end = start.add(const Duration(days: 6));
+    
+    return plannedOutfits.values
+        .where((outfit) => outfit.date.isAfter(start.subtract(const Duration(days: 1))) && 
+                           outfit.date.isBefore(end.add(const Duration(days: 1))))
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
   }
 }
 
@@ -154,26 +208,47 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     }
   }
 
-  /// Лайкнуть рекомендацию
-  void toggleLike(String id) {
-    final likedIds = Set<String>.from(state.likedIds);
-    if (likedIds.contains(id)) {
-      likedIds.remove(id);
-    } else {
-      likedIds.add(id);
-    }
-    state = state.copyWith(likedIds: likedIds);
+  /// Отметить рекомендацию как использованную
+  void markAsUsed(String id) {
+    final usedIds = Set<String>.from(state.usedIds);
+    usedIds.add(id);
+    state = state.copyWith(usedIds: usedIds);
   }
 
-  /// Сохранить рекомендацию
-  void toggleSave(String id) {
-    final savedIds = Set<String>.from(state.savedIds);
-    if (savedIds.contains(id)) {
-      savedIds.remove(id);
-    } else {
-      savedIds.add(id);
-    }
-    state = state.copyWith(savedIds: savedIds);
+  /// Запланировать образ на дату
+  void planOutfit({
+    required String recommendationId,
+    required DateTime date,
+    String? title,
+    String? description,
+  }) {
+    final recommendation = state.recommendations.firstWhere(
+      (r) => r.id == recommendationId,
+      orElse: () => throw Exception('Recommendation not found'),
+    );
+
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final plannedOutfit = PlannedOutfit(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      recommendationId: recommendationId,
+      date: normalizedDate,
+      title: title ?? recommendation.title,
+      description: description ?? recommendation.description,
+      items: recommendation.recommendedItems,
+    );
+
+    final plannedOutfits = Map<DateTime, PlannedOutfit>.from(state.plannedOutfits);
+    plannedOutfits[normalizedDate] = plannedOutfit;
+    
+    state = state.copyWith(plannedOutfits: plannedOutfits);
+  }
+
+  /// Отменить запланированный образ
+  void cancelPlannedOutfit(DateTime date) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final plannedOutfits = Map<DateTime, PlannedOutfit>.from(state.plannedOutfits);
+    plannedOutfits.remove(normalizedDate);
+    state = state.copyWith(plannedOutfits: plannedOutfits);
   }
 
   /// Сгенерировать новую рекомендацию
@@ -194,7 +269,7 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
         description: _generateDescription(occasion, weatherCondition),
         imageUrl: 'https://images.unsplash.com/photo-1550614000-4b9519e02d48?w=600',
         recommendedItems: _getRandomItems(),
-        temperature: (temperature ?? 15).toInt(),
+        temperature: temperature ?? 15.0,
         weatherCondition: weatherCondition ?? 'sunny',
         createdAt: DateTime.now(),
       );
@@ -235,14 +310,9 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
         .toList();
   }
 
-  /// Получить сохранённые рекомендации
-  List<OutfitRecommendation> getSaved() {
-    return state.recommendations.where((r) => state.savedIds.contains(r.id)).toList();
-  }
-
-  /// Получить лайкнутые рекомендации
-  List<OutfitRecommendation> getLiked() {
-    return state.recommendations.where((r) => state.likedIds.contains(r.id)).toList();
+  /// Получить использованные рекомендации
+  List<OutfitRecommendation> getUsed() {
+    return state.recommendations.where((r) => state.usedIds.contains(r.id)).toList();
   }
 
   // ==================== Private Methods ====================
@@ -288,7 +358,7 @@ final recommendationsStatsProvider = Provider<Map<String, int>>((ref) {
   final state = ref.watch(recommendationsProvider);
   return {
     'total': state.recommendations.length,
-    'liked': state.likedIds.length,
-    'saved': state.savedIds.length,
+    'planned': state.plannedOutfits.length,
+    'used': state.usedIds.length,
   };
 });

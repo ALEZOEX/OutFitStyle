@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 
-import '../../../domain/entities/outfit_recommendation.dart';
+import '../../../../domain/entities/outfit_recommendation.dart';
 import '../providers/recommendations_provider.dart';
 
 /// Экран деталей рекомендации
+/// Без социальной функциональности — только персональные действия
 class RecommendationDetailScreen extends ConsumerStatefulWidget {
   final String recommendationId;
 
@@ -55,9 +57,6 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
     final recommendation = state.recommendations
         .firstWhere((r) => r.id == widget.recommendationId, orElse: () => _createPlaceholder());
 
-    final isLiked = state.isLiked(recommendation.id);
-    final isSaved = state.isSaved(recommendation.id);
-    final notifier = ref.read(recommendationsProvider.notifier);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -94,9 +93,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: isLiked
-                        ? Colors.red.withValues(alpha: 0.2)
-                        : theme.colorScheme.surface.withValues(alpha: 0.9),
+                    color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -106,36 +103,12 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                     ],
                   ),
                   child: Icon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: isLiked ? Colors.red : theme.colorScheme.onSurface,
+                    Icons.calendar_today,
+                    color: theme.colorScheme.tertiary,
                   ),
                 ),
-                onPressed: () => notifier.toggleLike(recommendation.id),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isSaved
-                        ? theme.colorScheme.primary.withValues(alpha: 0.2)
-                        : theme.colorScheme.surface.withValues(alpha: 0.9),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    isSaved ? Icons.bookmark : Icons.bookmark_border,
-                    color: isSaved
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurface,
-                  ),
-                ),
-                onPressed: () => notifier.toggleSave(recommendation.id),
+                onPressed: () => _showPlanDialog(context, recommendation),
+                tooltip: 'Запланировать',
               ),
               const SizedBox(width: 8),
             ],
@@ -270,7 +243,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    recommendation.title,
+                    recommendation.title ?? 'Рекомендация',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -288,13 +261,14 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
           ],
         ),
         const SizedBox(height: 16),
-        Text(
-          recommendation.description,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            height: 1.5,
+        if (recommendation.description != null && recommendation.description!.isNotEmpty)
+          Text(
+            recommendation.description!,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.5,
+            ),
           ),
-        ),
       ],
     );
   }
@@ -504,24 +478,17 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
     OutfitRecommendation recommendation,
   ) {
     final theme = Theme.of(context);
-    final notifier = ref.read(recommendationsProvider.notifier);
 
     return Column(
       children: [
+        // Основные действия
         Row(
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Поделиться скоро будет доступно'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.share),
-                label: const Text('Поделиться'),
+                onPressed: () => _showPlanDialog(context, recommendation),
+                icon: const Icon(Icons.calendar_today),
+                label: const Text('Запланировать'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -534,15 +501,29 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
             Expanded(
               child: FilledButton.icon(
                 onPressed: () {
+                  if (recommendation.id != null) {
+                    final notifier = ref.read(recommendationsProvider.notifier);
+                    notifier.markAsUsed(recommendation.id!);
+                  }
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Применить рекомендацию'),
+                      content: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white),
+                          SizedBox(width: 12),
+                          Text('Рекомендация использована'),
+                        ],
+                      ),
                       behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
                     ),
                   );
                 },
                 icon: const Icon(Icons.check),
-                label: const Text('Применить'),
+                label: const Text('Использовать'),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -554,61 +535,220 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
           ],
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton.icon(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
+        // Вторичные действия
+        Row(
+          children: [
+            Expanded(
+              child: TextButton.icon(
+                onPressed: () {
+                  // Переход в конструктор с предзаполненными вещами
+                  context.push('/recommendations/builder');
+                },
+                icon: const Icon(Icons.build),
+                label: const Text('Конструктор'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  icon: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.delete_outline,
-                      color: Colors.red,
-                      size: 32,
-                    ),
-                  ),
-                  title: const Text('Удалить рекомендацию?'),
-                  content: const Text(
-                    'Это действие нельзя отменить',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Отмена'),
-                    ),
-                    FilledButton(
-                      onPressed: () {
-                        notifier.removeRecommendation(recommendation.id);
-                        Navigator.pop(context);
-                        context.pop();
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                      child: const Text('Удалить'),
-                    ),
-                  ],
                 ),
-              );
-            },
-            icon: const Icon(Icons.delete_outline),
-            label: const Text('Удалить рекомендацию'),
-            style: TextButton.styleFrom(
-              foregroundColor: theme.colorScheme.error,
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
             ),
-          ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      icon: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                          size: 32,
+                        ),
+                      ),
+                      title: const Text('Удалить рекомендацию?'),
+                      content: const Text(
+                        'Это действие нельзя отменить',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Отмена'),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            if (recommendation.id != null) {
+                              final notifier = ref.read(recommendationsProvider.notifier);
+                              notifier.removeRecommendation(recommendation.id!);
+                            }
+                            Navigator.pop(context);
+                            context.pop();
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          child: const Text('Удалить'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Удалить'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.error,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  /// Диалог планирования
+  void _showPlanDialog(BuildContext context, OutfitRecommendation recommendation) {
+    DateTime selectedDate = DateTime.now();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          icon: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.tertiaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.calendar_today,
+              color: Theme.of(context).colorScheme.tertiary,
+              size: 32,
+            ),
+          ),
+          title: const Text('Запланировать образ'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                recommendation.title ?? 'Образ',
+                style: Theme.of(context).textTheme.titleSmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                    locale: const Locale('ru', 'RU'),
+                  );
+                  if (picked != null) {
+                    setState(() => selectedDate = picked);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).colorScheme.outline),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        DateFormat('dd MMMM yyyy', 'ru_RU').format(selectedDate),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Быстрый выбор
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _QuickDateChip(
+                    label: 'Сегодня',
+                    date: DateTime.now(),
+                    isSelected: _isSameDay(selectedDate, DateTime.now()),
+                    onTap: () => setState(() => selectedDate = DateTime.now()),
+                  ),
+                  _QuickDateChip(
+                    label: 'Завтра',
+                    date: DateTime.now().add(const Duration(days: 1)),
+                    isSelected: _isSameDay(selectedDate, DateTime.now().add(const Duration(days: 1))),
+                    onTap: () => setState(() => selectedDate = DateTime.now().add(const Duration(days: 1))),
+                  ),
+                  _QuickDateChip(
+                    label: 'Выходные',
+                    date: _getNextWeekend(),
+                    isSelected: _isSameDay(selectedDate, _getNextWeekend()),
+                    onTap: () => setState(() => selectedDate = _getNextWeekend()),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Отмена'),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                if (recommendation.id == null) return;
+                final notifier = ref.read(recommendationsProvider.notifier);
+                notifier.planOutfit(
+                  recommendationId: recommendation.id!,
+                  date: selectedDate,
+                );
+                Navigator.pop(context);
+                
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green[700]),
+                        const SizedBox(width: 12),
+                        Text('Образ запланирован на ${DateFormat("dd MMMM", "ru_RU").format(selectedDate)}'),
+                      ],
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.check),
+              label: const Text('Запланировать'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -649,6 +789,18 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
     };
   }
 
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  DateTime _getNextWeekend() {
+    final now = DateTime.now();
+    int daysUntilSaturday = 6 - now.weekday;
+    if (daysUntilSaturday < 0) daysUntilSaturday += 7;
+    if (daysUntilSaturday == 0) daysUntilSaturday = 1;
+    return DateTime(now.year, now.month, now.day + daysUntilSaturday);
+  }
+
   OutfitRecommendation _createPlaceholder() {
     return OutfitRecommendation(
       id: widget.recommendationId,
@@ -659,6 +811,42 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
       temperature: null,
       weatherCondition: null,
       createdAt: DateTime.now(),
+    );
+  }
+}
+
+/// Быстрый выбор даты
+class _QuickDateChip extends StatelessWidget {
+  final String label;
+  final DateTime date;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _QuickDateChip({
+    required this.label,
+    required this.date,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return FilterChip(
+      selected: isSelected,
+      onSelected: (_) => onTap(),
+      label: Text(label),
+      selectedColor: theme.colorScheme.primaryContainer,
+      checkmarkColor: theme.colorScheme.onPrimaryContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.outline.withValues(alpha: 0.3),
+        ),
+      ),
     );
   }
 }
