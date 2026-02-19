@@ -13,13 +13,9 @@ export '../../domain/usecases/save_recommendation_usecase.dart';
 // Presentation
 export 'presentation/recommendations_screen.dart';
 export 'presentation/providers/recommendations_provider.dart';
+export 'presentation/screens/outfit_planner_screen.dart';
+export 'presentation/screens/outfit_builder_screen.dart';
+export 'presentation/screens/recommendation_detail_screen.dart';
 
 // Widgets
 export 'widgets/recommendation_card.dart';
-export 'widgets/recommendation_detail_screen.dart';
-export 'widgets/recommendation_feedback_dialog.dart';
-export 'widgets/recommendation_filter_sheet.dart';
-export 'widgets/recommendation_history_screen.dart';
-export 'widgets/recommendation_stats_card.dart';
-export 'widgets/saved_recommendations_screen.dart';
-export 'widgets/user_preferences_screen.dart';

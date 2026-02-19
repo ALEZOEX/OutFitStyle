@@ -1,55 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entities/recommendation.dart';
-import '../presentation/controllers/recommendation_state_notifier.dart';
-import 'recommendation_feedback_dialog.dart';
+import '../../../domain/entities/outfit_recommendation.dart';
 
-class RecommendationCard extends ConsumerWidget {
-  final Recommendation recommendation;
-  final String userId;
+/// Карточка персональной рекомендации
+/// Без социальной функциональности (лайки, комментарии, лента)
+class RecommendationCard extends StatelessWidget {
+  final OutfitRecommendation recommendation;
   final VoidCallback? onDetailsPressed;
-  final VoidCallback? onSharePressed;
+  final VoidCallback? onPlanPressed;
+  final VoidCallback? onUsePressed;
 
   const RecommendationCard({
     super.key,
     required this.recommendation,
-    required this.userId,
     this.onDetailsPressed,
-    this.onSharePressed,
+    this.onPlanPressed,
+    this.onUsePressed,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-
+  Widget build(BuildContext context) {
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: recommendation.isFavorite ? Colors.orange : Colors.transparent,
-          width: recommendation.isFavorite ? 2 : 0,
-        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with weather and confidence
+            // Header with weather
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    recommendation.weather ?? '',
+                    recommendation.title ?? 'Рекомендация',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (recommendation.weather != null)
+                if (recommendation.weatherCondition != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -60,7 +54,7 @@ class RecommendationCard extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Погода: ${recommendation.weather}',
+                      recommendation.weatherCondition!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.blue[800],
                           ),
@@ -70,119 +64,30 @@ class RecommendationCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
 
-            // Confidence and rating row
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.green[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'Доверие: ${recommendation.confidenceScore}%',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.green[800],
-                          fontWeight: FontWeight.w500,
-                        ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                if ((recommendation.rating ?? 0) > 0) ...[
-                  ...List.generate(5, (index) {
-                    return Icon(
-                      index < (recommendation.rating ?? 0)
-                          ? Icons.star
-                          : Icons.star_border,
-                      color: Colors.amber,
-                      size: 16,
-                    );
-                  }),
-                ],
-                const Spacer(),
-                if ((recommendation.usageCount ?? 0) > 0)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.purple[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'Использовано: ${recommendation.usageCount ?? 0}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.purple[800],
-                          ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Outfit title and occasion/activity
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Рекомендуемый образ:',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                if ((recommendation.occasion?.isNotEmpty ?? false) ||
-                    (recommendation.activity?.isNotEmpty ?? false))
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.indigo[50],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      (recommendation.occasion?.isNotEmpty ?? false)
-                          ? (recommendation.occasion ?? '')
-                          : ((recommendation.activity?.isNotEmpty ?? false)
-                              ? (recommendation.activity ?? '')
-                              : ''),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.indigo[700],
-                          ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
             // Outfit items
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: (recommendation.outfit?.clothingItemIds ?? [])
-                  .take(6) // Show up to 6 items
-                  .map((itemId) => _buildOutfitItem(itemId.toString(), context))
-                  .toList(),
-            ),
-            const SizedBox(height: 12),
-
-            // Recommendation reason
-            if (recommendation.recommendationReason?.isNotEmpty ?? false)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  border: Border.all(color: Colors.blue[200]!),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Причина: ${recommendation.recommendationReason ?? ''}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.blue[800],
-                      ),
-                ),
+            if (recommendation.recommendedItems != null &&
+                recommendation.recommendedItems!.isNotEmpty) ...[
+              Text(
+                'Рекомендуемые вещи:',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
-            if (!(recommendation.recommendationReason?.isNotEmpty ?? false))
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: recommendation.recommendedItems!
+                    .take(6)
+                    .map((item) => _buildOutfitItem(item, context))
+                    .toList(),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // Description
+            if (recommendation.description != null &&
+                recommendation.description!.isNotEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
@@ -192,52 +97,40 @@ class RecommendationCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Совет: ${_getRecommendationTip(recommendation.outfit?.id?.toString() ?? '')}',
+                  recommendation.description!,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.green[800],
                       ),
                 ),
               ),
+            if (recommendation.description == null ||
+                recommendation.description!.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  border: Border.all(color: Colors.blue[200]!),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Совет: ${_getRecommendationTip(recommendation.id ?? '')}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.blue[800],
+                      ),
+                ),
+              ),
             const SizedBox(height: 12),
 
-            // Action buttons
+            // Action buttons - персональные действия
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildActionButton(
-                  icon: (recommendation.isLiked ?? false)
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: (recommendation.isLiked ?? false) ? Colors.red : null,
-                  label: 'Нравится',
-                  onPressed: () {
-                    ref
-                        .read(recommendationStateNotifierProvider.notifier)
-                        .toggleLike(
-                          recommendation.id?.toString() ?? '',
-                        );
-                  },
-                ),
-                _buildActionButton(
-                  icon: Icons.feedback,
+                  icon: Icons.calendar_today,
                   color: Colors.blue,
-                  label: 'Отзыв',
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => RecommendationFeedbackDialog(
-                        recommendation: recommendation,
-                        userId: userId,
-                        onFeedbackSubmitted: (feedback) {
-                          // recommendationNotifier.submitDetailedFeedback(
-                          //   userId: userId,
-                          //   recommendationId: recommendation.id?.toString() ?? '',
-                          //   feedback: feedback,
-                          // );
-                        },
-                      ),
-                    );
-                  },
+                  label: 'Запланировать',
+                  onPressed: onPlanPressed,
                 ),
                 _buildActionButton(
                   icon: Icons.visibility,
@@ -246,25 +139,10 @@ class RecommendationCard extends ConsumerWidget {
                   onPressed: onDetailsPressed ?? () {},
                 ),
                 _buildActionButton(
-                  icon: recommendation.isSaved
-                      ? Icons.bookmark
-                      : Icons.bookmark_outline,
-                  color:
-                      recommendation.isSaved ? Colors.orange : null,
-                  label: 'Сохранить',
-                  onPressed: () {
-                    ref
-                        .read(recommendationStateNotifierProvider.notifier)
-                        .toggleSave(
-                          recommendation.id?.toString() ?? '',
-                        );
-                  },
-                ),
-                _buildActionButton(
-                  icon: Icons.share,
-                  color: Colors.purple,
-                  label: 'Поделиться',
-                  onPressed: onSharePressed ?? () {},
+                  icon: Icons.check,
+                  color: Colors.orange,
+                  label: 'Использовать',
+                  onPressed: onUsePressed,
                 ),
               ],
             ),
@@ -292,7 +170,7 @@ class RecommendationCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildOutfitItem(String itemId, BuildContext context) {
+  Widget _buildOutfitItem(String item, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -307,7 +185,7 @@ class RecommendationCard extends ConsumerWidget {
           const SizedBox(width: 4),
           Flexible(
             child: Text(
-              'Эл. $itemId',
+              item,
               style:
                   Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
               overflow: TextOverflow.ellipsis,

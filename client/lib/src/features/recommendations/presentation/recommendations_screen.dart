@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../presentation/providers/recommendations_provider.dart';
-import '../../../ui/widgets/recommendation_card.dart';
+import '../widgets/recommendation_card.dart';
 
-/// Экран рекомендаций - лента как в соцсети
+/// Экран персональных рекомендаций
+/// Без социальной функциональности — только персональные подборки
 class RecommendationsScreen extends ConsumerStatefulWidget {
   const RecommendationsScreen({super.key});
 
@@ -17,7 +18,6 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  String _selectedFilter = 'all';
 
   @override
   void initState() {
@@ -51,9 +51,9 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           SliverToBoxAdapter(
             child: _buildHeader(context, state, stats),
           ),
-          // Фильтры
+          // Быстрые действия
           SliverToBoxAdapter(
-            child: _buildFilters(context),
+            child: _buildQuickActions(context),
           ),
           // Кнопка генерации
           SliverToBoxAdapter(
@@ -62,6 +62,11 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           // Список рекомендаций
           _buildRecommendationsList(context, state),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/recommendations/planner'),
+        icon: const Icon(Icons.calendar_today),
+        label: const Text('Планировщик'),
       ),
     );
   }
@@ -141,19 +146,19 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
         Expanded(
           child: _buildStatCard(
             context,
-            icon: Icons.favorite,
-            label: 'Лайки',
-            value: stats['liked']?.toString() ?? '0',
-            color: Colors.red,
+            icon: Icons.calendar_today,
+            label: 'Запланировано',
+            value: stats['planned']?.toString() ?? '0',
+            color: theme.colorScheme.tertiary,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
             context,
-            icon: Icons.bookmark,
-            label: 'Сохранено',
-            value: stats['saved']?.toString() ?? '0',
+            icon: Icons.check_circle,
+            label: 'Использовано',
+            value: stats['used']?.toString() ?? '0',
             color: theme.colorScheme.secondary,
           ),
         ),
@@ -203,69 +208,34 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     );
   }
 
-  /// Фильтры
-  Widget _buildFilters(BuildContext context) {
+  /// Быстрые действия
+  Widget _buildQuickActions(BuildContext context) {
     final theme = Theme.of(context);
-    final filters = [
-      {'id': 'all', 'label': 'Все', 'icon': Icons.list},
-      {'id': 'liked', 'label': 'Лайки', 'icon': Icons.favorite},
-      {'id': 'saved', 'label': 'Сохранено', 'icon': Icons.bookmark},
-    ];
 
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: SizedBox(
-        height: 48,
-        child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          scrollDirection: Axis.horizontal,
-          itemCount: filters.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 8),
-          itemBuilder: (context, index) {
-            final filter = filters[index];
-            final isSelected = _selectedFilter == filter['id'];
-
-            return FilterChip(
-              selected: isSelected,
-              onSelected: (_) {
-                setState(() {
-                  _selectedFilter = filter['id'] as String;
-                });
-              },
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    filter['icon'] as IconData,
-                    size: 16,
-                    color: isSelected
-                        ? theme.colorScheme.onPrimaryContainer
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    filter['label'] as String,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isSelected
-                          ? theme.colorScheme.onPrimaryContainer
-                          : theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: _QuickActionChip(
+                icon: Icons.build,
+                label: 'Конструктор',
+                color: theme.colorScheme.primary,
+                onTap: () => context.push('/recommendations/builder'),
               ),
-              selectedColor: theme.colorScheme.primaryContainer,
-              checkmarkColor: theme.colorScheme.onPrimaryContainer,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(
-                  color: isSelected
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.outline.withValues(alpha: 0.3),
-                ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickActionChip(
+                icon: Icons.calendar_today,
+                label: 'Планировщик',
+                color: theme.colorScheme.tertiary,
+                onTap: () => context.push('/recommendations/planner'),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -366,14 +336,6 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     final theme = Theme.of(context);
     final notifier = ref.read(recommendationsProvider.notifier);
 
-    // Фильтрация
-    var recommendations = state.recommendations;
-    if (_selectedFilter == 'liked') {
-      recommendations = state.getLiked();
-    } else if (_selectedFilter == 'saved') {
-      recommendations = state.getSaved();
-    }
-
     if (state.status == RecommendationsLoadStatus.loading) {
       return const SliverFillRemaining(
         child: Center(
@@ -412,11 +374,9 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
       );
     }
 
-    if (recommendations.isEmpty) {
+    if (state.recommendations.isEmpty) {
       return SliverFillRemaining(
-        child: EmptyRecommendationsState(
-          onGenerate: () => _generateRecommendation(context),
-        ),
+        child: _buildEmptyState(context),
       );
     }
 
@@ -425,23 +385,21 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            final recommendation = recommendations[index];
+            final recommendation = state.recommendations[index];
             return FadeTransition(
               opacity: _fadeAnimation,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: RecommendationCard(
                   recommendation: recommendation,
-                  isLiked: state.isLiked(recommendation.id),
-                  isSaved: state.isSaved(recommendation.id),
-                  onTap: () => context.push('/recommendations/${recommendation.id}'),
-                  onLike: () => notifier.toggleLike(recommendation.id),
-                  onSave: () => notifier.toggleSave(recommendation.id),
+                  onDetailsPressed: () => context.push('/recommendations/${recommendation.id}'),
+                  onPlanPressed: () => _planRecommendation(context, recommendation.id),
+                  onUsePressed: () => _useRecommendation(context, recommendation.id),
                 ),
               ),
             );
           },
-          childCount: recommendations.length,
+          childCount: state.recommendations.length,
         ),
       ),
     );
@@ -481,5 +439,120 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
         ),
       );
     }
+  }
+
+  /// Запланировать рекомендацию
+  void _planRecommendation(BuildContext context, String? id) {
+    if (id == null) return;
+    context.push('/recommendations/planner', extra: id);
+  }
+
+  /// Использовать рекомендацию
+  void _useRecommendation(BuildContext context, String? id) {
+    if (id == null) return;
+    final notifier = ref.read(recommendationsProvider.notifier);
+    notifier.markAsUsed(id);
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Рекомендация отмечена как использованная'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+      ),
+    );
+  }
+
+  /// Пустое состояние
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.auto_awesome_outlined,
+              size: 80,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Нет рекомендаций',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Сгенерируйте персональную рекомендацию\nна основе погоды и вашего гардероба',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => _generateRecommendation(context),
+              icon: const Icon(Icons.auto_awesome),
+              label: const Text('Сгенерировать'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Элемент быстрого действия
+class _QuickActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _QuickActionChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: color.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
