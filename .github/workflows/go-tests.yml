@@ -2,23 +2,91 @@ name: Go Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
+    paths:
+      - 'server/**/*.go'
+      - 'server/go.mod'
+      - 'server/go.sum'
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+    paths:
+      - 'server/**/*.go'
+      - 'server/go.mod'
+      - 'server/go.sum'
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: outfitstyle_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
-        go-version: 1.21
+        go-version: '1.21'
+        cache: true
+        cache-dependency-path: server/go.sum
 
-    - name: Build and test
+    - name: Install dependencies
       run: |
-        cd server/api
-        go build -v ./...
-        go test -v ./...
+        cd server
+        go mod download
+
+    - name: Run unit tests (no database required)
+      run: |
+        cd server
+        go test -v -race -coverprofile=coverage_unit.out -covermode=atomic \
+          ./internal/core/... \
+          ./internal/api/... \
+          ./internal/infrastructure/adapters/... \
+          ./internal/infrastructure/external/... \
+          ./internal/validation/... \
+          ./internal/integration/...
+
+    - name: Run integration tests (requires database)
+      run: |
+        cd server
+        go test -v -race -coverprofile=coverage_integration.out -covermode=atomic \
+          -tags=integration \
+          ./tests/integration/...
+      env:
+        DATABASE_URL: postgres://postgres:test@localhost:5432/outfitstyle_test?sslmode=disable
+        REDIS_URL: redis://localhost:6379
+
+    - name: Combine coverage reports
+      run: |
+        cd server
+        echo "mode: atomic" > coverage.out
+        grep -h "^" coverage_unit.out coverage_integration.out 2>/dev/null | grep -v "^mode:" >> coverage.out || true
+        go tool cover -html=coverage.out -o coverage.html
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./server/coverage.out
+        flags: backend

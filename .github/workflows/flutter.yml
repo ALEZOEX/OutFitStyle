@@ -3,8 +3,16 @@ name: Flutter CI/CD
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'client/**/*.dart'
+      - 'client/pubspec.yaml'
+      - 'client/pubspec.lock'
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+    paths:
+      - 'client/**/*.dart'
+      - 'client/pubspec.yaml'
+      - 'client/pubspec.lock'
 
 env:
   FLUTTER_VERSION: '3.16.0'
@@ -18,32 +26,32 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('**/pubspec.lock') }}
-      
+          cache-key: flutter-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('client/pubspec.lock') }}
+
       - name: Install dependencies
         run: flutter pub get
-      
+
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
-      
+
       - name: Analyze
         run: flutter analyze --fatal-infos
-      
-      - name: Run tests
-        run: flutter test --coverage
-      
+
+      - name: Run unit tests
+        run: flutter test --coverage --test-randomize-ordering-seed=random
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
           file: ./client/coverage/lcov.info
           flags: flutter
-  
+
   build-android:
     needs: test
     runs-on: ubuntu-latest
@@ -54,22 +62,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-      
+
       - name: Install dependencies
         run: flutter pub get
-      
+
       - name: Build APK
         run: flutter build apk --release
-      
+
       - name: Build App Bundle
         run: flutter build appbundle --release
-      
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -77,7 +85,7 @@ jobs:
           path: |
             client/build/app/outputs/flutter-apk/app-release.apk
             client/build/app/outputs/bundle/release/app-release.aab
-  
+
   build-ios:
     needs: test
     runs-on: macos-latest
@@ -88,15 +96,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-      
+
       - name: Install dependencies
         run: flutter pub get
-      
+
       - name: Build iOS
         run: flutter build ios --release --no-codesign
