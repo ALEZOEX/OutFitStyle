@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -10,18 +11,29 @@ import (
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/middleware"
-	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
 )
 
+// WardrobeService интерфейс сервиса гардероба
+type WardrobeService interface {
+	List(ctx context.Context, userID domain.ID, q domain.WardrobeListQuery) ([]domain.WardrobeItem, int, error)
+	Get(ctx context.Context, userID, wardrobeID domain.ID) (*domain.WardrobeItem, error)
+	Create(ctx context.Context, userID domain.ID, req domain.WardrobeCreateRequest) (*domain.WardrobeItem, error)
+	Update(ctx context.Context, userID, wardrobeID domain.ID, req domain.WardrobeUpdateRequest) (*domain.WardrobeItem, error)
+	Delete(ctx context.Context, userID, wardrobeID domain.ID) error
+	SetFavorite(ctx context.Context, userID, wardrobeID domain.ID, isFavorite bool) error
+	SetArchived(ctx context.Context, userID, wardrobeID domain.ID, isArchived bool) error
+	MarkWorn(ctx context.Context, userID, wardrobeID domain.ID) (*domain.WardrobeItem, error)
+}
+
 type WardrobeHandler struct {
-	svc *services.WardrobeService
+	svc WardrobeService
 	log *zap.Logger
 }
 
-func NewWardrobeHandler(svc *services.WardrobeService, log *zap.Logger) *WardrobeHandler {
+func NewWardrobeHandler(svc WardrobeService, log *zap.Logger) *WardrobeHandler {
 	return &WardrobeHandler{svc: svc, log: log}
 }
 
