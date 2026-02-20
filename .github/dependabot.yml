@@ -10,13 +10,6 @@ updates:
     labels:
       - "dependencies"
       - "go"
-    groups:
-      go-dependencies:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
 
   - package-ecosystem: "pip"
     directory: "/ml-service"
