@@ -10,7 +10,7 @@ df = pd.read_csv('data/raw/season fashion dataset - multilabel.csv')
 
 print(f"Загружено {len(df)} записей")
 print(f"Колонки: {df.columns.tolist()}")
-print(f"\nПример данных (первые 5 строк):")
+print("\nПример данных (первые 5 строк):")
 print(df.head())
 
 # Создаём целевую переменную (is_recommended) на основе фактических выборов

@@ -84,7 +84,7 @@ with open(manifest_path, 'wb') as f:
 
 model.save_model(cbm_path)
 
-print(f"[OK] Dummy model created:")
+print("[OK] Dummy model created:")
 print(f"   Manifest: {manifest_path}")
 print(f"   Model: {cbm_path}")
 print(f"   Version: {manifest['version']}")

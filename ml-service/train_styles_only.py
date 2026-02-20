@@ -363,7 +363,7 @@ def main():
     
     result = model.predict_single(test_weather, test_user, test_item)
 
-    logger.info(f"\nРезультат тестового предсказания:")
+    logger.info("\nРезультат тестового предсказания:")
     logger.info(f"  Предмет: {test_item['item_name']}")
     logger.info(f"  Температура: {test_weather['temperature']}°C")
     logger.info(f"  Рекомендуется: {result['is_recommended']}")

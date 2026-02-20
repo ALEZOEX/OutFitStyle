@@ -2,6 +2,7 @@
 
 target-version = "py311"
 
+[lint]
 # Игнорируемые правила
 ignore = [
     "E501",  # line too long
@@ -22,9 +23,4 @@ exclude = [
     "catboost_info",
     ".venv",
     "venv",
-]
-
-# Игнорировать синтаксические ошибки в сгенерированных файлах
-extend-ignore = [
-    "E999",  # syntax errors
 ]

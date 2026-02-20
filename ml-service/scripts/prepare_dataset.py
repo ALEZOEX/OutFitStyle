@@ -315,7 +315,7 @@ if __name__ == '__main__':
     print("\nDataset Statistics:")
     print(f"   Total samples: {len(df)}")
     print(f"   Features: {len(df.columns)}")
-    print(f"\n   Categories distribution:")
+    print("\n   Categories distribution:")
     print(df['category'].value_counts())
     print(f"\n   Temperature range: {df['temperature'].min():.1f}°C to {df['temperature'].max():.1f}°C")
 
