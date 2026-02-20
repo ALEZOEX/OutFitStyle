@@ -93,5 +93,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Отключаем кэш чтобы избежать проблем с checksum
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
