@@ -61,13 +61,7 @@ jobs:
       run: |
         cd server
         go test -v -race -coverprofile=coverage_unit.out -covermode=atomic \
-          ./internal/core/... \
-          ./internal/api/... \
-          ./internal/infrastructure/adapters/... \
-          ./internal/infrastructure/external/... \
-          ./internal/validation/... \
-          ./internal/integration/... \
-          ./internal/pkg/...
+          $(go list ./... | grep -v /tests/integration/)
 
     - name: Run integration tests (requires database)
       run: |
@@ -82,8 +76,8 @@ jobs:
     - name: Combine coverage reports
       run: |
         cd server
-        echo "mode: atomic" > coverage.out
-        grep -h "^" coverage_unit.out coverage_integration.out 2>/dev/null | grep -v "^mode:" >> coverage.out || true
+        go install github.com/wadey/gocovmerge@latest
+        gocovmerge coverage_unit.out coverage_integration.out > coverage.out
         go tool cover -html=coverage.out -o coverage.html
 
     - name: Upload coverage
@@ -91,3 +85,5 @@ jobs:
       with:
         file: ./server/coverage.out
         flags: backend
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false

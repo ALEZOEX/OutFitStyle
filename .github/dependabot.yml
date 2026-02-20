@@ -11,8 +11,63 @@ updates:
       - "dependencies"
       - "go"
 
+  - package-ecosystem: "pip"
+    directory: "/ml-service"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "admin"
+    labels:
+      - "dependencies"
+      - "python"
+
+  - package-ecosystem: "pub"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "admin"
+    labels:
+      - "dependencies"
+      - "flutter"
+
   - package-ecosystem: "docker"
     directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "admin"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "admin"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/ml-service"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "admin"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/server/marketplace-service"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
@@ -32,3 +87,11 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+
+  groups:
+    go-dependencies:
+      patterns:
+        - "*"
+      update-types:
+        - "minor"
+        - "patch"

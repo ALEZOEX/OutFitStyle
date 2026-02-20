@@ -51,6 +51,8 @@ jobs:
         with:
           file: ./client/coverage/lcov.info
           flags: flutter
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   build-android:
     needs: test
@@ -71,6 +73,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build APK
         run: flutter build apk --release
@@ -106,5 +111,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+
       - name: Build iOS
         run: flutter build ios --release --no-codesign
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: client/build/ios/iphoneos/Runner.app
