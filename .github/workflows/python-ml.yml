@@ -79,7 +79,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/outfitstyle-ml-service
+          images: ghcr.io/alezoex/outfitstyle-ml-service
           tags: |
             type=sha
             type=ref,event=branch
