@@ -244,7 +244,7 @@ class ProfileScreen extends ConsumerWidget {
       error: (_, __) => 0,
     );
 
-    final statsData = [
+    final statsData = <Map<String, String>>[
       {'label': 'Вещей', 'value': stats.totalCount.toString(), 'icon': Icons.checkroom},
       {'label': 'Категорий', 'value': stats.categoriesCount.toString(), 'icon': Icons.category},
       {'label': 'Избранное', 'value': stats.favoritesCount.toString(), 'icon': Icons.favorite},

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/repositories/auth_repository.dart';
+import '../../../../presentation/routing/router.dart';
 import '../../../wardrobe/presentation/providers/wardrobe_provider.dart';
 
 /// Состояние профиля пользователя
@@ -138,7 +139,7 @@ class ProfileDataNotifier extends StateNotifier<AsyncValue<ProfileData>> {
         final profileData = ProfileData.fromMap(userData);
         state = AsyncValue.data(profileData);
       } else {
-        state = const AsyncValue.error(
+        state = AsyncValue.error(
           ProfileException('Не удалось загрузить данные профиля'),
           StackTrace.current,
         );
