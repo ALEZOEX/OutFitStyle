@@ -4,7 +4,7 @@ go 1.24.12
 
 require (
 	// Security
-	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	// Core web framework
 	github.com/gorilla/mux v1.8.1
