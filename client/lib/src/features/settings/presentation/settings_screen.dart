@@ -9,6 +9,9 @@ import '../../../ui/widgets/notification_dialog.dart';
 import 'screens/preferences_screen.dart';
 import 'screens/profile_settings_screen.dart';
 import 'screens/subscription_screen.dart';
+import 'screens/security_screen.dart';
+import 'screens/language_screen.dart';
+import 'screens/about_screen.dart';
 import '../../achievements/presentation/pages/achievements_page.dart';
 
 /// Провайдер для состояния разрешений
@@ -404,6 +407,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+              );
+            },
+          ),
+          Divider(
+            height: 1,
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+          ),
+          _buildSettingTile(
+            context,
+            icon: Icons.security,
+            title: 'Безопасность',
+            subtitle: 'Пароль, 2FA, сессии',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SecurityScreen()),
+              );
+            },
+          ),
+          Divider(
+            height: 1,
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+          ),
+          _buildSettingTile(
+            context,
+            icon: Icons.language,
+            title: 'Язык',
+            subtitle: 'Выберите язык приложения',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LanguageScreen()),
+              );
+            },
+          ),
+          Divider(
+            height: 1,
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+          ),
+          _buildSettingTile(
+            context,
+            icon: Icons.info_outline,
+            title: 'О приложении',
+            subtitle: 'Версия, команда, лицензии',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
               );
             },
           ),

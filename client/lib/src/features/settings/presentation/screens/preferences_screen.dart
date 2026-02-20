@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/api/api_client.dart';
-import '../../../../core/api/api_config.dart';
 import '../../../../services/auth_storage.dart';
 import '../../data/repositories/preferences_repository.dart';
 
@@ -217,8 +216,7 @@ final _authStorageProvider = Provider<AuthStorage>((ref) {
 
 final _apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(_authStorageProvider);
-  final config = ApiConfig(apiBase: ApiConfig.baseUrl);
-  return ApiClient(config: config, storage: storage);
+  return ApiClient(storage: storage);
 });
 
 final _preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {

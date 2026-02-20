@@ -15,6 +15,9 @@ import '../../features/generator/presentation/generator_screen.dart';
 import '../../features/settings/presentation/screens/profile_settings_screen.dart';
 import '../../features/settings/presentation/screens/preferences_screen.dart';
 import '../../features/settings/presentation/screens/subscription_screen.dart';
+import '../../features/settings/presentation/screens/security_screen.dart';
+import '../../features/settings/presentation/screens/language_screen.dart';
+import '../../features/settings/presentation/screens/about_screen.dart';
 import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
@@ -214,6 +217,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings/subscription',
         name: 'subscription',
         builder: (context, state) => const SubscriptionScreen(),
+      ),
+      // Безопасность
+      GoRoute(
+        path: '/settings/security',
+        name: 'security',
+        builder: (context, state) => const SecurityScreen(),
+      ),
+      // Язык
+      GoRoute(
+        path: '/settings/language',
+        name: 'language',
+        builder: (context, state) => const LanguageScreen(),
+      ),
+      // О приложении
+      GoRoute(
+        path: '/settings/about',
+        name: 'about',
+        builder: (context, state) => const AboutScreen(),
       ),
       // Достижения
       GoRoute(
