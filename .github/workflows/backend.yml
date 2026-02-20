@@ -63,9 +63,9 @@ jobs:
         run: cd server && go mod download
 
       - name: Run linter
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.64.5
+          version: v1.64.8
           working-directory: server
           args: --timeout=5m
 
