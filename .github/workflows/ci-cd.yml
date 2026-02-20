@@ -64,7 +64,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./server
-        file: ./server/Dockerfile.prod
+        file: ./server/Dockerfile
         push: true
         tags: ghcr.io/alezoex/outfitstyle-server:latest,ghcr.io/alezoex/outfitstyle-server:${{ github.sha }}
 
