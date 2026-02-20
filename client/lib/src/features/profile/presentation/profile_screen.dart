@@ -335,12 +335,6 @@ class ProfileScreen extends ConsumerWidget {
         'color': Colors.purple,
       },
       {
-        'icon': Icons.privacy_tip_outlined,
-        'label': 'Приватность',
-        'route': '/settings/privacy',
-        'color': Colors.teal,
-      },
-      {
         'icon': Icons.notifications_outlined,
         'label': 'Уведомления',
         'route': '/notifications',
