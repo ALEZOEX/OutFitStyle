@@ -14,39 +14,39 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./server/ml-service
+        working-directory: ./ml-service
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          cache-dependency-path: server/ml-service/requirements.txt
-      
+          cache-dependency-path: ml-service/requirements.txt
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-asyncio mypy ruff safety
-      
+
       - name: Lint with Ruff
         run: ruff check .
-      
+
       - name: Type check with MyPy
         run: mypy . --ignore-missing-imports
-      
+
       - name: Security check
         run: safety check
-      
+
       - name: Run tests
         run: pytest -v --cov=. --cov-report=xml
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
-          file: ./server/ml-service/coverage.xml
+          file: ./ml-service/coverage.xml
           flags: ml-service
   
   build-and-push:
@@ -84,7 +84,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./server/ml-service/Dockerfile
+          file: ./ml-service/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
