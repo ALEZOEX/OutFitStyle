@@ -19,6 +19,9 @@ type UserRepository interface {
 	// UpdateUser обновляет информацию о пользователе
 	UpdateUser(ctx context.Context, user *domain.User) error
 
+	// UpdatePassword обновляет пароль пользователя
+	UpdatePassword(ctx context.Context, userID domain.ID, newPassword string) error
+
 	// TZ-style profile/stat projection
 	// GetUserProfile возвращает профиль пользователя
 	GetUserProfile(ctx context.Context, userID domain.ID) (*domain.User, error)

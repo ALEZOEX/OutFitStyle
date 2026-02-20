@@ -24,4 +24,10 @@ abstract class IAuthRepository {
 
   /// Получить данные текущего пользователя
   Future<Map<String, dynamic>?> getCurrentUser();
+
+  /// Запросить восстановление пароля (отправка кода на email)
+  Future<bool> forgotPassword(String email);
+
+  /// Сбросить пароль по коду
+  Future<bool> resetPassword(String email, String code, String newPassword);
 }

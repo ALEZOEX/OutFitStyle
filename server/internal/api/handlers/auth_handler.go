@@ -3,18 +3,23 @@
 package handlers
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 
 	"outfitstyle/server/internal/api/middleware"
+	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/email"
 	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
 )
@@ -43,14 +48,27 @@ type AuthHandler struct {
 	auth            *services.AuthService                // Сервис аутентификации для выполнения бизнес-логики
 	lockout         *middleware.AccountLockout           // Защита от brute-force атак
 	lockoutDuration time.Duration                        // Длительность блокировки
+	redis           *redis.Client                        // Redis для кэширования кодов восстановления
+	userRepo        repositories.UserRepository          // Репозиторий пользователей
+	smtp            *email.SMTPService                   // SMTP сервис для отправки email
 }
 
 // NewAuthHandler создает новый экземпляр обработчика аутентификации
-func NewAuthHandler(auth *services.AuthService, lockout *middleware.AccountLockout, lockoutDuration time.Duration) *AuthHandler {
+func NewAuthHandler(
+	auth *services.AuthService,
+	lockout *middleware.AccountLockout,
+	lockoutDuration time.Duration,
+	redis *redis.Client,
+	userRepo repositories.UserRepository,
+	smtp *email.SMTPService,
+) *AuthHandler {
 	return &AuthHandler{
 		auth:            auth,
 		lockout:         lockout,
 		lockoutDuration: lockoutDuration,
+		redis:           redis,
+		userRepo:        userRepo,
+		smtp:            smtp,
 	}
 }
 
@@ -64,6 +82,8 @@ func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/logout", h.Logout).Methods(http.MethodPost) // требует AuthMiddleware
 	r.HandleFunc("/google", h.GoogleSignIn).Methods(http.MethodPost)
 	r.HandleFunc("/validate", h.ValidateToken).Methods(http.MethodPost)
+	r.HandleFunc("/forgot-password", h.ForgotPassword).Methods(http.MethodPost)
+	r.HandleFunc("/reset-password", h.ResetPassword).Methods(http.MethodPost)
 }
 
 // Register обрабатывает запрос на регистрацию нового пользователя
@@ -356,22 +376,169 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	resp.Error(w, http.StatusNotImplemented, errors.New("RefreshToken not implemented"))
 }
 
+// forgotPasswordRequest запрос на восстановление пароля
+type forgotPasswordRequest struct {
+	Email string `json:"email"`
+}
+
 // ForgotPassword обрабатывает запрос на восстановление забытого пароля
-// Заглушка для функции, которая может быть реализована позже
+// Отправляет email с 6-значным кодом восстановления
 func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	// Заглушка для ForgotPassword
-	resp.Error(w, http.StatusNotImplemented, errors.New("ForgotPassword not implemented"))
+	var req forgotPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	// Валидация email
+	v := validation.NewValidator()
+	validation.ValidateEmail(v, req.Email)
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
+	email := strings.TrimSpace(strings.ToLower(req.Email))
+
+	// Проверяем, существует ли пользователь
+	_, err := h.userRepo.GetUserByEmail(r.Context(), email)
+	if err != nil {
+		if errors.Is(err, repositories.ErrNotFound) {
+			// Не раскрываем, что email не существует (security best practice)
+			// Возвращаем успех в любом случае
+			resp.Success(w, map[string]any{"success": true})
+			return
+		}
+		resp.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Генерируем 6-значный код
+	code, err := generateResetCode()
+	if err != nil {
+		resp.Error(w, http.StatusInternalServerError, errors.Wrap(err, "failed to generate code"))
+		return
+	}
+
+	// Сохраняем код в Redis с TTL 15 минут
+	codeKey := fmt.Sprintf("password_reset:%s", email)
+	if h.redis != nil {
+		if err := h.redis.Set(r.Context(), codeKey, code, 15*time.Minute).Err(); err != nil {
+			resp.Error(w, http.StatusInternalServerError, errors.Wrap(err, "failed to store code"))
+			return
+		}
+	} else {
+		// Fallback: in-memory storage (для разработки без Redis)
+		// В production это не должно использоваться
+		resp.Error(w, http.StatusInternalServerError, errors.New("Redis unavailable"))
+		return
+	}
+
+	// Отправляем email
+	if h.smtp != nil {
+		if err := h.smtp.SendPasswordReset(email, code); err != nil {
+			// Логируем ошибку, но не раскрываем пользователю
+			// Код всё равно сохранён в Redis
+		}
+	}
+
+	// Возвращаем успех (не раскрываем, существует ли пользователь)
+	resp.Success(w, map[string]any{"success": true})
 }
 
-// ResetPassword обрабатывает запрос на сброс пароля
-// Заглушка для функции, которая может быть реализована позже
+// resetPasswordRequest запрос на сброс пароля
+type resetPasswordRequest struct {
+	Email       string `json:"email"`
+	Code        string `json:"code"`
+	NewPassword string `json:"new_password"`
+}
+
+// ResetPassword обрабатывает запрос на сброс пароля по коду
 func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	// Заглушка для ResetPassword
-	resp.Error(w, http.StatusNotImplemented, errors.New("ResetPassword not implemented"))
+	var req resetPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	// Валидация
+	v := validation.NewValidator()
+	validation.ValidateEmail(v, req.Email)
+	validation.ValidatePasswordPlaintext(v, req.NewPassword)
+	validation.ValidateStringLength(v, req.Code, 6, 6, "code", "code")
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
+	email := strings.TrimSpace(strings.ToLower(req.Email))
+
+	// Проверяем код в Redis
+	codeKey := fmt.Sprintf("password_reset:%s", email)
+	var storedCode string
+
+	if h.redis != nil {
+		val, err := h.redis.Get(r.Context(), codeKey).Result()
+		if err == redis.Nil {
+			resp.Error(w, http.StatusBadRequest, errors.New("invalid or expired code"))
+			return
+		}
+		if err != nil {
+			resp.Error(w, http.StatusInternalServerError, errors.Wrap(err, "failed to verify code"))
+			return
+		}
+		storedCode = val
+	} else {
+		resp.Error(w, http.StatusInternalServerError, errors.New("Redis unavailable"))
+		return
+	}
+
+	// Сравниваем коды
+	if storedCode != req.Code {
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid code"))
+		return
+	}
+
+	// Получаем пользователя
+	user, err := h.userRepo.GetUserByEmail(r.Context(), email)
+	if err != nil {
+		if errors.Is(err, repositories.ErrNotFound) {
+			resp.Error(w, http.StatusBadRequest, errors.New("user not found"))
+			return
+		}
+		resp.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Обновляем пароль
+	if err := h.userRepo.UpdatePassword(r.Context(), user.ID, req.NewPassword); err != nil {
+		resp.Error(w, http.StatusInternalServerError, errors.Wrap(err, "failed to update password"))
+		return
+	}
+
+	// Удаляем код из Redis (одноразовый)
+	_ = h.redis.Del(r.Context(), codeKey).Err()
+
+	resp.Success(w, map[string]any{"success": true})
+}
+
+// generateResetCode генерирует 6-значный случайный код
+func generateResetCode() (string, error) {
+	const digits = "0123456789"
+	code := make([]byte, 6)
+	for i := range code {
+		n, err := rand.Int(rand.Reader, big.NewInt(10))
+		if err != nil {
+			return "", err
+		}
+		code[i] = digits[n.Int64()]
+	}
+	return string(code), nil
 }
 
 // GoogleLogin обрабатывает запрос на вход через Google

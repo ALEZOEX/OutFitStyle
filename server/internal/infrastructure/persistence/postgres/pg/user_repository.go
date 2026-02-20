@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 
 	"outfitstyle/server/internal/core/domain"
 )
@@ -308,6 +309,28 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) erro
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to update user")
+	}
+
+	return nil
+}
+
+// UpdatePassword обновляет пароль пользователя
+func (r *UserRepository) UpdatePassword(ctx context.Context, userID domain.ID, newPassword string) error {
+	// Хешируем пароль с тем же cost, что и при регистрации (12)
+	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
+	if err != nil {
+		return errors.Wrap(err, "failed to hash password")
+	}
+
+	query := `
+		UPDATE users
+		SET password_hash = $1, updated_at = $2
+		WHERE id = $3
+	`
+
+	_, err = r.db.Exec(ctx, query, string(hash), time.Now(), userID)
+	if err != nil {
+		return errors.Wrap(err, "failed to update password")
 	}
 
 	return nil

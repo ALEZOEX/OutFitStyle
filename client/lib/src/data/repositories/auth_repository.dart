@@ -190,4 +190,34 @@ class AuthRepository implements IAuthRepository {
       return null;
     }
   }
+
+  @override
+  Future<bool> forgotPassword(String email) async {
+    try {
+      final response = await apiClient.post(
+        '/auth/forgot-password',
+        data: {'email': email},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> resetPassword(String email, String code, String newPassword) async {
+    try {
+      final response = await apiClient.post(
+        '/auth/reset-password',
+        data: {
+          'email': email,
+          'code': code,
+          'new_password': newPassword,
+        },
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 }
