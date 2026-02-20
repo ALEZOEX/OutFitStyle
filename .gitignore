@@ -48,6 +48,13 @@ pubspec.lock
 
 # iOS related
 /ios/Flutter/App.framework
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
 /ios/Flutter/Flutter.framework
 /ios/Flutter/Generated.xcconfig
 /ios/Flutter/app.flx
