@@ -52,6 +52,10 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+            buildkitd.flags=--no-cache
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -66,10 +70,10 @@ jobs:
           context: ./server
           file: ./server/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ghcr.io/alezoex/outfitstyle-server:latest
             ghcr.io/alezoex/outfitstyle-server:${{ github.sha }}
-          no-cache: true
 
       - name: Build and push ml-service
         uses: docker/build-push-action@v6
@@ -77,10 +81,10 @@ jobs:
           context: ./ml-service
           file: ./ml-service/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ghcr.io/alezoex/outfitstyle-ml:latest
             ghcr.io/alezoex/outfitstyle-ml:${{ github.sha }}
-          no-cache: true
 
       - name: Build and push marketplace-service
         uses: docker/build-push-action@v6
@@ -88,7 +92,7 @@ jobs:
           context: ./server/marketplace-service
           file: ./server/marketplace-service/Dockerfile.prod
           push: true
+          no-cache: true
           tags: |
             ghcr.io/alezoex/outfitstyle-marketplace:latest
             ghcr.io/alezoex/outfitstyle-marketplace:${{ github.sha }}
-          no-cache: true
