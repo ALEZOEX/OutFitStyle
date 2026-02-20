@@ -317,7 +317,7 @@ if __name__ == '__main__':
     print(f"   Features: {len(df.columns)}")
     print(f"\n   Categories distribution:")
     print(df['category'].value_counts())
-    print(f"\n   Temperature range: {df['temperature'].min():.1f}C to {df['temperature'].max():.1f}C")
+    print(f"\n   Temperature range: {df['temperature'].min():.1f}°C to {df['temperature'].max():.1f}°C")
 
     filepath = preparer.save_dataset(df)
 
