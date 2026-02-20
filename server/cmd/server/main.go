@@ -222,6 +222,7 @@ func main() {
 		weatherService,
 		mlClient,
 		personalizationRepo,
+		ratingRepo,
 		eventPublisher,
 		logger,
 	)
@@ -276,10 +277,23 @@ func main() {
 	uploadedRepo := pg.NewUploadedFilesRepository(db.Pool())
 	exportRepo := pg.NewExportRepository(db.Pool())
 
+	// ---------- Rating repository & service ----------
+	ratingRepo := pg.NewOutfitRatingRepository(db.Pool(), logger)
+
 	// ---------- Services for module 12 ----------
 	fileService := services.NewFileService(s3, uploadedRepo, userRepo)
 	exportService := services.NewExportService(exportRepo, uploadedRepo, s3)
 	accountService := services.NewAccountService(userRepo, sessionRepo)
+
+	// ---------- Rating service ----------
+	ratingService := services.NewRatingService(
+		ratingRepo,
+		recommendationRepo,
+		clothingRepo,
+		eventPublisher,
+		logger,
+	)
+	ratingHandler := handlers.NewRatingHandler(ratingService, achEngine, logger)
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
@@ -493,6 +507,10 @@ func setupRouter(
 	// /api/v1/recommendations/*
 	recommendations := protected.PathPrefix("/recommendations").Subrouter()
 	recommendationHandler.RegisterRoutes(recommendations)
+
+	// /api/v1/ratings/* (регистрируется внутри ratingHandler)
+	ratings := protected.PathPrefix("/ratings").Subrouter()
+	ratingHandler.RegisterRoutes(ratings)
 
 	// /api/v1/achievements/*
 	ach := protected.PathPrefix("/achievements").Subrouter()

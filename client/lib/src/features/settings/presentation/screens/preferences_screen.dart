@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/api/api_client.dart';
+import '../../../../core/api/api_config.dart';
 import '../../../../services/auth_storage.dart';
 import '../../data/repositories/preferences_repository.dart';
 
@@ -211,12 +212,13 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
 
 // Провайдеры для создания зависимостей
 final _authStorageProvider = Provider<AuthStorage>((ref) {
-  throw UnimplementedError('AuthStorage должен быть предоставлен');
+  return AuthStorage();
 });
 
 final _apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(_authStorageProvider);
-  return ApiClient(storage: storage);
+  final config = ApiConfig(apiBase: ApiConfig.baseUrl);
+  return ApiClient(config: config, storage: storage);
 });
 
 final _preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {
