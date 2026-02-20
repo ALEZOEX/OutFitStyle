@@ -39,8 +39,8 @@ jobs:
           cache-dependency-path: server/go.sum
       
       - name: Install dependencies
-        run: go mod download
-      
+        run: cd server && go mod download
+
       - name: Run linter
         uses: golangci/golangci-lint-action@v4
         with:
