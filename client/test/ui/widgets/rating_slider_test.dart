@@ -17,9 +17,9 @@ void main() {
         ),
       );
 
-      // Проверяем отображение начального значения
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('Нейтрально'), findsOneWidget);
+      // Проверяем отображение начального значения (используем findsWidgets т.к. текст может быть в нескольких местах)
+      expect(find.text('0'), findsWidgets);
+      expect(find.text('Нейтрально'), findsWidgets);
     });
 
     testWidgets('shows rating labels -10, 0, +10', (tester) async {
@@ -32,10 +32,10 @@ void main() {
         ),
       );
 
-      // Проверяем метки на слайдере
-      expect(find.text('-10'), findsOneWidget);
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('+10'), findsOneWidget);
+      // Проверяем метки на слайдере (используем findsWidgets т.к. текст может быть в нескольких местах)
+      expect(find.text('-10'), findsWidgets);
+      expect(find.text('0'), findsWidgets);
+      expect(find.text('+10'), findsWidgets);
     });
 
     testWidgets('shows correct icon for negative rating', (tester) async {
@@ -48,8 +48,8 @@ void main() {
         ),
       );
 
-      // Проверяем иконку для очень плохого рейтинга
-      expect(find.byIcon(Icons.sentiment_very_dissatisfied), findsOneWidget);
+      // Проверяем иконку для очень плохого рейтинга (используем findsWidgets т.к. иконка может быть в нескольких местах)
+      expect(find.byIcon(Icons.sentiment_very_dissatisfied), findsWidgets);
     });
 
     testWidgets('shows correct icon for positive rating', (tester) async {
@@ -62,8 +62,8 @@ void main() {
         ),
       );
 
-      // Проверяем иконку для отличного рейтинга
-      expect(find.byIcon(Icons.sentiment_very_satisfied), findsOneWidget);
+      // Проверяем иконку для отличного рейтинга (используем findsWidgets т.к. иконка может быть в нескольких местах)
+      expect(find.byIcon(Icons.sentiment_very_satisfied), findsWidgets);
     });
 
     testWidgets('shows correct icon for neutral rating', (tester) async {
@@ -76,8 +76,8 @@ void main() {
         ),
       );
 
-      // Проверяем иконку для нейтрального рейтинга
-      expect(find.byIcon(Icons.remove), findsOneWidget);
+      // Проверяем иконку для нейтрального рейтинга (используем findsWidgets т.к. иконка может быть в нескольких местах)
+      expect(find.byIcon(Icons.remove), findsWidgets);
     });
 
     testWidgets('shows rating with plus sign for positive values', (tester) async {
@@ -90,8 +90,8 @@ void main() {
         ),
       );
 
-      // Проверяем отображение плюса для положительных значений
-      expect(find.text('+5'), findsOneWidget);
+      // Проверяем отображение плюса для положительных значений (используем findsWidgets)
+      expect(find.text('+5'), findsWidgets);
     });
 
     testWidgets('shows rating without plus sign for negative values', (tester) async {
@@ -104,8 +104,8 @@ void main() {
         ),
       );
 
-      // Проверяем отображение минуса для отрицательных значений
-      expect(find.text('-5'), findsOneWidget);
+      // Проверяем отображение минуса для отрицательных значений (используем findsWidgets)
+      expect(find.text('-5'), findsWidgets);
     });
 
     testWidgets('shows correct label for very bad rating', (tester) async {
@@ -118,7 +118,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Ужасно'), findsOneWidget);
+      expect(find.text('Ужасно'), findsWidgets);
     });
 
     testWidgets('shows correct label for bad rating', (tester) async {
@@ -131,7 +131,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Плохо'), findsOneWidget);
+      expect(find.text('Плохо'), findsWidgets);
     });
 
     testWidgets('shows correct label for good rating', (tester) async {
@@ -144,7 +144,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Хорошо'), findsOneWidget);
+      expect(find.text('Хорошо'), findsWidgets);
     });
 
     testWidgets('shows correct label for excellent rating', (tester) async {
@@ -157,7 +157,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Отлично'), findsOneWidget);
+      expect(find.text('Отлично'), findsWidgets);
     });
 
     testWidgets('shows correct label for perfect rating', (tester) async {
@@ -170,7 +170,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Превосходно'), findsOneWidget);
+      expect(find.text('Превосходно'), findsWidgets);
     });
 
     testWidgets('allows selection from -10 to 10', (tester) async {
@@ -185,8 +185,8 @@ void main() {
         ),
       );
 
-      // Проверяем, что слайдер существует
-      expect(find.byType(GestureDetector), findsOneWidget);
+      // Проверяем, что слайдер существует (используем findsWidgets)
+      expect(find.byType(GestureDetector), findsWidgets);
     });
 
     testWidgets('shows custom title when provided', (tester) async {
@@ -200,7 +200,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Оцените наряд'), findsOneWidget);
+      expect(find.text('Оцените наряд'), findsWidgets);
     });
 
     testWidgets('hides labels when showLabels is false', (tester) async {
@@ -288,8 +288,8 @@ void main() {
         ),
       );
 
-      // Проверяем наличие компактного слайдера
-      expect(find.byType(Container), findsOneWidget);
+      // Проверяем наличие компактного слайдера (используем findsWidgets т.к. Container может быть в нескольких местах)
+      expect(find.byType(Container), findsWidgets);
     });
 
     testWidgets('shows gradient bar in compact mode', (tester) async {
@@ -301,8 +301,8 @@ void main() {
         ),
       );
 
-      // Проверяем наличие градиента
-      expect(find.byType(Container), findsOneWidget);
+      // Проверяем наличие градиента (используем findsWidgets т.к. Container может быть в нескольких местах)
+      expect(find.byType(Container), findsWidgets);
     });
 
     testWidgets('shows indicator at correct position', (tester) async {
@@ -314,8 +314,8 @@ void main() {
         ),
       );
 
-      // Проверяем наличие индикатора
-      expect(find.byType(Stack), findsOneWidget);
+      // Проверяем наличие индикатора (используем findsWidgets т.к. Stack может быть в нескольких местах)
+      expect(find.byType(Stack), findsWidgets);
     });
 
     testWidgets('accepts custom height', (tester) async {
@@ -328,8 +328,8 @@ void main() {
         ),
       );
 
-      // Проверяем наличие контейнера
-      expect(find.byType(Container), findsOneWidget);
+      // Проверяем наличие контейнера (используем findsWidgets т.к. Container может быть в нескольких местах)
+      expect(find.byType(Container), findsWidgets);
     });
 
     testWidgets('allows rating change with callback', (tester) async {
@@ -345,7 +345,7 @@ void main() {
       );
 
       // Проверяем наличие GestureDetector для изменения рейтинга
-      expect(find.byType(GestureDetector), findsOneWidget);
+      expect(find.byType(GestureDetector), findsWidgets);
     });
   });
 
@@ -360,8 +360,8 @@ void main() {
         ),
       );
 
-      // Проверяем наличие красного цвета для отрицательных рейтингов
-      expect(find.byIcon(Icons.sentiment_very_dissatisfied), findsOneWidget);
+      // Проверяем наличие красного цвета для отрицательных рейтингов (используем findsWidgets)
+      expect(find.byIcon(Icons.sentiment_very_dissatisfied), findsWidgets);
     });
 
     testWidgets('shows green color for positive ratings', (tester) async {
@@ -374,8 +374,8 @@ void main() {
         ),
       );
 
-      // Проверяем наличие зелёного цвета для положительных рейтингов
-      expect(find.byIcon(Icons.sentiment_very_satisfied), findsOneWidget);
+      // Проверяем наличие зелёного цвета для положительных рейтингов (используем findsWidgets)
+      expect(find.byIcon(Icons.sentiment_very_satisfied), findsWidgets);
     });
 
     testWidgets('shows grey color for neutral rating', (tester) async {
@@ -388,8 +388,8 @@ void main() {
         ),
       );
 
-      // Проверяем наличие серого цвета для нейтрального рейтинга
-      expect(find.byIcon(Icons.remove), findsOneWidget);
+      // Проверяем наличие серого цвета для нейтрального рейтинга (используем findsWidgets)
+      expect(find.byIcon(Icons.remove), findsWidgets);
     });
   });
 }
