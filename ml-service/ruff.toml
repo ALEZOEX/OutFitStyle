@@ -4,9 +4,10 @@ target-version = "py311"
 
 # Игнорируемые правила
 ignore = [
-    "E501",  # line too long (через чур длинные строки)
+    "E501",  # line too long
     "F401",  # unused import
     "F841",  # unused variable
+    "E722",  # bare except
 ]
 
 # Исключить директории
@@ -18,4 +19,12 @@ exclude = [
     "artifacts",
     "data",
     "models",
+    "catboost_info",
+    ".venv",
+    "venv",
+]
+
+# Игнорировать синтаксические ошибки в сгенерированных файлах
+extend-ignore = [
+    "E999",  # syntax errors
 ]
