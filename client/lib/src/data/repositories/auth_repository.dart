@@ -72,6 +72,7 @@ class AuthRepository implements IAuthRepository {
     try {
       // Используем AuthService для Google Sign-In
       await _authService.loginWithGoogle();
+      // Токены уже сохранены в AuthService
       return true;
     } on Exception {
       // Пробрасываем исключения для обработки в UI
