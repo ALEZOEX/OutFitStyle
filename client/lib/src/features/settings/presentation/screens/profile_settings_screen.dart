@@ -137,6 +137,22 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     }
   }
 
+  /// Обновить профиль (имя и email одним запросом)
+  Future<bool> updateProfile({String? name, String? email}) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final userData = await _repository.updateProfile(name: name, email: email);
+      state = ProfileState.fromMap(userData).copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Ошибка обновления профиля: $e',
+      );
+      return false;
+    }
+  }
+
   /// Удалить аккаунт
   Future<bool> deleteAccount({
     required String password,
@@ -330,11 +346,15 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     );
 
     try {
-      final nameSuccess = await ref.read(profileProvider.notifier).updateName(name);
-      if (!nameSuccess) throw Exception(ref.read(profileProvider).error);
+      // Обновляем имя и email одним запросом
+      final success = await ref.read(profileProvider.notifier).updateProfile(
+        name: name,
+        email: email,
+      );
 
-      final emailSuccess = await ref.read(profileProvider.notifier).updateEmail(email);
-      if (!emailSuccess) throw Exception(ref.read(profileProvider).error);
+      if (!success) {
+        throw Exception(ref.read(profileProvider).error ?? 'Ошибка обновления профиля');
+      }
 
       if (mounted) {
         Navigator.of(context).pop(); // Закрываем индикатор

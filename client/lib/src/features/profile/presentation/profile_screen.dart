@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/auth_repository.dart';
 import '../../../presentation/routing/router.dart';
-import '../../wardrobe/presentation/providers/wardrobe_provider.dart';
 import 'providers/profile_provider.dart';
 
 /// Экран профиля пользователя
@@ -14,7 +13,6 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authRepository = ref.read(authRepositoryProvider);
-    final theme = Theme.of(context);
     final profileState = ref.watch(profileDataProvider);
     final stats = ref.watch(profileStatsProvider);
 
@@ -526,16 +524,19 @@ class ProfileScreen extends ConsumerWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
-      child: OutlinedButton.icon(
-        onPressed: () => _showLogoutDialog(context, authRepository),
-        icon: const Icon(Icons.logout),
-        label: const Text('Выйти из аккаунта'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: theme.colorScheme.error,
-          side: BorderSide(color: theme.colorScheme.error.withOpacity(0.3)),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: OutlinedButton.icon(
+          onPressed: () => _showLogoutDialog(context, authRepository),
+          icon: const Icon(Icons.logout),
+          label: const Text('Выйти из аккаунта'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: theme.colorScheme.error,
+            side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3)),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         ),
       ),
