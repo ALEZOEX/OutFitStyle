@@ -11,16 +11,14 @@ _Achievement _$AchievementFromJson(Map<String, dynamic> json) => _Achievement(
   title: json['title'] as String,
   description: json['description'] as String,
   icon: json['icon'] as String,
-  category: json['category'] as String,
+  category: $enumDecode(_$AchievementCategoryEnumMap, json['category']),
   points: (json['points'] as num).toInt(),
-  isCompleted: json['isCompleted'] as bool? ?? false,
-  completedAt: json['completedAt'] == null
+  currentProgress: (json['currentProgress'] as num?)?.toInt() ?? 0,
+  targetValue: (json['targetValue'] as num?)?.toInt() ?? 1,
+  isUnlocked: json['isUnlocked'] as bool? ?? false,
+  unlockedAt: json['unlockedAt'] == null
       ? null
-      : DateTime.parse(json['completedAt'] as String),
-  progress: (json['progress'] as num?)?.toInt() ?? 0,
-  target: (json['target'] as num?)?.toInt() ?? 1,
-  reward: json['reward'] as String? ?? '',
-  isVisible: json['isVisible'] as bool? ?? true,
+      : DateTime.parse(json['unlockedAt'] as String),
   createdAt: json['createdAt'] == null
       ? null
       : DateTime.parse(json['createdAt'] as String),
@@ -28,12 +26,8 @@ _Achievement _$AchievementFromJson(Map<String, dynamic> json) => _Achievement(
       ? null
       : DateTime.parse(json['updatedAt'] as String),
   userId: json['userId'] as String?,
-  isUnlocked: json['isUnlocked'] as bool? ?? false,
-  currentProgress: (json['currentProgress'] as num?)?.toInt() ?? 0,
-  targetValue: (json['targetValue'] as num?)?.toInt() ?? 1,
-  unlockedAt: json['unlockedAt'] == null
-      ? null
-      : DateTime.parse(json['unlockedAt'] as String),
+  reward: json['reward'] as String? ?? '',
+  isVisible: json['isVisible'] as bool? ?? true,
   type: json['type'] as String?,
 );
 
@@ -43,20 +37,29 @@ Map<String, dynamic> _$AchievementToJson(_Achievement instance) =>
       'title': instance.title,
       'description': instance.description,
       'icon': instance.icon,
-      'category': instance.category,
+      'category': _$AchievementCategoryEnumMap[instance.category]!,
       'points': instance.points,
-      'isCompleted': instance.isCompleted,
-      'completedAt': instance.completedAt?.toIso8601String(),
-      'progress': instance.progress,
-      'target': instance.target,
-      'reward': instance.reward,
-      'isVisible': instance.isVisible,
+      'currentProgress': instance.currentProgress,
+      'targetValue': instance.targetValue,
+      'isUnlocked': instance.isUnlocked,
+      'unlockedAt': instance.unlockedAt?.toIso8601String(),
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'userId': instance.userId,
-      'isUnlocked': instance.isUnlocked,
-      'currentProgress': instance.currentProgress,
-      'targetValue': instance.targetValue,
-      'unlockedAt': instance.unlockedAt?.toIso8601String(),
+      'reward': instance.reward,
+      'isVisible': instance.isVisible,
       'type': instance.type,
     };
+
+const _$AchievementCategoryEnumMap = {
+  AchievementCategory.wardrobe: 'wardrobe',
+  AchievementCategory.recommendations: 'recommendations',
+  AchievementCategory.weather: 'weather',
+  AchievementCategory.time: 'time',
+  AchievementCategory.planning: 'planning',
+  AchievementCategory.ratings: 'ratings',
+  AchievementCategory.family: 'family',
+  AchievementCategory.subscription: 'subscription',
+  AchievementCategory.special: 'special',
+  AchievementCategory.starter: 'starter',
+};
