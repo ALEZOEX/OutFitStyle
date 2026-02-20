@@ -301,9 +301,9 @@ class TestErrorHandling:
             'temperature': ['hot', 'cold'],  # Should be numeric
             'humidity': [60, 70],
         })
-        
+
         assert df['temperature'].dtype == object
-        assert df['humidity'].dtype == int64
+        assert df['humidity'].dtype == np.int64
 
     def test_null_values(self):
         """Test handling of null values"""

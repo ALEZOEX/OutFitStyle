@@ -195,10 +195,10 @@ func TestSubscriptionService_ListPlans(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		mockTxRepo,
-		mockPromoRepo,
-		mockRedemptionRepo,
-		mockFamilyRepo,
+		*mockTxRepo,
+		*mockPromoRepo,
+		*mockRedemptionRepo,
+		*mockFamilyRepo,
 		logger,
 	)
 
@@ -241,10 +241,10 @@ func TestSubscriptionService_GetCurrent_WithActiveSubscription(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		mockTxRepo,
-		mockPromoRepo,
-		mockRedemptionRepo,
-		mockFamilyRepo,
+		*mockTxRepo,
+		*mockPromoRepo,
+		*mockRedemptionRepo,
+		*mockFamilyRepo,
 		logger,
 	)
 
@@ -318,10 +318,10 @@ func TestSubscriptionService_GetCurrent_NoSubscription(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		mockTxRepo,
-		mockPromoRepo,
-		mockRedemptionRepo,
-		mockFamilyRepo,
+		*mockTxRepo,
+		*mockPromoRepo,
+		*mockRedemptionRepo,
+		*mockFamilyRepo,
 		logger,
 	)
 
@@ -377,10 +377,10 @@ func TestSubscriptionService_CheckCanCreateRecommendation(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		mockTxRepo,
-		mockPromoRepo,
-		mockRedemptionRepo,
-		mockFamilyRepo,
+		*mockTxRepo,
+		*mockPromoRepo,
+		*mockRedemptionRepo,
+		*mockFamilyRepo,
 		logger,
 	)
 
@@ -439,10 +439,10 @@ func TestSubscriptionService_ValidatePromoCode(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		mockTxRepo,
-		mockPromoRepo,
-		mockRedemptionRepo,
-		mockFamilyRepo,
+		*mockTxRepo,
+		*mockPromoRepo,
+		*mockRedemptionRepo,
+		*mockFamilyRepo,
 		logger,
 	)
 

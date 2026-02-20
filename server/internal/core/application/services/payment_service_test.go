@@ -2,8 +2,8 @@ package services_test
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -272,7 +272,7 @@ func TestPromoCode_IsValidForPlan(t *testing.T) {
 func TestPromoCode_IsExpired(t *testing.T) {
 	t.Parallel()
 
-	now := timeNow()
+	now := time.Now()
 	future := now.AddDate(0, 1, 0)
 	past := now.AddDate(0, -1, 0)
 
@@ -299,9 +299,11 @@ func TestPromoCode_IsExpired(t *testing.T) {
 func TestPromoCode_CanBeUsedByUser(t *testing.T) {
 	t.Parallel()
 
+	intPtr := func(i int) *int { return &i }
+
 	// Лимит 1 использование на пользователя
 	promo1 := domain.PromoCode{
-		UsageLimitPerUser: 1,
+		UsageLimitPerUser: intPtr(1),
 	}
 
 	assert.True(t, promo1.CanBeUsedByUser(0))
@@ -309,17 +311,12 @@ func TestPromoCode_CanBeUsedByUser(t *testing.T) {
 
 	// Лимит 3 использования
 	promo2 := domain.PromoCode{
-		UsageLimitPerUser: 3,
+		UsageLimitPerUser: intPtr(3),
 	}
 
 	assert.True(t, promo2.CanBeUsedByUser(0))
 	assert.True(t, promo2.CanBeUsedByUser(2))
 	assert.False(t, promo2.CanBeUsedByUser(3))
-}
-
-// Helper для получения текущего времени
-func timeNow() domain.ID {
-	return domain.NewID() // Используем как заглушку
 }
 
 // TestSubscriptionStatus тест статусов подписки
@@ -384,7 +381,7 @@ func TestUserSubscription_IsActive(t *testing.T) {
 func TestUserSubscription_IsTrial(t *testing.T) {
 	t.Parallel()
 
-	now := timeNow()
+	now := time.Now()
 	future := now.AddDate(0, 0, 14)
 	past := now.AddDate(0, 0, -1)
 
