@@ -180,7 +180,7 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<Map<String, dynamic>?> getCurrentUser() async {
     try {
-      final response = await apiClient.get('/auth/me');
+      final response = await apiClient.get('/users/me');
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>?;
       }
