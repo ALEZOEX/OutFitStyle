@@ -3,8 +3,14 @@ name: Python ML Service CI/CD
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'ml-service/**/*.py'
+      - 'ml-service/requirements.txt'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'ml-service/**/*.py'
+      - 'ml-service/requirements.txt'
 
 env:
   PYTHON_VERSION: '3.11'
@@ -35,24 +41,25 @@ jobs:
       - name: Lint with Ruff
         # Ruff может находить синтаксические ошибки в legacy коде
         # Используем --exit-zero чтобы не блокировать CI
-        run: ruff check . --exit-zero || true
+        run: ruff check . --exit-zero
 
       - name: Type check with MyPy
-        run: mypy . --ignore-missing-imports || true
+        run: mypy . --ignore-missing-imports
 
       - name: Security check
-        run: safety check || true
+        run: safety check
 
       - name: Run tests
         # Тесты могут падать из-за отсутствия окружения (Redis, ML модель)
-        # Используем || true чтобы не блокировать CI
-        run: pytest -v --cov=. --cov-report=xml || true
+        run: pytest -v --cov=. --cov-report=xml
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
           file: ./ml-service/coverage.xml
           flags: ml-service
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
   
   build-and-push:
     needs: test
@@ -84,18 +91,15 @@ jobs:
             type=sha
             type=ref,event=branch
             type=semver,pattern={{version}}
-      
+            type=raw,value=latest,enable=${{ is_default_branch }}
+
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./ml-service
           file: ./ml-service/Dockerfile
           push: true
-          pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Принудительно строим без кэша
-          no-cache: true
-          # Отключаем GitHub Actions кэш
-          cache-from: ""
-          cache-to: ""
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
