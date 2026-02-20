@@ -349,6 +349,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                 ),
 
+                // Забыли пароль?
+                if (_isLogin)
+                  TextButton(
+                    onPressed: () => context.push('/forgot-password'),
+                    child: const Text('Забыли пароль?'),
+                  ),
+
                 const SizedBox(height: 32),
 
                 // Разделитель
