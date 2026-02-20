@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/achievement_category.dart';
+import '../../../../domain/entities/achievement.dart';
+import '../../data/repositories/achievements_repository.dart';
 import '../providers/achievements_providers.dart';
 import 'achievement_card.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Виджет таба с достижениями категории
 class AchievementCategoryTab extends ConsumerStatefulWidget {
@@ -239,6 +241,7 @@ class _AchievementCategoryTabState extends ConsumerState<AchievementCategoryTab>
   }
 
   void _showAchievementDetails(BuildContext context, Achievement achievement) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

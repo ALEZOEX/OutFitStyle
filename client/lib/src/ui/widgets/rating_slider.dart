@@ -139,6 +139,7 @@ class _RatingSliderState extends State<RatingSlider>
           // Текущее значение с иконкой
           AnimatedScale(
             scale: _scaleAnimation.value,
+            duration: const Duration(milliseconds: 200),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
@@ -281,8 +282,10 @@ class _RatingSliderState extends State<RatingSlider>
               animation: _scaleAnimation,
               builder: (context, child) {
                 final position = _ratingToSlider(_currentRating);
+                final box = context.findRenderObject() as RenderBox?;
+                final width = box?.size.width ?? 300.0;
                 return Positioned(
-                  left: '${(position * 100).clamp(5.0, 95.0)}%',
+                  left: (position * width).clamp(16.0, width - 16),
                   child: Transform.translate(
                     offset: const Offset(-16, 0),
                     child: Transform.scale(
@@ -396,23 +399,30 @@ class CompactRatingSlider extends StatelessWidget {
                 height: double.infinity,
               ),
             ),
-          Positioned(
-            left: '${((rating + 10) / 20 * 100).clamp(5.0, 95.0)}%',
-            child: Transform.translate(
-              offset: const Offset(-6, 0),
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: _getRatingColor(rating),
-                    width: 2,
+          Builder(
+            builder: (context) {
+              final box = context.findRenderObject() as RenderBox?;
+              final width = box?.size.width ?? 200.0;
+              final position = (rating + 10) / 20;
+              return Positioned(
+                left: (position * width).clamp(6.0, width - 6),
+                child: Transform.translate(
+                  offset: const Offset(-6, 0),
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: _getRatingColor(rating),
+                        width: 2,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),

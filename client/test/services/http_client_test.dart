@@ -2,9 +2,13 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:outfitstyle_client/src/services/http_client.dart';
-import 'package:outfitstyle_client/src/config/api_config.dart';
+import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'package:outfitstyle_client/src/services/auth_storage.dart';
+
+// Mock для AuthStorage
+class MockAuthStorage extends Mock implements AuthStorage {}
 
 void main() {
   group('AuthenticatedHttpClient Tests', () {
@@ -12,7 +16,7 @@ void main() {
     late AuthStorage authStorage;
 
     setUp(() {
-      apiConfig = ApiConfig(apiBase: 'https://api.example.com');
+      apiConfig = const ApiConfig(apiBase: 'https://api.example.com');
       authStorage = MockAuthStorage();
     });
 
@@ -89,23 +93,13 @@ void main() {
 
   group('ApiConfig Tests', () {
     test('ApiConfig has correct base URL', () {
-      final config = ApiConfig(apiBase: 'https://api.example.com');
+      const config = ApiConfig(apiBase: 'https://api.example.com');
       expect(config.apiBase, 'https://api.example.com');
     });
 
     test('ApiConfig builds correct endpoints', () {
-      final config = ApiConfig(apiBase: 'https://api.example.com');
+      const config = ApiConfig(apiBase: 'https://api.example.com');
       expect(config.apiBase, contains('https://'));
     });
   });
-}
-
-// Mock для AuthStorage
-class MockAuthStorage extends Mock implements AuthStorage {}
-
-// Extension для thenAnswer с функциями
-extension on Mock {
-  O thenAnswer<O>(FutureOr<O> Function(_) answer) {
-    return (this as dynamic).thenAnswer(answer);
-  }
 }

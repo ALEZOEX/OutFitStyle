@@ -3,6 +3,7 @@ export '../../domain/entities/achievement_progress.dart';
 export '../../domain/entities/user_achievement_status.dart';
 export '../../domain/enums/achievement_type.dart';
 export '../../domain/enums/achievement_status.dart';
+export 'data/repositories/achievements_repository.dart';
 export 'presentation/pages/achievements_page.dart';
 export 'presentation/widgets/achievement_card_widget.dart';
 export 'presentation/widgets/achievement_list_widget.dart';
