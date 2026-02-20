@@ -118,6 +118,11 @@ func (m *MockUserRepository) RateRecommendation(ctx context.Context, userID, rec
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) UpdatePassword(ctx context.Context, userID domain.ID, newPassword string) error {
+	args := m.Called(ctx, userID, newPassword)
+	return args.Error(0)
+}
+
 // MockSessionRepository - мок-реализация SessionRepository для тестов
 type MockSessionRepository struct {
 	mock.Mock
