@@ -30,11 +30,11 @@ jobs:
 
     - name: Test Python services
       run: |
-        cd server/ml-service
+        cd ml-service
         pip install -r requirements.txt
         python -m pytest tests/
 
-        cd ../marketplace-service
+        cd server/marketplace-service
         pip install -r requirements.txt
 
   build-and-push:
