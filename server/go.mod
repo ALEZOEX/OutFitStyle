@@ -64,7 +64,7 @@ require (
 
 require (
 	firebase.google.com/go/v4 v4.18.0
-	github.com/getsentry/sentry-go v0.40.0
+	github.com/getsentry/sentry-go v0.42.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/hibiken/asynq v0.25.1
 	github.com/minio/minio-go/v7 v7.0.97
