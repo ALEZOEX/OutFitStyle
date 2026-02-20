@@ -63,9 +63,9 @@ jobs:
         run: cd server && go mod download
 
       - name: Run linter
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: latest
+          version: v1.64.5
           working-directory: server
           args: --timeout=5m
 
@@ -83,10 +83,13 @@ jobs:
         with:
           file: ./server/coverage.out
           flags: backend
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
       - name: Security scan with gosec
-        uses: securego/gosec@master
+        uses: securego/gosec@v2.21.4
         with:
+          working-directory: server
           args: -exclude-dir=marketplace-service ./...
 
   build-and-push:
@@ -119,14 +122,15 @@ jobs:
             type=sha
             type=ref,event=branch
             type=semver,pattern={{version}}
+            type=raw,value=latest,enable=${{ is_default_branch }}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./server
           file: ./server/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Принудительно строим без кэша
-          no-cache: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
