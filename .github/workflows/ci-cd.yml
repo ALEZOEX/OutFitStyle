@@ -69,8 +69,8 @@ jobs:
           tags: |
             ghcr.io/alezoex/outfitstyle-server:latest
             ghcr.io/alezoex/outfitstyle-server:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/alezoex/outfitstyle-server:latest
-          cache-to: type=inline
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push ml-service
         uses: docker/build-push-action@v6
@@ -81,8 +81,8 @@ jobs:
           tags: |
             ghcr.io/alezoex/outfitstyle-ml:latest
             ghcr.io/alezoex/outfitstyle-ml:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/alezoex/outfitstyle-ml:latest
-          cache-to: type=inline
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push marketplace-service
         uses: docker/build-push-action@v6
@@ -93,5 +93,5 @@ jobs:
           tags: |
             ghcr.io/alezoex/outfitstyle-marketplace:latest
             ghcr.io/alezoex/outfitstyle-marketplace:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/alezoex/outfitstyle-marketplace:latest
-          cache-to: type=inline
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
