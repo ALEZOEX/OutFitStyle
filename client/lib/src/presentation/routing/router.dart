@@ -24,10 +24,12 @@ import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/onboarding/onboarding_storage.dart' as onboarding_storage;
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/outfit_details/presentation/outfit_details_screen.dart';
+import '../../features/splash/splash_screen.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_config.dart';
 import '../../services/auth_storage.dart';
+import '../../core/di/di.dart';
 
 /// Провайдер для AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -76,34 +78,38 @@ class AuthState {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/auth',
+    initialLocation: '/splash',
     refreshListenable: ref.read(goRouterRefreshProvider),
     redirect: (BuildContext context, GoRouterState state) {
       final path = state.uri.toString();
       final authState = ref.read(authStateProvider);
+      final onboardingDone = ref.read(onboardingDoneProvider);
 
-      // Если загрузка - не редиректим
-      if (authState.isLoading && path != '/') {
+      // Splash экран - всегда разрешаем
+      if (path == '/splash') {
         return null;
       }
 
-      // Корневой маршрут
-      if (path == '/') {
-        if (authState.isLoading) {
-          return null;
-        }
-        if (authState.isAuthenticated) {
-          return '/home';
-        }
-        return '/auth';
+      // Если загрузка состояния - не редиректим кроме splash
+      if (authState.isLoading) {
+        return '/splash';
       }
 
-      // Онбординг
+      // 1. Если onboarding не пройден - показываем onboarding (кроме splash)
+      if (!onboardingDone && path != '/onboarding') {
+        return '/onboarding';
+      }
+
+      // Онбординг - разрешаем доступ только если не пройден
       if (path.startsWith('/onboarding')) {
+        if (onboardingDone) {
+          // Если уже пройден, редиректим на home или auth
+          return authState.isAuthenticated ? '/home' : '/auth';
+        }
         return null;
       }
 
-      // Авторизация
+      // 2. Если не авторизован - показываем auth
       if (path.startsWith('/auth')) {
         if (authState.isAuthenticated) {
           return '/home';
@@ -111,7 +117,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // Для всех остальных маршрутов проверяем авторизацию
+      // Авторизация не нужна для splash и onboarding
+      if (path == '/splash' || path == '/onboarding') {
+        return null;
+      }
+
+      // 3. Для всех остальных маршрутов проверяем авторизацию
       if (!authState.isAuthenticated) {
         return '/auth';
       }
@@ -119,10 +130,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      // Splash экран - начальная точка
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      // Корневой маршрут - редирект на splash
       GoRoute(
         path: '/',
-        redirect: (context, state) => '/auth',
+        redirect: (context, state) => '/splash',
       ),
+      // Онбординг
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
@@ -131,8 +150,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return OnboardingScreen(
             onComplete: () async {
               await onboardingStorage.setDone();
+              // Обновляем состояние в ди
+              ref.read(onboardingDoneProvider.notifier).setDone();
               if (!context.mounted) return;
-              context.go('/home');
+              // После онбординга переходим на авторизацию
+              context.go('/auth');
             },
           );
         },

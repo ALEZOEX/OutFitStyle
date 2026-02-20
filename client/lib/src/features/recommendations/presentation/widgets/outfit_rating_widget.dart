@@ -75,7 +75,7 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
                 });
               },
               loading: () => _buildStarRating(0, (_) {}),
-              error: (_, __) => _buildStarRating(0, (_) {}),
+              error: (_, _) => _buildStarRating(0, (_) {}),
             ),
 
             const SizedBox(height: 12),
@@ -137,7 +137,7 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: scoreColor.withOpacity(0.1),
+            color: scoreColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: scoreColor, width: 1),
           ),
@@ -290,7 +290,7 @@ class QualityScoreWidget extends ConsumerWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: scoreColor.withOpacity(0.1),
+            color: scoreColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: scoreColor, width: 1),
           ),
@@ -316,7 +316,7 @@ class QualityScoreWidget extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox(width: 16, height: 16, child: CircularProgressIndicator.adaptive(strokeWidth: 2)),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 
