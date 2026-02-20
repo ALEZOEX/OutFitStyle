@@ -116,7 +116,9 @@ class WeatherService {
   String _getWeatherCondition(int code) {
     // WMO Weather interpretation codes (WW)
     if (code == 0) return 'clear';
-    if (code >= 1 && code <= 3) return 'partly_cloudy';
+    if (code == 1) return 'mostly_clear';
+    if (code == 2) return 'partly_cloudy';
+    if (code == 3) return 'overcast';
     if (code >= 45 && code <= 48) return 'foggy';
     if (code >= 51 && code <= 67) return 'rain';
     if (code >= 71 && code <= 77) return 'snow';
@@ -126,13 +128,36 @@ class WeatherService {
     return 'unknown';
   }
 
+  /// Получить описание погоды по коду WMO на русском языке
+  String _getWeatherDescription(int code) {
+    // WMO Weather interpretation codes (WW)
+    if (code == 0) return 'Ясно';
+    if (code == 1) return 'Преимущественно ясно';
+    if (code == 2) return 'Переменная облачность';
+    if (code == 3) return 'Пасмурно';
+    if (code >= 45 && code <= 48) return 'Туман';
+    if (code >= 51 && code <= 55) return 'Морось';
+    if (code >= 56 && code <= 57) return 'Переохлажденная морось';
+    if (code >= 61 && code <= 65) return 'Дождь';
+    if (code >= 66 && code <= 67) return 'Переохлажденный дождь';
+    if (code >= 71 && code <= 75) return 'Снег';
+    if (code == 77) return 'Снежные зерна';
+    if (code >= 80 && code <= 82) return 'Ливневый дождь';
+    if (code >= 85 && code <= 86) return 'Ливневый снег';
+    if (code >= 95 && code <= 96) return 'Гроза';
+    if (code >= 97 && code <= 99) return 'Гроза с градом';
+    return 'Неизвестно';
+  }
+
   WeatherData _parseOpenMeteoResponse(Map<String, dynamic> data) {
     final current = data['current_weather'] as Map<String, dynamic>;
+    final weatherCode = current['weathercode'] as int;
 
     return WeatherData(
       temperature: (current['temperature'] as num).toDouble(),
       feelsLike: (current['temperature'] as num).toDouble(), // Open-Meteo не предоставляет feels_like
-      condition: _getWeatherCondition(current['weathercode'] as int),
+      condition: _getWeatherCondition(weatherCode),
+      description: _getWeatherDescription(weatherCode),
       humidity: 50, // Open-Meteo требует отдельного запроса
       windSpeed: (current['windspeed'] as num).toDouble(),
       latitude: (data['latitude'] as num).toDouble(),
