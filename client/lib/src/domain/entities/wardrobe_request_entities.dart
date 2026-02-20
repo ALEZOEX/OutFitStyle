@@ -31,6 +31,8 @@ class WardrobeItemCreateRequest {
   final String condition;
   final String userId;
   final String clothingItemId;
+  final String? color;
+  final String? size;
 
   WardrobeItemCreateRequest({
     required this.name,
@@ -64,6 +66,8 @@ class WardrobeItemCreateRequest {
     this.condition = 'good',
     required this.userId,
     required this.clothingItemId,
+    this.color,
+    this.size,
   });
 
   Map<String, dynamic> toJson() {
@@ -99,6 +103,8 @@ class WardrobeItemCreateRequest {
       'condition': condition,
       'user_id': userId,
       'clothing_item_id': clothingItemId,
+      'color': color,
+      'size': size,
     };
   }
 }
