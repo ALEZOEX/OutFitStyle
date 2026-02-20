@@ -26,11 +26,45 @@ final sessionProvider = StateProvider<SessionStatus>((ref) {
 });
 
 // Providers for onboarding
-final onboardingDoneProvider = StateProvider<bool>((ref) {
-  // В реальном приложении здесь будет проверка, завершен ли онбординг
-  // Пока возвращаем фиктивное значение
-  return true; // Предполагаем, что онбординг всегда завершен для демонстрации
+final onboardingDoneProvider = StateNotifierProvider<OnboardingDoneNotifier, bool>((ref) {
+  return OnboardingDoneNotifier();
 });
+
+class OnboardingDoneNotifier extends StateNotifier<bool> {
+  OnboardingDoneNotifier() : super(false) {
+    _checkOnboarding();
+  }
+
+  Future<void> _checkOnboarding() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final done = prefs.getBool('onboarding_done_v1') ?? false;
+      state = done;
+    } catch (_) {
+      state = false;
+    }
+  }
+
+  Future<void> setDone() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('onboarding_done_v1', true);
+      state = true;
+    } catch (_) {
+      // Игнорируем ошибку, но не меняем состояние
+    }
+  }
+
+  Future<void> reset() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('onboarding_done_v1');
+      state = false;
+    } catch (_) {
+      // Игнорируем ошибку
+    }
+  }
+}
 
 // Провайдер для управления темой
 final themeModeProvider = StateProvider((ref) => ThemeMode.system);

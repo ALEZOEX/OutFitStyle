@@ -26,8 +26,8 @@ class RatingApiService {
       data: {
         'rating': rating,
         'outfit_items': outfitItems ?? [],
-        if (feedback != null) 'feedback': feedback,
-        if (thermalFeedback != null) 'thermal_feedback': thermalFeedback.name,
+        'feedback': feedback,
+        'thermal_feedback': thermalFeedback?.name,
       },
     );
 
