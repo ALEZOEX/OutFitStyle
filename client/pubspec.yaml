@@ -91,6 +91,7 @@ dependencies:
   path: ^1.9.0
   sqflite: ^2.3.0
   flutter_svg: ^2.2.3
+  package_info_plus: ^8.1.2
 
 dev_dependencies:
   flutter_test:

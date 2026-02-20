@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../core/api/api_config.dart';
 import '../../../../data/remote/wardrobe_api_service.dart';
 import '../../../../services/auth_storage.dart';
 import '../../../../domain/entities/catalog_entity.dart';
@@ -76,8 +75,7 @@ class WardrobeState {
 /// Провайдер ApiClient
 final apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(authStorageProvider);
-  final config = ApiConfig(apiBase: ApiConfig.baseUrl);
-  return ApiClient(config: config, storage: storage);
+  return ApiClient(storage: storage);
 });
 
 /// Провайдер WardrobeApiService
