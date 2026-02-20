@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../../../../core/api/api_client.dart';
-import '../../../../../core/api/api_config.dart';
-import '../../../../../data/remote/catalog_api_service.dart';
-import '../../../../../services/auth_storage.dart';
+import '../../../../../../core/api/api_client.dart';
+import '../../../../../../core/api/api_config.dart';
+import '../../../../../../data/remote/catalog_api_service.dart';
+import '../../../../../../services/auth_storage.dart';
 import '../../../../domain/entities/catalog_entity.dart';
 import '../providers/wardrobe_provider.dart';
 
