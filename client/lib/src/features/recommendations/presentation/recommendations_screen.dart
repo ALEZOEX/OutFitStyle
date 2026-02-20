@@ -265,7 +265,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                   end: Alignment.bottomRight,
                   colors: [
                     theme.colorScheme.primary.withValues(alpha: 0.8),
-                    theme.colorScheme.secondary,
+                    theme.colorScheme.secondary.withValues(alpha: 0.9),
                   ],
                 ),
               ),
@@ -282,7 +282,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                               : 'Сгенерировать рекомендацию',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: theme.colorScheme.onPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -291,7 +291,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                               ? 'Подбираем идеальный outfit...'
                               : 'На основе погоды и предпочтений',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -302,7 +302,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: state.isGenerating
@@ -310,12 +310,12 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                             padding: const EdgeInsets.all(12),
                             child: CircularProgressIndicator(
                               strokeWidth: 3,
-                              color: Colors.white,
+                              color: theme.colorScheme.onPrimary,
                             ),
                           )
                         : Icon(
                             Icons.auto_awesome,
-                            color: Colors.white,
+                            color: theme.colorScheme.onPrimary,
                             size: 28,
                           ),
                   ),
