@@ -3,6 +3,7 @@
 package handlers
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
@@ -23,6 +24,25 @@ import (
 	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
 )
+
+// AuthService интерфейс сервиса аутентификации
+type AuthService interface {
+	Register(ctx context.Context, input domain.UserRegistration, device services.DeviceInfo) (*services.RegisterResult, error)
+	Login(ctx context.Context, input domain.UserLogin, device services.DeviceInfo) (*services.LoginResult, error)
+	Refresh(ctx context.Context, refreshToken string) (domain.TokenPair, error)
+	Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool) error
+	GoogleSignIn(ctx context.Context, idToken string, device services.DeviceInfo) (*services.LoginResult, error)
+	ValidateAccessToken(ctx context.Context, accessToken string) (domain.ID, domain.ID, error)
+	ValidateTokenForSilentLogin(ctx context.Context, accessToken string) (*domain.User, error)
+	SilentLogin(ctx context.Context, accessToken string, device services.DeviceInfo) (*services.LoginResult, error)
+}
+
+// AccountLockout интерфейс защиты от brute-force
+type AccountLockout interface {
+	CheckLoginAttempt(ctx context.Context, email string) (allowed bool, remaining int, lockedUntil *time.Time, err error)
+	RecordFailedAttempt(ctx context.Context, email string) error
+	Reset(ctx context.Context, email string) error
+}
 
 // sanitizeRegistrationRequest применяет санитизацию к данным регистрации
 func sanitizeRegistrationRequest(req *domain.UserRegistration) {
@@ -45,18 +65,18 @@ func sanitizeRegistrationRequest(req *domain.UserRegistration) {
 // AuthHandler структура обработчика аутентификации
 // Содержит зависимости для обработки запросов аутентификации
 type AuthHandler struct {
-	auth            *services.AuthService                // Сервис аутентификации для выполнения бизнес-логики
-	lockout         *middleware.AccountLockout           // Защита от brute-force атак
-	lockoutDuration time.Duration                        // Длительность блокировки
-	redis           *redis.Client                        // Redis для кэширования кодов восстановления
-	userRepo        repositories.UserRepository          // Репозиторий пользователей
-	smtp            *email.SMTPService                   // SMTP сервис для отправки email
+	auth            AuthService                        // Сервис аутентификации для выполнения бизнес-логики
+	lockout         AccountLockout                     // Защита от brute-force атак
+	lockoutDuration time.Duration                      // Длительность блокировки
+	redis           *redis.Client                      // Redis для кэширования кодов восстановления
+	userRepo        repositories.UserRepository        // Репозиторий пользователей
+	smtp            *email.SMTPService                 // SMTP сервис для отправки email
 }
 
 // NewAuthHandler создает новый экземпляр обработчика аутентификации
 func NewAuthHandler(
-	auth *services.AuthService,
-	lockout *middleware.AccountLockout,
+	auth AuthService,
+	lockout AccountLockout,
 	lockoutDuration time.Duration,
 	redis *redis.Client,
 	userRepo repositories.UserRepository,

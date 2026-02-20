@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
 )
@@ -53,6 +52,57 @@ func (m *MockSubscriptionPlanRepository) UpdatePlan(ctx context.Context, plan *d
 func (m *MockSubscriptionPlanRepository) DeletePlan(ctx context.Context, id int64) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
+}
+
+// MockPromoCodeRepository мок репозитория промокодов
+type MockPromoCodeRepository struct {
+	mock.Mock
+}
+
+func (m *MockPromoCodeRepository) GetByCode(ctx context.Context, code string) (*domain.PromoCode, error) {
+	args := m.Called(ctx, code)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.PromoCode), args.Error(1)
+}
+
+func (m *MockPromoCodeRepository) GetByID(ctx context.Context, id int64) (*domain.PromoCode, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.PromoCode), args.Error(1)
+}
+
+func (m *MockPromoCodeRepository) CreatePromoCode(ctx context.Context, promo *domain.PromoCode) (int64, error) {
+	args := m.Called(ctx, promo)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockPromoCodeRepository) UpdatePromoCode(ctx context.Context, promo *domain.PromoCode) error {
+	args := m.Called(ctx, promo)
+	return args.Error(0)
+}
+
+func (m *MockPromoCodeRepository) DeletePromoCode(ctx context.Context, id int64) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
+func (m *MockPromoCodeRepository) GetUsageCount(ctx context.Context, promoCodeID int64, userID domain.ID) (int, error) {
+	args := m.Called(ctx, promoCodeID, userID)
+	return args.Int(0), args.Error(1)
+}
+
+func (m *MockPromoCodeRepository) IncrementUsage(ctx context.Context, promoCodeID int64) error {
+	args := m.Called(ctx, promoCodeID)
+	return args.Error(0)
+}
+
+func (m *MockPromoCodeRepository) ListActivePromoCodes(ctx context.Context) ([]domain.PromoCode, error) {
+	args := m.Called(ctx)
+	return args.Get(0).([]domain.PromoCode), args.Error(1)
 }
 
 // MockUserSubscriptionRepository мок репозитория подписок
@@ -177,6 +227,131 @@ func (m *MockSubscriptionUsageRepository) BulkResetDailyCounters(ctx context.Con
 	return args.Error(0)
 }
 
+// MockSubscriptionTransactionRepository мок репозитория транзакций
+type MockSubscriptionTransactionRepository struct {
+	mock.Mock
+}
+
+func (m *MockSubscriptionTransactionRepository) CreateTransaction(ctx context.Context, tx *domain.SubscriptionTransaction) (int64, error) {
+	args := m.Called(ctx, tx)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockSubscriptionTransactionRepository) GetTransactionByID(ctx context.Context, id int64) (*domain.SubscriptionTransaction, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.SubscriptionTransaction), args.Error(1)
+}
+
+func (m *MockSubscriptionTransactionRepository) GetTransactionByExternalID(ctx context.Context, provider string, externalID string) (*domain.SubscriptionTransaction, error) {
+	args := m.Called(ctx, provider, externalID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.SubscriptionTransaction), args.Error(1)
+}
+
+func (m *MockSubscriptionTransactionRepository) GetUserTransactions(ctx context.Context, userID domain.ID, page, limit int) ([]domain.SubscriptionTransaction, int, error) {
+	args := m.Called(ctx, userID, page, limit)
+	return args.Get(0).([]domain.SubscriptionTransaction), args.Int(1), args.Error(2)
+}
+
+func (m *MockSubscriptionTransactionRepository) UpdateTransactionStatus(ctx context.Context, id int64, status string, paidAt *time.Time, receiptURL, errorMessage *string) error {
+	args := m.Called(ctx, id, status, paidAt, receiptURL, errorMessage)
+	return args.Error(0)
+}
+
+func (m *MockSubscriptionTransactionRepository) UpdateTransactionByExternalID(ctx context.Context, provider string, externalID string, status string, paidAt *time.Time, receiptURL, errorMessage *string) error {
+	args := m.Called(ctx, provider, externalID, status, paidAt, receiptURL, errorMessage)
+	return args.Error(0)
+}
+
+func (m *MockSubscriptionTransactionRepository) CreateRefundTransaction(ctx context.Context, originalTxID int64, refundTx *domain.SubscriptionTransaction) (int64, error) {
+	args := m.Called(ctx, originalTxID, refundTx)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+// MockPromoRedemptionRepository мок репозитория использований промокодов
+type MockPromoRedemptionRepository struct {
+	mock.Mock
+}
+
+func (m *MockPromoRedemptionRepository) CreateRedemption(ctx context.Context, redemption *domain.PromoRedemption) (int64, error) {
+	args := m.Called(ctx, redemption)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockPromoRedemptionRepository) GetRedemptionsByUser(ctx context.Context, userID domain.ID) ([]domain.PromoRedemption, error) {
+	args := m.Called(ctx, userID)
+	return args.Get(0).([]domain.PromoRedemption), args.Error(1)
+}
+
+func (m *MockPromoRedemptionRepository) GetRedemptionByPromoAndUser(ctx context.Context, promoCodeID int64, userID domain.ID) (*domain.PromoRedemption, error) {
+	args := m.Called(ctx, promoCodeID, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.PromoRedemption), args.Error(1)
+}
+
+// MockFamilyMemberRepository мок репозитория семейных участников
+type MockFamilyMemberRepository struct {
+	mock.Mock
+}
+
+func (m *MockFamilyMemberRepository) GetFamilyMembers(ctx context.Context, ownerUserID domain.ID) ([]domain.FamilyMember, error) {
+	args := m.Called(ctx, ownerUserID)
+	return args.Get(0).([]domain.FamilyMember), args.Error(1)
+}
+
+func (m *MockFamilyMemberRepository) GetFamilyMemberByID(ctx context.Context, id int64) (*domain.FamilyMember, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.FamilyMember), args.Error(1)
+}
+
+func (m *MockFamilyMemberRepository) GetFamilyMemberByMemberID(ctx context.Context, memberUserID domain.ID) (*domain.FamilyMember, error) {
+	args := m.Called(ctx, memberUserID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.FamilyMember), args.Error(1)
+}
+
+func (m *MockFamilyMemberRepository) CreateFamilyMember(ctx context.Context, member *domain.FamilyMember) (int64, error) {
+	args := m.Called(ctx, member)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockFamilyMemberRepository) UpdateFamilyMember(ctx context.Context, member *domain.FamilyMember) error {
+	args := m.Called(ctx, member)
+	return args.Error(0)
+}
+
+func (m *MockFamilyMemberRepository) RemoveFamilyMember(ctx context.Context, id int64) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
+func (m *MockFamilyMemberRepository) AcceptInvitation(ctx context.Context, memberUserID domain.ID) error {
+	args := m.Called(ctx, memberUserID)
+	return args.Error(0)
+}
+
+func (m *MockFamilyMemberRepository) GetActiveFamilyMembersCount(ctx context.Context, ownerUserID domain.ID) (int, error) {
+	args := m.Called(ctx, ownerUserID)
+	return args.Int(0), args.Error(1)
+}
+
+func (m *MockFamilyMemberRepository) GetPendingInvitations(ctx context.Context, ownerUserID domain.ID) ([]domain.FamilyMember, error) {
+	args := m.Called(ctx, ownerUserID)
+	return args.Get(0).([]domain.FamilyMember), args.Error(1)
+}
+
 // TestSubscriptionService_ListPlans тест получения списка планов
 func TestSubscriptionService_ListPlans(t *testing.T) {
 	t.Parallel()
@@ -184,10 +359,10 @@ func TestSubscriptionService_ListPlans(t *testing.T) {
 	mockPlanRepo := new(MockSubscriptionPlanRepository)
 	mockUserSubRepo := new(MockUserSubscriptionRepository)
 	mockUsageRepo := new(MockSubscriptionUsageRepository)
-	mockTxRepo := new(repositories.SubscriptionTransactionRepository)
-	mockPromoRepo := new(repositories.PromoRepository)
-	mockRedemptionRepo := new(repositories.PromoRedemptionRepository)
-	mockFamilyRepo := new(repositories.FamilyMemberRepository)
+	mockTxRepo := new(MockSubscriptionTransactionRepository)
+	mockPromoRepo := new(MockPromoCodeRepository)
+	mockRedemptionRepo := new(MockPromoRedemptionRepository)
+	mockFamilyRepo := new(MockFamilyMemberRepository)
 
 	logger, _ := zap.NewDevelopment()
 
@@ -195,10 +370,10 @@ func TestSubscriptionService_ListPlans(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		*mockTxRepo,
-		*mockPromoRepo,
-		*mockRedemptionRepo,
-		*mockFamilyRepo,
+		mockTxRepo,
+		mockPromoRepo,
+		mockRedemptionRepo,
+		mockFamilyRepo,
 		logger,
 	)
 
@@ -230,10 +405,10 @@ func TestSubscriptionService_GetCurrent_WithActiveSubscription(t *testing.T) {
 	mockPlanRepo := new(MockSubscriptionPlanRepository)
 	mockUserSubRepo := new(MockUserSubscriptionRepository)
 	mockUsageRepo := new(MockSubscriptionUsageRepository)
-	mockTxRepo := new(repositories.SubscriptionTransactionRepository)
-	mockPromoRepo := new(repositories.PromoRepository)
-	mockRedemptionRepo := new(repositories.PromoRedemptionRepository)
-	mockFamilyRepo := new(repositories.FamilyMemberRepository)
+	mockTxRepo := new(MockSubscriptionTransactionRepository)
+	mockPromoRepo := new(MockPromoCodeRepository)
+	mockRedemptionRepo := new(MockPromoRedemptionRepository)
+	mockFamilyRepo := new(MockFamilyMemberRepository)
 
 	logger, _ := zap.NewDevelopment()
 
@@ -241,10 +416,10 @@ func TestSubscriptionService_GetCurrent_WithActiveSubscription(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		*mockTxRepo,
-		*mockPromoRepo,
-		*mockRedemptionRepo,
-		*mockFamilyRepo,
+		mockTxRepo,
+		mockPromoRepo,
+		mockRedemptionRepo,
+		mockFamilyRepo,
 		logger,
 	)
 
@@ -307,10 +482,10 @@ func TestSubscriptionService_GetCurrent_NoSubscription(t *testing.T) {
 	mockPlanRepo := new(MockSubscriptionPlanRepository)
 	mockUserSubRepo := new(MockUserSubscriptionRepository)
 	mockUsageRepo := new(MockSubscriptionUsageRepository)
-	mockTxRepo := new(repositories.SubscriptionTransactionRepository)
-	mockPromoRepo := new(repositories.PromoRepository)
-	mockRedemptionRepo := new(repositories.PromoRedemptionRepository)
-	mockFamilyRepo := new(repositories.FamilyMemberRepository)
+	mockTxRepo := new(MockSubscriptionTransactionRepository)
+	mockPromoRepo := new(MockPromoCodeRepository)
+	mockRedemptionRepo := new(MockPromoRedemptionRepository)
+	mockFamilyRepo := new(MockFamilyMemberRepository)
 
 	logger, _ := zap.NewDevelopment()
 
@@ -318,10 +493,10 @@ func TestSubscriptionService_GetCurrent_NoSubscription(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		*mockTxRepo,
-		*mockPromoRepo,
-		*mockRedemptionRepo,
-		*mockFamilyRepo,
+		mockTxRepo,
+		mockPromoRepo,
+		mockRedemptionRepo,
+		mockFamilyRepo,
 		logger,
 	)
 
@@ -366,10 +541,10 @@ func TestSubscriptionService_CheckCanCreateRecommendation(t *testing.T) {
 	mockPlanRepo := new(MockSubscriptionPlanRepository)
 	mockUserSubRepo := new(MockUserSubscriptionRepository)
 	mockUsageRepo := new(MockSubscriptionUsageRepository)
-	mockTxRepo := new(repositories.SubscriptionTransactionRepository)
-	mockPromoRepo := new(repositories.PromoRepository)
-	mockRedemptionRepo := new(repositories.PromoRedemptionRepository)
-	mockFamilyRepo := new(repositories.FamilyMemberRepository)
+	mockTxRepo := new(MockSubscriptionTransactionRepository)
+	mockPromoRepo := new(MockPromoCodeRepository)
+	mockRedemptionRepo := new(MockPromoRedemptionRepository)
+	mockFamilyRepo := new(MockFamilyMemberRepository)
 
 	logger, _ := zap.NewDevelopment()
 
@@ -377,10 +552,10 @@ func TestSubscriptionService_CheckCanCreateRecommendation(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		*mockTxRepo,
-		*mockPromoRepo,
-		*mockRedemptionRepo,
-		*mockFamilyRepo,
+		mockTxRepo,
+		mockPromoRepo,
+		mockRedemptionRepo,
+		mockFamilyRepo,
 		logger,
 	)
 
@@ -428,10 +603,10 @@ func TestSubscriptionService_ValidatePromoCode(t *testing.T) {
 	mockPlanRepo := new(MockSubscriptionPlanRepository)
 	mockUserSubRepo := new(MockUserSubscriptionRepository)
 	mockUsageRepo := new(MockSubscriptionUsageRepository)
-	mockTxRepo := new(repositories.SubscriptionTransactionRepository)
-	mockPromoRepo := new(MockSubscriptionPlanRepository) // Используем тот же мок для простоты
-	mockRedemptionRepo := new(repositories.PromoRedemptionRepository)
-	mockFamilyRepo := new(repositories.FamilyMemberRepository)
+	mockTxRepo := new(MockSubscriptionTransactionRepository)
+	mockPromoRepo := new(MockPromoCodeRepository)
+	mockRedemptionRepo := new(MockPromoRedemptionRepository)
+	mockFamilyRepo := new(MockFamilyMemberRepository)
 
 	logger, _ := zap.NewDevelopment()
 
@@ -439,10 +614,10 @@ func TestSubscriptionService_ValidatePromoCode(t *testing.T) {
 		mockPlanRepo,
 		mockUserSubRepo,
 		mockUsageRepo,
-		*mockTxRepo,
-		*mockPromoRepo,
-		*mockRedemptionRepo,
-		*mockFamilyRepo,
+		mockTxRepo,
+		mockPromoRepo,
+		mockRedemptionRepo,
+		mockFamilyRepo,
 		logger,
 	)
 
@@ -450,16 +625,17 @@ func TestSubscriptionService_ValidatePromoCode(t *testing.T) {
 	userID := domain.NewID()
 
 	validUntil := time.Now().AddDate(0, 1, 0)
+	usageLimitPerUser := 1
 
 	promo := &domain.PromoCode{
-		ID:              1,
+		ID:              domain.NewID(),
 		Code:            "WELCOME20",
 		DiscountType:    "percentage",
 		DiscountValue:   20,
 		IsActive:        true,
 		ValidUntil:      &validUntil,
 		ApplicablePlans: []string{"premium", "pro", "business"},
-		UsageLimitPerUser: 1,
+		UsageLimitPerUser: &usageLimitPerUser,
 	}
 
 	// Тест: Валидный промокод

@@ -11,16 +11,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
 	"outfitstyle/server/internal/api/middleware"
-	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
-	"outfitstyle/server/internal/infrastructure/email"
 )
 
 // MockAuthService - мок-реализация AuthService для тестов
@@ -218,8 +214,7 @@ func createTestHandler() (*AuthHandler, *MockAuthService, *MockAccountLockout, *
 	mockLockout := new(MockAccountLockout)
 	mockUserRepo := new(MockUserRepositoryForHandler)
 
-	// Создаем реальный сервис с моками
-	// Для тестов используем упрощенный подход - передаем nil для зависимостей, которые не используются
+	// Создаем обработчик с моками
 	handler := &AuthHandler{
 		auth:            mockAuth,
 		lockout:         mockLockout,
@@ -430,7 +425,7 @@ func TestAuthHandler_Refresh_Success(t *testing.T) {
 
 // TestAuthHandler_Refresh_EmptyToken тестирует обновление с пустым токеном
 func TestAuthHandler_Refresh_EmptyToken(t *testing.T) {
-	handler, mockAuth, _, _ := createTestHandler()
+	handler, _, _, _ := createTestHandler()
 
 	reqBody := map[string]string{
 		"refresh_token": "",
@@ -613,11 +608,13 @@ func TestAuthHandler_ResetPassword_Success(t *testing.T) {
 
 	// Для этого теста нужен Redis, поэтому тестируем только валидацию
 	// В реальном тесте нужно поднять Redis или использовать мок
+	// Mock user repo не используется напрямую, т.к. Redis недоступен
 
 	handler.ResetPassword(rr, req)
 
 	// Без Redis вернется ошибка
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	_ = mockUserRepo // явно используем переменную
 }
 
 // TestAuthHandler_ResetPassword_InvalidCode тестирует сброс пароля с невалидным кодом
@@ -677,7 +674,7 @@ func TestAuthHandler_GoogleSignIn_Success(t *testing.T) {
 
 // TestAuthHandler_GoogleSignIn_InvalidToken тестирует вход через Google с невалидным токеном
 func TestAuthHandler_GoogleSignIn_InvalidToken(t *testing.T) {
-	handler, mockAuth, _, _ := createTestHandler()
+	handler, _, _, _ := createTestHandler()
 
 	reqBody := map[string]string{
 		"id_token": "",

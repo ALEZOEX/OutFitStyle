@@ -16,7 +16,6 @@ import (
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/middleware"
-	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
 )
 
