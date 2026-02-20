@@ -168,7 +168,6 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
       isArchived: false,
       userId: '', // Сервер определит по токену
       clothingItemId: uuid.v4(), // Временный ID
-      brand: state.brand?.trim().isEmpty == true ? null : state.brand,
       color: state.color,
       size: state.size,
       localImagePath: state.localImagePath,
@@ -314,7 +313,7 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
             backgroundColor: Colors.orange,
           ),
         );
-        Navigator.pop(context, item);
+        Navigator.pop(context, request);
       }
     }
   }
