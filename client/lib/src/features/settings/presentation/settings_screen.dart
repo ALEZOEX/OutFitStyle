@@ -8,7 +8,6 @@ import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/notification_dialog.dart';
 import 'screens/preferences_screen.dart';
 import 'screens/profile_settings_screen.dart';
-import 'screens/privacy_settings_screen.dart';
 import 'screens/subscription_screen.dart';
 import '../../achievements/presentation/pages/achievements_page.dart';
 
@@ -405,22 +404,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
-              );
-            },
-          ),
-          Divider(
-            height: 1,
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
-          ),
-          _buildSettingTile(
-            context,
-            icon: Icons.shield_outlined,
-            title: 'Конфиденциальность',
-            subtitle: 'Настройки приватности',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PrivacySettingsScreen()),
               );
             },
           ),
