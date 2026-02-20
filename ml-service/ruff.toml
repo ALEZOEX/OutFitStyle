@@ -1,0 +1,21 @@
+# Ruff конфигурация для ml-service
+
+target-version = "py311"
+
+# Игнорируемые правила
+ignore = [
+    "E501",  # line too long (через чур длинные строки)
+    "F401",  # unused import
+    "F841",  # unused variable
+]
+
+# Исключить директории
+exclude = [
+    ".git",
+    ".pytest_cache",
+    ".mypy_cache",
+    "__pycache__",
+    "artifacts",
+    "data",
+    "models",
+]
