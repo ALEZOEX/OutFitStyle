@@ -362,13 +362,14 @@ def main():
     }
     
     result = model.predict_single(test_weather, test_user, test_item)
-    
+
     logger.info(f"\nРезультат тестового предсказания:")
     logger.info(f"  Предмет: {test_item['item_name']}")
     logger.info(f"  Температура: {test_weather['temperature']}°C")
     logger.info(f"  Рекомендуется: {result['is_recommended']}")
     logger.info(f"  Уверенность: {result['confidence']:.2%}")
-    
+    logger.info(f"  Вероятности: {result['probabilities']}")
+
     logger.info("\n✅ Обучение модели завершено!")
     logger.info(f"Модель сохранена как: {model_filename}")
 

@@ -100,7 +100,5 @@ class EnhancedPredictor:
         except Exception as e:
             logger.error(f"Prediction error: {e}")
             # Clean up on error
-            if 'data' in locals():
-                del data
             gc.collect()
             raise
