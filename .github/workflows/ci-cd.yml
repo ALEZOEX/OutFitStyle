@@ -2,42 +2,42 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.24
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.9
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
 
-    - name: Build and test Go service
-      run: |
-        cd server
-        go build -v ./...
-        go test -v ./...
+      - name: Build and test Go service
+        working-directory: server
+        run: |
+          go build -v ./...
+          go test -v ./...
 
-    - name: Test Python services
-      run: |
-        cd ml-service
-        pip install -r requirements.txt
-        pip install pytest
-        python -m pytest tests/ || true
+      - name: Test ML service
+        working-directory: ml-service
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+          python -m pytest tests/ -v
 
-        cd ../server/marketplace-service
-        pip install -r requirements.txt
-        # marketplace-service не имеет тестов, только установка зависимостей
+      - name: Install marketplace dependencies
+        working-directory: server/marketplace-service
+        run: pip install -r requirements.txt
 
   build-and-push:
     needs: build-and-test
@@ -48,44 +48,50 @@ jobs:
       packages: write
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and push server
-      uses: docker/build-push-action@v4
-      with:
-        context: ./server
-        file: ./server/Dockerfile
-        push: true
-        pull: true
-        no-cache: true
-        tags: ghcr.io/alezoex/outfitstyle-server:latest,ghcr.io/alezoex/outfitstyle-server:${{ github.sha }}
+      - name: Build and push server
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/alezoex/outfitstyle-server:latest
+            ghcr.io/alezoex/outfitstyle-server:${{ github.sha }}
+          cache-from: type=registry,ref=ghcr.io/alezoex/outfitstyle-server:latest
+          cache-to: type=inline
 
-    - name: Build and push ml-service
-      uses: docker/build-push-action@v4
-      with:
-        context: ./ml-service
-        file: ./ml-service/Dockerfile
-        push: true
-        pull: true
-        no-cache: true
-        tags: ghcr.io/alezoex/outfitstyle-ml:latest,ghcr.io/alezoex/outfitstyle-ml:${{ github.sha }}
+      - name: Build and push ml-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ml-service
+          file: ./ml-service/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/alezoex/outfitstyle-ml:latest
+            ghcr.io/alezoex/outfitstyle-ml:${{ github.sha }}
+          cache-from: type=registry,ref=ghcr.io/alezoex/outfitstyle-ml:latest
+          cache-to: type=inline
 
-    - name: Build and push marketplace-service
-      uses: docker/build-push-action@v4
-      with:
-        context: ./server/marketplace-service
-        file: ./server/marketplace-service/Dockerfile.prod
-        push: true
-        pull: true
-        no-cache: true
-        tags: ghcr.io/alezoex/outfitstyle-marketplace:latest,ghcr.io/alezoex/outfitstyle-marketplace:${{ github.sha }}
+      - name: Build and push marketplace-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server/marketplace-service
+          file: ./server/marketplace-service/Dockerfile.prod
+          push: true
+          tags: |
+            ghcr.io/alezoex/outfitstyle-marketplace:latest
+            ghcr.io/alezoex/outfitstyle-marketplace:${{ github.sha }}
+          cache-from: type=registry,ref=ghcr.io/alezoex/outfitstyle-marketplace:latest
+          cache-to: type=inline
