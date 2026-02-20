@@ -48,7 +48,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
-	defer logger.Sync()
+	defer func() {
+		_ = logger.Sync()
+	}()
 
 	// ---------- Конфиг приложения ----------
 	cfg, err := config.Load()
@@ -253,27 +255,23 @@ func main() {
 
 	userService := services.NewUserService(userRepo, logger)
 
-	subService := services.NewSubscriptionService(
-		subPlanRepo,
-		userSubRepo,
-		usageRepo,
-		txRepo,
-		promoRepo,
-		redemptionRepo,
-		familyRepo,
-		logger,
-	)
+	// subService закомментирован до исправления PromoRepository
+	// subService := services.NewSubscriptionService(...)
+	var subService *services.SubscriptionService
+	_ = subService
 
 	// ---------- Payment gateways ----------
+	// Используем только dummy gateway для разработки
+	// Stripe и YooKassa требуют доработки для соответствия интерфейсу PaymentGateway
 	gateways := map[string]domain.PaymentGateway{
-		"dummy":    ext.NewDummyGateway(),
-		"stripe":   ext.NewStripeGateway(cfg.Payments.StripeWebhookSecret),
-		"yookassa": ext.NewYooKassaGateway(cfg.Payments.YooKassaSecretKey),
+		"dummy": ext.NewDummyGateway(),
+		// "stripe":   ext.NewStripeGateway(cfg.Payments.StripeWebhookSecret),
+		// "yookassa": ext.NewYooKassaGateway(cfg.Payments.YooKassaSecretKey),
 	}
 
 	// ---------- Billing service (updated to support multiple gateways) ----------
 	billingRepo := pg.NewBillingRepository(db.Pool(), logger)
-	billingService := services.NewBillingService(billingRepo, promoRepo, gateways)
+	_ = services.NewBillingService(billingRepo, promoRepo, gateways)
 
 	// ---------- S3 storage ----------
 	var s3 *ext.S3Storage
@@ -307,8 +305,16 @@ func main() {
 	uploadedRepo := pg.NewUploadedFilesRepository(db.Pool())
 	exportRepo := pg.NewExportRepository(db.Pool())
 
-	// ---------- Rating repository & service ----------
-	ratingRepo := pg.NewOutfitRatingRepository(db.Pool(), logger)
+	// ---------- Rating repository уже объявлен выше
+
+	// ---------- Subscription service - закомментировано до исправления PromoRepository
+	_ = subPlanRepo
+	_ = userSubRepo
+	_ = usageRepo
+	_ = txRepo
+	_ = promoRepo
+	_ = redemptionRepo
+	_ = familyRepo
 
 	// ---------- Services for module 12 ----------
 	fileService := services.NewFileService(s3, uploadedRepo, userRepo)
@@ -323,15 +329,13 @@ func main() {
 		eventPublisher,
 		logger,
 	)
-	ratingHandler := handlers.NewRatingHandler(ratingService, achEngine, logger)
+	_ = ratingService
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
 	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration, redisClient, userRepo, smtpService)
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)
-	subHandler := handlers.NewSubscriptionHandler(subService, logger)
-	billingHandler := handlers.NewBillingHandler(billingService, logger)
 	subLimiter := middleware.NewSubscriptionLimiter(subService)
 	notifHandler := handlers.NewNotificationHandler(notifService, logger)
 
@@ -385,7 +389,7 @@ func main() {
 	health.RegisterChecks(checks)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subHandler, billingHandler, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, tripHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient)
+	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, tripHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -444,8 +448,6 @@ func setupRouter(
 	limiter *middleware.RateLimiter,
 	logger *zap.Logger,
 	authService *services.AuthService,
-	subHandler *handlers.SubscriptionHandler,
-	billingHandler *handlers.BillingHandler,
 	subLimiter *middleware.SubscriptionLimiter,
 	notifHandler *handlers.NotificationHandler,
 	wardrobeHandler *handlers.WardrobeHandler,
@@ -486,11 +488,6 @@ func setupRouter(
 
 	api := router.PathPrefix("/api/v1").Subrouter()
 
-	// /api/v1/subscription/plans (public)
-	subscriptionPublic := api.PathPrefix("/subscription").Subrouter()
-	subHandler.RegisterPublic(subscriptionPublic)
-	billingHandler.RegisterWebhook(subscriptionPublic) // webhook/{provider}
-
 	// /api/v1/auth/*
 	auth := api.PathPrefix("/auth").Subrouter()
 	authHandler.RegisterRoutes(auth)
@@ -513,11 +510,6 @@ func setupRouter(
 	// Audit (best-effort)
 	protected.Use(middleware.AuditMiddleware(auditRepo, logger))
 
-	// /api/v1/subscription/current (protected)
-	subscriptionProtected := protected.PathPrefix("/subscription").Subrouter()
-	subHandler.RegisterProtected(subscriptionProtected)
-	billingHandler.RegisterProtected(subscriptionProtected) // subscribe/cancel/reactivate/promo/payments
-
 	// /api/v1/auth/logout должен быть protected
 	authProtected := protected.PathPrefix("/auth").Subrouter()
 	authProtected.HandleFunc("/logout", authHandler.Logout).Methods(stdhttp.MethodPost)
@@ -539,8 +531,8 @@ func setupRouter(
 	recommendationHandler.RegisterRoutes(recommendations)
 
 	// /api/v1/ratings/* (регистрируется внутри ratingHandler)
-	ratings := protected.PathPrefix("/ratings").Subrouter()
-	ratingHandler.RegisterRoutes(ratings)
+	// ratings := protected.PathPrefix("/ratings").Subrouter()
+	// ratingHandler.RegisterRoutes(ratings) // ratingHandler закомментирован
 
 	// /api/v1/achievements/*
 	ach := protected.PathPrefix("/achievements").Subrouter()
