@@ -21,7 +21,7 @@ require (
 	github.com/prometheus/client_golang v1.23.0
 
 	// Messaging
-	github.com/segmentio/kafka-go v0.4.37
+	github.com/segmentio/kafka-go v0.4.50
 	github.com/swaggo/http-swagger v1.3.4
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.45.0
