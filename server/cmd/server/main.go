@@ -29,6 +29,7 @@ import (
 	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/core/use_cases"
 	"outfitstyle/server/internal/infrastructure/cache"
+	"outfitstyle/server/internal/infrastructure/email"
 	"outfitstyle/server/internal/infrastructure/eventing"
 	ext "outfitstyle/server/internal/infrastructure/external"
 	"outfitstyle/server/internal/infrastructure/observability"
@@ -111,7 +112,16 @@ func main() {
 	clothingRepo := pg.NewClothingRepository(db.Pool(), redisClient, logger)
 	wardrobeRepo := pg.NewWardrobeRepository(db.Pool())
 	// specRepo := pg.NewSubcategorySpecRepository(db.Pool(), logger)
-	subRepo := pg.NewSubscriptionRepository(db.Pool(), logger)
+
+	// Subscription repositories
+	subPlanRepo := pg.NewSubscriptionPlanRepository(db.Pool())
+	userSubRepo := pg.NewUserSubscriptionRepository(db.Pool())
+	usageRepo := pg.NewSubscriptionUsageRepository(db.Pool())
+	txRepo := pg.NewSubscriptionTransactionRepository(db.Pool())
+	promoRepo := pg.NewPromoRepository(db.Pool())
+	redemptionRepo := pg.NewPromoRedemptionRepository(db.Pool())
+	familyRepo := pg.NewFamilyMemberRepository(db.Pool())
+
 	notifRepo := pg.NewNotificationRepository(db.Pool())
 	pushTokenRepo := pg.NewPushTokenRepository(db.Pool())
 	tripRepo := pg.NewTripRepository(db.Pool())
@@ -128,12 +138,12 @@ func main() {
 
 	// ---------- Token Service с поддержкой RS256 ----------
 	tokenConfig := services.TokenServiceConfig{
-		JWTSecret:          cfg.Security.JWTSecret,
-		JWTPrivateKeyPath:  cfg.Security.JWTPrivateKeyPath,
-		JWTPublicKeyPath:   cfg.Security.JWTPublicKeyPath,
-		UseRS256:           cfg.Security.UseRS256,
-		AccessTTL:          cfg.Security.AccessTokenTTL,
-		RefreshTTL:         cfg.Security.RefreshTokenTTL,
+		JWTSecret:      cfg.Security.JWTSecret,
+		PrivateKeyPath: cfg.Security.JWTPrivateKeyPath,
+		PublicKeyPath:  cfg.Security.JWTPublicKeyPath,
+		UseRS256:       cfg.Security.UseRS256,
+		AccessTTL:      cfg.Security.AccessTokenTTL,
+		RefreshTTL:     cfg.Security.RefreshTokenTTL,
 	}
 	tokenSvc, err := services.NewTokenService(tokenConfig)
 	if err != nil {
@@ -189,6 +199,15 @@ func main() {
 	// ---------- Notification services ----------
 	notifService := services.NewNotificationService(notifRepo, pushTokenRepo, qClient)
 
+	// ---------- SMTP Service (для восстановления пароля) ----------
+	smtpService := email.NewSMTPService(
+		cfg.Email.SMTPHost,
+		cfg.Email.SMTPPort,
+		cfg.Email.SMTPUser,
+		cfg.Email.SMTPPassword,
+		cfg.Email.From,
+	)
+
 	// ---------- Personalization repository ----------
 	personalizationRepo := pg.NewPersonalizationRepository(db.Pool())
 
@@ -231,7 +250,16 @@ func main() {
 
 	userService := services.NewUserService(userRepo, logger)
 
-	subService := services.NewSubscriptionService(subRepo)
+	subService := services.NewSubscriptionService(
+		subPlanRepo,
+		userSubRepo,
+		usageRepo,
+		txRepo,
+		promoRepo,
+		redemptionRepo,
+		familyRepo,
+		logger,
+	)
 
 	// ---------- Payment gateways ----------
 	gateways := map[string]domain.PaymentGateway{
@@ -242,8 +270,7 @@ func main() {
 
 	// ---------- Billing service (updated to support multiple gateways) ----------
 	billingRepo := pg.NewBillingRepository(db.Pool(), logger)
-	promoRepo := pg.NewPromoRepository(db.Pool())
-	billingService := services.NewBillingService(subRepo, billingRepo, promoRepo, gateways)
+	billingService := services.NewBillingService(billingRepo, promoRepo, gateways)
 
 	// ---------- S3 storage ----------
 	var s3 *ext.S3Storage
@@ -297,7 +324,7 @@ func main() {
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
-	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration)
+	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration, redisClient, userRepo, smtpService)
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)
 	subHandler := handlers.NewSubscriptionHandler(subService, logger)

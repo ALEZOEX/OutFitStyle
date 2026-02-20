@@ -20,6 +20,7 @@ import '../../features/settings/presentation/screens/language_screen.dart';
 import '../../features/settings/presentation/screens/about_screen.dart';
 import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/auth/presentation/auth_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/onboarding/onboarding_storage.dart' as onboarding_storage;
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
@@ -117,6 +118,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
+      // Восстановление пароля доступно без авторизации
+      if (path == '/forgot-password') {
+        return null;
+      }
+
       // Авторизация не нужна для splash и onboarding
       if (path == '/splash' || path == '/onboarding') {
         return null;
@@ -163,6 +169,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/auth',
         name: 'auth',
         builder: (context, state) => const AuthScreen(),
+      ),
+      // Восстановление пароля
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot_password',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
       // Главный экран с shell навигацией
       GoRoute(
