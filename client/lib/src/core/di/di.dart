@@ -35,6 +35,11 @@ class OnboardingDoneNotifier extends StateNotifier<bool> {
     _checkOnboarding();
   }
 
+  /// Публичный метод для обновления состояния
+  void updateState(bool value) {
+    state = value;
+  }
+
   Future<void> _checkOnboarding() async {
     try {
       final prefs = await SharedPreferences.getInstance();
