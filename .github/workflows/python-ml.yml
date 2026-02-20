@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          cache-dependency-path: ml-service/requirements.txt
+          cache-dependency-path: ml-service/requirements*.txt
 
       - name: Install dependencies
         run: |
