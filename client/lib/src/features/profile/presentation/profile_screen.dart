@@ -244,7 +244,7 @@ class ProfileScreen extends ConsumerWidget {
       error: (_, __) => 0,
     );
 
-    final statsData = <Map<String, String>>[
+    final statsData = [
       {'label': 'Вещей', 'value': stats.totalCount.toString(), 'icon': Icons.checkroom},
       {'label': 'Категорий', 'value': stats.categoriesCount.toString(), 'icon': Icons.category},
       {'label': 'Избранное', 'value': stats.favoritesCount.toString(), 'icon': Icons.favorite},
@@ -282,7 +282,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Элемент статистики
-  Widget _buildStatItem(BuildContext context, Map<String, String> stat) {
+  Widget _buildStatItem(BuildContext context, Map<String, dynamic> stat) {
     final theme = Theme.of(context);
 
     return Column(

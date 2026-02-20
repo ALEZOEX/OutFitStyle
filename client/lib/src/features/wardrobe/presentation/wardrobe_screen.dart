@@ -6,7 +6,6 @@ import '../../../domain/entities/wardrobe_item.dart';
 import '../../../domain/entities/wardrobe_request_entities.dart';
 import '../presentation/providers/wardrobe_provider.dart';
 import '../../../ui/widgets/wardrobe_item_card.dart';
-import 'screens/catalog_selection_screen.dart';
 
 /// Экран гардероба - личные вещи пользователя
 class WardrobeScreen extends ConsumerStatefulWidget {
@@ -67,16 +66,6 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Кнопка "Выбрать из каталога"
-          FloatingActionButton.small(
-            heroTag: 'catalogBtn',
-            onPressed: () => _navigateToCatalog(context),
-            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-            foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-            tooltip: 'Выбрать из каталога',
-            child: const Icon(Icons.inventory_2),
-          ),
-          const SizedBox(height: 8),
           // Основная кнопка "Добавить"
           FloatingActionButton.extended(
             heroTag: 'addBtn',
@@ -449,17 +438,6 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
         onItemAdded: () {
           ref.read(wardrobeProvider.notifier).refresh();
         },
-      ),
-    );
-  }
-
-  /// Навигация к экрану выбора из каталога
-  void _navigateToCatalog(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CatalogSelectionScreen(
-          initialCategory: _selectedCategory != 'all' ? _selectedCategory : null,
-        ),
       ),
     );
   }
