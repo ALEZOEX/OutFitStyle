@@ -76,7 +76,8 @@ class WardrobeState {
 /// Провайдер ApiClient
 final apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(authStorageProvider);
-  return ApiClient(storage: storage);
+  final config = ApiConfig(apiBase: ApiConfig.baseUrl);
+  return ApiClient(config: config, storage: storage);
 });
 
 /// Провайдер WardrobeApiService
