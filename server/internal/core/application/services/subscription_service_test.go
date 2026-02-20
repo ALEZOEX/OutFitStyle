@@ -536,34 +536,34 @@ func TestSubscriptionService_GetCurrent_NoSubscription(t *testing.T) {
 
 // TestSubscriptionService_CheckCanCreateRecommendation тест проверки лимита рекомендаций
 func TestSubscriptionService_CheckCanCreateRecommendation(t *testing.T) {
-	t.Parallel()
-
-	mockPlanRepo := new(MockSubscriptionPlanRepository)
-	mockUserSubRepo := new(MockUserSubscriptionRepository)
-	mockUsageRepo := new(MockSubscriptionUsageRepository)
-	mockTxRepo := new(MockSubscriptionTransactionRepository)
-	mockPromoRepo := new(MockPromoCodeRepository)
-	mockRedemptionRepo := new(MockPromoRedemptionRepository)
-	mockFamilyRepo := new(MockFamilyMemberRepository)
-
-	logger, _ := zap.NewDevelopment()
-
-	svc := services.NewSubscriptionService(
-		mockPlanRepo,
-		mockUserSubRepo,
-		mockUsageRepo,
-		mockTxRepo,
-		mockPromoRepo,
-		mockRedemptionRepo,
-		mockFamilyRepo,
-		logger,
-	)
+	// Не используем t.Parallel() так как подтесты делят общие моки
 
 	ctx := context.Background()
 	userID := domain.NewID()
 
 	// Тест 1: Лимит не превышен
 	t.Run("LimitNotExceeded", func(t *testing.T) {
+		mockPlanRepo := new(MockSubscriptionPlanRepository)
+		mockUserSubRepo := new(MockUserSubscriptionRepository)
+		mockUsageRepo := new(MockSubscriptionUsageRepository)
+		mockTxRepo := new(MockSubscriptionTransactionRepository)
+		mockPromoRepo := new(MockPromoCodeRepository)
+		mockRedemptionRepo := new(MockPromoRedemptionRepository)
+		mockFamilyRepo := new(MockFamilyMemberRepository)
+
+		logger, _ := zap.NewDevelopment()
+
+		svc := services.NewSubscriptionService(
+			mockPlanRepo,
+			mockUserSubRepo,
+			mockUsageRepo,
+			mockTxRepo,
+			mockPromoRepo,
+			mockRedemptionRepo,
+			mockFamilyRepo,
+			logger,
+		)
+
 		mockUserSubRepo.On("GetActiveSubscription", ctx, userID).Return(nil, nil)
 		mockPlanRepo.On("GetPlanByCode", ctx, "free").Return(&domain.SubscriptionPlan{
 			Code: "free",
@@ -580,6 +580,27 @@ func TestSubscriptionService_CheckCanCreateRecommendation(t *testing.T) {
 
 	// Тест 2: Лимит превышен
 	t.Run("LimitExceeded", func(t *testing.T) {
+		mockPlanRepo := new(MockSubscriptionPlanRepository)
+		mockUserSubRepo := new(MockUserSubscriptionRepository)
+		mockUsageRepo := new(MockSubscriptionUsageRepository)
+		mockTxRepo := new(MockSubscriptionTransactionRepository)
+		mockPromoRepo := new(MockPromoCodeRepository)
+		mockRedemptionRepo := new(MockPromoRedemptionRepository)
+		mockFamilyRepo := new(MockFamilyMemberRepository)
+
+		logger, _ := zap.NewDevelopment()
+
+		svc := services.NewSubscriptionService(
+			mockPlanRepo,
+			mockUserSubRepo,
+			mockUsageRepo,
+			mockTxRepo,
+			mockPromoRepo,
+			mockRedemptionRepo,
+			mockFamilyRepo,
+			logger,
+		)
+
 		mockUserSubRepo.On("GetActiveSubscription", ctx, userID).Return(nil, nil)
 		mockPlanRepo.On("GetPlanByCode", ctx, "free").Return(&domain.SubscriptionPlan{
 			Code: "free",

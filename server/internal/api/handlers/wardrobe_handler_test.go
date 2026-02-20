@@ -471,7 +471,7 @@ func TestWardrobeHandler_Favorite_MissingValue(t *testing.T) {
 	handler.Favorite(rr, req)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
-	assert.Contains(t, rr.Body.String(), "is_favorite is required")
+	assert.Contains(t, rr.Body.String(), "is_favorite required")
 }
 
 // TestWardrobeHandler_Archive_Success тестирует установку статуса архивного
