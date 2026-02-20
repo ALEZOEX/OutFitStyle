@@ -24,6 +24,7 @@ type RecommendationService struct {
 	clothingRepo    repositories.ClothingRepository        // Репозиторий одежды
 	userRepo        repositories.UserRepository            // Репозиторий пользователей
 	personalization repositories.PersonalizationRepository // Репозиторий персонализации
+	ratingRepo      repositories.OutfitRatingRepository    // Репозиторий оценок
 
 	eventPublisher eventing.EventPublisher  // Паблишер событий
 	weather        *external.WeatherService // Сервис погоды
@@ -41,6 +42,7 @@ func NewRecommendationService(
 	weather *external.WeatherService,
 	ml *external.MLClient,
 	personalization repositories.PersonalizationRepository,
+	ratingRepo repositories.OutfitRatingRepository,
 	eventPublisher eventing.EventPublisher,
 	logger *zap.Logger,
 ) *RecommendationService {
@@ -49,6 +51,7 @@ func NewRecommendationService(
 		clothingRepo:    clothingRepo,
 		userRepo:        userRepo,
 		personalization: personalization,
+		ratingRepo:      ratingRepo,
 		eventPublisher:  eventPublisher,
 		weather:         weather,
 		ml:              ml,
@@ -797,6 +800,7 @@ func regenTips(oldRec *domain.RecommendationRecord, chosenCount int) []string {
 }
 
 // rankLiteOrFallback: теперь поддерживает exclude map (может быть nil)
+// Также фильтрует вещи с низким рейтингом (quality_score < -5)
 func (s *RecommendationService) rankLiteOrFallback(
 	ctx context.Context,
 	userID domain.ID,
@@ -812,6 +816,26 @@ func (s *RecommendationService) rankLiteOrFallback(
 	styleC = 0.5
 	colorH = 0.5
 	rankings = map[string][]rankedLite{}
+
+	// Получаем вещи с низким рейтингом для фильтрации
+	// Порог -5: исключаем вещи со средним quality_score < -5
+	lowQualityItems, err := s.ratingRepo.GetLowQualityItems(ctx, userID, -5.0)
+	if err != nil {
+		s.logger.Debug("Не удалось получить вещи с низким рейтингом", zap.Error(err))
+	}
+
+	// Создаём множество ID вещей с низким рейтингом
+	lowQualitySet := make(map[int64]bool)
+	for _, item := range lowQualityItems {
+		lowQualitySet[item.ClothingItemID] = true
+	}
+
+	if len(lowQualitySet) > 0 {
+		s.logger.Info("Фильтрация вещей с низким рейтингом",
+			zap.String("user_id", userID.String()),
+			zap.Int("low_quality_count", len(lowQualitySet)),
+		)
+	}
 
 	// Загружаем данные персонализации
 	prefs, _ := s.personalization.GetUserPreferences(ctx, userID)
@@ -864,7 +888,19 @@ func (s *RecommendationService) rankLiteOrFallback(
 	ratingMap, _ := s.personalization.GetItemRatingsMap(ctx, userID, ids)
 
 	for _, c := range candidates {
+		// Пропускаем исключённые вещи
 		if excluded != nil && excluded[c.ID] {
+			continue
+		}
+
+		// Пропускаем вещи с низким рейтингом
+		// Конвертируем UUID в int64 для сравнения с lowQualitySet
+		itemIDInt64 := domain.IDToInt64(c.ID)
+		if lowQualitySet[itemIDInt64] {
+			s.logger.Debug("Исключена вещь с низким рейтингом",
+				zap.String("item_id", c.ID.String()),
+				zap.Int64("item_id_int64", itemIDInt64),
+			)
 			continue
 		}
 
@@ -1105,14 +1141,6 @@ func valStr(p *string, def string) string {
 
 // derefInt разыменовывает указатель или возвращает значение по умолчанию
 func derefInt(p *int, def int) int {
-	if p == nil {
-		return def
-	}
-	return *p
-}
-
-// derefString разыменовывает указатель или возвращает значение по умолчанию
-func derefString(p *string, def string) string {
 	if p == nil {
 		return def
 	}
