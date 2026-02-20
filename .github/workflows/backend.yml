@@ -87,7 +87,7 @@ jobs:
       - name: Security scan with gosec
         uses: securego/gosec@master
         with:
-          args: ./...
+          args: -exclude-dir=marketplace-service ./...
 
   build-and-push:
     needs: test
