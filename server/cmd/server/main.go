@@ -113,6 +113,9 @@ func main() {
 	wardrobeRepo := pg.NewWardrobeRepository(db.Pool())
 	// specRepo := pg.NewSubcategorySpecRepository(db.Pool(), logger)
 
+	// Rating repository (нужен до recommendationService)
+	ratingRepo := pg.NewOutfitRatingRepository(db.Pool(), logger)
+
 	// Subscription repositories
 	subPlanRepo := pg.NewSubscriptionPlanRepository(db.Pool())
 	userSubRepo := pg.NewUserSubscriptionRepository(db.Pool())
