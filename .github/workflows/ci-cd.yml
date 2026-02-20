@@ -66,6 +66,7 @@ jobs:
         context: ./server
         file: ./server/Dockerfile
         push: true
+        no-cache: true
         tags: ghcr.io/alezoex/outfitstyle-server:latest,ghcr.io/alezoex/outfitstyle-server:${{ github.sha }}
 
     - name: Build and push ml-service
@@ -74,6 +75,7 @@ jobs:
         context: ./ml-service
         file: ./ml-service/Dockerfile
         push: true
+        no-cache: true
         tags: ghcr.io/alezoex/outfitstyle-ml:latest,ghcr.io/alezoex/outfitstyle-ml:${{ github.sha }}
 
     - name: Build and push marketplace-service
@@ -82,4 +84,5 @@ jobs:
         context: ./server/marketplace-service
         file: ./server/marketplace-service/Dockerfile.prod
         push: true
+        no-cache: true
         tags: ghcr.io/alezoex/outfitstyle-marketplace:latest,ghcr.io/alezoex/outfitstyle-marketplace:${{ github.sha }}

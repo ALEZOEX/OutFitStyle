@@ -95,3 +95,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           # Принудительно строим без кэша
           no-cache: true
+          # Отключаем GitHub Actions кэш
+          cache-from: ""
+          cache-to: ""
