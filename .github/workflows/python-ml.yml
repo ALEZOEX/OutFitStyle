@@ -44,7 +44,7 @@ jobs:
         run: ruff check . --exit-zero
 
       - name: Type check with MyPy
-        run: mypy . --ignore-missing-imports
+        run: mypy . --ignore-missing-imports --explicit-package-bases
 
       - name: Security check
         run: safety check
