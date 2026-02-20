@@ -52,10 +52,11 @@ class TestFeatureDataFrame:
             'humidity': [60, 80],
             'category': ['upper', 'outerwear'],
         })
-        
+
         assert pd.api.types.is_float_dtype(df['temperature'])
         assert pd.api.types.is_integer_dtype(df['humidity'])
-        assert pd.api.types.is_object_dtype(df['category'])
+        # pandas 3.x использует StringDtype вместо object
+        assert pd.api.types.is_string_dtype(df['category'])
 
 
 class TestModelManifest:
@@ -302,7 +303,8 @@ class TestErrorHandling:
             'humidity': [60, 70],
         })
 
-        assert df['temperature'].dtype == object
+        # pandas 3.x использует StringDtype вместо object
+        assert pd.api.types.is_string_dtype(df['temperature'])
         assert df['humidity'].dtype == np.int64
 
     def test_null_values(self):
