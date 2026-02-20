@@ -6,6 +6,7 @@ import '../widgets/achievement_card.dart';
 import '../widgets/achievement_category_tab.dart';
 import '../../../../domain/entities/achievement_category.dart';
 import '../../../../domain/entities/achievement.dart';
+import '../../data/repositories/achievements_repository.dart';
 
 /// Страница достижений с табами категорий и фильтрами
 class AchievementsPage extends ConsumerStatefulWidget {

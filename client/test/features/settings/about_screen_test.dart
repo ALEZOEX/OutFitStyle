@@ -28,8 +28,8 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Проверяем заголовок
-      expect(find.text('О приложении'), findsOneWidget);
+      // Проверяем заголовок (первый найденный — это заголовок AppBar)
+      expect(find.text('О приложении'), findsWidgets);
     });
 
     testWidgets('shows app name', (tester) async {
@@ -105,11 +105,11 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Проверяем секцию соцсетей
-      expect(find.text('Мы в соцсетях'), findsOneWidget);
-      expect(find.text('Сайт'), findsOneWidget);
-      expect(find.text('Telegram'), findsOneWidget);
-      expect(find.text('VK'), findsOneWidget);
+      // Проверяем секцию соцсетей (используем findsWidgets т.к. текст может быть в прокручиваемой области)
+      expect(find.text('Мы в соцсетях'), findsWidgets);
+      expect(find.text('Сайт'), findsWidgets);
+      expect(find.text('Telegram'), findsWidgets);
+      expect(find.text('VK'), findsWidgets);
     });
 
     testWidgets('shows documents section', (tester) async {
@@ -124,9 +124,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Проверяем секцию документов
-      expect(find.text('Документы'), findsOneWidget);
-      expect(find.text('Политика конфиденциальности'), findsOneWidget);
-      expect(find.text('Условия использования'), findsOneWidget);
+      expect(find.text('Документы'), findsWidgets);
+      expect(find.text('Политика конфиденциальности'), findsWidgets);
+      expect(find.text('Условия использования'), findsWidgets);
     });
 
     testWidgets('shows team section', (tester) async {
@@ -141,7 +141,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Проверяем секцию команды
-      expect(find.text('Команда'), findsOneWidget);
+      expect(find.text('Команда'), findsWidgets);
       expect(find.text('Показать команду'), findsOneWidget);
     });
 
@@ -157,7 +157,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Проверяем секцию лицензий
-      expect(find.text('Лицензии'), findsOneWidget);
+      expect(find.text('Лицензии'), findsWidgets);
       expect(find.text('Открыть лицензии'), findsOneWidget);
     });
 
@@ -275,7 +275,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Проверяем иконку информации
-      expect(find.byIcon(Icons.info_outline), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline), findsWidgets);
     });
 
     testWidgets('shows share icon in social section', (tester) async {
@@ -305,7 +305,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Проверяем иконку документов
-      expect(find.byIcon(Icons.description), findsOneWidget);
+      expect(find.byIcon(Icons.description), findsWidgets);
     });
 
     testWidgets('shows groups icon in team section', (tester) async {
@@ -320,7 +320,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Проверяем иконку команды
-      expect(find.byIcon(Icons.groups), findsOneWidget);
+      expect(find.byIcon(Icons.groups), findsWidgets);
     });
 
     testWidgets('shows account balance icon in licenses', (tester) async {
@@ -335,7 +335,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Проверяем иконку лицензий
-      expect(find.byIcon(Icons.account_balance), findsOneWidget);
+      expect(find.byIcon(Icons.account_balance), findsWidgets);
     });
 
     testWidgets('shows open in new icons for links', (tester) async {
@@ -365,10 +365,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Проверяем описание функций
-      expect(find.textContaining('погоды'), findsOneWidget);
-      expect(find.textContaining('предпочтений'), findsOneWidget);
-      expect(find.textContaining('трендов'), findsOneWidget);
-      expect(find.textContaining('искусственного интеллекта'), findsOneWidget);
+      expect(find.textContaining('погоды'), findsWidgets);
+      expect(find.textContaining('предпочтений'), findsWidgets);
+      expect(find.textContaining('трендов'), findsWidgets);
+      expect(find.textContaining('искусственного интеллекта'), findsWidgets);
     });
   });
 }

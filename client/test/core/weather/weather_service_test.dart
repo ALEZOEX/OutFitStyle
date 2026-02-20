@@ -1,13 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:outfitstyle_client/src/core/weather/weather_service.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/models/weather.dart';
+
+// Mock для ApiClient
+class MockApiClient extends Mock implements ApiClient {}
 
 void main() {
   group('WeatherService Tests', () {
     late WeatherService weatherService;
+    late MockApiClient mockApiClient;
 
     setUp(() {
-      weatherService = WeatherService();
+      mockApiClient = MockApiClient();
+      weatherService = WeatherService(apiClient: mockApiClient);
     });
 
     test('WeatherService is initialized', () {

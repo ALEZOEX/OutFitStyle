@@ -6,6 +6,7 @@ import 'package:outfitstyle_client/src/features/achievements/presentation/pages/
 import 'package:outfitstyle_client/src/domain/entities/achievement.dart';
 import 'package:outfitstyle_client/src/domain/entities/achievement_category.dart';
 import 'package:outfitstyle_client/src/domain/enums/achievement_status.dart';
+import 'package:outfitstyle_client/src/features/achievements/data/repositories/achievements_repository.dart';
 
 void main() {
   group('AchievementsPage Widget Tests', () {
@@ -66,7 +67,7 @@ void main() {
           title: 'Мастер стиля',
           description: 'Создать 10 образов',
           icon: '🌟',
-          category: AchievementCategory.style,
+          category: AchievementCategory.planning,
           points: 50,
           currentProgress: 5,
           targetValue: 10,
@@ -261,7 +262,7 @@ void main() {
         title: 'Мастер стиля',
         description: 'Создать 10 образов',
         icon: '🌟',
-        category: AchievementCategory.style,
+        category: AchievementCategory.ratings,
         points: 50,
         currentProgress: 5,
         targetValue: 10,
@@ -277,7 +278,7 @@ void main() {
         title: 'Test',
         description: 'Test',
         icon: '🎯',
-        category: AchievementCategory.style,
+        category: AchievementCategory.ratings,
         points: 10,
         currentProgress: 7,
         targetValue: 10,
@@ -293,7 +294,7 @@ void main() {
         title: 'Test',
         description: 'Test',
         icon: '🎯',
-        category: AchievementCategory.style,
+        category: AchievementCategory.ratings,
         points: 10,
         currentProgress: 0,
         targetValue: 0,
@@ -309,7 +310,7 @@ void main() {
         title: 'Test',
         description: 'Test',
         icon: '🎯',
-        category: AchievementCategory.style,
+        category: AchievementCategory.ratings,
         points: 10,
         currentProgress: 15,
         targetValue: 10,

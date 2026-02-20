@@ -143,7 +143,7 @@ class AchievementCard extends StatelessWidget {
           achievement.icon,
           style: TextStyle(
             fontSize: 28,
-            brightness: isUnlocked ? Brightness.light : Brightness.normal,
+            color: isUnlocked ? null : Colors.grey,
           ),
         ),
       ),
