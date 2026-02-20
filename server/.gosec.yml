@@ -1,0 +1,28 @@
+# GoSec конфигурация
+global:
+  # Минимальная серьёзность для отчёта
+  severity: "medium"
+  # Минимальная уверенность
+  confidence: "medium"
+
+# Исключения для конкретных правил
+rules:
+  # G104: Errors unhandled - игнорируем в определённых местах
+  - G104
+  # G117: Exported struct field matches secret pattern - ложные срабатывания для конфигов
+  - G117
+  # G306: WriteFile permissions - игнорируем для PEM файлов
+  - G306
+
+# Исключения по файлам
+exclude-files:
+  - ".*\\.g\\.go$"
+  - ".*\\.freezed\\.go$"
+  - ".*_test\\.go$"
+  - "internal/contracts/.*"
+
+# Исключения по директориям
+exclude-dirs:
+  - "vendor"
+  - "docs"
+  - "cmd"
