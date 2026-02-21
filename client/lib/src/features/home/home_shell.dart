@@ -18,7 +18,7 @@ class HomeShellWrapper extends ConsumerStatefulWidget {
   ConsumerState<HomeShellWrapper> createState() => _HomeShellWrapperState();
 }
 
-class _HomeShellWrapperState extends State<HomeShellWrapper> {
+class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [

@@ -5,6 +5,7 @@ import '../../../../core/api/api_client.dart';
 import '../../../../core/di/di.dart';
 import '../../../../domain/entities/achievement.dart';
 import '../../../../domain/entities/achievement_category.dart';
+import '../../data/models/achievement_dto.dart';
 import '../../data/repositories/achievements_repository_impl.dart';
 import '../../data/services/achievements_api_service.dart';
 

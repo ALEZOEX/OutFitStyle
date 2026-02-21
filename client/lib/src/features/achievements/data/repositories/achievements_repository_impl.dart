@@ -12,6 +12,7 @@ import '../../../../domain/repositories/achievement_repository.dart';
 import '../models/achievement_dto.dart';
 import '../services/achievements_api_service.dart';
 import 'achievement_definitions.dart';
+import 'achievements_repository.dart';
 
 /// Репозиторий для работы с достижениями с поддержкой API и offline-first
 class AchievementsRepositoryImpl implements AchievementRepository {
@@ -157,9 +158,12 @@ class AchievementsRepositoryImpl implements AchievementRepository {
   }
 
   /// Разблокировать достижение напрямую
-  Future<void> unlockAchievement(String achievementId) async {
+  @override
+  Future<Either<String, AchievementProgress>> unlockAchievement({
+    required String achievementId,
+  }) async {
     final index = _localCache.indexWhere((a) => a.id == achievementId);
-    if (index == -1) return;
+    if (index == -1) return left('Achievement not found');
 
     final achievement = _localCache[index];
     final updated = achievement.copyWith(
@@ -171,6 +175,21 @@ class AchievementsRepositoryImpl implements AchievementRepository {
 
     _localCache[index] = updated;
     _notifyListeners();
+
+    // Пытаемся разблокировать на сервере
+    try {
+      final result = await _apiService.unlockAchievement(achievementId);
+      return right(result);
+    } catch (e) {
+      // Возвращаем локальный прогресс
+      return right(AchievementProgress(
+        achievementId: achievementId,
+        currentProgress: updated.currentProgress,
+        targetValue: updated.targetValue,
+        isUnlocked: true,
+        unlockedAt: updated.unlockedAt,
+      ));
+    }
   }
 
   /// Сбросить прогресс достижения
@@ -407,45 +426,4 @@ enum AchievementFilter {
 
   final String displayName;
   const AchievementFilter(this.displayName);
-}
-
-/// Статистика достижений
-class AchievementStats {
-  final int totalAchievements;
-  final int unlockedAchievements;
-  final int totalPoints;
-  final int earnedPoints;
-  final double progressPercent;
-
-  const AchievementStats({
-    required this.totalAchievements,
-    required this.unlockedAchievements,
-    required this.totalPoints,
-    required this.earnedPoints,
-    required this.progressPercent,
-  });
-
-  /// Общий прогресс в формате "X/Y"
-  String get progressText => '$unlockedAchievements/$totalAchievements';
-
-  /// Заработанные очки в формате "X/Y"
-  String get pointsText => '$earnedPoints/$totalPoints';
-}
-
-/// Прогресс категории
-class CategoryProgress {
-  final AchievementCategory category;
-  final int total;
-  final int unlocked;
-  final double progressPercent;
-
-  const CategoryProgress({
-    required this.category,
-    required this.total,
-    required this.unlocked,
-    required this.progressPercent,
-  });
-
-  /// Прогресс в формате "X/Y"
-  String get progressText => '$unlocked/$total';
 }
