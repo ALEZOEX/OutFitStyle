@@ -4,9 +4,10 @@ services:
     environment:
       - POSTGRES_DB=outfitstyle
       - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=
       - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,7 +15,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # Ограничение ресурсов для PostgreSQL
+    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -28,17 +29,14 @@ services:
 
   redis:
     image: redis:7-alpine
-    environment:
-      - LANG=ru_RU.UTF-8
-      - LC_ALL=ru_RU.UTF-8
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 3
-    # Ограничение ресурсов для Redis
+    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -56,21 +54,22 @@ services:
       dockerfile: ../Dockerfile.ml-service
     volumes:
       - ./ml-service/models:/app/models:ro
-    ports:
-      - "5000:8000"
+    expose:
+      - "8000"
     environment:
       - MODEL_PATH=/app/models/model.pkl
       - LOG_LEVEL=info
       - YANDEX_TRANSLATE_API_KEY=${YANDEX_TRANSLATE_API_KEY}
       - YANDEX_FOLDER_ID=${YANDEX_FOLDER_ID}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-    # Ограничение ресурсов для ML-сервиса
+    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -99,7 +98,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    # Ограничение ресурсов для миграций
     deploy:
       resources:
         limits:
@@ -129,20 +127,20 @@ services:
       - DB_PASSWORD=
       - DB_NAME=outfitstyle
       - DATABASE_URL=postgres://postgres@postgres:5432/outfitstyle?sslmode=disable
-      - DATABASE_MAX_CONNECTIONS=5  # Уменьшено для экономии ресурсов
-      - DATABASE_MAX_IDLE_CONNECTIONS=2  # Уменьшено для экономии ресурсов
+      - DATABASE_MAX_CONNECTIONS=5
+      - DATABASE_MAX_IDLE_CONNECTIONS=2
       - REDIS_URL=redis://redis:6379
       - REDIS_PASSWORD=
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ACCESS_TOKEN_TTL=15m
       - JWT_REFRESH_TOKEN_TTL=720h
-      - CORS_ALLOWED_ORIGINS=*
-      - RATE_LIMIT_PER_MINUTE=10  # Уменьшено для экономии ресурсов
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      - RATE_LIMIT_PER_MINUTE=100
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - ML_SERVICE_URL=http://ml-service:8000
       - ML_SERVICE_TIMEOUT=30s
       - WEATHER_API_KEY=${WEATHER_API_KEY}
-      - OPENWEATHER_CACHE_TTL=5m  # Уменьшено для экономии ресурсов
+      - OPENWEATHER_CACHE_TTL=5m
       - OPENWEATHER_BASE_URL=https://api.openweathermap.org/data/2.5
       - WEATHER_PROVIDER=openweather
       - OPENMETEO_BASE_URL=https://api.open-meteo.com
@@ -153,19 +151,14 @@ services:
       - FROM_EMAIL=${FROM_EMAIL}
       - SMTP_TLS=${SMTP_TLS}
       - SMTP_DEBUG=${SMTP_DEBUG}
-      - SENTRY_DSN=
+      - SENTRY_DSN=${SENTRY_DSN}
       - ADMIN_API_KEY=${ADMIN_API_KEY}
-      - FEATURE_PARTNER_CATALOG=false  # Отключено для экономии ресурсов
-      - FEATURE_AB_TESTING=false  # Отключено для экономии ресурсов
-      - FEATURE_ACHIEVEMENTS=false  # Отключено для экономии ресурсов
-      - FEATURE_TRIPS=false  # Отключено для экономии ресурсов
+      - FEATURE_PARTNER_CATALOG=${FEATURE_PARTNER_CATALOG}
+      - FEATURE_AB_TESTING=${FEATURE_AB_TESTING}
+      - FEATURE_ACHIEVEMENTS=${FEATURE_ACHIEVEMENTS}
+      - FEATURE_TRIPS=${FEATURE_TRIPS}
       - API_KEY_PEPPER=dev-pepper
-      - LOG_LEVEL=warn  # Уменьшено для экономии ресурсов
-      # Kafka Configuration
-      - KAFKA_BROKERS=kafka:29092
-      - KAFKA_TOPIC_RECOMMENDATIONS=recommendations
-      - KAFKA_TOPIC_EVENTS=user_events
-      - EVENTING_ENABLED=1
+      - LOG_LEVEL=${LOG_LEVEL}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -178,7 +171,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    # Ограничение ресурсов для API
+    restart: unless-stopped
     deploy:
       resources:
         limits:
