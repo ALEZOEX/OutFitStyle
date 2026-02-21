@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/theme_controller.dart';
 import '../routing/router.dart';
+import '../../features/notifications/presentation/providers/notification_providers.dart';
 
 /// Виджет для инициализации состояния авторизации
 class AuthInitializer extends ConsumerStatefulWidget {
@@ -25,6 +26,11 @@ class _AuthInitializerState extends ConsumerState<AuthInitializer> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authStateNotifier = ref.read(authStateProvider.notifier);
       authStateNotifier.checkAuth();
+
+      // Инициализируем загрузку уведомлений и запускаем polling
+      final notificationsNotifier = ref.read(notificationsProvider.notifier);
+      notificationsNotifier.loadNotifications(refresh: true);
+      notificationsNotifier.startPolling();
     });
   }
 

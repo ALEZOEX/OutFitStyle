@@ -59,7 +59,6 @@ const _$AchievementCategoryEnumMap = {
   AchievementCategory.planning: 'planning',
   AchievementCategory.ratings: 'ratings',
   AchievementCategory.family: 'family',
-  AchievementCategory.subscription: 'subscription',
   AchievementCategory.special: 'special',
   AchievementCategory.starter: 'starter',
 };

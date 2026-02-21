@@ -35,6 +35,7 @@ import (
 	"outfitstyle/server/internal/infrastructure/observability"
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
 	pg "outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
+	"outfitstyle/server/internal/infrastructure/push"
 	"outfitstyle/server/internal/infrastructure/queue"
 	"outfitstyle/server/internal/infrastructure/adapters"
 	"outfitstyle/server/internal/pkg/health"
@@ -201,6 +202,31 @@ func main() {
 	)
 	geoHandler := handlers.NewGeoHandler(geo, logger)
 
+	// ---------- FCM Client (Firebase Cloud Messaging) ----------
+	var fcmClient *push.FCMClient
+	if cfg.Push.FCMCredentialsFile != "" {
+		fcmClient, err = push.NewFCMClient(push.FCMClientConfig{
+			CredentialsFile: cfg.Push.FCMCredentialsFile,
+		}, logger)
+		if err != nil {
+			logger.Warn("FCM client initialization failed, push notifications disabled",
+				zap.String("credentials_file", cfg.Push.FCMCredentialsFile),
+				zap.Error(err),
+			)
+			fcmClient = nil
+		} else {
+			logger.Info("FCM client initialized successfully")
+			defer func() {
+				if err := fcmClient.Close(); err != nil {
+					logger.Warn("FCM client close error", zap.Error(err))
+				}
+			}()
+		}
+	} else {
+		logger.Info("FCM credentials not configured, push notifications disabled")
+		fcmClient = nil
+	}
+
 	// ---------- Notification services ----------
 	notifService := services.NewNotificationService(notifRepo, pushTokenRepo, qClient)
 
@@ -218,12 +244,15 @@ func main() {
 
 	// ---------- Event Publisher ----------
 	var eventPublisher eventing.EventPublisher
-	if cfg.Eventing.Enabled {
-		eventPublisher = eventing.NewKafkaEventPublisher(cfg.Eventing.KafkaBrokers, cfg.Eventing.KafkaTopic)
-		logger.Info("Event publisher enabled", zap.Strings("brokers", cfg.Eventing.KafkaBrokers), zap.String("topic", cfg.Eventing.KafkaTopic))
+	var kafkaPublisher *eventing.KafkaEventPublisher
+	if cfg.Eventing.Enabled && len(cfg.Eventing.KafkaBrokers) > 0 && cfg.Eventing.KafkaBrokers[0] != "" {
+		kafkaPublisher = eventing.NewKafkaEventPublisher(cfg.Eventing.KafkaBrokers, cfg.Eventing.KafkaTopicRecommendations)
+		eventPublisher = kafkaPublisher
+		logger.Info("Event publisher enabled", zap.Strings("brokers", cfg.Eventing.KafkaBrokers), zap.String("topic", cfg.Eventing.KafkaTopicRecommendations))
 	} else {
 		// Заглушка для event publisher, если отключен
 		eventPublisher = nil
+		kafkaPublisher = nil
 		logger.Info("Event publisher disabled")
 	}
 
@@ -238,6 +267,12 @@ func main() {
 		mlService, // Using the ML service adapter instead of the raw client
 	)
 
+	// ---------- Recommendation cache ----------
+	recCache := cache.NewRecommendationCache(redisClient, logger, cfg.MLFallback.CacheTTL)
+
+	// ---------- Fallback recommendation service ----------
+	fallbackSvc := services.NewFallbackRecommendationService(logger)
+
 	// ---------- Доменные сервисы ----------
 	recommendationService := services.NewRecommendationService(
 		recommendationRepo,
@@ -248,12 +283,30 @@ func main() {
 		personalizationRepo,
 		ratingRepo,
 		eventPublisher,
+		recCache,
+		fallbackSvc,
 		logger,
 	)
 
 	achEngine := services.NewAchievementEngine(achEngineRepo, userRepo, notifService) // notifService может быть nil, если не включен
 
 	userService := services.NewUserService(userRepo, logger)
+
+	// ---------- Push Notification Service ----------
+	var pushNotificationService *services.PushNotificationService
+	if fcmClient != nil {
+		pushNotificationService = services.NewPushNotificationService(
+			fcmClient,
+			notifRepo,
+			pushTokenRepo,
+			userRepo,
+			logger,
+		)
+		logger.Info("Push notification service initialized")
+	} else {
+		logger.Info("Push notification service disabled (no FCM client)")
+		pushNotificationService = nil
+	}
 
 	// subService закомментирован до исправления PromoRepository
 	// subService := services.NewSubscriptionService(...)
@@ -337,7 +390,7 @@ func main() {
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)
 	subLimiter := middleware.NewSubscriptionLimiter(subService)
-	notifHandler := handlers.NewNotificationHandler(notifService, logger)
+	notifHandler := handlers.NewNotificationHandler(notifService, pushNotificationService, logger)
 
 	// ---------- Новые обработчики для модуля 4 ----------
 	wardrobeHandler := handlers.NewWardrobeHandler(wardrobeService, logger)
@@ -389,7 +442,7 @@ func main() {
 	health.RegisterChecks(checks)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, tripHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient)
+	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, tripHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -420,6 +473,16 @@ func main() {
 
 	if err := srv.Shutdown(ctx); err != nil {
 		logger.Error("Server forced to shutdown", zap.Error(err))
+	}
+
+	// Закрываем Kafka publisher
+	if kafkaPublisher != nil {
+		logger.Info("Closing Kafka publisher...")
+		if err := kafkaPublisher.Close(); err != nil {
+			logger.Error("Failed to close Kafka publisher", zap.Error(err))
+		} else {
+			logger.Info("Kafka publisher closed successfully")
+		}
 	}
 
 	logger.Info("Server stopped successfully")
@@ -468,6 +531,7 @@ func setupRouter(
 	auditRepo repositories.AuditRepository,
 	db *dbpg.DB,
 	mlClient *ext.MLClient,
+	recCache *cache.RecommendationCache,
 ) *mux.Router {
 	router := mux.NewRouter()
 
@@ -558,6 +622,12 @@ func setupRouter(
 	// public geo (автокомплит городов)
 	geoR := api.PathPrefix("/geo").Subrouter()
 	geoHandler.RegisterRoutes(geoR)
+
+	// public ml health (проверка доступности ML сервиса)
+	mlHealth := api.PathPrefix("/ml").Subrouter()
+	mlHealthHandler := handlers.NewMLHealthHandler(mlClient, recCache, logger, cfg.MLFallback.HealthCheckTTL)
+	mlHealth.HandleFunc("/health", mlHealthHandler.GetHealth).Methods(stdhttp.MethodGet)
+	mlHealth.HandleFunc("/health/detailed", mlHealthHandler.GetHealthDetailed).Methods(stdhttp.MethodGet)
 
 	// Public sharing
 	sharePublic := api.PathPrefix("/share").Subrouter()

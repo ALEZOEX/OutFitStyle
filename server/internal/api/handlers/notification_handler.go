@@ -18,12 +18,13 @@ import (
 )
 
 type NotificationHandler struct {
-	svc *services.NotificationService
-	log *zap.Logger
+	notifSvc *services.NotificationService
+	pushSvc  *services.PushNotificationService
+	log      *zap.Logger
 }
 
-func NewNotificationHandler(svc *services.NotificationService, log *zap.Logger) *NotificationHandler {
-	return &NotificationHandler{svc: svc, log: log}
+func NewNotificationHandler(notifSvc *services.NotificationService, pushSvc *services.PushNotificationService, log *zap.Logger) *NotificationHandler {
+	return &NotificationHandler{notifSvc: notifSvc, pushSvc: pushSvc, log: log}
 }
 
 func (h *NotificationHandler) RegisterRoutes(r *mux.Router) {
@@ -33,6 +34,9 @@ func (h *NotificationHandler) RegisterRoutes(r *mux.Router) {
 
 	r.HandleFunc("/token", h.RegisterToken).Methods(http.MethodPost)
 	r.HandleFunc("/token", h.DeleteToken).Methods(http.MethodDelete)
+
+	// Новый endpoint для регистрации device token (алиас для совместимости)
+	r.HandleFunc("/register-device", h.RegisterDevice).Methods(http.MethodPost)
 }
 
 func (h *NotificationHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +54,7 @@ func (h *NotificationHandler) List(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(q.Get("page"))
 	limit, _ := strconv.Atoi(q.Get("limit"))
 
-	items, total, unreadCount, err := h.svc.List(r.Context(), userID, unreadOnly, page, limit)
+	items, total, unreadCount, err := h.notifSvc.List(r.Context(), userID, unreadOnly, page, limit)
 	if err != nil {
 		h.log.Error("notifications list failed", zap.Error(err))
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to list notifications"))
@@ -88,7 +92,7 @@ func (h *NotificationHandler) ReadOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.svc.MarkRead(r.Context(), userID, id); err != nil {
+	if err := h.notifSvc.MarkRead(r.Context(), userID, id); err != nil {
 		if errors.Is(err, repositories.ErrNotFound) {
 			resp.Error(w, http.StatusNotFound, err)
 			return
@@ -107,7 +111,7 @@ func (h *NotificationHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	n, err := h.svc.MarkReadAll(r.Context(), userID)
+	n, err := h.notifSvc.MarkReadAll(r.Context(), userID)
 	if err != nil {
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to mark read-all"))
 		return
@@ -144,7 +148,7 @@ func (h *NotificationHandler) RegisterToken(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := h.svc.RegisterToken(r.Context(), userID, req); err != nil {
+	if err := h.notifSvc.RegisterToken(r.Context(), userID, req); err != nil {
 		resp.Error(w, http.StatusBadRequest, err)
 		return
 	}
@@ -175,7 +179,7 @@ func (h *NotificationHandler) DeleteToken(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := h.svc.DeleteToken(r.Context(), userID, req.Token); err != nil {
+	if err := h.notifSvc.DeleteToken(r.Context(), userID, req.Token); err != nil {
 		if errors.Is(err, repositories.ErrNotFound) {
 			resp.Error(w, http.StatusNotFound, err)
 			return
@@ -185,4 +189,22 @@ func (h *NotificationHandler) DeleteToken(w http.ResponseWriter, r *http.Request
 	}
 
 	resp.Success(w, map[string]any{"success": true})
+}
+
+// RegisterDevice регистрирует токен устройства для push-уведомлений.
+// Это алиас для /notifications/token, но с более семантичным именем.
+// @Summary Register device token for push notifications
+// @Description Register FCM/APNS token for receiving push notifications
+// @Tags notifications
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body domain.RegisterPushTokenRequest true "Device token registration request"
+// @Success 200 {object} map[string]bool
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /api/v1/notifications/register-device [post]
+func (h *NotificationHandler) RegisterDevice(w http.ResponseWriter, r *http.Request) {
+	// Делегируем логику методу RegisterToken
+	h.RegisterToken(w, r)
 }

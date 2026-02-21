@@ -8,10 +8,10 @@ import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/notification_dialog.dart';
 import 'screens/preferences_screen.dart';
 import 'screens/profile_settings_screen.dart';
-import 'screens/subscription_screen.dart';
 import 'screens/security_screen.dart';
 import 'screens/language_screen.dart';
 import 'screens/about_screen.dart';
+import 'screens/notification_settings_screen.dart';
 import '../../achievements/presentation/pages/achievements_page.dart';
 
 /// Провайдер для состояния разрешений
@@ -384,13 +384,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           _buildSettingTile(
             context,
-            icon: Icons.emoji_events,
-            title: 'Достижения',
-            subtitle: 'Ваши награды',
+            icon: Icons.notifications_active,
+            title: 'Уведомления',
+            subtitle: 'Push, Email, SMS настройки',
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AchievementsPage()),
+                MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
               );
             },
           ),
@@ -400,13 +400,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           _buildSettingTile(
             context,
-            icon: Icons.workspace_premium,
-            title: 'Подписка',
-            subtitle: 'Premium функции',
+            icon: Icons.emoji_events,
+            title: 'Достижения',
+            subtitle: 'Ваши награды',
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+                MaterialPageRoute(builder: (context) => const AchievementsPage()),
               );
             },
           ),

@@ -11,22 +11,26 @@ import (
 )
 
 // SMTPService сервис для отправки email через SMTP
+// Устарел: используйте SMTPEmailService из email_service.go
 type SMTPService struct {
 	host     string
 	port     int
 	username string
 	password string
 	from     string
+	renderer *TemplateRenderer
 }
 
 // NewSMTPService создает новый экземпляр SMTP сервиса
 func NewSMTPService(host string, port int, username, password, from string) *SMTPService {
+	renderer, _ := NewTemplateRenderer()
 	return &SMTPService{
 		host:     host,
 		port:     port,
 		username: username,
 		password: password,
 		from:     from,
+		renderer: renderer,
 	}
 }
 
@@ -39,9 +43,30 @@ func (s *SMTPService) SendPasswordReset(email, code string) error {
 	}
 
 	subject := "Сброс пароля OutfitStyle"
-	htmlBody, err := s.renderPasswordResetTemplate(code)
-	if err != nil {
-		return fmt.Errorf("failed to render email template: %w", err)
+
+	var htmlBody string
+	var err error
+
+	// Используем новый рендерер если доступен
+	if s.renderer != nil {
+		htmlBody, err = s.renderer.RenderPasswordReset(TemplateData{
+			Email:      email,
+			Code:       code,
+			ResetUrl:   "https://outfitstyle.app/reset-password",
+			SupportUrl: "https://outfitstyle.app/support",
+		})
+		if err != nil {
+			fmt.Printf("Template render failed, using fallback: %v\n", err)
+			htmlBody, err = s.renderPasswordResetTemplate(code)
+			if err != nil {
+				return fmt.Errorf("failed to render email template: %w", err)
+			}
+		}
+	} else {
+		htmlBody, err = s.renderPasswordResetTemplate(code)
+		if err != nil {
+			return fmt.Errorf("failed to render email template: %w", err)
+		}
 	}
 
 	// Формируем MIME сообщение
@@ -74,122 +99,48 @@ func (s *SMTPService) SendPasswordReset(email, code string) error {
 	return nil
 }
 
-// renderPasswordResetTemplate рендерит HTML шаблон письма
+// renderPasswordResetTemplate рендерит HTML шаблон письма (fallback для обратной совместимости)
 func (s *SMTPService) renderPasswordResetTemplate(code string) (string, error) {
 	tmplStr := `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сброс пароля</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: #4F46E5;
-        }
-        .title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 16px;
-        }
-        .code-container {
-            background-color: #f3f4f6;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin: 24px 0;
-        }
-        .code {
-            font-size: 36px;
-            font-weight: bold;
-            color: #4F46E5;
-            letter-spacing: 8px;
-            font-family: monospace;
-        }
-        .instructions {
-            color: #6b7280;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-        .warning {
-            background-color: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 12px 16px;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #92400e;
-        }
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-            font-size: 12px;
-            color: #9ca3af;
-            text-align: center;
-        }
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;background-color:#f5f5f5}
+        .container{background-color:#fff;border-radius:12px;padding:40px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .logo{text-align:center;font-size:28px;font-weight:bold;color:#4F46E5;margin-bottom:20px}
+        .title{font-size:24px;font-weight:600;color:#1f2937;margin-bottom:16px}
+        .code-container{background-color:#f3f4f6;border-radius:8px;padding:20px;text-align:center;margin:24px 0}
+        .code{font-size:36px;font-weight:bold;color:#4F46E5;letter-spacing:8px;font-family:monospace}
+        .instructions{color:#6b7280;font-size:14px;margin-top:20px}
+        .warning{background-color:#fef3c7;border-left:4px solid #f59e0b;padding:12px 16px;margin-top:20px;font-size:14px;color:#92400e}
+        .footer{margin-top:30px;padding-top:20px;border-top:1px solid #e5e7eb;font-size:12px;color:#9ca3af;text-align:center}
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="logo">OutfitStyle</div>
-        </div>
-        
+        <div class="logo">OutfitStyle</div>
         <div class="title">Сброс пароля</div>
-        
         <p>Вы запросили сброс пароля для вашего аккаунта OutfitStyle.</p>
-        
-        <div class="code-container">
-            <div class="code">{{.Code}}</div>
-        </div>
-        
-        <p class="instructions">
-            Введите этот код в приложении для сброса пароля. 
-            Код действителен в течение 15 минут.
-        </p>
-        
-        <div class="warning">
-            <strong>Важно:</strong> Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо.
-            Ваш пароль останется без изменений.
-        </div>
-        
-        <div class="footer">
-            © {{.Year}} OutfitStyle. Все права защищены.<br>
-            Это автоматическое письмо, пожалуйста, не отвечайте на него.
-        </div>
+        <div class="code-container"><div class="code">{{.Code}}</div></div>
+        <p class="instructions">Введите этот код в приложении для сброса пароля. Код действителен в течение 15 минут.</p>
+        <div class="warning"><strong>Важно:</strong> Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо.</div>
+        <div class="footer">© {{.Year}} OutfitStyle. Все права защищены.</div>
     </div>
 </body>
 </html>`
 
-	tmpl, err := template.New("password_reset").Parse(tmplStr)
+	tmpl, err := template.New("password_reset_fallback").Parse(tmplStr)
 	if err != nil {
 		return "", err
 	}
 
 	var buf bytes.Buffer
 	data := map[string]any{
-		"Code":  code,
-		"Year":  time.Now().Year(),
+		"Code": code,
+		"Year": time.Now().Year(),
 	}
 
 	if err := tmpl.Execute(&buf, data); err != nil {

@@ -6,13 +6,11 @@ import 'package:outfitstyle_client/src/ui/widgets/rating_slider.dart';
 void main() {
   group('RatingSlider Widget Tests', () {
     testWidgets('shows initial rating of 0', (tester) async {
-      int selectedRating = 0;
-
       await tester.pumpWidget(
         MaterialApp(
           home: RatingSlider(
             initialRating: 0,
-            onRatingChanged: (rating) => selectedRating = rating,
+            onRatingChanged: (_) {},
           ),
         ),
       );
@@ -174,13 +172,11 @@ void main() {
     });
 
     testWidgets('allows selection from -10 to 10', (tester) async {
-      int selectedRating = 0;
-
       await tester.pumpWidget(
         MaterialApp(
           home: RatingSlider(
             initialRating: 0,
-            onRatingChanged: (rating) => selectedRating = rating,
+            onRatingChanged: (_) {},
           ),
         ),
       );
@@ -333,13 +329,11 @@ void main() {
     });
 
     testWidgets('allows rating change with callback', (tester) async {
-      int newRating = 0;
-
       await tester.pumpWidget(
         MaterialApp(
           home: CompactRatingSlider(
             rating: 0,
-            onRatingChanged: (rating) => newRating = rating,
+            onRatingChanged: (_) {},
           ),
         ),
       );

@@ -47,16 +47,16 @@ DROP INDEX IF EXISTS idx_sessions_refresh_hash_active;
 -- ============================================================================
 -- RECOMMENDATIONS TABLE INDEXES
 -- ============================================================================
+DROP INDEX IF EXISTS idx_recommendations_algorithm;
 DROP INDEX IF EXISTS idx_recommendations_ml_powered;
-DROP INDEX IF EXISTS idx_recommendations_temperature;
 DROP INDEX IF EXISTS idx_recommendations_user_created;
 
 -- ============================================================================
--- USER_PROFILES TABLE INDEXES
+-- USER_PROFILES TABLE INDEXES (wardrobe_items)
 -- ============================================================================
-DROP INDEX IF EXISTS idx_wardrobe_items_season;
-DROP INDEX IF EXISTS idx_wardrobe_items_color;
-DROP INDEX IF EXISTS idx_wardrobe_items_category;
+DROP INDEX IF EXISTS idx_wardrobe_items_tags_gin;
+DROP INDEX IF EXISTS idx_wardrobe_items_favorite;
+DROP INDEX IF EXISTS idx_wardrobe_items_condition;
 DROP INDEX IF EXISTS idx_wardrobe_items_user_archived;
 
 -- ============================================================================

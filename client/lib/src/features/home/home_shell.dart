@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/home/home_screen.dart';
 import '../../features/wardrobe/presentation/wardrobe_screen.dart';
 import '../../features/recommendations/presentation/recommendations_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/trip/presentation/trip_screen.dart';
+import '../../features/notifications/presentation/providers/notification_providers.dart';
+import '../../features/notifications/presentation/widgets/notification_icon.dart';
 
 /// Wrapper для главного экрана с навигацией
-class HomeShellWrapper extends StatefulWidget {
+class HomeShellWrapper extends ConsumerStatefulWidget {
   const HomeShellWrapper({super.key});
 
   @override
-  State<HomeShellWrapper> createState() => _HomeShellWrapperState();
+  ConsumerState<HomeShellWrapper> createState() => _HomeShellWrapperState();
 }
 
 class _HomeShellWrapperState extends State<HomeShellWrapper> {
@@ -21,6 +25,7 @@ class _HomeShellWrapperState extends State<HomeShellWrapper> {
     HomeScreen(),
     WardrobeScreen(),
     RecommendationsScreen(),
+    TripScreen(),
     ProfileScreen(),
   ];
 
@@ -38,6 +43,8 @@ class _HomeShellWrapperState extends State<HomeShellWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    final unreadCount = ref.watch(unreadCountProvider);
+
     return HomeShell(
       title: _getTitle(_currentIndex),
       child: _screens[_currentIndex],
@@ -49,6 +56,24 @@ class _HomeShellWrapperState extends State<HomeShellWrapper> {
       },
       showBottomNav: true,
       showAppBar: true,
+      appBarActions: [
+        // Кнопка уведомлений с badge
+        NotificationIconButton(
+          unreadCount: unreadCount,
+          onPressed: () {
+            context.push('/notifications');
+          },
+        ),
+        // Кнопка настроек в профиле
+        if (_currentIndex == 4)
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              context.push('/settings/profile');
+            },
+            tooltip: 'Настройки',
+          ),
+      ],
     );
   }
 
@@ -57,7 +82,8 @@ class _HomeShellWrapperState extends State<HomeShellWrapper> {
       0 => 'Главная',
       1 => 'Гардероб',
       2 => 'Рекомендации',
-      3 => 'Профиль',
+      3 => 'Поездки',
+      4 => 'Профиль',
       _ => 'OutfitStyle',
     };
   }
@@ -67,7 +93,7 @@ class _HomeShellWrapperState extends State<HomeShellWrapper> {
 class HomeShell extends StatelessWidget {
   final String title;
   final Widget child;
-  final List<Widget>? actions;
+  final List<Widget>? appBarActions;
   final bool showAppBar;
   final bool showBottomNav;
   final int currentIndex;
@@ -77,7 +103,7 @@ class HomeShell extends StatelessWidget {
     Key? key,
     required this.title,
     required this.child,
-    this.actions,
+    this.appBarActions,
     this.showAppBar = true,
     this.showBottomNav = true,
     this.currentIndex = 0,
@@ -113,6 +139,11 @@ class HomeShell extends StatelessWidget {
                 label: 'Рекомендации',
               ),
               NavigationDestination(
+                icon: Icon(Icons.flight_takeoff_outlined),
+                selectedIcon: Icon(Icons.flight_takeoff),
+                label: 'Поездки',
+              ),
+              NavigationDestination(
                 icon: Icon(Icons.person_outlined),
                 selectedIcon: Icon(Icons.person),
                 label: 'Профиль',
@@ -134,18 +165,7 @@ class HomeShell extends StatelessWidget {
               title: Text(title),
               centerTitle: false,
               scrolledUnderElevation: 0,
-              actions: actions ??
-                  [
-                    // Кнопка настроек в профиле
-                    if (currentIndex == 3)
-                      IconButton(
-                        icon: const Icon(Icons.settings_outlined),
-                        onPressed: () {
-                          context.push('/settings/profile');
-                        },
-                        tooltip: 'Настройки',
-                      ),
-                  ],
+              actions: appBarActions ?? const [],
             )
           : null,
       body: body,

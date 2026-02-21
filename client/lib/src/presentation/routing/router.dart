@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,18 +16,26 @@ import '../../features/wardrobe/presentation/screens/add_wardrobe_item_screen.da
 import '../../features/generator/presentation/generator_screen.dart';
 import '../../features/settings/presentation/screens/profile_settings_screen.dart';
 import '../../features/settings/presentation/screens/preferences_screen.dart';
-import '../../features/settings/presentation/screens/subscription_screen.dart';
 import '../../features/settings/presentation/screens/security_screen.dart';
 import '../../features/settings/presentation/screens/language_screen.dart';
 import '../../features/settings/presentation/screens/about_screen.dart';
+import '../../features/settings/presentation/screens/notification_settings_screen.dart';
 import '../../features/achievements/presentation/pages/achievements_page.dart';
+import '../../features/achievements/presentation/pages/achievement_detail_page.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/onboarding/onboarding_storage.dart' as onboarding_storage;
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
+import '../../features/admin/presentation/pages/admin_users_page.dart';
+import '../../features/admin/presentation/pages/admin_user_detail_page.dart';
 import '../../features/outfit_details/presentation/outfit_details_screen.dart';
 import '../../features/splash/splash_screen.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/trip/presentation/pages/trip_list_page.dart';
+import '../../features/trip/presentation/pages/trip_detail_page.dart';
+import '../../features/trip/presentation/pages/trip_create_page.dart';
+import '../../features/trip/presentation/pages/add_items_page.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_config.dart';
@@ -77,6 +87,40 @@ class AuthState {
   const AuthState.unauthenticated() : this._(isLoading: false, isAuthenticated: false);
 }
 
+/// Провайдер для проверки прав администратора
+final adminAccessProvider = FutureProvider<bool>((ref) async {
+  final authRepo = ref.read(authRepositoryProvider);
+  try {
+    final token = await authRepo.authStorage.readAccessToken();
+    if (token == null) return false;
+
+    // Получаем роль из JWT claims (payload)
+    // JWT формат: header.payload.signature
+    final parts = token.split('.');
+    if (parts.length != 3) return false;
+
+    // Декодируем payload (base64url)
+    String payload = parts[1];
+    // Добавляем padding если нужно
+    final padding = 4 - payload.length % 4;
+    if (padding != 4) {
+      payload += '=' * padding;
+    }
+
+    // Заменяем URL-safe символы
+    payload = payload.replaceAll('-', '+').replaceAll('_', '/');
+
+    final decoded = utf8.decode(base64.decode(payload));
+    final json = jsonDecode(decoded) as Map<String, dynamic>;
+
+    // Проверяем роль
+    final role = json['role'] as String?;
+    return role == 'admin';
+  } catch (e) {
+    return false;
+  }
+});
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
@@ -121,6 +165,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Восстановление пароля доступно без авторизации
       if (path == '/forgot-password') {
         return null;
+      }
+
+      // Проверка доступа к админ-панели
+      if (path.startsWith('/admin')) {
+        // Если не авторизован - редирект на auth
+        if (!authState.isAuthenticated) {
+          return '/auth?redirect=/admin';
+        }
+        // Проверяем роль администратора
+        // adminAccessProvider возвращает AsyncValue<bool>, поэтому используем .valueOrNull
+        final isAdminAsync = ref.read(adminAccessProvider);
+        final isAdmin = isAdminAsync.valueOrNull ?? false;
+        if (!isAdmin) {
+          return '/home'; // или специальная страница "доступ запрещён"
+        }
       }
 
       // Авторизация не нужна для splash и onboarding
@@ -247,11 +306,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'preferences',
         builder: (context, state) => const PreferencesScreen(),
       ),
-      GoRoute(
-        path: '/settings/subscription',
-        name: 'subscription',
-        builder: (context, state) => const SubscriptionScreen(),
-      ),
       // Безопасность
       GoRoute(
         path: '/settings/security',
@@ -270,11 +324,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'about',
         builder: (context, state) => const AboutScreen(),
       ),
+      // Настройки уведомлений
+      GoRoute(
+        path: '/settings/notifications',
+        name: 'notification_settings',
+        builder: (context, state) => const NotificationSettingsScreen(),
+      ),
       // Достижения
       GoRoute(
         path: '/achievements',
         name: 'achievements',
         builder: (context, state) => const AchievementsPage(),
+      ),
+      // Детали достижения
+      GoRoute(
+        path: '/achievements/:id',
+        name: 'achievement_detail',
+        builder: (context, state) => AchievementDetailPage(
+          achievementId: state.pathParameters['id']!,
+        ),
       ),
       // Generator
       GoRoute(
@@ -290,11 +358,63 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           outfitId: state.pathParameters['id']!,
         ),
       ),
-      // Admin
+      // Admin - Dashboard
       GoRoute(
         path: '/admin',
         name: 'admin',
         builder: (context, state) => const AdminDashboardScreen(),
+      ),
+      // Admin - Users
+      GoRoute(
+        path: '/admin/users',
+        name: 'admin_users',
+        builder: (context, state) => const AdminUsersPage(),
+      ),
+      // Admin - User Detail
+      GoRoute(
+        path: '/admin/users/:id',
+        name: 'admin_user_detail',
+        builder: (context, state) => AdminUserDetailPage(
+          userId: state.pathParameters['id']!,
+        ),
+      ),
+      // Уведомления
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (context, state) => const NotificationsPage(),
+      ),
+      // Поездки
+      GoRoute(
+        path: '/trips',
+        name: 'trips',
+        builder: (context, state) => const TripListPage(),
+      ),
+      GoRoute(
+        path: '/trips/create',
+        name: 'trip_create',
+        builder: (context, state) => const TripCreatePage(),
+      ),
+      GoRoute(
+        path: '/trips/:id',
+        name: 'trip_detail',
+        builder: (context, state) => TripDetailPage(
+          tripId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/trips/:id/edit',
+        name: 'trip_edit',
+        builder: (context, state) => TripCreatePage(
+          tripId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/trips/:id/add-items',
+        name: 'trip_add_items',
+        builder: (context, state) => AddItemsToTripPage(
+          tripId: state.pathParameters['id']!,
+        ),
       ),
     ],
   );

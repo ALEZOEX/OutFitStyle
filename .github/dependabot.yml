@@ -1,56 +1,76 @@
 version: 2
 updates:
+  # ── Go ──
   - package-ecosystem: "gomod"
     directory: "/server"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 10
-    reviewers:
-      - "admin"
     labels:
       - "dependencies"
       - "go"
+    groups:
+      go-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
 
+  # ── Python: ML Service ──
   - package-ecosystem: "pip"
     directory: "/ml-service"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 10
-    reviewers:
-      - "admin"
     labels:
       - "dependencies"
       - "python"
+    groups:
+      python-ml-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
 
+  # ── Python: Marketplace Service ──
+  - package-ecosystem: "pip"
+    directory: "/server/marketplace-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    groups:
+      python-marketplace-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # ── Flutter ──
   - package-ecosystem: "pub"
     directory: "/client"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 10
-    reviewers:
-      - "admin"
     labels:
       - "dependencies"
       - "flutter"
+    groups:
+      flutter-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
 
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "admin"
-    labels:
-      - "dependencies"
-      - "docker"
-
+  # ── Docker ──
   - package-ecosystem: "docker"
     directory: "/server"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 5
-    reviewers:
-      - "admin"
     labels:
       - "dependencies"
       - "docker"
@@ -59,9 +79,8 @@ updates:
     directory: "/ml-service"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 5
-    reviewers:
-      - "admin"
     labels:
       - "dependencies"
       - "docker"
@@ -70,20 +89,23 @@ updates:
     directory: "/server/marketplace-service"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 5
-    reviewers:
-      - "admin"
     labels:
       - "dependencies"
       - "docker"
 
+  # ── GitHub Actions ──
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 5
-    reviewers:
-      - "admin"
     labels:
       - "dependencies"
       - "github-actions"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

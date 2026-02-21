@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>Подписка заканчивается — OutfitStyle</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        
+        @media (prefers-color-scheme: dark) {
+            .dark-mode-bg { background-color: #1a1a2e !important; }
+            .dark-mode-text { color: #ffffff !important; }
+            .dark-mode-card { background-color: #16213e !important; }
+            .dark-mode-plan { background-color: #0f3460 !important; color: #90cdf4 !important; }
+            .dark-mode-feature { background-color: #1a365d !important; color: #c4b5fd !important; }
+        }
+        
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .padding-mobile { padding: 20px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <!-- Preheader -->
+    <div style="display: none; font-size: 1px; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+        Ваша подписка {{.PlanName}} заканчивается {{.ExpiryDate}}. Продлите сейчас!
+    </div>
+    
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f6f8;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="600" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td class="dark-mode-card" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); padding: 40px 30px; text-align: center;">
+                            <div style="font-size: 56px; line-height: 1; margin-bottom: 16px;">⏰</div>
+                            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
+                                Подписка заканчивается
+                            </h1>
+                            <p style="margin: 0; font-size: 16px; color: rgba(255,255,255,0.95);">
+                                {{.DaysLeft}} дн. до окончания
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="dark-mode-bg padding-mobile" style="padding: 40px 30px; background-color: #ffffff;">
+                            <!-- Greeting -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 22px; font-weight: 600; color: #1a1a2e; padding-bottom: 16px;">
+                                        {{.Name}}, не упустите!
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 16px; line-height: 1.6; color: #4a5568; padding-bottom: 24px;">
+                                        Ваша подписка <strong>{{.PlanName}}</strong> заканчивается <strong>{{.ExpiryDate}}</strong>. Продлите сейчас, чтобы продолжить пользоваться всеми возможностями OutfitStyle.
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Current Plan -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 24px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td class="dark-mode-plan" style="color: #ffffff;" valign="top">
+                                                    <p style="margin: 0 0 4px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">
+                                                        Ваш тариф
+                                                    </p>
+                                                    <p style="margin: 0 0 16px 0; font-size: 28px; font-weight: 700;">
+                                                        {{.PlanName}}
+                                                    </p>
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                                        {{range .PlanFeatures}}
+                                                        <tr>
+                                                            <td width="20" style="font-size: 16px; padding-right: 8px;">✓</td>
+                                                            <td style="font-size: 14px; line-height: 1.6; opacity: 0.95;">{{.}}</td>
+                                                        </tr>
+                                                        {{end}}
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Why Subscribe -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 18px; font-weight: 600; color: #1a1a2e; padding-bottom: 20px;">
+                                        Что вы теряете без подписки:
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            {{range .LoseFeatures}}
+                                            <tr>
+                                                <td class="dark-mode-feature" style="background-color: #fef3c7; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px;" valign="top">
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td width="40" valign="middle" style="font-size: 28px; padding-right: 12px; text-align: center;">❌</td>
+                                                            <td class="dark-mode-text" valign="middle" style="font-size: 14px; color: #78350f; font-weight: 500;">
+                                                                {{.}}
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            {{end}}
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Special Offer -->
+                            {{if .DiscountPercent}}
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4; border-radius: 12px; border: 2px dashed #22c55e; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 24px; text-align: center;">
+                                        <p style="margin: 0 0 8px 0; font-size: 14px; color: #166534; font-weight: 600;">
+                                            🎁 Специальное предложение!
+                                        </p>
+                                        <p class="dark-mode-text" style="margin: 0 0 16px 0; font-size: 32px; font-weight: 700; color: #15803d;">
+                                            Скидка {{.DiscountPercent}}%
+                                        </p>
+                                        <p class="dark-mode-text" style="margin: 0; font-size: 13px; color: #166534;">
+                                            При продлении в течение {{.DiscountDays}} дней
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            {{end}}
+                            
+                            <!-- CTA Button -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+                                <tr>
+                                    <td align="center">
+                                        <!--[if mso]>
+                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{.RenewUrl}}" style="height:56px;v-text-anchor:middle;width:300px;" arcsize="10%" stroke="f" fillcolor="#667eea">
+                                            <w:anchorlock/>
+                                            <center style="color:#ffffff;font-family:sans-serif;font-size:17px;font-weight:bold;">
+                                        <![endif]-->
+                                        <a href="{{.RenewUrl}}" target="_blank" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; display: inline-block; font-size: 17px; font-weight: 700; line-height: 56px; text-align: center; text-decoration: none; width: 300px; border-radius: 8px; -webkit-text-size-adjust: none; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);">
+                                            🚀 Продлить подписку
+                                        </a>
+                                        <!--[if mso]>
+                                            </center>
+                                        </v:roundrect>
+                                        <![endif]-->
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Alternative Plans -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" class="dark-mode-text" style="font-size: 14px; color: #718096; padding-bottom: 16px;">
+                                        Хотите изменить тариф?
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{.PlansUrl}}" style="color: #667eea; font-size: 14px; font-weight: 600; text-decoration: underline;">
+                                            Посмотреть все тарифы →
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td class="dark-mode-card" style="background-color: #f8f9fa; padding: 30px; border-top: 1px solid #e2e8f0;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" class="dark-mode-text" style="font-size: 14px; color: #718096;">
+                                        <p style="margin: 0 0 12px 0;">
+                                            Вопросы? Напишите в поддержку
+                                        </p>
+                                        <p style="margin: 0 0 12px 0;">
+                                            <a href="{{.SupportUrl}}" style="color: #667eea; text-decoration: underline;">support@outfitstyle.app</a>
+                                        </p>
+                                        <p style="margin: 16px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            © {{.Year}} OutfitStyle. Все права защищены.
+                                        </p>
+                                        <p style="margin: 8px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            <a href="{{.UnsubscribeUrl}}" style="color: #667eea; text-decoration: underline;">Отписаться от напоминаний</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="padding: 40px 0;"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

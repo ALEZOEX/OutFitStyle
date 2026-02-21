@@ -20,7 +20,6 @@ abstract class User with _$User {
     String? website,
     bool? isVerified,
     bool? isPremium,
-    String? subscriptionStatus,
     DateTime? joinedAt,
     DateTime? lastActiveAt,
     Map<String, dynamic>? preferences,

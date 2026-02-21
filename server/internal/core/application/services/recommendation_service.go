@@ -14,6 +14,7 @@ import (
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
+	"outfitstyle/server/internal/infrastructure/cache"
 	"outfitstyle/server/internal/infrastructure/eventing"
 	"outfitstyle/server/internal/infrastructure/external"
 )
@@ -29,9 +30,11 @@ type RecommendationService struct {
 	eventPublisher eventing.EventPublisher  // Паблишер событий
 	weather        *external.WeatherService // Сервис погоды
 	ml             *external.MLClient       // ML-клиент
+	recCache       *cache.RecommendationCache // Кэш рекомендаций
 
-	fallback *FallbackRanker // Резервный ранжировщик
-	logger   *zap.Logger     // Логгер
+	fallbackSvc *FallbackRecommendationService // Fallback сервис рекомендаций
+	fallback    *FallbackRanker                // Резервный ранжировщик (legacy)
+	logger      *zap.Logger                    // Логгер
 }
 
 // NewRecommendationService создает новый экземпляр сервиса рекомендаций
@@ -44,6 +47,8 @@ func NewRecommendationService(
 	personalization repositories.PersonalizationRepository,
 	ratingRepo repositories.OutfitRatingRepository,
 	eventPublisher eventing.EventPublisher,
+	recCache *cache.RecommendationCache,
+	fallbackSvc *FallbackRecommendationService,
 	logger *zap.Logger,
 ) *RecommendationService {
 	return &RecommendationService{
@@ -55,6 +60,8 @@ func NewRecommendationService(
 		eventPublisher:  eventPublisher,
 		weather:         weather,
 		ml:              ml,
+		recCache:        recCache,
+		fallbackSvc:     fallbackSvc,
 		fallback:        NewFallbackRanker(),
 		logger:          logger,
 	}
@@ -799,8 +806,9 @@ func regenTips(oldRec *domain.RecommendationRecord, chosenCount int) []string {
 	return tips
 }
 
-// rankLiteOrFallback: теперь поддерживает exclude map (может быть nil)
+// rankLiteOrFallback: поддерживает exclude map (может быть nil)
 // Также фильтрует вещи с низким рейтингом (quality_score < -5)
+// Интегрирует кэширование ML ответов и graceful degradation через fallback сервис
 func (s *RecommendationService) rankLiteOrFallback(
 	ctx context.Context,
 	userID domain.ID,
@@ -812,7 +820,7 @@ func (s *RecommendationService) rankLiteOrFallback(
 	excluded map[domain.ID]bool,
 ) (modelVersion string, processingMs int, styleC float64, colorH float64, rankings map[string][]rankedLite) {
 
-	modelVersion = "fallback-v1"
+	modelVersion = "fallback-v2"
 	styleC = 0.5
 	colorH = 0.5
 	rankings = map[string][]rankedLite{}
@@ -846,6 +854,42 @@ func (s *RecommendationService) rankLiteOrFallback(
 	// Получаем часовой пояс пользователя и определяем время суток
 	tz, _ := s.userRepo.GetUserTimezone(ctx, userID)
 	timeOfDay := TimeOfDayInTZ(time.Now(), tz)
+
+	// Генерируем ключ кэша на основе параметров запроса
+	cacheKey := ""
+	if s.recCache != nil {
+		cacheKey = s.recCache.CacheKey(userID, s.recCache.GenerateContextHash(
+			ws.Temperature,
+			ws.WeatherCode,
+			occasion,
+			style,
+			formality,
+		))
+
+		// Попытка получить из кэша
+		if cachedResp, found, err := s.recCache.Get(ctx, cacheKey); err == nil && found && cachedResp != nil {
+			s.logger.Info("Кэш рекомендаций hit",
+				zap.String("user_id", userID.String()),
+				zap.String("cache_key", cacheKey))
+
+			modelVersion = cachedResp.ModelVersion + "-cached"
+			processingMs = cachedResp.ProcessingTimeMs
+			styleC = cachedResp.StyleCoherence
+			colorH = cachedResp.ColorHarmony
+
+			for cat, list := range cachedResp.Rankings {
+				out := make([]rankedLite, 0, len(list))
+				for _, it := range list {
+					if excluded != nil && excluded[it.ID] {
+						continue
+					}
+					out = append(out, rankedLite{ID: it.ID, Score: it.Score, Confidence: it.Confidence})
+				}
+				rankings[cat] = out
+			}
+			return
+		}
+	}
 
 	mlReq := external.TZMLRankRequest{
 		RequestID: uuid.NewString(),
@@ -972,11 +1016,21 @@ func (s *RecommendationService) rankLiteOrFallback(
 
 	start := time.Now()
 	mlResp, err := s.ml.Rank(ctx, mlReq)
+	latency := time.Since(start).Milliseconds()
+
 	if err != nil {
-		// ЛОГ ОШИБКИ ML:
-		s.logger.Warn("ML ранжирование не удалось, используем резервный вариант", zap.Error(err))
+		// Логирование ошибки ML с деталями
+		s.logger.Warn("ML ранжирование не удалось — переключение на fallback",
+			zap.Error(err),
+			zap.String("request_id", mlReq.RequestID),
+			zap.String("user_id", userID.String()),
+			zap.Int64("latency_ms", latency),
+			zap.Int("candidates_count", len(mlReq.Candidates)),
+		)
 	}
-	if err == nil {
+
+	if err == nil && mlResp.Rankings != nil {
+		// Успешный ответ от ML
 		modelVersion = mlResp.ModelVersion
 		processingMs = mlResp.ProcessingTimeMs
 		styleC = mlResp.StyleCoherence
@@ -992,32 +1046,71 @@ func (s *RecommendationService) rankLiteOrFallback(
 			}
 			rankings[cat] = out
 		}
+
+		s.logger.Debug("ML ранжирование успешно",
+			zap.String("request_id", mlReq.RequestID),
+			zap.String("model_version", modelVersion),
+			zap.Int("processing_ms", processingMs),
+			zap.Int64("total_latency_ms", latency))
+
+		// Сохраняем в кэш
+		if s.recCache != nil && cacheKey != "" {
+			if err := s.recCache.Set(ctx, cacheKey, &mlResp); err != nil {
+				s.logger.Warn("Не удалось сохранить кэш рекомендаций", zap.Error(err))
+			}
+		}
 		return
 	}
 
-	s.logger.Warn("ML ранжирование не удалось, используем резервный вариант", zap.Error(err))
-	processingMs = int(time.Since(start).Milliseconds())
+	// Fallback: используем новый fallback сервис
+	s.logger.Info("Используем fallback алгоритм рекомендаций",
+		zap.String("user_id", userID.String()),
+		zap.String("request_id", mlReq.RequestID),
+		zap.Int64("latency_ms", latency),
+		zap.Int("candidates_count", len(candidates)))
 
-	byCat := map[string][]rankedLite{}
-	for _, c := range candidates {
-		if excluded != nil && excluded[c.ID] {
-			continue
-		}
-		score := fallbackScoreLite(ws, style, c)
-		byCat[c.Category] = append(byCat[c.Category], rankedLite{
-			ID:         c.ID,
-			Score:      score,
-			Confidence: 0.5,
-		})
-	}
+	processingMs = int(latency)
 
-	for _, cat := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {
-		list := byCat[cat]
-		if len(list) == 0 {
-			continue
+	// Используем новый fallback сервис если он доступен
+	if s.fallbackSvc != nil {
+		fallbackResult := s.fallbackSvc.Rank(ws, candidates, excluded, style, formality, occasion)
+		modelVersion = fallbackResult.ModelVersion
+		processingMs = fallbackResult.ProcessingTimeMs
+		styleC = fallbackResult.StyleCoherence
+		colorH = fallbackResult.ColorHarmony
+		rankings = fallbackResult.ToRankedLite()
+
+		s.logger.Info("Fallback сервис выполнил ранжирование",
+			zap.String("user_id", userID.String()),
+			zap.String("model_version", modelVersion),
+			zap.Int("processing_ms", processingMs))
+	} else {
+		// Legacy fallback
+		modelVersion = "fallback-v1"
+		styleC = 0.5
+		colorH = 0.5
+
+		byCat := map[string][]rankedLite{}
+		for _, c := range candidates {
+			if excluded != nil && excluded[c.ID] {
+				continue
+			}
+			score := fallbackScoreLite(ws, style, c)
+			byCat[c.Category] = append(byCat[c.Category], rankedLite{
+				ID:         c.ID,
+				Score:      score,
+				Confidence: 0.5,
+			})
 		}
-		sort.Slice(list, func(i, j int) bool { return list[i].Score > list[j].Score })
-		rankings[cat] = list
+
+		for _, cat := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {
+			list := byCat[cat]
+			if len(list) == 0 {
+				continue
+			}
+			sort.Slice(list, func(i, j int) bool { return list[i].Score > list[j].Score })
+			rankings[cat] = list
+		}
 	}
 
 	return

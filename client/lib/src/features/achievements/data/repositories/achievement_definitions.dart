@@ -482,40 +482,6 @@ class AchievementDefinitions {
       ),
 
       // ============================================
-      // ПОДПИСКА (Subscription) - 3 достижения
-      // ============================================
-      const Achievement(
-        id: 'premium_user',
-        title: 'Premium пользователь',
-        description: 'Оформите Premium подписку',
-        icon: '💎',
-        category: AchievementCategory.subscription,
-        points: 100,
-        currentProgress: 0,
-        targetValue: 1,
-      ),
-      const Achievement(
-        id: 'pro_user',
-        title: 'Pro пользователь',
-        description: 'Оформите Pro подписку',
-        icon: '👑',
-        category: AchievementCategory.subscription,
-        points: 150,
-        currentProgress: 0,
-        targetValue: 1,
-      ),
-      const Achievement(
-        id: 'supporter',
-        title: 'Поддержавший',
-        description: 'Будьте подписчиком 3 месяца подряд',
-        icon: '🏆',
-        category: AchievementCategory.subscription,
-        points: 200,
-        currentProgress: 0,
-        targetValue: 3,
-      ),
-
-      // ============================================
       // ОСОБЫЕ (Special) - 7 достижений
       // ============================================
       const Achievement(

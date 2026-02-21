@@ -23,40 +23,40 @@ CREATE INDEX IF NOT EXISTS idx_users_active_last_login
 ON users(is_active, last_login_at DESC) WHERE is_active = true;
 
 -- ============================================================================
--- USER_PROFILES TABLE INDEXES
+-- USER_PROFILES TABLE INDEXES (wardrobe_items)
 -- ============================================================================
 
 -- Составной индекс для гардероба пользователя
-CREATE INDEX IF NOT EXISTS idx_wardrobe_items_user_archived 
+CREATE INDEX IF NOT EXISTS idx_wardrobe_items_user_archived
 ON wardrobe_items(user_id, is_archived, created_at DESC);
 
--- Индекс для фильтрации по категории
-CREATE INDEX IF NOT EXISTS idx_wardrobe_items_category 
-ON wardrobe_items(user_id, category, is_archived) WHERE is_archived = false;
+-- Индекс для фильтрации по condition (состояние одежды)
+CREATE INDEX IF NOT EXISTS idx_wardrobe_items_condition
+ON wardrobe_items(user_id, condition, is_archived) WHERE is_archived = false;
 
--- Индекс для цветовых предпочтений
-CREATE INDEX IF NOT EXISTS idx_wardrobe_items_color 
-ON wardrobe_items(user_id, color) WHERE is_archived = false;
+-- Индекс для избранных вещей
+CREATE INDEX IF NOT EXISTS idx_wardrobe_items_favorite
+ON wardrobe_items(user_id, is_favorite) WHERE is_favorite = true;
 
--- Индекс для сезонности одежды
-CREATE INDEX IF NOT EXISTS idx_wardrobe_items_season 
-ON wardrobe_items(user_id, season) WHERE is_archived = false;
+-- Индекс для GIN поиска по тегам
+CREATE INDEX IF NOT EXISTS idx_wardrobe_items_tags_gin
+ON wardrobe_items USING gin(tags);
 
 -- ============================================================================
 -- RECOMMENDATIONS TABLE INDEXES
 -- ============================================================================
 
 -- Составной индекс для истории рекомендаций пользователя
-CREATE INDEX IF NOT EXISTS idx_recommendations_user_created 
+CREATE INDEX IF NOT EXISTS idx_recommendations_user_created
 ON recommendations(user_id, created_at DESC);
 
--- Индекс для фильтрации по температуре
-CREATE INDEX IF NOT EXISTS idx_recommendations_temperature 
-ON recommendations(temperature, created_at DESC);
-
 -- Индекс для ML рекомендаций
-CREATE INDEX IF NOT EXISTS idx_recommendations_ml_powered 
+CREATE INDEX IF NOT EXISTS idx_recommendations_ml_powered
 ON recommendations(ml_powered, created_at DESC) WHERE ml_powered = true;
+
+-- Индекс для алгоритма рекомендаций
+CREATE INDEX IF NOT EXISTS idx_recommendations_algorithm
+ON recommendations(algorithm_used);
 
 -- ============================================================================
 -- SESSIONS TABLE INDEXES
