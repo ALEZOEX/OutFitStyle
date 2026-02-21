@@ -12,7 +12,6 @@ CREATE INDEX IF NOT EXISTS idx_wardrobe_items_user_active ON wardrobe_items(user
 CREATE INDEX IF NOT EXISTS idx_wardrobe_items_clothing_user ON wardrobe_items(clothing_item_id, user_id);
 
 -- Индексы для recommendations
-CREATE INDEX IF NOT EXISTS idx_recommendations_user_timestamp ON recommendations(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_recommendations_ml_powered ON recommendations(ml_powered);
 CREATE INDEX IF NOT EXISTS idx_recommendations_algorithm ON recommendations(algorithm_used);
 
@@ -23,14 +22,8 @@ CREATE INDEX IF NOT EXISTS idx_recommendation_items_category ON recommendation_i
 -- Индексы для recommendation_sessions
 CREATE INDEX IF NOT EXISTS idx_recommendation_sessions_user_model ON recommendation_sessions(user_id, model_version);
 
--- Индекс для ускорения поиска по JSONB полям в users
-CREATE INDEX IF NOT EXISTS idx_users_preferences_gin ON users USING gin(preferences);
-
 -- Индекс для ускорения поиска по массивам материалов в clothing_items
 CREATE INDEX IF NOT EXISTS idx_clothing_items_materials_gin ON clothing_items USING gin(materials);
 
 -- Индекс для ускорения поиска по тегам в wardrobe_items
 CREATE INDEX IF NOT EXISTS idx_wardrobe_items_tags_gin ON wardrobe_items USING gin(tags);
-
--- Индекс для ускорения поиска по usage в clothing_items (массив text[])
-CREATE INDEX IF NOT EXISTS idx_clothing_items_usage_gin ON clothing_items USING gin(usage array_ops);
