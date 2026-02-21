@@ -4,9 +4,9 @@ services:
     environment:
       - POSTGRES_DB=outfitstyle
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=
+      - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -88,12 +88,12 @@ services:
       dockerfile: Dockerfile
     command: /app/migrate
     environment:
-      - DB_HOST=host.docker.internal
-      - DB_PORT=5433
+      - DB_HOST=postgres
+      - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=
       - DB_NAME=outfitstyle
-      - DATABASE_URL=postgres://postgres@host.docker.internal:5433/outfitstyle?sslmode=disable
+      - DATABASE_URL=postgres://postgres@postgres:5432/outfitstyle?sslmode=disable
       - LOG_LEVEL=info
       - ENVIRONMENT=production
     depends_on:
@@ -123,12 +123,12 @@ services:
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=8080
       - ENVIRONMENT=production
-      - DB_HOST=host.docker.internal
-      - DB_PORT=5433
+      - DB_HOST=postgres
+      - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=
       - DB_NAME=outfitstyle
-      - DATABASE_URL=postgres://postgres@host.docker.internal:5433/outfitstyle?sslmode=disable
+      - DATABASE_URL=postgres://postgres@postgres:5432/outfitstyle?sslmode=disable
       - DATABASE_MAX_CONNECTIONS=5  # Уменьшено для экономии ресурсов
       - DATABASE_MAX_IDLE_CONNECTIONS=2  # Уменьшено для экономии ресурсов
       - REDIS_URL=redis://redis:6379
