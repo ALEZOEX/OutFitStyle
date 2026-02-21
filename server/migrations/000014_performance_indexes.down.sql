@@ -8,13 +8,6 @@ DROP INDEX IF EXISTS idx_user_subscriptions_expires_at;
 DROP INDEX IF EXISTS idx_user_subscriptions_active;
 
 -- ============================================================================
--- SESSIONS TABLE INDEXES
--- ============================================================================
-DROP INDEX IF EXISTS idx_sessions_expires_at;
-DROP INDEX IF EXISTS idx_sessions_user_active;
-DROP INDEX IF EXISTS idx_sessions_refresh_hash_active;
-
--- ============================================================================
 -- RECOMMENDATIONS TABLE INDEXES
 -- ============================================================================
 DROP INDEX IF EXISTS idx_recommendations_algorithm;
@@ -35,3 +28,10 @@ DROP INDEX IF EXISTS idx_users_active_last_login;
 DROP INDEX IF EXISTS idx_users_created_at;
 DROP INDEX IF EXISTS idx_users_oauth_provider_id;
 DROP INDEX IF EXISTS idx_users_email_active;
+
+-- ============================================================================
+-- SESSIONS TABLE INDEXES
+-- ============================================================================
+DROP INDEX IF EXISTS idx_sessions_refresh_hash_active;
+DROP INDEX IF EXISTS idx_sessions_user_active;
+DROP INDEX IF EXISTS idx_sessions_expires_at;
