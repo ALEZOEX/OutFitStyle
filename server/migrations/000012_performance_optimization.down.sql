@@ -12,7 +12,6 @@ DROP INDEX IF EXISTS idx_wardrobe_items_user_active;
 DROP INDEX IF EXISTS idx_wardrobe_items_clothing_user;
 
 -- Удаление индексов для recommendations
-DROP INDEX IF EXISTS idx_recommendations_user_timestamp;
 DROP INDEX IF EXISTS idx_recommendations_ml_powered;
 DROP INDEX IF EXISTS idx_recommendations_algorithm;
 
@@ -24,7 +23,5 @@ DROP INDEX IF EXISTS idx_recommendation_items_category;
 DROP INDEX IF EXISTS idx_recommendation_sessions_user_model;
 
 -- Удаление индексов GIN
-DROP INDEX IF EXISTS idx_users_preferences_gin;
 DROP INDEX IF EXISTS idx_clothing_items_materials_gin;
 DROP INDEX IF EXISTS idx_wardrobe_items_tags_gin;
-DROP INDEX IF EXISTS idx_clothing_items_usage_gin;

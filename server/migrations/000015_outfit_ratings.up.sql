@@ -6,10 +6,10 @@
 -- 1. outfit_ratings - оценки пользователей для рекомендаций
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS outfit_ratings (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     recommendation_id UUID NOT NULL REFERENCES recommendations(id) ON DELETE CASCADE,
-    outfit_items BIGINT[], -- ID вещей в наряде (для анализа)
+    outfit_items UUID[], -- ID вещей в наряде (для анализа)
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5), -- 1-5 звёзд
     quality_score INTEGER NOT NULL DEFAULT 0 CHECK (quality_score >= -10 AND quality_score <= 10), -- -10 до +10
     feedback TEXT, -- Текстовый отзыв
