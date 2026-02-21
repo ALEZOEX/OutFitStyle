@@ -90,10 +90,10 @@ services:
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-password}
-      - DB_NAME=${DB_NAME:-outfitstyle}
-      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-outfitstyle}?sslmode=disable
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=outfitstyle
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/outfitstyle?sslmode=disable
       - LOG_LEVEL=info
       - ENVIRONMENT=production
     depends_on:
@@ -125,10 +125,10 @@ services:
       - ENVIRONMENT=production
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-password}
-      - DB_NAME=${DB_NAME:-outfitstyle}
-      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-outfitstyle}?sslmode=disable
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=outfitstyle
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/outfitstyle?sslmode=disable
       - DATABASE_MAX_CONNECTIONS=5  # Уменьшено для экономии ресурсов
       - DATABASE_MAX_IDLE_CONNECTIONS=2  # Уменьшено для экономии ресурсов
       - REDIS_URL=redis://redis:6379

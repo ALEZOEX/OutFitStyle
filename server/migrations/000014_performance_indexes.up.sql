@@ -76,13 +76,13 @@ ON sessions(expires_at) WHERE is_active = true;
 
 -- Индекс для активных подписок
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_active
-ON user_subscriptions(user_id, status, expires_at)
+ON user_subscriptions(user_id, status, current_period_end)
 WHERE status IN ('active', 'trialing');
 
 -- Индекс для подписок по дате окончания
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_expires_at
-ON user_subscriptions(expires_at)
-WHERE status = 'active' AND expires_at IS NOT NULL;
+ON user_subscriptions(current_period_end)
+WHERE status = 'active' AND current_period_end IS NOT NULL;
 
 -- ============================================================================
 -- ANALYZE TABLES FOR QUERY OPTIMIZER
