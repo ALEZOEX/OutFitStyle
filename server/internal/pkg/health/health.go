@@ -9,12 +9,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"outfitstyle/server/internal/infrastructure/external"
 )
 
 // MLHealthClient минимальный контракт, чтобы не тащить конкретную реализацию ML клиента
 // Позволяет проверять доступность ML-сервиса без жесткой зависимости
 type MLHealthClient interface {
-	HealthCheck(ctx context.Context) bool
+	HealthCheck(ctx context.Context) external.HealthCheckResult
 }
 
 // Checker интерфейс для проверки работоспособности компонентов системы
@@ -76,11 +78,11 @@ func (h *HealthChecker) Check(ctx context.Context) HealthStatus {
 		defer cancel()
 
 		start := time.Now()
-		ok := h.mlClient != nil && h.mlClient.HealthCheck(mlCtx)
+		result := h.mlClient.HealthCheck(mlCtx)
 		lat := time.Since(start)
 
-		if !ok {
-			checks["ml_service"] = CheckResult{Status: "unhealthy", Error: "ML service not responding"}
+		if !result.Healthy {
+			checks["ml_service"] = CheckResult{Status: "unhealthy", Error: result.Error}
 		} else {
 			checks["ml_service"] = CheckResult{Status: "healthy", Latency: lat.String()}
 		}

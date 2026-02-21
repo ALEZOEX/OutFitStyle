@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>Новое достижение — OutfitStyle</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        
+        @media (prefers-color-scheme: dark) {
+            .dark-mode-bg { background-color: #1a1a2e !important; }
+            .dark-mode-text { color: #ffffff !important; }
+            .dark-mode-card { background-color: #16213e !important; }
+            .dark-mode-badge { background-color: #0f3460 !important; color: #fbb6ce !important; }
+            .dark-mode-points { background-color: #1a365d !important; color: #90cdf4 !important; }
+        }
+        
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .padding-mobile { padding: 20px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <!-- Preheader -->
+    <div style="display: none; font-size: 1px; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+        🏆 Поздравляем! Вы получили новое достижение и {{.PointsEarned}} очков стиля!
+    </div>
+    
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f6f8;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="600" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    
+                    <!-- Celebration Header -->
+                    <tr>
+                        <td class="dark-mode-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 50px 30px; text-align: center; position: relative;">
+                            <!-- Confetti decoration -->
+                            <div style="position: absolute; top: 20px; left: 30px; font-size: 24px;">✨</div>
+                            <div style="position: absolute; top: 30px; right: 40px; font-size: 20px;">🎉</div>
+                            <div style="position: absolute; bottom: 40px; left: 50px; font-size: 18px;">⭐</div>
+                            <div style="position: absolute; bottom: 30px; right: 60px; font-size: 22px;">🌟</div>
+                            
+                            <!-- Achievement Badge -->
+                            <div style="width: 120px; height: 120px; margin: 0 auto 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4); border: 6px solid rgba(255,255,255,0.3);">
+                                <span style="font-size: 64px; line-height: 1;">{{.AchievementIcon}}</span>
+                            </div>
+                            
+                            <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #ffffff; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                Достижение разблокировано!
+                            </h1>
+                            <p style="margin: 0; font-size: 18px; color: rgba(255,255,255,0.95); font-weight: 500;">
+                                {{.AchievementName}}
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="dark-mode-bg padding-mobile" style="padding: 40px 30px; background-color: #ffffff;">
+                            <!-- Congratulations -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 24px; font-weight: 700; color: #1a1a2e; padding-bottom: 16px; text-align: center;">
+                                        🎊 Поздравляем, {{.Name}}!
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 16px; line-height: 1.6; color: #4a5568; padding-bottom: 24px; text-align: center;">
+                                        Вы получили достижение <strong>«{{.AchievementName}}»</strong>!
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Achievement Description -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #faf5ff; border-radius: 16px; border: 2px solid #e9d5ff; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 30px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td align="center" class="dark-mode-badge" style="color: #6b21a8; padding-bottom: 16px;">
+                                                    <p style="margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                                                        📜 Описание достижения
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" class="dark-mode-text" style="padding-bottom: 20px;">
+                                                    <p style="margin: 0; font-size: 18px; font-weight: 600; color: #581c87;">
+                                                        {{.AchievementDescription}}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center">
+                                                    <div style="display: inline-block; background-color: #e9d5ff; border-radius: 20px; padding: 8px 20px;">
+                                                        <p style="margin: 0; font-size: 13px; color: #6b21a8; font-weight: 500;">
+                                                            {{.AchievementTier}}
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Points Earned -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 30px; text-align: center;">
+                                        <p style="margin: 0 0 8px 0; font-size: 14px; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 1px;">
+                                            👔 Очки стиля
+                                        </p>
+                                        <p class="dark-mode-points" style="margin: 0; font-size: 56px; font-weight: 700; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                                            +{{.PointsEarned}}
+                                        </p>
+                                        <p style="margin: 12px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">
+                                            Ваш общий счёт: <strong>{{.TotalPoints}}</strong> очков
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Progress to Next Achievement -->
+                            {{if .NextAchievementName}}
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 16px; font-weight: 600; color: #1a1a2e; padding-bottom: 16px;">
+                                        🎯 Следующая цель:
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 8px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td class="dark-mode-text" style="font-size: 14px; color: #4a5568;">
+                                                    {{.NextAchievementName}}
+                                                </td>
+                                                <td class="dark-mode-text" style="font-size: 14px; color: #718096; text-align: right;">
+                                                    {{.ProgressPercent}}%
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div style="height: 12px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden;">
+                                            <div style="width: {{.ProgressPercent}}%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 6px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 13px; color: #718096; padding-top: 8px;">
+                                        Осталось: {{.ProgressRemaining}}
+                                    </td>
+                                </tr>
+                            </table>
+                            {{end}}
+                            
+                            <!-- Stats Summary -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4; border-radius: 12px; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td align="center" class="dark-mode-text" style="color: #166534;">
+                                                    <p style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700;">{{.TotalAchievements}}</p>
+                                                    <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Всего достижений</p>
+                                                </td>
+                                                <td align="center" class="dark-mode-text" style="color: #166534; border-left: 1px solid #86efac; border-right: 1px solid #86efac;">
+                                                    <p style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700;">{{.CurrentStreak}}</p>
+                                                    <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Дней подряд</p>
+                                                </td>
+                                                <td align="center" class="dark-mode-text" style="color: #166534;">
+                                                    <p style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700;">{{.Rank}}</p>
+                                                    <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Ваш ранг</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- CTA Button -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <!--[if mso]>
+                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{.ViewProfileUrl}}" style="height:52px;v-text-anchor:middle;width:280px;" arcsize="10%" stroke="f" fillcolor="#667eea">
+                                            <w:anchorlock/>
+                                            <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">
+                                        <![endif]-->
+                                        <a href="{{.ViewProfileUrl}}" target="_blank" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; display: inline-block; font-size: 16px; font-weight: 600; line-height: 52px; text-align: center; text-decoration: none; width: 280px; border-radius: 8px; -webkit-text-size-adjust: none; box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);">
+                                            🏆 Мой профиль
+                                        </a>
+                                        <!--[if mso]>
+                                            </center>
+                                        </v:roundrect>
+                                        <![endif]-->
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td class="dark-mode-card" style="background-color: #f8f9fa; padding: 30px; border-top: 1px solid #e2e8f0;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" class="dark-mode-text" style="font-size: 14px; color: #718096;">
+                                        <p style="margin: 0 0 12px 0;">
+                                            Делитесь достижениями с друзьями!
+                                        </p>
+                                        <p style="margin: 0 0 16px 0;">
+                                            <a href="{{.ShareUrl}}" style="color: #667eea; text-decoration: underline; font-weight: 600;">Поделиться достижением →</a>
+                                        </p>
+                                        <p style="margin: 16px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            © {{.Year}} OutfitStyle. Все права защищены.
+                                        </p>
+                                        <p style="margin: 8px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            <a href="{{.UnsubscribeUrl}}" style="color: #667eea; text-decoration: underline;">Отписаться от уведомлений</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="padding: 40px 0;"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>Добро пожаловать в OutfitStyle!</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Reset styles */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .dark-mode-bg { background-color: #1a1a2e !important; }
+            .dark-mode-text { color: #ffffff !important; }
+            .dark-mode-card { background-color: #16213e !important; }
+            .dark-mode-border { border-color: #0f3460 !important; }
+        }
+        
+        /* Mobile styles */
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .fluid { width: 100% !important; height: auto !important; }
+            .stack-column { display: block !important; width: 100% !important; }
+            .padding-mobile { padding: 20px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <!-- Preheader -->
+    <div style="display: none; font-size: 1px; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+        Добро пожаловать в OutfitStyle! Ваш персональный стилист уже ждёт вас.
+    </div>
+    
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f6f8;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <!-- Email container -->
+                <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="600" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td class="dark-mode-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
+                                👗 OutfitStyle
+                            </h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="dark-mode-bg padding-mobile" style="padding: 40px 30px; background-color: #ffffff;">
+                            <!-- Greeting -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 28px; font-weight: 700; color: #1a1a2e; padding-bottom: 16px;">
+                                        Привет, {{.Name}}! 🎉
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 16px; line-height: 1.6; color: #4a5568; padding-bottom: 24px;">
+                                        Добро пожаловать в <strong>OutfitStyle</strong> — ваш персональный умный гардероб! Мы рады, что вы с нами.
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Features -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 18px; font-weight: 600; color: #1a1a2e; padding-bottom: 20px;">
+                                        Что вас ждёт:
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <!-- Feature 1 -->
+                                            <tr>
+                                                <td class="dark-mode-card" style="background-color: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 12px;" valign="top">
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td width="50" valign="top" style="font-size: 32px; padding-right: 16px;">🌤️</td>
+                                                            <td class="dark-mode-text" valign="top">
+                                                                <strong style="font-size: 16px; color: #1a1a2e;">Умные рекомендации</strong>
+                                                                <p style="margin: 4px 0 0 0; font-size: 14px; line-height: 1.5; color: #718096;">
+                                                                    Подбираем одежду с учётом погоды, ваших предпочтений и планов на день
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <!-- Feature 2 -->
+                                            <tr>
+                                                <td class="dark-mode-card" style="background-color: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 12px;" valign="top">
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td width="50" valign="top" style="font-size: 32px; padding-right: 16px;">👔</td>
+                                                            <td class="dark-mode-text" valign="top">
+                                                                <strong style="font-size: 16px; color: #1a1a2e;">Цифровой гардероб</strong>
+                                                                <p style="margin: 4px 0 0 0; font-size: 14px; line-height: 1.5; color: #718096;">
+                                                                    Загрузите фото одежды и создавайте идеальные образы в пару кликов
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <!-- Feature 3 -->
+                                            <tr>
+                                                <td class="dark-mode-card" style="background-color: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 12px;" valign="top">
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                        <tr>
+                                                            <td width="50" valign="top" style="font-size: 32px; padding-right: 16px;">🏆</td>
+                                                            <td class="dark-mode-text" valign="top">
+                                                                <strong style="font-size: 16px; color: #1a1a2e;">Достижения и стиль</strong>
+                                                                <p style="margin: 4px 0 0 0; font-size: 14px; line-height: 1.5; color: #718096;">
+                                                                    Получайте очки стиля, открывайте достижения и делитесь образами
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- CTA Button -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <!--[if mso]>
+                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{.AppUrl}}" style="height:52px;v-text-anchor:middle;width:280px;" arcsize="10%" stroke="f" fillcolor="#667eea">
+                                            <w:anchorlock/>
+                                            <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">
+                                        <![endif]-->
+                                        <a href="{{.AppUrl}}" target="_blank" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; display: inline-block; font-size: 16px; font-weight: 600; line-height: 52px; text-align: center; text-decoration: none; width: 280px; border-radius: 8px; -webkit-text-size-adjust: none; box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);">
+                                            ✨ Начать использовать
+                                        </a>
+                                        <!--[if mso]>
+                                            </center>
+                                        </v:roundrect>
+                                        <![endif]-->
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Tip box -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #eef2ff; border-radius: 12px; border-left: 4px solid #667eea;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <p class="dark-mode-text" style="margin: 0; font-size: 14px; line-height: 1.6; color: #4c51bf;">
+                                            <strong>💡 Совет:</strong> Начните с добавления первых вещей в гардероб — это займёт всего 5 минут, а результат вас приятно удивит!
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td class="dark-mode-card" style="background-color: #f8f9fa; padding: 30px; border-top: 1px solid #e2e8f0;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" class="dark-mode-text" style="font-size: 14px; color: #718096; padding-bottom: 16px;">
+                                        С заботой о вашем стиле,<br>
+                                        <strong style="color: #667eea;">Команда OutfitStyle</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 16px; border-top: 1px solid #e2e8f0;">
+                                        <p class="dark-mode-text" style="margin: 12px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            © {{.Year}} OutfitStyle. Все права защищены.
+                                        </p>
+                                        <p class="dark-mode-text" style="margin: 8px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            Это автоматическое письмо, пожалуйста, не отвечайте на него.
+                                        </p>
+                                        <p class="dark-mode-text" style="margin: 8px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            <a href="{{.UnsubscribeUrl}}" style="color: #667eea; text-decoration: underline;">Отписаться от рассылок</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                </table>
+                <!-- End email container -->
+                
+                <!-- Spacer -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="padding: 40px 0;"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

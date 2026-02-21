@@ -27,6 +27,7 @@ Godeps/
 .pub/
 flutter_*.png
 pubspec.lock
+client/build/
 
 # Drift generated files (keep .drift source files)
 **/*.g.dart

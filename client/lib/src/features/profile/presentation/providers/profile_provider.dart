@@ -18,7 +18,6 @@ class ProfileData {
   final String email;
   final String? photoUrl;
   final DateTime? createdAt;
-  final String? subscriptionPlan;
 
   const ProfileData({
     required this.userId,
@@ -26,7 +25,6 @@ class ProfileData {
     required this.email,
     this.photoUrl,
     this.createdAt,
-    this.subscriptionPlan,
   });
 
   /// Создать из [Map<String, dynamic>]
@@ -59,16 +57,12 @@ class ProfileData {
       }
     }
 
-    // План подписки
-    final subscriptionPlan = data['subscription_plan'] as String? ?? 'free';
-
     return ProfileData(
       userId: data['id'] as String? ?? data['user_id'] as String? ?? '',
       displayName: name,
       email: email,
       photoUrl: photoUrl,
       createdAt: createdAt,
-      subscriptionPlan: subscriptionPlan,
     );
   }
 
@@ -205,15 +199,5 @@ final userFirstLetterProvider = Provider<String>((ref) {
     data: (data) => data.firstLetter,
     loading: () => 'U',
     error: (_, __) => 'U',
-  );
-});
-
-/// Провайдер для получения плана подписки
-final userSubscriptionPlanProvider = Provider<String>((ref) {
-  final profileState = ref.watch(profileDataProvider);
-  return profileState.when(
-    data: (data) => data.subscriptionPlan ?? 'free',
-    loading: () => 'free',
-    error: (_, __) => 'free',
   );
 });

@@ -23,7 +23,6 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   website: json['website'] as String?,
   isVerified: json['isVerified'] as bool?,
   isPremium: json['isPremium'] as bool?,
-  subscriptionStatus: json['subscriptionStatus'] as String?,
   joinedAt: json['joinedAt'] == null
       ? null
       : DateTime.parse(json['joinedAt'] as String),
@@ -59,7 +58,6 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'website': instance.website,
   'isVerified': instance.isVerified,
   'isPremium': instance.isPremium,
-  'subscriptionStatus': instance.subscriptionStatus,
   'joinedAt': instance.joinedAt?.toIso8601String(),
   'lastActiveAt': instance.lastActiveAt?.toIso8601String(),
   'preferences': instance.preferences,

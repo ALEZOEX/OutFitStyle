@@ -27,9 +27,9 @@ func (m *MockMLClient) SendAction(ctx context.Context, req external.ActionReques
 	return args.Get(0).(external.ActionResponse), args.Error(1)
 }
 
-func (m *MockMLClient) HealthCheck(ctx context.Context) bool {
+func (m *MockMLClient) HealthCheck(ctx context.Context) external.HealthCheckResult {
 	args := m.Called(ctx)
-	return args.Bool(0)
+	return args.Get(0).(external.HealthCheckResult)
 }
 
 func (m *MockMLClient) GenerateOutfit(ctx context.Context, userID string, meta map[string]interface{}) (external.GenerateOutfitResponse, error) {

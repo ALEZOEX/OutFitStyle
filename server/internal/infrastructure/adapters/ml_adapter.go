@@ -13,7 +13,7 @@ import (
 type MLClientInterface interface {
 	Rank(ctx context.Context, req external.TZMLRankRequest) (external.TZMLRankResponse, error)
 	SendAction(ctx context.Context, req external.ActionRequest) (external.ActionResponse, error)
-	HealthCheck(ctx context.Context) bool
+	HealthCheck(ctx context.Context) external.HealthCheckResult
 	GenerateOutfit(ctx context.Context, userID string, meta map[string]interface{}) (external.GenerateOutfitResponse, error)
 	GenerateRecommendation(ctx context.Context, userID string, meta map[string]interface{}) (external.GenerateRecommendationResponse, error)
 	ProcessFeedback(ctx context.Context, userID string, requestID string, meta map[string]interface{}) error

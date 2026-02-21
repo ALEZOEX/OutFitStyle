@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>Погодное предупреждение — OutfitStyle</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        
+        @media (prefers-color-scheme: dark) {
+            .dark-mode-bg { background-color: #1a1a2e !important; }
+            .dark-mode-text { color: #ffffff !important; }
+            .dark-mode-card { background-color: #16213e !important; }
+            .dark-mode-alert { background-color: #2d1f3d !important; color: #fbb6ce !important; }
+            .dark-mode-tip { background-color: #1a365d !important; color: #90cdf4 !important; }
+        }
+        
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .padding-mobile { padding: 20px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <!-- Preheader -->
+    <div style="display: none; font-size: 1px; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+        ⚠️ {{.AlertTitle}}. Проверьте рекомендации по одежде.
+    </div>
+    
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f6f8;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="600" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    
+                    <!-- Alert Header -->
+                    <tr>
+                        <td class="dark-mode-card" style="background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%); padding: 40px 30px; text-align: center;">
+                            <div style="font-size: 64px; line-height: 1; margin-bottom: 16px;">{{.AlertIcon}}</div>
+                            <h1 style="margin: 0; font-size: 26px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
+                                {{.AlertTitle}}
+                            </h1>
+                            <p style="margin: 0; font-size: 15px; color: rgba(255,255,255,0.95);">
+                                {{.Location}} • {{.Date}}
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="dark-mode-bg padding-mobile" style="padding: 40px 30px; background-color: #ffffff;">
+                            <!-- Alert Message -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 18px; font-weight: 600; color: #1a1a2e; padding-bottom: 16px;">
+                                        Здравствуйте, {{.Name}}!
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 16px; line-height: 1.6; color: #4a5568; padding-bottom: 24px;">
+                                        В вашем городе ожидается {{.WeatherCondition}}. Мы подготовили рекомендации, чтобы вы чувствовали себя комфортно.
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Weather Details -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef3c7; border-radius: 12px; border-left: 4px solid #f59e0b; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="60" valign="top" style="font-size: 40px; padding-right: 16px; text-align: center;">
+                                                    {{.WeatherIcon}}
+                                                </td>
+                                                <td class="dark-mode-alert" style="color: #92400e;" valign="top">
+                                                    <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">Прогноз погоды:</p>
+                                                    <p style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #78350f;">
+                                                        {{.Temperature}}
+                                                    </p>
+                                                    <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #92400e;">
+                                                        {{.WeatherDescription}}<br>
+                                                        {{.AdditionalInfo}}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Clothing Recommendations -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td class="dark-mode-text" style="font-size: 18px; font-weight: 600; color: #1a1a2e; padding-bottom: 20px;">
+                                        🧥 Что надеть:
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <!-- Wear This -->
+                                            <tr>
+                                                <td style="padding-bottom: 16px;">
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #86efac;">
+                                                        <tr>
+                                                            <td style="padding: 20px;">
+                                                                <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #166534;">
+                                                                    ✅ Рекомендуется:
+                                                                </p>
+                                                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                                    {{range .WearThis}}
+                                                                    <tr>
+                                                                        <td width="24" style="font-size: 18px; padding-right: 8px;">•</td>
+                                                                        <td class="dark-mode-text" style="font-size: 14px; color: #166534; padding-bottom: 4px;">{{.}}</td>
+                                                                    </tr>
+                                                                    {{end}}
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <!-- Avoid -->
+                                            <tr>
+                                                <td>
+                                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 12px; border: 1px solid #fca5a5;">
+                                                        <tr>
+                                                            <td style="padding: 20px;">
+                                                                <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #991b1b;">
+                                                                    ❌ Лучше избегать:
+                                                                </p>
+                                                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                                    {{range .Avoid}}
+                                                                    <tr>
+                                                                        <td width="24" style="font-size: 18px; padding-right: 8px;">•</td>
+                                                                        <td class="dark-mode-text" style="font-size: 14px; color: #991b1b; padding-bottom: 4px;">{{.}}</td>
+                                                                    </tr>
+                                                                    {{end}}
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Health Tips -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #e0f2fe; border-radius: 12px; border-left: 4px solid #0ea5e9; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <p class="dark-mode-tip" style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #075985;">
+                                            💡 Советы для здоровья:
+                                        </p>
+                                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8; color: #0c4a6e;">
+                                            {{range .HealthTips}}
+                                            <li>{{.}}</li>
+                                            {{end}}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- CTA Button -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <!--[if mso]>
+                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{.ViewOutfitsUrl}}" style="height:52px;v-text-anchor:middle;width:300px;" arcsize="10%" stroke="f" fillcolor="#667eea">
+                                            <w:anchorlock/>
+                                            <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">
+                                        <![endif]-->
+                                        <a href="{{.ViewOutfitsUrl}}" target="_blank" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; display: inline-block; font-size: 16px; font-weight: 600; line-height: 52px; text-align: center; text-decoration: none; width: 300px; border-radius: 8px; -webkit-text-size-adjust: none; box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);">
+                                            👗 Подобрать образ
+                                        </a>
+                                        <!--[if mso]>
+                                            </center>
+                                        </v:roundrect>
+                                        <![endif]-->
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td class="dark-mode-card" style="background-color: #f8f9fa; padding: 30px; border-top: 1px solid #e2e8f0;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" class="dark-mode-text" style="font-size: 14px; color: #718096;">
+                                        <p style="margin: 0 0 12px 0;">
+                                            📱 Получайте погодные уведомления в приложении
+                                        </p>
+                                        <p style="margin: 0 0 12px 0;">
+                                            <a href="{{.AppUrl}}" style="color: #667eea; text-decoration: underline;">Открыть OutfitStyle</a>
+                                        </p>
+                                        <p style="margin: 16px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            © {{.Year}} OutfitStyle. Все права защищены.
+                                        </p>
+                                        <p style="margin: 8px 0 0 0; font-size: 12px; color: #a0aec0;">
+                                            <a href="{{.UnsubscribeUrl}}" style="color: #667eea; text-decoration: underline;">Отключить погодные уведомления</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="padding: 40px 0;"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

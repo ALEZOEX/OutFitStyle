@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -27,6 +25,8 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+    networks:
+      - outfitstyle
 
   redis:
     image: redis:7-alpine
@@ -49,11 +49,13 @@ services:
         reservations:
           cpus: '0.1'
           memory: 64M
+    networks:
+      - outfitstyle
 
   ml-service:
     build:
-      context: .
-      dockerfile: ./Dockerfile.ml-service
+      context: ./ml-service
+      dockerfile: ../Dockerfile.ml-service
     volumes:
       - ./ml-service/models:/app/models:ro
     ports:
@@ -79,11 +81,13 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
+    networks:
+      - outfitstyle
 
   migrate:
     build:
-      context: .
-      dockerfile: ./server/Dockerfile
+      context: ./server
+      dockerfile: Dockerfile
     command: /app/migrate
     environment:
       - DB_HOST=postgres
@@ -106,11 +110,13 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
+    networks:
+      - outfitstyle
 
   api:
     build:
-      context: .
-      dockerfile: ./server/Dockerfile
+      context: ./server
+      dockerfile: Dockerfile
     command: /app/server
     ports:
       - "8080:8080"
@@ -157,6 +163,11 @@ services:
       - FEATURE_TRIPS=false  # Отключено для экономии ресурсов
       - API_KEY_PEPPER=dev-pepper
       - LOG_LEVEL=warn  # Уменьшено для экономии ресурсов
+      # Kafka Configuration
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_TOPIC_RECOMMENDATIONS=recommendations
+      - KAFKA_TOPIC_EVENTS=user_events
+      - EVENTING_ENABLED=1
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -178,6 +189,13 @@ services:
         reservations:
           cpus: '0.5'
           memory: 1G
+    networks:
+      - outfitstyle
 
 volumes:
   postgres_data:
+
+networks:
+  outfitstyle:
+    name: outfitstyle_network
+    driver: bridge

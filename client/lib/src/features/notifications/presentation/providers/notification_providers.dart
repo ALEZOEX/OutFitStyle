@@ -1,0 +1,249 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/api/api_client.dart';
+import '../../../../services/auth_storage.dart';
+import '../../data/datasources/notification_remote_data_source.dart';
+import '../../data/models/notification_dto.dart';
+import '../../data/repositories/notification_repository.dart';
+
+/// Провайдер для NotificationRepository
+final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
+  final authStorage = AuthStorage();
+  final apiClient = ApiClient(storage: authStorage);
+  final remoteDataSource = NotificationRemoteDataSource(apiClient);
+  return NotificationRepository(remoteDataSource: remoteDataSource);
+});
+
+/// Состояние списка уведомлений
+enum NotificationsLoadStatus {
+  initial,
+  loading,
+  success,
+  error,
+}
+
+/// Состояние для уведомлений
+class NotificationsState {
+  final List<NotificationModel> notifications;
+  final int unreadCount;
+  final NotificationsLoadStatus status;
+  final String? error;
+  final bool isLoadingMore;
+  final bool hasMore;
+
+  const NotificationsState({
+    this.notifications = const [],
+    this.unreadCount = 0,
+    this.status = NotificationsLoadStatus.initial,
+    this.error,
+    this.isLoadingMore = false,
+    this.hasMore = false,
+  });
+
+  NotificationsState copyWith({
+    List<NotificationModel>? notifications,
+    int? unreadCount,
+    NotificationsLoadStatus? status,
+    String? error,
+    bool? isLoadingMore,
+    bool? hasMore,
+  }) {
+    return NotificationsState(
+      notifications: notifications ?? this.notifications,
+      unreadCount: unreadCount ?? this.unreadCount,
+      status: status ?? this.status,
+      error: error ?? this.error,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasMore: hasMore ?? this.hasMore,
+    );
+  }
+
+  /// Получить непрочитанные уведомления
+  List<NotificationModel> get unreadNotifications {
+    return notifications.where((n) => !n.isRead).toList();
+  }
+
+  /// Получить прочитанные уведомления
+  List<NotificationModel> get readNotifications {
+    return notifications.where((n) => n.isRead).toList();
+  }
+}
+
+/// StateNotifier для управления состоянием уведомлений
+class NotificationsNotifier extends StateNotifier<NotificationsState> {
+  final NotificationRepository _repository;
+  Timer? _pollingTimer;
+
+  static const Duration _pollingInterval = Duration(seconds: 30);
+  static const int _pageSize = 20;
+
+  NotificationsNotifier(this._repository) : super(const NotificationsState());
+
+  /// Загрузить уведомления
+  Future<void> loadNotifications({bool refresh = false}) async {
+    if (state.status == NotificationsLoadStatus.loading && !refresh) {
+      return;
+    }
+
+    state = state.copyWith(
+      status: NotificationsLoadStatus.loading,
+      error: null,
+      isLoadingMore: !refresh,
+    );
+
+    try {
+      final result = await _repository.getNotifications(
+        page: refresh ? 1 : _getCurrentPage(),
+        limit: _pageSize,
+      );
+
+      final updatedNotifications = refresh
+          ? result.notifications
+          : [...state.notifications, ...result.notifications];
+
+      state = state.copyWith(
+        notifications: updatedNotifications,
+        unreadCount: result.unreadCount,
+        status: NotificationsLoadStatus.success,
+        hasMore: result.hasMore,
+        isLoadingMore: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: NotificationsLoadStatus.error,
+        error: e.toString(),
+        isLoadingMore: false,
+      );
+    }
+  }
+
+  /// Отметить уведомление как прочитанное
+  Future<void> markAsRead(String notificationId) async {
+    try {
+      await _repository.markAsRead(notificationId);
+
+      // Обновляем локальное состояние
+      final updatedNotifications = state.notifications.map((n) {
+        if (n.id == notificationId) {
+          return n.copyWith(isRead: true);
+        }
+        return n;
+      }).toList();
+
+      state = state.copyWith(
+        notifications: updatedNotifications,
+        unreadCount: state.unreadCount > 0 ? state.unreadCount - 1 : 0,
+      );
+    } catch (e) {
+      // Можно добавить логирование или показать snackbar
+      debugPrint('Ошибка при отметке уведомления: $e');
+    }
+  }
+
+  /// Отметить все уведомления как прочитанные
+  Future<void> markAllAsRead() async {
+    try {
+      await _repository.markAllAsRead();
+
+      // Обновляем локальное состояние
+      final updatedNotifications = state.notifications.map((n) {
+        return n.copyWith(isRead: true);
+      }).toList();
+
+      state = state.copyWith(
+        notifications: updatedNotifications,
+        unreadCount: 0,
+      );
+    } catch (e) {
+      debugPrint('Ошибка при отметке всех уведомлений: $e');
+    }
+  }
+
+  /// Зарегистрировать device token
+  Future<void> registerDeviceToken({
+    required String token,
+    required String platform,
+    String? deviceId,
+  }) async {
+    try {
+      await _repository.registerDeviceToken(
+        token: token,
+        platform: platform,
+        deviceId: deviceId,
+      );
+    } catch (e) {
+      debugPrint('Ошибка регистрации device token: $e');
+    }
+  }
+
+  /// Запустить поллинг для обновления количества непрочитанных
+  void startPolling() {
+    _stopPolling();
+    _pollingTimer = Timer.periodic(_pollingInterval, (_) {
+      _refreshUnreadCount();
+    });
+  }
+
+  /// Остановить поллинг
+  void stopPolling() {
+    _stopPolling();
+  }
+
+  void _stopPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
+
+  /// Обновить только количество непрочитанных
+  Future<void> _refreshUnreadCount() async {
+    try {
+      final count = await _repository.getUnreadCount();
+      if (count != state.unreadCount) {
+        state = state.copyWith(unreadCount: count);
+        // Если есть новые непрочитанные, можно перезагрузить список
+        if (count > state.unreadCount) {
+          loadNotifications(refresh: true);
+        }
+      }
+    } catch (e) {
+      // Игнорируем ошибки при фоновом обновлении
+      debugPrint('Ошибка обновления unread count: $e');
+    }
+  }
+
+  int _getCurrentPage() {
+    return (state.notifications.length / _pageSize).ceil() + 1;
+  }
+
+  /// Очистить состояние
+  void clear() {
+    stopPolling();
+    state = const NotificationsState();
+  }
+
+  @override
+  void dispose() {
+    stopPolling();
+    super.dispose();
+  }
+}
+
+/// Провайдер для управления состоянием уведомлений
+final notificationsProvider = StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
+  final repository = ref.watch(notificationRepositoryProvider);
+  return NotificationsNotifier(repository);
+});
+
+/// Провайдер только для количества непрочитанных уведомлений
+final unreadCountProvider = Provider<int>((ref) {
+  return ref.watch(notificationsProvider).unreadCount;
+});
+
+/// Провайдер для проверки наличия непрочитанных уведомлений
+final hasUnreadNotificationsProvider = Provider<bool>((ref) {
+  return ref.watch(notificationsProvider).unreadCount > 0;
+});

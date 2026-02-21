@@ -32,5 +32,5 @@ CREATE INDEX IF NOT EXISTS idx_clothing_items_materials_gin ON clothing_items US
 -- Индекс для ускорения поиска по тегам в wardrobe_items
 CREATE INDEX IF NOT EXISTS idx_wardrobe_items_tags_gin ON wardrobe_items USING gin(tags);
 
--- Индекс для ускорения поиска по usage в clothing_items
-CREATE INDEX IF NOT EXISTS idx_clothing_items_usage_gin ON clothing_items USING gin(usage);
+-- Индекс для ускорения поиска по usage в clothing_items (массив text[])
+CREATE INDEX IF NOT EXISTS idx_clothing_items_usage_gin ON clothing_items USING gin(usage array_ops);

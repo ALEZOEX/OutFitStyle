@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/auth_repository.dart';
 import '../../../presentation/routing/router.dart';
+import '../../achievements/presentation/providers/achievements_providers.dart';
 import 'providers/profile_provider.dart';
+import '../../admin/presentation/providers/admin_auth_provider.dart';
 
 /// Экран профиля пользователя
 class ProfileScreen extends ConsumerWidget {
@@ -136,6 +138,25 @@ class ProfileScreen extends ConsumerWidget {
                             ),
                           ),
                   ),
+                  // Скрытая кнопка админ-панели (долгое нажатие)
+                  GestureDetector(
+                    onLongPress: () async {
+                      final adminAuth = ref.read(adminAuthProvider);
+                      final isAdmin = await adminAuth.isAdmin();
+                      if (!context.mounted) return;
+                      if (isAdmin) {
+                        context.push('/admin');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Требуется роль администратора'),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      }
+                    },
+                    child: const SizedBox.shrink(),
+                  ),
                   const SizedBox(height: 16),
                   // Имя пользователя
                   Text(
@@ -189,43 +210,6 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          // Бейдж подписки
-          profileState.when(
-            data: (profile) {
-              final planName = profile.subscriptionPlan == 'premium' ? 'Pro Plan' : 'Free Plan';
-              final planColor = profile.subscriptionPlan == 'premium'
-                  ? theme.colorScheme.tertiary
-                  : theme.colorScheme.primary;
-
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.workspace_premium,
-                      size: 18,
-                      color: planColor,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      planName,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: planColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
         ],
       ),
     );
@@ -234,6 +218,7 @@ class ProfileScreen extends ConsumerWidget {
   /// Статистика пользователя
   Widget _buildStats(BuildContext context, ProfileStats stats, AsyncValue<ProfileData> profileState) {
     final theme = Theme.of(context);
+    final achievementsStats = ref.watch(achievementsStatsProvider);
 
     // Получаем количество дней в приложении из профиля
     final daysInApp = profileState.when(
@@ -274,7 +259,110 @@ class ProfileScreen extends ConsumerWidget {
               return _buildStatItem(context, stat);
             }).toList(),
           ),
+          // Статистика достижений
+          const SizedBox(height: 16),
+          _buildAchievementsStats(context, achievementsStats),
         ],
+      ),
+    );
+  }
+
+  /// Статистика достижений в профиле
+  Widget _buildAchievementsStats(BuildContext context, AchievementStats stats) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: () => context.push('/achievements'),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              theme.colorScheme.primaryContainer.withOpacity(0.5),
+              theme.colorScheme.secondaryContainer.withOpacity(0.5),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: theme.colorScheme.primary.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary,
+                    theme.colorScheme.secondary,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.emoji_events,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Достижения',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    stats.progressText,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Прогресс бар
+            SizedBox(
+              width: 80,
+              child: Column(
+                children: [
+                  Text(
+                    '${stats.progressPercent.round()}%',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(2),
+                    child: LinearProgressIndicator(
+                      value: stats.progressPercent / 100,
+                      backgroundColor: theme.colorScheme.outline.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.colorScheme.primary,
+                      ),
+                      minHeight: 6,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -337,12 +425,6 @@ class ProfileScreen extends ConsumerWidget {
         'label': 'Уведомления',
         'route': '/notifications',
         'color': Colors.orange,
-      },
-      {
-        'icon': Icons.workspace_premium_outlined,
-        'label': 'Подписка',
-        'route': '/settings/subscription',
-        'color': Colors.amber,
       },
       {
         'icon': Icons.emoji_events_outlined,

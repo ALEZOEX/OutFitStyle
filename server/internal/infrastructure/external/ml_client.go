@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/pkg/circuitbreaker"
 )
@@ -17,9 +18,36 @@ type MLClient struct {
 	baseURL string
 	http    *http.Client
 	cb      *circuitbreaker.CircuitBreaker
+	logger  *zap.Logger
+
+	// Настройки retry
+	retryAttempts int
+	retryDelayMs  int
+}
+
+type MLClientConfig struct {
+	BaseURL       string
+	Timeout       time.Duration
+	RetryAttempts int
+	RetryDelayMs  int
+	Logger        *zap.Logger
 }
 
 func NewMLClient(baseURL string, timeout time.Duration) *MLClient {
+	return NewMLClientWithConfig(MLClientConfig{
+		BaseURL:       baseURL,
+		Timeout:       timeout,
+		RetryAttempts: 2,
+		RetryDelayMs:  500,
+		Logger:        nil,
+	})
+}
+
+func NewMLClientWithConfig(cfg MLClientConfig) *MLClient {
+	if cfg.Logger == nil {
+		cfg.Logger = zap.NewNop()
+	}
+
 	// Create transport with connection pooling and keep-alive
 	transport := &http.Transport{
 		MaxIdleConns:        100,
@@ -32,23 +60,33 @@ func NewMLClient(baseURL string, timeout time.Duration) *MLClient {
 	cb := circuitbreaker.New(circuitbreaker.Config{
 		MaxFailures:       5,
 		ResetTimeout:      30 * time.Second,
-		Timeout:           timeout,
+		Timeout:           cfg.Timeout,
 		HalfOpenSuccesses: 3,
 	})
 
 	return &MLClient{
-		baseURL: baseURL,
+		baseURL: cfg.BaseURL,
 		http: &http.Client{
-			Timeout:   timeout,
+			Timeout:   cfg.Timeout,
 			Transport: transport,
 		},
-		cb: cb,
+		cb:            cb,
+		logger:        cfg.Logger,
+		retryAttempts: cfg.RetryAttempts,
+		retryDelayMs:  cfg.RetryDelayMs,
 	}
 }
 
 // GetCircuitBreaker возвращает circuit breaker для мониторинга
 func (c *MLClient) GetCircuitBreaker() *circuitbreaker.CircuitBreaker {
 	return c.cb
+}
+
+// MLHealthResponse — ответ health endpoint ML сервиса
+type MLHealthResponse struct {
+	Status    string `json:"status"`
+	Version   string `json:"version,omitempty"`
+	ModelInfo string `json:"model_info,omitempty"`
 }
 
 func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankResponse, error) {
@@ -63,11 +101,17 @@ func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankRespo
 
 	// Circuit breaker обёртка
 	err = c.cb.Execute(ctx, func() error {
-		// Retry mechanism with exponential backoff
-		maxRetries := 3
 		var lastErr error
 
-		for attempt := 0; attempt <= maxRetries; attempt++ {
+		for attempt := 0; attempt <= c.retryAttempts; attempt++ {
+			// Логирование попытки
+			if attempt > 0 {
+				c.logger.Warn("ML rank retry",
+					zap.Int("attempt", attempt+1),
+					zap.Int("max_attempts", c.retryAttempts+1),
+					zap.String("request_id", req.RequestID))
+			}
+
 			httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(body))
 			if err != nil {
 				return errors.Wrap(err, "new request")
@@ -78,16 +122,26 @@ func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankRespo
 			httpReq.Header.Set("X-Request-Id", req.RequestID)
 			httpReq.Header.Set("X-User-Id", req.UserID.String())
 
+			start := time.Now()
 			res, err := c.http.Do(httpReq)
+			latency := time.Since(start).Milliseconds()
+
 			if err != nil {
 				lastErr = errors.Wrap(err, "do request")
-				if attempt == maxRetries {
+				c.logger.Error("ML rank request failed",
+					zap.Error(lastErr),
+					zap.Int("attempt", attempt+1),
+					zap.String("request_id", req.RequestID))
+
+				if attempt >= c.retryAttempts {
 					return lastErr
 				}
+				// Экспоненциальная задержка перед retry
+				delay := time.Duration(c.retryDelayMs*(1<<uint(attempt))) * time.Millisecond
 				select {
 				case <-ctx.Done():
 					return ctx.Err()
-				case <-time.After(time.Duration(attempt+1) * 500 * time.Millisecond):
+				case <-time.After(delay):
 					continue
 				}
 			}
@@ -96,13 +150,21 @@ func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankRespo
 
 			if res.StatusCode/100 != 2 {
 				lastErr = errors.Errorf("ml bad status: %d", res.StatusCode)
-				if attempt == maxRetries {
+				c.logger.Warn("ML rank bad status",
+					zap.Int("status", res.StatusCode),
+					zap.Int("attempt", attempt+1),
+					zap.String("request_id", req.RequestID),
+					zap.Int64("latency_ms", latency))
+
+				if attempt >= c.retryAttempts {
 					return lastErr
 				}
+				// Экспоненциальная задержка перед retry
+				delay := time.Duration(c.retryDelayMs*(1<<uint(attempt))) * time.Millisecond
 				select {
 				case <-ctx.Done():
 					return ctx.Err()
-				case <-time.After(time.Duration(attempt+1) * 500 * time.Millisecond):
+				case <-time.After(delay):
 					continue
 				}
 			}
@@ -110,6 +172,11 @@ func (c *MLClient) Rank(ctx context.Context, req TZMLRankRequest) (TZMLRankRespo
 			if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
 				return errors.Wrap(err, "decode response")
 			}
+
+			c.logger.Debug("ML rank success",
+				zap.String("request_id", req.RequestID),
+				zap.Int64("latency_ms", latency),
+				zap.String("model_version", out.ModelVersion))
 			return nil
 		}
 		return lastErr
@@ -169,7 +236,69 @@ func (c *MLClient) SendAction(ctx context.Context, req ActionRequest) (ActionRes
 	return out, nil
 }
 
-func (c *MLClient) HealthCheck(ctx context.Context) bool {
+// HealthCheckResult — результат проверки здоровья ML сервиса
+type HealthCheckResult struct {
+	Healthy   bool   `json:"healthy"`
+	Status    string `json:"status,omitempty"`
+	Version   string `json:"version,omitempty"`
+	ModelInfo string `json:"model_info,omitempty"`
+	LatencyMs int64  `json:"latency_ms,omitempty"`
+	Error     string `json:"error,omitempty"`
+}
+
+// HealthCheck выполняет проверку здоровья ML сервиса
+// Возвращает расширенную информацию о статусе
+func (c *MLClient) HealthCheck(ctx context.Context) HealthCheckResult {
+	result := HealthCheckResult{
+		Healthy: false,
+		Status:  "unknown",
+	}
+
+	u := fmt.Sprintf("%s/health", c.baseURL)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		result.Error = err.Error()
+		return result
+	}
+
+	start := time.Now()
+	res, err := c.http.Do(httpReq)
+	result.LatencyMs = time.Since(start).Milliseconds()
+
+	if err != nil {
+		result.Error = err.Error()
+		result.Status = "unreachable"
+		c.logger.Debug("ML health check failed", zap.Error(err))
+		return result
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode/100 != 2 {
+		result.Error = fmt.Sprintf("status %d", res.StatusCode)
+		result.Status = "unhealthy"
+		return result
+	}
+
+	// Пытаемся распарсить ответ
+	var healthResp MLHealthResponse
+	if err := json.NewDecoder(res.Body).Decode(&healthResp); err == nil {
+		result.Status = healthResp.Status
+		result.Version = healthResp.Version
+		result.ModelInfo = healthResp.ModelInfo
+	} else {
+		result.Status = "healthy"
+	}
+
+	result.Healthy = true
+	c.logger.Debug("ML health check passed",
+		zap.String("status", result.Status),
+		zap.Int64("latency_ms", result.LatencyMs))
+
+	return result
+}
+
+// IsHealthy выполняет быструю проверку здоровья (только статус код)
+func (c *MLClient) IsHealthy(ctx context.Context) bool {
 	u := fmt.Sprintf("%s/health", c.baseURL)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
@@ -182,7 +311,6 @@ func (c *MLClient) HealthCheck(ctx context.Context) bool {
 	}
 	defer res.Body.Close()
 
-	// Проверяем, что статус успешный (2xx)
 	return res.StatusCode >= 200 && res.StatusCode < 300
 }
 

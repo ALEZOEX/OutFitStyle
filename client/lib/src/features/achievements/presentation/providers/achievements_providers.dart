@@ -1,14 +1,23 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../core/di/di.dart';
 import '../../../../domain/entities/achievement.dart';
 import '../../../../domain/entities/achievement_category.dart';
-import '../../data/repositories/achievements_repository.dart';
-import '../../data/repositories/achievement_definitions.dart';
+import '../../data/repositories/achievements_repository_impl.dart';
+import '../../data/services/achievements_api_service.dart';
 
-/// Провайдер репозитория достижений (singleton)
-final achievementsRepositoryProvider = Provider<AchievementsRepository>((ref) {
-  final repo = AchievementsRepository();
+/// Провайдер API сервиса достижений
+final achievementsApiServiceProvider = Provider<AchievementsApiService>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return AchievementsApiService(apiClient);
+});
+
+/// Провайдер репозитория достижений (с API интеграцией)
+final achievementsRepositoryProvider = Provider<AchievementsRepositoryImpl>((ref) {
+  final apiService = ref.watch(achievementsApiServiceProvider);
+  final repo = AchievementsRepositoryImpl(apiService);
   ref.onDispose(() => repo.dispose());
   return repo;
 });
@@ -16,7 +25,7 @@ final achievementsRepositoryProvider = Provider<AchievementsRepository>((ref) {
 /// Провайдер списка всех достижений
 final allAchievementsProvider = Provider<List<Achievement>>((ref) {
   final repository = ref.watch(achievementsRepositoryProvider);
-  return repository.getAllAchievements();
+  return repository.achievements;
 });
 
 /// Провайдер статистики достижений
@@ -46,6 +55,16 @@ final categoryProgressProvider = Provider.family<CategoryProgress, AchievementCa
 /// Провайдер для отслеживания только что разблокированных достижений
 final newlyUnlockedAchievementsProvider = StateProvider<List<Achievement>>((ref) => []);
 
+/// Провайдер данных достижений пользователя из API
+final userAchievementsDataProvider = FutureProvider<UserAchievementsData>((ref) async {
+  final repository = ref.watch(achievementsRepositoryProvider);
+  final result = await repository.getUserAchievementsData();
+  return result.fold(
+    (error) => throw Exception(error),
+    (data) => data,
+  );
+});
+
 /// State notifier для управления достижениями
 class AchievementsNotifier extends StateNotifier<AchievementsState> {
   AchievementsNotifier(this._repository) : super(const AchievementsState()) {
@@ -54,7 +73,7 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
     });
   }
 
-  final AchievementsRepository _repository;
+  final AchievementsRepositoryImpl _repository;
   late final StreamSubscription<List<Achievement>> _subscription;
 
   @override
@@ -63,10 +82,32 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
     super.dispose();
   }
 
-  /// Загрузить все достижения
+  /// Загрузить все достижения из API
   Future<void> loadAllAchievements() async {
     state = state.copyWith(isLoading: true);
-    // Данные загружаются автоматически через stream
+    try {
+      // Репозиторий автоматически загружает данные при инициализации
+      // Здесь мы просто ждем обновления через stream
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  /// Загрузить достижения пользователя из API
+  Future<UserAchievementsData?> loadUserAchievements() async {
+    try {
+      final result = await _repository.getUserAchievementsData();
+      return result.fold(
+        (error) {
+          debugPrint('Ошибка загрузки достижений пользователя: $error');
+          return null;
+        },
+        (data) => data,
+      );
+    } catch (e) {
+      debugPrint('Ошибка загрузки достижений пользователя: $e');
+      return null;
+    }
   }
 
   /// Обновить прогресс достижения
@@ -99,7 +140,23 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
     return _repository.getStats();
   }
 
-  /// Обработать событие для трекинга достижений
+  /// Трекнуть событие для достижений
+  /// Возвращает список только что разблокированных достижений
+  Future<List<Achievement>> trackEvent({
+    required String eventType,
+    int value = 1,
+  }) async {
+    final result = await _repository.trackEvent(eventType: eventType, value: value);
+    return result.fold(
+      (error) {
+        debugPrint('Ошибка трекинга события: $error');
+        return [];
+      },
+      (achievements) => achievements,
+    );
+  }
+
+  /// Обработать событие для трекинга достижений (локальная версия)
   /// Возвращает список только что разблокированных достижений
   Future<List<Achievement>> handleEvent(AchievementEventType type, {int value = 1}) async {
     final newlyUnlocked = <Achievement>[];
@@ -239,6 +296,10 @@ class AchievementsState {
   /// Получить заблокированные достижения
   List<Achievement> get lockedAchievements =>
       achievements.where((a) => !a.isUnlocked).toList();
+
+  /// Получить достижения в процессе
+  List<Achievement> get inProgressAchievements =>
+      achievements.where((a) => !a.isUnlocked && a.currentProgress > 0).toList();
 
   /// Общий прогресс
   double get overallProgress {
