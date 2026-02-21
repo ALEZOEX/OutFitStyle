@@ -2,17 +2,15 @@ services:
   postgres:
     image: postgres:15
     environment:
-      - LANG=ru_RU.UTF-8
-      - LC_ALL=ru_RU.UTF-8
-      - POSTGRES_DB=${DB_NAME:-outfitstyle}
-      - POSTGRES_USER=${DB_USER:-postgres}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=outfitstyle
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-outfitstyle}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d outfitstyle"]
       interval: 5s
       timeout: 5s
       retries: 5
