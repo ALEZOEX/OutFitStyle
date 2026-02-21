@@ -6,10 +6,10 @@
 -- 1. outfit_ratings - оценки пользователей для рекомендаций
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS outfit_ratings (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id BIGSERIAL PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     recommendation_id UUID NOT NULL REFERENCES recommendations(id) ON DELETE CASCADE,
-    outfit_items UUID[], -- ID вещей в наряде (для анализа)
+    outfit_items BIGINT[], -- ID вещей в наряде (для анализа)
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5), -- 1-5 звёзд
     quality_score INTEGER NOT NULL DEFAULT 0 CHECK (quality_score >= -10 AND quality_score <= 10), -- -10 до +10
     feedback TEXT, -- Текстовый отзыв
@@ -29,7 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_outfit_ratings_quality_score ON outfit_ratings(qu
 -- 2. recommendation_quality - представление для среднего рейтинга
 -- ============================================================================
 CREATE OR REPLACE VIEW recommendation_quality_stats AS
-SELECT 
+SELECT
     recommendation_id,
     COUNT(*) as rating_count,
     AVG(rating) as avg_rating,
@@ -46,7 +46,7 @@ GROUP BY recommendation_id;
 -- 3. user_rating_stats - статистика оценок пользователя
 -- ============================================================================
 CREATE OR REPLACE VIEW user_rating_stats AS
-SELECT 
+SELECT
     user_id,
     COUNT(*) as total_ratings,
     AVG(rating) as avg_rating,
@@ -61,7 +61,7 @@ GROUP BY user_id;
 -- 4. low_quality_items - вещи с низким рейтингом (для ML фильтрации)
 -- ============================================================================
 CREATE OR REPLACE VIEW low_quality_items AS
-SELECT 
+SELECT
     unnest(outfit_items) as clothing_item_id,
     COUNT(*) as times_in_low_rating,
     AVG(quality_score) as avg_quality_score
