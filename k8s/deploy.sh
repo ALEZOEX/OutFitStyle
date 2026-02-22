@@ -43,6 +43,11 @@ INFRA_MANIFESTS=(
     "kafka.yaml"
 )
 
+# Landing page (React)
+LANDING_MANIFESTS=(
+    "landing-deployment.yaml"
+)
+
 # Функция для вывода сообщений
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -107,6 +112,15 @@ apply_manifests() {
     # Применение инфраструктуры (мониторинг, kafka)
     log_info "Применение инфраструктуры (Prometheus, Grafana, Kafka)..."
     for manifest in "${INFRA_MANIFESTS[@]}"; do
+        if [ -f "${SCRIPT_DIR}/${manifest}" ]; then
+            log_info "Применение ${manifest}..."
+            kubectl apply -f "${SCRIPT_DIR}/${manifest}"
+        fi
+    done
+
+    # Применение landing page
+    log_info "Применение landing page..."
+    for manifest in "${LANDING_MANIFESTS[@]}"; do
         if [ -f "${SCRIPT_DIR}/${manifest}" ]; then
             log_info "Применение ${manifest}..."
             kubectl apply -f "${SCRIPT_DIR}/${manifest}"
