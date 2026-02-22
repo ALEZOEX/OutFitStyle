@@ -19,6 +19,16 @@ spec:
       labels:
         app: backend
     spec:
+      initContainers:
+        - name: migrate
+          image: ghcr.io/alezoex/outfitstyle-server:latest
+          command: ["/app/migrate"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: database-url
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -47,19 +57,37 @@ spec:
                 secretKeyRef:
                   name: outfitstyle-secrets
                   key: openweather-api-key
+            - name: SERVER_HOST
+              value: "0.0.0.0"
+            - name: SERVER_PORT
+              value: "8080"
+            - name: ENVIRONMENT
+              value: "production"
             - name: ML_SERVICE_URL
               value: "http://ml-service:8000"
             - name: REDIS_URL
               value: "redis://redis:6379"
-            - name: SERVER_PORT
-              value: "8080"
+            - name: EVENTING_ENABLED
+              value: "0"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: CORS_ALLOWED_ORIGINS
+              value: "https://outfitstyle.play2go.cloud"
+            - name: DB_HOST
+              value: "postgres"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "outfitstyle"
+            - name: DB_USER
+              value: "postgres"
           resources:
             requests:
-              memory: "128Mi"
+              memory: "256Mi"
               cpu: "150m"
             limits:
-              memory: "256Mi"
-              cpu: "300m"
+              memory: "512Mi"
+              cpu: "1"
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
