@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "outfitstyle-ml"
+version = "1.0.0"
+description = "OutfitStyle ML Service - Recommendation engine"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.0.0",
+    "catboost>=1.2.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.3.0",
+    "redis>=5.0.0",
+    "requests>=2.31.0",
+    "prometheus-client>=0.19.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-anyio>=0.0.0",
+    "mypy>=1.7.0",
+    "ruff>=0.1.0",
+    "types-requests>=2.31.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["api*", "app*", "contracts*", "model*", "services*", "train*", "scripts*"]
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+explicit_package_bases = true
+warn_return_any = false
+warn_unused_configs = true
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
