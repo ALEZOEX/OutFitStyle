@@ -64,6 +64,7 @@ require (
 
 require (
 	firebase.google.com/go/v4 v4.18.0
+	github.com/alicebob/miniredis/v2 v2.36.1
 	github.com/getsentry/sentry-go v0.40.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/hibiken/asynq v0.25.1
@@ -87,7 +88,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.53.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.53.0 // indirect
 	github.com/MicahParks/keyfunc v1.9.0 // indirect
-	github.com/alicebob/miniredis/v2 v2.36.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20251022180443-0feb69152e9f // indirect
