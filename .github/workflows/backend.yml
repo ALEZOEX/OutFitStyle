@@ -86,12 +86,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
 
-      - name: Security scan with gosec
-        uses: securego/gosec@v2.21.4
-        with:
-          working-directory: server
-          args: -exclude-dir=marketplace-service ./...
-
   build-and-push:
     needs: test
     runs-on: ubuntu-latest

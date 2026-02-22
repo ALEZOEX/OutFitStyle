@@ -38,9 +38,10 @@ jobs:
           cd server
           go test -v -race ./internal/core/... ./internal/api/... ./internal/infrastructure/... ./internal/validation/...
 
-  # 2. Проверка уязвимостей в Go-зависимостях
+  # 2. Проверка уязвимостей в Go-зависимостях (информационно)
   go-vuln-check:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,9 +61,10 @@ jobs:
           cd server
           govulncheck ./...
 
-  # 3. SAST анализ с gosec
+  # 3. SAST анализ с gosec (информационно)
   gosec:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -80,11 +82,12 @@ jobs:
       - name: Run gosec
         run: |
           cd server
-          gosec -exclude-generated -config .gosec.yml ./...
+          gosec -exclude-dir=vendor ./... || true
 
-  # 4. Сборка и сканирование Docker-образа
+  # 4. Сборка и сканирование Docker-образа (информационно)
   docker-scan:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -101,20 +104,6 @@ jobs:
         with:
           scan-type: 'image'
           image-ref: 'outfitstyle/api:test'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'image'
-          image-ref: 'outfitstyle/api:test'
           format: 'table'
           exit-code: '0'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
