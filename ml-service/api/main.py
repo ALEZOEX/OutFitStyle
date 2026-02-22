@@ -25,7 +25,7 @@ from contracts.tz_rank_contract import TZRankRequest, TZRankResponse, TZRankedIt
 from contracts.translation_contracts import TranslationRequest, TranslationResponse, BatchTranslationRequest, BatchTranslationResponse
 from model.enhanced_predictor import EnhancedPredictor
 from model.features_with_priorities import build_feature_frame
-from model.internal_schema import InternalRequest, InternalItem, InternalContext, InternalWeatherData, InternalUserProfile
+from model.internal_schema import InternalRequest, InternalItem, InternalContext, InternalWeatherData, InternalUserProfile, InternalSourceType
 from contracts.event_contract import ActionEvent, ActionEventResponse
 from model.event_logger import log_rank_impression, log_outfits_impression, log_action
 
@@ -56,7 +56,7 @@ def adapt_ml_request_to_internal(external_request: MLRankRequest) -> InternalReq
             fit=item.fit,
             pattern=item.pattern,
             icon_emoji=item.icon_emoji,
-            source=item.source,
+            source=InternalSourceType(item.source.value),
             is_owned=item.is_owned,
             created_at=item.created_at,
             source_priority=item.source_priority
