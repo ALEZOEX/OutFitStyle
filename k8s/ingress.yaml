@@ -15,7 +15,7 @@ spec:
   # Optional: specify ingressClassName for Traefik
   # ingressClassName: traefik
   rules:
-    - host: OutFitStyle.play2go.cloud
+    - host: outfitstyle.play2go.cloud
       http:
         paths:
           # API routes - proxy to backend
