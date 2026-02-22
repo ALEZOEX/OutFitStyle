@@ -163,7 +163,7 @@ def generate_outfits(
     result: List[Outfit] = []
     used_ids: Set[str] = set()
     for o in scored:
-        ids = {v.get("id") for v in o.items.values()}
+        ids = {v.get("id") for v in o.items.values() if v.get("id") is not None}
         if len(ids & used_ids) >= 2:  # не даём почти одинаковые outfits
             continue
         result.append(o)

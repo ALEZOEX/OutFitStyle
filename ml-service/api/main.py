@@ -8,7 +8,7 @@ import time
 import logging
 import os
 import redis
-import requests
+import requests  # type: ignore[import-untyped]
 import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import asyncio
