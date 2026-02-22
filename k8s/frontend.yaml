@@ -166,14 +166,15 @@ spec:
             - name: static-files
               mountPath: /usr/share/nginx/html
           securityContext:
-            runAsUser: 0
+            runAsNonRoot: true
+            runAsUser: 101
             capabilities:
               drop:
                 - ALL
       containers:
         - name: frontend
           image: nginx:alpine
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http

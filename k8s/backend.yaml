@@ -25,8 +25,8 @@ spec:
         fsGroup: 2000
       containers:
         - name: backend
-          image: outfitstyle-backend:latest
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/alezoex/outfitstyle-server:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               name: http
