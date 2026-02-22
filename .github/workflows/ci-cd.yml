@@ -92,3 +92,27 @@ jobs:
           tags: |
             ghcr.io/alezoex/outfitstyle-marketplace:latest
             ghcr.io/alezoex/outfitstyle-marketplace:${{ github.sha }}
+
+  deploy-k3s:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to k3s server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          script: |
+            cd /root/OutFitStyle
+            git fetch origin main
+            git reset --hard origin/main
+            chmod +x ./k8s/deploy.sh
+            ./k8s/deploy.sh apply
+            echo "=== Deployment complete ==="
+            kubectl get pods -n outfitstyle
+            kubectl get svc -n outfitstyle
+            kubectl get ingress -n outfitstyle
