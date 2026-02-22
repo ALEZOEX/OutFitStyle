@@ -37,7 +37,9 @@ COPY --from=builder /app/api ./api
 COPY --from=builder /app/contracts ./contracts
 COPY --from=builder /app/model ./model
 COPY --from=builder /app/services ./services
-COPY --from=builder /app/models ./models
+
+# Create models directory (will be empty if no models exist)
+RUN mkdir -p /app/models
 
 # Create non-root user for security
 RUN groupadd -g 1000 mluser && \

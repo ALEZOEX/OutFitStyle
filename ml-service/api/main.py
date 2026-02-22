@@ -114,15 +114,23 @@ async def lifespan(app: FastAPI):
     # Startup
     global predictor
     model_path = os.getenv("MODEL_PATH", "models/model.pkl")  # путь к модели для загрузки
-    try:
-        predictor = ThreadSafePredictor(model_path)
-        logging.info(f"ML model loaded successfully from {model_path}")
-    except Exception as e:
-        logging.error(f"Failed to load ML model: {e}")
-        raise
+    
+    # Проверяем существование модели
+    if not os.path.exists(model_path):
+        logging.warning(f"ML model not found at {model_path}. Running without model.")
+        predictor = None
+    else:
+        try:
+            predictor = ThreadSafePredictor(model_path)
+            logging.info(f"ML model loaded successfully from {model_path}")
+        except Exception as e:
+            logging.error(f"Failed to load ML model: {e}")
+            predictor = None
+    
     yield
     # Shutdown
-    prediction_pool.shutdown(wait=True)
+    if predictor is not None:
+        prediction_pool.shutdown(wait=True)
 
 
 app = FastAPI(
