@@ -1,11 +1,23 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, Tuple
-import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _safe_float(val: Any, default: float) -> float:
+    """Безопасное преобразование в float с обработкой None"""
+    if val is None:
+        return default
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return default
 
 
 ALLOWED_CATS = {"outerwear", "upper", "lower", "footwear", "accessory"}
 
-NEUTRAL_COLORS = {"black", "white", "gray", "grey", "beige", "navy", "brown"}
+NEUTRAL_COLORS = {"black", "white", "gray", "beige", "navy", "brown"}
 STYLE_GROUPS = {
     "business": "smart",
     "formal": "smart",
@@ -42,7 +54,7 @@ def _style_coherence(items: List[Dict[str, Any]], user_style: str) -> float:
 
 
 def _formality_consistency(items: List[Dict[str, Any]]) -> float:
-    vals = [float(it.get("formality_level", 3)) for it in items]
+    vals = [_safe_float(it.get("formality_level"), 3.0) for it in items]
     if not vals:
         return 0.5
     spread = max(vals) - min(vals)
@@ -65,23 +77,42 @@ def _color_harmony(items: List[Dict[str, Any]]) -> float:
 
 
 def _weather_fit(items: List[Dict[str, Any]], temperature: float) -> float:
+    """
+    Проверка соответствия одежды температуре.
+    Возвращает долю предметов, подходящих для данной температуры.
+    """
     ok = 0
     for it in items:
-        mn = float(it.get("min_temp", -100))
-        mx = float(it.get("max_temp", 100))
+        mn = _safe_float(it.get("min_temp"), -100.0)
+        mx = _safe_float(it.get("max_temp"), 100.0)
         if mn <= temperature <= mx:
             ok += 1
     return ok / max(1, len(items))
 
 
 def _outfit_score(items: List[Dict[str, Any]], item_scores: List[float], user_style: str, temperature: float) -> Tuple[float, Dict[str, float]]:
-    base = float(np.mean(item_scores)) if item_scores else 0.0
+    """
+    Расчёт скоринга аутфита.
+    
+    Weather fit используется как множитель-штраг: если одежда не подходит погоде,
+    общий скоринг значительно снижается.
+    """
+    base = sum(item_scores) / len(item_scores) if item_scores else 0.0
     sc = _style_coherence(items, user_style)
     fc = _formality_consistency(items)
     ch = _color_harmony(items)
     wf = _weather_fit(items, temperature)
 
-    score = 0.60 * base + 0.15 * sc + 0.10 * fc + 0.10 * ch + 0.05 * wf
+    # Базовый скоринг
+    score = 0.60 * base + 0.15 * sc + 0.10 * fc + 0.10 * ch
+    
+    # Weather fit как штрафной множитель (не слагаемое!)
+    # Если wf < 0.5, значит больше половины предметов не подходят погоде
+    if wf < 0.5:
+        score *= (wf * 2)  # сильный штраф
+    else:
+        score *= (0.5 + wf)  # небольшой бонус за соответствие
+    
     return score, {
         "base": base,
         "style_coherence": sc,
@@ -100,6 +131,21 @@ def generate_outfits(
     topn_per_category: int = 20,
     beam_size: int = 60,
 ) -> List[Outfit]:
+    """
+    Генерация аутфитов с помощью beam search.
+    
+    Args:
+        candidates: Список кандидатов-предметов
+        scores_by_id: Словарь {item_id: score}
+        temperature: Температура воздуха (для подбора по погоде)
+        user_style: Предпочтения пользователя
+        k: Количество аутфитов для возврата
+        topn_per_category: Максимум предметов на категорию
+        beam_size: Размер луча для beam search
+    
+    Returns:
+        Список аутфитов, отсортированный по скорингу
+    """
     # группируем по категориям
     by_cat: Dict[str, List[Dict[str, Any]]] = {}
     for it in candidates:
@@ -116,13 +162,26 @@ def generate_outfits(
     # обязательные категории
     required = ["upper", "lower", "footwear"]
     optional = []
-    if temperature < 10 and "outerwear" in by_cat:
-        optional.append("outerwear")
+    
+    # Верхняя одежда обязательна при температуре ниже 0°C
+    if "outerwear" in by_cat:
+        if temperature < 0:
+            required.append("outerwear")
+        elif temperature < 10:
+            optional.append("outerwear")
+    
     if "accessory" in by_cat:
         optional.append("accessory")
 
+    # Проверяем наличие всех обязательных категорий
+    for cat in required:
+        if cat not in by_cat or not by_cat[cat]:
+            # Нельзя собрать полный аутфит без обязательной категории
+            return []
+
     cats = [c for c in required if c in by_cat] + [c for c in optional if c in by_cat]
     if not cats:
+        logger.warning("No categories available for outfit generation")
         return []
 
     # beam search по категориям
@@ -130,45 +189,61 @@ def generate_outfits(
     for cat in cats:
         pool = by_cat.get(cat, [])
         if not pool:
+            logger.warning("No items in category %s", cat)
             continue
         next_beams = []
         for partial in beams:
-            used = {v.get("id") for v in partial.values()}
+            used = {v.get("id") for v in partial.values() if v.get("id") is not None}
             for it in pool:
-                if it.get("id") in used:
+                it_id = it.get("id")
+                if it_id is None or it_id in used:
                     continue
                 nm = dict(partial)
                 nm[cat] = it
                 next_beams.append(nm)
 
         def partial_score(m):
-            vals = [scores_by_id.get(v.get("id"), 0.0) for v in m.values()]
-            return float(np.mean(vals)) if vals else 0.0
+            vals = [scores_by_id.get(v.get("id"), 0.0) for v in m.values() if v.get("id") is not None]
+            return sum(vals) / len(vals) if vals else 0.0
 
         next_beams.sort(key=partial_score, reverse=True)
         beams = next_beams[:beam_size]
         if not beams:
+            logger.warning("Beam search terminated at category %s - no valid combinations", cat)
             break
 
-    # финальный скор + простая диверсификация
+    logger.info("Beam search completed: %d beams, generating %d outfits", len(beams), k)
+
+    # финальный скоринг + диверсификация (попарное сравнение)
     scored: List[Outfit] = []
     for m in beams:
         items = list(m.values())
-        item_scores = [scores_by_id.get(x.get("id"), 0.0) for x in items]
+        item_scores = [scores_by_id.get(x.get("id"), 0.0) for x in items if x.get("id") is not None]
         s, br = _outfit_score(items, item_scores, user_style=user_style, temperature=temperature)
         scored.append(Outfit(items=m, outfit_score=s, breakdown=br))
 
     scored.sort(key=lambda o: o.outfit_score, reverse=True)
 
+    # Диверсификация: сравниваем каждый аутфит с уже выбранными попарно
     result: List[Outfit] = []
-    used_ids: Set[str] = set()
+    selected_ids: List[Set[str]] = []
     for o in scored:
-        ids: Set[str] = {v["id"] for v in o.items.values() if "id" in v and v["id"] is not None}
-        if len(ids & used_ids) >= 2:  # не даём почти одинаковые outfits
+        ids: Set[str] = {v["id"] for v in o.items.values() if v.get("id") is not None}
+        
+        # Проверяем пересечение с каждым уже выбранным аутфитом
+        is_duplicate = False
+        for prev_ids in selected_ids:
+            if len(ids & prev_ids) >= 2:  # не более 1 общего предмета
+                is_duplicate = True
+                break
+        
+        if is_duplicate:
             continue
+            
         result.append(o)
-        used_ids |= ids
+        selected_ids.append(ids)
         if len(result) >= k:
             break
 
+    logger.info("Generated %d outfits (requested %d)", len(result), k)
     return result
