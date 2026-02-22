@@ -35,6 +35,14 @@ MANIFESTS=(
     "ingress.yaml"
 )
 
+# Мониторинг и инфраструктура (опционально)
+INFRA_MANIFESTS=(
+    "monitoring-deployment.yaml"
+    "grafana.yaml"
+    "servicemonitor.yaml"
+    "kafka.yaml"
+)
+
 # Функция для вывода сообщений
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -72,36 +80,45 @@ check_cluster() {
 # Применение манифестов
 apply_manifests() {
     log_info "Начало развёртывания OutfitStyle..."
-    
+
     # Проверка secrets
     if [ ! -f "${SCRIPT_DIR}/secrets.yaml" ]; then
         log_warn "Файл secrets.yaml не найден. Создайте его на основе secrets.yaml.example"
         log_info "Пример: cp ${SCRIPT_DIR}/secrets.yaml.example ${SCRIPT_DIR}/secrets.yaml"
         exit 1
     fi
-    
+
     # Применение namespace
     log_info "Создание namespace ${NAMESPACE}..."
     kubectl apply -f "${SCRIPT_DIR}/namespace.yaml"
-    
+
     # Применение secrets
     log_info "Применение secrets..."
     kubectl apply -f "${SCRIPT_DIR}/secrets.yaml"
-    
-    # Применение остальных манифестов
+
+    # Применение основных манифестов
     for manifest in "${MANIFESTS[@]}"; do
         if [ "$manifest" != "namespace.yaml" ]; then
             log_info "Применение ${manifest}..."
             kubectl apply -f "${SCRIPT_DIR}/${manifest}"
         fi
     done
-    
+
+    # Применение инфраструктуры (мониторинг, kafka)
+    log_info "Применение инфраструктуры (Prometheus, Grafana, Kafka)..."
+    for manifest in "${INFRA_MANIFESTS[@]}"; do
+        if [ -f "${SCRIPT_DIR}/${manifest}" ]; then
+            log_info "Применение ${manifest}..."
+            kubectl apply -f "${SCRIPT_DIR}/${manifest}"
+        fi
+    done
+
     log_success "Все манифесты применены!"
-    
+
     # Ожидание готовности подов
     log_info "Ожидание готовности подов..."
     wait_for_pods
-    
+
     # Вывод информации
     show_status
 }
@@ -161,27 +178,33 @@ show_status() {
     echo ""
     log_info "=== Статус развёртывания ==="
     echo ""
-    
+
     # Поды
     log_info "Поды:"
     kubectl get pods -n ${NAMESPACE} -o wide
     echo ""
-    
+
     # Сервисы
     log_info "Сервисы:"
     kubectl get svc -n ${NAMESPACE} -o wide
     echo ""
-    
+
     # Ingress
     log_info "Ingress:"
     kubectl get ingress -n ${NAMESPACE} -o wide
     echo ""
-    
+
     # PVC
     log_info "PersistentVolumeClaims:"
     kubectl get pvc -n ${NAMESPACE} -o wide
     echo ""
-    
+
+    # Доступ к Grafana
+    log_info "=== Доступ к мониторингу ==="
+    echo "Grafana: http://outfitstyle.play2go.cloud/grafana"
+    echo "Prometheus: http://outfitstyle.play2go.cloud/prometheus"
+    echo ""
+
     # События
     log_info "Последние события:"
     kubectl get events -n ${NAMESPACE} --sort-by='.lastTimestamp' | tail -10
