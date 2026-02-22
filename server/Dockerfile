@@ -10,11 +10,11 @@ RUN apk add --no-cache git ca-certificates gcc musl-dev
 WORKDIR /app
 
 # Копировать go.mod и go.sum для кэширования зависимостей
-COPY server/go.mod server/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Копировать исходный код
-COPY server/ ./
+COPY . ./
 
 # Собрать бинарники
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server cmd/server/main.go
@@ -37,7 +37,7 @@ COPY --from=builder /app/server /app/server
 COPY --from=builder /app/migrate /app/migrate
 
 # Копировать файлы миграций
-COPY --from=builder /app/migrations/ /app/migrations/
+COPY --from=builder /app/migrations /app/migrations
 
 # Создать непривилегированный пользователь
 RUN addgroup -g 65532 nonroot && \
