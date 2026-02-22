@@ -98,7 +98,7 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t outfitstyle/api:test -f ./server/Dockerfile .
+          docker build -t outfitstyle/api:test -f ./server/Dockerfile ./server
 
       - name: Install Trivy
         uses: aquasecurity/trivy-action@master
