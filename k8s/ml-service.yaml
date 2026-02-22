@@ -15,10 +15,6 @@ spec:
       labels:
         app: ml-service
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 2000
       containers:
         - name: ml-service
           image: ghcr.io/alezoex/outfitstyle-ml:latest
@@ -38,13 +34,6 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            runAsUser: 1000
-            capabilities:
-              drop:
-                - ALL
           livenessProbe:
             httpGet:
               path: /health

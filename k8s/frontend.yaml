@@ -148,29 +148,6 @@ spec:
       labels:
         app: frontend
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 101
-        fsGroup: 101
-      initContainers:
-        - name: setup-app
-          image: busybox:1.35
-          command: ['sh', '-c']
-          args:
-            - |
-              mkdir -p /usr/share/nginx/html/app
-              cp /config/app/index.html /usr/share/nginx/html/app/index.html
-          volumeMounts:
-            - name: app-placeholder
-              mountPath: /config/app
-            - name: static-files
-              mountPath: /usr/share/nginx/html
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 101
-            capabilities:
-              drop:
-                - ALL
       containers:
         - name: frontend
           image: nginx:alpine
@@ -190,6 +167,10 @@ spec:
             - name: static-files
               mountPath: /usr/share/nginx/html/app
               readOnly: true
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
           resources:
             requests:
               memory: "64Mi"
@@ -197,13 +178,6 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "100m"
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            runAsUser: 101
-            capabilities:
-              drop:
-                - ALL
           livenessProbe:
             httpGet:
               path: /health
@@ -238,6 +212,10 @@ spec:
               - key: index.html
                 path: index.html
         - name: static-files
+          emptyDir: {}
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
           emptyDir: {}
 ---
 apiVersion: v1
