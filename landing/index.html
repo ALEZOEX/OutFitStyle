@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OutfitStyle — Умные рекомендации одежды</title>
+    <meta name="description" content="Получайте персонализированные рекомендации одежды на основе погоды, ваших предпочтений и случая">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fdf4ff',
+                            100: '#fae8ff',
+                            200: '#f5d0fe',
+                            300: '#f0abfc',
+                            400: '#e879f9',
+                            500: '#d946ef',
+                            600: '#c026d3',
+                            700: '#a21caf',
+                            800: '#86198f',
+                            900: '#701a75',
+                        },
+                        accent: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #d946ef 50%, #f43f5e 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #d946ef 0%, #f43f5e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(217, 70, 239, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold gradient-text">OutfitStyle</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-primary-600 transition-colors">Преимущества</a>
+                    <a href="#how-it-works" class="text-gray-600 hover:text-primary-600 transition-colors">Как это работает</a>
+                    <a href="#contact" class="text-gray-600 hover:text-primary-600 transition-colors">Контакты</a>
+                    <a href="/app" class="px-5 py-2.5 gradient-bg text-white font-medium rounded-full hover:opacity-90 transition-opacity shadow-lg shadow-primary-500/30">
+                        Попробовать
+                    </a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-gray-900">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
+            <div class="px-4 py-4 space-y-4">
+                <a href="#features" class="block text-gray-600 hover:text-primary-600">Преимущества</a>
+                <a href="#how-it-works" class="block text-gray-600 hover:text-primary-600">Как это работает</a>
+                <a href="#contact" class="block text-gray-600 hover:text-primary-600">Контакты</a>
+                <a href="/app" class="block px-5 py-2.5 gradient-bg text-white font-medium rounded-full text-center">
+                    Попробовать
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+                    <span class="block text-gray-900">Ваш персональный</span>
+                    <span class="block gradient-text mt-2">стилист 24/7</span>
+                </h1>
+                <p class="mt-6 text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+                    Получайте умные рекомендации одежды на основе погоды, ваших предпочтений и случая. 
+                    Создавайте идеальный образ за секунды.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/app" class="px-8 py-4 gradient-bg text-white font-semibold rounded-full hover:opacity-90 transition-opacity shadow-xl shadow-primary-500/30 text-lg">
+                        Попробовать бесплатно
+                    </a>
+                    <a href="#how-it-works" class="px-8 py-4 bg-white text-gray-700 font-semibold rounded-full border-2 border-gray-200 hover:border-primary-300 transition-colors text-lg">
+                        Узнать больше
+                    </a>
+                </div>
+                <div class="mt-12 flex items-center justify-center space-x-8 text-sm text-gray-500">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span>Бесплатно</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span>Без регистрации</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span>Мгновенный результат</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Почему OutfitStyle?</h2>
+                <p class="mt-4 text-lg text-gray-600">Технологии на страже вашего стиля</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="card-hover bg-gray-50 rounded-2xl p-8">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Погода в реальном времени</h3>
+                    <p class="text-gray-600">Анализируем текущую погоду и прогноз для точных рекомендаций</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="card-hover bg-gray-50 rounded-2xl p-8">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">ИИ рекомендации</h3>
+                    <p class="text-gray-600">Машинное обучение подбирает идеальные сочетания вещей</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="card-hover bg-gray-50 rounded-2xl p-8">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Персонализация</h3>
+                    <p class="text-gray-600">Учитываем ваши предпочтения и стиль для индивидуальных советов</p>
+                </div>
+                <!-- Feature 4 -->
+                <div class="card-hover bg-gray-50 rounded-2xl p-8">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Работает офлайн</h3>
+                    <p class="text-gray-600">Доступ к рекомендациям даже без подключения к интернету</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Как это работает</h2>
+                <p class="mt-4 text-lg text-gray-600">Три простых шага к идеальному образу</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-12">
+                <!-- Step 1 -->
+                <div class="text-center">
+                    <div class="relative inline-block mb-6">
+                        <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center">
+                            <span class="text-3xl font-bold text-white">1</span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Выберите случай</h3>
+                    <p class="text-gray-600 max-w-xs mx-auto">
+                        Укажите куда вы идёте: работа, прогулка, свидание или спорт
+                    </p>
+                </div>
+                <!-- Step 2 -->
+                <div class="text-center">
+                    <div class="relative inline-block mb-6">
+                        <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center">
+                            <span class="text-3xl font-bold text-white">2</span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Настройте предпочтения</h3>
+                    <p class="text-gray-600 max-w-xs mx-auto">
+                        Расскажите о своём стиле и любимых вещах для точных рекомендаций
+                    </p>
+                </div>
+                <!-- Step 3 -->
+                <div class="text-center">
+                    <div class="relative inline-block mb-6">
+                        <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center">
+                            <span class="text-3xl font-bold text-white">3</span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Получите рекомендацию</h3>
+                    <p class="text-gray-600 max-w-xs mx-auto">
+                        ИИ проанализирует погоду и подберёт идеальный наряд за секунды
+                    </p>
+                </div>
+            </div>
+            <div class="mt-16 text-center">
+                <a href="/app" class="inline-flex items-center px-8 py-4 gradient-bg text-white font-semibold rounded-full hover:opacity-90 transition-opacity shadow-xl shadow-primary-500/30 text-lg">
+                    Попробовать сейчас
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="gradient-bg rounded-3xl p-12 text-center">
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
+                    Готовы создать идеальный образ?
+                </h2>
+                <p class="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
+                    Присоединяйтесь к тысячам пользователей, которые уже доверяют OutfitStyle выбор одежды
+                </p>
+                <a href="/app" class="inline-block px-10 py-4 bg-white text-primary-600 font-semibold rounded-full hover:bg-gray-100 transition-colors shadow-xl text-lg">
+                    Начать бесплатно
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold text-white">OutfitStyle</span>
+                    </div>
+                    <p class="text-gray-400 max-w-sm">
+                        Умные рекомендации одежды на основе погоды и ваших предпочтений
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Навигация</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="hover:text-white transition-colors">Преимущества</a></li>
+                        <li><a href="#how-it-works" class="hover:text-white transition-colors">Как это работает</a></li>
+                        <li><a href="/app" class="hover:text-white transition-colors">Приложение</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Контакты</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>support@outfitstyle.app</li>
+                        <li>OutFitStyle.play2go.cloud</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
+                <p>&copy; 2026 OutfitStyle. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile menu script -->
+    <script>
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
