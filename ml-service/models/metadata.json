@@ -2,7 +2,7 @@
   "format": "catboost_cbm",
   "model_kind": "classifier",
   "cbm_path": "model.cbm",
-  "version": "20260218_021408",
+  "version": "20260218_022319",
   "cat_features": [
     "weather_condition",
     "season",

@@ -2,10 +2,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../core/di/di.dart';
 import '../../../../domain/entities/achievement.dart';
 import '../../../../domain/entities/achievement_category.dart';
+import '../../../wardrobe/presentation/providers/wardrobe_provider.dart';
 import '../../data/models/achievement_dto.dart';
+import '../../data/repositories/achievements_repository.dart';
 import '../../data/repositories/achievements_repository_impl.dart';
 import '../../data/services/achievements_api_service.dart';
 
@@ -123,7 +124,7 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
 
   /// Разблокировать достижение
   Future<void> unlockAchievement(String achievementId) async {
-    await _repository.unlockAchievement(achievementId);
+    await _repository.unlockAchievement(userId: 0, achievementId: int.tryParse(achievementId) ?? 0);
   }
 
   /// Сбросить прогресс достижения

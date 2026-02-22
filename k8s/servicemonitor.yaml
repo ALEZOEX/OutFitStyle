@@ -11,7 +11,7 @@ spec:
     matchLabels:
       app: api
   endpoints:
-  - port: http  # Имя порта в Service
+  - port: http
     path: /metrics
     interval: 30s
 ---
@@ -28,6 +28,6 @@ spec:
     matchLabels:
       app: ml-service
   endpoints:
-  - port: http  # Имя порта в Service
-    path: /metrics  # Предполагается, что ML-сервис экспортирует метрики
+  - port: http
+    path: /metrics
     interval: 30s

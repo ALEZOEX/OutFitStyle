@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_config.dart';
@@ -67,6 +68,21 @@ class AchievementsApiService {
     await _apiClient.delete(
       '/api/v1/achievements/$achievementId/progress',
     );
+  }
+
+  /// Разблокировать достижение по ID
+  Future<Either<String, AchievementProgressDto>> unlockAchievementById(int achievementId) async {
+    try {
+      final response = await _apiClient.post(
+        '/api/v1/achievements/$achievementId/unlock',
+      );
+      final data = response.data as Map<String, dynamic>;
+      final progress = AchievementProgressDto.fromJson(data);
+
+      return right(progress);
+    } on DioException catch (e) {
+      return left(e.response?.data?['message'] as String? ?? 'Failed to unlock achievement');
+    }
   }
 }
 
