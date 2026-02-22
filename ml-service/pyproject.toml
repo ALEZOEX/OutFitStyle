@@ -35,11 +35,12 @@ dev = [
 include = ["api*", "app*", "contracts*", "model*", "services*", "train*", "scripts*"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 ignore_missing_imports = true
 explicit_package_bases = true
 warn_return_any = false
 warn_unused_configs = true
+exclude = [".pytest_cache", ".ruff_cache", "__pycache__", "htmlcov", "tests"]
 
 [tool.ruff]
 target-version = "py39"

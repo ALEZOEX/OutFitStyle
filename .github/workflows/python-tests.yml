@@ -42,7 +42,7 @@ jobs:
         run: ruff check . --output-format=github
 
       - name: Type check with MyPy
-        run: mypy . --ignore-missing-imports --no-error-summary || true
+        run: mypy . --config-file=pyproject.toml || true
 
       - name: Security check with Safety
         run: safety check --ignore 70612,71668 || true
