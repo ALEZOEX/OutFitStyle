@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { 
-  Moon, Sun, Layers, ChevronRight, CloudSun, CloudRain, 
+import {
+  Moon, Sun, ChevronRight, CloudSun, CloudRain,
   Sparkles, Smartphone, WifiOff, Clock, Umbrella
 } from 'lucide-react';
 import { HeroVisual } from './components/HeroVisual';
@@ -8,6 +8,7 @@ import { GlowCard } from './components/GlowCard';
 import { Marquee } from './components/Marquee';
 import { RevealText } from './components/RevealText';
 import { Magnetic } from './components/Magnetic';
+import logo from './assets/logo.png';
 
 export function App() {
   const [isDark, setIsDark] = useState(false);
@@ -62,8 +63,8 @@ export function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow">
-                <Layers className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow">
+                <img src={logo} alt="OutfitStyle" className="w-full h-full object-cover" />
               </div>
               <span className="text-xl font-bold tracking-tight">OutfitStyle</span>
             </div>
