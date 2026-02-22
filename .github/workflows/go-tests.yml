@@ -1,5 +1,6 @@
 name: Go Tests
 
+# Отключено - дублируется с ci-cd.yml
 on:
   push:
     branches: [ main, develop ]
@@ -17,6 +18,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: false
     
     services:
       postgres:
