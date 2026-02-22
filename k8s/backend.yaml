@@ -27,6 +27,7 @@ spec:
         - name: backend
           image: ghcr.io/alezoex/outfitstyle-server:latest
           imagePullPolicy: Always
+          command: ["/app/server"]
           ports:
             - containerPort: 8080
               name: http
