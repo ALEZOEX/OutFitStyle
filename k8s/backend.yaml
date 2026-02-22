@@ -97,14 +97,14 @@ spec:
                 - ALL
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /health
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /readyz
+              path: /health
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 5
