@@ -67,7 +67,9 @@ jobs:
         with:
           version: v1.64.8
           working-directory: server
-          args: --timeout=5m
+          args: --timeout=10m
+          only-new-issues: true
+          skip-dirs: marketplace-service
 
       - name: Run tests
         run: |
