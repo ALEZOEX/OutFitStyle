@@ -21,8 +21,8 @@ spec:
         fsGroup: 2000
       containers:
         - name: ml-service
-          image: outfitstyle-ml-service:latest
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/alezoex/outfitstyle-ml:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
               name: http
