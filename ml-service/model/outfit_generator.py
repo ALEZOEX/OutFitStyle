@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 import numpy as np
 
 
@@ -25,7 +25,7 @@ class Outfit:
     breakdown: Dict[str, float]
 
 
-def _style_group(s: str) -> str:
+def _style_group(s: Optional[str]) -> str:
     s = (s or "casual").lower()
     return STYLE_GROUPS.get(s, s)
 
@@ -161,7 +161,7 @@ def generate_outfits(
     scored.sort(key=lambda o: o.outfit_score, reverse=True)
 
     result: List[Outfit] = []
-    used_ids = set()
+    used_ids: Set[str] = set()
     for o in scored:
         ids = {v.get("id") for v in o.items.values()}
         if len(ids & used_ids) >= 2:  # не даём почти одинаковые outfits

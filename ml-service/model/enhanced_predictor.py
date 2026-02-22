@@ -77,6 +77,9 @@ class EnhancedPredictor:
             data = Pool(feature_df, cat_features=self.cat_features)
 
         # Memory optimization: explicitly manage memory during prediction
+        if self.model is None:
+            raise ValueError("Model not loaded")
+            
         try:
             if self.model_kind == "classifier":
                 proba = self.model.predict_proba(data)[:, 1]

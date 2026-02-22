@@ -105,7 +105,7 @@ def log_action(
     entity_id: str,
     meta: Optional[Dict[str, Any]] = None,
 ) -> None:
-    payload = {
+    payload: Dict[str, Any] = {
         "event": "action",
         "request_id": request_id,
         "user_id": user_id,

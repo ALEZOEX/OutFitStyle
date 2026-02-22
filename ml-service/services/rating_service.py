@@ -26,7 +26,7 @@ class RatingEvent:
     outfit_items: List[int]
     feedback: Optional[str] = None
     thermal_feedback: Optional[str] = None
-    timestamp: datetime = None
+    timestamp: Optional[datetime] = None
 
     def __post_init__(self):
         if self.timestamp is None:
