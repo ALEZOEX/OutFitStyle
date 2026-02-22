@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/auth_repository.dart';
 import '../../../presentation/routing/router.dart';
+import '../../achievements/data/repositories/achievements_repository.dart';
 import '../../achievements/presentation/providers/achievements_providers.dart';
 import 'providers/profile_provider.dart';
 import '../../admin/presentation/providers/admin_auth_provider.dart';
@@ -23,11 +24,11 @@ class ProfileScreen extends ConsumerWidget {
         slivers: [
           // Заголовок профиля
           SliverToBoxAdapter(
-            child: _buildProfileHeader(context, profileState),
+            child: _buildProfileHeader(context, profileState, ref),
           ),
           // Статистика
           SliverToBoxAdapter(
-            child: _buildStats(context, stats, profileState),
+            child: _buildStats(context, stats, profileState, ref),
           ),
           const SliverToBoxAdapter(
             child: SizedBox(height: 24),
@@ -56,7 +57,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Заголовок профиля
-  Widget _buildProfileHeader(BuildContext context, AsyncValue<ProfileData> profileState) {
+  Widget _buildProfileHeader(BuildContext context, AsyncValue<ProfileData> profileState, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Container(
@@ -216,7 +217,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Статистика пользователя
-  Widget _buildStats(BuildContext context, ProfileStats stats, AsyncValue<ProfileData> profileState) {
+  Widget _buildStats(BuildContext context, ProfileStats stats, AsyncValue<ProfileData> profileState, WidgetRef ref) {
     final theme = Theme.of(context);
     final achievementsStats = ref.watch(achievementsStatsProvider);
 

@@ -83,7 +83,8 @@ spec:
   selector:
     app: api
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 8080
   type: ClusterIP
@@ -134,13 +135,13 @@ spec:
             - ALL
         livenessProbe:
           httpGet:
-            path: /
+            path: /health
             port: 8000
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /
+            path: /health
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 5
@@ -154,7 +155,8 @@ spec:
   selector:
     app: ml-service
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 8000
   type: ClusterIP
