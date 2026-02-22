@@ -14,7 +14,7 @@ COPY requirements.txt .
 # Add retry mechanism for pip install
 RUN pip install --retries 5 --timeout 30 --no-cache-dir -r requirements.txt
 
-# Copy the application code
+# Copy the application code (excluding tests and dev files via .dockerignore)
 COPY . .
 
 # Stage 2: Create the production image
@@ -29,12 +29,15 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Копируем код приложения
-COPY --from=builder /app /app
-# ⬇️ Копируем модель если существует
-COPY models/ /app/models/
-# ⬅️ ВАЖНО: копируем установленные пакеты Python
+# Copy installed packages from builder
 COPY --from=builder /usr/local /usr/local
+
+# Copy application code
+COPY --from=builder /app/api ./api
+COPY --from=builder /app/contracts ./contracts
+COPY --from=builder /app/model ./model
+COPY --from=builder /app/services ./services
+COPY --from=builder /app/models ./models
 
 # Create non-root user for security
 RUN groupadd -g 1000 mluser && \

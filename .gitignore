@@ -90,6 +90,12 @@ k8s/secrets.yaml
 # ML Models and dependencies
 server/ml-service/models/*.pkl
 server/ml-service/requirements.txt
+ml-service/__pycache__/
+ml-service/.pytest_cache/
+ml-service/.ruff_cache/
+ml-service/htmlcov/
+ml-service/.coverage*
+ml-service/coverage.xml
 
 # OS generated files
 .DS_Store
