@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: migrate
-        image: outfitstyle-backend
+        image: ghcr.io/alezoex/outfitstyle-server:latest
         command: ["/app/migrate"]
         env:
         - name: DB_HOST
