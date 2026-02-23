@@ -14,7 +14,10 @@
             primary: { 500: '#d946ef', 600: '#c026d3', 400: '#e879f9' },
             accent: { 400: '#f472b6', 500: '#ec4899' },
           },
-          animation: { blob: 'blob 10s infinite', 'fade-in': 'fadeIn 0.8s ease-out' },
+          animation: {
+            blob: 'blob 10s infinite',
+            'fade-in': 'fadeIn 0.8s ease-out'
+          },
           keyframes: {
             blob: {
               '0%': { transform: 'translate(0px, 0px) scale(1)' },
@@ -32,6 +35,14 @@
     }
   </script>
   <style>
+    /* ===== ДОБАВЛЕНЫ animation-delay классы ===== */
+    .animation-delay-2000 {
+      animation-delay: 2s;
+    }
+    .animation-delay-4000 {
+      animation-delay: 4s;
+    }
+
     .glass-header {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(12px);
@@ -53,17 +64,17 @@
   </style>
 </head>
 <body class="min-h-screen bg-gray-50 dark:bg-[#090a0f] text-gray-900 dark:text-white transition-colors duration-500">
-  
+
   <!-- Background Noise -->
   <div class="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
        style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')">
   </div>
 
-  <!-- Floating Orbs -->
+  <!-- Floating Orbs — ИСПРАВЛЕНЫ самозакрывающиеся div -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-500/20 blur-[120px] animate-blob" />
-    <div class="absolute top-[20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-500/20 blur-[120px] animate-blob animation-delay-2000" />
-    <div class="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-blue-500/20 blur-[120px] animate-blob animation-delay-4000" />
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-500/20 blur-[120px] animate-blob"></div>
+    <div class="absolute top-[20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-500/20 blur-[120px] animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-blue-500/20 blur-[120px] animate-blob animation-delay-4000"></div>
   </div>
 
   <!-- Navigation -->
@@ -83,7 +94,7 @@
   <!-- Main Content -->
   <main class="relative z-10 pt-32 pb-20">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      
+
       <div class="animate-fade-in">
         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 backdrop-blur-md mb-8">
           <span class="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-200">Юридическая информация</span>
@@ -92,7 +103,7 @@
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-white">
           Условия <span class="gradient-text">использования</span>
         </h1>
-        
+
         <p class="text-gray-600 dark:text-gray-300 mb-12 text-lg">
           Последнее обновление: 23 февраля 2026 г.
         </p>
@@ -100,7 +111,7 @@
         <div class="space-y-8">
           <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
-              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">1</span>
+              <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-500 to-accent-500">1.</span>
               Принятие условий
             </h2>
             <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
@@ -110,7 +121,7 @@
 
           <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
-              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">2</span>
+              <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-500 to-accent-500">2.</span>
               Описание сервиса
             </h2>
             <p class="text-gray-800 dark:text-gray-100 leading-relaxed mb-4">
@@ -138,7 +149,7 @@
 
           <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
-              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">3</span>
+              <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-500 to-accent-500">3.</span>
               Правила использования
             </h2>
             <p class="text-gray-800 dark:text-gray-100 leading-relaxed mb-4">
@@ -166,7 +177,7 @@
 
           <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
-              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">4</span>
+              <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-500 to-accent-500">4.</span>
               Интеллектуальная собственность
             </h2>
             <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
@@ -176,7 +187,7 @@
 
           <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
-              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">5</span>
+              <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-500 to-accent-500">5.</span>
               Отказ от ответственности
             </h2>
             <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
@@ -186,7 +197,7 @@
 
           <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
-              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">6</span>
+              <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-500 to-accent-500">6.</span>
               Изменения условий
             </h2>
             <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
@@ -196,7 +207,7 @@
 
           <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
-              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">7</span>
+              <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-500 to-accent-500">7.</span>
               Прекращение доступа
             </h2>
             <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
@@ -206,11 +217,11 @@
 
           <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
             <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
-              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">8</span>
+              <span class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-500 to-accent-500">8.</span>
               Контакты
             </h2>
             <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
-              По вопросам условий использования: 
+              По вопросам условий использования:
               <a href="mailto:outfitstyle.official.app@gmail.com" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">
                 outfitstyle.official.app@gmail.com
               </a>
