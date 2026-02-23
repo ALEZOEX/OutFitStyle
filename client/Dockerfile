@@ -6,7 +6,11 @@ WORKDIR /app
 COPY pubspec.* ./
 RUN flutter pub get
 
+# Generate freezed and json_serializable files
 COPY . .
+RUN flutter pub run build_runner build --delete-conflicting-outputs
+
+# Build for web
 RUN flutter build web --release --no-tree-shake-icons
 
 # Runtime stage
