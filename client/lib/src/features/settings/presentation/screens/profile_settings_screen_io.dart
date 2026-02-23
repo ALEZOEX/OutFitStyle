@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
@@ -314,6 +313,15 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     );
   }
 
+  /// Получить ImageProvider для аватара
+  /// Использует NetworkImage для всех URL (сервер возвращает только URL)
+  ImageProvider? _getAvatarImageProvider(String avatarUrl) {
+    if (avatarUrl.isEmpty) return null;
+    
+    // Все аватары хранятся на сервере, используем NetworkImage
+    return NetworkImage(avatarUrl);
+  }
+
   Future<void> _saveProfile() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
@@ -590,12 +598,10 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                         CircleAvatar(
                           radius: 60,
                           backgroundColor: theme.colorScheme.primaryContainer,
-                          backgroundImage: state.avatarUrl != null
-                              ? state.avatarUrl!.startsWith('http')
-                                  ? CachedNetworkImageProvider(state.avatarUrl!)
-                                  : FileImage(File(state.avatarUrl!)) as ImageProvider
-                                  : null,
-                          child: state.avatarUrl == null
+                          backgroundImage: state.avatarUrl != null && state.avatarUrl!.isNotEmpty
+                              ? _getAvatarImageProvider(state.avatarUrl!)
+                              : null,
+                          child: state.avatarUrl == null || state.avatarUrl!.isEmpty
                               ? Icon(
                                   Icons.person,
                                   size: 60,
