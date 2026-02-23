@@ -1,74 +1,226 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Политика конфиденциальности - OutfitStyle</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem;
-      background: #fafafa;
-      color: #1a1a1a;
-      line-height: 1.6;
-    }
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: #090a0f;
-        color: #f0f0f0;
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: { 500: '#d946ef', 600: '#c026d3', 400: '#e879f9' },
+            accent: { 400: '#f472b6', 500: '#ec4899' },
+          },
+          animation: { blob: 'blob 10s infinite', 'fade-in': 'fadeIn 0.8s ease-out' },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
       }
     }
-    h1 { font-size: 2.5rem; margin-bottom: 1rem; }
-    h2 { font-size: 1.5rem; margin-top: 2rem; }
-    a { color: #d946ef; }
-    ul { padding-left: 1.5rem; }
-    li { margin-bottom: 0.5rem; }
+  </script>
+  <style>
+    .glass-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass-header {
+      background: rgba(9, 10, 15, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #d946ef 0%, #f472b6 50%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #d946ef 0%, #f472b6 100%);
+    }
   </style>
 </head>
-<body>
-  <a href="/" style="display:inline-block;margin-bottom:2rem">← На главную</a>
+<body class="min-h-screen bg-gray-50 dark:bg-[#090a0f] text-gray-900 dark:text-white transition-colors duration-500">
   
-  <h1>Политика конфиденциальности</h1>
-  <p style="color:#666">Последнее обновление: 23 февраля 2026 г.</p>
+  <!-- Background Noise -->
+  <div class="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
+       style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')">
+  </div>
 
-  <h2>1. Общие положения</h2>
-  <p>Мы уважаем вашу конфиденциальность и стремимся защитить ваши персональные данные. Эта политика описывает, какие данные мы собираем и как их используем.</p>
+  <!-- Floating Orbs -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-500/20 blur-[120px] animate-blob" />
+    <div class="absolute top-[20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-500/20 blur-[120px] animate-blob animation-delay-2000" />
+    <div class="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-blue-500/20 blur-[120px] animate-blob animation-delay-4000" />
+  </div>
 
-  <h2>2. Какие данные мы собираем</h2>
-  <ul>
-    <li>Фотографии одежды и аксессуаров, которые вы загружаете</li>
-    <li>Предпочтения по стилю и размерам</li>
-    <li>Данные о местоположении (для погодных рекомендаций)</li>
-    <li>Техническая информация об устройстве</li>
-  </ul>
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass-header py-5">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors font-medium">
+          ← На главную
+        </a>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-gray-900 dark:text-white">OutfitStyle</span>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-  <h2>3. Как мы используем данные</h2>
-  <ul>
-    <li>Для создания персонализированных рекомендаций одежды</li>
-    <li>Для улучшения работы нейросети</li>
-    <li>Для предоставления погодных рекомендаций</li>
-  </ul>
+  <!-- Main Content -->
+  <main class="relative z-10 pt-32 pb-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="animate-fade-in">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 backdrop-blur-md mb-8">
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-200">Юридическая информация</span>
+        </div>
 
-  <h2>4. Хранение данных</h2>
-  <p>Ваши данные хранятся локально на устройстве и могут быть синхронизированы с нашими серверами для обеспечения доступа с нескольких устройств.</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-white">
+          Политика <span class="gradient-text">конфиденциальности</span>
+        </h1>
+        
+        <p class="text-gray-600 dark:text-gray-300 mb-12 text-lg">
+          Последнее обновление: 23 февраля 2026 г.
+        </p>
 
-  <h2>5. Передача данных третьим лицам</h2>
-  <p>Мы не передаём ваши персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством.</p>
+        <div class="space-y-8">
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">1</span>
+              Общие положения
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              Мы уважаем вашу конфиденциальность и стремимся защитить ваши персональные данные. Эта политика описывает, какие данные мы собираем и как их используем.
+            </p>
+          </section>
 
-  <h2>6. Ваши права</h2>
-  <ul>
-    <li>Право на доступ к вашим данным</li>
-    <li>Право на исправление данных</li>
-    <li>Право на удаление данных</li>
-    <li>Право на экспорт данных</li>
-  </ul>
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">2</span>
+              Какие данные мы собираем
+            </h2>
+            <ul class="space-y-3 text-gray-800 dark:text-gray-100">
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Фотографии одежды и аксессуаров, которые вы загружаете
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Предпочтения по стилю и размерам
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Данные о местоположении (для погодных рекомендаций)
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Техническая информация об устройстве
+              </li>
+            </ul>
+          </section>
 
-  <h2>7. Контакты</h2>
-  <p>По вопросам конфиденциальности пишите: <a href="mailto:outfitstyle.official.app@gmail.com">outfitstyle.official.app@gmail.com</a></p>
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">3</span>
+              Как мы используем данные
+            </h2>
+            <ul class="space-y-3 text-gray-800 dark:text-gray-100">
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Для создания персонализированных рекомендаций одежды
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Для улучшения работы нейросети
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Для предоставления погодных рекомендаций
+              </li>
+            </ul>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">4</span>
+              Хранение данных
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              Ваши данные хранятся локально на устройстве и могут быть синхронизированы с нашими серверами для обеспечения доступа с нескольких устройств.
+            </p>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">5</span>
+              Передача данных третьим лицам
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              Мы не передаём ваши персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством.
+            </p>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">6</span>
+              Ваши права
+            </h2>
+            <ul class="space-y-3 text-gray-800 dark:text-gray-100">
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Право на доступ к вашим данным
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Право на исправление данных
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Право на удаление данных
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Право на экспорт данных
+              </li>
+            </ul>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">7</span>
+              Контакты
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              По вопросам конфиденциальности пишите: 
+              <a href="mailto:outfitstyle.official.app@gmail.com" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">
+                outfitstyle.official.app@gmail.com
+              </a>
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-[#090a0f]/95 backdrop-blur-lg py-8">
+    <div class="max-w-4xl mx-auto px-4 text-center text-sm text-gray-600 dark:text-gray-400">
+      <p>&copy; 2026 OutfitStyle. Все права защищены.</p>
+    </div>
+  </footer>
 </body>
 </html>

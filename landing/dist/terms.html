@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,90 +11,221 @@
       theme: {
         extend: {
           colors: {
-            primary: {
-              50: '#fdf4ff',
-              100: '#fae8ff',
-              200: '#f5d0fe',
-              300: '#f0abfc',
-              400: '#e879f9',
-              500: '#d946ef',
-              600: '#c026d3',
-              700: '#a21caf',
-              800: '#86198f',
-              900: '#701a75',
+            primary: { 500: '#d946ef', 600: '#c026d3', 400: '#e879f9' },
+            accent: { 400: '#f472b6', 500: '#ec4899' },
+          },
+          animation: { blob: 'blob 10s infinite', 'fade-in': 'fadeIn 0.8s ease-out' },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
             },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
           }
         }
       }
     }
   </script>
+  <style>
+    .glass-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass-header {
+      background: rgba(9, 10, 15, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #d946ef 0%, #f472b6 50%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #d946ef 0%, #f472b6 100%);
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-[#fafafa] dark:bg-[#090a0f] text-gray-900 dark:text-gray-100">
-  <div class="max-w-3xl mx-auto px-4 py-16">
-    <a href="/" class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline mb-8">
-      ← На главную
-    </a>
-    
-    <h1 class="text-4xl font-bold mb-8">Условия использования</h1>
-    
-    <div class="prose dark:prose-invert max-w-none">
-      <p class="text-gray-600 dark:text-gray-400 mb-6">
-        Последнее обновление: 23 февраля 2026 г.
-      </p>
-
-      <h2 class="text-2xl font-bold mt-8 mb-4">1. Принятие условий</h2>
-      <p class="mb-4">
-        Используя приложение OutfitStyle, вы соглашаетесь с настоящими Условиями использования. 
-        Если вы не согласны, пожалуйста, не используйте приложение.
-      </p>
-
-      <h2 class="text-2xl font-bold mt-8 mb-4">2. Описание сервиса</h2>
-      <p class="mb-4">
-        OutfitStyle предоставляет рекомендации по подбору одежды на основе:
-      </p>
-      <ul class="list-disc pl-6 mb-4 space-y-2">
-        <li>Вашего гардероба</li>
-        <li>Погодных условий</li>
-        <li>Предпочтений по стилю</li>
-        <li>Типа мероприятия</li>
-      </ul>
-
-      <h2 class="text-2xl font-bold mt-8 mb-4">3. Правила использования</h2>
-      <p class="mb-4">Вы соглашаетесь не:</p>
-      <ul class="list-disc pl-6 mb-4 space-y-2">
-        <li>Использовать сервис в незаконных целях</li>
-        <li>Загружать контент, нарушающий авторские права</li>
-        <li>Пытаться взломать или обойти защиту сервиса</li>
-        <li>Использовать сервис для спама или рекламы</li>
-      </ul>
-
-      <h2 class="text-2xl font-bold mt-8 mb-4">4. Интеллектуальная собственность</h2>
-      <p class="mb-4">
-        Все права на приложение, включая код, дизайн и контент, принадлежат OutfitStyle.
-      </p>
-
-      <h2 class="text-2xl font-bold mt-8 mb-4">5. Отказ от ответственности</h2>
-      <p class="mb-4">
-        Сервис предоставляется «как есть». Мы не гарантируем, что рекомендации будут идеальными 
-        или что сервис будет работать без перебоев.
-      </p>
-
-      <h2 class="text-2xl font-bold mt-8 mb-4">6. Изменения условий</h2>
-      <p class="mb-4">
-        Мы можем изменять эти условия в любое время. Продолжение использования сервиса означает 
-        принятие новых условий.
-      </p>
-
-      <h2 class="text-2xl font-bold mt-8 mb-4">7. Прекращение доступа</h2>
-      <p class="mb-4">
-        Мы оставляем за собой право прекратить доступ к сервису в любое время по любой причине.
-      </p>
-
-      <h2 class="text-2xl font-bold mt-8 mb-4">8. Контакты</h2>
-      <p class="mb-4">
-        По вопросам условий использования: <a href="mailto:legal@outfitstyle.ru" class="text-primary-600 dark:text-primary-400 hover:underline">legal@outfitstyle.ru</a>
-      </p>
-    </div>
+<body class="min-h-screen bg-gray-50 dark:bg-[#090a0f] text-gray-900 dark:text-white transition-colors duration-500">
+  
+  <!-- Background Noise -->
+  <div class="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
+       style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')">
   </div>
+
+  <!-- Floating Orbs -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-500/20 blur-[120px] animate-blob" />
+    <div class="absolute top-[20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-500/20 blur-[120px] animate-blob animation-delay-2000" />
+    <div class="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-blue-500/20 blur-[120px] animate-blob animation-delay-4000" />
+  </div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass-header py-5">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors font-medium">
+          ← На главную
+        </a>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-gray-900 dark:text-white">OutfitStyle</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="relative z-10 pt-32 pb-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="animate-fade-in">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 backdrop-blur-md mb-8">
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-200">Юридическая информация</span>
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-white">
+          Условия <span class="gradient-text">использования</span>
+        </h1>
+        
+        <p class="text-gray-600 dark:text-gray-300 mb-12 text-lg">
+          Последнее обновление: 23 февраля 2026 г.
+        </p>
+
+        <div class="space-y-8">
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">1</span>
+              Принятие условий
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              Используя приложение OutfitStyle, вы соглашаетесь с настоящими Условиями использования. Если вы не согласны, пожалуйста, не используйте приложение.
+            </p>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">2</span>
+              Описание сервиса
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed mb-4">
+              OutfitStyle предоставляет рекомендации по подбору одежды на основе:
+            </p>
+            <ul class="space-y-3 text-gray-800 dark:text-gray-100">
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Вашего гардероба
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Погодных условий
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Предпочтений по стилю
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Типа мероприятия
+              </li>
+            </ul>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">3</span>
+              Правила использования
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed mb-4">
+              Вы соглашаетесь не:
+            </p>
+            <ul class="space-y-3 text-gray-800 dark:text-gray-100">
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Использовать сервис в незаконных целях
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Загружать контент, нарушающий авторские права
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Пытаться взломать или обойти защиту сервиса
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-primary-500 mt-1">•</span>
+                Использовать сервис для спама или рекламы
+              </li>
+            </ul>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">4</span>
+              Интеллектуальная собственность
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              Все права на приложение, включая код, дизайн и контент, принадлежат OutfitStyle.
+            </p>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">5</span>
+              Отказ от ответственности
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              Сервис предоставляется «как есть». Мы не гарантируем, что рекомендации будут идеальными или что сервис будет работать без перебоев.
+            </p>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">6</span>
+              Изменения условий
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              Мы можем изменять эти условия в любое время. Продолжение использования сервиса означает принятие новых условий.
+            </p>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">7</span>
+              Прекращение доступа
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              Мы оставляем за собой право прекратить доступ к сервису в любое время по любой причине.
+            </p>
+          </section>
+
+          <section class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-gray-600 p-6 sm:p-8 shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-3 text-gray-900 dark:text-white">
+              <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white text-sm">8</span>
+              Контакты
+            </h2>
+            <p class="text-gray-800 dark:text-gray-100 leading-relaxed">
+              По вопросам условий использования: 
+              <a href="mailto:outfitstyle.official.app@gmail.com" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">
+                outfitstyle.official.app@gmail.com
+              </a>
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-[#090a0f]/95 backdrop-blur-lg py-8">
+    <div class="max-w-4xl mx-auto px-4 text-center text-sm text-gray-600 dark:text-gray-400">
+      <p>&copy; 2026 OutfitStyle. Все права защищены.</p>
+    </div>
+  </footer>
 </body>
 </html>
