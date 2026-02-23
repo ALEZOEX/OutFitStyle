@@ -3,13 +3,14 @@
 # Скрипт развёртывания OutfitStyle в Kubernetes (k3s)
 #
 # Использование:
-#   ./deploy.sh [apply|rollback|status|cleanup]
+#   ./deploy.sh [apply|rollback|status|cleanup|rebuild-indexes]
 #
 # Команды:
-#   apply   - Применить все манифесты и развернуть приложение
-#   rollback - Откатить развёртывание (удалить все ресурсы)
-#   status  - Показать статус развёртывания
-#   cleanup - Полная очистка (включая PVC)
+#   apply           - Применить все манифесты и развернуть приложение
+#   rollback        - Откатить развёртывание (удалить все ресурсы)
+#   status          - Показать статус развёртывания
+#   cleanup         - Полная очистка (включая PVC)
+#   rebuild-indexes - Ручной запуск пересоздания индексов
 #
 
 set -e
@@ -153,6 +154,13 @@ apply_manifests() {
         log_success "CronJob rebuild-indexes применён (запуск 1-го числа каждого месяца в 03:00)"
     fi
 
+    # Применение alert правил для мониторинга
+    log_info "Применение Prometheus alert правил..."
+    if [ -f "${SCRIPT_DIR}/rebuild-indexes-alerts.yaml" ]; then
+        kubectl apply -f "${SCRIPT_DIR}/rebuild-indexes-alerts.yaml"
+        log_success "Prometheus alert правила применены"
+    fi
+
     log_success "Все манифесты применены!"
 
     # Ожидание готовности подов
@@ -202,15 +210,35 @@ rollback() {
 # Полная очистка (включая PVC)
 cleanup() {
     log_warn "Начало полной очистки (включая PersistentVolumeClaims)..."
-    
+
     # Удаление PVC
     log_info "Удаление PersistentVolumeClaims..."
     kubectl delete pvc --all -n ${NAMESPACE} --ignore-not-found=true || true
-    
+
     # Откат развёртывания
     rollback
-    
+
     log_success "Полная очистка завершена"
+}
+
+# Ручной запуск пересоздания индексов
+rebuild_indexes_manual() {
+    log_warn "Ручной запуск пересоздания индексов..."
+
+    # Создаём job вручную
+    kubectl create job --from=cronjob/rebuild-indexes rebuild-indexes-manual -n ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+
+    log_info "Ожидание завершения задачи..."
+    kubectl wait --for=condition=complete job/rebuild-indexes-manual -n ${NAMESPACE} --timeout=7200s || log_error "Задача не завершена в течение 2 часов"
+
+    # Вывод логов
+    log_info "Логи задачи:"
+    kubectl logs job/rebuild-indexes-manual -n ${NAMESPACE}
+
+    # Удаление задачи
+    kubectl delete job/rebuild-indexes-manual -n ${NAMESPACE} --ignore-not-found=true || true
+
+    log_success "Пересоздание индексов завершено"
 }
 
 # Показать статус
@@ -222,6 +250,45 @@ show_status() {
     # Поды
     log_info "Поды:"
     kubectl get pods -n ${NAMESPACE} -o wide
+    echo ""
+
+    # Jobs
+    log_info "Jobs (миграции и пересоздание индексов):"
+    kubectl get jobs -n ${NAMESPACE} -o wide
+    echo ""
+
+    # CronJobs
+    log_info "CronJobs:"
+    kubectl get cronjobs -n ${NAMESPACE} -o wide
+    echo ""
+
+    # Последние события
+    log_info "Последние события:"
+    kubectl get events -n ${NAMESPACE} --sort-by='.lastTimestamp' | tail -20
+    echo ""
+
+    # Статус миграций
+    log_info "Статус миграций:"
+    if kubectl get job/migrate -n ${NAMESPACE} &>/dev/null; then
+        kubectl get job/migrate -n ${NAMESPACE} -o wide
+        echo ""
+        log_info "Последние логи миграций:"
+        kubectl logs job/migrate -n ${NAMESPACE} --tail=20 || echo "Логи недоступны"
+    else
+        echo "Job migrate не найден"
+    fi
+    echo ""
+
+    # Статус пересоздания индексов
+    log_info "Статус пересоздания индексов:"
+    if kubectl get cronjob/rebuild-indexes -n ${NAMESPACE} &>/dev/null; then
+        kubectl get cronjob/rebuild-indexes -n ${NAMESPACE} -o wide
+        echo ""
+        log_info "Последние задачи пересоздания индексов:"
+        kubectl get jobs -n ${NAMESPACE} -l app=rebuild-indexes --sort-by='.metadata.creationTimestamp' -o wide | tail -5
+    else
+        echo "CronJob rebuild-indexes не найден"
+    fi
     echo ""
 
     # Сервисы
@@ -254,7 +321,7 @@ show_status() {
 main() {
     check_kubectl
     check_cluster
-    
+
     case "${1:-apply}" in
         apply)
             apply_manifests
@@ -268,14 +335,18 @@ main() {
         cleanup)
             cleanup
             ;;
+        rebuild-indexes)
+            rebuild_indexes_manual
+            ;;
         *)
-            echo "Использование: $0 {apply|rollback|status|cleanup}"
+            echo "Использование: $0 {apply|rollback|status|cleanup|rebuild-indexes}"
             echo ""
             echo "Команды:"
-            echo "  apply    - Применить все манифесты и развернуть приложение"
-            echo "  rollback - Откатить развёртывание (удалить все ресурсы)"
-            echo "  status   - Показать статус развёртывания"
-            echo "  cleanup  - Полная очистка (включая PVC)"
+            echo "  apply           - Применить все манифесты и развернуть приложение"
+            echo "  rollback        - Откатить развёртывание (удалить все ресурсы)"
+            echo "  status          - Показать статус развёртывания"
+            echo "  cleanup         - Полная очистка (включая PVC)"
+            echo "  rebuild-indexes - Ручной запуск пересоздания индексов"
             exit 1
             ;;
     esac
