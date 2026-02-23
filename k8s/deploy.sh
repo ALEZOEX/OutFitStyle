@@ -94,6 +94,19 @@ apply_manifests() {
     log_info "Применение secrets..."
     kubectl apply -f "${SCRIPT_DIR}/secrets.yaml"
 
+    # Очистка старых ненужных ресурсов
+    log_info "Очистка старых ресурсов..."
+    kubectl delete deployment grafana -n ${NAMESPACE} --ignore-not-found=true || true
+    kubectl delete deployment prometheus -n ${NAMESPACE} --ignore-not-found=true || true
+    kubectl delete deployment kafka -n ${NAMESPACE} --ignore-not-found=true || true
+    kubectl delete deployment zookeeper -n ${NAMESPACE} --ignore-not-found=true || true
+    kubectl delete svc grafana -n ${NAMESPACE} --ignore-not-found=true || true
+    kubectl delete svc prometheus -n ${NAMESPACE} --ignore-not-found=true || true
+    kubectl delete svc kafka -n ${NAMESPACE} --ignore-not-found=true || true
+    kubectl delete svc zookeeper -n ${NAMESPACE} --ignore-not-found=true || true
+    kubectl delete pvc grafana-pvc -n ${NAMESPACE} --ignore-not-found=true || true
+    log_success "Старые ресурсы удалены"
+
     # Применение миграций БД
     log_info "Применение миграций базы данных..."
     if [ -f "${SCRIPT_DIR}/migrate-job.yaml" ]; then
