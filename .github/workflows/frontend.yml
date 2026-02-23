@@ -105,5 +105,5 @@ jobs:
           owner: alezoex
           name: outfitstyle/frontend
           token: ${{ secrets.GITHUB_TOKEN }}
-          untagged-ages: 1
-          keep-latest: 3
+          untagged-keep-latest: 3
+          untagged-older-than: 1
