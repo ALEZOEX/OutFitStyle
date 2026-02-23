@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Moon, Sun, ChevronRight, CloudSun, CloudRain,
-  Sparkles, Smartphone, WifiOff, Clock, Umbrella, Layers
+  Sparkles, Smartphone, WifiOff, Clock, Umbrella, Layers, ChevronDown
 } from 'lucide-react';
 import { HeroVisual } from './components/HeroVisual';
 import { GlowCard } from './components/GlowCard';
@@ -270,6 +270,68 @@ export function App() {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="max-w-3xl mx-auto">
+            <RevealText text="Частые вопросы" className="text-4xl md:text-5xl font-extrabold text-center mb-4 text-gray-900 dark:text-white tracking-tight" />
+            <p className="text-center text-xl text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto">
+              Ответы на популярные вопросы о приложении
+            </p>
+
+            <div className="space-y-4">
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+                  Как работает приложение?
+                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                  Нейросеть анализирует ваш гардероб, текущую погоду и событие, чтобы предложить идеальный образ. Просто добавьте вещи в приложение и получайте рекомендации каждое утро.
+                </div>
+              </details>
+
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+                  Это бесплатно?
+                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                  Да, базовая версия приложения полностью бесплатна. Премиум-функции доступны по подписке и включают расширенные возможности персонализации.
+                </div>
+              </details>
+
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+                  Работает ли приложение без интернета?
+                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                  Да, приложение поддерживает оффлайн-режим. Вы можете просматривать свой гардероб и получать рекомендации без подключения к сети.
+                </div>
+              </details>
+
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+                  Как добавить вещи в гардероб?
+                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                  Просто сделайте фото одежды и загрузите в приложение. ИИ автоматически определит категорию, цвет и стиль вещи.
+                </div>
+              </details>
+
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+                  Как связаться с поддержкой?
+                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                  Напишите нам на <a href="mailto:support@outfitstyle.ru" className="text-primary-600 dark:text-primary-400 hover:underline">support@outfitstyle.ru</a>. Мы отвечаем в течение 24 часов.
+                </div>
+              </details>
+            </div>
+          </div>
+        </section>
+
         {/* Call to Action Banner */}
         <section id="download" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20">
           <div className="max-w-5xl mx-auto text-center">
@@ -309,9 +371,7 @@ export function App() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="col-span-2">
               <div className="flex items-center gap-2 text-gray-900 dark:text-white font-bold text-xl mb-4">
-                <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
-                  <Layers className="w-4 h-4 text-white" />
-                </div>
+                <img src={logo} alt="OutfitStyle" className="w-8 h-8 rounded-lg object-cover" />
                 OutfitStyle
               </div>
               <p className="text-gray-500 dark:text-gray-400 max-w-sm">
@@ -329,17 +389,16 @@ export function App() {
             <div>
               <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">Поддержка</h4>
               <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-                <li><a href="#" className="hover:text-primary-500 transition-colors">Помощь и FAQ</a></li>
-                <li><a href="#" className="hover:text-primary-500 transition-colors">Связаться с нами</a></li>
-                <li><a href="#" className="hover:text-primary-500 transition-colors">Пресс-кит</a></li>
+                <li><a href="#faq" className="hover:text-primary-500 transition-colors">FAQ</a></li>
+                <li><a href="mailto:support@outfitstyle.ru" className="hover:text-primary-500 transition-colors">support@outfitstyle.ru</a></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
             <p>&copy; {new Date().getFullYear()} OutfitStyle. Все права защищены.</p>
             <div className="flex gap-4">
-              <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Политика конфиденциальности</a>
-              <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Условия использования</a>
+              <a href="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors">Политика конфиденциальности</a>
+              <a href="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors">Условия использования</a>
             </div>
           </div>
         </div>
