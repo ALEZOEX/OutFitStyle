@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: landing
-          image: ghcr.io/alezoex/outfitstyle-landing:latest
+          image: ghcr.io/alezoex/outfitstyle/landing:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
