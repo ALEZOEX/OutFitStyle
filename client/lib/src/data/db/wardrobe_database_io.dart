@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 /// Создает соединение с БД для IO платформ (Android, iOS, Desktop)
-LazyDatabase _openConnectionIo() {
+LazyDatabase openConnectionIo() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'wardrobe.sqlite'));

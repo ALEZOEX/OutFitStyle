@@ -1,6 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:drift/drift.dart' as drift;
 
+// Conditional import for connection creation
+import 'wardrobe_database_io.dart' if (dart.library.html) 'wardrobe_database_web.dart';
+
 part 'wardrobe_database.g.dart';
 
 /// Таблица элементов одежды
@@ -300,5 +303,4 @@ class WardrobeDatabase extends _$WardrobeDatabase {
   Future<void> close() async => super.close();
 }
 
-// Conditional import for connection creation
-LazyDatabase _openConnection() => _openConnectionIo();
+LazyDatabase _openConnection() => openConnectionIo();

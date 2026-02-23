@@ -25,7 +25,7 @@ class DatabaseException implements Exception {
 }
 
 /// Создает соединение с БД для IO платформ (Android, iOS, Desktop)
-QueryExecutor _createConnectionIo() {
+QueryExecutor createConnectionIo() {
   try {
     return LazyDatabase(() async {
       final dbFolder = await getApplicationDocumentsDirectory();
