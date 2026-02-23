@@ -38,6 +38,13 @@ jobs:
         working-directory: ./landing
         run: npm run build
 
+      - name: Copy static HTML files to dist
+        working-directory: ./landing
+        run: |
+          cp public/privacy.html dist/
+          cp public/terms.html dist/
+          ls -la dist/
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
