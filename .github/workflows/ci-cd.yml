@@ -117,3 +117,37 @@ jobs:
             kubectl get pods -n outfitstyle
             kubectl get svc -n outfitstyle
             kubectl get ingress -n outfitstyle
+
+  cleanup-old-images:
+    needs: deploy-k3s
+    runs-on: ubuntu-latest
+    if: always() && needs.deploy-k3s.result == 'success'
+    permissions:
+      packages: write
+    steps:
+      - name: Delete old server images
+        uses: bots-house/ghcr-delete-image-action@v1.1.0
+        with:
+          owner: alezoex
+          name: outfitstyle/outfitstyle-server
+          token: ${{ secrets.GITHUB_TOKEN }}
+          untagged-ages: 1
+          keep-latest: 3
+
+      - name: Delete old ml-service images
+        uses: bots-house/ghcr-delete-image-action@v1.1.0
+        with:
+          owner: alezoex
+          name: outfitstyle/outfitstyle-ml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          untagged-ages: 1
+          keep-latest: 3
+
+      - name: Delete old marketplace-service images
+        uses: bots-house/ghcr-delete-image-action@v1.1.0
+        with:
+          owner: alezoex
+          name: outfitstyle/outfitstyle-marketplace
+          token: ${{ secrets.GITHUB_TOKEN }}
+          untagged-ages: 1
+          keep-latest: 3
