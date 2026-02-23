@@ -91,3 +91,19 @@ jobs:
             echo "📊 Pod status:"
             kubectl get pods -n outfitstyle -l app=frontend
           EOF
+
+  cleanup-old-images:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always() && needs.deploy.result == 'success'
+    permissions:
+      packages: write
+    steps:
+      - name: Delete old frontend images
+        uses: bots-house/ghcr-delete-image-action@v1.1.0
+        with:
+          owner: alezoex
+          name: outfitstyle/frontend
+          token: ${{ secrets.GITHUB_TOKEN }}
+          untagged-ages: 1
+          keep-latest: 3
