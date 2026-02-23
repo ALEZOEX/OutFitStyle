@@ -5,6 +5,9 @@ import 'package:crypto/crypto.dart' show sha256;
 import 'package:logger/logger.dart';
 import 'package:drift/native.dart' as native;
 
+// Conditional import for connection creation
+import 'local_database_io.dart' if (dart.library.html) 'local_database_web.dart';
+
 part 'local_database.g.dart';
 
 // Drift table definition for outfit recommendations
@@ -154,5 +157,4 @@ class SecurityException implements Exception {
   String toString() => 'SecurityException: $message';
 }
 
-// Conditional import for connection creation
-QueryExecutor _createConnection() => _createConnectionIo();
+QueryExecutor _createConnection() => createConnectionIo();

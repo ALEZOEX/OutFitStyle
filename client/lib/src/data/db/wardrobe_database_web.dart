@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/wasm.dart';
 
 /// Создает соединение с БД для Web платформы (IndexedDB)
-LazyDatabase _openConnectionIo() {
+LazyDatabase openConnectionIo() {
   return LazyDatabase(() async {
     final db = await WasmDatabase.open(
       databaseName: 'wardrobe_db',
