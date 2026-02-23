@@ -107,6 +107,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 600m
           script: |
             cd /root/OutFitStyle
             git fetch origin main
