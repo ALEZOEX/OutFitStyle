@@ -36,12 +36,6 @@ MANIFESTS=(
     "ingress.yaml"
 )
 
-# Мониторинг (Grafana - опционально)
-INFRA_MANIFESTS=(
-    "monitoring-deployment.yaml"
-    "grafana.yaml"
-)
-
 # Landing page (React)
 LANDING_MANIFESTS=(
     "landing-deployment.yaml"
@@ -121,15 +115,6 @@ apply_manifests() {
     # Применение основных манифестов
     for manifest in "${MANIFESTS[@]}"; do
         if [ "$manifest" != "namespace.yaml" ]; then
-            log_info "Применение ${manifest}..."
-            kubectl apply -f "${SCRIPT_DIR}/${manifest}"
-        fi
-    done
-
-    # Применение инфраструктуры (мониторинг, kafka)
-    log_info "Применение инфраструктуры (Prometheus, Grafana, Kafka)..."
-    for manifest in "${INFRA_MANIFESTS[@]}"; do
-        if [ -f "${SCRIPT_DIR}/${manifest}" ]; then
             log_info "Применение ${manifest}..."
             kubectl apply -f "${SCRIPT_DIR}/${manifest}"
         fi
@@ -295,16 +280,6 @@ show_status() {
     log_info "PersistentVolumeClaims:"
     kubectl get pvc -n ${NAMESPACE} -o wide
     echo ""
-
-    # Доступ к Grafana
-    log_info "=== Доступ к мониторингу ==="
-    echo "Grafana: http://outfitstyle.play2go.cloud/grafana"
-    echo "Prometheus: http://outfitstyle.play2go.cloud/prometheus"
-    echo ""
-
-    # События
-    log_info "Последние события:"
-    kubectl get events -n ${NAMESPACE} --sort-by='.lastTimestamp' | tail -10
 }
 
 # Основная функция
