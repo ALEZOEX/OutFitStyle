@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Moon, Sun, ChevronRight, CloudSun, CloudRain,
-  Sparkles, Smartphone, WifiOff, Clock, Umbrella
+  Sparkles, Smartphone, WifiOff, Clock, Umbrella, Layers
 } from 'lucide-react';
 import { HeroVisual } from './components/HeroVisual';
 import { GlowCard } from './components/GlowCard';
