@@ -1,19 +1,4 @@
-import 'dart:io' show Platform;
+/// Platform flags с поддержкой всех платформ включая Web
+/// Использует conditional imports для определения платформы
 
-/// Флаг платформы Android
-bool get isAndroid => Platform.isAndroid;
-
-/// Флаг платформы iOS
-bool get isIOS => Platform.isIOS;
-
-/// Флаг платформы Windows
-bool get isWindows => Platform.isWindows;
-
-/// Флаг платформы macOS
-bool get isMacOS => Platform.isMacOS;
-
-/// Флаг платформы Linux
-bool get isLinux => Platform.isLinux;
-
-/// Флаг платформы Fuchsia
-bool get isFuchsia => Platform.isFuchsia;
+export 'platform_flags_io.dart' if (dart.library.html) 'platform_flags_web.dart';

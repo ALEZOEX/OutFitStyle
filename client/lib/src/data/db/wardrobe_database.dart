@@ -1,10 +1,5 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
-import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
+import 'package:drift/drift.dart' as drift;
 
 part 'wardrobe_database.g.dart';
 
@@ -94,14 +89,11 @@ class WardrobeDatabase extends _$WardrobeDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // Миграции будут добавляться по мере необходимости
         if (from < 2) {
-          // Пример миграции для версии 2
-          // await m.addColumn(clothingItems, clothingItems.newColumn);
+          // Миграции будут добавляться по мере необходимости
         }
       },
       beforeOpen: (OpeningDetails details) async {
-        // Включение foreign keys
         await customStatement('PRAGMA foreign_keys = ON');
       },
     );
@@ -109,85 +101,55 @@ class WardrobeDatabase extends _$WardrobeDatabase {
 
   // ==================== ClothingItems CRUD ====================
 
-  /// Получить все элементы одежды
-  Future<List<DbClothingItem>> getAllClothingItems({
-    bool includeArchived = false,
-  }) async {
+  Future<List<DbClothingItem>> getAllClothingItems({bool includeArchived = false}) async {
     if (!includeArchived) {
-      return (select(clothingItems)..where((tbl) => tbl.isArchived.equals(false)))
-          .get();
+      return (select(clothingItems)..where((tbl) => tbl.isArchived.equals(false))).get();
     }
     return select(clothingItems).get();
   }
 
-  /// Получить поток всех элементов одежды
-  Stream<List<DbClothingItem>> watchAllClothingItems({
-    bool includeArchived = false,
-  }) {
+  Stream<List<DbClothingItem>> watchAllClothingItems({bool includeArchived = false}) {
     if (!includeArchived) {
       return (select(clothingItems)
             ..where((tbl) => tbl.isArchived.equals(false))
-            ..orderBy([
-              (t) => OrderingTerm.desc(t.addedDate),
-            ]))
+            ..orderBy([(t) => OrderingTerm.desc(t.addedDate)]))
           .watch();
     }
-    return (select(clothingItems)
-          ..orderBy([
-            (t) => OrderingTerm.desc(t.addedDate),
-          ]))
-        .watch();
+    return (select(clothingItems)..orderBy([(t) => OrderingTerm.desc(t.addedDate)])).watch();
   }
 
-  /// Получить элемент по ID
   Future<DbClothingItem?> getClothingItemById(int id) async {
-    return (select(clothingItems)..where((tbl) => tbl.id.equals(id)))
-        .getSingleOrNull();
+    return (select(clothingItems)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
-  /// Получить элемент по externalId
   Future<DbClothingItem?> getClothingItemByExternalId(String externalId) async {
-    return (select(clothingItems)..where((tbl) => tbl.externalId.equals(externalId)))
-        .getSingleOrNull();
+    return (select(clothingItems)..where((tbl) => tbl.externalId.equals(externalId))).getSingleOrNull();
   }
 
-  /// Получить элемент по serverId
   Future<DbClothingItem?> getClothingItemByServerId(String serverId) async {
-    return (select(clothingItems)..where((tbl) => tbl.serverId.equals(serverId)))
-        .getSingleOrNull();
+    return (select(clothingItems)..where((tbl) => tbl.serverId.equals(serverId))).getSingleOrNull();
   }
 
-  /// Вставить элемент
   Future<int> insertClothingItem(ClothingItemsCompanion item) async {
     return into(clothingItems).insert(item);
   }
 
-  /// Обновить элемент
   Future<void> updateClothingItem(DbClothingItem item) async {
-    await (update(clothingItems)..where((tbl) => tbl.id.equals(item.id)))
-        .write(item);
+    await (update(clothingItems)..where((tbl) => tbl.id.equals(item.id))).write(item);
   }
 
-  /// Обновить элемент по ID
-  Future<void> updateClothingItemById(
-    int id,
-    ClothingItemsCompanion item,
-  ) async {
-    await (update(clothingItems)..where((tbl) => tbl.id.equals(id)))
-        .write(item);
+  Future<void> updateClothingItemById(int id, ClothingItemsCompanion item) async {
+    await (update(clothingItems)..where((tbl) => tbl.id.equals(id))).write(item);
   }
 
-  /// Удалить элемент
   Future<bool> deleteClothingItem(int id) async {
     return (await (delete(clothingItems)..where((tbl) => tbl.id.equals(id))).go()) > 0;
   }
 
-  /// Получить несинхронизированные элементы
   Future<List<DbClothingItem>> getUnsyncedClothingItems() async {
     return (select(clothingItems)..where((tbl) => tbl.dirty.equals(true))).get();
   }
 
-  /// Отметить элемент как синхронизированный
   Future<void> markClothingItemAsSynced(int id, String serverId) async {
     await (update(clothingItems)..where((tbl) => tbl.id.equals(id))).write(
       ClothingItemsCompanion(
@@ -198,85 +160,58 @@ class WardrobeDatabase extends _$WardrobeDatabase {
     );
   }
 
-  /// Пометить элемент как изменённый (dirty)
   Future<void> markClothingItemAsDirty(int id) async {
     await (update(clothingItems)..where((tbl) => tbl.id.equals(id))).write(
-      ClothingItemsCompanion(
-        dirty: const Value(true),
-      ),
+      ClothingItemsCompanion(dirty: const Value(true)),
     );
   }
 
-  /// Получить избранные элементы
   Future<List<DbClothingItem>> getFavoriteClothingItems() async {
     return (select(clothingItems)..where((tbl) => tbl.isFavorite.equals(true))).get();
   }
 
-  /// Получить элементы по категории
   Future<List<DbClothingItem>> getClothingItemsByCategory(String category) async {
-    return (select(clothingItems)..where((tbl) => tbl.category.equals(category)))
-        .get();
+    return (select(clothingItems)..where((tbl) => tbl.category.equals(category))).get();
   }
 
   // ==================== Outfits CRUD ====================
 
-  /// Получить все образы
-  Future<List<DbOutfit>> getAllOutfits() async {
-    return select(outfits).get();
-  }
+  Future<List<DbOutfit>> getAllOutfits() async => select(outfits).get();
 
-  /// Получить поток всех образов
   Stream<List<DbOutfit>> watchAllOutfits() {
-    return (select(outfits)
-          ..orderBy([
-            (t) => OrderingTerm.desc(t.addedDate),
-          ]))
-        .watch();
+    return (select(outfits)..orderBy([(t) => OrderingTerm.desc(t.addedDate)])).watch();
   }
 
-  /// Получить образ по ID
   Future<DbOutfit?> getOutfitById(int id) async {
     return (select(outfits)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
-  /// Получить образ по externalId
   Future<DbOutfit?> getOutfitByExternalId(String externalId) async {
-    return (select(outfits)..where((tbl) => tbl.externalId.equals(externalId)))
-        .getSingleOrNull();
+    return (select(outfits)..where((tbl) => tbl.externalId.equals(externalId))).getSingleOrNull();
   }
 
-  /// Получить образ по serverId
   Future<DbOutfit?> getOutfitByServerId(String serverId) async {
-    return (select(outfits)..where((tbl) => tbl.serverId.equals(serverId)))
-        .getSingleOrNull();
+    return (select(outfits)..where((tbl) => tbl.serverId.equals(serverId))).getSingleOrNull();
   }
 
-  /// Вставить образ
-  Future<int> insertOutfit(OutfitsCompanion outfit) async {
-    return into(outfits).insert(outfit);
-  }
+  Future<int> insertOutfit(OutfitsCompanion outfit) async => into(outfits).insert(outfit);
 
-  /// Обновить образ
   Future<void> updateOutfit(DbOutfit outfit) async {
     await (update(outfits)..where((tbl) => tbl.id.equals(outfit.id))).write(outfit);
   }
 
-  /// Обновить образ по ID
   Future<void> updateOutfitById(int id, OutfitsCompanion outfit) async {
     await (update(outfits)..where((tbl) => tbl.id.equals(id))).write(outfit);
   }
 
-  /// Удалить образ
   Future<bool> deleteOutfit(int id) async {
     return (await (delete(outfits)..where((tbl) => tbl.id.equals(id))).go()) > 0;
   }
 
-  /// Получить несинхронизированные образы
   Future<List<DbOutfit>> getUnsyncedOutfits() async {
     return (select(outfits)..where((tbl) => tbl.dirty.equals(true))).get();
   }
 
-  /// Отметить образ как синхронизированный
   Future<void> markOutfitAsSynced(int id, String serverId) async {
     await (update(outfits)..where((tbl) => tbl.id.equals(id))).write(
       OutfitsCompanion(
@@ -287,54 +222,40 @@ class WardrobeDatabase extends _$WardrobeDatabase {
     );
   }
 
-  /// Пометить образ как изменённый (dirty)
   Future<void> markOutfitAsDirty(int id) async {
     await (update(outfits)..where((tbl) => tbl.id.equals(id))).write(
-      OutfitsCompanion(
-        dirty: const Value(true),
-      ),
+      OutfitsCompanion(dirty: const Value(true)),
     );
   }
 
-  /// Получить избранные образы
   Future<List<DbOutfit>> getFavoriteOutfits() async {
     return (select(outfits)..where((tbl) => tbl.isFavorite.equals(true))).get();
   }
 
   // ==================== OutfitItems CRUD ====================
 
-  /// Получить все элементы образа
   Future<List<DbOutfitItem>> getOutfitItemsByOutfitId(int outfitId) async {
     return (select(outfitItems)
           ..where((tbl) => tbl.outfitId.equals(outfitId))
-          ..orderBy([
-            (t) => OrderingTerm.asc(t.sortOrder),
-          ]))
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
         .get();
   }
 
-  /// Получить поток элементов образа
   Stream<List<DbOutfitItem>> watchOutfitItemsByOutfitId(int outfitId) {
     return (select(outfitItems)
           ..where((tbl) => tbl.outfitId.equals(outfitId))
-          ..orderBy([
-            (t) => OrderingTerm.asc(t.sortOrder),
-          ]))
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
         .watch();
   }
 
-  /// Получить элемент связи по ID
   Future<DbOutfitItem?> getOutfitItemById(int id) async {
-    return (select(outfitItems)..where((tbl) => tbl.id.equals(id)))
-        .getSingleOrNull();
+    return (select(outfitItems)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
-  /// Вставить элемент связи
   Future<int> insertOutfitItem(OutfitItemsCompanion item) async {
     return into(outfitItems).insert(item);
   }
 
-  /// Вставить несколько элементов связи
   Future<void> insertOutfitItems(List<OutfitItemsCompanion> items) async {
     await batch((batch) {
       for (final item in items) {
@@ -343,38 +264,30 @@ class WardrobeDatabase extends _$WardrobeDatabase {
     });
   }
 
-  /// Обновить элемент связи
   Future<void> updateOutfitItem(DbOutfitItem item) async {
-    await (update(outfitItems)..where((tbl) => tbl.id.equals(item.id)))
-        .write(item);
+    await (update(outfitItems)..where((tbl) => tbl.id.equals(item.id))).write(item);
   }
 
-  /// Удалить элемент связи
   Future<bool> deleteOutfitItem(int id) async {
     return (await (delete(outfitItems)..where((tbl) => tbl.id.equals(id))).go()) > 0;
   }
 
-  /// Удалить все элементы связи для образа
   Future<void> deleteOutfitItemsByOutfitId(int outfitId) async {
     await (delete(outfitItems)..where((tbl) => tbl.outfitId.equals(outfitId))).go();
   }
 
-  /// Получить образы для элемента одежды
   Future<List<DbOutfitItem>> getOutfitItemsByClothingItemId(int clothingItemId) async {
-    return (select(outfitItems)..where((tbl) => tbl.clothingItemId.equals(clothingItemId)))
-        .get();
+    return (select(outfitItems)..where((tbl) => tbl.clothingItemId.equals(clothingItemId))).get();
   }
 
   // ==================== Batch Operations ====================
 
-  /// Выполнить пакетную операцию
   Future<void> batchOperation(Future<void> Function(Batch batch) action) async {
     await batch(action);
   }
 
   // ==================== Utility Methods ====================
 
-  /// Очистить базу данных (для тестов)
   Future<void> clearAllData() async {
     await batch((batch) {
       batch.deleteAll(outfitItems);
@@ -383,22 +296,9 @@ class WardrobeDatabase extends _$WardrobeDatabase {
     });
   }
 
-  /// Закрыть соединение с БД
   @override
-  Future<void> close() async {
-    await super.close();
-  }
+  Future<void> close() async => super.close();
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'wardrobe.sqlite'));
-
-    if (Platform.isAndroid || Platform.isIOS) {
-      await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
-    }
-
-    return NativeDatabase.createInBackground(file);
-  });
-}
+// Conditional import for connection creation
+LazyDatabase _openConnection() => _openConnectionIo();
