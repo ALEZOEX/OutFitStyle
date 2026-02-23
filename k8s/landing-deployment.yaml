@@ -16,16 +16,12 @@ spec:
         app: landing
     spec:
       containers:
-        - name: nginx
-          image: nginx:alpine
+        - name: landing
+          image: ghcr.io/alezoex/outfitstyle-landing:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http
-          volumeMounts:
-            - name: landing-files
-              mountPath: /usr/share/nginx/html
-              readOnly: true
           resources:
             requests:
               memory: "64Mi"
@@ -45,10 +41,6 @@ spec:
               port: 80
             initialDelaySeconds: 5
             periodSeconds: 5
-      volumes:
-        - name: landing-files
-          configMap:
-            name: landing-files
 ---
 apiVersion: v1
 kind: Service
