@@ -101,6 +101,25 @@ apply_manifests() {
     log_info "Применение secrets..."
     kubectl apply -f "${SCRIPT_DIR}/secrets.yaml"
 
+    # Применение миграций БД
+    log_info "Применение миграций базы данных..."
+    if [ -f "${SCRIPT_DIR}/migrate-job.yaml" ]; then
+        # Удаляем старый job, если существует
+        kubectl delete job migrate -n ${NAMESPACE} --ignore-not-found=true || true
+        # Применяем новый job
+        kubectl apply -f "${SCRIPT_DIR}/migrate-job.yaml"
+        # Ждём завершения миграций
+        log_info "Ожидание завершения миграций..."
+        kubectl wait --for=condition=complete job/migrate -n ${NAMESPACE} --timeout=300s || log_warn "Миграции не завершены в течение 300с"
+        # Проверяем статус
+        if kubectl get job/migrate -n ${NAMESPACE} -o jsonpath='{.status.failed}' | grep -q '[1-9]'; then
+            log_error "Миграции завершились с ошибкой!"
+            kubectl logs job/migrate -n ${NAMESPACE}
+            exit 1
+        fi
+        log_success "Миграции успешно применены!"
+    fi
+
     # Применение основных манифестов
     for manifest in "${MANIFESTS[@]}"; do
         if [ "$manifest" != "namespace.yaml" ]; then
@@ -126,6 +145,13 @@ apply_manifests() {
             kubectl apply -f "${SCRIPT_DIR}/${manifest}"
         fi
     done
+
+    # Применение CronJob для пересоздания индексов
+    log_info "Применение CronJob для пересоздания индексов..."
+    if [ -f "${SCRIPT_DIR}/rebuild-indexes-cronjob.yaml" ]; then
+        kubectl apply -f "${SCRIPT_DIR}/rebuild-indexes-cronjob.yaml"
+        log_success "CronJob rebuild-indexes применён (запуск 1-го числа каждого месяца в 03:00)"
+    fi
 
     log_success "Все манифесты применены!"
 
