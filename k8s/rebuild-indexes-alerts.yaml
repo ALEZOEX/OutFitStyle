@@ -1,0 +1,48 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rebuild-indexes-alerts
+  namespace: outfitstyle
+  labels:
+    app: monitoring
+    role: alert-rules
+spec:
+  groups:
+  - name: rebuild-indexes.rules
+    interval: 1m
+    rules:
+    # Alert если CronJob не запускался больше 35 дней
+    - alert: RebuildIndexesNotRun
+      expr: |
+        (time() - kube_cronjob_status_last_schedule_time{cronjob="rebuild-indexes", namespace="outfitstyle"}) > 3024000
+      for: 1h
+      labels:
+        severity: warning
+        service: database
+      annotations:
+        summary: "CronJob rebuild-indexes не запускался больше 35 дней"
+        description: "Последний запуск CronJob rebuild-indexes был более 35 дней назад. Индексы могут требовать оптимизации."
+    
+    # Alert если последняя задача завершилась ошибкой
+    - alert: RebuildIndexesFailed
+      expr: |
+        kube_job_status_failed{job_name=~"rebuild-indexes-.*", namespace="outfitstyle"} == 1
+      for: 5m
+      labels:
+        severity: critical
+        service: database
+      annotations:
+        summary: "CronJob rebuild-indexes завершился с ошибкой"
+        description: "Задача {{ $labels.job_name }} завершилась с ошибкой. Проверьте логи."
+    
+    # Alert если задача выполняется слишком долго (> 2 часов)
+    - alert: RebuildIndexesRunningTooLong
+      expr: |
+        (time() - kube_job_status_start_time{job_name=~"rebuild-indexes-.*", namespace="outfitstyle"}) > 7200
+      for: 10m
+      labels:
+        severity: warning
+        service: database
+      annotations:
+        summary: "CronJob rebuild-indexes выполняется слишком долго"
+        description: "Задача {{ $labels.job_name }} выполняется более 2 часов."

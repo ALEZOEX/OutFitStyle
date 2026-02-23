@@ -1,3 +1,38 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rebuild-indexes-monitor
+  namespace: outfitstyle
+  labels:
+    app: rebuild-indexes
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rebuild-indexes-monitor
+  namespace: outfitstyle
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rebuild-indexes-monitor
+  namespace: outfitstyle
+subjects:
+- kind: ServiceAccount
+  name: rebuild-indexes-monitor
+  namespace: outfitstyle
+roleRef:
+  kind: Role
+  name: rebuild-indexes-monitor
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -5,16 +40,21 @@ metadata:
   namespace: outfitstyle
   labels:
     app: rebuild-indexes
+    monitoring: enabled
 spec:
   # Запускать 1-го числа каждого месяца в 03:00
   schedule: "0 3 1 * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            app: rebuild-indexes
         spec:
+          serviceAccountName: rebuild-indexes-monitor
           containers:
           - name: rebuild-indexes
             image: ghcr.io/alezoex/outfitstyle-server:latest
@@ -22,9 +62,34 @@ spec:
             - /bin/sh
             - -c
             - |
-              echo "Начало пересоздания индексов..."
-              psql "$DATABASE_URL" -f /app/migrations/rebuild_indexes.sql
-              echo "Пересоздание индексов завершено!"
+              echo "=== Начало пересоздания индексов ==="
+              echo "Время: $(date)"
+              echo ""
+              
+              # Запуск пересоздания индексов с логированием
+              psql "$DATABASE_URL" -f /app/migrations/rebuild_indexes.sql 2>&1 | tee /var/log/rebuild_indexes.log
+              
+              EXIT_CODE=${PIPESTATUS[0]}
+              
+              echo ""
+              echo "=== Завершение пересоздания индексов ==="
+              echo "Время завершения: $(date)"
+              echo "Статус: $([ $EXIT_CODE -eq 0 ] && echo 'УСПЕШНО' || echo 'ОШИБКА')"
+              
+              # Вывод размера индексов после пересоздания
+              echo ""
+              echo "=== Размер индексов после пересоздания ==="
+              psql "$DATABASE_URL" -c "
+              SELECT 
+                  schemaname,
+                  tablename,
+                  indexname,
+                  pg_size_pretty(pg_relation_size(indexrelid)) AS index_size
+              FROM pg_indexes
+              WHERE schemaname = 'public'
+              ORDER BY pg_relation_size(indexrelid) DESC LIMIT 20;"
+              
+              exit $EXIT_CODE
             env:
             - name: DB_HOST
               value: postgres.outfitstyle.svc.cluster.local
@@ -62,6 +127,12 @@ spec:
               capabilities:
                 drop:
                 - ALL
+            volumeMounts:
+            - name: log-volume
+              mountPath: /var/log
+          volumes:
+          - name: log-volume
+            emptyDir: {}
           restartPolicy: OnFailure
           initContainers:
           - name: wait-for-db
