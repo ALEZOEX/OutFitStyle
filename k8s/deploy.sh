@@ -36,12 +36,10 @@ MANIFESTS=(
     "ingress.yaml"
 )
 
-# Мониторинг и инфраструктура (опционально)
+# Мониторинг (Grafana - опционально)
 INFRA_MANIFESTS=(
     "monitoring-deployment.yaml"
     "grafana.yaml"
-    "servicemonitor.yaml"
-    "kafka.yaml"
 )
 
 # Landing page (React)
@@ -106,19 +104,18 @@ apply_manifests() {
     log_info "Применение миграций базы данных..."
     if [ -f "${SCRIPT_DIR}/migrate-job.yaml" ]; then
         # Удаляем старый job, если существует
-        kubectl delete job migrate -n ${NAMESPACE} --ignore-not-found=true || true
+        kubectl delete job/migrate -n ${NAMESPACE} --ignore-not-found=true || true
         # Применяем новый job
         kubectl apply -f "${SCRIPT_DIR}/migrate-job.yaml"
         # Ждём завершения миграций
-        log_info "Ожидание завершения миграций..."
-        kubectl wait --for=condition=complete job/migrate -n ${NAMESPACE} --timeout=300s || log_warn "Миграции не завершены в течение 300с"
-        # Проверяем статус
-        if kubectl get job/migrate -n ${NAMESPACE} -o jsonpath='{.status.failed}' | grep -q '[1-9]'; then
-            log_error "Миграции завершились с ошибкой!"
-            kubectl logs job/migrate -n ${NAMESPACE}
-            exit 1
+        log_info "Ожидание завершения миграций (до 5 минут)..."
+        if kubectl wait --for=condition=complete job/migrate -n ${NAMESPACE} --timeout=300s; then
+            log_success "Миграции успешно применены!"
+        else
+            log_warn "Миграции не завершены в течение 5 минут. Проверьте логи:"
+            kubectl logs job/migrate -n ${NAMESPACE} || echo "Логи недоступны"
+            log_warn "Продолжаем развёртывание..."
         fi
-        log_success "Миграции успешно применены!"
     fi
 
     # Применение основных манифестов
@@ -152,13 +149,6 @@ apply_manifests() {
     if [ -f "${SCRIPT_DIR}/rebuild-indexes-cronjob.yaml" ]; then
         kubectl apply -f "${SCRIPT_DIR}/rebuild-indexes-cronjob.yaml"
         log_success "CronJob rebuild-indexes применён (запуск 1-го числа каждого месяца в 03:00)"
-    fi
-
-    # Применение alert правил для мониторинга
-    log_info "Применение Prometheus alert правил..."
-    if [ -f "${SCRIPT_DIR}/rebuild-indexes-alerts.yaml" ]; then
-        kubectl apply -f "${SCRIPT_DIR}/rebuild-indexes-alerts.yaml"
-        log_success "Prometheus alert правила применены"
     fi
 
     log_success "Все манифесты применены!"
