@@ -6,7 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -21,45 +21,23 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 80
-              name: http
-          env:
-            - name: API_URL
-              value: "http://backend:80"
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
+              cpu: 20m
+              memory: 64Mi
             limits:
-              memory: "256Mi"
-              cpu: "200m"
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 3
+              cpu: 100m
+              memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: frontend
   namespace: outfitstyle
-  labels:
-    app: frontend
 spec:
   selector:
     app: frontend
   ports:
-    - name: http
-      protocol: TCP
-      port: 80
+    - port: 80
       targetPort: 80
   type: ClusterIP
