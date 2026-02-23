@@ -107,5 +107,4 @@ jobs:
           owner: alezoex
           name: outfitstyle/landing
           token: ${{ secrets.GITHUB_TOKEN }}
-          untagged-keep-latest: 3
-          untagged-older-than: 1
+          untagged-older-than: 7

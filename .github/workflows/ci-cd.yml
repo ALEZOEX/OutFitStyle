@@ -132,8 +132,7 @@ jobs:
           owner: alezoex
           name: outfitstyle/outfitstyle-server
           token: ${{ secrets.GITHUB_TOKEN }}
-          untagged-keep-latest: 3
-          untagged-older-than: 1
+          untagged-older-than: 7
 
       - name: Delete old ml-service images
         uses: bots-house/ghcr-delete-image-action@v1.1.0
@@ -141,8 +140,7 @@ jobs:
           owner: alezoex
           name: outfitstyle/outfitstyle-ml
           token: ${{ secrets.GITHUB_TOKEN }}
-          untagged-keep-latest: 3
-          untagged-older-than: 1
+          untagged-older-than: 7
 
       - name: Delete old marketplace-service images
         uses: bots-house/ghcr-delete-image-action@v1.1.0
@@ -150,5 +148,4 @@ jobs:
           owner: alezoex
           name: outfitstyle/outfitstyle-marketplace
           token: ${{ secrets.GITHUB_TOKEN }}
-          untagged-keep-latest: 3
-          untagged-older-than: 1
+          untagged-older-than: 7
