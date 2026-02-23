@@ -85,6 +85,9 @@ dependencies:
   # For code generation
   freezed_annotation: ^3.1.0
 
+  # Web support
+  universal_html: ^2.2.4
+
   # Additional dependencies
   encrypt: ^5.0.3
   get_it: ^9.2.0
