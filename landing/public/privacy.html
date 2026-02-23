@@ -4,90 +4,71 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Политика конфиденциальности - OutfitStyle</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: {
-              50: '#fdf4ff',
-              100: '#fae8ff',
-              200: '#f5d0fe',
-              300: '#f0abfc',
-              400: '#e879f9',
-              500: '#d946ef',
-              600: '#c026d3',
-              700: '#a21caf',
-              800: '#86198f',
-              900: '#701a75',
-            },
-          }
-        }
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #090a0f;
+        color: #f0f0f0;
       }
     }
-  </script>
+    h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; }
+    a { color: #d946ef; }
+    ul { padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+  </style>
 </head>
-<body class="min-h-screen bg-[#fafafa] dark:bg-[#090a0f] text-gray-900 dark:text-gray-100">
-  <div class="max-w-3xl mx-auto px-4 py-16">
-    <a href="/" class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:underline mb-8">
-      ← На главную
-    </a>
-    
-    <h1 class="text-4xl font-bold mb-8">Политика конфиденциальности</h1>
-    
-    <div class="prose dark:prose-invert max-w-none">
-      <p class="text-gray-600 dark:text-gray-400 mb-6">
-        Последнее обновление: 23 февраля 2026 г.
-      </p>
+<body>
+  <a href="/" style="display:inline-block;margin-bottom:2rem">← На главную</a>
+  
+  <h1>Политика конфиденциальности</h1>
+  <p style="color:#666">Последнее обновление: 23 февраля 2026 г.</p>
 
-      <h2 class="text-2xl font-bold mt-8 mb-4">1. Общие положения</h2>
-      <p class="mb-4">
-        Мы уважаем вашу конфиденциальность и стремимся защитить ваши персональные данные. 
-        Эта политика описывает, какие данные мы собираем и как их используем.
-      </p>
+  <h2>1. Общие положения</h2>
+  <p>Мы уважаем вашу конфиденциальность и стремимся защитить ваши персональные данные. Эта политика описывает, какие данные мы собираем и как их используем.</p>
 
-      <h2 class="text-2xl font-bold mt-8 mb-4">2. Какие данные мы собираем</h2>
-      <ul class="list-disc pl-6 mb-4 space-y-2">
-        <li>Фотографии одежды и аксессуаров, которые вы загружаете</li>
-        <li>Предпочтения по стилю и размерам</li>
-        <li>Данные о местоположении (для погодных рекомендаций)</li>
-        <li>Техническая информация об устройстве</li>
-      </ul>
+  <h2>2. Какие данные мы собираем</h2>
+  <ul>
+    <li>Фотографии одежды и аксессуаров, которые вы загружаете</li>
+    <li>Предпочтения по стилю и размерам</li>
+    <li>Данные о местоположении (для погодных рекомендаций)</li>
+    <li>Техническая информация об устройстве</li>
+  </ul>
 
-      <h2 class="text-2xl font-bold mt-8 mb-4">3. Как мы используем данные</h2>
-      <ul class="list-disc pl-6 mb-4 space-y-2">
-        <li>Для создания персонализированных рекомендаций одежды</li>
-        <li>Для улучшения работы нейросети</li>
-        <li>Для предоставления погодных рекомендаций</li>
-      </ul>
+  <h2>3. Как мы используем данные</h2>
+  <ul>
+    <li>Для создания персонализированных рекомендаций одежды</li>
+    <li>Для улучшения работы нейросети</li>
+    <li>Для предоставления погодных рекомендаций</li>
+  </ul>
 
-      <h2 class="text-2xl font-bold mt-8 mb-4">4. Хранение данных</h2>
-      <p class="mb-4">
-        Ваши данные хранятся локально на устройстве и могут быть синхронизированы с нашими серверами 
-        для обеспечения доступа с нескольких устройств.
-      </p>
+  <h2>4. Хранение данных</h2>
+  <p>Ваши данные хранятся локально на устройстве и могут быть синхронизированы с нашими серверами для обеспечения доступа с нескольких устройств.</p>
 
-      <h2 class="text-2xl font-bold mt-8 mb-4">5. Передача данных третьим лицам</h2>
-      <p class="mb-4">
-        Мы не передаём ваши персональные данные третьим лицам, за исключением случаев, 
-        предусмотренных законодательством.
-      </p>
+  <h2>5. Передача данных третьим лицам</h2>
+  <p>Мы не передаём ваши персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством.</p>
 
-      <h2 class="text-2xl font-bold mt-8 mb-4">6. Ваши права</h2>
-      <ul class="list-disc pl-6 mb-4 space-y-2">
-        <li>Право на доступ к вашим данным</li>
-        <li>Право на исправление данных</li>
-        <li>Право на удаление данных</li>
-        <li>Право на экспорт данных</li>
-      </ul>
+  <h2>6. Ваши права</h2>
+  <ul>
+    <li>Право на доступ к вашим данным</li>
+    <li>Право на исправление данных</li>
+    <li>Право на удаление данных</li>
+    <li>Право на экспорт данных</li>
+  </ul>
 
-      <h2 class="text-2xl font-bold mt-8 mb-4">7. Контакты</h2>
-      <p class="mb-4">
-        По вопросам конфиденциальности пишите: <a href="mailto:privacy@outfitstyle.ru" class="text-primary-600 dark:text-primary-400 hover:underline">privacy@outfitstyle.ru</a>
-      </p>
-    </div>
-  </div>
+  <h2>7. Контакты</h2>
+  <p>По вопросам конфиденциальности пишите: <a href="mailto:outfitstyle.official.app@gmail.com">outfitstyle.official.app@gmail.com</a></p>
 </body>
 </html>
