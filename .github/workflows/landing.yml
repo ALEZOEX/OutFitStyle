@@ -55,9 +55,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Ensure lowercase repository name
+      - name: Ensure lowercase image name
         run: |
-          echo "IMAGE_NAME_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "IMAGE_NAME_LOWERCASE=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Extract metadata
         id: meta
@@ -93,7 +93,7 @@ jobs:
 
       - name: Deploy to k3s
         run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=30 root@144.31.234.69 << 'EOF'
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=30 root@${{ secrets.SERVER_IP }} << 'EOF'
             cd /root/OutFitStyle
             git pull origin main
             kubectl apply -f k8s/landing-deployment.yaml
@@ -111,7 +111,7 @@ jobs:
       - name: Delete old landing images
         uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
-          owner: alezoex
+          owner: ${{ github.repository_owner }}
           name: outfitstyle/landing
           token: ${{ secrets.GITHUB_TOKEN }}
           untagged-older-than: 7
