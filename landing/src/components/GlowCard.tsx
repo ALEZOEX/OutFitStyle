@@ -58,7 +58,7 @@ export function GlowCard({
           `,
         }}
       />
-      <div className="relative z-10 p-8 h-full flex flex-col">{children}</div>
+      <div className="relative z-10 p-6 sm:p-8 h-full flex flex-col overflow-hidden">{children}</div>
     </div>
   );
 }

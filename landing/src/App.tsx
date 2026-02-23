@@ -72,7 +72,7 @@ export function App() {
             <div className="hidden md:flex items-center gap-8 font-medium text-sm text-gray-600 dark:text-gray-300">
               <a href="#features" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Преимущества</a>
               <a href="#how-it-works" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Как это работает</a>
-              <a href="#reviews" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Отзывы</a>
+              <a href="#examples" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Примеры</a>
             </div>
 
             <div className="flex items-center gap-4">
@@ -219,6 +219,50 @@ export function App() {
                 <h3 className="text-xl font-bold mb-3">Экономия времени</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                   Пользователи OutfitStyle экономят до 20 минут каждое утро, доверяя выбор одежды искусственному интеллекту.
+                </p>
+              </GlowCard>
+
+            </div>
+          </div>
+        </section>
+
+        {/* Examples Section */}
+        <section id="examples" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="max-w-7xl mx-auto">
+            <RevealText text="Примеры образов" className="text-4xl md:text-5xl font-extrabold text-center mb-4 text-gray-900 dark:text-white tracking-tight" />
+            <p className="text-center text-xl text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto">
+              Смотрите, как нейросеть сочетает вещи из вашего гардероба для разных ситуаций
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+              <GlowCard>
+                <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                  <CloudSun className="w-16 h-16 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">Деловая встреча</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Классический пиджак, белая рубашка, брюки чинос. Идеально для презентации проекта.
+                </p>
+              </GlowCard>
+
+              <GlowCard>
+                <div className="w-full h-48 bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                  <Umbrella className="w-16 h-16 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">Прогулка в дождь</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Водонепроницаемая куртка, удобные ботинки, вместительный рюкзак.
+                </p>
+              </GlowCard>
+
+              <GlowCard>
+                <div className="w-full h-48 bg-gradient-to-br from-pink-100 to-pink-200 dark:from-pink-900/30 dark:to-pink-800/30 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                  <Sparkles className="w-16 h-16 text-pink-600 dark:text-pink-400" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">Вечеринка</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Стильное платье, яркие аксессуары, удобная обувь для танцев.
                 </p>
               </GlowCard>
 
