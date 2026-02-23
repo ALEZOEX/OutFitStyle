@@ -305,7 +305,7 @@ export function App() {
                   <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
                 </summary>
                 <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                  Да, приложение поддерживает оффлайн-режим. Вы можете просматривать свой гардероб и получать рекомендации без подключения к сети.
+                  Приложение может работать без интернета для просмотра загруженного гардероба. Однако для получения рекомендаций на основе погоды требуется подключение к сети.
                 </div>
               </details>
 
@@ -315,7 +315,7 @@ export function App() {
                   <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
                 </summary>
                 <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                  Просто сделайте фото одежды и загрузите в приложение. ИИ автоматически определит категорию, цвет и стиль вещи.
+                  Откройте раздел «Гардероб» и добавьте ваши вещи вручную. Укажите категорию, цвет, бренд и другие параметры для каждой вещи.
                 </div>
               </details>
 
@@ -325,7 +325,7 @@ export function App() {
                   <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
                 </summary>
                 <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                  Напишите нам на <a href="mailto:support@outfitstyle.ru" className="text-primary-600 dark:text-primary-400 hover:underline">support@outfitstyle.ru</a>. Мы отвечаем в течение 24 часов.
+                  Напишите нам на <a href="mailto:outfitstyle.official.app@gmail.com" className="text-primary-600 dark:text-primary-400 hover:underline">outfitstyle.official.app@gmail.com</a>. Мы отвечаем в течение 24 часов.
                 </div>
               </details>
             </div>
@@ -390,7 +390,7 @@ export function App() {
               <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">Поддержка</h4>
               <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
                 <li><a href="#faq" className="hover:text-primary-500 transition-colors">FAQ</a></li>
-                <li><a href="mailto:support@outfitstyle.ru" className="hover:text-primary-500 transition-colors">support@outfitstyle.ru</a></li>
+                <li><a href="mailto:outfitstyle.official.app@gmail.com" className="hover:text-primary-500 transition-colors">outfitstyle.official.app@gmail.com</a></li>
               </ul>
             </div>
           </div>
