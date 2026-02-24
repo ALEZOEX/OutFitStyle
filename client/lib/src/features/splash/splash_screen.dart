@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/di/di.dart';
+import '../../presentation/routing/router.dart';
 import '../onboarding/onboarding_storage.dart' as onboarding_storage;
 
 /// Провайдер для отслеживания состояния проверки onboarding
