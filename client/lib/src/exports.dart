@@ -3,7 +3,7 @@
 export 'domain/domain_exports.dart';
 
 // Data layer exports - repository implementations only
-// Note: Do not export domain interfaces here to avoid ambiguous exports
+// Примечание: Не экспортируем интерфейсы domain здесь, чтобы избежать неоднозначных экспортов
 export 'data/repositories/auth_repository.dart';
 export 'data/repositories/profile_repository.dart';
 export 'data/repositories/wardrobe_repository.dart';
@@ -18,6 +18,6 @@ export 'features/features_exports.dart';
 // Core layer exports
 export 'core/core_exports.dart';
 
-// NOTE: To avoid ambiguous exports, we do NOT export:
+// ПРИМЕЧАНИЕ: Чтобы избежать неоднозначных экспортов, НЕ экспортируем:
 // - domain/repositories/auth_repository.dart (interface)
 // The data layer implementations should be used directly
