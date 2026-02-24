@@ -166,15 +166,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final isLoading = ref.watch(authLoadingProvider);
     final error = ref.watch(authErrorProvider);
     final theme = Theme.of(context);
+    final isWide = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+            child: SizedBox(
+              width: isWide ? 400 : double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                 // Логотип
                 const AppAvatar(
                   radius: 50,
@@ -390,6 +393,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                 ),
               ],
+              ),
             ),
           ),
         ),
