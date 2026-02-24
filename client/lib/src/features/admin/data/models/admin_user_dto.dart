@@ -6,7 +6,7 @@ part 'admin_user_dto.freezed.dart';
 part 'admin_user_dto.g.dart';
 
 /// DTO пользователя для админ-панели (ответ от API)
-@freezed
+@Freezed(anyMap: true)
 abstract class AdminUserDto with _$AdminUserDto {
   const factory AdminUserDto({
     required String id,
@@ -40,7 +40,7 @@ extension AdminUserDtoExtension on AdminUserDto {
 }
 
 /// DTO для запроса обновления роли
-@freezed
+@Freezed(anyMap: true)
 abstract class UpdateUserRoleRequest with _$UpdateUserRoleRequest {
   const factory UpdateUserRoleRequest({
     @JsonKey(name: 'role') required String role,
@@ -51,7 +51,7 @@ abstract class UpdateUserRoleRequest with _$UpdateUserRoleRequest {
 }
 
 /// DTO для запроса блокировки пользователя
-@freezed
+@Freezed(anyMap: true)
 abstract class BlockUserRequest with _$BlockUserRequest {
   const factory BlockUserRequest({
     @JsonKey(name: 'is_active') required bool isActive,
@@ -62,7 +62,7 @@ abstract class BlockUserRequest with _$BlockUserRequest {
 }
 
 /// DTO для запроса сброса пароля
-@freezed
+@Freezed(anyMap: true)
 abstract class ResetPasswordRequest with _$ResetPasswordRequest {
   const factory ResetPasswordRequest({
     @JsonKey(name: 'user_id') required String userId,
