@@ -24,11 +24,11 @@ class ApiConfig {
   /// Статические значения по умолчанию
   /// Для локальной разработки: http://localhost:8080
   /// Для Android эмулятора: http://10.0.2.2:8080
-  /// Для production: / (относительный путь, nginx будет проксировать на бэкенд)
+  /// Для production: '' (пустая строка — относительный путь, nginx будет проксировать)
   /// Примечание: пути в API клиента должны начинаться с /api/v1/...
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: '/',
+    defaultValue: '',
   );
   static const Duration defaultConnectTimeout = Duration(seconds: 10);
   static const Duration defaultReceiveTimeout = Duration(seconds: 10);
