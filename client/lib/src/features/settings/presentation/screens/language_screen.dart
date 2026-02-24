@@ -203,7 +203,12 @@ class LanguageScreen extends ConsumerWidget {
               ref.read(autoLanguageProvider.notifier).setAutoLanguage(value);
               _showLanguageChangedSnackbar(context);
             },
-            activeThumbColor: theme.colorScheme.primary,
+            thumbColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return theme.colorScheme.primary;
+              }
+              return null;
+            }),
           ),
         ],
       ),
