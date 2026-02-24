@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/logger.dart';
 
 final dioProvider = Provider((ref) => Dio(BaseOptions(
-      baseUrl: 'https://api.outfitstyle.com', // Replace with actual base URL
+      baseUrl: 'https://outfitstyle.ru', // Replace with actual base URL
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       sendTimeout: const Duration(seconds: 30),
