@@ -1,5 +1,5 @@
-// Web-specific main entry point
-// Firebase web packages are incompatible with current Flutter version
+// Web-версия main entry point
+// Firebase web пакеты несовместимы с текущей версией Flutter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,11 +15,11 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Firebase web is temporarily disabled due to compatibility issues
-  debugPrint('🌐 Web: Running without Firebase (compatibility mode)');
-  debugPrint('📝 Some features may be limited');
+  // Firebase web временно отключён из-за проблем совместимости
+  debugPrint('🌐 Web: Запуск без Firebase (режим совместимости)');
+  debugPrint('📝 Некоторые функции могут быть ограничены');
 
-  // Initialize error handler
+  // Инициализация обработчика ошибок
   await ErrorHandler.init();
 
   runApp(
