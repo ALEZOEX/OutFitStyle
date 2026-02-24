@@ -573,7 +573,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Switch(
                 value: _notificationsEnabled,
                 onChanged: (_) => _requestNotificationPermission(),
-                activeThumbColor: theme.colorScheme.primary,
+                thumbColor: WidgetStateProperty.resolveWith((states) { if (states.contains(WidgetState.selected)) { return theme.colorScheme.primary; } return null; }),
               ),
             ],
           ),
@@ -649,7 +649,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         value: value,
         onChanged: onChanged,
         activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
-        activeThumbColor: theme.colorScheme.primary,
+        thumbColor: WidgetStateProperty.resolveWith((states) { if (states.contains(WidgetState.selected)) { return theme.colorScheme.primary; } return null; }),
       ),
     );
   }
@@ -708,7 +708,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Switch(
             value: _locationEnabled,
             onChanged: (_) => _requestLocationPermission(),
-            activeThumbColor: theme.colorScheme.primary,
+            thumbColor: WidgetStateProperty.resolveWith((states) { if (states.contains(WidgetState.selected)) { return theme.colorScheme.primary; } return null; }),
           ),
         ],
       ),

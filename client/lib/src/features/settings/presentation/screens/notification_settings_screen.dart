@@ -366,7 +366,12 @@ class _NotificationSettingsScreenState
         value: value,
         onChanged: onChanged,
         activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
-        activeThumbColor: theme.colorScheme.primary,
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return theme.colorScheme.primary;
+          }
+          return null;
+        }),
       ),
     );
   }
@@ -416,7 +421,12 @@ class _NotificationSettingsScreenState
         value: value,
         onChanged: onChanged,
         activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
-        activeThumbColor: theme.colorScheme.primary,
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return theme.colorScheme.primary;
+          }
+          return null;
+        }),
       ),
     );
   }

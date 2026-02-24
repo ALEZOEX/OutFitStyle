@@ -620,7 +620,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                 _showSnackBar('2FA отключена');
               }
             },
-            activeThumbColor: theme.colorScheme.primary,
+            thumbColor: WidgetStateProperty.resolveWith((states) { if (states.contains(WidgetState.selected)) { return theme.colorScheme.primary; } return null; }),
           ),
         ],
       ),
@@ -948,7 +948,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
       trailing: Switch(
         value: isLinked,
         onChanged: onToggle,
-        activeThumbColor: theme.colorScheme.primary,
+        thumbColor: WidgetStateProperty.resolveWith((states) { if (states.contains(WidgetState.selected)) { return theme.colorScheme.primary; } return null; }),
       ),
     );
   }

@@ -9,8 +9,8 @@ part 'admin_user_dto.g.dart';
 @freezed
 abstract class AdminUserDto with _$AdminUserDto {
   const factory AdminUserDto({
-    @JsonKey(name: 'id') required String id,
-    @JsonKey(name: 'email') required String email,
+    required String id,
+    required String email,
     @JsonKey(name: 'display_name') String? displayName,
     @JsonKey(name: 'is_active') required bool isActive,
     @JsonKey(name: 'is_verified') required bool isVerified,
