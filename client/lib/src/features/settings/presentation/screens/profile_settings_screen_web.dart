@@ -481,6 +481,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
       return;
     }
 
+    if (!mounted) return;
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
