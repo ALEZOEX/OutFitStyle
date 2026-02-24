@@ -6,10 +6,12 @@ class AppConfig {
   static const String version = '1.0.0';
 
   // Базовые URL для API
+  // Для production: '/' — nginx проксирует запросы на бэкенд
+  // Для development: 'http://localhost:8080'
   static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL',
       defaultValue: kDebugMode
           ? 'http://localhost:8080'
-          : 'https://outfitstyle.ru/api/v1');
+          : '/');
 
   // Настройки Firebase
   static const String firebaseProjectId = String.fromEnvironment(
