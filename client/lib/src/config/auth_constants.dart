@@ -3,7 +3,7 @@ class AuthConstants {
   static const String anonymousSignInMethod = 'anonymous';
   static const String emailPasswordSignInMethod = 'password';
 
-  // Error codes
+  // Коды ошибок
   static const String errorCodeUserNotFound = 'user-not-found';
   static const String errorCodeWrongPassword = 'wrong-password';
   static const String errorCodeWeakPassword = 'weak-password';

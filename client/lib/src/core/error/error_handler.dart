@@ -8,7 +8,7 @@ class ErrorHandler {
     if (_initialized) return;
 
     try {
-      // Set the Flutter error handler to use Crashlytics
+      // Установить обработчик ошибок Flutter для использования Crashlytics
       FlutterError.onError = (FlutterErrorDetails details) {
         if (kReleaseMode) {
           FirebaseCrashlytics.instance.recordFlutterFatalError(details);
@@ -17,7 +17,7 @@ class ErrorHandler {
         }
       };
 
-      // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+      // Передать все необработанные асинхронные ошибки, которые не обработаны Flutter, в Crashlytics
       PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
         if (kReleaseMode) {
           FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
@@ -25,12 +25,12 @@ class ErrorHandler {
         return true;
       };
 
-      // Enable crashlytics reporting
+      // Включить отчеты Crashlytics
       await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
       _initialized = true;
     } catch (e) {
       debugPrint('⚠️ Crashlytics init failed: $e');
-      // Use default error handler
+      // Использовать обработчик ошибок по умолчанию
       FlutterError.presentError = FlutterError.presentError;
     }
   }
