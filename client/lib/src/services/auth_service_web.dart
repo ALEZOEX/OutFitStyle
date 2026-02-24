@@ -24,17 +24,11 @@ class AuthService {
        )),
        _googleSignIn = GoogleSignIn(
          scopes: ['email', 'profile'],
-         // Web client ID для серверной верификации
-         // Для web используется один client ID
-         serverClientId: _getServerClientId(),
+         // Web OAuth 2.0 Client ID для браузера
+         clientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
+         // Server client ID для верификации на бэкенде
+         serverClientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
        );
-
-  /// Получает server client ID для Web
-  /// Web использует фиксированный Web OAuth client ID
-  static String? _getServerClientId() {
-    // Web OAuth client ID из Google Cloud Console
-    return '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com';
-  }
 
   Future<TokenPair> loginWithGoogle() async {
     try {
