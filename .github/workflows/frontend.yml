@@ -69,8 +69,8 @@ jobs:
             export LANG=en_US.UTF-8
             export LC_ALL=en_US.UTF-8
             set -e
-            kubectl rollout restart deployment/frontend -n outfitstyle
-            kubectl rollout status deployment/frontend -n outfitstyle --timeout=300s
+            kubectl -n outfitstyle set image deployment/frontend frontend=ghcr.io/alezoex/outfitstyle-frontend:${{ github.sha }}
+            kubectl -n outfitstyle rollout status deployment/frontend --timeout=300s
           EOF
 
   cleanup-old-images:
