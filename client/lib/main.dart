@@ -16,12 +16,8 @@ Future<void> main() async {
   // Firebase работает только на mobile (iOS/Android)
   // На web Firebase требует firebase_options.dart который нужно генерировать через flutterfire configure
   if (!kIsWeb) {
-    try {
-      await ErrorHandler.init();
-      debugPrint('✅ Firebase и Crashlytics включены');
-    } catch (e) {
-      debugPrint('⚠️ Firebase не настроен: $e');
-    }
+    // ErrorHandler.init() - требует Firebase
+    debugPrint('📱 Mobile-версия: Firebase будет инициализирован в AuthService');
   } else {
     debugPrint('📝 Web-версия: Firebase отключён (требуется firebase_options.dart)');
   }
