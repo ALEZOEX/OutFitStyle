@@ -28,7 +28,7 @@ class ApiConfig {
   /// Примечание: пути в API клиента должны начинаться с /api/v1/...
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: '/',
+    defaultValue: 'https://outfitstyle.ru',
   );
   static const Duration defaultConnectTimeout = Duration(seconds: 10);
   static const Duration defaultReceiveTimeout = Duration(seconds: 10);
