@@ -71,10 +71,37 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - name: Decode google-services.json
+      - name: Create google-services.json (fallback)
         run: |
-          mkdir -p client/android/app
-          echo "$GOOGLE_SERVICES_JSON" | base64 -d > client/android/app/google-services.json
+          mkdir -p android/app
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
+          else
+            cat > android/app/google-services.json << 'EOF'
+            {
+              "project_info": {
+                "project_number": "000000000000",
+                "project_id": "outfitstyle-dummy",
+                "storage_bucket": "outfitstyle-dummy.appspot.com"
+              },
+              "client": [
+                {
+                  "client_info": {
+                    "mobile_client_id": "000000000000-android:0000000000000000",
+                    "android_client_info": {
+                      "package_name": "com.outfitstyle.app",
+                      "certificate_hash": []
+                    }
+                  },
+                  "oauth_client": [],
+                  "api_key": [{"current_key": "dummy_api_key_for_ci_build"}],
+                  "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+                }
+              ],
+              "configuration_version": "1"
+            }
+            EOF
+          fi
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
