@@ -18,6 +18,8 @@ RUN printf 'server {\n\
     index index.html;\n\
     location = /privacy.html { try_files $uri =404; }\n\
     location = /terms.html { try_files $uri =404; }\n\
+    location = /privacy { try_files /privacy.html =404; }\n\
+    location = /terms { try_files /terms.html =404; }\n\
     location /assets/ { expires 1y; add_header Cache-Control "public, immutable"; }\n\
     location / { try_files $uri $uri/ /index.html; }\n\
 }\n' > /etc/nginx/conf.d/default.conf
