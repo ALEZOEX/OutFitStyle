@@ -11,7 +11,7 @@ class AppConfig {
   static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL',
       defaultValue: kDebugMode
           ? 'http://localhost:8080'
-          : 'https://outfitstyle.ru');
+          : '/');
 
   // Настройки Firebase
   static const String firebaseProjectId = String.fromEnvironment(
