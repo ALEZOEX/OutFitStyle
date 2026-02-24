@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -84,10 +82,11 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   /// Загрузить аватар и сохранить на сервере
-  Future<bool> uploadAvatar(File imageFile) async {
+  /// IO-версия принимает XFile и передаёт в uploadService
+  Future<bool> uploadAvatar(XFile imageFile) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // Загружаем файл на сервер
+      // Загружаем файл на сервер (uploadService принимает XFile)
       final imageUrl = await _uploadService.uploadImage(imageFile);
 
       // Обновляем профиль с новым URL
@@ -250,9 +249,8 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
       );
 
       if (image != null && mounted) {
-        // Загружаем изображение на сервер
-        final imageFile = File(image.path);
-        final success = await ref.read(profileProvider.notifier).uploadAvatar(imageFile);
+        // IO-версия: передаем XFile напрямую (конвертация внутри uploadAvatar)
+        final success = await ref.read(profileProvider.notifier).uploadAvatar(image);
 
         if (mounted) {
           if (success) {

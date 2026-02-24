@@ -1,11 +1,9 @@
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:universal_html/html.dart' as html;
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
@@ -96,13 +94,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<bool> uploadAvatar(XFile imageFile) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // Web-версия: читаем файл как bytes и создаем FormData
-      final bytes = await imageFile.readAsBytes();
-      final blob = html.Blob([bytes], 'image/jpeg');
-      final htmlFile = html.File([blob], 'avatar.jpg', {'type': 'image/jpeg'});
-      
-      // Используем uploadImage с html.File
-      final imageUrl = await _uploadService.uploadImage(htmlFile);
+      // Web-версия: передаем XFile напрямую (uploadService конвертирует)
+      final imageUrl = await _uploadService.uploadImage(imageFile);
       final userData = await _repository.uploadAvatar(imageUrl);
 
       state = ProfileState.fromMap(userData).copyWith(isLoading: false);
@@ -661,12 +654,13 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     }
 
     // Если URL начинается с http, используем CachedNetworkImage
-    if (state.avatarUrl!.startsWith('http')) {
-      return CachedNetworkImageProvider(state.avatarUrl!);
+    final avatarUrl = state.avatarUrl;
+    if (avatarUrl != null && avatarUrl.startsWith('http')) {
+      return CachedNetworkImageProvider(avatarUrl);
     }
 
     // Иначе пробуем как network image
-    return NetworkImage(state.avatarUrl!);
+    return avatarUrl != null ? NetworkImage(avatarUrl) : null;
   }
 
   Widget _buildTextField({

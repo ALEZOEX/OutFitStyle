@@ -1,9 +1,6 @@
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import '../../services/auth_storage.dart';
 import 'api_config.dart';
@@ -40,21 +37,21 @@ class UploadService {
 
   /// Загружает изображение на сервер
   ///
-  /// [file] - файл изображения для загрузки (html.File для web)
+  /// [imageFile] - файл изображения для загрузки (XFile от image_picker)
   /// [onProgress] - callback для отслеживания прогресса (0.0 - 1.0)
   ///
   /// Возвращает URL загруженного изображения
   ///
   /// Endpoint: POST /api/v1/upload/image
   Future<String> uploadImage(
-    html.File file, {
+    XFile imageFile, {
     void Function(double progress)? onProgress,
   }) async {
     try {
-      final fileName = file.name;
+      final fileName = imageFile.name;
 
       // Читаем байты файла
-      final bytes = await _readFileAsBytes(file);
+      final bytes = await imageFile.readAsBytes();
 
       // Создаем FormData для multipart запроса
       final formData = FormData.fromMap({
@@ -95,34 +92,22 @@ class UploadService {
     }
   }
 
-  /// Загружает изображение из File (для совместности с IO версией)
-  /// Web-версия принимает File как dynamic и конвертирует
-  Future<String> uploadImageFromFile(
-    dynamic file, {
-    void Function(double progress)? onProgress,
-  }) async {
-    if (file is html.File) {
-      return uploadImage(file, onProgress: onProgress);
-    }
-    throw UploadException('Неподдерживаемый тип файла для Web');
-  }
-
   /// Загружает несколько изображений
   ///
-  /// [files] - список файлов изображений (html.File для web)
+  /// [imageFiles] - список файлов изображений (XFile от image_picker)
   /// [onProgress] - callback для отслеживания прогресса
   ///
   /// Возвращает список URL загруженных изображений
   Future<List<String>> uploadImages(
-    List<html.File> files, {
+    List<XFile> imageFiles, {
     void Function(double progress)? onProgress,
   }) async {
     final urls = <String>[];
-    final totalFiles = files.length;
+    final totalFiles = imageFiles.length;
 
     for (var i = 0; i < totalFiles; i++) {
       final url = await uploadImage(
-        files[i],
+        imageFiles[i],
         onProgress: (fileProgress) {
           if (onProgress != null) {
             // Общий прогресс: (количество готовых файлов + прогресс текущего) / общее количество
@@ -135,31 +120,6 @@ class UploadService {
     }
 
     return urls;
-  }
-
-  /// Читает файл как байты
-  Future<Uint8List> _readFileAsBytes(html.File file) async {
-    final completer = Completer<Uint8List>();
-    final reader = html.FileReader();
-
-    reader.onLoadEnd.listen((e) {
-      final result = reader.result;
-      if (result is ByteBuffer) {
-        completer.complete(result.asUint8List());
-      } else if (result is Uint8List) {
-        completer.complete(result);
-      } else {
-        completer.completeError('Не удалось прочитать файл');
-      }
-    });
-
-    reader.onError.listen((e) {
-      completer.completeError('Ошибка чтения файла: ${e.target}');
-    });
-
-    reader.readAsArrayBuffer(file);
-
-    return completer.future;
   }
 
   MediaType _getContentType(String fileName) {

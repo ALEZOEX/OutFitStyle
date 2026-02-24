@@ -11,6 +11,13 @@ class SecurityConfig {
 
   SecurityConfig._internal();
 
+  /// Создать защищённый HttpClient с certificate pinning
+  HttpClient createSecureHttpClient() {
+    final client = HttpClient();
+    applyToHttpClient(client);
+    return client;
+  }
+
   /// Валидация сертификата для certificate pinning
   bool validateCertificate(dynamic cert, String host) {
     // Здесь можно реализовать pinning сертификатов

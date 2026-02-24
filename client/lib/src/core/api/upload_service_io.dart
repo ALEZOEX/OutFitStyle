@@ -1,12 +1,12 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import '../../services/auth_storage.dart';
 import 'api_config.dart';
 
 /// Сервис для загрузки изображений на сервер
-/// 
+///
 /// Использует multipart/form-data для загрузки файлов
 /// Возвращает URL загруженного изображения
 class UploadService {
@@ -36,14 +36,14 @@ class UploadService {
 
   /// Загружает изображение на сервер
   ///
-  /// [imageFile] - файл изображения для загрузки
+  /// [imageFile] - файл изображения для загрузки (XFile от image_picker)
   /// [onProgress] - callback для отслеживания прогресса (0.0 - 1.0)
   ///
   /// Возвращает URL загруженного изображения
   ///
   /// Endpoint: POST /api/v1/upload/image
   Future<String> uploadImage(
-    File imageFile, {
+    XFile imageFile, {
     void Function(double progress)? onProgress,
   }) async {
     try {
@@ -89,18 +89,18 @@ class UploadService {
   }
 
   /// Загружает несколько изображений
-  /// 
-  /// [imageFiles] - список файлов изображений
+  ///
+  /// [imageFiles] - список файлов изображений (XFile от image_picker)
   /// [onProgress] - callback для отслеживания прогресса
-  /// 
+  ///
   /// Возвращает список URL загруженных изображений
   Future<List<String>> uploadImages(
-    List<File> imageFiles, {
+    List<XFile> imageFiles, {
     void Function(double progress)? onProgress,
   }) async {
     final urls = <String>[];
     final totalFiles = imageFiles.length;
-    
+
     for (var i = 0; i < totalFiles; i++) {
       final url = await uploadImage(
         imageFiles[i],
@@ -114,7 +114,7 @@ class UploadService {
       );
       urls.add(url);
     }
-    
+
     return urls;
   }
 
