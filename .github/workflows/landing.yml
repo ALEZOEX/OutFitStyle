@@ -1,4 +1,4 @@
-name: Landing CI/CD
+﻿name: Landing CI/CD
 
 on:
   push:
@@ -17,26 +17,10 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: landing/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./landing
-        run: npm ci
-
-      - name: Build landing
-        working-directory: ./landing
-        run: npm run build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -70,6 +54,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
 
   deploy:
     needs: build-and-push
@@ -86,7 +72,7 @@ jobs:
 
       - name: Deploy to k3s
         run: |
-          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=30 root@${{ secrets.SERVER_IP }} << 'EOF'
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=30 root@${{ secrets.DEPLOY_HOST }} << 'EOF'
             cd /root/OutFitStyle
             git pull origin main
             kubectl apply -f k8s/landing-deployment.yaml

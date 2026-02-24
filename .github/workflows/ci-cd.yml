@@ -89,6 +89,8 @@ jobs:
             ${{ env.REGISTRY }}/alezoex/outfitstyle-server:${{ env.SHORT_SHA }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
 
       - name: Build and push ml-service
         uses: docker/build-push-action@v6
@@ -101,6 +103,8 @@ jobs:
             ${{ env.REGISTRY }}/alezoex/outfitstyle-ml:${{ env.SHORT_SHA }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
 
       - name: Build and push marketplace-service
         uses: docker/build-push-action@v6
@@ -113,6 +117,8 @@ jobs:
             ${{ env.REGISTRY }}/alezoex/outfitstyle-marketplace:${{ env.SHORT_SHA }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
 
   deploy-k3s:
     needs: build-and-push
@@ -167,3 +173,4 @@ jobs:
           name: outfitstyle-marketplace
           token: ${{ secrets.GITHUB_TOKEN }}
           untagged-older-than: 7
+

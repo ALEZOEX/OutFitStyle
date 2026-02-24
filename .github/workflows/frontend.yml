@@ -58,6 +58,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
 
   deploy:
     needs: build
@@ -97,3 +99,4 @@ jobs:
           name: outfitstyle/frontend
           token: ${{ secrets.GITHUB_TOKEN }}
           untagged-older-than: 7
+
