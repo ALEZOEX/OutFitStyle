@@ -160,8 +160,14 @@ class SessionManager {
         throw Exception('Не указаны учетные данные для входа');
       }
 
-      await _updateSessionFromFirebase(credential.user!);
-      AppLogger.info('Sign in successful for user: ${credential.user!.uid}');
+      final user = credential.user;
+      if (user == null) {
+        AppLogger.warning('No user in credential after sign in');
+        throw Exception('Не удалось получить данные пользователя');
+      }
+      
+      await _updateSessionFromFirebase(user);
+      AppLogger.info('Sign in successful for user: ${user.uid}');
       return true;
     } catch (e) {
       // Логирование ошибки входа
@@ -193,8 +199,14 @@ class SessionManager {
         password: password,
       );
 
-      await _updateSessionFromFirebase(credential.user!);
-      AppLogger.info('Sign up successful for user: ${credential.user!.uid}');
+      final user = credential.user;
+      if (user == null) {
+        AppLogger.warning('No user in credential after sign up');
+        throw Exception('Не удалось получить данные пользователя');
+      }
+      
+      await _updateSessionFromFirebase(user);
+      AppLogger.info('Sign up successful for user: ${user.uid}');
       return true;
     } catch (e) {
       // Логирование ошибки регистрации
