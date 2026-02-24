@@ -1,4 +1,4 @@
-name: Frontend CI/CD
+﻿name: Frontend CI/CD
 
 on:
   push:
@@ -21,7 +21,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -37,9 +36,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Ensure lowercase repository name
+      - name: Ensure lowercase image name
         run: |
-          echo "IMAGE_NAME_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "IMAGE_NAME_LOWERCASE=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Extract metadata
         id: meta
@@ -49,7 +48,6 @@ jobs:
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=,format=short
-            type=ref,event=pr
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -60,13 +58,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
 
     steps:
       - name: Checkout repository
@@ -77,18 +73,13 @@ jobs:
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
-          if_key_not_found: 'error'
 
       - name: Deploy to k3s
         run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=30 root@${{ secrets.SERVER_IP }} << 'EOF'
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=30 root@${{ secrets.DEPLOY_HOST }} << 'EOF'
             set -e
-            echo "🔄 Updating frontend deployment..."
             kubectl rollout restart deployment/frontend -n outfitstyle
-            echo "⏳ Waiting for rollout..."
             kubectl rollout status deployment/frontend -n outfitstyle --timeout=300s
-            echo "✅ Frontend updated successfully!"
-            echo "📊 Pod status:"
             kubectl get pods -n outfitstyle -l app=frontend
           EOF
 
@@ -102,7 +93,7 @@ jobs:
       - name: Delete old frontend images
         uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
-          owner: alezoex
+          owner: ${{ github.repository_owner }}
           name: outfitstyle/frontend
           token: ${{ secrets.GITHUB_TOKEN }}
           untagged-older-than: 7

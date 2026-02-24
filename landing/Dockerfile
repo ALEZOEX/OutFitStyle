@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+﻿FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -12,16 +12,15 @@ FROM nginx:alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# nginx конфиг для SPA с поддержкой privacy.html и terms.html
-RUN echo 'server { \
-    listen 80; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    location = /privacy.html { try_files $uri =404; } \
-    location = /terms.html { try_files $uri =404; } \
-    location /assets/ { expires 1y; add_header Cache-Control "public, immutable"; } \
-    location / { try_files $uri $uri/ /index.html; } \
-}' > /etc/nginx/conf.d/default.conf
+RUN printf 'server {\n\
+    listen 80;\n\
+    root /usr/share/nginx/html;\n\
+    index index.html;\n\
+    location = /privacy.html { try_files $uri =404; }\n\
+    location = /terms.html { try_files $uri =404; }\n\
+    location /assets/ { expires 1y; add_header Cache-Control "public, immutable"; }\n\
+    location / { try_files $uri $uri/ /index.html; }\n\
+}\n' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
