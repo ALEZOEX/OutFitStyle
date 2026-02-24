@@ -29,10 +29,19 @@ spec:
                 port:
                   number: 80
 
-    # Flutter Web
+    # Flutter Web + API Proxy
     - host: app.outfitstyle.ru
       http:
         paths:
+          # API прокси на backend
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 80
+          # Фронтенд
           - path: /
             pathType: Prefix
             backend:
