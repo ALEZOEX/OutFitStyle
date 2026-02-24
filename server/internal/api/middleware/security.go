@@ -11,8 +11,12 @@ func SecurityHeadersMiddleware() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Заголовки безопасности
+			// ПРИОРИТЕТ 1: Обязательные заголовки (рекомендации пентеста)
+			w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.Header().Set("X-Frame-Options", "DENY")
+
+			// ПРИОРИТЕТ 2: Рекомендованные заголовки
 			w.Header().Set("X-XSS-Protection", "1; mode=block")
 			w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 			w.Header().Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
