@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
@@ -7,6 +7,8 @@ metadata:
     app: postgres
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: postgres
@@ -15,6 +17,9 @@ spec:
       labels:
         app: postgres
     spec:
+      securityContext:
+        fsGroup: 70
+        runAsNonRoot: true
       initContainers:
       - name: init-db-permissions
         image: busybox:1.35
@@ -23,16 +28,15 @@ spec:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
         securityContext:
-          runAsUser: 0  # root to change ownership
+          runAsUser: 0
           runAsNonRoot: false
           capabilities:
-            drop:
-            - ALL
-            add:
-            - CHOWN
+            drop: ["ALL"]
+            add: ["CHOWN"]
       containers:
       - name: postgres
-        image: postgres:15
+        image: postgres:15-alpine
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5432
         env:
@@ -51,29 +55,26 @@ spec:
             secretKeyRef:
               name: outfitstyle-secrets
               key: db-password
-        volumeMounts:
-        - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
         livenessProbe:
           exec:
             command:
-            - pg_isready
-            - -U
-            - $(POSTGRES_USER)
-            - -d
-            - $(POSTGRES_DB)
+            - sh
+            - -c
+            - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
           initialDelaySeconds: 30
           periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         readinessProbe:
           exec:
             command:
-            - pg_isready
-            - -U
-            - $(POSTGRES_USER)
-            - -d
-            - $(POSTGRES_DB)
+            - sh
+            - -c
+            - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
           initialDelaySeconds: 5
           periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
         resources:
           requests:
             memory: "256Mi"
@@ -84,10 +85,12 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           runAsNonRoot: true
-          runAsUser: 70  # UID for official postgres image
+          runAsUser: 70
           capabilities:
-            drop:
-            - ALL
+            drop: ["ALL"]
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
@@ -102,19 +105,7 @@ spec:
   selector:
     app: postgres
   ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
   type: ClusterIP
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-  namespace: outfitstyle
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
