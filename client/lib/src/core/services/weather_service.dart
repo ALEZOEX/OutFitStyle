@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/domain/entities/weather_data.dart';
 
-/// Service for interacting with weather APIs
-/// Note: This service follows the repository pattern and should typically be used through the WeatherRepository
+/// Сервис для взаимодействия с погодными API
+/// Примечание: Этот сервис следует паттерну repository и обычно используется через WeatherRepository
 class WeatherService {
   final Dio _dio;
   final String _apiKey;
