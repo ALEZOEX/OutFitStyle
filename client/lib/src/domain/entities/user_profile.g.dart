@@ -12,25 +12,31 @@ _UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
   email: json['email'] as String,
   avatarUrl: json['avatarUrl'] as String?,
   bio: json['bio'] as String?,
-  birthDate: json['birthDate'] == null
-      ? null
-      : DateTime.parse(json['birthDate'] as String),
-  preferredCategories: (json['preferredCategories'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  preferredColors: (json['preferredColors'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  preferredBrands: (json['preferredBrands'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  birthDate:
+      json['birthDate'] == null
+          ? null
+          : DateTime.parse(json['birthDate'] as String),
+  preferredCategories:
+      (json['preferredCategories'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+  preferredColors:
+      (json['preferredColors'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+  preferredBrands:
+      (json['preferredBrands'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
   preferences: json['preferences'] as Map<String, dynamic>?,
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
-      ? null
-      : DateTime.parse(json['updatedAt'] as String),
+  createdAt:
+      json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+  updatedAt:
+      json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>

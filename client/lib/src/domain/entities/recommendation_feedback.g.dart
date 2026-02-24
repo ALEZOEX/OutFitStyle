@@ -41,12 +41,14 @@ _RecommendationFeedback _$RecommendationFeedbackFromJson(
       $enumDecodeNullable(_$FeedbackSourceEnumMap, json['source']) ??
       FeedbackSource.user,
   dummyField: json['dummyField'] as String? ?? '',
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
-      ? null
-      : DateTime.parse(json['updatedAt'] as String),
+  createdAt:
+      json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+  updatedAt:
+      json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$RecommendationFeedbackToJson(

@@ -25,9 +25,10 @@ _WardrobeItem _$WardrobeItemFromJson(Map<String, dynamic> json) =>
       snowOk: json['snowOk'] as bool?,
       windOk: json['windOk'] as bool?,
       usage: (json['usage'] as num?)?.toInt(),
-      materials: (json['materials'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      materials:
+          (json['materials'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList(),
       gender: json['gender'] as String?,
       fit: json['fit'] as String?,
       pattern: json['pattern'] as String?,
@@ -38,9 +39,10 @@ _WardrobeItem _$WardrobeItemFromJson(Map<String, dynamic> json) =>
       season: json['season'] as String?,
       serverId: json['serverId'] as String?,
       dirty: json['dirty'] as bool?,
-      lastSyncedAt: json['lastSyncedAt'] == null
-          ? null
-          : DateTime.parse(json['lastSyncedAt'] as String),
+      lastSyncedAt:
+          json['lastSyncedAt'] == null
+              ? null
+              : DateTime.parse(json['lastSyncedAt'] as String),
     );
 
 Map<String, dynamic> _$WardrobeItemToJson(_WardrobeItem instance) =>

@@ -14,25 +14,27 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   phoneNumber: json['phoneNumber'] as String?,
   bio: json['bio'] as String?,
   location: json['location'] as String?,
-  birthDate: json['birthDate'] == null
-      ? null
-      : DateTime.parse(json['birthDate'] as String),
+  birthDate:
+      json['birthDate'] == null
+          ? null
+          : DateTime.parse(json['birthDate'] as String),
   gender: json['gender'] as String?,
   occupation: json['occupation'] as String?,
   company: json['company'] as String?,
   website: json['website'] as String?,
   isVerified: json['isVerified'] as bool?,
   isPremium: json['isPremium'] as bool?,
-  joinedAt: json['joinedAt'] == null
-      ? null
-      : DateTime.parse(json['joinedAt'] as String),
-  lastActiveAt: json['lastActiveAt'] == null
-      ? null
-      : DateTime.parse(json['lastActiveAt'] as String),
+  joinedAt:
+      json['joinedAt'] == null
+          ? null
+          : DateTime.parse(json['joinedAt'] as String),
+  lastActiveAt:
+      json['lastActiveAt'] == null
+          ? null
+          : DateTime.parse(json['lastActiveAt'] as String),
   preferences: json['preferences'] as Map<String, dynamic>?,
-  interests: (json['interests'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  interests:
+      (json['interests'] as List<dynamic>?)?.map((e) => e as String).toList(),
   profileVisibility: json['profileVisibility'] as String?,
   notificationSettings: json['notificationSettings'] as String?,
   privacySettings: json['privacySettings'] as String?,

@@ -41,18 +41,22 @@ _ClothingItem _$ClothingItemFromJson(Map<String, dynamic> json) =>
       usageCount: (json['usageCount'] as num?)?.toInt() ?? 0,
       timesWorn: (json['timesWorn'] as num?)?.toInt() ?? 0,
       comfortRating: (json['comfortRating'] as num?)?.toDouble() ?? 0.0,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
-      addedDate: json['addedDate'] == null
-          ? null
-          : DateTime.parse(json['addedDate'] as String),
-      lastWornDate: json['lastWornDate'] == null
-          ? null
-          : DateTime.parse(json['lastWornDate'] as String),
+      createdAt:
+          json['createdAt'] == null
+              ? null
+              : DateTime.parse(json['createdAt'] as String),
+      updatedAt:
+          json['updatedAt'] == null
+              ? null
+              : DateTime.parse(json['updatedAt'] as String),
+      addedDate:
+          json['addedDate'] == null
+              ? null
+              : DateTime.parse(json['addedDate'] as String),
+      lastWornDate:
+          json['lastWornDate'] == null
+              ? null
+              : DateTime.parse(json['lastWornDate'] as String),
       price: (json['price'] as num?)?.toDouble(),
       size: json['size'] as String?,
     );
@@ -70,9 +74,10 @@ Map<String, dynamic> _$ClothingItemToJson(
   'brand': instance.brand,
   'material': instance.material,
   'seasons': instance.seasons.map((e) => _$ClothingSeasonEnumMap[e]!).toList(),
-  'weatherConditions': instance.weatherConditions
-      .map((e) => _$ClothingWeatherEnumMap[e]!)
-      .toList(),
+  'weatherConditions':
+      instance.weatherConditions
+          .map((e) => _$ClothingWeatherEnumMap[e]!)
+          .toList(),
   'isFavorite': instance.isFavorite,
   'isArchived': instance.isArchived,
   'occasions': instance.occasions,

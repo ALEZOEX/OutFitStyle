@@ -13,9 +13,10 @@ _AchievementProgress _$AchievementProgressFromJson(Map<String, dynamic> json) =>
       currentProgress: (json['currentProgress'] as num).toInt(),
       targetProgress: (json['targetProgress'] as num).toInt(),
       isCompleted: json['isCompleted'] as bool,
-      completedAt: json['completedAt'] == null
-          ? null
-          : DateTime.parse(json['completedAt'] as String),
+      completedAt:
+          json['completedAt'] == null
+              ? null
+              : DateTime.parse(json['completedAt'] as String),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

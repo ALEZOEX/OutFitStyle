@@ -16,15 +16,18 @@ _Achievement _$AchievementFromJson(Map<String, dynamic> json) => _Achievement(
   currentProgress: (json['currentProgress'] as num?)?.toInt() ?? 0,
   targetValue: (json['targetValue'] as num?)?.toInt() ?? 1,
   isUnlocked: json['isUnlocked'] as bool? ?? false,
-  unlockedAt: json['unlockedAt'] == null
-      ? null
-      : DateTime.parse(json['unlockedAt'] as String),
-  createdAt: json['createdAt'] == null
-      ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
-      ? null
-      : DateTime.parse(json['updatedAt'] as String),
+  unlockedAt:
+      json['unlockedAt'] == null
+          ? null
+          : DateTime.parse(json['unlockedAt'] as String),
+  createdAt:
+      json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+  updatedAt:
+      json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
   userId: json['userId'] as String?,
   reward: json['reward'] as String? ?? '',
   isVisible: json['isVisible'] as bool? ?? true,

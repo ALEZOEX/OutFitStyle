@@ -4,14 +4,16 @@ part of 'wardrobe_database.dart';
 
 // ignore_for_file: type=lint
 class $ClothingItemsTable extends ClothingItems
-    with TableInfo<$ClothingItemsTable, DbClothingItem> {
+    with drift.TableInfo<$ClothingItemsTable, DbClothingItem> {
   @override
-  final GeneratedDatabase attachedDatabase;
+  final drift.GeneratedDatabase attachedDatabase;
   final String? _alias;
   $ClothingItemsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  static const drift.VerificationMeta _idMeta = const drift.VerificationMeta(
+    'id',
+  );
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> id = drift.GeneratedColumn<int>(
     'id',
     aliasedName,
     false,
@@ -22,277 +24,288 @@ class $ClothingItemsTable extends ClothingItems
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _externalIdMeta = const VerificationMeta(
-    'externalId',
+  static const drift.VerificationMeta _externalIdMeta =
+      const drift.VerificationMeta('externalId');
+  @override
+  late final drift.GeneratedColumn<String> externalId =
+      drift.GeneratedColumn<String>(
+        'external_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _nameMeta = const drift.VerificationMeta(
+    'name',
   );
   @override
-  late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
-    'external_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+  late final drift.GeneratedColumn<String> name = drift.GeneratedColumn<String>(
     'name',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _descriptionMeta = const VerificationMeta(
-    'description',
+  static const drift.VerificationMeta _descriptionMeta =
+      const drift.VerificationMeta('description');
+  @override
+  late final drift.GeneratedColumn<String> description =
+      drift.GeneratedColumn<String>(
+        'description',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _imageUrlMeta =
+      const drift.VerificationMeta('imageUrl');
+  @override
+  late final drift.GeneratedColumn<String> imageUrl =
+      drift.GeneratedColumn<String>(
+        'image_url',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _categoryMeta =
+      const drift.VerificationMeta('category');
+  @override
+  late final drift.GeneratedColumn<String> category =
+      drift.GeneratedColumn<String>(
+        'category',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const drift.VerificationMeta _tagsMeta = const drift.VerificationMeta(
+    'tags',
   );
   @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-    'description',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
-    'imageUrl',
-  );
-  @override
-  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
-    'image_url',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _categoryMeta = const VerificationMeta(
-    'category',
-  );
-  @override
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
-    'category',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
-  @override
-  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
+  late final drift.GeneratedColumn<String> tags = drift.GeneratedColumn<String>(
     'tags',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('[]'),
+    defaultValue: const drift.Constant('[]'),
   );
-  static const VerificationMeta _colorMeta = const VerificationMeta('color');
-  @override
-  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+  static const drift.VerificationMeta _colorMeta = const drift.VerificationMeta(
     'color',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
   );
-  static const VerificationMeta _brandMeta = const VerificationMeta('brand');
   @override
-  late final GeneratedColumn<String> brand = GeneratedColumn<String>(
+  late final drift.GeneratedColumn<String> color =
+      drift.GeneratedColumn<String>(
+        'color',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _brandMeta = const drift.VerificationMeta(
     'brand',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _materialMeta = const VerificationMeta(
-    'material',
   );
   @override
-  late final GeneratedColumn<String> material = GeneratedColumn<String>(
-    'material',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _seasonsMeta = const VerificationMeta(
-    'seasons',
-  );
+  late final drift.GeneratedColumn<String> brand =
+      drift.GeneratedColumn<String>(
+        'brand',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _materialMeta =
+      const drift.VerificationMeta('material');
   @override
-  late final GeneratedColumn<String> seasons = GeneratedColumn<String>(
-    'seasons',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('[]'),
-  );
-  static const VerificationMeta _weatherConditionsMeta = const VerificationMeta(
-    'weatherConditions',
-  );
+  late final drift.GeneratedColumn<String> material =
+      drift.GeneratedColumn<String>(
+        'material',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _seasonsMeta =
+      const drift.VerificationMeta('seasons');
   @override
-  late final GeneratedColumn<String> weatherConditions =
-      GeneratedColumn<String>(
+  late final drift.GeneratedColumn<String> seasons =
+      drift.GeneratedColumn<String>(
+        'seasons',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const drift.Constant('[]'),
+      );
+  static const drift.VerificationMeta _weatherConditionsMeta =
+      const drift.VerificationMeta('weatherConditions');
+  @override
+  late final drift.GeneratedColumn<String> weatherConditions =
+      drift.GeneratedColumn<String>(
         'weather_conditions',
         aliasedName,
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('[]'),
+        defaultValue: const drift.Constant('[]'),
       );
-  static const VerificationMeta _occasionsMeta = const VerificationMeta(
-    'occasions',
-  );
+  static const drift.VerificationMeta _occasionsMeta =
+      const drift.VerificationMeta('occasions');
   @override
-  late final GeneratedColumn<String> occasions = GeneratedColumn<String>(
-    'occasions',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('[]'),
-  );
-  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
-    'isFavorite',
-  );
+  late final drift.GeneratedColumn<String> occasions =
+      drift.GeneratedColumn<String>(
+        'occasions',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const drift.Constant('[]'),
+      );
+  static const drift.VerificationMeta _isFavoriteMeta =
+      const drift.VerificationMeta('isFavorite');
   @override
-  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
-    'is_favorite',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_favorite" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
-    'isArchived',
-  );
+  late final drift.GeneratedColumn<bool> isFavorite =
+      drift.GeneratedColumn<bool>(
+        'is_favorite',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_favorite" IN (0, 1))',
+        ),
+        defaultValue: const drift.Constant(false),
+      );
+  static const drift.VerificationMeta _isArchivedMeta =
+      const drift.VerificationMeta('isArchived');
   @override
-  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
-    'is_archived',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_archived" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _timesWornMeta = const VerificationMeta(
-    'timesWorn',
-  );
+  late final drift.GeneratedColumn<bool> isArchived =
+      drift.GeneratedColumn<bool>(
+        'is_archived',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_archived" IN (0, 1))',
+        ),
+        defaultValue: const drift.Constant(false),
+      );
+  static const drift.VerificationMeta _timesWornMeta =
+      const drift.VerificationMeta('timesWorn');
   @override
-  late final GeneratedColumn<int> timesWorn = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> timesWorn = drift.GeneratedColumn<int>(
     'times_worn',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0),
+    defaultValue: const drift.Constant(0),
   );
-  static const VerificationMeta _comfortRatingMeta = const VerificationMeta(
-    'comfortRating',
-  );
+  static const drift.VerificationMeta _comfortRatingMeta =
+      const drift.VerificationMeta('comfortRating');
   @override
-  late final GeneratedColumn<double> comfortRating = GeneratedColumn<double>(
-    'comfort_rating',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
-  );
-  static const VerificationMeta _addedDateMeta = const VerificationMeta(
-    'addedDate',
-  );
+  late final drift.GeneratedColumn<double> comfortRating =
+      drift.GeneratedColumn<double>(
+        'comfort_rating',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const drift.Constant(0.0),
+      );
+  static const drift.VerificationMeta _addedDateMeta =
+      const drift.VerificationMeta('addedDate');
   @override
-  late final GeneratedColumn<int> addedDate = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> addedDate = drift.GeneratedColumn<int>(
     'added_date',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
+  static const drift.VerificationMeta _createdAtMeta =
+      const drift.VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> createdAt = drift.GeneratedColumn<int>(
     'created_at',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
+  static const drift.VerificationMeta _updatedAtMeta =
+      const drift.VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> updatedAt = drift.GeneratedColumn<int>(
     'updated_at',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _lastWornDateMeta = const VerificationMeta(
-    'lastWornDate',
-  );
+  static const drift.VerificationMeta _lastWornDateMeta =
+      const drift.VerificationMeta('lastWornDate');
   @override
-  late final GeneratedColumn<int> lastWornDate = GeneratedColumn<int>(
-    'last_worn_date',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _priceMeta = const VerificationMeta('price');
-  @override
-  late final GeneratedColumn<double> price = GeneratedColumn<double>(
+  late final drift.GeneratedColumn<int> lastWornDate =
+      drift.GeneratedColumn<int>(
+        'last_worn_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _priceMeta = const drift.VerificationMeta(
     'price',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
   );
-  static const VerificationMeta _sizeMeta = const VerificationMeta('size');
   @override
-  late final GeneratedColumn<String> size = GeneratedColumn<String>(
+  late final drift.GeneratedColumn<double> price =
+      drift.GeneratedColumn<double>(
+        'price',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _sizeMeta = const drift.VerificationMeta(
+    'size',
+  );
+  @override
+  late final drift.GeneratedColumn<String> size = drift.GeneratedColumn<String>(
     'size',
     aliasedName,
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _usageCountMeta = const VerificationMeta(
-    'usageCount',
-  );
+  static const drift.VerificationMeta _usageCountMeta =
+      const drift.VerificationMeta('usageCount');
   @override
-  late final GeneratedColumn<int> usageCount = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> usageCount = drift.GeneratedColumn<int>(
     'usage_count',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0),
+    defaultValue: const drift.Constant(0),
   );
-  static const VerificationMeta _serverIdMeta = const VerificationMeta(
-    'serverId',
+  static const drift.VerificationMeta _serverIdMeta =
+      const drift.VerificationMeta('serverId');
+  @override
+  late final drift.GeneratedColumn<String> serverId =
+      drift.GeneratedColumn<String>(
+        'server_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _dirtyMeta = const drift.VerificationMeta(
+    'dirty',
   );
   @override
-  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-    'server_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
-  @override
-  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+  late final drift.GeneratedColumn<bool> dirty = drift.GeneratedColumn<bool>(
     'dirty',
     aliasedName,
     false,
@@ -301,21 +314,21 @@ class $ClothingItemsTable extends ClothingItems
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("dirty" IN (0, 1))',
     ),
-    defaultValue: const Constant(false),
+    defaultValue: const drift.Constant(false),
   );
-  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
-    'lastSyncedAt',
-  );
+  static const drift.VerificationMeta _lastSyncedAtMeta =
+      const drift.VerificationMeta('lastSyncedAt');
   @override
-  late final GeneratedColumn<int> lastSyncedAt = GeneratedColumn<int>(
-    'last_synced_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
+  late final drift.GeneratedColumn<int> lastSyncedAt =
+      drift.GeneratedColumn<int>(
+        'last_synced_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
   @override
-  List<GeneratedColumn> get $columns => [
+  List<drift.GeneratedColumn> get $columns => [
     id,
     externalId,
     name,
@@ -350,11 +363,11 @@ class $ClothingItemsTable extends ClothingItems
   String get actualTableName => $name;
   static const String $name = 'clothing_items';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<DbClothingItem> instance, {
+  drift.VerificationContext validateIntegrity(
+    drift.Insertable<DbClothingItem> instance, {
     bool isInserting = false,
   }) {
-    final context = VerificationContext();
+    final context = drift.VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
@@ -544,23 +557,25 @@ class $ClothingItemsTable extends ClothingItems
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<drift.GeneratedColumn> get $primaryKey => {id};
   @override
   DbClothingItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbClothingItem(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
       externalId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}external_id'],
       ),
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
+      name:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}name'],
+          )!,
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -569,14 +584,16 @@ class $ClothingItemsTable extends ClothingItems
         DriftSqlType.string,
         data['${effectivePrefix}image_url'],
       ),
-      category: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}category'],
-      )!,
-      tags: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}tags'],
-      )!,
+      category:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}category'],
+          )!,
+      tags:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}tags'],
+          )!,
       color: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}color'],
@@ -589,46 +606,56 @@ class $ClothingItemsTable extends ClothingItems
         DriftSqlType.string,
         data['${effectivePrefix}material'],
       ),
-      seasons: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}seasons'],
-      )!,
-      weatherConditions: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}weather_conditions'],
-      )!,
-      occasions: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}occasions'],
-      )!,
-      isFavorite: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_favorite'],
-      )!,
-      isArchived: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_archived'],
-      )!,
-      timesWorn: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}times_worn'],
-      )!,
-      comfortRating: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}comfort_rating'],
-      )!,
-      addedDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}added_date'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}updated_at'],
-      )!,
+      seasons:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}seasons'],
+          )!,
+      weatherConditions:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}weather_conditions'],
+          )!,
+      occasions:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}occasions'],
+          )!,
+      isFavorite:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_favorite'],
+          )!,
+      isArchived:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_archived'],
+          )!,
+      timesWorn:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}times_worn'],
+          )!,
+      comfortRating:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.double,
+            data['${effectivePrefix}comfort_rating'],
+          )!,
+      addedDate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}added_date'],
+          )!,
+      createdAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}created_at'],
+          )!,
+      updatedAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}updated_at'],
+          )!,
       lastWornDate: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_worn_date'],
@@ -641,18 +668,20 @@ class $ClothingItemsTable extends ClothingItems
         DriftSqlType.string,
         data['${effectivePrefix}size'],
       ),
-      usageCount: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}usage_count'],
-      )!,
+      usageCount:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}usage_count'],
+          )!,
       serverId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}server_id'],
       ),
-      dirty: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}dirty'],
-      )!,
+      dirty:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}dirty'],
+          )!,
       lastSyncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_synced_at'],
@@ -666,7 +695,8 @@ class $ClothingItemsTable extends ClothingItems
   }
 }
 
-class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
+class DbClothingItem extends drift.DataClass
+    implements drift.Insertable<DbClothingItem> {
   final int id;
   final String? externalId;
   final String name;
@@ -724,109 +754,122 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
     this.lastSyncedAt,
   });
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+  Map<String, drift.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, drift.Expression>{};
+    map['id'] = drift.Variable<int>(id);
     if (!nullToAbsent || externalId != null) {
-      map['external_id'] = Variable<String>(externalId);
+      map['external_id'] = drift.Variable<String>(externalId);
     }
-    map['name'] = Variable<String>(name);
+    map['name'] = drift.Variable<String>(name);
     if (!nullToAbsent || description != null) {
-      map['description'] = Variable<String>(description);
+      map['description'] = drift.Variable<String>(description);
     }
     if (!nullToAbsent || imageUrl != null) {
-      map['image_url'] = Variable<String>(imageUrl);
+      map['image_url'] = drift.Variable<String>(imageUrl);
     }
-    map['category'] = Variable<String>(category);
-    map['tags'] = Variable<String>(tags);
+    map['category'] = drift.Variable<String>(category);
+    map['tags'] = drift.Variable<String>(tags);
     if (!nullToAbsent || color != null) {
-      map['color'] = Variable<String>(color);
+      map['color'] = drift.Variable<String>(color);
     }
     if (!nullToAbsent || brand != null) {
-      map['brand'] = Variable<String>(brand);
+      map['brand'] = drift.Variable<String>(brand);
     }
     if (!nullToAbsent || material != null) {
-      map['material'] = Variable<String>(material);
+      map['material'] = drift.Variable<String>(material);
     }
-    map['seasons'] = Variable<String>(seasons);
-    map['weather_conditions'] = Variable<String>(weatherConditions);
-    map['occasions'] = Variable<String>(occasions);
-    map['is_favorite'] = Variable<bool>(isFavorite);
-    map['is_archived'] = Variable<bool>(isArchived);
-    map['times_worn'] = Variable<int>(timesWorn);
-    map['comfort_rating'] = Variable<double>(comfortRating);
-    map['added_date'] = Variable<int>(addedDate);
-    map['created_at'] = Variable<int>(createdAt);
-    map['updated_at'] = Variable<int>(updatedAt);
+    map['seasons'] = drift.Variable<String>(seasons);
+    map['weather_conditions'] = drift.Variable<String>(weatherConditions);
+    map['occasions'] = drift.Variable<String>(occasions);
+    map['is_favorite'] = drift.Variable<bool>(isFavorite);
+    map['is_archived'] = drift.Variable<bool>(isArchived);
+    map['times_worn'] = drift.Variable<int>(timesWorn);
+    map['comfort_rating'] = drift.Variable<double>(comfortRating);
+    map['added_date'] = drift.Variable<int>(addedDate);
+    map['created_at'] = drift.Variable<int>(createdAt);
+    map['updated_at'] = drift.Variable<int>(updatedAt);
     if (!nullToAbsent || lastWornDate != null) {
-      map['last_worn_date'] = Variable<int>(lastWornDate);
+      map['last_worn_date'] = drift.Variable<int>(lastWornDate);
     }
     if (!nullToAbsent || price != null) {
-      map['price'] = Variable<double>(price);
+      map['price'] = drift.Variable<double>(price);
     }
     if (!nullToAbsent || size != null) {
-      map['size'] = Variable<String>(size);
+      map['size'] = drift.Variable<String>(size);
     }
-    map['usage_count'] = Variable<int>(usageCount);
+    map['usage_count'] = drift.Variable<int>(usageCount);
     if (!nullToAbsent || serverId != null) {
-      map['server_id'] = Variable<String>(serverId);
+      map['server_id'] = drift.Variable<String>(serverId);
     }
-    map['dirty'] = Variable<bool>(dirty);
+    map['dirty'] = drift.Variable<bool>(dirty);
     if (!nullToAbsent || lastSyncedAt != null) {
-      map['last_synced_at'] = Variable<int>(lastSyncedAt);
+      map['last_synced_at'] = drift.Variable<int>(lastSyncedAt);
     }
     return map;
   }
 
   ClothingItemsCompanion toCompanion(bool nullToAbsent) {
     return ClothingItemsCompanion(
-      id: Value(id),
-      externalId: externalId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(externalId),
-      name: Value(name),
-      description: description == null && nullToAbsent
-          ? const Value.absent()
-          : Value(description),
-      imageUrl: imageUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(imageUrl),
-      category: Value(category),
-      tags: Value(tags),
-      color: color == null && nullToAbsent
-          ? const Value.absent()
-          : Value(color),
-      brand: brand == null && nullToAbsent
-          ? const Value.absent()
-          : Value(brand),
-      material: material == null && nullToAbsent
-          ? const Value.absent()
-          : Value(material),
-      seasons: Value(seasons),
-      weatherConditions: Value(weatherConditions),
-      occasions: Value(occasions),
-      isFavorite: Value(isFavorite),
-      isArchived: Value(isArchived),
-      timesWorn: Value(timesWorn),
-      comfortRating: Value(comfortRating),
-      addedDate: Value(addedDate),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-      lastWornDate: lastWornDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastWornDate),
-      price: price == null && nullToAbsent
-          ? const Value.absent()
-          : Value(price),
-      size: size == null && nullToAbsent ? const Value.absent() : Value(size),
-      usageCount: Value(usageCount),
-      serverId: serverId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(serverId),
-      dirty: Value(dirty),
-      lastSyncedAt: lastSyncedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastSyncedAt),
+      id: drift.Value(id),
+      externalId:
+          externalId == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(externalId),
+      name: drift.Value(name),
+      description:
+          description == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(description),
+      imageUrl:
+          imageUrl == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(imageUrl),
+      category: drift.Value(category),
+      tags: drift.Value(tags),
+      color:
+          color == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(color),
+      brand:
+          brand == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(brand),
+      material:
+          material == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(material),
+      seasons: drift.Value(seasons),
+      weatherConditions: drift.Value(weatherConditions),
+      occasions: drift.Value(occasions),
+      isFavorite: drift.Value(isFavorite),
+      isArchived: drift.Value(isArchived),
+      timesWorn: drift.Value(timesWorn),
+      comfortRating: drift.Value(comfortRating),
+      addedDate: drift.Value(addedDate),
+      createdAt: drift.Value(createdAt),
+      updatedAt: drift.Value(updatedAt),
+      lastWornDate:
+          lastWornDate == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(lastWornDate),
+      price:
+          price == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(price),
+      size:
+          size == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(size),
+      usageCount: drift.Value(usageCount),
+      serverId:
+          serverId == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(serverId),
+      dirty: drift.Value(dirty),
+      lastSyncedAt:
+          lastSyncedAt == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(lastSyncedAt),
     );
   }
 
@@ -834,7 +877,7 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
+    serializer ??= drift.driftRuntimeOptions.defaultSerializer;
     return DbClothingItem(
       id: serializer.fromJson<int>(json['id']),
       externalId: serializer.fromJson<String?>(json['externalId']),
@@ -867,7 +910,7 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
+    serializer ??= drift.driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'externalId': serializer.toJson<String?>(externalId),
@@ -901,15 +944,15 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
 
   DbClothingItem copyWith({
     int? id,
-    Value<String?> externalId = const Value.absent(),
+    drift.Value<String?> externalId = const drift.Value.absent(),
     String? name,
-    Value<String?> description = const Value.absent(),
-    Value<String?> imageUrl = const Value.absent(),
+    drift.Value<String?> description = const drift.Value.absent(),
+    drift.Value<String?> imageUrl = const drift.Value.absent(),
     String? category,
     String? tags,
-    Value<String?> color = const Value.absent(),
-    Value<String?> brand = const Value.absent(),
-    Value<String?> material = const Value.absent(),
+    drift.Value<String?> color = const drift.Value.absent(),
+    drift.Value<String?> brand = const drift.Value.absent(),
+    drift.Value<String?> material = const drift.Value.absent(),
     String? seasons,
     String? weatherConditions,
     String? occasions,
@@ -920,13 +963,13 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
     int? addedDate,
     int? createdAt,
     int? updatedAt,
-    Value<int?> lastWornDate = const Value.absent(),
-    Value<double?> price = const Value.absent(),
-    Value<String?> size = const Value.absent(),
+    drift.Value<int?> lastWornDate = const drift.Value.absent(),
+    drift.Value<double?> price = const drift.Value.absent(),
+    drift.Value<String?> size = const drift.Value.absent(),
     int? usageCount,
-    Value<String?> serverId = const Value.absent(),
+    drift.Value<String?> serverId = const drift.Value.absent(),
     bool? dirty,
-    Value<int?> lastSyncedAt = const Value.absent(),
+    drift.Value<int?> lastSyncedAt = const drift.Value.absent(),
   }) => DbClothingItem(
     id: id ?? this.id,
     externalId: externalId.present ? externalId.value : this.externalId,
@@ -959,13 +1002,11 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
   DbClothingItem copyWithCompanion(ClothingItemsCompanion data) {
     return DbClothingItem(
       id: data.id.present ? data.id.value : this.id,
-      externalId: data.externalId.present
-          ? data.externalId.value
-          : this.externalId,
+      externalId:
+          data.externalId.present ? data.externalId.value : this.externalId,
       name: data.name.present ? data.name.value : this.name,
-      description: data.description.present
-          ? data.description.value
-          : this.description,
+      description:
+          data.description.present ? data.description.value : this.description,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       category: data.category.present ? data.category.value : this.category,
       tags: data.tags.present ? data.tags.value : this.tags,
@@ -973,36 +1014,37 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
       brand: data.brand.present ? data.brand.value : this.brand,
       material: data.material.present ? data.material.value : this.material,
       seasons: data.seasons.present ? data.seasons.value : this.seasons,
-      weatherConditions: data.weatherConditions.present
-          ? data.weatherConditions.value
-          : this.weatherConditions,
+      weatherConditions:
+          data.weatherConditions.present
+              ? data.weatherConditions.value
+              : this.weatherConditions,
       occasions: data.occasions.present ? data.occasions.value : this.occasions,
-      isFavorite: data.isFavorite.present
-          ? data.isFavorite.value
-          : this.isFavorite,
-      isArchived: data.isArchived.present
-          ? data.isArchived.value
-          : this.isArchived,
+      isFavorite:
+          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
+      isArchived:
+          data.isArchived.present ? data.isArchived.value : this.isArchived,
       timesWorn: data.timesWorn.present ? data.timesWorn.value : this.timesWorn,
-      comfortRating: data.comfortRating.present
-          ? data.comfortRating.value
-          : this.comfortRating,
+      comfortRating:
+          data.comfortRating.present
+              ? data.comfortRating.value
+              : this.comfortRating,
       addedDate: data.addedDate.present ? data.addedDate.value : this.addedDate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      lastWornDate: data.lastWornDate.present
-          ? data.lastWornDate.value
-          : this.lastWornDate,
+      lastWornDate:
+          data.lastWornDate.present
+              ? data.lastWornDate.value
+              : this.lastWornDate,
       price: data.price.present ? data.price.value : this.price,
       size: data.size.present ? data.size.value : this.size,
-      usageCount: data.usageCount.present
-          ? data.usageCount.value
-          : this.usageCount,
+      usageCount:
+          data.usageCount.present ? data.usageCount.value : this.usageCount,
       serverId: data.serverId.present ? data.serverId.value : this.serverId,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
-      lastSyncedAt: data.lastSyncedAt.present
-          ? data.lastSyncedAt.value
-          : this.lastSyncedAt,
+      lastSyncedAt:
+          data.lastSyncedAt.present
+              ? data.lastSyncedAt.value
+              : this.lastSyncedAt,
     );
   }
 
@@ -1103,126 +1145,126 @@ class DbClothingItem extends DataClass implements Insertable<DbClothingItem> {
           other.lastSyncedAt == this.lastSyncedAt);
 }
 
-class ClothingItemsCompanion extends UpdateCompanion<DbClothingItem> {
-  final Value<int> id;
-  final Value<String?> externalId;
-  final Value<String> name;
-  final Value<String?> description;
-  final Value<String?> imageUrl;
-  final Value<String> category;
-  final Value<String> tags;
-  final Value<String?> color;
-  final Value<String?> brand;
-  final Value<String?> material;
-  final Value<String> seasons;
-  final Value<String> weatherConditions;
-  final Value<String> occasions;
-  final Value<bool> isFavorite;
-  final Value<bool> isArchived;
-  final Value<int> timesWorn;
-  final Value<double> comfortRating;
-  final Value<int> addedDate;
-  final Value<int> createdAt;
-  final Value<int> updatedAt;
-  final Value<int?> lastWornDate;
-  final Value<double?> price;
-  final Value<String?> size;
-  final Value<int> usageCount;
-  final Value<String?> serverId;
-  final Value<bool> dirty;
-  final Value<int?> lastSyncedAt;
+class ClothingItemsCompanion extends drift.UpdateCompanion<DbClothingItem> {
+  final drift.Value<int> id;
+  final drift.Value<String?> externalId;
+  final drift.Value<String> name;
+  final drift.Value<String?> description;
+  final drift.Value<String?> imageUrl;
+  final drift.Value<String> category;
+  final drift.Value<String> tags;
+  final drift.Value<String?> color;
+  final drift.Value<String?> brand;
+  final drift.Value<String?> material;
+  final drift.Value<String> seasons;
+  final drift.Value<String> weatherConditions;
+  final drift.Value<String> occasions;
+  final drift.Value<bool> isFavorite;
+  final drift.Value<bool> isArchived;
+  final drift.Value<int> timesWorn;
+  final drift.Value<double> comfortRating;
+  final drift.Value<int> addedDate;
+  final drift.Value<int> createdAt;
+  final drift.Value<int> updatedAt;
+  final drift.Value<int?> lastWornDate;
+  final drift.Value<double?> price;
+  final drift.Value<String?> size;
+  final drift.Value<int> usageCount;
+  final drift.Value<String?> serverId;
+  final drift.Value<bool> dirty;
+  final drift.Value<int?> lastSyncedAt;
   const ClothingItemsCompanion({
-    this.id = const Value.absent(),
-    this.externalId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.description = const Value.absent(),
-    this.imageUrl = const Value.absent(),
-    this.category = const Value.absent(),
-    this.tags = const Value.absent(),
-    this.color = const Value.absent(),
-    this.brand = const Value.absent(),
-    this.material = const Value.absent(),
-    this.seasons = const Value.absent(),
-    this.weatherConditions = const Value.absent(),
-    this.occasions = const Value.absent(),
-    this.isFavorite = const Value.absent(),
-    this.isArchived = const Value.absent(),
-    this.timesWorn = const Value.absent(),
-    this.comfortRating = const Value.absent(),
-    this.addedDate = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.lastWornDate = const Value.absent(),
-    this.price = const Value.absent(),
-    this.size = const Value.absent(),
-    this.usageCount = const Value.absent(),
-    this.serverId = const Value.absent(),
-    this.dirty = const Value.absent(),
-    this.lastSyncedAt = const Value.absent(),
+    this.id = const drift.Value.absent(),
+    this.externalId = const drift.Value.absent(),
+    this.name = const drift.Value.absent(),
+    this.description = const drift.Value.absent(),
+    this.imageUrl = const drift.Value.absent(),
+    this.category = const drift.Value.absent(),
+    this.tags = const drift.Value.absent(),
+    this.color = const drift.Value.absent(),
+    this.brand = const drift.Value.absent(),
+    this.material = const drift.Value.absent(),
+    this.seasons = const drift.Value.absent(),
+    this.weatherConditions = const drift.Value.absent(),
+    this.occasions = const drift.Value.absent(),
+    this.isFavorite = const drift.Value.absent(),
+    this.isArchived = const drift.Value.absent(),
+    this.timesWorn = const drift.Value.absent(),
+    this.comfortRating = const drift.Value.absent(),
+    this.addedDate = const drift.Value.absent(),
+    this.createdAt = const drift.Value.absent(),
+    this.updatedAt = const drift.Value.absent(),
+    this.lastWornDate = const drift.Value.absent(),
+    this.price = const drift.Value.absent(),
+    this.size = const drift.Value.absent(),
+    this.usageCount = const drift.Value.absent(),
+    this.serverId = const drift.Value.absent(),
+    this.dirty = const drift.Value.absent(),
+    this.lastSyncedAt = const drift.Value.absent(),
   });
   ClothingItemsCompanion.insert({
-    this.id = const Value.absent(),
-    this.externalId = const Value.absent(),
+    this.id = const drift.Value.absent(),
+    this.externalId = const drift.Value.absent(),
     required String name,
-    this.description = const Value.absent(),
-    this.imageUrl = const Value.absent(),
+    this.description = const drift.Value.absent(),
+    this.imageUrl = const drift.Value.absent(),
     required String category,
-    this.tags = const Value.absent(),
-    this.color = const Value.absent(),
-    this.brand = const Value.absent(),
-    this.material = const Value.absent(),
-    this.seasons = const Value.absent(),
-    this.weatherConditions = const Value.absent(),
-    this.occasions = const Value.absent(),
-    this.isFavorite = const Value.absent(),
-    this.isArchived = const Value.absent(),
-    this.timesWorn = const Value.absent(),
-    this.comfortRating = const Value.absent(),
+    this.tags = const drift.Value.absent(),
+    this.color = const drift.Value.absent(),
+    this.brand = const drift.Value.absent(),
+    this.material = const drift.Value.absent(),
+    this.seasons = const drift.Value.absent(),
+    this.weatherConditions = const drift.Value.absent(),
+    this.occasions = const drift.Value.absent(),
+    this.isFavorite = const drift.Value.absent(),
+    this.isArchived = const drift.Value.absent(),
+    this.timesWorn = const drift.Value.absent(),
+    this.comfortRating = const drift.Value.absent(),
     required int addedDate,
     required int createdAt,
     required int updatedAt,
-    this.lastWornDate = const Value.absent(),
-    this.price = const Value.absent(),
-    this.size = const Value.absent(),
-    this.usageCount = const Value.absent(),
-    this.serverId = const Value.absent(),
-    this.dirty = const Value.absent(),
-    this.lastSyncedAt = const Value.absent(),
-  }) : name = Value(name),
-       category = Value(category),
-       addedDate = Value(addedDate),
-       createdAt = Value(createdAt),
-       updatedAt = Value(updatedAt);
-  static Insertable<DbClothingItem> custom({
-    Expression<int>? id,
-    Expression<String>? externalId,
-    Expression<String>? name,
-    Expression<String>? description,
-    Expression<String>? imageUrl,
-    Expression<String>? category,
-    Expression<String>? tags,
-    Expression<String>? color,
-    Expression<String>? brand,
-    Expression<String>? material,
-    Expression<String>? seasons,
-    Expression<String>? weatherConditions,
-    Expression<String>? occasions,
-    Expression<bool>? isFavorite,
-    Expression<bool>? isArchived,
-    Expression<int>? timesWorn,
-    Expression<double>? comfortRating,
-    Expression<int>? addedDate,
-    Expression<int>? createdAt,
-    Expression<int>? updatedAt,
-    Expression<int>? lastWornDate,
-    Expression<double>? price,
-    Expression<String>? size,
-    Expression<int>? usageCount,
-    Expression<String>? serverId,
-    Expression<bool>? dirty,
-    Expression<int>? lastSyncedAt,
+    this.lastWornDate = const drift.Value.absent(),
+    this.price = const drift.Value.absent(),
+    this.size = const drift.Value.absent(),
+    this.usageCount = const drift.Value.absent(),
+    this.serverId = const drift.Value.absent(),
+    this.dirty = const drift.Value.absent(),
+    this.lastSyncedAt = const drift.Value.absent(),
+  }) : name = drift.Value(name),
+       category = drift.Value(category),
+       addedDate = drift.Value(addedDate),
+       createdAt = drift.Value(createdAt),
+       updatedAt = drift.Value(updatedAt);
+  static drift.Insertable<DbClothingItem> custom({
+    drift.Expression<int>? id,
+    drift.Expression<String>? externalId,
+    drift.Expression<String>? name,
+    drift.Expression<String>? description,
+    drift.Expression<String>? imageUrl,
+    drift.Expression<String>? category,
+    drift.Expression<String>? tags,
+    drift.Expression<String>? color,
+    drift.Expression<String>? brand,
+    drift.Expression<String>? material,
+    drift.Expression<String>? seasons,
+    drift.Expression<String>? weatherConditions,
+    drift.Expression<String>? occasions,
+    drift.Expression<bool>? isFavorite,
+    drift.Expression<bool>? isArchived,
+    drift.Expression<int>? timesWorn,
+    drift.Expression<double>? comfortRating,
+    drift.Expression<int>? addedDate,
+    drift.Expression<int>? createdAt,
+    drift.Expression<int>? updatedAt,
+    drift.Expression<int>? lastWornDate,
+    drift.Expression<double>? price,
+    drift.Expression<String>? size,
+    drift.Expression<int>? usageCount,
+    drift.Expression<String>? serverId,
+    drift.Expression<bool>? dirty,
+    drift.Expression<int>? lastSyncedAt,
   }) {
-    return RawValuesInsertable({
+    return drift.RawValuesInsertable({
       if (id != null) 'id': id,
       if (externalId != null) 'external_id': externalId,
       if (name != null) 'name': name,
@@ -1254,33 +1296,33 @@ class ClothingItemsCompanion extends UpdateCompanion<DbClothingItem> {
   }
 
   ClothingItemsCompanion copyWith({
-    Value<int>? id,
-    Value<String?>? externalId,
-    Value<String>? name,
-    Value<String?>? description,
-    Value<String?>? imageUrl,
-    Value<String>? category,
-    Value<String>? tags,
-    Value<String?>? color,
-    Value<String?>? brand,
-    Value<String?>? material,
-    Value<String>? seasons,
-    Value<String>? weatherConditions,
-    Value<String>? occasions,
-    Value<bool>? isFavorite,
-    Value<bool>? isArchived,
-    Value<int>? timesWorn,
-    Value<double>? comfortRating,
-    Value<int>? addedDate,
-    Value<int>? createdAt,
-    Value<int>? updatedAt,
-    Value<int?>? lastWornDate,
-    Value<double?>? price,
-    Value<String?>? size,
-    Value<int>? usageCount,
-    Value<String?>? serverId,
-    Value<bool>? dirty,
-    Value<int?>? lastSyncedAt,
+    drift.Value<int>? id,
+    drift.Value<String?>? externalId,
+    drift.Value<String>? name,
+    drift.Value<String?>? description,
+    drift.Value<String?>? imageUrl,
+    drift.Value<String>? category,
+    drift.Value<String>? tags,
+    drift.Value<String?>? color,
+    drift.Value<String?>? brand,
+    drift.Value<String?>? material,
+    drift.Value<String>? seasons,
+    drift.Value<String>? weatherConditions,
+    drift.Value<String>? occasions,
+    drift.Value<bool>? isFavorite,
+    drift.Value<bool>? isArchived,
+    drift.Value<int>? timesWorn,
+    drift.Value<double>? comfortRating,
+    drift.Value<int>? addedDate,
+    drift.Value<int>? createdAt,
+    drift.Value<int>? updatedAt,
+    drift.Value<int?>? lastWornDate,
+    drift.Value<double?>? price,
+    drift.Value<String?>? size,
+    drift.Value<int>? usageCount,
+    drift.Value<String?>? serverId,
+    drift.Value<bool>? dirty,
+    drift.Value<int?>? lastSyncedAt,
   }) {
     return ClothingItemsCompanion(
       id: id ?? this.id,
@@ -1314,88 +1356,90 @@ class ClothingItemsCompanion extends UpdateCompanion<DbClothingItem> {
   }
 
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
+  Map<String, drift.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, drift.Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = drift.Variable<int>(id.value);
     }
     if (externalId.present) {
-      map['external_id'] = Variable<String>(externalId.value);
+      map['external_id'] = drift.Variable<String>(externalId.value);
     }
     if (name.present) {
-      map['name'] = Variable<String>(name.value);
+      map['name'] = drift.Variable<String>(name.value);
     }
     if (description.present) {
-      map['description'] = Variable<String>(description.value);
+      map['description'] = drift.Variable<String>(description.value);
     }
     if (imageUrl.present) {
-      map['image_url'] = Variable<String>(imageUrl.value);
+      map['image_url'] = drift.Variable<String>(imageUrl.value);
     }
     if (category.present) {
-      map['category'] = Variable<String>(category.value);
+      map['category'] = drift.Variable<String>(category.value);
     }
     if (tags.present) {
-      map['tags'] = Variable<String>(tags.value);
+      map['tags'] = drift.Variable<String>(tags.value);
     }
     if (color.present) {
-      map['color'] = Variable<String>(color.value);
+      map['color'] = drift.Variable<String>(color.value);
     }
     if (brand.present) {
-      map['brand'] = Variable<String>(brand.value);
+      map['brand'] = drift.Variable<String>(brand.value);
     }
     if (material.present) {
-      map['material'] = Variable<String>(material.value);
+      map['material'] = drift.Variable<String>(material.value);
     }
     if (seasons.present) {
-      map['seasons'] = Variable<String>(seasons.value);
+      map['seasons'] = drift.Variable<String>(seasons.value);
     }
     if (weatherConditions.present) {
-      map['weather_conditions'] = Variable<String>(weatherConditions.value);
+      map['weather_conditions'] = drift.Variable<String>(
+        weatherConditions.value,
+      );
     }
     if (occasions.present) {
-      map['occasions'] = Variable<String>(occasions.value);
+      map['occasions'] = drift.Variable<String>(occasions.value);
     }
     if (isFavorite.present) {
-      map['is_favorite'] = Variable<bool>(isFavorite.value);
+      map['is_favorite'] = drift.Variable<bool>(isFavorite.value);
     }
     if (isArchived.present) {
-      map['is_archived'] = Variable<bool>(isArchived.value);
+      map['is_archived'] = drift.Variable<bool>(isArchived.value);
     }
     if (timesWorn.present) {
-      map['times_worn'] = Variable<int>(timesWorn.value);
+      map['times_worn'] = drift.Variable<int>(timesWorn.value);
     }
     if (comfortRating.present) {
-      map['comfort_rating'] = Variable<double>(comfortRating.value);
+      map['comfort_rating'] = drift.Variable<double>(comfortRating.value);
     }
     if (addedDate.present) {
-      map['added_date'] = Variable<int>(addedDate.value);
+      map['added_date'] = drift.Variable<int>(addedDate.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<int>(createdAt.value);
+      map['created_at'] = drift.Variable<int>(createdAt.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<int>(updatedAt.value);
+      map['updated_at'] = drift.Variable<int>(updatedAt.value);
     }
     if (lastWornDate.present) {
-      map['last_worn_date'] = Variable<int>(lastWornDate.value);
+      map['last_worn_date'] = drift.Variable<int>(lastWornDate.value);
     }
     if (price.present) {
-      map['price'] = Variable<double>(price.value);
+      map['price'] = drift.Variable<double>(price.value);
     }
     if (size.present) {
-      map['size'] = Variable<String>(size.value);
+      map['size'] = drift.Variable<String>(size.value);
     }
     if (usageCount.present) {
-      map['usage_count'] = Variable<int>(usageCount.value);
+      map['usage_count'] = drift.Variable<int>(usageCount.value);
     }
     if (serverId.present) {
-      map['server_id'] = Variable<String>(serverId.value);
+      map['server_id'] = drift.Variable<String>(serverId.value);
     }
     if (dirty.present) {
-      map['dirty'] = Variable<bool>(dirty.value);
+      map['dirty'] = drift.Variable<bool>(dirty.value);
     }
     if (lastSyncedAt.present) {
-      map['last_synced_at'] = Variable<int>(lastSyncedAt.value);
+      map['last_synced_at'] = drift.Variable<int>(lastSyncedAt.value);
     }
     return map;
   }
@@ -1435,14 +1479,17 @@ class ClothingItemsCompanion extends UpdateCompanion<DbClothingItem> {
   }
 }
 
-class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
+class $OutfitsTable extends Outfits
+    with drift.TableInfo<$OutfitsTable, DbOutfit> {
   @override
-  final GeneratedDatabase attachedDatabase;
+  final drift.GeneratedDatabase attachedDatabase;
   final String? _alias;
   $OutfitsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  static const drift.VerificationMeta _idMeta = const drift.VerificationMeta(
+    'id',
+  );
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> id = drift.GeneratedColumn<int>(
     'id',
     aliasedName,
     false,
@@ -1453,193 +1500,194 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _externalIdMeta = const VerificationMeta(
-    'externalId',
+  static const drift.VerificationMeta _externalIdMeta =
+      const drift.VerificationMeta('externalId');
+  @override
+  late final drift.GeneratedColumn<String> externalId =
+      drift.GeneratedColumn<String>(
+        'external_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _nameMeta = const drift.VerificationMeta(
+    'name',
   );
   @override
-  late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
-    'external_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+  late final drift.GeneratedColumn<String> name = drift.GeneratedColumn<String>(
     'name',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _descriptionMeta = const VerificationMeta(
-    'description',
-  );
+  static const drift.VerificationMeta _descriptionMeta =
+      const drift.VerificationMeta('description');
   @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-    'description',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
-    'imageUrl',
-  );
+  late final drift.GeneratedColumn<String> description =
+      drift.GeneratedColumn<String>(
+        'description',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _imageUrlMeta =
+      const drift.VerificationMeta('imageUrl');
   @override
-  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
-    'image_url',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _clothingItemIdsMeta = const VerificationMeta(
-    'clothingItemIds',
-  );
+  late final drift.GeneratedColumn<String> imageUrl =
+      drift.GeneratedColumn<String>(
+        'image_url',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _clothingItemIdsMeta =
+      const drift.VerificationMeta('clothingItemIds');
   @override
-  late final GeneratedColumn<String> clothingItemIds = GeneratedColumn<String>(
-    'clothing_item_ids',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('[]'),
-  );
-  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
-    'isFavorite',
-  );
+  late final drift.GeneratedColumn<String> clothingItemIds =
+      drift.GeneratedColumn<String>(
+        'clothing_item_ids',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const drift.Constant('[]'),
+      );
+  static const drift.VerificationMeta _isFavoriteMeta =
+      const drift.VerificationMeta('isFavorite');
   @override
-  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
-    'is_favorite',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_favorite" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _timesWornMeta = const VerificationMeta(
-    'timesWorn',
-  );
+  late final drift.GeneratedColumn<bool> isFavorite =
+      drift.GeneratedColumn<bool>(
+        'is_favorite',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_favorite" IN (0, 1))',
+        ),
+        defaultValue: const drift.Constant(false),
+      );
+  static const drift.VerificationMeta _timesWornMeta =
+      const drift.VerificationMeta('timesWorn');
   @override
-  late final GeneratedColumn<int> timesWorn = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> timesWorn = drift.GeneratedColumn<int>(
     'times_worn',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0),
+    defaultValue: const drift.Constant(0),
   );
-  static const VerificationMeta _comfortRatingMeta = const VerificationMeta(
-    'comfortRating',
+  static const drift.VerificationMeta _comfortRatingMeta =
+      const drift.VerificationMeta('comfortRating');
+  @override
+  late final drift.GeneratedColumn<double> comfortRating =
+      drift.GeneratedColumn<double>(
+        'comfort_rating',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const drift.Constant(0.0),
+      );
+  static const drift.VerificationMeta _tagsMeta = const drift.VerificationMeta(
+    'tags',
   );
   @override
-  late final GeneratedColumn<double> comfortRating = GeneratedColumn<double>(
-    'comfort_rating',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
-  );
-  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
-  @override
-  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
+  late final drift.GeneratedColumn<String> tags = drift.GeneratedColumn<String>(
     'tags',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('[]'),
+    defaultValue: const drift.Constant('[]'),
   );
-  static const VerificationMeta _occasionsMeta = const VerificationMeta(
-    'occasions',
-  );
+  static const drift.VerificationMeta _occasionsMeta =
+      const drift.VerificationMeta('occasions');
   @override
-  late final GeneratedColumn<String> occasions = GeneratedColumn<String>(
-    'occasions',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('[]'),
-  );
-  static const VerificationMeta _weatherConditionsMeta = const VerificationMeta(
-    'weatherConditions',
-  );
+  late final drift.GeneratedColumn<String> occasions =
+      drift.GeneratedColumn<String>(
+        'occasions',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const drift.Constant('[]'),
+      );
+  static const drift.VerificationMeta _weatherConditionsMeta =
+      const drift.VerificationMeta('weatherConditions');
   @override
-  late final GeneratedColumn<String> weatherConditions =
-      GeneratedColumn<String>(
+  late final drift.GeneratedColumn<String> weatherConditions =
+      drift.GeneratedColumn<String>(
         'weather_conditions',
         aliasedName,
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('[]'),
+        defaultValue: const drift.Constant('[]'),
       );
-  static const VerificationMeta _seasonsMeta = const VerificationMeta(
-    'seasons',
-  );
+  static const drift.VerificationMeta _seasonsMeta =
+      const drift.VerificationMeta('seasons');
   @override
-  late final GeneratedColumn<String> seasons = GeneratedColumn<String>(
-    'seasons',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('[]'),
-  );
-  static const VerificationMeta _addedDateMeta = const VerificationMeta(
-    'addedDate',
-  );
+  late final drift.GeneratedColumn<String> seasons =
+      drift.GeneratedColumn<String>(
+        'seasons',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const drift.Constant('[]'),
+      );
+  static const drift.VerificationMeta _addedDateMeta =
+      const drift.VerificationMeta('addedDate');
   @override
-  late final GeneratedColumn<int> addedDate = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> addedDate = drift.GeneratedColumn<int>(
     'added_date',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
+  static const drift.VerificationMeta _createdAtMeta =
+      const drift.VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> createdAt = drift.GeneratedColumn<int>(
     'created_at',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
+  static const drift.VerificationMeta _updatedAtMeta =
+      const drift.VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> updatedAt = drift.GeneratedColumn<int>(
     'updated_at',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _serverIdMeta = const VerificationMeta(
-    'serverId',
+  static const drift.VerificationMeta _serverIdMeta =
+      const drift.VerificationMeta('serverId');
+  @override
+  late final drift.GeneratedColumn<String> serverId =
+      drift.GeneratedColumn<String>(
+        'server_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const drift.VerificationMeta _dirtyMeta = const drift.VerificationMeta(
+    'dirty',
   );
   @override
-  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-    'server_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
-  @override
-  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+  late final drift.GeneratedColumn<bool> dirty = drift.GeneratedColumn<bool>(
     'dirty',
     aliasedName,
     false,
@@ -1648,21 +1696,21 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("dirty" IN (0, 1))',
     ),
-    defaultValue: const Constant(false),
+    defaultValue: const drift.Constant(false),
   );
-  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
-    'lastSyncedAt',
-  );
+  static const drift.VerificationMeta _lastSyncedAtMeta =
+      const drift.VerificationMeta('lastSyncedAt');
   @override
-  late final GeneratedColumn<int> lastSyncedAt = GeneratedColumn<int>(
-    'last_synced_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
+  late final drift.GeneratedColumn<int> lastSyncedAt =
+      drift.GeneratedColumn<int>(
+        'last_synced_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
   @override
-  List<GeneratedColumn> get $columns => [
+  List<drift.GeneratedColumn> get $columns => [
     id,
     externalId,
     name,
@@ -1689,11 +1737,11 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
   String get actualTableName => $name;
   static const String $name = 'outfits';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<DbOutfit> instance, {
+  drift.VerificationContext validateIntegrity(
+    drift.Insertable<DbOutfit> instance, {
     bool isInserting = false,
   }) {
-    final context = VerificationContext();
+    final context = drift.VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
@@ -1833,23 +1881,25 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<drift.GeneratedColumn> get $primaryKey => {id};
   @override
   DbOutfit map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbOutfit(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
       externalId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}external_id'],
       ),
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
+      name:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}name'],
+          )!,
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -1858,58 +1908,70 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
         DriftSqlType.string,
         data['${effectivePrefix}image_url'],
       ),
-      clothingItemIds: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}clothing_item_ids'],
-      )!,
-      isFavorite: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_favorite'],
-      )!,
-      timesWorn: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}times_worn'],
-      )!,
-      comfortRating: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}comfort_rating'],
-      )!,
-      tags: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}tags'],
-      )!,
-      occasions: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}occasions'],
-      )!,
-      weatherConditions: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}weather_conditions'],
-      )!,
-      seasons: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}seasons'],
-      )!,
-      addedDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}added_date'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}updated_at'],
-      )!,
+      clothingItemIds:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}clothing_item_ids'],
+          )!,
+      isFavorite:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_favorite'],
+          )!,
+      timesWorn:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}times_worn'],
+          )!,
+      comfortRating:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.double,
+            data['${effectivePrefix}comfort_rating'],
+          )!,
+      tags:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}tags'],
+          )!,
+      occasions:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}occasions'],
+          )!,
+      weatherConditions:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}weather_conditions'],
+          )!,
+      seasons:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}seasons'],
+          )!,
+      addedDate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}added_date'],
+          )!,
+      createdAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}created_at'],
+          )!,
+      updatedAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}updated_at'],
+          )!,
       serverId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}server_id'],
       ),
-      dirty: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}dirty'],
-      )!,
+      dirty:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}dirty'],
+          )!,
       lastSyncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_synced_at'],
@@ -1923,7 +1985,7 @@ class $OutfitsTable extends Outfits with TableInfo<$OutfitsTable, DbOutfit> {
   }
 }
 
-class DbOutfit extends DataClass implements Insertable<DbOutfit> {
+class DbOutfit extends drift.DataClass implements drift.Insertable<DbOutfit> {
   final int id;
   final String? externalId;
   final String name;
@@ -1965,71 +2027,76 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
     this.lastSyncedAt,
   });
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+  Map<String, drift.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, drift.Expression>{};
+    map['id'] = drift.Variable<int>(id);
     if (!nullToAbsent || externalId != null) {
-      map['external_id'] = Variable<String>(externalId);
+      map['external_id'] = drift.Variable<String>(externalId);
     }
-    map['name'] = Variable<String>(name);
+    map['name'] = drift.Variable<String>(name);
     if (!nullToAbsent || description != null) {
-      map['description'] = Variable<String>(description);
+      map['description'] = drift.Variable<String>(description);
     }
     if (!nullToAbsent || imageUrl != null) {
-      map['image_url'] = Variable<String>(imageUrl);
+      map['image_url'] = drift.Variable<String>(imageUrl);
     }
-    map['clothing_item_ids'] = Variable<String>(clothingItemIds);
-    map['is_favorite'] = Variable<bool>(isFavorite);
-    map['times_worn'] = Variable<int>(timesWorn);
-    map['comfort_rating'] = Variable<double>(comfortRating);
-    map['tags'] = Variable<String>(tags);
-    map['occasions'] = Variable<String>(occasions);
-    map['weather_conditions'] = Variable<String>(weatherConditions);
-    map['seasons'] = Variable<String>(seasons);
-    map['added_date'] = Variable<int>(addedDate);
-    map['created_at'] = Variable<int>(createdAt);
-    map['updated_at'] = Variable<int>(updatedAt);
+    map['clothing_item_ids'] = drift.Variable<String>(clothingItemIds);
+    map['is_favorite'] = drift.Variable<bool>(isFavorite);
+    map['times_worn'] = drift.Variable<int>(timesWorn);
+    map['comfort_rating'] = drift.Variable<double>(comfortRating);
+    map['tags'] = drift.Variable<String>(tags);
+    map['occasions'] = drift.Variable<String>(occasions);
+    map['weather_conditions'] = drift.Variable<String>(weatherConditions);
+    map['seasons'] = drift.Variable<String>(seasons);
+    map['added_date'] = drift.Variable<int>(addedDate);
+    map['created_at'] = drift.Variable<int>(createdAt);
+    map['updated_at'] = drift.Variable<int>(updatedAt);
     if (!nullToAbsent || serverId != null) {
-      map['server_id'] = Variable<String>(serverId);
+      map['server_id'] = drift.Variable<String>(serverId);
     }
-    map['dirty'] = Variable<bool>(dirty);
+    map['dirty'] = drift.Variable<bool>(dirty);
     if (!nullToAbsent || lastSyncedAt != null) {
-      map['last_synced_at'] = Variable<int>(lastSyncedAt);
+      map['last_synced_at'] = drift.Variable<int>(lastSyncedAt);
     }
     return map;
   }
 
   OutfitsCompanion toCompanion(bool nullToAbsent) {
     return OutfitsCompanion(
-      id: Value(id),
-      externalId: externalId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(externalId),
-      name: Value(name),
-      description: description == null && nullToAbsent
-          ? const Value.absent()
-          : Value(description),
-      imageUrl: imageUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(imageUrl),
-      clothingItemIds: Value(clothingItemIds),
-      isFavorite: Value(isFavorite),
-      timesWorn: Value(timesWorn),
-      comfortRating: Value(comfortRating),
-      tags: Value(tags),
-      occasions: Value(occasions),
-      weatherConditions: Value(weatherConditions),
-      seasons: Value(seasons),
-      addedDate: Value(addedDate),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-      serverId: serverId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(serverId),
-      dirty: Value(dirty),
-      lastSyncedAt: lastSyncedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastSyncedAt),
+      id: drift.Value(id),
+      externalId:
+          externalId == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(externalId),
+      name: drift.Value(name),
+      description:
+          description == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(description),
+      imageUrl:
+          imageUrl == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(imageUrl),
+      clothingItemIds: drift.Value(clothingItemIds),
+      isFavorite: drift.Value(isFavorite),
+      timesWorn: drift.Value(timesWorn),
+      comfortRating: drift.Value(comfortRating),
+      tags: drift.Value(tags),
+      occasions: drift.Value(occasions),
+      weatherConditions: drift.Value(weatherConditions),
+      seasons: drift.Value(seasons),
+      addedDate: drift.Value(addedDate),
+      createdAt: drift.Value(createdAt),
+      updatedAt: drift.Value(updatedAt),
+      serverId:
+          serverId == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(serverId),
+      dirty: drift.Value(dirty),
+      lastSyncedAt:
+          lastSyncedAt == null && nullToAbsent
+              ? const drift.Value.absent()
+              : drift.Value(lastSyncedAt),
     );
   }
 
@@ -2037,7 +2104,7 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
+    serializer ??= drift.driftRuntimeOptions.defaultSerializer;
     return DbOutfit(
       id: serializer.fromJson<int>(json['id']),
       externalId: serializer.fromJson<String?>(json['externalId']),
@@ -2062,7 +2129,7 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
+    serializer ??= drift.driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'externalId': serializer.toJson<String?>(externalId),
@@ -2088,10 +2155,10 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
 
   DbOutfit copyWith({
     int? id,
-    Value<String?> externalId = const Value.absent(),
+    drift.Value<String?> externalId = const drift.Value.absent(),
     String? name,
-    Value<String?> description = const Value.absent(),
-    Value<String?> imageUrl = const Value.absent(),
+    drift.Value<String?> description = const drift.Value.absent(),
+    drift.Value<String?> imageUrl = const drift.Value.absent(),
     String? clothingItemIds,
     bool? isFavorite,
     int? timesWorn,
@@ -2103,9 +2170,9 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
     int? addedDate,
     int? createdAt,
     int? updatedAt,
-    Value<String?> serverId = const Value.absent(),
+    drift.Value<String?> serverId = const drift.Value.absent(),
     bool? dirty,
-    Value<int?> lastSyncedAt = const Value.absent(),
+    drift.Value<int?> lastSyncedAt = const drift.Value.absent(),
   }) => DbOutfit(
     id: id ?? this.id,
     externalId: externalId.present ? externalId.value : this.externalId,
@@ -2130,38 +2197,39 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
   DbOutfit copyWithCompanion(OutfitsCompanion data) {
     return DbOutfit(
       id: data.id.present ? data.id.value : this.id,
-      externalId: data.externalId.present
-          ? data.externalId.value
-          : this.externalId,
+      externalId:
+          data.externalId.present ? data.externalId.value : this.externalId,
       name: data.name.present ? data.name.value : this.name,
-      description: data.description.present
-          ? data.description.value
-          : this.description,
+      description:
+          data.description.present ? data.description.value : this.description,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
-      clothingItemIds: data.clothingItemIds.present
-          ? data.clothingItemIds.value
-          : this.clothingItemIds,
-      isFavorite: data.isFavorite.present
-          ? data.isFavorite.value
-          : this.isFavorite,
+      clothingItemIds:
+          data.clothingItemIds.present
+              ? data.clothingItemIds.value
+              : this.clothingItemIds,
+      isFavorite:
+          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
       timesWorn: data.timesWorn.present ? data.timesWorn.value : this.timesWorn,
-      comfortRating: data.comfortRating.present
-          ? data.comfortRating.value
-          : this.comfortRating,
+      comfortRating:
+          data.comfortRating.present
+              ? data.comfortRating.value
+              : this.comfortRating,
       tags: data.tags.present ? data.tags.value : this.tags,
       occasions: data.occasions.present ? data.occasions.value : this.occasions,
-      weatherConditions: data.weatherConditions.present
-          ? data.weatherConditions.value
-          : this.weatherConditions,
+      weatherConditions:
+          data.weatherConditions.present
+              ? data.weatherConditions.value
+              : this.weatherConditions,
       seasons: data.seasons.present ? data.seasons.value : this.seasons,
       addedDate: data.addedDate.present ? data.addedDate.value : this.addedDate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       serverId: data.serverId.present ? data.serverId.value : this.serverId,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
-      lastSyncedAt: data.lastSyncedAt.present
-          ? data.lastSyncedAt.value
-          : this.lastSyncedAt,
+      lastSyncedAt:
+          data.lastSyncedAt.present
+              ? data.lastSyncedAt.value
+              : this.lastSyncedAt,
     );
   }
 
@@ -2238,93 +2306,93 @@ class DbOutfit extends DataClass implements Insertable<DbOutfit> {
           other.lastSyncedAt == this.lastSyncedAt);
 }
 
-class OutfitsCompanion extends UpdateCompanion<DbOutfit> {
-  final Value<int> id;
-  final Value<String?> externalId;
-  final Value<String> name;
-  final Value<String?> description;
-  final Value<String?> imageUrl;
-  final Value<String> clothingItemIds;
-  final Value<bool> isFavorite;
-  final Value<int> timesWorn;
-  final Value<double> comfortRating;
-  final Value<String> tags;
-  final Value<String> occasions;
-  final Value<String> weatherConditions;
-  final Value<String> seasons;
-  final Value<int> addedDate;
-  final Value<int> createdAt;
-  final Value<int> updatedAt;
-  final Value<String?> serverId;
-  final Value<bool> dirty;
-  final Value<int?> lastSyncedAt;
+class OutfitsCompanion extends drift.UpdateCompanion<DbOutfit> {
+  final drift.Value<int> id;
+  final drift.Value<String?> externalId;
+  final drift.Value<String> name;
+  final drift.Value<String?> description;
+  final drift.Value<String?> imageUrl;
+  final drift.Value<String> clothingItemIds;
+  final drift.Value<bool> isFavorite;
+  final drift.Value<int> timesWorn;
+  final drift.Value<double> comfortRating;
+  final drift.Value<String> tags;
+  final drift.Value<String> occasions;
+  final drift.Value<String> weatherConditions;
+  final drift.Value<String> seasons;
+  final drift.Value<int> addedDate;
+  final drift.Value<int> createdAt;
+  final drift.Value<int> updatedAt;
+  final drift.Value<String?> serverId;
+  final drift.Value<bool> dirty;
+  final drift.Value<int?> lastSyncedAt;
   const OutfitsCompanion({
-    this.id = const Value.absent(),
-    this.externalId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.description = const Value.absent(),
-    this.imageUrl = const Value.absent(),
-    this.clothingItemIds = const Value.absent(),
-    this.isFavorite = const Value.absent(),
-    this.timesWorn = const Value.absent(),
-    this.comfortRating = const Value.absent(),
-    this.tags = const Value.absent(),
-    this.occasions = const Value.absent(),
-    this.weatherConditions = const Value.absent(),
-    this.seasons = const Value.absent(),
-    this.addedDate = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.serverId = const Value.absent(),
-    this.dirty = const Value.absent(),
-    this.lastSyncedAt = const Value.absent(),
+    this.id = const drift.Value.absent(),
+    this.externalId = const drift.Value.absent(),
+    this.name = const drift.Value.absent(),
+    this.description = const drift.Value.absent(),
+    this.imageUrl = const drift.Value.absent(),
+    this.clothingItemIds = const drift.Value.absent(),
+    this.isFavorite = const drift.Value.absent(),
+    this.timesWorn = const drift.Value.absent(),
+    this.comfortRating = const drift.Value.absent(),
+    this.tags = const drift.Value.absent(),
+    this.occasions = const drift.Value.absent(),
+    this.weatherConditions = const drift.Value.absent(),
+    this.seasons = const drift.Value.absent(),
+    this.addedDate = const drift.Value.absent(),
+    this.createdAt = const drift.Value.absent(),
+    this.updatedAt = const drift.Value.absent(),
+    this.serverId = const drift.Value.absent(),
+    this.dirty = const drift.Value.absent(),
+    this.lastSyncedAt = const drift.Value.absent(),
   });
   OutfitsCompanion.insert({
-    this.id = const Value.absent(),
-    this.externalId = const Value.absent(),
+    this.id = const drift.Value.absent(),
+    this.externalId = const drift.Value.absent(),
     required String name,
-    this.description = const Value.absent(),
-    this.imageUrl = const Value.absent(),
-    this.clothingItemIds = const Value.absent(),
-    this.isFavorite = const Value.absent(),
-    this.timesWorn = const Value.absent(),
-    this.comfortRating = const Value.absent(),
-    this.tags = const Value.absent(),
-    this.occasions = const Value.absent(),
-    this.weatherConditions = const Value.absent(),
-    this.seasons = const Value.absent(),
+    this.description = const drift.Value.absent(),
+    this.imageUrl = const drift.Value.absent(),
+    this.clothingItemIds = const drift.Value.absent(),
+    this.isFavorite = const drift.Value.absent(),
+    this.timesWorn = const drift.Value.absent(),
+    this.comfortRating = const drift.Value.absent(),
+    this.tags = const drift.Value.absent(),
+    this.occasions = const drift.Value.absent(),
+    this.weatherConditions = const drift.Value.absent(),
+    this.seasons = const drift.Value.absent(),
     required int addedDate,
     required int createdAt,
     required int updatedAt,
-    this.serverId = const Value.absent(),
-    this.dirty = const Value.absent(),
-    this.lastSyncedAt = const Value.absent(),
-  }) : name = Value(name),
-       addedDate = Value(addedDate),
-       createdAt = Value(createdAt),
-       updatedAt = Value(updatedAt);
-  static Insertable<DbOutfit> custom({
-    Expression<int>? id,
-    Expression<String>? externalId,
-    Expression<String>? name,
-    Expression<String>? description,
-    Expression<String>? imageUrl,
-    Expression<String>? clothingItemIds,
-    Expression<bool>? isFavorite,
-    Expression<int>? timesWorn,
-    Expression<double>? comfortRating,
-    Expression<String>? tags,
-    Expression<String>? occasions,
-    Expression<String>? weatherConditions,
-    Expression<String>? seasons,
-    Expression<int>? addedDate,
-    Expression<int>? createdAt,
-    Expression<int>? updatedAt,
-    Expression<String>? serverId,
-    Expression<bool>? dirty,
-    Expression<int>? lastSyncedAt,
+    this.serverId = const drift.Value.absent(),
+    this.dirty = const drift.Value.absent(),
+    this.lastSyncedAt = const drift.Value.absent(),
+  }) : name = drift.Value(name),
+       addedDate = drift.Value(addedDate),
+       createdAt = drift.Value(createdAt),
+       updatedAt = drift.Value(updatedAt);
+  static drift.Insertable<DbOutfit> custom({
+    drift.Expression<int>? id,
+    drift.Expression<String>? externalId,
+    drift.Expression<String>? name,
+    drift.Expression<String>? description,
+    drift.Expression<String>? imageUrl,
+    drift.Expression<String>? clothingItemIds,
+    drift.Expression<bool>? isFavorite,
+    drift.Expression<int>? timesWorn,
+    drift.Expression<double>? comfortRating,
+    drift.Expression<String>? tags,
+    drift.Expression<String>? occasions,
+    drift.Expression<String>? weatherConditions,
+    drift.Expression<String>? seasons,
+    drift.Expression<int>? addedDate,
+    drift.Expression<int>? createdAt,
+    drift.Expression<int>? updatedAt,
+    drift.Expression<String>? serverId,
+    drift.Expression<bool>? dirty,
+    drift.Expression<int>? lastSyncedAt,
   }) {
-    return RawValuesInsertable({
+    return drift.RawValuesInsertable({
       if (id != null) 'id': id,
       if (externalId != null) 'external_id': externalId,
       if (name != null) 'name': name,
@@ -2348,25 +2416,25 @@ class OutfitsCompanion extends UpdateCompanion<DbOutfit> {
   }
 
   OutfitsCompanion copyWith({
-    Value<int>? id,
-    Value<String?>? externalId,
-    Value<String>? name,
-    Value<String?>? description,
-    Value<String?>? imageUrl,
-    Value<String>? clothingItemIds,
-    Value<bool>? isFavorite,
-    Value<int>? timesWorn,
-    Value<double>? comfortRating,
-    Value<String>? tags,
-    Value<String>? occasions,
-    Value<String>? weatherConditions,
-    Value<String>? seasons,
-    Value<int>? addedDate,
-    Value<int>? createdAt,
-    Value<int>? updatedAt,
-    Value<String?>? serverId,
-    Value<bool>? dirty,
-    Value<int?>? lastSyncedAt,
+    drift.Value<int>? id,
+    drift.Value<String?>? externalId,
+    drift.Value<String>? name,
+    drift.Value<String?>? description,
+    drift.Value<String?>? imageUrl,
+    drift.Value<String>? clothingItemIds,
+    drift.Value<bool>? isFavorite,
+    drift.Value<int>? timesWorn,
+    drift.Value<double>? comfortRating,
+    drift.Value<String>? tags,
+    drift.Value<String>? occasions,
+    drift.Value<String>? weatherConditions,
+    drift.Value<String>? seasons,
+    drift.Value<int>? addedDate,
+    drift.Value<int>? createdAt,
+    drift.Value<int>? updatedAt,
+    drift.Value<String?>? serverId,
+    drift.Value<bool>? dirty,
+    drift.Value<int?>? lastSyncedAt,
   }) {
     return OutfitsCompanion(
       id: id ?? this.id,
@@ -2392,64 +2460,66 @@ class OutfitsCompanion extends UpdateCompanion<DbOutfit> {
   }
 
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
+  Map<String, drift.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, drift.Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = drift.Variable<int>(id.value);
     }
     if (externalId.present) {
-      map['external_id'] = Variable<String>(externalId.value);
+      map['external_id'] = drift.Variable<String>(externalId.value);
     }
     if (name.present) {
-      map['name'] = Variable<String>(name.value);
+      map['name'] = drift.Variable<String>(name.value);
     }
     if (description.present) {
-      map['description'] = Variable<String>(description.value);
+      map['description'] = drift.Variable<String>(description.value);
     }
     if (imageUrl.present) {
-      map['image_url'] = Variable<String>(imageUrl.value);
+      map['image_url'] = drift.Variable<String>(imageUrl.value);
     }
     if (clothingItemIds.present) {
-      map['clothing_item_ids'] = Variable<String>(clothingItemIds.value);
+      map['clothing_item_ids'] = drift.Variable<String>(clothingItemIds.value);
     }
     if (isFavorite.present) {
-      map['is_favorite'] = Variable<bool>(isFavorite.value);
+      map['is_favorite'] = drift.Variable<bool>(isFavorite.value);
     }
     if (timesWorn.present) {
-      map['times_worn'] = Variable<int>(timesWorn.value);
+      map['times_worn'] = drift.Variable<int>(timesWorn.value);
     }
     if (comfortRating.present) {
-      map['comfort_rating'] = Variable<double>(comfortRating.value);
+      map['comfort_rating'] = drift.Variable<double>(comfortRating.value);
     }
     if (tags.present) {
-      map['tags'] = Variable<String>(tags.value);
+      map['tags'] = drift.Variable<String>(tags.value);
     }
     if (occasions.present) {
-      map['occasions'] = Variable<String>(occasions.value);
+      map['occasions'] = drift.Variable<String>(occasions.value);
     }
     if (weatherConditions.present) {
-      map['weather_conditions'] = Variable<String>(weatherConditions.value);
+      map['weather_conditions'] = drift.Variable<String>(
+        weatherConditions.value,
+      );
     }
     if (seasons.present) {
-      map['seasons'] = Variable<String>(seasons.value);
+      map['seasons'] = drift.Variable<String>(seasons.value);
     }
     if (addedDate.present) {
-      map['added_date'] = Variable<int>(addedDate.value);
+      map['added_date'] = drift.Variable<int>(addedDate.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<int>(createdAt.value);
+      map['created_at'] = drift.Variable<int>(createdAt.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<int>(updatedAt.value);
+      map['updated_at'] = drift.Variable<int>(updatedAt.value);
     }
     if (serverId.present) {
-      map['server_id'] = Variable<String>(serverId.value);
+      map['server_id'] = drift.Variable<String>(serverId.value);
     }
     if (dirty.present) {
-      map['dirty'] = Variable<bool>(dirty.value);
+      map['dirty'] = drift.Variable<bool>(dirty.value);
     }
     if (lastSyncedAt.present) {
-      map['last_synced_at'] = Variable<int>(lastSyncedAt.value);
+      map['last_synced_at'] = drift.Variable<int>(lastSyncedAt.value);
     }
     return map;
   }
@@ -2482,14 +2552,16 @@ class OutfitsCompanion extends UpdateCompanion<DbOutfit> {
 }
 
 class $OutfitItemsTable extends OutfitItems
-    with TableInfo<$OutfitItemsTable, DbOutfitItem> {
+    with drift.TableInfo<$OutfitItemsTable, DbOutfitItem> {
   @override
-  final GeneratedDatabase attachedDatabase;
+  final drift.GeneratedDatabase attachedDatabase;
   final String? _alias;
   $OutfitItemsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  static const drift.VerificationMeta _idMeta = const drift.VerificationMeta(
+    'id',
+  );
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> id = drift.GeneratedColumn<int>(
     'id',
     aliasedName,
     false,
@@ -2500,69 +2572,67 @@ class $OutfitItemsTable extends OutfitItems
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _outfitIdMeta = const VerificationMeta(
-    'outfitId',
-  );
+  static const drift.VerificationMeta _outfitIdMeta =
+      const drift.VerificationMeta('outfitId');
   @override
-  late final GeneratedColumn<int> outfitId = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> outfitId = drift.GeneratedColumn<int>(
     'outfit_id',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _clothingItemIdMeta = const VerificationMeta(
-    'clothingItemId',
-  );
+  static const drift.VerificationMeta _clothingItemIdMeta =
+      const drift.VerificationMeta('clothingItemId');
   @override
-  late final GeneratedColumn<int> clothingItemId = GeneratedColumn<int>(
-    'clothing_item_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
-    'sortOrder',
-  );
+  late final drift.GeneratedColumn<int> clothingItemId =
+      drift.GeneratedColumn<int>(
+        'clothing_item_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      );
+  static const drift.VerificationMeta _sortOrderMeta =
+      const drift.VerificationMeta('sortOrder');
   @override
-  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+  late final drift.GeneratedColumn<int> sortOrder = drift.GeneratedColumn<int>(
     'sort_order',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0),
+    defaultValue: const drift.Constant(0),
   );
-  static const VerificationMeta _isPrimaryMeta = const VerificationMeta(
-    'isPrimary',
-  );
+  static const drift.VerificationMeta _isPrimaryMeta =
+      const drift.VerificationMeta('isPrimary');
   @override
-  late final GeneratedColumn<bool> isPrimary = GeneratedColumn<bool>(
-    'is_primary',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_primary" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _metadataMeta = const VerificationMeta(
-    'metadata',
-  );
+  late final drift.GeneratedColumn<bool> isPrimary =
+      drift.GeneratedColumn<bool>(
+        'is_primary',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_primary" IN (0, 1))',
+        ),
+        defaultValue: const drift.Constant(false),
+      );
+  static const drift.VerificationMeta _metadataMeta =
+      const drift.VerificationMeta('metadata');
   @override
-  late final GeneratedColumn<String> metadata = GeneratedColumn<String>(
-    'metadata',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('{}'),
-  );
+  late final drift.GeneratedColumn<String> metadata =
+      drift.GeneratedColumn<String>(
+        'metadata',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const drift.Constant('{}'),
+      );
   @override
-  List<GeneratedColumn> get $columns => [
+  List<drift.GeneratedColumn> get $columns => [
     id,
     outfitId,
     clothingItemId,
@@ -2576,11 +2646,11 @@ class $OutfitItemsTable extends OutfitItems
   String get actualTableName => $name;
   static const String $name = 'outfit_items';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<DbOutfitItem> instance, {
+  drift.VerificationContext validateIntegrity(
+    drift.Insertable<DbOutfitItem> instance, {
     bool isInserting = false,
   }) {
-    final context = VerificationContext();
+    final context = drift.VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
@@ -2626,35 +2696,41 @@ class $OutfitItemsTable extends OutfitItems
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<drift.GeneratedColumn> get $primaryKey => {id};
   @override
   DbOutfitItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbOutfitItem(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      outfitId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}outfit_id'],
-      )!,
-      clothingItemId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}clothing_item_id'],
-      )!,
-      sortOrder: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sort_order'],
-      )!,
-      isPrimary: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_primary'],
-      )!,
-      metadata: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}metadata'],
-      )!,
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      outfitId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}outfit_id'],
+          )!,
+      clothingItemId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}clothing_item_id'],
+          )!,
+      sortOrder:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}sort_order'],
+          )!,
+      isPrimary:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_primary'],
+          )!,
+      metadata:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}metadata'],
+          )!,
     );
   }
 
@@ -2664,7 +2740,8 @@ class $OutfitItemsTable extends OutfitItems
   }
 }
 
-class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
+class DbOutfitItem extends drift.DataClass
+    implements drift.Insertable<DbOutfitItem> {
   final int id;
   final int outfitId;
   final int clothingItemId;
@@ -2680,25 +2757,25 @@ class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
     required this.metadata,
   });
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['outfit_id'] = Variable<int>(outfitId);
-    map['clothing_item_id'] = Variable<int>(clothingItemId);
-    map['sort_order'] = Variable<int>(sortOrder);
-    map['is_primary'] = Variable<bool>(isPrimary);
-    map['metadata'] = Variable<String>(metadata);
+  Map<String, drift.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, drift.Expression>{};
+    map['id'] = drift.Variable<int>(id);
+    map['outfit_id'] = drift.Variable<int>(outfitId);
+    map['clothing_item_id'] = drift.Variable<int>(clothingItemId);
+    map['sort_order'] = drift.Variable<int>(sortOrder);
+    map['is_primary'] = drift.Variable<bool>(isPrimary);
+    map['metadata'] = drift.Variable<String>(metadata);
     return map;
   }
 
   OutfitItemsCompanion toCompanion(bool nullToAbsent) {
     return OutfitItemsCompanion(
-      id: Value(id),
-      outfitId: Value(outfitId),
-      clothingItemId: Value(clothingItemId),
-      sortOrder: Value(sortOrder),
-      isPrimary: Value(isPrimary),
-      metadata: Value(metadata),
+      id: drift.Value(id),
+      outfitId: drift.Value(outfitId),
+      clothingItemId: drift.Value(clothingItemId),
+      sortOrder: drift.Value(sortOrder),
+      isPrimary: drift.Value(isPrimary),
+      metadata: drift.Value(metadata),
     );
   }
 
@@ -2706,7 +2783,7 @@ class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
+    serializer ??= drift.driftRuntimeOptions.defaultSerializer;
     return DbOutfitItem(
       id: serializer.fromJson<int>(json['id']),
       outfitId: serializer.fromJson<int>(json['outfitId']),
@@ -2718,7 +2795,7 @@ class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
+    serializer ??= drift.driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'outfitId': serializer.toJson<int>(outfitId),
@@ -2748,9 +2825,10 @@ class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
     return DbOutfitItem(
       id: data.id.present ? data.id.value : this.id,
       outfitId: data.outfitId.present ? data.outfitId.value : this.outfitId,
-      clothingItemId: data.clothingItemId.present
-          ? data.clothingItemId.value
-          : this.clothingItemId,
+      clothingItemId:
+          data.clothingItemId.present
+              ? data.clothingItemId.value
+              : this.clothingItemId,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
       metadata: data.metadata.present ? data.metadata.value : this.metadata,
@@ -2785,39 +2863,39 @@ class DbOutfitItem extends DataClass implements Insertable<DbOutfitItem> {
           other.metadata == this.metadata);
 }
 
-class OutfitItemsCompanion extends UpdateCompanion<DbOutfitItem> {
-  final Value<int> id;
-  final Value<int> outfitId;
-  final Value<int> clothingItemId;
-  final Value<int> sortOrder;
-  final Value<bool> isPrimary;
-  final Value<String> metadata;
+class OutfitItemsCompanion extends drift.UpdateCompanion<DbOutfitItem> {
+  final drift.Value<int> id;
+  final drift.Value<int> outfitId;
+  final drift.Value<int> clothingItemId;
+  final drift.Value<int> sortOrder;
+  final drift.Value<bool> isPrimary;
+  final drift.Value<String> metadata;
   const OutfitItemsCompanion({
-    this.id = const Value.absent(),
-    this.outfitId = const Value.absent(),
-    this.clothingItemId = const Value.absent(),
-    this.sortOrder = const Value.absent(),
-    this.isPrimary = const Value.absent(),
-    this.metadata = const Value.absent(),
+    this.id = const drift.Value.absent(),
+    this.outfitId = const drift.Value.absent(),
+    this.clothingItemId = const drift.Value.absent(),
+    this.sortOrder = const drift.Value.absent(),
+    this.isPrimary = const drift.Value.absent(),
+    this.metadata = const drift.Value.absent(),
   });
   OutfitItemsCompanion.insert({
-    this.id = const Value.absent(),
+    this.id = const drift.Value.absent(),
     required int outfitId,
     required int clothingItemId,
-    this.sortOrder = const Value.absent(),
-    this.isPrimary = const Value.absent(),
-    this.metadata = const Value.absent(),
-  }) : outfitId = Value(outfitId),
-       clothingItemId = Value(clothingItemId);
-  static Insertable<DbOutfitItem> custom({
-    Expression<int>? id,
-    Expression<int>? outfitId,
-    Expression<int>? clothingItemId,
-    Expression<int>? sortOrder,
-    Expression<bool>? isPrimary,
-    Expression<String>? metadata,
+    this.sortOrder = const drift.Value.absent(),
+    this.isPrimary = const drift.Value.absent(),
+    this.metadata = const drift.Value.absent(),
+  }) : outfitId = drift.Value(outfitId),
+       clothingItemId = drift.Value(clothingItemId);
+  static drift.Insertable<DbOutfitItem> custom({
+    drift.Expression<int>? id,
+    drift.Expression<int>? outfitId,
+    drift.Expression<int>? clothingItemId,
+    drift.Expression<int>? sortOrder,
+    drift.Expression<bool>? isPrimary,
+    drift.Expression<String>? metadata,
   }) {
-    return RawValuesInsertable({
+    return drift.RawValuesInsertable({
       if (id != null) 'id': id,
       if (outfitId != null) 'outfit_id': outfitId,
       if (clothingItemId != null) 'clothing_item_id': clothingItemId,
@@ -2828,12 +2906,12 @@ class OutfitItemsCompanion extends UpdateCompanion<DbOutfitItem> {
   }
 
   OutfitItemsCompanion copyWith({
-    Value<int>? id,
-    Value<int>? outfitId,
-    Value<int>? clothingItemId,
-    Value<int>? sortOrder,
-    Value<bool>? isPrimary,
-    Value<String>? metadata,
+    drift.Value<int>? id,
+    drift.Value<int>? outfitId,
+    drift.Value<int>? clothingItemId,
+    drift.Value<int>? sortOrder,
+    drift.Value<bool>? isPrimary,
+    drift.Value<String>? metadata,
   }) {
     return OutfitItemsCompanion(
       id: id ?? this.id,
@@ -2846,25 +2924,25 @@ class OutfitItemsCompanion extends UpdateCompanion<DbOutfitItem> {
   }
 
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
+  Map<String, drift.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, drift.Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = drift.Variable<int>(id.value);
     }
     if (outfitId.present) {
-      map['outfit_id'] = Variable<int>(outfitId.value);
+      map['outfit_id'] = drift.Variable<int>(outfitId.value);
     }
     if (clothingItemId.present) {
-      map['clothing_item_id'] = Variable<int>(clothingItemId.value);
+      map['clothing_item_id'] = drift.Variable<int>(clothingItemId.value);
     }
     if (sortOrder.present) {
-      map['sort_order'] = Variable<int>(sortOrder.value);
+      map['sort_order'] = drift.Variable<int>(sortOrder.value);
     }
     if (isPrimary.present) {
-      map['is_primary'] = Variable<bool>(isPrimary.value);
+      map['is_primary'] = drift.Variable<bool>(isPrimary.value);
     }
     if (metadata.present) {
-      map['metadata'] = Variable<String>(metadata.value);
+      map['metadata'] = drift.Variable<String>(metadata.value);
     }
     return map;
   }
@@ -2883,17 +2961,17 @@ class OutfitItemsCompanion extends UpdateCompanion<DbOutfitItem> {
   }
 }
 
-abstract class _$WardrobeDatabase extends GeneratedDatabase {
+abstract class _$WardrobeDatabase extends drift.GeneratedDatabase {
   _$WardrobeDatabase(QueryExecutor e) : super(e);
   $WardrobeDatabaseManager get managers => $WardrobeDatabaseManager(this);
   late final $ClothingItemsTable clothingItems = $ClothingItemsTable(this);
   late final $OutfitsTable outfits = $OutfitsTable(this);
   late final $OutfitItemsTable outfitItems = $OutfitItemsTable(this);
   @override
-  Iterable<TableInfo<Table, Object?>> get allTables =>
-      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  Iterable<drift.TableInfo<drift.Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<drift.TableInfo<drift.Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [
+  List<drift.DatabaseSchemaEntity> get allSchemaEntities => [
     clothingItems,
     outfits,
     outfitItems,
@@ -2902,67 +2980,67 @@ abstract class _$WardrobeDatabase extends GeneratedDatabase {
 
 typedef $$ClothingItemsTableCreateCompanionBuilder =
     ClothingItemsCompanion Function({
-      Value<int> id,
-      Value<String?> externalId,
+      drift.Value<int> id,
+      drift.Value<String?> externalId,
       required String name,
-      Value<String?> description,
-      Value<String?> imageUrl,
+      drift.Value<String?> description,
+      drift.Value<String?> imageUrl,
       required String category,
-      Value<String> tags,
-      Value<String?> color,
-      Value<String?> brand,
-      Value<String?> material,
-      Value<String> seasons,
-      Value<String> weatherConditions,
-      Value<String> occasions,
-      Value<bool> isFavorite,
-      Value<bool> isArchived,
-      Value<int> timesWorn,
-      Value<double> comfortRating,
+      drift.Value<String> tags,
+      drift.Value<String?> color,
+      drift.Value<String?> brand,
+      drift.Value<String?> material,
+      drift.Value<String> seasons,
+      drift.Value<String> weatherConditions,
+      drift.Value<String> occasions,
+      drift.Value<bool> isFavorite,
+      drift.Value<bool> isArchived,
+      drift.Value<int> timesWorn,
+      drift.Value<double> comfortRating,
       required int addedDate,
       required int createdAt,
       required int updatedAt,
-      Value<int?> lastWornDate,
-      Value<double?> price,
-      Value<String?> size,
-      Value<int> usageCount,
-      Value<String?> serverId,
-      Value<bool> dirty,
-      Value<int?> lastSyncedAt,
+      drift.Value<int?> lastWornDate,
+      drift.Value<double?> price,
+      drift.Value<String?> size,
+      drift.Value<int> usageCount,
+      drift.Value<String?> serverId,
+      drift.Value<bool> dirty,
+      drift.Value<int?> lastSyncedAt,
     });
 typedef $$ClothingItemsTableUpdateCompanionBuilder =
     ClothingItemsCompanion Function({
-      Value<int> id,
-      Value<String?> externalId,
-      Value<String> name,
-      Value<String?> description,
-      Value<String?> imageUrl,
-      Value<String> category,
-      Value<String> tags,
-      Value<String?> color,
-      Value<String?> brand,
-      Value<String?> material,
-      Value<String> seasons,
-      Value<String> weatherConditions,
-      Value<String> occasions,
-      Value<bool> isFavorite,
-      Value<bool> isArchived,
-      Value<int> timesWorn,
-      Value<double> comfortRating,
-      Value<int> addedDate,
-      Value<int> createdAt,
-      Value<int> updatedAt,
-      Value<int?> lastWornDate,
-      Value<double?> price,
-      Value<String?> size,
-      Value<int> usageCount,
-      Value<String?> serverId,
-      Value<bool> dirty,
-      Value<int?> lastSyncedAt,
+      drift.Value<int> id,
+      drift.Value<String?> externalId,
+      drift.Value<String> name,
+      drift.Value<String?> description,
+      drift.Value<String?> imageUrl,
+      drift.Value<String> category,
+      drift.Value<String> tags,
+      drift.Value<String?> color,
+      drift.Value<String?> brand,
+      drift.Value<String?> material,
+      drift.Value<String> seasons,
+      drift.Value<String> weatherConditions,
+      drift.Value<String> occasions,
+      drift.Value<bool> isFavorite,
+      drift.Value<bool> isArchived,
+      drift.Value<int> timesWorn,
+      drift.Value<double> comfortRating,
+      drift.Value<int> addedDate,
+      drift.Value<int> createdAt,
+      drift.Value<int> updatedAt,
+      drift.Value<int?> lastWornDate,
+      drift.Value<double?> price,
+      drift.Value<String?> size,
+      drift.Value<int> usageCount,
+      drift.Value<String?> serverId,
+      drift.Value<bool> dirty,
+      drift.Value<int?> lastSyncedAt,
     });
 
 class $$ClothingItemsTableFilterComposer
-    extends Composer<_$WardrobeDatabase, $ClothingItemsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $ClothingItemsTable> {
   $$ClothingItemsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -2970,144 +3048,144 @@ class $$ClothingItemsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  drift.ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get externalId => $composableBuilder(
+  drift.ColumnFilters<String> get externalId => $composableBuilder(
     column: $table.externalId,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get name => $composableBuilder(
+  drift.ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get description => $composableBuilder(
+  drift.ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get imageUrl => $composableBuilder(
+  drift.ColumnFilters<String> get imageUrl => $composableBuilder(
     column: $table.imageUrl,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get category => $composableBuilder(
+  drift.ColumnFilters<String> get category => $composableBuilder(
     column: $table.category,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get tags => $composableBuilder(
+  drift.ColumnFilters<String> get tags => $composableBuilder(
     column: $table.tags,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get color => $composableBuilder(
+  drift.ColumnFilters<String> get color => $composableBuilder(
     column: $table.color,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get brand => $composableBuilder(
+  drift.ColumnFilters<String> get brand => $composableBuilder(
     column: $table.brand,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get material => $composableBuilder(
+  drift.ColumnFilters<String> get material => $composableBuilder(
     column: $table.material,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get seasons => $composableBuilder(
+  drift.ColumnFilters<String> get seasons => $composableBuilder(
     column: $table.seasons,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get weatherConditions => $composableBuilder(
+  drift.ColumnFilters<String> get weatherConditions => $composableBuilder(
     column: $table.weatherConditions,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get occasions => $composableBuilder(
+  drift.ColumnFilters<String> get occasions => $composableBuilder(
     column: $table.occasions,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get isFavorite => $composableBuilder(
+  drift.ColumnFilters<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get isArchived => $composableBuilder(
+  drift.ColumnFilters<bool> get isArchived => $composableBuilder(
     column: $table.isArchived,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get timesWorn => $composableBuilder(
+  drift.ColumnFilters<int> get timesWorn => $composableBuilder(
     column: $table.timesWorn,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<double> get comfortRating => $composableBuilder(
+  drift.ColumnFilters<double> get comfortRating => $composableBuilder(
     column: $table.comfortRating,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get addedDate => $composableBuilder(
+  drift.ColumnFilters<int> get addedDate => $composableBuilder(
     column: $table.addedDate,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get createdAt => $composableBuilder(
+  drift.ColumnFilters<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get updatedAt => $composableBuilder(
+  drift.ColumnFilters<int> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get lastWornDate => $composableBuilder(
+  drift.ColumnFilters<int> get lastWornDate => $composableBuilder(
     column: $table.lastWornDate,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<double> get price => $composableBuilder(
+  drift.ColumnFilters<double> get price => $composableBuilder(
     column: $table.price,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get size => $composableBuilder(
+  drift.ColumnFilters<String> get size => $composableBuilder(
     column: $table.size,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get usageCount => $composableBuilder(
+  drift.ColumnFilters<int> get usageCount => $composableBuilder(
     column: $table.usageCount,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get serverId => $composableBuilder(
+  drift.ColumnFilters<String> get serverId => $composableBuilder(
     column: $table.serverId,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get dirty => $composableBuilder(
+  drift.ColumnFilters<bool> get dirty => $composableBuilder(
     column: $table.dirty,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get lastSyncedAt => $composableBuilder(
+  drift.ColumnFilters<int> get lastSyncedAt => $composableBuilder(
     column: $table.lastSyncedAt,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 }
 
 class $$ClothingItemsTableOrderingComposer
-    extends Composer<_$WardrobeDatabase, $ClothingItemsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $ClothingItemsTable> {
   $$ClothingItemsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -3115,144 +3193,144 @@ class $$ClothingItemsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  drift.ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get externalId => $composableBuilder(
+  drift.ColumnOrderings<String> get externalId => $composableBuilder(
     column: $table.externalId,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get name => $composableBuilder(
+  drift.ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get description => $composableBuilder(
+  drift.ColumnOrderings<String> get description => $composableBuilder(
     column: $table.description,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get imageUrl => $composableBuilder(
+  drift.ColumnOrderings<String> get imageUrl => $composableBuilder(
     column: $table.imageUrl,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get category => $composableBuilder(
+  drift.ColumnOrderings<String> get category => $composableBuilder(
     column: $table.category,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get tags => $composableBuilder(
+  drift.ColumnOrderings<String> get tags => $composableBuilder(
     column: $table.tags,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get color => $composableBuilder(
+  drift.ColumnOrderings<String> get color => $composableBuilder(
     column: $table.color,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get brand => $composableBuilder(
+  drift.ColumnOrderings<String> get brand => $composableBuilder(
     column: $table.brand,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get material => $composableBuilder(
+  drift.ColumnOrderings<String> get material => $composableBuilder(
     column: $table.material,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get seasons => $composableBuilder(
+  drift.ColumnOrderings<String> get seasons => $composableBuilder(
     column: $table.seasons,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get weatherConditions => $composableBuilder(
+  drift.ColumnOrderings<String> get weatherConditions => $composableBuilder(
     column: $table.weatherConditions,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get occasions => $composableBuilder(
+  drift.ColumnOrderings<String> get occasions => $composableBuilder(
     column: $table.occasions,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+  drift.ColumnOrderings<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isArchived => $composableBuilder(
+  drift.ColumnOrderings<bool> get isArchived => $composableBuilder(
     column: $table.isArchived,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get timesWorn => $composableBuilder(
+  drift.ColumnOrderings<int> get timesWorn => $composableBuilder(
     column: $table.timesWorn,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get comfortRating => $composableBuilder(
+  drift.ColumnOrderings<double> get comfortRating => $composableBuilder(
     column: $table.comfortRating,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get addedDate => $composableBuilder(
+  drift.ColumnOrderings<int> get addedDate => $composableBuilder(
     column: $table.addedDate,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get createdAt => $composableBuilder(
+  drift.ColumnOrderings<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get updatedAt => $composableBuilder(
+  drift.ColumnOrderings<int> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get lastWornDate => $composableBuilder(
+  drift.ColumnOrderings<int> get lastWornDate => $composableBuilder(
     column: $table.lastWornDate,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get price => $composableBuilder(
+  drift.ColumnOrderings<double> get price => $composableBuilder(
     column: $table.price,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get size => $composableBuilder(
+  drift.ColumnOrderings<String> get size => $composableBuilder(
     column: $table.size,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get usageCount => $composableBuilder(
+  drift.ColumnOrderings<int> get usageCount => $composableBuilder(
     column: $table.usageCount,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get serverId => $composableBuilder(
+  drift.ColumnOrderings<String> get serverId => $composableBuilder(
     column: $table.serverId,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get dirty => $composableBuilder(
+  drift.ColumnOrderings<bool> get dirty => $composableBuilder(
     column: $table.dirty,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get lastSyncedAt => $composableBuilder(
+  drift.ColumnOrderings<int> get lastSyncedAt => $composableBuilder(
     column: $table.lastSyncedAt,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 }
 
 class $$ClothingItemsTableAnnotationComposer
-    extends Composer<_$WardrobeDatabase, $ClothingItemsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $ClothingItemsTable> {
   $$ClothingItemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -3260,101 +3338,101 @@ class $$ClothingItemsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  drift.GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get externalId => $composableBuilder(
+  drift.GeneratedColumn<String> get externalId => $composableBuilder(
     column: $table.externalId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get name =>
+  drift.GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get description => $composableBuilder(
+  drift.GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get imageUrl =>
+  drift.GeneratedColumn<String> get imageUrl =>
       $composableBuilder(column: $table.imageUrl, builder: (column) => column);
 
-  GeneratedColumn<String> get category =>
+  drift.GeneratedColumn<String> get category =>
       $composableBuilder(column: $table.category, builder: (column) => column);
 
-  GeneratedColumn<String> get tags =>
+  drift.GeneratedColumn<String> get tags =>
       $composableBuilder(column: $table.tags, builder: (column) => column);
 
-  GeneratedColumn<String> get color =>
+  drift.GeneratedColumn<String> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
 
-  GeneratedColumn<String> get brand =>
+  drift.GeneratedColumn<String> get brand =>
       $composableBuilder(column: $table.brand, builder: (column) => column);
 
-  GeneratedColumn<String> get material =>
+  drift.GeneratedColumn<String> get material =>
       $composableBuilder(column: $table.material, builder: (column) => column);
 
-  GeneratedColumn<String> get seasons =>
+  drift.GeneratedColumn<String> get seasons =>
       $composableBuilder(column: $table.seasons, builder: (column) => column);
 
-  GeneratedColumn<String> get weatherConditions => $composableBuilder(
+  drift.GeneratedColumn<String> get weatherConditions => $composableBuilder(
     column: $table.weatherConditions,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get occasions =>
+  drift.GeneratedColumn<String> get occasions =>
       $composableBuilder(column: $table.occasions, builder: (column) => column);
 
-  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+  drift.GeneratedColumn<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get isArchived => $composableBuilder(
+  drift.GeneratedColumn<bool> get isArchived => $composableBuilder(
     column: $table.isArchived,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get timesWorn =>
+  drift.GeneratedColumn<int> get timesWorn =>
       $composableBuilder(column: $table.timesWorn, builder: (column) => column);
 
-  GeneratedColumn<double> get comfortRating => $composableBuilder(
+  drift.GeneratedColumn<double> get comfortRating => $composableBuilder(
     column: $table.comfortRating,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get addedDate =>
+  drift.GeneratedColumn<int> get addedDate =>
       $composableBuilder(column: $table.addedDate, builder: (column) => column);
 
-  GeneratedColumn<int> get createdAt =>
+  drift.GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<int> get updatedAt =>
+  drift.GeneratedColumn<int> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<int> get lastWornDate => $composableBuilder(
+  drift.GeneratedColumn<int> get lastWornDate => $composableBuilder(
     column: $table.lastWornDate,
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get price =>
+  drift.GeneratedColumn<double> get price =>
       $composableBuilder(column: $table.price, builder: (column) => column);
 
-  GeneratedColumn<String> get size =>
+  drift.GeneratedColumn<String> get size =>
       $composableBuilder(column: $table.size, builder: (column) => column);
 
-  GeneratedColumn<int> get usageCount => $composableBuilder(
+  drift.GeneratedColumn<int> get usageCount => $composableBuilder(
     column: $table.usageCount,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get serverId =>
+  drift.GeneratedColumn<String> get serverId =>
       $composableBuilder(column: $table.serverId, builder: (column) => column);
 
-  GeneratedColumn<bool> get dirty =>
+  drift.GeneratedColumn<bool> get dirty =>
       $composableBuilder(column: $table.dirty, builder: (column) => column);
 
-  GeneratedColumn<int> get lastSyncedAt => $composableBuilder(
+  drift.GeneratedColumn<int> get lastSyncedAt => $composableBuilder(
     column: $table.lastSyncedAt,
     builder: (column) => column,
   );
@@ -3362,7 +3440,7 @@ class $$ClothingItemsTableAnnotationComposer
 
 class $$ClothingItemsTableTableManager
     extends
-        RootTableManager<
+        drift.RootTableManager<
           _$WardrobeDatabase,
           $ClothingItemsTable,
           DbClothingItem,
@@ -3373,57 +3451,62 @@ class $$ClothingItemsTableTableManager
           $$ClothingItemsTableUpdateCompanionBuilder,
           (
             DbClothingItem,
-            BaseReferences<
+            drift.BaseReferences<
               _$WardrobeDatabase,
               $ClothingItemsTable,
               DbClothingItem
             >,
           ),
           DbClothingItem,
-          PrefetchHooks Function()
+          drift.PrefetchHooks Function()
         > {
   $$ClothingItemsTableTableManager(
     _$WardrobeDatabase db,
     $ClothingItemsTable table,
   ) : super(
-        TableManagerState(
+        drift.TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ClothingItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ClothingItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ClothingItemsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer:
+              () => $$ClothingItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () =>
+                  $$ClothingItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$ClothingItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<String?> externalId = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<String?> description = const Value.absent(),
-                Value<String?> imageUrl = const Value.absent(),
-                Value<String> category = const Value.absent(),
-                Value<String> tags = const Value.absent(),
-                Value<String?> color = const Value.absent(),
-                Value<String?> brand = const Value.absent(),
-                Value<String?> material = const Value.absent(),
-                Value<String> seasons = const Value.absent(),
-                Value<String> weatherConditions = const Value.absent(),
-                Value<String> occasions = const Value.absent(),
-                Value<bool> isFavorite = const Value.absent(),
-                Value<bool> isArchived = const Value.absent(),
-                Value<int> timesWorn = const Value.absent(),
-                Value<double> comfortRating = const Value.absent(),
-                Value<int> addedDate = const Value.absent(),
-                Value<int> createdAt = const Value.absent(),
-                Value<int> updatedAt = const Value.absent(),
-                Value<int?> lastWornDate = const Value.absent(),
-                Value<double?> price = const Value.absent(),
-                Value<String?> size = const Value.absent(),
-                Value<int> usageCount = const Value.absent(),
-                Value<String?> serverId = const Value.absent(),
-                Value<bool> dirty = const Value.absent(),
-                Value<int?> lastSyncedAt = const Value.absent(),
+                drift.Value<int> id = const drift.Value.absent(),
+                drift.Value<String?> externalId = const drift.Value.absent(),
+                drift.Value<String> name = const drift.Value.absent(),
+                drift.Value<String?> description = const drift.Value.absent(),
+                drift.Value<String?> imageUrl = const drift.Value.absent(),
+                drift.Value<String> category = const drift.Value.absent(),
+                drift.Value<String> tags = const drift.Value.absent(),
+                drift.Value<String?> color = const drift.Value.absent(),
+                drift.Value<String?> brand = const drift.Value.absent(),
+                drift.Value<String?> material = const drift.Value.absent(),
+                drift.Value<String> seasons = const drift.Value.absent(),
+                drift.Value<String> weatherConditions =
+                    const drift.Value.absent(),
+                drift.Value<String> occasions = const drift.Value.absent(),
+                drift.Value<bool> isFavorite = const drift.Value.absent(),
+                drift.Value<bool> isArchived = const drift.Value.absent(),
+                drift.Value<int> timesWorn = const drift.Value.absent(),
+                drift.Value<double> comfortRating = const drift.Value.absent(),
+                drift.Value<int> addedDate = const drift.Value.absent(),
+                drift.Value<int> createdAt = const drift.Value.absent(),
+                drift.Value<int> updatedAt = const drift.Value.absent(),
+                drift.Value<int?> lastWornDate = const drift.Value.absent(),
+                drift.Value<double?> price = const drift.Value.absent(),
+                drift.Value<String?> size = const drift.Value.absent(),
+                drift.Value<int> usageCount = const drift.Value.absent(),
+                drift.Value<String?> serverId = const drift.Value.absent(),
+                drift.Value<bool> dirty = const drift.Value.absent(),
+                drift.Value<int?> lastSyncedAt = const drift.Value.absent(),
               }) => ClothingItemsCompanion(
                 id: id,
                 externalId: externalId,
@@ -3455,33 +3538,34 @@ class $$ClothingItemsTableTableManager
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<String?> externalId = const Value.absent(),
+                drift.Value<int> id = const drift.Value.absent(),
+                drift.Value<String?> externalId = const drift.Value.absent(),
                 required String name,
-                Value<String?> description = const Value.absent(),
-                Value<String?> imageUrl = const Value.absent(),
+                drift.Value<String?> description = const drift.Value.absent(),
+                drift.Value<String?> imageUrl = const drift.Value.absent(),
                 required String category,
-                Value<String> tags = const Value.absent(),
-                Value<String?> color = const Value.absent(),
-                Value<String?> brand = const Value.absent(),
-                Value<String?> material = const Value.absent(),
-                Value<String> seasons = const Value.absent(),
-                Value<String> weatherConditions = const Value.absent(),
-                Value<String> occasions = const Value.absent(),
-                Value<bool> isFavorite = const Value.absent(),
-                Value<bool> isArchived = const Value.absent(),
-                Value<int> timesWorn = const Value.absent(),
-                Value<double> comfortRating = const Value.absent(),
+                drift.Value<String> tags = const drift.Value.absent(),
+                drift.Value<String?> color = const drift.Value.absent(),
+                drift.Value<String?> brand = const drift.Value.absent(),
+                drift.Value<String?> material = const drift.Value.absent(),
+                drift.Value<String> seasons = const drift.Value.absent(),
+                drift.Value<String> weatherConditions =
+                    const drift.Value.absent(),
+                drift.Value<String> occasions = const drift.Value.absent(),
+                drift.Value<bool> isFavorite = const drift.Value.absent(),
+                drift.Value<bool> isArchived = const drift.Value.absent(),
+                drift.Value<int> timesWorn = const drift.Value.absent(),
+                drift.Value<double> comfortRating = const drift.Value.absent(),
                 required int addedDate,
                 required int createdAt,
                 required int updatedAt,
-                Value<int?> lastWornDate = const Value.absent(),
-                Value<double?> price = const Value.absent(),
-                Value<String?> size = const Value.absent(),
-                Value<int> usageCount = const Value.absent(),
-                Value<String?> serverId = const Value.absent(),
-                Value<bool> dirty = const Value.absent(),
-                Value<int?> lastSyncedAt = const Value.absent(),
+                drift.Value<int?> lastWornDate = const drift.Value.absent(),
+                drift.Value<double?> price = const drift.Value.absent(),
+                drift.Value<String?> size = const drift.Value.absent(),
+                drift.Value<int> usageCount = const drift.Value.absent(),
+                drift.Value<String?> serverId = const drift.Value.absent(),
+                drift.Value<bool> dirty = const drift.Value.absent(),
+                drift.Value<int?> lastSyncedAt = const drift.Value.absent(),
               }) => ClothingItemsCompanion.insert(
                 id: id,
                 externalId: externalId,
@@ -3511,16 +3595,23 @@ class $$ClothingItemsTableTableManager
                 dirty: dirty,
                 lastSyncedAt: lastSyncedAt,
               ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          drift.BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
         ),
       );
 }
 
 typedef $$ClothingItemsTableProcessedTableManager =
-    ProcessedTableManager<
+    drift.ProcessedTableManager<
       _$WardrobeDatabase,
       $ClothingItemsTable,
       DbClothingItem,
@@ -3531,58 +3622,62 @@ typedef $$ClothingItemsTableProcessedTableManager =
       $$ClothingItemsTableUpdateCompanionBuilder,
       (
         DbClothingItem,
-        BaseReferences<_$WardrobeDatabase, $ClothingItemsTable, DbClothingItem>,
+        drift.BaseReferences<
+          _$WardrobeDatabase,
+          $ClothingItemsTable,
+          DbClothingItem
+        >,
       ),
       DbClothingItem,
-      PrefetchHooks Function()
+      drift.PrefetchHooks Function()
     >;
 typedef $$OutfitsTableCreateCompanionBuilder =
     OutfitsCompanion Function({
-      Value<int> id,
-      Value<String?> externalId,
+      drift.Value<int> id,
+      drift.Value<String?> externalId,
       required String name,
-      Value<String?> description,
-      Value<String?> imageUrl,
-      Value<String> clothingItemIds,
-      Value<bool> isFavorite,
-      Value<int> timesWorn,
-      Value<double> comfortRating,
-      Value<String> tags,
-      Value<String> occasions,
-      Value<String> weatherConditions,
-      Value<String> seasons,
+      drift.Value<String?> description,
+      drift.Value<String?> imageUrl,
+      drift.Value<String> clothingItemIds,
+      drift.Value<bool> isFavorite,
+      drift.Value<int> timesWorn,
+      drift.Value<double> comfortRating,
+      drift.Value<String> tags,
+      drift.Value<String> occasions,
+      drift.Value<String> weatherConditions,
+      drift.Value<String> seasons,
       required int addedDate,
       required int createdAt,
       required int updatedAt,
-      Value<String?> serverId,
-      Value<bool> dirty,
-      Value<int?> lastSyncedAt,
+      drift.Value<String?> serverId,
+      drift.Value<bool> dirty,
+      drift.Value<int?> lastSyncedAt,
     });
 typedef $$OutfitsTableUpdateCompanionBuilder =
     OutfitsCompanion Function({
-      Value<int> id,
-      Value<String?> externalId,
-      Value<String> name,
-      Value<String?> description,
-      Value<String?> imageUrl,
-      Value<String> clothingItemIds,
-      Value<bool> isFavorite,
-      Value<int> timesWorn,
-      Value<double> comfortRating,
-      Value<String> tags,
-      Value<String> occasions,
-      Value<String> weatherConditions,
-      Value<String> seasons,
-      Value<int> addedDate,
-      Value<int> createdAt,
-      Value<int> updatedAt,
-      Value<String?> serverId,
-      Value<bool> dirty,
-      Value<int?> lastSyncedAt,
+      drift.Value<int> id,
+      drift.Value<String?> externalId,
+      drift.Value<String> name,
+      drift.Value<String?> description,
+      drift.Value<String?> imageUrl,
+      drift.Value<String> clothingItemIds,
+      drift.Value<bool> isFavorite,
+      drift.Value<int> timesWorn,
+      drift.Value<double> comfortRating,
+      drift.Value<String> tags,
+      drift.Value<String> occasions,
+      drift.Value<String> weatherConditions,
+      drift.Value<String> seasons,
+      drift.Value<int> addedDate,
+      drift.Value<int> createdAt,
+      drift.Value<int> updatedAt,
+      drift.Value<String?> serverId,
+      drift.Value<bool> dirty,
+      drift.Value<int?> lastSyncedAt,
     });
 
 class $$OutfitsTableFilterComposer
-    extends Composer<_$WardrobeDatabase, $OutfitsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $OutfitsTable> {
   $$OutfitsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -3590,104 +3685,104 @@ class $$OutfitsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  drift.ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get externalId => $composableBuilder(
+  drift.ColumnFilters<String> get externalId => $composableBuilder(
     column: $table.externalId,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get name => $composableBuilder(
+  drift.ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get description => $composableBuilder(
+  drift.ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get imageUrl => $composableBuilder(
+  drift.ColumnFilters<String> get imageUrl => $composableBuilder(
     column: $table.imageUrl,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get clothingItemIds => $composableBuilder(
+  drift.ColumnFilters<String> get clothingItemIds => $composableBuilder(
     column: $table.clothingItemIds,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get isFavorite => $composableBuilder(
+  drift.ColumnFilters<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get timesWorn => $composableBuilder(
+  drift.ColumnFilters<int> get timesWorn => $composableBuilder(
     column: $table.timesWorn,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<double> get comfortRating => $composableBuilder(
+  drift.ColumnFilters<double> get comfortRating => $composableBuilder(
     column: $table.comfortRating,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get tags => $composableBuilder(
+  drift.ColumnFilters<String> get tags => $composableBuilder(
     column: $table.tags,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get occasions => $composableBuilder(
+  drift.ColumnFilters<String> get occasions => $composableBuilder(
     column: $table.occasions,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get weatherConditions => $composableBuilder(
+  drift.ColumnFilters<String> get weatherConditions => $composableBuilder(
     column: $table.weatherConditions,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get seasons => $composableBuilder(
+  drift.ColumnFilters<String> get seasons => $composableBuilder(
     column: $table.seasons,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get addedDate => $composableBuilder(
+  drift.ColumnFilters<int> get addedDate => $composableBuilder(
     column: $table.addedDate,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get createdAt => $composableBuilder(
+  drift.ColumnFilters<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get updatedAt => $composableBuilder(
+  drift.ColumnFilters<int> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get serverId => $composableBuilder(
+  drift.ColumnFilters<String> get serverId => $composableBuilder(
     column: $table.serverId,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get dirty => $composableBuilder(
+  drift.ColumnFilters<bool> get dirty => $composableBuilder(
     column: $table.dirty,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get lastSyncedAt => $composableBuilder(
+  drift.ColumnFilters<int> get lastSyncedAt => $composableBuilder(
     column: $table.lastSyncedAt,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 }
 
 class $$OutfitsTableOrderingComposer
-    extends Composer<_$WardrobeDatabase, $OutfitsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $OutfitsTable> {
   $$OutfitsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -3695,104 +3790,104 @@ class $$OutfitsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  drift.ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get externalId => $composableBuilder(
+  drift.ColumnOrderings<String> get externalId => $composableBuilder(
     column: $table.externalId,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get name => $composableBuilder(
+  drift.ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get description => $composableBuilder(
+  drift.ColumnOrderings<String> get description => $composableBuilder(
     column: $table.description,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get imageUrl => $composableBuilder(
+  drift.ColumnOrderings<String> get imageUrl => $composableBuilder(
     column: $table.imageUrl,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get clothingItemIds => $composableBuilder(
+  drift.ColumnOrderings<String> get clothingItemIds => $composableBuilder(
     column: $table.clothingItemIds,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+  drift.ColumnOrderings<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get timesWorn => $composableBuilder(
+  drift.ColumnOrderings<int> get timesWorn => $composableBuilder(
     column: $table.timesWorn,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get comfortRating => $composableBuilder(
+  drift.ColumnOrderings<double> get comfortRating => $composableBuilder(
     column: $table.comfortRating,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get tags => $composableBuilder(
+  drift.ColumnOrderings<String> get tags => $composableBuilder(
     column: $table.tags,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get occasions => $composableBuilder(
+  drift.ColumnOrderings<String> get occasions => $composableBuilder(
     column: $table.occasions,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get weatherConditions => $composableBuilder(
+  drift.ColumnOrderings<String> get weatherConditions => $composableBuilder(
     column: $table.weatherConditions,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get seasons => $composableBuilder(
+  drift.ColumnOrderings<String> get seasons => $composableBuilder(
     column: $table.seasons,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get addedDate => $composableBuilder(
+  drift.ColumnOrderings<int> get addedDate => $composableBuilder(
     column: $table.addedDate,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get createdAt => $composableBuilder(
+  drift.ColumnOrderings<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get updatedAt => $composableBuilder(
+  drift.ColumnOrderings<int> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get serverId => $composableBuilder(
+  drift.ColumnOrderings<String> get serverId => $composableBuilder(
     column: $table.serverId,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get dirty => $composableBuilder(
+  drift.ColumnOrderings<bool> get dirty => $composableBuilder(
     column: $table.dirty,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get lastSyncedAt => $composableBuilder(
+  drift.ColumnOrderings<int> get lastSyncedAt => $composableBuilder(
     column: $table.lastSyncedAt,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 }
 
 class $$OutfitsTableAnnotationComposer
-    extends Composer<_$WardrobeDatabase, $OutfitsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $OutfitsTable> {
   $$OutfitsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -3800,73 +3895,73 @@ class $$OutfitsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  drift.GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get externalId => $composableBuilder(
+  drift.GeneratedColumn<String> get externalId => $composableBuilder(
     column: $table.externalId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get name =>
+  drift.GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get description => $composableBuilder(
+  drift.GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get imageUrl =>
+  drift.GeneratedColumn<String> get imageUrl =>
       $composableBuilder(column: $table.imageUrl, builder: (column) => column);
 
-  GeneratedColumn<String> get clothingItemIds => $composableBuilder(
+  drift.GeneratedColumn<String> get clothingItemIds => $composableBuilder(
     column: $table.clothingItemIds,
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+  drift.GeneratedColumn<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get timesWorn =>
+  drift.GeneratedColumn<int> get timesWorn =>
       $composableBuilder(column: $table.timesWorn, builder: (column) => column);
 
-  GeneratedColumn<double> get comfortRating => $composableBuilder(
+  drift.GeneratedColumn<double> get comfortRating => $composableBuilder(
     column: $table.comfortRating,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get tags =>
+  drift.GeneratedColumn<String> get tags =>
       $composableBuilder(column: $table.tags, builder: (column) => column);
 
-  GeneratedColumn<String> get occasions =>
+  drift.GeneratedColumn<String> get occasions =>
       $composableBuilder(column: $table.occasions, builder: (column) => column);
 
-  GeneratedColumn<String> get weatherConditions => $composableBuilder(
+  drift.GeneratedColumn<String> get weatherConditions => $composableBuilder(
     column: $table.weatherConditions,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get seasons =>
+  drift.GeneratedColumn<String> get seasons =>
       $composableBuilder(column: $table.seasons, builder: (column) => column);
 
-  GeneratedColumn<int> get addedDate =>
+  drift.GeneratedColumn<int> get addedDate =>
       $composableBuilder(column: $table.addedDate, builder: (column) => column);
 
-  GeneratedColumn<int> get createdAt =>
+  drift.GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<int> get updatedAt =>
+  drift.GeneratedColumn<int> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<String> get serverId =>
+  drift.GeneratedColumn<String> get serverId =>
       $composableBuilder(column: $table.serverId, builder: (column) => column);
 
-  GeneratedColumn<bool> get dirty =>
+  drift.GeneratedColumn<bool> get dirty =>
       $composableBuilder(column: $table.dirty, builder: (column) => column);
 
-  GeneratedColumn<int> get lastSyncedAt => $composableBuilder(
+  drift.GeneratedColumn<int> get lastSyncedAt => $composableBuilder(
     column: $table.lastSyncedAt,
     builder: (column) => column,
   );
@@ -3874,7 +3969,7 @@ class $$OutfitsTableAnnotationComposer
 
 class $$OutfitsTableTableManager
     extends
-        RootTableManager<
+        drift.RootTableManager<
           _$WardrobeDatabase,
           $OutfitsTable,
           DbOutfit,
@@ -3885,43 +3980,45 @@ class $$OutfitsTableTableManager
           $$OutfitsTableUpdateCompanionBuilder,
           (
             DbOutfit,
-            BaseReferences<_$WardrobeDatabase, $OutfitsTable, DbOutfit>,
+            drift.BaseReferences<_$WardrobeDatabase, $OutfitsTable, DbOutfit>,
           ),
           DbOutfit,
-          PrefetchHooks Function()
+          drift.PrefetchHooks Function()
         > {
   $$OutfitsTableTableManager(_$WardrobeDatabase db, $OutfitsTable table)
     : super(
-        TableManagerState(
+        drift.TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$OutfitsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$OutfitsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$OutfitsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer:
+              () => $$OutfitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$OutfitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$OutfitsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<String?> externalId = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<String?> description = const Value.absent(),
-                Value<String?> imageUrl = const Value.absent(),
-                Value<String> clothingItemIds = const Value.absent(),
-                Value<bool> isFavorite = const Value.absent(),
-                Value<int> timesWorn = const Value.absent(),
-                Value<double> comfortRating = const Value.absent(),
-                Value<String> tags = const Value.absent(),
-                Value<String> occasions = const Value.absent(),
-                Value<String> weatherConditions = const Value.absent(),
-                Value<String> seasons = const Value.absent(),
-                Value<int> addedDate = const Value.absent(),
-                Value<int> createdAt = const Value.absent(),
-                Value<int> updatedAt = const Value.absent(),
-                Value<String?> serverId = const Value.absent(),
-                Value<bool> dirty = const Value.absent(),
-                Value<int?> lastSyncedAt = const Value.absent(),
+                drift.Value<int> id = const drift.Value.absent(),
+                drift.Value<String?> externalId = const drift.Value.absent(),
+                drift.Value<String> name = const drift.Value.absent(),
+                drift.Value<String?> description = const drift.Value.absent(),
+                drift.Value<String?> imageUrl = const drift.Value.absent(),
+                drift.Value<String> clothingItemIds =
+                    const drift.Value.absent(),
+                drift.Value<bool> isFavorite = const drift.Value.absent(),
+                drift.Value<int> timesWorn = const drift.Value.absent(),
+                drift.Value<double> comfortRating = const drift.Value.absent(),
+                drift.Value<String> tags = const drift.Value.absent(),
+                drift.Value<String> occasions = const drift.Value.absent(),
+                drift.Value<String> weatherConditions =
+                    const drift.Value.absent(),
+                drift.Value<String> seasons = const drift.Value.absent(),
+                drift.Value<int> addedDate = const drift.Value.absent(),
+                drift.Value<int> createdAt = const drift.Value.absent(),
+                drift.Value<int> updatedAt = const drift.Value.absent(),
+                drift.Value<String?> serverId = const drift.Value.absent(),
+                drift.Value<bool> dirty = const drift.Value.absent(),
+                drift.Value<int?> lastSyncedAt = const drift.Value.absent(),
               }) => OutfitsCompanion(
                 id: id,
                 externalId: externalId,
@@ -3945,25 +4042,27 @@ class $$OutfitsTableTableManager
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<String?> externalId = const Value.absent(),
+                drift.Value<int> id = const drift.Value.absent(),
+                drift.Value<String?> externalId = const drift.Value.absent(),
                 required String name,
-                Value<String?> description = const Value.absent(),
-                Value<String?> imageUrl = const Value.absent(),
-                Value<String> clothingItemIds = const Value.absent(),
-                Value<bool> isFavorite = const Value.absent(),
-                Value<int> timesWorn = const Value.absent(),
-                Value<double> comfortRating = const Value.absent(),
-                Value<String> tags = const Value.absent(),
-                Value<String> occasions = const Value.absent(),
-                Value<String> weatherConditions = const Value.absent(),
-                Value<String> seasons = const Value.absent(),
+                drift.Value<String?> description = const drift.Value.absent(),
+                drift.Value<String?> imageUrl = const drift.Value.absent(),
+                drift.Value<String> clothingItemIds =
+                    const drift.Value.absent(),
+                drift.Value<bool> isFavorite = const drift.Value.absent(),
+                drift.Value<int> timesWorn = const drift.Value.absent(),
+                drift.Value<double> comfortRating = const drift.Value.absent(),
+                drift.Value<String> tags = const drift.Value.absent(),
+                drift.Value<String> occasions = const drift.Value.absent(),
+                drift.Value<String> weatherConditions =
+                    const drift.Value.absent(),
+                drift.Value<String> seasons = const drift.Value.absent(),
                 required int addedDate,
                 required int createdAt,
                 required int updatedAt,
-                Value<String?> serverId = const Value.absent(),
-                Value<bool> dirty = const Value.absent(),
-                Value<int?> lastSyncedAt = const Value.absent(),
+                drift.Value<String?> serverId = const drift.Value.absent(),
+                drift.Value<bool> dirty = const drift.Value.absent(),
+                drift.Value<int?> lastSyncedAt = const drift.Value.absent(),
               }) => OutfitsCompanion.insert(
                 id: id,
                 externalId: externalId,
@@ -3985,16 +4084,23 @@ class $$OutfitsTableTableManager
                 dirty: dirty,
                 lastSyncedAt: lastSyncedAt,
               ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          drift.BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
         ),
       );
 }
 
 typedef $$OutfitsTableProcessedTableManager =
-    ProcessedTableManager<
+    drift.ProcessedTableManager<
       _$WardrobeDatabase,
       $OutfitsTable,
       DbOutfit,
@@ -4003,31 +4109,34 @@ typedef $$OutfitsTableProcessedTableManager =
       $$OutfitsTableAnnotationComposer,
       $$OutfitsTableCreateCompanionBuilder,
       $$OutfitsTableUpdateCompanionBuilder,
-      (DbOutfit, BaseReferences<_$WardrobeDatabase, $OutfitsTable, DbOutfit>),
+      (
+        DbOutfit,
+        drift.BaseReferences<_$WardrobeDatabase, $OutfitsTable, DbOutfit>,
+      ),
       DbOutfit,
-      PrefetchHooks Function()
+      drift.PrefetchHooks Function()
     >;
 typedef $$OutfitItemsTableCreateCompanionBuilder =
     OutfitItemsCompanion Function({
-      Value<int> id,
+      drift.Value<int> id,
       required int outfitId,
       required int clothingItemId,
-      Value<int> sortOrder,
-      Value<bool> isPrimary,
-      Value<String> metadata,
+      drift.Value<int> sortOrder,
+      drift.Value<bool> isPrimary,
+      drift.Value<String> metadata,
     });
 typedef $$OutfitItemsTableUpdateCompanionBuilder =
     OutfitItemsCompanion Function({
-      Value<int> id,
-      Value<int> outfitId,
-      Value<int> clothingItemId,
-      Value<int> sortOrder,
-      Value<bool> isPrimary,
-      Value<String> metadata,
+      drift.Value<int> id,
+      drift.Value<int> outfitId,
+      drift.Value<int> clothingItemId,
+      drift.Value<int> sortOrder,
+      drift.Value<bool> isPrimary,
+      drift.Value<String> metadata,
     });
 
 class $$OutfitItemsTableFilterComposer
-    extends Composer<_$WardrobeDatabase, $OutfitItemsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $OutfitItemsTable> {
   $$OutfitItemsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -4035,39 +4144,39 @@ class $$OutfitItemsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  drift.ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get outfitId => $composableBuilder(
+  drift.ColumnFilters<int> get outfitId => $composableBuilder(
     column: $table.outfitId,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get clothingItemId => $composableBuilder(
+  drift.ColumnFilters<int> get clothingItemId => $composableBuilder(
     column: $table.clothingItemId,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<int> get sortOrder => $composableBuilder(
+  drift.ColumnFilters<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get isPrimary => $composableBuilder(
+  drift.ColumnFilters<bool> get isPrimary => $composableBuilder(
     column: $table.isPrimary,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 
-  ColumnFilters<String> get metadata => $composableBuilder(
+  drift.ColumnFilters<String> get metadata => $composableBuilder(
     column: $table.metadata,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => drift.ColumnFilters(column),
   );
 }
 
 class $$OutfitItemsTableOrderingComposer
-    extends Composer<_$WardrobeDatabase, $OutfitItemsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $OutfitItemsTable> {
   $$OutfitItemsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -4075,39 +4184,39 @@ class $$OutfitItemsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  drift.ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get outfitId => $composableBuilder(
+  drift.ColumnOrderings<int> get outfitId => $composableBuilder(
     column: $table.outfitId,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get clothingItemId => $composableBuilder(
+  drift.ColumnOrderings<int> get clothingItemId => $composableBuilder(
     column: $table.clothingItemId,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get sortOrder => $composableBuilder(
+  drift.ColumnOrderings<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isPrimary => $composableBuilder(
+  drift.ColumnOrderings<bool> get isPrimary => $composableBuilder(
     column: $table.isPrimary,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get metadata => $composableBuilder(
+  drift.ColumnOrderings<String> get metadata => $composableBuilder(
     column: $table.metadata,
-    builder: (column) => ColumnOrderings(column),
+    builder: (column) => drift.ColumnOrderings(column),
   );
 }
 
 class $$OutfitItemsTableAnnotationComposer
-    extends Composer<_$WardrobeDatabase, $OutfitItemsTable> {
+    extends drift.Composer<_$WardrobeDatabase, $OutfitItemsTable> {
   $$OutfitItemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -4115,30 +4224,30 @@ class $$OutfitItemsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  drift.GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get outfitId =>
+  drift.GeneratedColumn<int> get outfitId =>
       $composableBuilder(column: $table.outfitId, builder: (column) => column);
 
-  GeneratedColumn<int> get clothingItemId => $composableBuilder(
+  drift.GeneratedColumn<int> get clothingItemId => $composableBuilder(
     column: $table.clothingItemId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get sortOrder =>
+  drift.GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 
-  GeneratedColumn<bool> get isPrimary =>
+  drift.GeneratedColumn<bool> get isPrimary =>
       $composableBuilder(column: $table.isPrimary, builder: (column) => column);
 
-  GeneratedColumn<String> get metadata =>
+  drift.GeneratedColumn<String> get metadata =>
       $composableBuilder(column: $table.metadata, builder: (column) => column);
 }
 
 class $$OutfitItemsTableTableManager
     extends
-        RootTableManager<
+        drift.RootTableManager<
           _$WardrobeDatabase,
           $OutfitItemsTable,
           DbOutfitItem,
@@ -4149,30 +4258,35 @@ class $$OutfitItemsTableTableManager
           $$OutfitItemsTableUpdateCompanionBuilder,
           (
             DbOutfitItem,
-            BaseReferences<_$WardrobeDatabase, $OutfitItemsTable, DbOutfitItem>,
+            drift.BaseReferences<
+              _$WardrobeDatabase,
+              $OutfitItemsTable,
+              DbOutfitItem
+            >,
           ),
           DbOutfitItem,
-          PrefetchHooks Function()
+          drift.PrefetchHooks Function()
         > {
   $$OutfitItemsTableTableManager(_$WardrobeDatabase db, $OutfitItemsTable table)
     : super(
-        TableManagerState(
+        drift.TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$OutfitItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$OutfitItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$OutfitItemsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer:
+              () => $$OutfitItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$OutfitItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () =>
+                  $$OutfitItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<int> outfitId = const Value.absent(),
-                Value<int> clothingItemId = const Value.absent(),
-                Value<int> sortOrder = const Value.absent(),
-                Value<bool> isPrimary = const Value.absent(),
-                Value<String> metadata = const Value.absent(),
+                drift.Value<int> id = const drift.Value.absent(),
+                drift.Value<int> outfitId = const drift.Value.absent(),
+                drift.Value<int> clothingItemId = const drift.Value.absent(),
+                drift.Value<int> sortOrder = const drift.Value.absent(),
+                drift.Value<bool> isPrimary = const drift.Value.absent(),
+                drift.Value<String> metadata = const drift.Value.absent(),
               }) => OutfitItemsCompanion(
                 id: id,
                 outfitId: outfitId,
@@ -4183,12 +4297,12 @@ class $$OutfitItemsTableTableManager
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                drift.Value<int> id = const drift.Value.absent(),
                 required int outfitId,
                 required int clothingItemId,
-                Value<int> sortOrder = const Value.absent(),
-                Value<bool> isPrimary = const Value.absent(),
-                Value<String> metadata = const Value.absent(),
+                drift.Value<int> sortOrder = const drift.Value.absent(),
+                drift.Value<bool> isPrimary = const drift.Value.absent(),
+                drift.Value<String> metadata = const drift.Value.absent(),
               }) => OutfitItemsCompanion.insert(
                 id: id,
                 outfitId: outfitId,
@@ -4197,16 +4311,23 @@ class $$OutfitItemsTableTableManager
                 isPrimary: isPrimary,
                 metadata: metadata,
               ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          drift.BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
         ),
       );
 }
 
 typedef $$OutfitItemsTableProcessedTableManager =
-    ProcessedTableManager<
+    drift.ProcessedTableManager<
       _$WardrobeDatabase,
       $OutfitItemsTable,
       DbOutfitItem,
@@ -4217,10 +4338,14 @@ typedef $$OutfitItemsTableProcessedTableManager =
       $$OutfitItemsTableUpdateCompanionBuilder,
       (
         DbOutfitItem,
-        BaseReferences<_$WardrobeDatabase, $OutfitItemsTable, DbOutfitItem>,
+        drift.BaseReferences<
+          _$WardrobeDatabase,
+          $OutfitItemsTable,
+          DbOutfitItem
+        >,
       ),
       DbOutfitItem,
-      PrefetchHooks Function()
+      drift.PrefetchHooks Function()
     >;
 
 class $WardrobeDatabaseManager {
