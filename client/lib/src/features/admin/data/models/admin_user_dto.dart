@@ -11,26 +11,15 @@ abstract class AdminUserDto with _$AdminUserDto {
   const factory AdminUserDto({
     required String id,
     required String email,
-    String? displayName,
-    required bool isActive,
-    required bool isVerified,
-    required DateTime createdAt,
-    DateTime? lastLoginAt,
+    @JsonKey(name: 'display_name') String? displayName,
+    @JsonKey(name: 'is_active') required bool isActive,
+    @JsonKey(name: 'is_verified') required bool isVerified,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
   }) = _AdminUserDto;
 
-  factory AdminUserDto.fromJson(Map<String, dynamic> json) {
-    return AdminUserDto(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      displayName: json['display_name'] as String?,
-      isActive: json['is_active'] as bool,
-      isVerified: json['is_verified'] as bool,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      lastLoginAt: json['last_login_at'] != null
-          ? DateTime.parse(json['last_login_at'] as String)
-          : null,
-    );
-  }
+  factory AdminUserDto.fromJson(Map<String, dynamic> json) =>
+      _$AdminUserDtoFromJson(json);
 }
 
 /// Extension для конвертации DTO в domain entity
@@ -54,40 +43,31 @@ extension AdminUserDtoExtension on AdminUserDto {
 @freezed
 abstract class UpdateUserRoleRequest with _$UpdateUserRoleRequest {
   const factory UpdateUserRoleRequest({
-    required String role,
+    @JsonKey(name: 'role') required String role,
   }) = _UpdateUserRoleRequest;
 
-  factory UpdateUserRoleRequest.fromJson(Map<String, dynamic> json) {
-    return UpdateUserRoleRequest(
-      role: json['role'] as String,
-    );
-  }
+  factory UpdateUserRoleRequest.fromJson(Map<String, dynamic> json) =>
+      _$UpdateUserRoleRequestFromJson(json);
 }
 
 /// DTO для запроса блокировки пользователя
 @freezed
 abstract class BlockUserRequest with _$BlockUserRequest {
   const factory BlockUserRequest({
-    required bool isActive,
+    @JsonKey(name: 'is_active') required bool isActive,
   }) = _BlockUserRequest;
 
-  factory BlockUserRequest.fromJson(Map<String, dynamic> json) {
-    return BlockUserRequest(
-      isActive: json['is_active'] as bool,
-    );
-  }
+  factory BlockUserRequest.fromJson(Map<String, dynamic> json) =>
+      _$BlockUserRequestFromJson(json);
 }
 
 /// DTO для запроса сброса пароля
 @freezed
 abstract class ResetPasswordRequest with _$ResetPasswordRequest {
   const factory ResetPasswordRequest({
-    required String userId,
+    @JsonKey(name: 'user_id') required String userId,
   }) = _ResetPasswordRequest;
 
-  factory ResetPasswordRequest.fromJson(Map<String, dynamic> json) {
-    return ResetPasswordRequest(
-      userId: json['user_id'] as String,
-    );
-  }
+  factory ResetPasswordRequest.fromJson(Map<String, dynamic> json) =>
+      _$ResetPasswordRequestFromJson(json);
 }
