@@ -1,11 +1,11 @@
 {
-    "name": "outfitstyle_client",
-    "short_name": "outfitstyle_client",
+    "name": "OutfitStyle",
+    "short_name": "OutfitStyle",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
+    "background_color": "#ffffff",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "OutfitStyle - твой стильный гардероб",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
