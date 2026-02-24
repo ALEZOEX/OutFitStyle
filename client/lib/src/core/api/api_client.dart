@@ -23,11 +23,15 @@ class ApiClient {
         final token = tokenPair?.accessToken;
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
+        } else {
+          // Отладка: нет токена
+          print('[ApiClient] Нет токена для запроса: ${options.method} ${options.path}');
         }
         return handler.next(options);
       },
       onError: (DioException err, handler) {
-        // Можем добавить логику для обработки ошибок
+        // Логируем ошибки для отладки
+        print('[ApiClient] Error: ${err.type} ${err.requestOptions.path} - ${err.response?.statusCode}');
         return handler.next(err);
       },
     ));

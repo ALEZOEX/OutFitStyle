@@ -25,10 +25,12 @@ class AuthStorage {
   }
 
   Future<void> writeTokenPair(TokenPair pair) async {
+    print('[AuthStorage] Сохраняем токен: ${pair.accessToken.substring(0, 10)}...');
     await _storage.write(key: _kAccessToken, value: pair.accessToken);
     await _storage.write(key: _kRefreshToken, value: pair.refreshToken);
     await _storage.write(
         key: _kExpiresAt, value: pair.expiresAt.toIso8601String());
+    print('[AuthStorage] Токен сохранён');
   }
 
   Future<String?> readAccessToken() async {
@@ -45,6 +47,8 @@ class AuthStorage {
     final access = await _storage.read(key: _kAccessToken);
     final refresh = await _storage.read(key: _kRefreshToken);
     final expiresAtStr = await _storage.read(key: _kExpiresAt);
+
+    print('[AuthStorage] Чтение токена: access=${access != null ? "present" : "null"}, refresh=${refresh != null ? "present" : "null"}');
 
     if (access == null || refresh == null) return null;
 
