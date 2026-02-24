@@ -544,6 +544,11 @@ func setupRouter(
 		middleware.MetricsMiddleware(),
 	)
 
+	// Global OPTIONS handler для CORS preflight запросов
+	router.Methods(stdhttp.MethodOptions).HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		w.WriteHeader(stdhttp.StatusNoContent)
+	})
+
 	router.HandleFunc("/health", func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 		health.Handler(db.Pool(), mlClient)(w, r)
 	}).Methods(stdhttp.MethodGet)
