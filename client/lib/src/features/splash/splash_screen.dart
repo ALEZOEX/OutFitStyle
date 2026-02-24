@@ -26,56 +26,73 @@ class SplashScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Запускаем проверку при первом билде
-    Future.microtask(() async {
-      try {
-        await ref.read(splashInitProvider.future);
-      } catch (e) {
-        // В случае ошибки просто логируем
-        debugPrint('Ошибка инициализации splash: $e');
-      }
-    });
-
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Логотип
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(60),
+    // Используем FutureBuilder для отслеживания завершения инициализации
+    return ref.watch(splashInitProvider).when(
+      data: (_) {
+        // Инициализация завершена - роутер сам обработает редирект
+        // Показываем пустой экран на время редиректа
+        return const Scaffold(body: SizedBox.shrink());
+      },
+      loading: () => Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Логотип
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(60),
+                  ),
+                  child: Icon(
+                    Icons.checkroom,
+                    size: 60,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
-                child: Icon(
-                  Icons.checkroom,
-                  size: 60,
-                  color: Theme.of(context).primaryColor,
+                const SizedBox(height: 32),
+                // Название приложения
+                Text(
+                  'OutfitStyle',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
                 ),
-              ),
-              const SizedBox(height: 32),
-              // Название приложения
-              Text(
-                'OutfitStyle',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
-              ),
-              const SizedBox(height: 48),
-              // Индикатор загрузки
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text(
-                'Загрузка...',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-              ),
-            ],
+                const SizedBox(height: 48),
+                // Индикатор загрузки
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text(
+                  'Загрузка...',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      error: (error, stack) => Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('Ошибка загрузки: $error'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => ref.invalidate(splashInitProvider),
+                  child: const Text('Повторить'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
