@@ -135,7 +135,10 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 10m
+          envs: LANG,LC_ALL
           script: |
+            export LANG=en_US.UTF-8
+            export LC_ALL=en_US.UTF-8
             cd /root/OutFitStyle
             git fetch origin main
             git reset --hard origin/main
