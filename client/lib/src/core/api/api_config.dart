@@ -13,10 +13,10 @@ class ApiConfig {
   /// Статические значения по умолчанию
   /// Для локальной разработки: http://localhost:8080
   /// Для Android эмулятора: http://10.0.2.2:8080
-  /// Для production: https://api.outfitstyle.com
+  /// Для production: https://outfitstyle.ru/api/v1
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8080',
+    defaultValue: 'https://outfitstyle.ru/api/v1',
   );
   static const Duration defaultConnectTimeout = Duration(seconds: 10);
   static const Duration defaultReceiveTimeout = Duration(seconds: 10);
