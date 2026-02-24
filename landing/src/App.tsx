@@ -397,8 +397,8 @@ export function App() {
           <div className="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
             <p>&copy; {new Date().getFullYear()} OutfitStyle. Все права защищены.</p>
             <div className="flex gap-4">
-              <a href="/privacy.html" className="hover:text-gray-900 dark:hover:text-white transition-colors">Политика конфиденциальности</a>
-              <a href="/terms.html" className="hover:text-gray-900 dark:hover:text-white transition-colors">Условия использования</a>
+              <a href="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors">Политика конфиденциальности</a>
+              <a href="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors">Условия использования</a>
             </div>
           </div>
         </div>
