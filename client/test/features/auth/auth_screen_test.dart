@@ -7,9 +7,13 @@ import 'package:outfitstyle_client/src/features/auth/presentation/screens/forgot
 void main() {
   group('AuthScreen Widget Tests', () {
     testWidgets('AuthScreen displays login form initially', (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
             home: AuthScreen(),
           ),
         ),
@@ -22,9 +26,13 @@ void main() {
     });
 
     testWidgets('AuthScreen has form fields', (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
             home: AuthScreen(),
           ),
         ),
@@ -37,9 +45,13 @@ void main() {
     });
 
     testWidgets('AuthScreen validates empty email', (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
             home: AuthScreen(),
           ),
         ),
@@ -52,9 +64,13 @@ void main() {
     });
 
     testWidgets('AuthScreen validates empty password', (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
             home: AuthScreen(),
           ),
         ),
@@ -67,9 +83,13 @@ void main() {
     });
 
     testWidgets('AuthScreen accepts valid input', (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
             home: AuthScreen(),
           ),
         ),
@@ -84,9 +104,13 @@ void main() {
 
   group('ForgotPasswordScreen Widget Tests', () {
     testWidgets('ForgotPasswordScreen displays email field', (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
             home: ForgotPasswordScreen(),
           ),
         ),
@@ -99,9 +123,13 @@ void main() {
     });
 
     testWidgets('ForgotPasswordScreen validates email format', (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
             home: ForgotPasswordScreen(),
           ),
         ),
