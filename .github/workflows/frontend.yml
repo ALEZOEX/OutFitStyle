@@ -13,7 +13,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/frontend
 
 jobs:
   build:
@@ -36,28 +35,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Ensure lowercase image name
-        run: |
-          echo "IMAGE_NAME_LOWERCASE=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWERCASE }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=,format=short
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: ./client
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: |
+            ghcr.io/alezoex/outfitstyle-frontend:latest
+            ghcr.io/alezoex/outfitstyle-frontend:${{ github.sha }}
           provenance: false
           sbom: false
 
@@ -82,7 +67,6 @@ jobs:
             set -e
             kubectl rollout restart deployment/frontend -n outfitstyle
             kubectl rollout status deployment/frontend -n outfitstyle --timeout=300s
-            kubectl get pods -n outfitstyle -l app=frontend
           EOF
 
   cleanup-old-images:
@@ -96,7 +80,6 @@ jobs:
         uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
           owner: ${{ github.repository_owner }}
-          name: outfitstyle/frontend
+          name: outfitstyle-frontend
           token: ${{ secrets.GITHUB_TOKEN }}
           untagged-older-than: 7
-

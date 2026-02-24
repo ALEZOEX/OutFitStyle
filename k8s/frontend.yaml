@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/alezoex/outfitstyle/frontend:latest
+          image: ghcr.io/alezoex/outfitstyle-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
