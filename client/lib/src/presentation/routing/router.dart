@@ -423,7 +423,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 /// Утилита для обновления роутера при изменении состояния авторизации
 /// Используется ChangeNotifierProvider для уведомления роутера
 final goRouterRefreshProvider = ChangeNotifierProvider((ref) {
-  return GoRouterRefreshStream();
+  final notifier = GoRouterRefreshStream();
+  
+  // Слушаем изменения authState и уведомляем роутер
+  ref.listen<AuthState>(authStateProvider, (prev, next) {
+    notifier.notifyAuthChanged();
+  });
+  
+  return notifier;
 });
 
 class GoRouterRefreshStream extends ChangeNotifier {
