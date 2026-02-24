@@ -22,7 +22,7 @@ dependencies:
   # State Management
   provider: ^6.1.1
   flutter_riverpod: ^2.6.1
-  go_router: ^17.1.0
+  go_router: ^14.8.1
 
   # Offline-first database
   drift: ^2.31.0
