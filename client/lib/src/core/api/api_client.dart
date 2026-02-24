@@ -39,10 +39,16 @@ class ApiClient {
 
   Dio get raw => _dio;
 
+  /// Нормализует path — убирает leading slash для корректной работы с baseUrl
+  String _normalizePath(String path) {
+    // Убираем leading slash чтобы Dio обрабатывал path как относительный
+    return path.startsWith('/') ? path.substring(1) : path;
+  }
+
   // GET-запрос
   Future<Response> get(String path, {Map<String, dynamic>? params}) async {
     try {
-      final response = await _dio.get(path, queryParameters: params);
+      final response = await _dio.get(_normalizePath(path), queryParameters: params);
       return response;
     } on DioException catch (e) {
       throw mapError(e);
@@ -52,7 +58,7 @@ class ApiClient {
   // POST-запрос
   Future<Response> post(String path, {dynamic data}) async {
     try {
-      final response = await _dio.post(path, data: data);
+      final response = await _dio.post(_normalizePath(path), data: data);
       return response;
     } on DioException catch (e) {
       throw mapError(e);
@@ -62,7 +68,7 @@ class ApiClient {
   // PUT-запрос
   Future<Response> put(String path, {dynamic data}) async {
     try {
-      final response = await _dio.put(path, data: data);
+      final response = await _dio.put(_normalizePath(path), data: data);
       return response;
     } on DioException catch (e) {
       throw mapError(e);
@@ -72,7 +78,7 @@ class ApiClient {
   // DELETE-запрос
   Future<Response> delete(String path) async {
     try {
-      final response = await _dio.delete(path);
+      final response = await _dio.delete(_normalizePath(path));
       return response;
     } on DioException catch (e) {
       throw mapError(e);
