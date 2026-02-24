@@ -289,8 +289,6 @@ class WardrobeDatabase extends _$WardrobeDatabase {
     await batch(action);
   }
 
-  // ==================== Utility Methods ====================
-
   Future<void> clearAllData() async {
     await batch((batch) {
       batch.deleteAll(outfitItems);
@@ -298,9 +296,6 @@ class WardrobeDatabase extends _$WardrobeDatabase {
       batch.deleteAll(clothingItems);
     });
   }
-
-  @override
-  Future<void> close() async => super.close();
 }
 
 LazyDatabase _openConnection() => openConnectionIo();

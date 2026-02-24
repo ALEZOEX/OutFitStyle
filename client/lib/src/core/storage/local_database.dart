@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:convert' show utf8;
 import 'package:drift/drift.dart';
-import 'package:crypto/crypto.dart' show sha256;
 import 'package:logger/logger.dart';
-import 'package:drift/native.dart' as native;
 
 // Conditional import for connection creation
 import 'local_database_io.dart' if (dart.library.html) 'local_database_web.dart';
@@ -107,13 +104,6 @@ class LocalDatabase extends _$LocalDatabase {
     },
   );
 
-  static String _generateDbHash() {
-    final salt = DateTime.now().millisecondsSinceEpoch.toString();
-    final bytes = utf8.encode(salt);
-    final digest = sha256.convert(bytes);
-    return digest.toString().substring(0, 8);
-  }
-
   Future<T> safeTransaction<T>(Future<T> Function() transaction) async {
     try {
       final result = await transaction();
@@ -124,9 +114,6 @@ class LocalDatabase extends _$LocalDatabase {
       rethrow;
     }
   }
-
-  @override
-  Future<void> close() async => super.close();
 
   Future<Map<String, dynamic>> getDatabaseStats() async {
     try {

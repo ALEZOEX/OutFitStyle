@@ -1,6 +1,3 @@
-/// Web-версия флагов платформ
-/// Все мобильные/десктоп платформы возвращают false на вебе
-
 bool get isAndroid => false;
 bool get isIOS => false;
 bool get isWindows => false;
