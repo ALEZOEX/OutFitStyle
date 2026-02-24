@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 
-// Minimal DI setup to avoid circular dependencies and missing files
+// Минимальная настройка DI для избежания циклических зависимостей и отсутствующих файлов
 // Core
 final loggerProvider = Provider((ref) => Logger());
 
@@ -15,7 +15,7 @@ final sharedPreferencesProvider =
 
 final connectivityProvider = Provider<Connectivity>((ref) => Connectivity());
 
-// Session provider (using the existing session file)
+// Session provider (используем существующий session file)
 enum SessionStatus { unknown, authed }
 
 final sessionProvider = StateProvider<SessionStatus>((ref) {
@@ -25,7 +25,7 @@ final sessionProvider = StateProvider<SessionStatus>((ref) {
       .authed; // Предполагаем, что пользователь всегда аутентифицирован для демонстрации
 });
 
-// Providers for onboarding
+// Providers для onboarding
 final onboardingDoneProvider = StateNotifierProvider<OnboardingDoneNotifier, bool>((ref) {
   return OnboardingDoneNotifier();
 });
