@@ -14,23 +14,23 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize Firebase (safely, without crashing if not configured)
+  // Инициализация Firebase (безопасно, без сбоев если не настроен)
   bool firebaseInitialized = false;
   try {
     await Firebase.initializeApp();
-    debugPrint('✅ Firebase initialized successfully');
+    debugPrint('✅ Firebase успешно инициализирован');
     firebaseInitialized = true;
   } catch (e) {
-    debugPrint('⚠️ Firebase not configured: $e');
-    debugPrint('📝 Running without Firebase (some features may be limited)');
+    debugPrint('⚠️ Firebase не настроен: $e');
+    debugPrint('📝 Запуск без Firebase (некоторые функции могут быть ограничены)');
   }
 
-  // Initialize error handler (only if Firebase is available)
+  // Инициализация обработчика ошибок (только если Firebase доступен)
   if (firebaseInitialized) {
     await ErrorHandler.init();
-    debugPrint('✅ Crashlytics enabled');
+    debugPrint('✅ Crashlytics включён');
   } else {
-    debugPrint('⚠️ Crashlytics disabled (Firebase not available)');
+    debugPrint('⚠️ Crashlytics отключён (Firebase недоступен)');
   }
 
   runApp(
