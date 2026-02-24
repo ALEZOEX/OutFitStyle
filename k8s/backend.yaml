@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
@@ -70,7 +70,7 @@ spec:
             - name: ENVIRONMENT
               value: "production"
             - name: ML_SERVICE_URL
-              value: "http://ml-service:8000"
+              value: "http://ml-service"
             - name: REDIS_URL
               value: "redis://redis:6379"
             - name: EVENTING_ENABLED
@@ -80,13 +80,13 @@ spec:
             - name: CORS_ALLOWED_ORIGINS
               value: "https://outfitstyle.play2go.cloud"
             - name: DB_HOST
-              value: "postgres"
+              value: "outfitstyle"
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
               value: "outfitstyle"
             - name: DB_USER
-              value: "postgres"
+              value: "outfitstyle"
           resources:
             requests:
               cpu: 100m
@@ -135,3 +135,4 @@ spec:
       port: 80
       targetPort: 8080
   type: ClusterIP
+
