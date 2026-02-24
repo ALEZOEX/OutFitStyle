@@ -1,4 +1,4 @@
-apiVersion: v1
+﻿apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
@@ -46,13 +46,12 @@ spec:
             runAsUser: 0
             runAsNonRoot: false
             capabilities:
-              drop:
-                - ALL
-              add:
-                - CHOWN
+              drop: ["ALL"]
+              add: ["CHOWN"]
       containers:
         - name: postgres
           image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
           env:
@@ -77,25 +76,23 @@ spec:
           livenessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-                - -d
-                - $(POSTGRES_DB)
+                - sh
+                - -c
+                - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-                - -d
-                - $(POSTGRES_DB)
+                - sh
+                - -c
+                - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             requests:
               memory: "256Mi"
@@ -108,8 +105,7 @@ spec:
             runAsNonRoot: true
             runAsUser: 70
             capabilities:
-              drop:
-                - ALL
+              drop: ["ALL"]
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
