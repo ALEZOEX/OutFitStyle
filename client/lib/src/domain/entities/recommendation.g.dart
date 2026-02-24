@@ -18,9 +18,10 @@ _Recommendation _$RecommendationFromJson(Map<String, dynamic> json) =>
         json['source'],
       ),
       confidenceScore: (json['confidence_score'] as num?)?.toDouble(),
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
+      createdAt:
+          json['created_at'] == null
+              ? null
+              : DateTime.parse(json['created_at'] as String),
       outfit: const OutfitConverter().fromJson(
         json['outfit'] as Map<String, dynamic>?,
       ),
@@ -39,9 +40,10 @@ _Recommendation _$RecommendationFromJson(Map<String, dynamic> json) =>
       userId: (json['user_id'] as num?)?.toInt(),
       outfitId: (json['outfit_id'] as num?)?.toInt(),
       weatherCondition: json['weather_condition'] as String?,
-      recommendedItems: (json['recommended_items'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      recommendedItems:
+          (json['recommended_items'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList(),
       metadata: json['metadata'] as Map<String, dynamic>?,
       isLiked: json['is_liked'] as bool?,
       feedback: json['feedback'] as String?,
