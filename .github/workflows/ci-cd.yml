@@ -3,8 +3,16 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main]
+    paths:
+      - 'server/**'
+      - 'ml-service/**'
+      - 'k8s/**'
+      - '.github/workflows/ci-cd.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'server/**'
+      - 'ml-service/**'
 
 jobs:
   build-and-test:
@@ -107,7 +115,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 600m
+          command_timeout: 10m
           script: |
             cd /root/OutFitStyle
             git fetch origin main
@@ -116,8 +124,6 @@ jobs:
             ./k8s/deploy.sh apply
             echo "=== Deployment complete ==="
             kubectl get pods -n outfitstyle
-            kubectl get svc -n outfitstyle
-            kubectl get ingress -n outfitstyle
 
   cleanup-old-images:
     needs: deploy-k3s
@@ -129,23 +135,23 @@ jobs:
       - name: Delete old server images
         uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
-          owner: alezoex
-          name: outfitstyle/outfitstyle-server
+          owner: ${{ github.repository_owner }}
+          name: outfitstyle-server
           token: ${{ secrets.GITHUB_TOKEN }}
           untagged-older-than: 7
 
       - name: Delete old ml-service images
         uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
-          owner: alezoex
-          name: outfitstyle/outfitstyle-ml
+          owner: ${{ github.repository_owner }}
+          name: outfitstyle-ml
           token: ${{ secrets.GITHUB_TOKEN }}
           untagged-older-than: 7
 
       - name: Delete old marketplace-service images
         uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
-          owner: alezoex
-          name: outfitstyle/outfitstyle-marketplace
+          owner: ${{ github.repository_owner }}
+          name: outfitstyle-marketplace
           token: ${{ secrets.GITHUB_TOKEN }}
           untagged-older-than: 7
