@@ -43,6 +43,8 @@ jobs:
           tags: |
             ghcr.io/alezoex/outfitstyle-frontend:latest
             ghcr.io/alezoex/outfitstyle-frontend:${{ github.sha }}
+          build-args: |
+            API_BASE_URL=/
           provenance: false
           sbom: false
 
