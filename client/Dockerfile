@@ -11,8 +11,8 @@ COPY . .
 RUN flutter pub run build_runner build --delete-conflicting-outputs
 
 # Build for web with API base URL
-# Для production используем относительный путь '/' (nginx будет проксировать)
-ARG API_BASE_URL=/
+# Для production используем пустую строку (nginx будет проксировать /api/v1/*)
+ARG API_BASE_URL=
 RUN flutter build web --release --no-tree-shake-icons --dart-define=API_BASE_URL=${API_BASE_URL}
 
 # Runtime stage

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/logger.dart';
 
 final dioProvider = Provider((ref) => Dio(BaseOptions(
-      baseUrl: '/', // nginx проксирует запросы на /api/v1/*
+      baseUrl: '', // относительные запросы на /api/v1/* (nginx проксирует)
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       sendTimeout: const Duration(seconds: 30),
