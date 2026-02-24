@@ -1,4 +1,4 @@
-﻿name: Landing CI/CD
+name: Landing CI/CD
 
 on:
   push:

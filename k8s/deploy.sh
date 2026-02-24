@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 #
 # РЎРєСЂРёРїС‚ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ OutfitStyle РІ Kubernetes (k3s)
 #
