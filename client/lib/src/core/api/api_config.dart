@@ -1,4 +1,15 @@
-/// Конфигурация API
+/// Конфигурация API для клиента
+/// 
+/// # Настройка baseUrl для разных сред:
+/// - **Production**: `/` — nginx проксирует запросы на бэкенд (CORS не требуется)
+/// - **Development**: `http://localhost:8080` или `http://10.0.2.2:8080` для эмулятора
+/// 
+/// # Важно:
+/// Все пути в API методах должны начинаться с `/api/v1/...`, например:
+/// ```dart
+/// await apiClient.get('/api/v1/notifications');
+/// await apiClient.post('/api/v1/auth/google');
+/// ```
 class ApiConfig {
   final String apiBase;
   final Duration connectTimeout;
