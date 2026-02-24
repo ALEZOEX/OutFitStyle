@@ -6,20 +6,31 @@ part 'admin_user_dto.freezed.dart';
 part 'admin_user_dto.g.dart';
 
 /// DTO пользователя для админ-панели (ответ от API)
-@Freezed()
+@freezed
 abstract class AdminUserDto with _$AdminUserDto {
   const factory AdminUserDto({
     required String id,
     required String email,
-    @JsonKey(name: 'display_name') String? displayName,
-    @JsonKey(name: 'is_active') required bool isActive,
-    @JsonKey(name: 'is_verified') required bool isVerified,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-    @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
+    String? displayName,
+    required bool isActive,
+    required bool isVerified,
+    required DateTime createdAt,
+    DateTime? lastLoginAt,
   }) = _AdminUserDto;
 
-  factory AdminUserDto.fromJson(Map<String, dynamic> json) =>
-      _$AdminUserDtoFromJson(json);
+  factory AdminUserDto.fromJson(Map<String, dynamic> json) {
+    return AdminUserDto(
+      id: json['id'] as String,
+      email: json['email'] as String,
+      displayName: json['display_name'] as String?,
+      isActive: json['is_active'] as bool,
+      isVerified: json['is_verified'] as bool,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      lastLoginAt: json['last_login_at'] != null
+          ? DateTime.parse(json['last_login_at'] as String)
+          : null,
+    );
+  }
 }
 
 /// Extension для конвертации DTO в domain entity
@@ -40,34 +51,43 @@ extension AdminUserDtoExtension on AdminUserDto {
 }
 
 /// DTO для запроса обновления роли
-@Freezed()
+@freezed
 abstract class UpdateUserRoleRequest with _$UpdateUserRoleRequest {
   const factory UpdateUserRoleRequest({
-    @JsonKey(name: 'role') required String role,
+    required String role,
   }) = _UpdateUserRoleRequest;
 
-  factory UpdateUserRoleRequest.fromJson(Map<String, dynamic> json) =>
-      _$UpdateUserRoleRequestFromJson(json);
+  factory UpdateUserRoleRequest.fromJson(Map<String, dynamic> json) {
+    return UpdateUserRoleRequest(
+      role: json['role'] as String,
+    );
+  }
 }
 
 /// DTO для запроса блокировки пользователя
-@Freezed()
+@freezed
 abstract class BlockUserRequest with _$BlockUserRequest {
   const factory BlockUserRequest({
-    @JsonKey(name: 'is_active') required bool isActive,
+    required bool isActive,
   }) = _BlockUserRequest;
 
-  factory BlockUserRequest.fromJson(Map<String, dynamic> json) =>
-      _$BlockUserRequestFromJson(json);
+  factory BlockUserRequest.fromJson(Map<String, dynamic> json) {
+    return BlockUserRequest(
+      isActive: json['is_active'] as bool,
+    );
+  }
 }
 
 /// DTO для запроса сброса пароля
-@Freezed()
+@freezed
 abstract class ResetPasswordRequest with _$ResetPasswordRequest {
   const factory ResetPasswordRequest({
-    @JsonKey(name: 'user_id') required String userId,
+    required String userId,
   }) = _ResetPasswordRequest;
 
-  factory ResetPasswordRequest.fromJson(Map<String, dynamic> json) =>
-      _$ResetPasswordRequestFromJson(json);
+  factory ResetPasswordRequest.fromJson(Map<String, dynamic> json) {
+    return ResetPasswordRequest(
+      userId: json['user_id'] as String,
+    );
+  }
 }
