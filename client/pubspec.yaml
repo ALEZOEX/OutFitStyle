@@ -136,4 +136,4 @@ flutter_launcher_icons:
     image_path: "assets/icons/app/Icon-512.png"
   macos:
     generate: true
-    image_path: "assets/icons/app/Icon-512.png""// Force rebuild"  
+    image_path: "assets/icons/app/Icon-512.png"  
