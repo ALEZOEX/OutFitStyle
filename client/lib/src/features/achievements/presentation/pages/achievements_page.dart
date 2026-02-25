@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:confetti/confetti.dart';
+
+import '../../../../ui/widgets/max_width_container.dart';
 import '../providers/achievements_providers.dart';
 import '../widgets/achievement_card.dart';
 import '../widgets/achievement_category_tab.dart';
@@ -52,15 +54,15 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
     final stats = ref.watch(achievementsStatsProvider);
 
     // Слушаем только что разблокированные достижения для анимации
-    ref.listen<List<Achievement>>(
-      newlyUnlockedAchievementsProvider,
-      (previous, next) {
-        if (next.isNotEmpty) {
-          _confettiController.play();
-          _showUnlockedSnackbar(next);
-        }
-      },
-    );
+    ref.listen<List<Achievement>>(newlyUnlockedAchievementsProvider, (
+      previous,
+      next,
+    ) {
+      if (next.isNotEmpty) {
+        _confettiController.play();
+        _showUnlockedSnackbar(next);
+      }
+    });
 
     return Scaffold(
       body: Stack(
@@ -83,9 +85,11 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
                     actions: [
                       IconButton(
                         icon: const Icon(Icons.refresh),
-                        onPressed: () => ref
-                            .read(achievementsNotifierProvider.notifier)
-                            .loadAllAchievements(),
+                        onPressed:
+                            () =>
+                                ref
+                                    .read(achievementsNotifierProvider.notifier)
+                                    .loadAllAchievements(),
                         tooltip: 'Обновить',
                       ),
                     ],
@@ -98,33 +102,36 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
                     delegate: _SliverTabBarDelegate(
                       TabBar(
                         controller: _tabController,
-                        tabs: AchievementCategory.values
-                            .map((category) => Tab(
-                                  text: category.icon,
-                                ))
-                            .toList(),
+                        tabs:
+                            AchievementCategory.values
+                                .map((category) => Tab(text: category.icon))
+                                .toList(),
                         indicatorColor: theme.colorScheme.primary,
                         indicatorWeight: 3,
                         labelColor: theme.colorScheme.primary,
-                        unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                        unselectedLabelColor:
+                            theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     pinned: true,
                   ),
                   // Фильтры
-                  SliverToBoxAdapter(
-                    child: _buildFilterChips(theme),
-                  ),
+                  SliverToBoxAdapter(child: _buildFilterChips(theme)),
                 ];
               },
-              body: TabBarView(
-                controller: _tabController,
-                children: AchievementCategory.values
-                    .map((category) => AchievementCategoryTab(
-                          category: category,
-                          filter: _currentFilter,
-                        ))
-                    .toList(),
+              body: ResponsiveMaxWidthContainer(
+                child: TabBarView(
+                  controller: _tabController,
+                  children:
+                      AchievementCategory.values
+                          .map(
+                            (category) => AchievementCategoryTab(
+                              category: category,
+                              filter: _currentFilter,
+                            ),
+                          )
+                          .toList(),
+                ),
               ),
             ),
           ),
@@ -242,8 +249,8 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: stats.progressPercent / 100,
-                    backgroundColor:
-                        theme.colorScheme.onPrimaryContainer.withOpacity(0.2),
+                    backgroundColor: theme.colorScheme.onPrimaryContainer
+                        .withOpacity(0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       theme.colorScheme.primary,
                     ),
@@ -262,23 +269,24 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
-        children: AchievementFilter.values.map((filter) {
-          final isSelected = _currentFilter == filter;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(filter.displayName),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  _currentFilter = filter;
-                });
-              },
-              selectedColor: theme.colorScheme.primaryContainer,
-              checkmarkColor: theme.colorScheme.primary,
-            ),
-          );
-        }).toList(),
+        children:
+            AchievementFilter.values.map((filter) {
+              final isSelected = _currentFilter == filter;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
+                  label: Text(filter.displayName),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      _currentFilter = filter;
+                    });
+                  },
+                  selectedColor: theme.colorScheme.primaryContainer,
+                  checkmarkColor: theme.colorScheme.primary,
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -327,7 +335,9 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
                   Text(
                     achievement.title,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onInverseSurface.withOpacity(0.8),
+                      color: theme.colorScheme.onInverseSurface.withOpacity(
+                        0.8,
+                      ),
                     ),
                   ),
                 ],
@@ -337,9 +347,7 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
         ),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -354,7 +362,10 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: tabBar,

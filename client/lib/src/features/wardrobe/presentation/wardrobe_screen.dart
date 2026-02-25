@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/wardrobe_item.dart';
 import '../../../domain/entities/wardrobe_request_entities.dart';
+import '../../../ui/widgets/max_width_container.dart';
 import '../presentation/providers/wardrobe_provider.dart';
 import '../../../ui/widgets/wardrobe_item_card.dart';
 
@@ -47,20 +48,20 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     final categories = ref.watch(wardrobeCategoriesProvider);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Заголовок со статистикой
-          SliverToBoxAdapter(
-            child: _buildHeader(context, wardrobeState),
-          ),
-          // Фильтры по категориям
-          if (categories.isNotEmpty)
-            SliverToBoxAdapter(
-              child: _buildCategoryFilters(context, categories),
-            ),
-          // Список элементов
-          _buildWardrobeGrid(context, wardrobeState),
-        ],
+      body: ResponsiveMaxWidthContainer(
+        child: CustomScrollView(
+          slivers: [
+            // Заголовок со статистикой
+            SliverToBoxAdapter(child: _buildHeader(context, wardrobeState)),
+            // Фильтры по категориям
+            if (categories.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _buildCategoryFilters(context, categories),
+              ),
+            // Список элементов
+            _buildWardrobeGrid(context, wardrobeState),
+          ],
+        ),
       ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
@@ -112,7 +113,8 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                   ],
                 ),
                 IconButton(
-                  onPressed: () => ref.read(wardrobeProvider.notifier).refresh(),
+                  onPressed:
+                      () => ref.read(wardrobeProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh),
                   tooltip: 'Обновить',
                   style: IconButton.styleFrom(
@@ -184,10 +186,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.2), width: 1),
       ),
       child: Column(
         children: [
@@ -212,7 +211,10 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
   }
 
   /// Фильтры по категориям
-  Widget _buildCategoryFilters(BuildContext context, Map<String, int> categories) {
+  Widget _buildCategoryFilters(
+    BuildContext context,
+    Map<String, int> categories,
+  ) {
     final theme = Theme.of(context);
 
     // Добавляем категорию "Все"
@@ -230,13 +232,15 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
           separatorBuilder: (_, __) => const SizedBox(width: 8),
           itemBuilder: (context, index) {
             final entry = allCategories.entries.elementAt(index);
-            final category = entry.key == 'all' ? 'Все' : _getCategoryName(entry.key);
+            final category =
+                entry.key == 'all' ? 'Все' : _getCategoryName(entry.key);
 
             return FilterChip(
               selected: _selectedCategory == entry.key,
               onSelected: (_) {
                 setState(() {
-                  _selectedCategory = _selectedCategory == entry.key ? null : entry.key;
+                  _selectedCategory =
+                      _selectedCategory == entry.key ? null : entry.key;
                 });
               },
               label: Row(
@@ -247,11 +251,15 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                   Text(category),
                   const SizedBox(width: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: _selectedCategory == entry.key
-                          ? theme.colorScheme.onPrimary.withOpacity(0.3)
-                          : theme.colorScheme.surfaceContainerHighest,
+                      color:
+                          _selectedCategory == entry.key
+                              ? theme.colorScheme.onPrimary.withOpacity(0.3)
+                              : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -269,9 +277,10 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: _selectedCategory == entry.key
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.outline.withOpacity(0.3),
+                  color:
+                      _selectedCategory == entry.key
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline.withOpacity(0.3),
                 ),
               ),
             );
@@ -287,9 +296,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
 
     if (state.status == WardrobeLoadStatus.loading) {
       return const SliverFillRemaining(
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -326,13 +333,12 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     // Фильтрация по категории
     var items = state.items;
     if (_selectedCategory != null && _selectedCategory != 'all') {
-      items = items.where((item) => item.category == _selectedCategory).toList();
+      items =
+          items.where((item) => item.category == _selectedCategory).toList();
     }
 
     if (items.isEmpty) {
-      return SliverFillRemaining(
-        child: _buildEmptyState(context),
-      );
+      return SliverFillRemaining(child: _buildEmptyState(context));
     }
 
     return SliverPadding(
@@ -344,20 +350,20 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final item = items[index];
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: WardrobeItemCard(
-                item: item,
-                onTap: () => context.push('/wardrobe/item/${item.id}'),
-                onFavorite: () => ref.read(wardrobeProvider.notifier).toggleFavorite(item.id!),
-              ),
-            );
-          },
-          childCount: items.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final item = items[index];
+          return FadeTransition(
+            opacity: _fadeAnimation,
+            child: WardrobeItemCard(
+              item: item,
+              onTap: () => context.push('/wardrobe/item/${item.id}'),
+              onFavorite:
+                  () => ref
+                      .read(wardrobeProvider.notifier)
+                      .toggleFavorite(item.id!),
+            ),
+          );
+        }, childCount: items.length),
       ),
     );
   }
@@ -434,11 +440,12 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => _AddItemSheet(
-        onItemAdded: () {
-          ref.read(wardrobeProvider.notifier).refresh();
-        },
-      ),
+      builder:
+          (context) => _AddItemSheet(
+            onItemAdded: () {
+              ref.read(wardrobeProvider.notifier).refresh();
+            },
+          ),
     );
   }
 
@@ -492,7 +499,20 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
     'shoes': ['👟', '👞', '👠', '👡', '👢', '🥿', '🥾', '🩴'],
     'outerwear': ['🧥', '🦺', '🥼', '👘', '🥻'],
     'headwear': ['🧢', '👒', '🎩', '🎓', '🧕', '⛑️', '👑'],
-    'accessory': ['👜', '👛', '👝', '👓', '🕶️', '⌚', '💍', '🎒', '🎀', '🧣', '🧤', '🧦'],
+    'accessory': [
+      '👜',
+      '👛',
+      '👝',
+      '👓',
+      '🕶️',
+      '⌚',
+      '💍',
+      '🎒',
+      '🎀',
+      '🧣',
+      '🧤',
+      '🧦',
+    ],
   };
 
   final _categories = [
@@ -568,7 +588,9 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
             ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -590,7 +612,9 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
             ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -616,7 +640,8 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
     if (errorStr.contains('Требуется авторизация')) {
       return 'Требуется авторизация';
     }
-    if (errorStr.contains('Нет соединения') || errorStr.contains('connection')) {
+    if (errorStr.contains('Нет соединения') ||
+        errorStr.contains('connection')) {
       return 'Нет соединения с интернетом';
     }
     if (errorStr.contains('Ошибка сервера')) {
@@ -678,30 +703,32 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _categories.map((cat) {
-              final isSelected = _selectedCategory == cat['value'];
-              return ChoiceChip(
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(cat['icon'] as IconData, size: 18),
-                    const SizedBox(width: 4),
-                    Text(cat['label'] as String),
-                  ],
-                ),
-                selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) {
-                    setState(() {
-                      _selectedCategory = cat['value'] as String;
-                      _selectedEmoji = _emojiCategories[_selectedCategory]!.first;
-                    });
-                  }
-                },
-                selectedColor: theme.colorScheme.primaryContainer,
-                checkmarkColor: theme.colorScheme.onPrimaryContainer,
-              );
-            }).toList(),
+            children:
+                _categories.map((cat) {
+                  final isSelected = _selectedCategory == cat['value'];
+                  return ChoiceChip(
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(cat['icon'] as IconData, size: 18),
+                        const SizedBox(width: 4),
+                        Text(cat['label'] as String),
+                      ],
+                    ),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() {
+                          _selectedCategory = cat['value'] as String;
+                          _selectedEmoji =
+                              _emojiCategories[_selectedCategory]!.first;
+                        });
+                      }
+                    },
+                    selectedColor: theme.colorScheme.primaryContainer,
+                    checkmarkColor: theme.colorScheme.onPrimaryContainer,
+                  );
+                }).toList(),
           ),
           const SizedBox(height: 24),
           // Выбор эмодзи
@@ -715,34 +742,37 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: _emojiCategories[_selectedCategory]!.map((emoji) {
-              final isSelected = _selectedEmoji == emoji;
-              return GestureDetector(
-                onTap: () => setState(() => _selectedEmoji = emoji),
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? theme.colorScheme.primaryContainer
-                        : theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected
-                          ? theme.colorScheme.primary
-                          : Colors.transparent,
-                      width: 2,
+            children:
+                _emojiCategories[_selectedCategory]!.map((emoji) {
+                  final isSelected = _selectedEmoji == emoji;
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedEmoji = emoji),
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color:
+                            isSelected
+                                ? theme.colorScheme.primaryContainer
+                                : theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color:
+                              isSelected
+                                  ? theme.colorScheme.primary
+                                  : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          emoji,
+                          style: const TextStyle(fontSize: 28),
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      emoji,
-                      style: const TextStyle(fontSize: 28),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
           ),
           const SizedBox(height: 24),
           // Название
@@ -755,9 +785,10 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                 borderRadius: BorderRadius.circular(12),
               ),
               prefixText: '$_selectedEmoji  ',
-              errorText: _errorMessage != null && _nameController.text.trim().isEmpty
-                  ? _errorMessage
-                  : null,
+              errorText:
+                  _errorMessage != null && _nameController.text.trim().isEmpty
+                      ? _errorMessage
+                      : null,
             ),
             autofocus: true,
             enabled: !_isSubmitting,
@@ -781,16 +812,19 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
             height: 56,
             child: FilledButton.icon(
               onPressed: _isSubmitting ? null : _saveItem,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Icon(Icons.save),
+              icon:
+                  _isSubmitting
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                      : const Icon(Icons.save),
               label: Text(
                 _isSubmitting ? 'Добавление...' : 'Добавить в гардероб',
               ),

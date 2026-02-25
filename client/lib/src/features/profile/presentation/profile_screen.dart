@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../presentation/routing/router.dart';
 import '../../../presentation/theme/theme_controller.dart';
+import '../../../ui/widgets/max_width_container.dart';
 import '../../achievements/data/repositories/achievements_repository.dart';
 import '../../achievements/presentation/providers/achievements_providers.dart';
 import 'providers/profile_provider.dart';
@@ -21,44 +22,40 @@ class ProfileScreen extends ConsumerWidget {
     final stats = ref.watch(profileStatsProvider);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Заголовок профиля
-          SliverToBoxAdapter(
-            child: _buildProfileHeader(context, profileState, ref),
-          ),
-          // Статистика
-          SliverToBoxAdapter(
-            child: _buildStats(context, stats, profileState, ref),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
-          ),
-          // Меню настроек
-          SliverToBoxAdapter(
-            child: _buildSettingsMenu(context, ref),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
-          ),
-          // Дополнительные опции
-          SliverToBoxAdapter(
-            child: _buildAdditionalOptions(context),
-          ),
-          // Кнопка выхода
-          SliverToBoxAdapter(
-            child: _buildLogoutButton(context, authRepository),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 32),
-          ),
-        ],
+      body: ResponsiveMaxWidthContainer(
+        child: CustomScrollView(
+          slivers: [
+            // Заголовок профиля
+            SliverToBoxAdapter(
+              child: _buildProfileHeader(context, profileState, ref),
+            ),
+            // Статистика
+            SliverToBoxAdapter(
+              child: _buildStats(context, stats, profileState, ref),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            // Меню настроек
+            SliverToBoxAdapter(child: _buildSettingsMenu(context, ref)),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            // Дополнительные опции
+            SliverToBoxAdapter(child: _buildAdditionalOptions(context)),
+            // Кнопка выхода
+            SliverToBoxAdapter(
+              child: _buildLogoutButton(context, authRepository),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          ],
+        ),
       ),
     );
   }
 
   /// Заголовок профиля
-  Widget _buildProfileHeader(BuildContext context, AsyncValue<ProfileData> profileState, WidgetRef ref) {
+  Widget _buildProfileHeader(
+    BuildContext context,
+    AsyncValue<ProfileData> profileState,
+    WidgetRef ref,
+  ) {
     final theme = Theme.of(context);
 
     return Container(
@@ -91,54 +88,66 @@ class ProfileScreen extends ConsumerWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
                           blurRadius: 15,
                           offset: const Offset(0, 5),
                         ),
                       ],
                     ),
-                    child: avatarUrl != null && avatarUrl.isNotEmpty
-                        ? ClipOval(
-                            child: Image.network(
-                              avatarUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stack) {
-                                return Center(
-                                  child: Text(
-                                    firstLetter,
-                                    style: theme.textTheme.headlineLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                    child:
+                        avatarUrl != null && avatarUrl.isNotEmpty
+                            ? ClipOval(
+                              child: Image.network(
+                                avatarUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stack) {
+                                  return Center(
+                                    child: Text(
+                                      firstLetter,
+                                      style: theme.textTheme.headlineLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                     ),
-                                  ),
-                                );
-                              },
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white.withValues(alpha: 0.7),
+                                  );
+                                },
+                                loadingBuilder: (
+                                  context,
+                                  child,
+                                  loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white.withValues(alpha: 0.7),
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          )
-                        : Center(
-                            child: Text(
-                              firstLetter,
-                              style: theme.textTheme.headlineLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                  );
+                                },
+                              ),
+                            )
+                            : Center(
+                              child: Text(
+                                firstLetter,
+                                style: theme.textTheme.headlineLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                          ),
                   ),
                   // Скрытая кнопка админ-панели (долгое нажатие)
                   GestureDetector(
@@ -179,37 +188,39 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               );
             },
-            loading: () => const Column(
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Загрузка профиля...'),
-              ],
-            ),
-            error: (error, stack) => Column(
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: theme.colorScheme.error,
+            loading:
+                () => const Column(
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Загрузка профиля...'),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Ошибка загрузки профиля',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
+            error:
+                (error, stack) => Column(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: theme.colorScheme.error,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Ошибка загрузки профиля',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      error.toString(),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  error.toString(),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: 16),
         ],
@@ -218,7 +229,12 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Статистика пользователя
-  Widget _buildStats(BuildContext context, ProfileStats stats, AsyncValue<ProfileData> profileState, WidgetRef ref) {
+  Widget _buildStats(
+    BuildContext context,
+    ProfileStats stats,
+    AsyncValue<ProfileData> profileState,
+    WidgetRef ref,
+  ) {
     final theme = Theme.of(context);
     final achievementsStats = ref.watch(achievementsStatsProvider);
 
@@ -230,10 +246,26 @@ class ProfileScreen extends ConsumerWidget {
     );
 
     final statsData = [
-      {'label': 'Вещей', 'value': stats.totalCount.toString(), 'icon': Icons.checkroom},
-      {'label': 'Категорий', 'value': stats.categoriesCount.toString(), 'icon': Icons.category},
-      {'label': 'Избранное', 'value': stats.favoritesCount.toString(), 'icon': Icons.favorite},
-      {'label': 'Дней', 'value': daysInApp.toString(), 'icon': Icons.calendar_today},
+      {
+        'label': 'Вещей',
+        'value': stats.totalCount.toString(),
+        'icon': Icons.checkroom,
+      },
+      {
+        'label': 'Категорий',
+        'value': stats.categoriesCount.toString(),
+        'icon': Icons.category,
+      },
+      {
+        'label': 'Избранное',
+        'value': stats.favoritesCount.toString(),
+        'icon': Icons.favorite,
+      },
+      {
+        'label': 'Дней',
+        'value': daysInApp.toString(),
+        'icon': Icons.calendar_today,
+      },
     ];
 
     return Container(
@@ -257,9 +289,10 @@ class ProfileScreen extends ConsumerWidget {
             spacing: 16,
             runSpacing: 16,
             alignment: WrapAlignment.center,
-            children: statsData.map((stat) {
-              return _buildStatItem(context, stat);
-            }).toList(),
+            children:
+                statsData.map((stat) {
+                  return _buildStatItem(context, stat);
+                }).toList(),
           ),
           // Статистика достижений
           const SizedBox(height: 16),
@@ -330,7 +363,9 @@ class ProfileScreen extends ConsumerWidget {
                   Text(
                     stats.progressText,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                      color: theme.colorScheme.onPrimaryContainer.withOpacity(
+                        0.8,
+                      ),
                     ),
                   ),
                 ],
@@ -353,7 +388,9 @@ class ProfileScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(2),
                     child: LinearProgressIndicator(
                       value: stats.progressPercent / 100,
-                      backgroundColor: theme.colorScheme.outline.withOpacity(0.2),
+                      backgroundColor: theme.colorScheme.outline.withOpacity(
+                        0.2,
+                      ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         theme.colorScheme.primary,
                       ),
@@ -510,7 +547,11 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Плитка переключателя темы
-  Widget _buildThemeTile(BuildContext context, ThemeMode themeMode, WidgetRef ref) {
+  Widget _buildThemeTile(
+    BuildContext context,
+    ThemeMode themeMode,
+    WidgetRef ref,
+  ) {
     final theme = Theme.of(context);
     final themeText = switch (themeMode) {
       ThemeMode.dark => 'Тёмная',
@@ -577,56 +618,57 @@ class ProfileScreen extends ConsumerWidget {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Выберите тему'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<ThemeMode>(
-              title: const Text('Светлая'),
-              subtitle: const Text('Всегда светлая тема'),
-              value: ThemeMode.light,
-              groupValue: themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  notifier.setLight();
-                  Navigator.pop(context);
-                }
-              },
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Выберите тему'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<ThemeMode>(
+                  title: const Text('Светлая'),
+                  subtitle: const Text('Всегда светлая тема'),
+                  value: ThemeMode.light,
+                  groupValue: themeMode,
+                  onChanged: (value) {
+                    if (value != null) {
+                      notifier.setLight();
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('Тёмная'),
+                  subtitle: const Text('Всегда тёмная тема'),
+                  value: ThemeMode.dark,
+                  groupValue: themeMode,
+                  onChanged: (value) {
+                    if (value != null) {
+                      notifier.setDark();
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('Системная'),
+                  subtitle: const Text('Автоматически от настроек устройства'),
+                  value: ThemeMode.system,
+                  groupValue: themeMode,
+                  onChanged: (value) {
+                    if (value != null) {
+                      notifier.setSystem();
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ],
             ),
-            RadioListTile<ThemeMode>(
-              title: const Text('Тёмная'),
-              subtitle: const Text('Всегда тёмная тема'),
-              value: ThemeMode.dark,
-              groupValue: themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  notifier.setDark();
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            RadioListTile<ThemeMode>(
-              title: const Text('Системная'),
-              subtitle: const Text('Автоматически от настроек устройства'),
-              value: ThemeMode.system,
-              groupValue: themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  notifier.setSystem();
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -635,10 +677,26 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     final options = <Map<String, dynamic>>[
-      {'icon': Icons.security_outlined, 'label': 'Безопасность', 'route': '/settings/security'},
-      {'icon': Icons.privacy_tip_outlined, 'label': 'Конфиденциальность', 'route': '/settings/privacy'},
-      {'icon': Icons.language_outlined, 'label': 'Язык', 'route': '/settings/language'},
-      {'icon': Icons.info_outline, 'label': 'О приложении', 'route': '/settings/about'},
+      {
+        'icon': Icons.security_outlined,
+        'label': 'Безопасность',
+        'route': '/settings/security',
+      },
+      {
+        'icon': Icons.privacy_tip_outlined,
+        'label': 'Конфиденциальность',
+        'route': '/settings/privacy',
+      },
+      {
+        'icon': Icons.language_outlined,
+        'label': 'Язык',
+        'route': '/settings/language',
+      },
+      {
+        'icon': Icons.info_outline,
+        'label': 'О приложении',
+        'route': '/settings/about',
+      },
     ];
 
     return Container(
@@ -658,57 +716,61 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
       child: Column(
-        children: options.map((option) {
-          final index = options.indexOf(option);
-          final isLast = index == options.length - 1;
+        children:
+            options.map((option) {
+              final index = options.indexOf(option);
+              final isLast = index == options.length - 1;
 
-          return InkWell(
-            onTap: () {
-              context.push(option['route'] as String);
-            },
-            borderRadius: BorderRadius.vertical(
-              top: index == 0 ? const Radius.circular(20) : Radius.zero,
-              bottom: isLast ? const Radius.circular(20) : Radius.zero,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      option['icon'] as IconData,
-                      color: theme.colorScheme.onSurfaceVariant,
-                      size: 22,
-                    ),
+              return InkWell(
+                onTap: () {
+                  context.push(option['route'] as String);
+                },
+                borderRadius: BorderRadius.vertical(
+                  top: index == 0 ? const Radius.circular(20) : Radius.zero,
+                  bottom: isLast ? const Radius.circular(20) : Radius.zero,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          option['icon'] as IconData,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        option['label'] as String,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(
+                        Icons.chevron_right,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Text(
-                    option['label'] as String,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    Icons.chevron_right,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
 
   /// Кнопка выхода
-  Widget _buildLogoutButton(BuildContext context, AuthRepository authRepository) {
+  Widget _buildLogoutButton(
+    BuildContext context,
+    AuthRepository authRepository,
+  ) {
     final theme = Theme.of(context);
 
     return Container(
@@ -721,7 +783,9 @@ class ProfileScreen extends ConsumerWidget {
           label: const Text('Выйти из аккаунта'),
           style: OutlinedButton.styleFrom(
             foregroundColor: theme.colorScheme.error,
-            side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3)),
+            side: BorderSide(
+              color: theme.colorScheme.error.withValues(alpha: 0.3),
+            ),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -736,51 +800,48 @@ class ProfileScreen extends ConsumerWidget {
   void _showLogoutDialog(BuildContext context, AuthRepository authRepository) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        icon: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.logout,
-            color: Colors.red,
-            size: 32,
-          ),
-        ),
-        title: const Text(
-          'Выйти из аккаунта?',
-          textAlign: TextAlign.center,
-        ),
-        content: const Text(
-          'Вы будете перенаправлены на экран входа',
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              await authRepository.logout();
-              if (context.mounted) {
-                context.go('/auth');
-              }
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: const Text('Выйти'),
+            icon: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.logout, color: Colors.red, size: 32),
+            ),
+            title: const Text(
+              'Выйти из аккаунта?',
+              textAlign: TextAlign.center,
+            ),
+            content: const Text(
+              'Вы будете перенаправлены на экран входа',
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  await authRepository.logout();
+                  if (context.mounted) {
+                    context.go('/auth');
+                  }
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Выйти'),
+              ),
+            ],
+            actionsAlignment: MainAxisAlignment.center,
           ),
-        ],
-        actionsAlignment: MainAxisAlignment.center,
-      ),
     );
   }
 }

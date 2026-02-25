@@ -80,6 +80,10 @@ func (m *MockAuthService) SilentLogin(ctx context.Context, accessToken string, d
 	return args.Get(0).(*services.LoginResult), args.Error(1)
 }
 
+func (m *MockAuthService) GoogleClientID() string {
+	return "test-google-client-id"
+}
+
 // MockAccountLockout - мок-реализация AccountLockout для тестов
 type MockAccountLockout struct {
 	mock.Mock
