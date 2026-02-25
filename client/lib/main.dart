@@ -2,25 +2,29 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
 
+import 'firebase_options.dart';
 import 'src/presentation/app/app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Инициализируем Firebase на web и mobile
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    debugPrint('📝 Web-версия: Firebase инициализирован');
+  } else {
+    // Mobile будет инициализирован в AuthService
+    debugPrint('📱 Mobile-версия: Firebase будет инициализирован в AuthService');
+  }
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  // Firebase работает только на mobile (iOS/Android)
-  // На web Firebase требует firebase_options.dart который нужно генерировать через flutterfire configure
-  if (!kIsWeb) {
-    // ErrorHandler.init() - требует Firebase
-    debugPrint('📱 Mobile-версия: Firebase будет инициализирован в AuthService');
-  } else {
-    debugPrint('📝 Web-версия: Firebase отключён (требуется firebase_options.dart)');
-  }
 
   runApp(
     ProviderScope(
