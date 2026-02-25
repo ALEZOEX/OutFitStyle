@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/core/application/repositories"
@@ -71,6 +72,7 @@ type AuthHandler struct {
 	redis           *redis.Client                      // Redis для кэширования кодов восстановления
 	userRepo        repositories.UserRepository        // Репозиторий пользователей
 	smtp            *email.SMTPService                 // SMTP сервис для отправки email
+	logger          *zap.Logger                        // Логгер для отладки
 }
 
 // NewAuthHandler создает новый экземпляр обработчика аутентификации
@@ -81,6 +83,7 @@ func NewAuthHandler(
 	redis *redis.Client,
 	userRepo repositories.UserRepository,
 	smtp *email.SMTPService,
+	logger *zap.Logger,
 ) *AuthHandler {
 	return &AuthHandler{
 		auth:            auth,
@@ -89,6 +92,7 @@ func NewAuthHandler(
 		redis:           redis,
 		userRepo:        userRepo,
 		smtp:            smtp,
+		logger:          logger,
 	}
 }
 

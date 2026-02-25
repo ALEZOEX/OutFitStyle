@@ -6,6 +6,7 @@ package integration_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/handlers"
@@ -164,6 +166,11 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	googleClient := external.NewGoogleAuthClient(cfg.Security.GoogleClientID)
 	authSvc := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient)
 
+	// Account lockout stub для тестов
+	accountLockout := &mockAccountLockout{}
+	lockoutDuration := 30 * time.Minute
+	var redisClient *redis.Client = nil // Redis не требуется для базовых тестов
+
 	subSvc := services.NewSubscriptionService(subRepo)
 	subLimiter := middleware.NewSubscriptionLimiter(subSvc)
 
@@ -181,7 +188,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	userSvc := services.NewUserService(userRepo, logger)
 
 	// Handlers
-	authH := handlers.NewAuthHandler(authSvc)
+	authH := handlers.NewAuthHandler(authSvc, accountLockout, lockoutDuration, redisClient, userRepo, nil, logger)
 	userH := handlers.NewUserHandler(userSvc, nil, nil, nil, nil, logger) // only profile here, not testing for module 12
 	wardrobeH := handlers.NewWardrobeHandler(wardrobeSvc, logger)
 	recH := handlers.NewRecommendationHandlerWithUseCases(recSvc, nil, logger, nil) // Using new constructor with use cases
@@ -299,5 +306,20 @@ func doGET(t *testing.T, url string, accessToken string) map[string]any {
 		t.Fatalf("status %d body=%v", res.StatusCode, out)
 	}
 	return out
+}
+
+// mockAccountLockout — заглушка для тестов
+type mockAccountLockout struct{}
+
+func (m *mockAccountLockout) CheckLoginAttempt(ctx context.Context, email string) (bool, int, *time.Time, error) {
+	return true, 5, nil, nil
+}
+
+func (m *mockAccountLockout) RecordFailedAttempt(ctx context.Context, email string) error {
+	return nil
+}
+
+func (m *mockAccountLockout) Reset(ctx context.Context, email string) error {
+	return nil
 }
 
