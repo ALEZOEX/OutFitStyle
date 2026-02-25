@@ -377,8 +377,8 @@ func (s *FallbackRecommendationService) shuffleTop3(items []RankedItem) {
 		return
 	}
 
-	// Перемешиваем только топ-3
-	for i := len(items) - 1; i > len(items)-3 && i > 0; i-- {
+	// Перемешиваем только топ-3 (первые 3 элемента)
+	for i := 2; i > 0; i-- {
 		j := s.rng.Intn(i + 1)
 		items[i], items[j] = items[j], items[i]
 	}
