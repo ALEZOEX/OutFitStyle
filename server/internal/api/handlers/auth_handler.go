@@ -327,9 +327,13 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Логирование для отладки
+	tokenPrefix := req.IDToken
+	if len(tokenPrefix) > 50 {
+		tokenPrefix = tokenPrefix[:50]
+	}
 	h.logger.Info("Google Sign-In запрос",
-		"token_length", len(req.IDToken),
-		"token_prefix", req.IDToken[:min(50, len(req.IDToken))],
+		zap.Int("token_length", len(req.IDToken)),
+		zap.String("token_prefix", tokenPrefix+"..."),
 	)
 
 	device := services.DeviceInfo{
@@ -344,16 +348,16 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	out, err := h.auth.GoogleSignIn(r.Context(), req.IDToken, device)
 	if err != nil {
 		h.logger.Error("Ошибка Google Sign-In",
-			"error", err.Error(),
-			"error_type", fmt.Sprintf("%T", err),
+			zap.String("error", err.Error()),
+			zap.String("error_type", fmt.Sprintf("%T", err)),
 		)
 		resp.Error(w, http.StatusUnauthorized, err)
 		return
 	}
 
 	h.logger.Info("Google Sign-In успешен",
-		"user_id", out.User.ID,
-		"email", out.User.Email,
+		zap.String("user_id", out.User.ID.String()),
+		zap.String("email", out.User.Email),
 	)
 	resp.Success(w, out)
 }
