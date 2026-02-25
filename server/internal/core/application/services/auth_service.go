@@ -204,20 +204,20 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device DeviceInfo) (*LoginResult, error) {
 	// 1. Валидируем токен через Google
 	s.logger.Info("GoogleSignIn: валидация токена",
-		"token_length", len(idToken),
-		"client_id", s.google.(*GoogleAuthClient).ClientID(),
+		zap.Int("token_length", len(idToken)),
+		zap.String("client_id", s.google.ClientID()),
 	)
 	gUser, err := s.google.Verify(ctx, idToken)
 	if err != nil {
 		s.logger.Error("GoogleSignIn: ошибка верификации токена",
-			"error", err.Error(),
+			zap.String("error", err.Error()),
 		)
 		return nil, ErrInvalidCredentials // Или более специфичная ошибка
 	}
 
 	s.logger.Info("GoogleSignIn: токен верифицирован",
-		"email", gUser.Email,
-		"email_verified", gUser.EmailVerified,
+		zap.String("email", gUser.Email),
+		zap.Bool("email_verified", gUser.EmailVerified),
 	)
 
 	if !gUser.EmailVerified {
