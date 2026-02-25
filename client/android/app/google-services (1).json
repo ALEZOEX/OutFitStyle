@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "242419520610",
+    "project_id": "outfitstyle-ce15f",
+    "storage_bucket": "outfitstyle-ce15f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:242419520610:android:2d29e36349db9023cc2d3b",
+        "android_client_info": {
+          "package_name": "com.app.outfitstyle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDk6XX38RSZb9VOVrUE8ynnocEqOWcw3JE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "242419520610-aqko3ms0jvdsj3t2t8sahqkaqaut21ct.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.app.outfitstyle"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
