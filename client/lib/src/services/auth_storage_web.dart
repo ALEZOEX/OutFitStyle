@@ -1,4 +1,4 @@
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 import '../models/token_pair.dart';
 
 /// Веб-версия хранилища аутентификации с использованием localStorage
@@ -7,7 +7,7 @@ class AuthStorage {
   static const _kRefreshToken = 'os_refresh_token';
   static const _kExpiresAt = 'os_expires_at';
 
-  final html.Storage _localStorage = html.window.localStorage;
+  final web.Storage _localStorage = web.window.localStorage;
 
   /// Сохраняет пару токенов в localStorage
   Future<void> writeTokenPair(TokenPair pair) async {
