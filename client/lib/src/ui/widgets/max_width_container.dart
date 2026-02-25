@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 /// Виджет-обёртка для ограничения ширины контента
 ///
@@ -13,7 +14,7 @@ import 'package:flutter/material.dart';
 class MaxWidthContainer extends StatelessWidget {
   final Widget child;
   final double maxWidth;
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
   final bool center;
 
   const MaxWidthContainer({
@@ -46,8 +47,8 @@ class MaxWidthContainer extends StatelessWidget {
 class ResponsiveMaxWidthContainer extends StatelessWidget {
   final Widget child;
   final double maxWidth;
-  final EdgeInsets? mobilePadding;
-  final EdgeInsets? desktopPadding;
+  final EdgeInsetsGeometry? mobilePadding;
+  final EdgeInsetsGeometry? desktopPadding;
 
   const ResponsiveMaxWidthContainer({
     super.key,
@@ -70,7 +71,7 @@ class ResponsiveMaxWidthContainer extends StatelessWidget {
             isMobile
                 ? double.infinity
                 : isTablet
-                ? min(maxWidth * 0.9, constraints.maxWidth)
+                ? math.min(maxWidth * 0.9, constraints.maxWidth)
                 : maxWidth;
 
         final effectivePadding = isMobile ? mobilePadding : desktopPadding;

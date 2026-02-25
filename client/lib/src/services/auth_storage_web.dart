@@ -75,9 +75,9 @@ class AuthStorage {
   Future<void> clearSession() async {
     try {
       print('[AuthStorage Web] Очистка сессии');
-      _localStorage.remove(_kAccessToken);
-      _localStorage.remove(_kRefreshToken);
-      _localStorage.remove(_kExpiresAt);
+      _localStorage.removeItem(_kAccessToken);
+      _localStorage.removeItem(_kRefreshToken);
+      _localStorage.removeItem(_kExpiresAt);
       print('[AuthStorage Web] Сессия очищена');
     } catch (e) {
       print('[AuthStorage Web] Ошибка очистки сессии: $e');
