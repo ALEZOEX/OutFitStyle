@@ -30,7 +30,7 @@ func NewUserRepository(db *pgxpool.Pool, logger *zap.Logger) *UserRepository {
 func (r *UserRepository) GetUser(ctx context.Context, id domain.ID) (*domain.User, error) {
 	query := `
 		SELECT
-			id, email, password_hash, display_name, avatar_url, gender, date_of_birth AS birth_date,
+			id, email, password_hash, display_name, avatar_url, gender, birth_date,
 			default_location, default_latitude, default_longitude, timezone, locale,
 			body_measurements, preferences, is_active, is_verified, verified_at,
 			oauth_provider, oauth_id, last_login_at, login_count, created_at, updated_at
@@ -124,7 +124,7 @@ func (r *UserRepository) GetUser(ctx context.Context, id domain.ID) (*domain.Use
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
 	query := `
 		SELECT
-			id, email, password_hash, display_name, avatar_url, gender, date_of_birth AS birth_date,
+			id, email, password_hash, display_name, avatar_url, gender, birth_date,
 			default_location, default_latitude, default_longitude, timezone, locale,
 			body_measurements, preferences, is_active, is_verified, verified_at,
 			oauth_provider, oauth_id, last_login_at, login_count, created_at, updated_at
@@ -218,7 +218,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 func (r *UserRepository) CreateUser(ctx context.Context, user *domain.User) error {
 	query := `
 		INSERT INTO users (
-			id, email, password_hash, display_name, avatar_url, gender, date_of_birth,
+			id, email, password_hash, display_name, avatar_url, gender, birth_date,
 			default_location, default_latitude, default_longitude, timezone, locale,
 			body_measurements, preferences, is_active, is_verified, created_at, updated_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
@@ -270,7 +270,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *domain.User) erro
 func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) error {
 	query := `
 		UPDATE users
-		SET display_name = $1, avatar_url = $2, gender = $3, date_of_birth = $4,
+		SET display_name = $1, avatar_url = $2, gender = $3, birth_date = $4,
 			default_location = $5, default_latitude = $6, default_longitude = $7,
 			timezone = $8, locale = $9, body_measurements = $10, preferences = $11,
 			is_active = $12, is_verified = $13, last_login_at = $14, login_count = $15,
