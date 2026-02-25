@@ -91,7 +91,7 @@ class AuthService {
 
     // Проверяем валидность токена через наш эндпоинт
     final response = await _dio.post(
-      '/auth/validate',
+      '/api/v1/auth/validate',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
