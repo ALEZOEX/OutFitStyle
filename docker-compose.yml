@@ -109,7 +109,6 @@ services:
       - FEATURE_PARTNER_CATALOG=${FEATURE_PARTNER_CATALOG:-true}
       - FEATURE_AB_TESTING=${FEATURE_AB_TESTING:-true}
       - FEATURE_ACHIEVEMENTS=${FEATURE_ACHIEVEMENTS:-true}
-      - FEATURE_TRIPS=${FEATURE_TRIPS:-false}
       - API_KEY_PEPPER=${API_KEY_PEPPER:-dev-pepper}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     depends_on:
