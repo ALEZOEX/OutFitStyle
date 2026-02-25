@@ -28,6 +28,8 @@ class AuthService {
          clientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
          // Server client ID для верификации на бэкенде
          serverClientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
+         // Используем popup вместо redirect (избегаем redirect_uri_mismatch)
+         signInMode: SignInMode.POPUP,
        );
 
   Future<TokenPair> loginWithGoogle() async {
