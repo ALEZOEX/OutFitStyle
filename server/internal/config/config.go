@@ -50,14 +50,14 @@ type MLServiceConfig struct {
 }
 
 type MLFallbackConfig struct {
-	Enabled          bool          `json:"enabled"`            // Включить fallback механизм
-	CacheTTL         time.Duration `json:"cache_ttl"`          // TTL кэша рекомендаций
-	HealthCheckTTL   time.Duration `json:"health_check_ttl"`   // TTL статуса health check
-	RetryAttempts    int           `json:"retry_attempts"`     // Количество попыток retry
-	RetryDelayMs     int           `json:"retry_delay_ms"`     // Задержка между retry в мс
-	RequestTimeout   time.Duration `json:"request_timeout"`    // Таймаут запроса к ML
-	UseCache         bool          `json:"use_cache"`          // Использовать кэширование
-	InvalidateOnUpdate bool        `json:"invalidate_on_update"` // Инвалидировать кэш при обновлении гардероба
+	Enabled            bool          `json:"enabled"`              // Включить fallback механизм
+	CacheTTL           time.Duration `json:"cache_ttl"`            // TTL кэша рекомендаций
+	HealthCheckTTL     time.Duration `json:"health_check_ttl"`     // TTL статуса health check
+	RetryAttempts      int           `json:"retry_attempts"`       // Количество попыток retry
+	RetryDelayMs       int           `json:"retry_delay_ms"`       // Задержка между retry в мс
+	RequestTimeout     time.Duration `json:"request_timeout"`      // Таймаут запроса к ML
+	UseCache           bool          `json:"use_cache"`            // Использовать кэширование
+	InvalidateOnUpdate bool          `json:"invalidate_on_update"` // Инвалидировать кэш при обновлении гардероба
 }
 
 type OpenWeatherConfig struct {
@@ -121,7 +121,6 @@ type FeaturesConfig struct {
 	ABTesting      bool
 	PartnerCatalog bool
 	Achievements   bool
-	Trips          bool
 }
 
 type APIKeysConfig struct {
@@ -129,11 +128,11 @@ type APIKeysConfig struct {
 }
 
 type EventingConfig struct {
-	KafkaBrokers          []string
-	KafkaTopic            string
+	KafkaBrokers              []string
+	KafkaTopic                string
 	KafkaTopicRecommendations string
-	KafkaTopicEvents      string
-	Enabled               bool
+	KafkaTopicEvents          string
+	Enabled                   bool
 }
 
 type AdminConfig struct {
@@ -211,13 +210,13 @@ func Load() (*AppConfig, error) {
 			Timeout: getEnvDurationFirst([]string{"ML_SERVICE_TIMEOUT"}, 30*time.Second),
 		},
 		MLFallback: MLFallbackConfig{
-			Enabled:          getEnvBool("ML_FALLBACK_ENABLED", true),
-			CacheTTL:         getEnvDurationFirst([]string{"ML_CACHE_TTL"}, 10*time.Minute),
-			HealthCheckTTL:   getEnvDurationFirst([]string{"ML_HEALTH_CHECK_TTL"}, 30*time.Second),
-			RetryAttempts:    getEnvInt("ML_RETRY_ATTEMPTS", 2, 0, 5),
-			RetryDelayMs:     getEnvInt("ML_RETRY_DELAY_MS", 500, 100, 2000),
-			RequestTimeout:   getEnvDurationFirst([]string{"ML_REQUEST_TIMEOUT"}, 5*time.Second),
-			UseCache:         getEnvBool("ML_USE_CACHE", true),
+			Enabled:            getEnvBool("ML_FALLBACK_ENABLED", true),
+			CacheTTL:           getEnvDurationFirst([]string{"ML_CACHE_TTL"}, 10*time.Minute),
+			HealthCheckTTL:     getEnvDurationFirst([]string{"ML_HEALTH_CHECK_TTL"}, 30*time.Second),
+			RetryAttempts:      getEnvInt("ML_RETRY_ATTEMPTS", 2, 0, 5),
+			RetryDelayMs:       getEnvInt("ML_RETRY_DELAY_MS", 500, 100, 2000),
+			RequestTimeout:     getEnvDurationFirst([]string{"ML_REQUEST_TIMEOUT"}, 5*time.Second),
+			UseCache:           getEnvBool("ML_USE_CACHE", true),
 			InvalidateOnUpdate: getEnvBool("ML_INVALIDATE_ON_UPDATE", true),
 		},
 		OpenWeather: OpenWeatherConfig{
@@ -276,17 +275,16 @@ func Load() (*AppConfig, error) {
 			PartnerCatalog: getEnvBool("FEATURE_PARTNER_CATALOG", true),
 			ABTesting:      getEnvBool("FEATURE_AB_TESTING", true),
 			Achievements:   getEnvBool("FEATURE_ACHIEVEMENTS", true),
-			Trips:          getEnvBool("FEATURE_TRIPS", false),
 		},
 		APIKeys: APIKeysConfig{
 			Pepper: getEnvFirst([]string{"API_KEY_PEPPER"}, getEnvFirst([]string{"JWT_SECRET"}, "")),
 		},
 		Eventing: EventingConfig{
-			KafkaBrokers:          splitCSV(getEnvFirst([]string{"KAFKA_BROKERS"}, "")),
-			KafkaTopic:            getEnvFirst([]string{"KAFKA_TOPIC"}, "outfitstyle-events"),
+			KafkaBrokers:              splitCSV(getEnvFirst([]string{"KAFKA_BROKERS"}, "")),
+			KafkaTopic:                getEnvFirst([]string{"KAFKA_TOPIC"}, "outfitstyle-events"),
 			KafkaTopicRecommendations: getEnvFirst([]string{"KAFKA_TOPIC_RECOMMENDATIONS"}, "recommendations"),
-			KafkaTopicEvents:      getEnvFirst([]string{"KAFKA_TOPIC_EVENTS"}, "user_events"),
-			Enabled:               getEnvBool("EVENTING_ENABLED", true),
+			KafkaTopicEvents:          getEnvFirst([]string{"KAFKA_TOPIC_EVENTS"}, "user_events"),
+			Enabled:                   getEnvBool("EVENTING_ENABLED", true),
 		},
 	}
 

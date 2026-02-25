@@ -28,6 +28,7 @@ import (
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/core/use_cases"
+	"outfitstyle/server/internal/infrastructure/adapters"
 	"outfitstyle/server/internal/infrastructure/cache"
 	"outfitstyle/server/internal/infrastructure/email"
 	"outfitstyle/server/internal/infrastructure/eventing"
@@ -37,7 +38,6 @@ import (
 	pg "outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
 	"outfitstyle/server/internal/infrastructure/push"
 	"outfitstyle/server/internal/infrastructure/queue"
-	"outfitstyle/server/internal/infrastructure/adapters"
 	"outfitstyle/server/internal/pkg/health"
 
 	"github.com/redis/go-redis/v9"
@@ -130,7 +130,6 @@ func main() {
 
 	notifRepo := pg.NewNotificationRepository(db.Pool())
 	pushTokenRepo := pg.NewPushTokenRepository(db.Pool())
-	tripRepo := pg.NewTripRepository(db.Pool())
 	savedOutfitRepo := pg.NewSavedOutfitRepository(db.Pool())
 	catalogRepo := pg.NewCatalogRepository(db.Pool())
 	achievementRepo := pg.NewAchievementRepository(db.Pool(), logger)
@@ -177,9 +176,9 @@ func main() {
 	accountLockout := middleware.NewAccountLockout(
 		redisClient,
 		logger,
-		5,                // max attempts
-		lockoutDuration,  // lockout duration
-		15*time.Minute,   // window duration
+		5,               // max attempts
+		lockoutDuration, // lockout duration
+		15*time.Minute,  // window duration
 	)
 
 	// ---------- Queue client ----------
@@ -349,8 +348,7 @@ func main() {
 	// ---------- Новые сервисы для модуля 4 ----------
 	wardrobeService := services.NewWardrobeService(wardrobeRepo, clothingRepo)
 
-	// ---------- Модуль 11: Trips, Saved Outfits, Catalog services ----------
-	tripService := services.NewTripService(tripRepo)
+	// ---------- Модуль 11: Saved Outfits, Catalog services ----------
 	savedOutfitService := services.NewSavedOutfitService(savedOutfitRepo)
 	catalogService := services.NewCatalogService(catalogRepo, redisClient)
 
@@ -396,7 +394,6 @@ func main() {
 	wardrobeHandler := handlers.NewWardrobeHandler(wardrobeService, logger)
 
 	// ---------- Модуль 11: Handlers ----------
-	tripHandler := handlers.NewTripHandler(tripService, logger)
 	savedOutfitHandler := handlers.NewSavedOutfitHandler(savedOutfitService)
 	catalogHandler := handlers.NewCatalogHandler(catalogService)
 
@@ -442,7 +439,7 @@ func main() {
 	health.RegisterChecks(checks)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, tripHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache)
+	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -516,7 +513,6 @@ func setupRouter(
 	wardrobeHandler *handlers.WardrobeHandler,
 	recommendationHandler *handlers.RecommendationHandler,
 	achievementHandler *handlers.AchievementHandler,
-	tripHandler *handlers.TripHandler,
 	savedOutfitHandler *handlers.SavedOutfitHandler,
 	catalogHandler *handlers.CatalogHandler,
 	shareHandler *handlers.ShareHandler,
@@ -606,10 +602,6 @@ func setupRouter(
 	// /api/v1/achievements/*
 	ach := protected.PathPrefix("/achievements").Subrouter()
 	achievementHandler.RegisterRoutes(ach)
-
-	// /api/v1/trips/*
-	trips := protected.PathPrefix("/trips").Subrouter()
-	tripHandler.RegisterRoutes(trips)
 
 	// /api/v1/outfits/*
 	outfits := protected.PathPrefix("/outfits").Subrouter()
