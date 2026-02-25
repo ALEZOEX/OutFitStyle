@@ -1,28 +1,32 @@
 #!/bin/bash
 #
-# РЎРєСЂРёРїС‚ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ OutfitStyle РІ Kubernetes (k3s)
+# Скрипт развёртывания OutfitStyle в Kubernetes (k3s)
 #
-# РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ:
+# Использование:
 #   ./deploy.sh [apply|rollback|status|cleanup|rebuild-indexes]
 #
-# РљРѕРјР°РЅРґС‹:
-#   apply           - РџСЂРёРјРµРЅРёС‚СЊ РІСЃРµ РјР°РЅРёС„РµСЃС‚С‹ Рё СЂР°Р·РІРµСЂРЅСѓС‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ
-#   rollback        - РћС‚РєР°С‚РёС‚СЊ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёРµ (СѓРґР°Р»РёС‚СЊ РІСЃРµ СЂРµСЃСѓСЂСЃС‹)
-#   status          - РџРѕРєР°Р·Р°С‚СЊ СЃС‚Р°С‚СѓСЃ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ
-#   cleanup         - РџРѕР»РЅР°СЏ РѕС‡РёСЃС‚РєР° (РІРєР»СЋС‡Р°СЏ PVC)
-#   rebuild-indexes - Р СѓС‡РЅРѕР№ Р·Р°РїСѓСЃРє РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ
+# Команды:
+#   apply           - Применить все манифесты и развернуть приложение
+#   rollback        - Откатить развёртывание (удалить все ресурсы)
+#   status          - Показать статус развёртывания
+#   cleanup         - Полная очистка (включая PVC)
+#   rebuild-indexes - Ручной запуск пересоздания индексов
 #
+
+# Установка UTF-8 локали для корректного отображения русских символов
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 set -e
 
-# Р¦РІРµС‚Р° РґР»СЏ РІС‹РІРѕРґР°
+# Цвета для вывода
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# РџРµСЂРµРјРµРЅРЅС‹Рµ
+# Переменные
 NAMESPACE="outfitstyle"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MANIFESTS=(
@@ -40,7 +44,7 @@ LANDING_MANIFESTS=(
     "landing-deployment.yaml"
 )
 
-# Р¤СѓРЅРєС†РёСЏ РґР»СЏ РІС‹РІРѕРґР° СЃРѕРѕР±С‰РµРЅРёР№
+# Функция для вывода сообщений
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -57,44 +61,44 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ kubectl
+# Проверка наличия kubectl
 check_kubectl() {
     if ! command -v kubectl &> /dev/null; then
-        log_error "kubectl РЅРµ РЅР°Р№РґРµРЅ. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СѓСЃС‚Р°РЅРѕРІРёС‚Рµ kubectl."
+        log_error "kubectl не найден. Пожалуйста, установите kubectl."
         exit 1
     fi
 }
 
-# РџСЂРѕРІРµСЂРєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ Рє РєР»Р°СЃС‚РµСЂСѓ
+# Проверка подключения к кластеру
 check_cluster() {
     if ! kubectl cluster-info &> /dev/null; then
-        log_error "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕРґРєР»СЋС‡РёС‚СЊСЃСЏ Рє Kubernetes РєР»Р°СЃС‚РµСЂСѓ."
+        log_error "Не удалось подключиться к Kubernetes кластеру."
         exit 1
     fi
-    log_success "РџРѕРґРєР»СЋС‡РµРЅРёРµ Рє РєР»Р°СЃС‚РµСЂСѓ СѓСЃС‚Р°РЅРѕРІР»РµРЅРѕ"
+    log_success "Подключение к кластеру установлено"
 }
 
-# РџСЂРёРјРµРЅРµРЅРёРµ РјР°РЅРёС„РµСЃС‚РѕРІ
+# Применение манифестов
 apply_manifests() {
-    log_info "РќР°С‡Р°Р»Рѕ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ OutfitStyle..."
+    log_info "Начало развёртывания OutfitStyle..."
 
-    # РџСЂРѕРІРµСЂРєР° secrets
+    # Проверка secrets
     if [ ! -f "${SCRIPT_DIR}/secrets.yaml" ]; then
-        log_warn "Р¤Р°Р№Р» secrets.yaml РЅРµ РЅР°Р№РґРµРЅ. РЎРѕР·РґР°Р№С‚Рµ РµРіРѕ РЅР° РѕСЃРЅРѕРІРµ secrets.yaml.example"
-        log_info "РџСЂРёРјРµСЂ: cp ${SCRIPT_DIR}/secrets.yaml.example ${SCRIPT_DIR}/secrets.yaml"
+        log_warn "Файл secrets.yaml не найден. Создайте его на основе secrets.yaml.example"
+        log_info "Пример: cp ${SCRIPT_DIR}/secrets.yaml.example ${SCRIPT_DIR}/secrets.yaml"
         exit 1
     fi
 
-    # РџСЂРёРјРµРЅРµРЅРёРµ namespace
-    log_info "РЎРѕР·РґР°РЅРёРµ namespace ${NAMESPACE}..."
+    # Применение namespace
+    log_info "Создание namespace ${NAMESPACE}..."
     kubectl apply -f "${SCRIPT_DIR}/namespace.yaml"
 
-    # РџСЂРёРјРµРЅРµРЅРёРµ secrets
-    log_info "РџСЂРёРјРµРЅРµРЅРёРµ secrets..."
+    # Применение secrets
+    log_info "Применение secrets..."
     kubectl apply -f "${SCRIPT_DIR}/secrets.yaml"
 
-    # РћС‡РёСЃС‚РєР° СЃС‚Р°СЂС‹С… РЅРµРЅСѓР¶РЅС‹С… СЂРµСЃСѓСЂСЃРѕРІ
-    log_info "РћС‡РёСЃС‚РєР° СЃС‚Р°СЂС‹С… СЂРµСЃСѓСЂСЃРѕРІ..."
+    # Очистка старых ненужных ресурсов
+    log_info "Очистка старых ресурсов..."
     kubectl delete deployment grafana -n ${NAMESPACE} --ignore-not-found=true || true
     kubectl delete deployment prometheus -n ${NAMESPACE} --ignore-not-found=true || true
     kubectl delete deployment kafka -n ${NAMESPACE} --ignore-not-found=true || true
@@ -104,143 +108,143 @@ apply_manifests() {
     kubectl delete svc kafka -n ${NAMESPACE} --ignore-not-found=true || true
     kubectl delete svc zookeeper -n ${NAMESPACE} --ignore-not-found=true || true
     kubectl delete pvc grafana-pvc -n ${NAMESPACE} --ignore-not-found=true || true
-    log_success "РЎС‚Р°СЂС‹Рµ СЂРµСЃСѓСЂСЃС‹ СѓРґР°Р»РµРЅС‹"
+    log_success "Старые ресурсы удалены"
 
-    # РџСЂРёРјРµРЅРµРЅРёРµ РјРёРіСЂР°С†РёР№ Р‘Р”
-    log_info "РџСЂРёРјРµРЅРµРЅРёРµ РјРёРіСЂР°С†РёР№ Р±Р°Р·С‹ РґР°РЅРЅС‹С…..."
+    # Применение миграций БД
+    log_info "Применение миграций базы данных..."
     if [ -f "${SCRIPT_DIR}/migrate-job.yaml" ]; then
-        # РЈРґР°Р»СЏРµРј СЃС‚Р°СЂС‹Р№ job, РµСЃР»Рё СЃСѓС‰РµСЃС‚РІСѓРµС‚
+        # Удаляем старый job, если существует
         kubectl delete job/migrate -n ${NAMESPACE} --ignore-not-found=true || true
-        # РџСЂРёРјРµРЅСЏРµРј РЅРѕРІС‹Р№ job
+        # Применяем новый job
         kubectl apply -f "${SCRIPT_DIR}/migrate-job.yaml"
-        # Р–РґС‘Рј Р·Р°РІРµСЂС€РµРЅРёСЏ РјРёРіСЂР°С†РёР№
-        log_info "РћР¶РёРґР°РЅРёРµ Р·Р°РІРµСЂС€РµРЅРёСЏ РјРёРіСЂР°С†РёР№ (РґРѕ 5 РјРёРЅСѓС‚)..."
+        # Ждём завершения миграций
+        log_info "Ожидание завершения миграций (до 5 минут)..."
         if kubectl wait --for=condition=complete job/migrate -n ${NAMESPACE} --timeout=300s; then
-            log_success "РњРёРіСЂР°С†РёРё СѓСЃРїРµС€РЅРѕ РїСЂРёРјРµРЅРµРЅС‹!"
+            log_success "Миграции успешно применены!"
         else
-            log_warn "РњРёРіСЂР°С†РёРё РЅРµ Р·Р°РІРµСЂС€РµРЅС‹ РІ С‚РµС‡РµРЅРёРµ 5 РјРёРЅСѓС‚. РџСЂРѕРІРµСЂСЊС‚Рµ Р»РѕРіРё:"
-            kubectl logs job/migrate -n ${NAMESPACE} || echo "Р›РѕРіРё РЅРµРґРѕСЃС‚СѓРїРЅС‹"
-            log_warn "РџСЂРѕРґРѕР»Р¶Р°РµРј СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёРµ..."
+            log_warn "Миграции не завершены в течение 5 минут. Проверьте логи:"
+            kubectl logs job/migrate -n ${NAMESPACE} || echo "Логи недоступны"
+            log_warn "Продолжаем развёртывание..."
         fi
     fi
 
-    # РџСЂРёРјРµРЅРµРЅРёРµ РѕСЃРЅРѕРІРЅС‹С… РјР°РЅРёС„РµСЃС‚РѕРІ
+    # Применение основных манифестов
     for manifest in "${MANIFESTS[@]}"; do
         if [ "$manifest" != "namespace.yaml" ]; then
-            log_info "РџСЂРёРјРµРЅРµРЅРёРµ ${manifest}..."
+            log_info "Применение ${manifest}..."
             kubectl apply -f "${SCRIPT_DIR}/${manifest}"
         fi
     done
 
-    # РџСЂРёРјРµРЅРµРЅРёРµ landing page
-    log_info "РџСЂРёРјРµРЅРµРЅРёРµ landing page..."
+    # Применение landing page
+    log_info "Применение landing page..."
     for manifest in "${LANDING_MANIFESTS[@]}"; do
         if [ -f "${SCRIPT_DIR}/${manifest}" ]; then
-            log_info "РџСЂРёРјРµРЅРµРЅРёРµ ${manifest}..."
+            log_info "Применение ${manifest}..."
             kubectl apply -f "${SCRIPT_DIR}/${manifest}"
         fi
     done
 
-    # РџСЂРёРјРµРЅРµРЅРёРµ CronJob РґР»СЏ РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ
-    log_info "РџСЂРёРјРµРЅРµРЅРёРµ CronJob РґР»СЏ РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ..."
+    # Применение CronJob для пересоздания индексов
+    log_info "Применение CronJob для пересоздания индексов..."
     if [ -f "${SCRIPT_DIR}/rebuild-indexes-cronjob.yaml" ]; then
         kubectl apply -f "${SCRIPT_DIR}/rebuild-indexes-cronjob.yaml"
-        log_success "CronJob rebuild-indexes РїСЂРёРјРµРЅС‘РЅ (Р·Р°РїСѓСЃРє 1-РіРѕ С‡РёСЃР»Р° РєР°Р¶РґРѕРіРѕ РјРµСЃСЏС†Р° РІ 03:00)"
+        log_success "CronJob rebuild-indexes применён (запуск 1-го числа каждого месяца в 03:00)"
     fi
 
-    log_success "Р’СЃРµ РјР°РЅРёС„РµСЃС‚С‹ РїСЂРёРјРµРЅРµРЅС‹!"
+    log_success "Все манифесты применены!"
 
-    # РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё РїРѕРґРѕРІ
-    log_info "РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё РїРѕРґРѕРІ..."
+    # Ожидание готовности подов
+    log_info "Ожидание готовности подов..."
     wait_for_pods
 
-    # Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё
+    # Вывод информации
     show_status
 }
 
-# РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё РїРѕРґРѕРІ
+# Ожидание готовности подов
 wait_for_pods() {
-    log_info "РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё PostgreSQL..."
-    kubectl wait --for=condition=ready pod -l app=postgres -n ${NAMESPACE} --timeout=120s || log_warn "PostgreSQL РЅРµ РіРѕС‚РѕРІР° РІ С‚РµС‡РµРЅРёРµ 120СЃ"
-    
-    log_info "РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё Redis..."
-    kubectl wait --for=condition=ready pod -l app=redis -n ${NAMESPACE} --timeout=60s || log_warn "Redis РЅРµ РіРѕС‚РѕРІ РІ С‚РµС‡РµРЅРёРµ 60СЃ"
-    
-    log_info "РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё Backend..."
-    kubectl wait --for=condition=ready pod -l app=backend -n ${NAMESPACE} --timeout=120s || log_warn "Backend РЅРµ РіРѕС‚РѕРІ РІ С‚РµС‡РµРЅРёРµ 120СЃ"
-    
-    log_info "РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё ML Service..."
-    kubectl wait --for=condition=ready pod -l app=ml-service -n ${NAMESPACE} --timeout=120s || log_warn "ML Service РЅРµ РіРѕС‚РѕРІ РІ С‚РµС‡РµРЅРёРµ 120СЃ"
-    
-    log_info "РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё Frontend..."
-    kubectl wait --for=condition=ready pod -l app=frontend -n ${NAMESPACE} --timeout=60s || log_warn "Frontend РЅРµ РіРѕС‚РѕРІ РІ С‚РµС‡РµРЅРёРµ 60СЃ"
+    log_info "Ожидание готовности PostgreSQL..."
+    kubectl wait --for=condition=ready pod -l app=postgres -n ${NAMESPACE} --timeout=120s || log_warn "PostgreSQL не готова в течение 120с"
+
+    log_info "Ожидание готовности Redis..."
+    kubectl wait --for=condition=ready pod -l app=redis -n ${NAMESPACE} --timeout=60s || log_warn "Redis не готов в течение 60с"
+
+    log_info "Ожидание готовности Backend..."
+    kubectl wait --for=condition=ready pod -l app=backend -n ${NAMESPACE} --timeout=120s || log_warn "Backend не готов в течение 120с"
+
+    log_info "Ожидание готовности ML Service..."
+    kubectl wait --for=condition=ready pod -l app=ml-service -n ${NAMESPACE} --timeout=120s || log_warn "ML Service не готов в течение 120с"
+
+    log_info "Ожидание готовности Frontend..."
+    kubectl wait --for=condition=ready pod -l app=frontend -n ${NAMESPACE} --timeout=60s || log_warn "Frontend не готов в течение 60с"
 }
 
-# РћС‚РєР°С‚ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ
+# Откат развёртывания
 rollback() {
-    log_warn "РќР°С‡Р°Р»Рѕ РѕС‚РєР°С‚Р° СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ..."
-    
+    log_warn "Начало отката развёртывания..."
+
     for manifest in "${MANIFESTS[@]}"; do
         if [ -f "${SCRIPT_DIR}/${manifest}" ]; then
-            log_info "РЈРґР°Р»РµРЅРёРµ СЂРµСЃСѓСЂСЃРѕРІ РёР· ${manifest}..."
+            log_info "Удаление ресурсов из ${manifest}..."
             kubectl delete -f "${SCRIPT_DIR}/${manifest}" --ignore-not-found=true || true
         fi
     done
-    
-    # РЈРґР°Р»РµРЅРёРµ secrets Рё namespace
+
+    # Удаление secrets и namespace
     kubectl delete -f "${SCRIPT_DIR}/secrets.yaml" --ignore-not-found=true || true
     kubectl delete -f "${SCRIPT_DIR}/namespace.yaml" --ignore-not-found=true || true
-    
-    log_success "РћС‚РєР°С‚ Р·Р°РІРµСЂС€С‘РЅ"
+
+    log_success "Откат завершён"
 }
 
-# РџРѕР»РЅР°СЏ РѕС‡РёСЃС‚РєР° (РІРєР»СЋС‡Р°СЏ PVC)
+# Полная очистка (включая PVC)
 cleanup() {
-    log_warn "РќР°С‡Р°Р»Рѕ РїРѕР»РЅРѕР№ РѕС‡РёСЃС‚РєРё (РІРєР»СЋС‡Р°СЏ PersistentVolumeClaims)..."
+    log_warn "Начало полной очистки (включая PersistentVolumeClaims)..."
 
-    # РЈРґР°Р»РµРЅРёРµ PVC
-    log_info "РЈРґР°Р»РµРЅРёРµ PersistentVolumeClaims..."
+    # Удаление PVC
+    log_info "Удаление PersistentVolumeClaims..."
     kubectl delete pvc --all -n ${NAMESPACE} --ignore-not-found=true || true
 
-    # РћС‚РєР°С‚ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ
+    # Откат развёртывания
     rollback
 
-    log_success "РџРѕР»РЅР°СЏ РѕС‡РёСЃС‚РєР° Р·Р°РІРµСЂС€РµРЅР°"
+    log_success "Полная очистка завершена"
 }
 
-# Р СѓС‡РЅРѕР№ Р·Р°РїСѓСЃРє РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ
+# Ручной запуск пересоздания индексов
 rebuild_indexes_manual() {
-    log_warn "Р СѓС‡РЅРѕР№ Р·Р°РїСѓСЃРє РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ..."
+    log_warn "Ручной запуск пересоздания индексов..."
 
-    # РЎРѕР·РґР°С‘Рј job РІСЂСѓС‡РЅСѓСЋ
+    # Создаём job вручную
     kubectl create job --from=cronjob/rebuild-indexes rebuild-indexes-manual -n ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
 
-    log_info "РћР¶РёРґР°РЅРёРµ Р·Р°РІРµСЂС€РµРЅРёСЏ Р·Р°РґР°С‡Рё..."
-    kubectl wait --for=condition=complete job/rebuild-indexes-manual -n ${NAMESPACE} --timeout=7200s || log_error "Р—Р°РґР°С‡Р° РЅРµ Р·Р°РІРµСЂС€РµРЅР° РІ С‚РµС‡РµРЅРёРµ 2 С‡Р°СЃРѕРІ"
+    log_info "Ожидание завершения задачи..."
+    kubectl wait --for=condition=complete job/rebuild-indexes-manual -n ${NAMESPACE} --timeout=7200s || log_error "Задача не завершена в течение 2 часов"
 
-    # Р’С‹РІРѕРґ Р»РѕРіРѕРІ
-    log_info "Р›РѕРіРё Р·Р°РґР°С‡Рё:"
+    # Вывод логов
+    log_info "Логи задачи:"
     kubectl logs job/rebuild-indexes-manual -n ${NAMESPACE}
 
-    # РЈРґР°Р»РµРЅРёРµ Р·Р°РґР°С‡Рё
+    # Удаление задачи
     kubectl delete job/rebuild-indexes-manual -n ${NAMESPACE} --ignore-not-found=true || true
 
-    log_success "РџРµСЂРµСЃРѕР·РґР°РЅРёРµ РёРЅРґРµРєСЃРѕРІ Р·Р°РІРµСЂС€РµРЅРѕ"
+    log_success "Пересоздание индексов завершено"
 }
 
-# РџРѕРєР°Р·Р°С‚СЊ СЃС‚Р°С‚СѓСЃ
+# Показать статус
 show_status() {
     echo ""
-    log_info "=== РЎС‚Р°С‚СѓСЃ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ ==="
+    log_info "=== Статус развёртывания ==="
     echo ""
 
-    # РџРѕРґС‹
-    log_info "РџРѕРґС‹:"
+    # Поды
+    log_info "Поды:"
     kubectl get pods -n ${NAMESPACE} -o wide
     echo ""
 
     # Jobs
-    log_info "Jobs (РјРёРіСЂР°С†РёРё Рё РїРµСЂРµСЃРѕР·РґР°РЅРёРµ РёРЅРґРµРєСЃРѕРІ):"
+    log_info "Jobs (миграции и пересоздание индексов):"
     kubectl get jobs -n ${NAMESPACE} -o wide
     echo ""
 
@@ -249,37 +253,37 @@ show_status() {
     kubectl get cronjobs -n ${NAMESPACE} -o wide
     echo ""
 
-    # РџРѕСЃР»РµРґРЅРёРµ СЃРѕР±С‹С‚РёСЏ
-    log_info "РџРѕСЃР»РµРґРЅРёРµ СЃРѕР±С‹С‚РёСЏ:"
+    # Последние события
+    log_info "Последние события:"
     kubectl get events -n ${NAMESPACE} --sort-by='.lastTimestamp' | tail -20
     echo ""
 
-    # РЎС‚Р°С‚СѓСЃ РјРёРіСЂР°С†РёР№
-    log_info "РЎС‚Р°С‚СѓСЃ РјРёРіСЂР°С†РёР№:"
+    # Статус миграций
+    log_info "Статус миграций:"
     if kubectl get job/migrate -n ${NAMESPACE} &>/dev/null; then
         kubectl get job/migrate -n ${NAMESPACE} -o wide
         echo ""
-        log_info "РџРѕСЃР»РµРґРЅРёРµ Р»РѕРіРё РјРёРіСЂР°С†РёР№:"
-        kubectl logs job/migrate -n ${NAMESPACE} --tail=20 || echo "Р›РѕРіРё РЅРµРґРѕСЃС‚СѓРїРЅС‹"
+        log_info "Последние логи миграций:"
+        kubectl logs job/migrate -n ${NAMESPACE} --tail=20 || echo "Логи недоступны"
     else
-        echo "Job migrate РЅРµ РЅР°Р№РґРµРЅ"
+        echo "Job migrate не найден"
     fi
     echo ""
 
-    # РЎС‚Р°С‚СѓСЃ РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ
-    log_info "РЎС‚Р°С‚СѓСЃ РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ:"
+    # Статус пересоздания индексов
+    log_info "Статус пересоздания индексов:"
     if kubectl get cronjob/rebuild-indexes -n ${NAMESPACE} &>/dev/null; then
         kubectl get cronjob/rebuild-indexes -n ${NAMESPACE} -o wide
         echo ""
-        log_info "РџРѕСЃР»РµРґРЅРёРµ Р·Р°РґР°С‡Рё РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ:"
+        log_info "Последние задачи пересоздания индексов:"
         kubectl get jobs -n ${NAMESPACE} -l app=rebuild-indexes --sort-by='.metadata.creationTimestamp' -o wide | tail -5
     else
-        echo "CronJob rebuild-indexes РЅРµ РЅР°Р№РґРµРЅ"
+        echo "CronJob rebuild-indexes не найден"
     fi
     echo ""
 
-    # РЎРµСЂРІРёСЃС‹
-    log_info "РЎРµСЂРІРёСЃС‹:"
+    # Сервисы
+    log_info "Сервисы:"
     kubectl get svc -n ${NAMESPACE} -o wide
     echo ""
 
@@ -294,7 +298,7 @@ show_status() {
     echo ""
 }
 
-# РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ
+# Основная функция
 main() {
     check_kubectl
     check_cluster
@@ -316,14 +320,14 @@ main() {
             rebuild_indexes_manual
             ;;
         *)
-            echo "РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ: $0 {apply|rollback|status|cleanup|rebuild-indexes}"
+            echo "Использование: $0 {apply|rollback|status|cleanup|rebuild-indexes}"
             echo ""
-            echo "РљРѕРјР°РЅРґС‹:"
-            echo "  apply           - РџСЂРёРјРµРЅРёС‚СЊ РІСЃРµ РјР°РЅРёС„РµСЃС‚С‹ Рё СЂР°Р·РІРµСЂРЅСѓС‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ"
-            echo "  rollback        - РћС‚РєР°С‚РёС‚СЊ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёРµ (СѓРґР°Р»РёС‚СЊ РІСЃРµ СЂРµСЃСѓСЂСЃС‹)"
-            echo "  status          - РџРѕРєР°Р·Р°С‚СЊ СЃС‚Р°С‚СѓСЃ СЂР°Р·РІС‘СЂС‚С‹РІР°РЅРёСЏ"
-            echo "  cleanup         - РџРѕР»РЅР°СЏ РѕС‡РёСЃС‚РєР° (РІРєР»СЋС‡Р°СЏ PVC)"
-            echo "  rebuild-indexes - Р СѓС‡РЅРѕР№ Р·Р°РїСѓСЃРє РїРµСЂРµСЃРѕР·РґР°РЅРёСЏ РёРЅРґРµРєСЃРѕРІ"
+            echo "Команды:"
+            echo "  apply           - Применить все манифесты и развернуть приложение"
+            echo "  rollback        - Откатить развёртывание (удалить все ресурсы)"
+            echo "  status          - Показать статус развёртывания"
+            echo "  cleanup         - Полная очистка (включая PVC)"
+            echo "  rebuild-indexes - Ручной запуск пересоздания индексов"
             exit 1
             ;;
     esac
