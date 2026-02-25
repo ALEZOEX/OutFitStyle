@@ -12,8 +12,8 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
-  flutter_secure_storage: ^9.2.4
-  google_sign_in: ^6.2.1
+  flutter_secure_storage: ^10.0.0
+  google_sign_in: ^7.2.0
   web: ^1.1.0
   # HTTP
   http: ^1.6.0
@@ -22,8 +22,8 @@ dependencies:
 
   # State Management
   provider: ^6.1.1
-  flutter_riverpod: ^2.6.1
-  go_router: ^14.8.1
+  flutter_riverpod: ^3.2.1
+  go_router: ^17.1.0
 
   # Offline-first database
   drift: ^2.31.0
@@ -35,7 +35,7 @@ dependencies:
   json_annotation: ^4.9.0
 
   # UI
-  google_fonts: ^6.3.2
+  google_fonts: ^8.0.2
   shimmer: ^3.0.0
   cached_network_image: ^3.4.1
   flutter_blurhash: ^0.9.1
@@ -67,14 +67,14 @@ dependencies:
   firebase_crashlytics: ^5.0.7
   firebase_analytics: ^12.1.2
   firebase_remote_config: ^6.1.4
-  flutter_local_notifications: ^17.2.2
+  flutter_local_notifications: ^21.0.0-dev.2
 
   # Logging
   logger: ^2.6.1
   logging: ^1.2.0
 
   # Timezone
-  timezone: ^0.9.4
+  timezone: ^0.11.0
 
   # Synchronization
   synchronized: ^3.1.0
@@ -95,12 +95,12 @@ dependencies:
   path: ^1.9.0
   sqflite: ^2.3.0
   flutter_svg: ^2.2.3
-  package_info_plus: ^8.1.2
+  package_info_plus: ^9.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_native_splash: ^2.4.7
   flutter_launcher_icons: ^0.14.4
   drift_dev: ^2.31.0
