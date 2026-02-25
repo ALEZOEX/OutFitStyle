@@ -21,14 +21,36 @@ func NewWardrobeRepository(db *pgxpool.Pool) *WardrobeRepository {
 }
 
 func (r *WardrobeRepository) GetByUser(ctx context.Context, userID domain.ID) ([]domain.WardrobeItem, error) {
+	// Используем COALESCE для item_data: если поле пустое, собираем данные из clothing_items через JSON
 	query := `
 		SELECT
-			id, user_id, clothing_item_id, custom_name, notes, tags, purchase_date, purchase_price,
-			purchase_currency, wear_count, last_worn_at, is_favorite, is_archived, condition,
-			created_at, updated_at, item_data
-		FROM user_wardrobe
-		WHERE user_id = $1
-		ORDER BY created_at DESC
+			w.id, w.user_id, w.clothing_item_id, w.custom_name, w.notes, w.tags, w.purchase_date, w.purchase_price,
+			w.purchase_currency, w.wear_count, w.last_worn_at, w.is_favorite, w.is_archived, w.condition,
+			w.created_at, w.updated_at,
+			COALESCE(
+				w.item_data,
+				jsonb_build_object(
+					'id', ci.id,
+					'name', ci.name,
+					'category', ci.category,
+					'subcategory', ci.subcategory,
+					'style', ci.style,
+					'season', ci.season,
+					'base_colour', ci.base_colour,
+					'pattern', ci.pattern,
+					'fit', ci.fit,
+					'gender', ci.gender,
+					'source', ci.source,
+					'is_owned', ci.is_owned,
+					'is_active', ci.is_active,
+					'image_url', ci.image_url,
+					'icon_emoji', ci.icon_emoji
+				)
+			) as item_data
+		FROM wardrobe_items w
+		JOIN clothing_items ci ON w.clothing_item_id = ci.id
+		WHERE w.user_id = $1
+		ORDER BY w.created_at DESC
 	`
 
 	rows, err := r.db.Query(ctx, query, userID)
@@ -209,70 +231,92 @@ func (r *WardrobeRepository) List(ctx context.Context, userID domain.ID, q domai
 	// Calculate offset
 	offset := (q.Page - 1) * q.Limit
 
-	// Base query
+	// Base query с JOIN для получения данных clothing_item
+	// Используем COALESCE для item_data: если поле пустое, собираем данные из clothing_items
 	query := `
 		SELECT
-			id, user_id, clothing_item_id, custom_name, notes, tags, purchase_date, purchase_price,
-			purchase_currency, wear_count, last_worn_at, is_favorite, is_archived, condition,
-			created_at, updated_at, item_data
-		FROM user_wardrobe
-		WHERE user_id = $1
+			w.id, w.user_id, w.clothing_item_id, w.custom_name, w.notes, w.tags, w.purchase_date, w.purchase_price,
+			w.purchase_currency, w.wear_count, w.last_worn_at, w.is_favorite, w.is_archived, w.condition,
+			w.created_at, w.updated_at,
+			COALESCE(
+				w.item_data,
+				jsonb_build_object(
+					'id', ci.id,
+					'name', ci.name,
+					'category', ci.category,
+					'subcategory', ci.subcategory,
+					'style', ci.style,
+					'season', ci.season,
+					'base_colour', ci.base_colour,
+					'pattern', ci.pattern,
+					'fit', ci.fit,
+					'gender', ci.gender,
+					'source', ci.source,
+					'is_owned', ci.is_owned,
+					'is_active', ci.is_active,
+					'image_url', ci.image_url,
+					'icon_emoji', ci.icon_emoji
+				)
+			) as item_data
+		FROM wardrobe_items w
+		JOIN clothing_items ci ON w.clothing_item_id = ci.id
+		WHERE w.user_id = $1
 	`
 	args := []interface{}{userID}
 	argIndex := 2
 
-	// Apply filters
+	// Apply filters - используем поля из clothing_items для фильтрации
 	if q.Category != nil {
-		query += fmt.Sprintf(" AND item_data->>'category' = $%d", argIndex)
+		query += fmt.Sprintf(" AND ci.category = $%d", argIndex)
 		args = append(args, *q.Category)
 		argIndex++
 	}
 
 	if q.Style != nil {
-		query += fmt.Sprintf(" AND item_data->>'style' = $%d", argIndex)
+		query += fmt.Sprintf(" AND ci.style = $%d", argIndex)
 		args = append(args, *q.Style)
 		argIndex++
 	}
 
 	if q.Season != nil {
-		query += fmt.Sprintf(" AND item_data->>'season' = $%d", argIndex)
+		query += fmt.Sprintf(" AND ci.season = $%d", argIndex)
 		args = append(args, *q.Season)
 		argIndex++
 	}
 
 	if q.IsFavorite != nil {
-		query += fmt.Sprintf(" AND is_favorite = $%d", argIndex)
+		query += fmt.Sprintf(" AND w.is_favorite = $%d", argIndex)
 		args = append(args, *q.IsFavorite)
 		argIndex++
 	}
 
 	if q.IsArchived != nil {
-		query += fmt.Sprintf(" AND is_archived = $%d", argIndex)
+		query += fmt.Sprintf(" AND w.is_archived = $%d", argIndex)
 		args = append(args, *q.IsArchived)
 		argIndex++
 	}
 
 	if q.Search != nil {
-		query += fmt.Sprintf(" AND (custom_name ILIKE $%d OR item_data->>'name' ILIKE $%d)", argIndex, argIndex)
+		query += fmt.Sprintf(" AND (w.custom_name ILIKE $%d OR ci.name ILIKE $%d)", argIndex, argIndex)
 		searchTerm := "%" + *q.Search + "%"
 		args = append(args, searchTerm)
 		argIndex++
 	}
 
 	// Apply sorting - validate allowed fields to prevent SQL injection
-	orderField := "created_at"
+	orderField := "w.created_at"
 	orderDir := "DESC"
 
 	switch q.Sort {
 	case "updated_at":
-		orderField = "updated_at"
+		orderField = "w.updated_at"
 	case "wear_count":
-		orderField = "wear_count"
+		orderField = "w.wear_count"
 	case "name":
-		orderField = "item_data->>'name'"
+		orderField = "ci.name"
 	default:
 		// Default to a safe field if an invalid sort field is provided
-		orderField = "created_at"
+		orderField = "w.created_at"
 	}
 
 	switch q.Order {
@@ -285,23 +329,7 @@ func (r *WardrobeRepository) List(ctx context.Context, userID domain.ID, q domai
 		orderDir = "DESC"
 	}
 
-	// Use a switch statement to safely construct the ORDER BY clause
-	orderByClause := ""
-	switch orderField {
-	case "updated_at":
-		orderByClause = "ORDER BY updated_at"
-	case "wear_count":
-		orderByClause = "ORDER BY wear_count"
-	case "item_data->>'name'":
-		orderByClause = "ORDER BY item_data->>'name'"
-	default:
-		orderByClause = "ORDER BY created_at"
-	}
-
-	// Append direction
-	orderByClause += " " + orderDir
-
-	query += fmt.Sprintf(" %s LIMIT $%d OFFSET $%d", orderByClause, argIndex, argIndex+1)
+	query += fmt.Sprintf(" ORDER BY %s %s LIMIT $%d OFFSET $%d", orderField, orderDir, argIndex, argIndex+1)
 	args = append(args, q.Limit, offset)
 
 	rows, err := r.db.Query(ctx, query, args...)
@@ -375,47 +403,48 @@ func (r *WardrobeRepository) List(ctx context.Context, userID domain.ID, q domai
 		items = append(items, item)
 	}
 
-	// Get total count
+	// Get total count с JOIN для clothing_items
 	countQuery := `
 		SELECT COUNT(*)
-		FROM user_wardrobe
-		WHERE user_id = $1
+		FROM wardrobe_items w
+		JOIN clothing_items ci ON w.clothing_item_id = ci.id
+		WHERE w.user_id = $1
 	`
 	countArgs := []interface{}{userID}
 	countArgIndex := 2
 
 	if q.Category != nil {
-		countQuery += fmt.Sprintf(" AND item_data->>'category' = $%d", countArgIndex)
+		countQuery += fmt.Sprintf(" AND ci.category = $%d", countArgIndex)
 		countArgs = append(countArgs, *q.Category)
 		countArgIndex++
 	}
 
 	if q.Style != nil {
-		countQuery += fmt.Sprintf(" AND item_data->>'style' = $%d", countArgIndex)
+		countQuery += fmt.Sprintf(" AND ci.style = $%d", countArgIndex)
 		countArgs = append(countArgs, *q.Style)
 		countArgIndex++
 	}
 
 	if q.Season != nil {
-		countQuery += fmt.Sprintf(" AND item_data->>'season' = $%d", countArgIndex)
+		countQuery += fmt.Sprintf(" AND ci.season = $%d", countArgIndex)
 		countArgs = append(countArgs, *q.Season)
 		countArgIndex++
 	}
 
 	if q.IsFavorite != nil {
-		countQuery += fmt.Sprintf(" AND is_favorite = $%d", countArgIndex)
+		countQuery += fmt.Sprintf(" AND w.is_favorite = $%d", countArgIndex)
 		countArgs = append(countArgs, *q.IsFavorite)
 		countArgIndex++
 	}
 
 	if q.IsArchived != nil {
-		countQuery += fmt.Sprintf(" AND is_archived = $%d", countArgIndex)
+		countQuery += fmt.Sprintf(" AND w.is_archived = $%d", countArgIndex)
 		countArgs = append(countArgs, *q.IsArchived)
 		countArgIndex++
 	}
 
 	if q.Search != nil {
-		countQuery += fmt.Sprintf(" AND (custom_name ILIKE $%d OR item_data->>'name' ILIKE $%d)", countArgIndex, countArgIndex)
+		countQuery += fmt.Sprintf(" AND (w.custom_name ILIKE $%d OR ci.name ILIKE $%d)", countArgIndex, countArgIndex)
 		searchTerm := "%" + *q.Search + "%"
 		countArgs = append(countArgs, searchTerm)
 	}
@@ -429,13 +458,35 @@ func (r *WardrobeRepository) List(ctx context.Context, userID domain.ID, q domai
 }
 
 func (r *WardrobeRepository) GetByID(ctx context.Context, userID domain.ID, wardrobeID domain.ID) (*domain.WardrobeItem, error) {
+	// Используем COALESCE для item_data с JOIN для clothing_items
 	query := `
 		SELECT
-			id, user_id, clothing_item_id, custom_name, notes, tags, purchase_date, purchase_price,
-			purchase_currency, wear_count, last_worn_at, is_favorite, is_archived, condition,
-			created_at, updated_at, item_data
-		FROM user_wardrobe
-		WHERE user_id = $1 AND id = $2
+			w.id, w.user_id, w.clothing_item_id, w.custom_name, w.notes, w.tags, w.purchase_date, w.purchase_price,
+			w.purchase_currency, w.wear_count, w.last_worn_at, w.is_favorite, w.is_archived, w.condition,
+			w.created_at, w.updated_at,
+			COALESCE(
+				w.item_data,
+				jsonb_build_object(
+					'id', ci.id,
+					'name', ci.name,
+					'category', ci.category,
+					'subcategory', ci.subcategory,
+					'style', ci.style,
+					'season', ci.season,
+					'base_colour', ci.base_colour,
+					'pattern', ci.pattern,
+					'fit', ci.fit,
+					'gender', ci.gender,
+					'source', ci.source,
+					'is_owned', ci.is_owned,
+					'is_active', ci.is_active,
+					'image_url', ci.image_url,
+					'icon_emoji', ci.icon_emoji
+				)
+			) as item_data
+		FROM wardrobe_items w
+		JOIN clothing_items ci ON w.clothing_item_id = ci.id
+		WHERE w.user_id = $1 AND w.id = $2
 	`
 
 	var item domain.WardrobeItem
@@ -509,12 +560,36 @@ func (r *WardrobeRepository) Add(ctx context.Context, userID domain.ID, clothing
 	id := domain.NewID()
 	now := time.Now()
 
-	var itemData domain.ClothingItem
-	// We'll need to implement a way to get the clothing item, for now we'll just create a minimal one
-	itemData.ID = clothingItemID
+	// Загружаем данные clothing_item для item_data
+	var clothingItem domain.ClothingItem
+	ciQuery := `
+		SELECT id, name, category, subcategory, style, season, base_colour, pattern, fit, gender, source, is_owned, is_active, image_url, icon_emoji
+		FROM clothing_items
+		WHERE id = $1
+	`
+	err := r.db.QueryRow(ctx, ciQuery, clothingItemID).Scan(
+		&clothingItem.ID,
+		&clothingItem.Name,
+		&clothingItem.Category,
+		&clothingItem.Subcategory,
+		&clothingItem.Style,
+		&clothingItem.Season,
+		&clothingItem.BaseColour,
+		&clothingItem.Pattern,
+		&clothingItem.Fit,
+		&clothingItem.Gender,
+		&clothingItem.Source,
+		&clothingItem.IsOwned,
+		&clothingItem.IsActive,
+		&clothingItem.ImageURL,
+		&clothingItem.IconEmoji,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to load clothing item")
+	}
 
 	query := `
-		INSERT INTO user_wardrobe (
+		INSERT INTO wardrobe_items (
 			id, user_id, clothing_item_id, custom_name, notes, tags, wear_count, is_favorite, is_archived, condition, created_at, updated_at, item_data
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 	`
@@ -524,7 +599,7 @@ func (r *WardrobeRepository) Add(ctx context.Context, userID domain.ID, clothing
 		return nil, errors.Wrap(err, "failed to marshal tags")
 	}
 
-	itemDataJSON, err := json.Marshal(itemData)
+	itemDataJSON, err := json.Marshal(clothingItem)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal clothing item data")
 	}
@@ -562,7 +637,7 @@ func (r *WardrobeRepository) Add(ctx context.Context, userID domain.ID, clothing
 		Condition:      "good",
 		CreatedAt:      now,
 		UpdatedAt:      now,
-		Item:           itemData,
+		Item:           clothingItem,
 	}
 
 	return wardrobeItem, nil
@@ -646,14 +721,37 @@ func (r *WardrobeRepository) SetArchived(ctx context.Context, userID domain.ID, 
 }
 
 func (r *WardrobeRepository) MarkWorn(ctx context.Context, userID domain.ID, wardrobeID domain.ID) (*domain.WardrobeItem, error) {
+	// Используем RETURNING с COALESCE для item_data и JOIN для clothing_items
 	query := `
-		UPDATE user_wardrobe
+		UPDATE wardrobe_items w
 		SET wear_count = wear_count + 1, last_worn_at = $1, updated_at = $2
-		WHERE user_id = $3 AND id = $4
+		WHERE w.user_id = $3 AND w.id = $4
 		RETURNING
-			id, user_id, clothing_item_id, custom_name, notes, tags, purchase_date, purchase_price,
-			purchase_currency, wear_count, last_worn_at, is_favorite, is_archived, condition,
-			created_at, updated_at, item_data
+			w.id, w.user_id, w.clothing_item_id, w.custom_name, w.notes, w.tags, w.purchase_date, w.purchase_price,
+			w.purchase_currency, w.wear_count, w.last_worn_at, w.is_favorite, w.is_archived, w.condition,
+			w.created_at, w.updated_at,
+			COALESCE(
+				w.item_data,
+				jsonb_build_object(
+					'id', ci.id,
+					'name', ci.name,
+					'category', ci.category,
+					'subcategory', ci.subcategory,
+					'style', ci.style,
+					'season', ci.season,
+					'base_colour', ci.base_colour,
+					'pattern', ci.pattern,
+					'fit', ci.fit,
+					'gender', ci.gender,
+					'source', ci.source,
+					'is_owned', ci.is_owned,
+					'is_active', ci.is_active,
+					'image_url', ci.image_url,
+					'icon_emoji', ci.icon_emoji
+				)
+			) as item_data
+		FROM clothing_items ci
+		WHERE w.clothing_item_id = ci.id
 	`
 
 	var item domain.WardrobeItem
