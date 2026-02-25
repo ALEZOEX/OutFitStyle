@@ -24,7 +24,7 @@ class AuthRepository implements IAuthRepository {
   Future<bool> login(String email, String password) async {
     try {
       final response = await apiClient.post(
-        '/auth/login',
+        '/api/v1/auth/login',
         data: {
           'email': email,
           'password': password,
@@ -47,7 +47,7 @@ class AuthRepository implements IAuthRepository {
   Future<bool> register(String email, String password, String name) async {
     try {
       final response = await apiClient.post(
-        '/auth/register',
+        '/api/v1/auth/register',
         data: {
           'email': email,
           'password': password,
