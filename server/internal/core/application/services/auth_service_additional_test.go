@@ -8,11 +8,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
+
+// Тестовый logger
+var testLogger = zap.NewNop()
 
 // TestAuthService_Register_DuplicateEmail тестирует регистрацию с существующим email
 func TestAuthService_Register_DuplicateEmail(t *testing.T) {
@@ -20,7 +24,7 @@ func TestAuthService_Register_DuplicateEmail(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	input := domain.UserRegistration{
 		Email:    "existing@example.com",
@@ -50,7 +54,7 @@ func TestAuthService_Register_ValidationError(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	input := domain.UserRegistration{
 		Email:    "", // Неверный email
@@ -70,7 +74,7 @@ func TestAuthService_Login_UserNotFound(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	loginInput := domain.UserLogin{
 		Email:    "nonexistent@example.com",
@@ -94,7 +98,7 @@ func TestAuthService_Login_WrongPassword(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	password := "password123"
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
@@ -130,7 +134,7 @@ func TestAuthService_Login_EmptyCredentials(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	loginInput := domain.UserLogin{
 		Email:    "",
@@ -150,7 +154,7 @@ func TestAuthService_Refresh_EmptyToken(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	result, err := authService.Refresh(context.Background(), "")
 
@@ -166,7 +170,7 @@ func TestAuthService_Refresh_InvalidToken(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	mockTokenSvc.On("HashRefreshToken", "invalid_token").Return("hashed_invalid_token")
 	mockSessionRepo.On("GetByRefreshHash", mock.Anything, "hashed_invalid_token").Return(nil, repositories.ErrNotFound)
@@ -187,7 +191,7 @@ func TestAuthService_Refresh_ExpiredSession(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	expiredTime := time.Now().Add(-time.Hour)
 	session := &repositories.Session{
@@ -217,7 +221,7 @@ func TestAuthService_Refresh_InactiveSession(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	futureTime := time.Now().Add(time.Hour)
 	session := &repositories.Session{
@@ -247,7 +251,7 @@ func TestAuthService_Logout_AllDevices(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	userID := domain.NewID()
 	sessionID := domain.NewID()
@@ -266,7 +270,7 @@ func TestAuthService_Logout_SingleDevice(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	userID := domain.NewID()
 	sessionID := domain.NewID()
@@ -285,7 +289,7 @@ func TestAuthService_ValidateAccessToken_InvalidToken(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	mockTokenSvc.On("ValidateAccessToken", "invalid_token").Return(domain.ID{}, domain.ID{}, assert.AnError)
 
@@ -305,7 +309,7 @@ func TestAuthService_ValidateAccessToken_SessionNotFound(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	userID := domain.NewID()
 	sessionID := domain.NewID()
@@ -330,7 +334,7 @@ func TestAuthService_ValidateAccessToken_Success(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
 	userID := domain.NewID()
 	sessionID := domain.NewID()
