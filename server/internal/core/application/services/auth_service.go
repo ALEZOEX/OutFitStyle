@@ -112,11 +112,11 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 		DisplayName:  input.DisplayName,
 		IsActive:     true,
 		IsVerified:   false,
-		Locale:       "ru",
-		Timezone:     "Europe/Moscow",
+		Locale:       ptr("ru"),
+		Timezone:     ptr("Europe/Moscow"),
 	}
 	if input.Locale != nil && *input.Locale != "" {
-		u.Locale = *input.Locale
+		u.Locale = input.Locale
 	}
 
 	if err := s.userRepo.CreateUser(ctx, u); err != nil {
@@ -250,8 +250,8 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 			IsVerified:    true, // Google уже проверил
 			OAuthProvider: &provider,
 			OAuthID:       nil, // Можно сохранить sub из токена, если нужно
-			Locale:        "ru",
-			Timezone:      "Europe/Moscow",
+			Locale:        ptr("ru"),
+			Timezone:      ptr("Europe/Moscow"),
 		}
 
 		if err := s.userRepo.CreateUser(ctx, newUser); err != nil {

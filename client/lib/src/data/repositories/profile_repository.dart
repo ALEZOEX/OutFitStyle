@@ -12,7 +12,7 @@ class ProfileRepository {
 
   /// Получить профиль текущего пользователя
   Future<Map<String, dynamic>> getMe() async {
-    final response = await apiClient.get('/users/me');
+    final response = await apiClient.get('/api/v1/user/me');
     if (response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     }
@@ -22,7 +22,7 @@ class ProfileRepository {
   /// Обновить настройки пользователя
   Future<void> updatePreferences(Map<String, dynamic> preferences) async {
     final response = await apiClient.put(
-      '/users/me/preferences',
+      '/api/v1/user/preferences',
       data: preferences,
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
@@ -33,7 +33,7 @@ class ProfileRepository {
   /// Обновить профиль пользователя
   Future<void> updateProfile(Map<String, dynamic> profileData) async {
     final response = await apiClient.put(
-      '/users/me',
+      '/api/v1/user/profile',
       data: profileData,
     );
     if (response.statusCode != 200 && response.statusCode != 204) {

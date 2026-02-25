@@ -20,8 +20,8 @@ type User struct {
 	DefaultLocation  *string  `json:"default_location,omitempty"`
 	DefaultLatitude  *float64 `json:"default_latitude,omitempty"`
 	DefaultLongitude *float64 `json:"default_longitude,omitempty"`
-	Timezone         string   `json:"timezone"`
-	Locale           string   `json:"locale"`
+	Timezone         *string  `json:"timezone,omitempty"`
+	Locale           *string  `json:"locale,omitempty"`
 
 	BodyMeasurements json.RawMessage `json:"body_measurements,omitempty"`
 	Preferences      json.RawMessage `json:"preferences,omitempty"`

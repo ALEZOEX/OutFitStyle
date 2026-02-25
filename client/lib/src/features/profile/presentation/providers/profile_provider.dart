@@ -33,22 +33,26 @@ class ProfileData {
       throw const ProfileException('Данные профиля недоступны');
     }
 
+    // Сервер возвращает {"user": {...}, "stats": {...}}
+    // Извлекаем данные пользователя из вложенного объекта
+    final userData = data['user'] as Map<String, dynamic>? ?? data;
+
     // Извлекаем имя: displayName или name или email
-    final name = data['display_name'] as String? ??
-                 data['name'] as String? ??
-                 data['email'] as String? ??
+    final name = userData['display_name'] as String? ??
+                 userData['name'] as String? ??
+                 userData['email'] as String? ??
                  'Пользователь';
 
     // Извлекаем email
-    final email = data['email'] as String? ?? '';
+    final email = userData['email'] as String? ?? '';
 
     // Извлекаем фото
-    final photoUrl = data['photo_url'] as String? ??
-                     data['avatar_url'] as String?;
+    final photoUrl = userData['photo_url'] as String? ??
+                     userData['avatar_url'] as String?;
 
     // Дата создания аккаунта
     DateTime? createdAt;
-    final createdAtStr = data['created_at'] as String?;
+    final createdAtStr = userData['created_at'] as String?;
     if (createdAtStr != null) {
       try {
         createdAt = DateTime.parse(createdAtStr);
@@ -58,7 +62,7 @@ class ProfileData {
     }
 
     return ProfileData(
-      userId: data['id'] as String? ?? data['user_id'] as String? ?? '',
+      userId: userData['id'] as String? ?? userData['user_id'] as String? ?? '',
       displayName: name,
       email: email,
       photoUrl: photoUrl,
