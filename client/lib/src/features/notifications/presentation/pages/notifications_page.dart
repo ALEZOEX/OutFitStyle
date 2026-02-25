@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../ui/widgets/max_width_container.dart';
 import '../../data/models/notification_dto.dart';
 import '../providers/notification_providers.dart';
 import '../widgets/notification_tile.dart';
@@ -39,9 +40,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final notifier = ref.read(notificationsProvider.notifier);
 
     // Фильтруем уведомления
-    final displayedNotifications = _showUnreadOnly
-        ? state.unreadNotifications
-        : state.notifications;
+    final displayedNotifications =
+        _showUnreadOnly ? state.unreadNotifications : state.notifications;
 
     return Scaffold(
       appBar: AppBar(
@@ -63,18 +63,19 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 _showUnreadOnly = value;
               });
             },
-            itemBuilder: (context) => [
-              CheckedPopupMenuItem(
-                value: false,
-                checked: !_showUnreadOnly,
-                child: const Text('Все уведомления'),
-              ),
-              CheckedPopupMenuItem(
-                value: true,
-                checked: _showUnreadOnly,
-                child: const Text('Только непрочитанные'),
-              ),
-            ],
+            itemBuilder:
+                (context) => [
+                  CheckedPopupMenuItem(
+                    value: false,
+                    checked: !_showUnreadOnly,
+                    child: const Text('Все уведомления'),
+                  ),
+                  CheckedPopupMenuItem(
+                    value: true,
+                    checked: _showUnreadOnly,
+                    child: const Text('Только непрочитанные'),
+                  ),
+                ],
           ),
         ],
       ),
@@ -111,7 +112,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
           // Основной контент
           Expanded(
-            child: _buildContent(state, displayedNotifications, notifier),
+            child: ResponsiveMaxWidthContainer(
+              child: _buildContent(state, displayedNotifications, notifier),
+            ),
           ),
         ],
       ),
@@ -128,22 +131,17 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     // Загрузка
     if (state.status == NotificationsLoadStatus.loading &&
         notifications.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     // Ошибка
-    if (state.status == NotificationsLoadStatus.error && notifications.isEmpty) {
+    if (state.status == NotificationsLoadStatus.error &&
+        notifications.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
               'Ошибка загрузки',
@@ -228,7 +226,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           final notification = notifications[index];
 
           // Показываем заголовки секций
-          if (index == 0 && !_showUnreadOnly && state.readNotifications.isNotEmpty) {
+          if (index == 0 &&
+              !_showUnreadOnly &&
+              state.readNotifications.isNotEmpty) {
             // Показываем заголовок "Непрочитанные" если есть непрочитанные
             if (notification.isRead == false) {
               return Column(
@@ -294,23 +294,26 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   void _showConfirmMarkAllAsRead(NotificationsNotifier notifier) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Прочитать все'),
-        content: const Text('Вы уверены, что хотите отметить все уведомления как прочитанные?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Прочитать все'),
+            content: const Text(
+              'Вы уверены, что хотите отметить все уведомления как прочитанные?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  notifier.markAllAsRead();
+                },
+                child: const Text('Прочитать все'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              notifier.markAllAsRead();
-            },
-            child: const Text('Прочитать все'),
-          ),
-        ],
-      ),
     );
   }
 }

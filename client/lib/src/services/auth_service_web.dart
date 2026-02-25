@@ -14,6 +14,9 @@ class AuthService {
   final GoogleSignIn _googleSignIn;
   final FirebaseAuth _firebaseAuth;
 
+  /// Web OAuth 2.0 Client ID для браузера (должен совпадать с GOOGLE_CLIENT_ID на бэкенде)
+  static const _webClientId = '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com';
+
   AuthService({
     required this.apiBase,
     required this.authStorage,
@@ -27,61 +30,100 @@ class AuthService {
        _googleSignIn = GoogleSignIn(
          scopes: ['email', 'profile'],
          // Web OAuth 2.0 Client ID для браузера
-         clientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
+         clientId: _webClientId,
          // Server client ID для верификации на бэкенде
-         serverClientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
+         serverClientId: _webClientId,
        ),
        _firebaseAuth = FirebaseAuth.instance;
 
   Future<TokenPair> loginWithGoogle() async {
     try {
-      // 1. Используем Firebase Auth для Google Sign-In на вебе
-      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
-      googleProvider.addScope('email');
-      googleProvider.addScope('profile');
+      print('[GoogleSignIn Web] Начало входа через Google');
 
-      // 2. Запускаем вход через Firebase (использует popup)
-      final UserCredential userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
+      // 1. Используем GoogleSignIn для получения Google ID Token
+      // Это критично: Firebase Auth getIdToken() возвращает Firebase токен,
+      // а не Google ID Token, который ожидает бэкенд
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
-      // 3. Получаем ID токен
-      final String? idToken = await userCredential.user?.getIdToken();
-
-      if (idToken == null) {
-        throw Exception('Не удалось получить Google ID Token');
+      if (googleUser == null) {
+        print('[GoogleSignIn Web] Вход отменён пользователем');
+        throw Exception('Вход отменён пользователем');
       }
 
-      // 4. Отправляем idToken на наш Go-бэкенд
+      print('[GoogleSignIn Web] Пользователь авторизован: ${googleUser.email}');
+
+      // 2. Получаем Google ID Token (не Firebase!)
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      print('[GoogleSignIn Web] Google ID Token получен: ${idToken != null ? "yes" : "no"}');
+
+      if (idToken == null || idToken.isEmpty) {
+        print('[GoogleSignIn Web] Google ID Token пуст');
+        throw Exception('Не удалось получить Google ID Token. Проверьте настройки OAuth в Google Cloud Console.');
+      }
+
+      // 3. Отправляем Google ID Token на наш Go-бэкенд
+      print('[GoogleSignIn Web] Отправка токена на бэкенд: /api/v1/auth/google');
+      
       final response = await _dio.post(
         '/api/v1/auth/google',
         data: {'id_token': idToken},
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          sendTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
       );
 
+      print('[GoogleSignIn Web] Ответ от бэкенда: status=${response.statusCode}');
+
       if (response.statusCode != 200) {
+        print('[GoogleSignIn Web] Ошибка бэкенда: ${response.statusCode} - ${response.data}');
         throw Exception(
             'Ошибка Google Sign-In: ${response.statusCode} - ${response.data}');
       }
 
       final data = response.data as Map<String, dynamic>;
+      print('[GoogleSignIn Web] Данные ответа: ${data.keys.join(", ")}');
 
       // Проверяем, что 'tokens' существует и является Map
       if (data['tokens'] != null && data['tokens'] is Map<String, dynamic>) {
-        final tokens =
-            TokenPair.fromJson(data['tokens'] as Map<String, dynamic>);
+        final tokens = TokenPair.fromJson(data['tokens'] as Map<String, dynamic>);
+        print('[GoogleSignIn Web] Токены получены: access=${_maskToken(tokens.accessToken)}');
 
-        // 5. Сохраняем сессию
+        // 4. Сохраняем сессию в localStorage
         await authStorage.writeTokenPair(tokens);
+        print('[GoogleSignIn Web] Сессия сохранена');
 
         return tokens;
       } else {
-        throw Exception(
-            'Неверный формат ответа от сервера: отсутствуют токены');
+        print('[GoogleSignIn Web] Неверный формат ответа: tokens=${data['tokens']}');
+        throw Exception('Неверный формат ответа от сервера: отсутствуют токены');
       }
     } on FirebaseAuthException catch (e) {
       // Если ошибка Firebase Auth
+      print('[GoogleSignIn Web] Firebase Auth error: ${e.message}');
       await _googleSignIn.signOut();
       throw Exception('Ошибка Firebase Auth: ${e.message}');
+    } on DioException catch (e) {
+      // Ошибки сети
+      print('[GoogleSignIn Web] Dio error: ${e.type} - ${e.message}');
+      await _googleSignIn.signOut();
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw Exception('Превышено время ожидания ответа от сервера');
+      }
+      throw Exception('Ошибка сети: ${e.message}');
+    } on Exception catch (e) {
+      // Ошибки popup blocker или других браузерных ограничений
+      print('[GoogleSignIn Web] Browser error: $e');
+      await _googleSignIn.signOut();
+      throw Exception('Браузер заблокировал окно входа. Разрешите popup для этого сайта.');
     } catch (e) {
       // Если другая ошибка
+      print('[GoogleSignIn Web] Unexpected error: $e');
       await _googleSignIn.signOut();
       rethrow;
     }
@@ -132,5 +174,11 @@ class AuthService {
       }
     }
     await authStorage.clearSession();
+  }
+
+  /// Маскирует токен для логирования
+  String _maskToken(String token) {
+    if (token.length < 10) return '***';
+    return '${token.substring(0, 5)}...${token.substring(token.length - 5)}';
   }
 }

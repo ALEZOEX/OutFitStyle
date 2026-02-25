@@ -55,3 +55,14 @@ type UserLogin struct {
 	DeviceID   *string `json:"device_id,omitempty"`
 	DeviceName *string `json:"device_name,omitempty"`
 }
+
+// GetDisplayName возвращает отображаемое имя пользователя или email если имя не задано
+func (u *User) GetDisplayName() string {
+	if u == nil {
+		return ""
+	}
+	if u.DisplayName != nil && *u.DisplayName != "" {
+		return *u.DisplayName
+	}
+	return u.Email
+}

@@ -53,6 +53,14 @@ type LoginResult struct {
 	// subscription добавим позже (модуль подписок)
 }
 
+// GoogleClientID возвращает Google Client ID для отладки
+func (s *AuthService) GoogleClientID() string {
+	if s.google == nil {
+		return "nil"
+	}
+	return s.google.ClientID()
+}
+
 // NewAuthService создает новый экземпляр сервиса аутентификации
 func NewAuthService(
 	userRepo repositories.UserRepository,

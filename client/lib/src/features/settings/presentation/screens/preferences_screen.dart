@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../services/auth_storage.dart';
 import '../../data/repositories/preferences_repository.dart';
@@ -16,7 +17,7 @@ enum ClothingSizeUI {
 
   final String label;
   const ClothingSizeUI(this.label);
-  
+
   static ClothingSizeUI? fromString(String? size) {
     if (size == null) return null;
     return ClothingSizeUI.values.firstWhere(
@@ -37,11 +38,11 @@ enum StylePreferenceUI {
   final String label;
   final String emoji;
   const StylePreferenceUI(this.label, this.emoji);
-  
+
   static List<String> toStyleList(List<StylePreferenceUI> styles) {
     return styles.map((s) => s.label.toLowerCase()).toList();
   }
-  
+
   static List<StylePreferenceUI> fromStyleList(List<String> styles) {
     return styles.map((s) {
       return StylePreferenceUI.values.firstWhere(
@@ -116,7 +117,9 @@ class PreferencesState {
   factory PreferencesState.fromPreferencesMap(Map<String, dynamic> pref) {
     return PreferencesState(
       colors: List<String>.from(pref['preferred_colors'] ?? []),
-      styles: StylePreferenceUI.fromStyleList(List<String>.from(pref['preferred_styles'] ?? [])),
+      styles: StylePreferenceUI.fromStyleList(
+        List<String>.from(pref['preferred_styles'] ?? []),
+      ),
       brands: List<String>.from(pref['preferred_brands'] ?? []),
       minBudget: ((pref['max_budget'] as num?) ?? 50000) ~/ 2,
       maxBudget: ((pref['max_budget'] as num?) ?? 50000).round(),
@@ -128,10 +131,9 @@ class PreferencesState {
 class PreferencesNotifier extends StateNotifier<PreferencesState> {
   final PreferencesRepository _repository;
 
-  PreferencesNotifier({
-    required PreferencesRepository repository,
-  }) : _repository = repository,
-       super(const PreferencesState()) {
+  PreferencesNotifier({required PreferencesRepository repository})
+    : _repository = repository,
+      super(const PreferencesState()) {
     _loadPreferences();
   }
 
@@ -140,7 +142,9 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final pref = await _repository.getPreferences();
-      state = PreferencesState.fromPreferencesMap(pref).copyWith(isLoading: false);
+      state = PreferencesState.fromPreferencesMap(
+        pref,
+      ).copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -187,7 +191,9 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
   }
 
   void removeBrand(String brand) {
-    state = state.copyWith(brands: state.brands.where((b) => b != brand).toList());
+    state = state.copyWith(
+      brands: state.brands.where((b) => b != brand).toList(),
+    );
   }
 
   void toggleColor(String color) {
@@ -203,7 +209,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
   void updateBudget(int min, int max) {
     state = state.copyWith(minBudget: min, maxBudget: max);
   }
-  
+
   void clearError() {
     state = state.copyWith(error: null);
   }
@@ -224,10 +230,11 @@ final _preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {
   return PreferencesRepository(apiClient: apiClient);
 });
 
-final preferencesProvider = StateNotifierProvider<PreferencesNotifier, PreferencesState>((ref) {
-  final repository = ref.watch(_preferencesRepositoryProvider);
-  return PreferencesNotifier(repository: repository);
-});
+final preferencesProvider =
+    StateNotifierProvider<PreferencesNotifier, PreferencesState>((ref) {
+      final repository = ref.watch(_preferencesRepositoryProvider);
+      return PreferencesNotifier(repository: repository);
+    });
 
 /// Экран настроек предпочтений
 class PreferencesScreen extends ConsumerStatefulWidget {
@@ -240,15 +247,33 @@ class PreferencesScreen extends ConsumerStatefulWidget {
 class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
   final _brandController = TextEditingController();
   final _popularBrands = [
-    'Nike', 'Adidas', 'Zara', 'H&M', 'Uniqlo',
-    'Gucci', 'Prada', 'Louis Vuitton', 'Chanel',
-    'Levi\'s', 'Tommy Hilfiger', 'Calvin Klein',
+    'Nike',
+    'Adidas',
+    'Zara',
+    'H&M',
+    'Uniqlo',
+    'Gucci',
+    'Prada',
+    'Louis Vuitton',
+    'Chanel',
+    'Levi\'s',
+    'Tommy Hilfiger',
+    'Calvin Klein',
   ];
 
   final _availableColors = [
-    'Черный', 'Белый', 'Серый', 'Синий', 'Красный',
-    'Зеленый', 'Желтый', 'Оранжевый', 'Фиолетовый',
-    'Розовый', 'Коричневый', 'Бежевый',
+    'Черный',
+    'Белый',
+    'Серый',
+    'Синий',
+    'Красный',
+    'Зеленый',
+    'Желтый',
+    'Оранжевый',
+    'Фиолетовый',
+    'Розовый',
+    'Коричневый',
+    'Бежевый',
   ];
 
   @override
@@ -260,34 +285,37 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
   void _showAddBrandDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text('Добавить бренд'),
-        content: TextField(
-          controller: _brandController,
-          decoration: const InputDecoration(
-            hintText: 'Название бренда',
-            border: OutlineInputBorder(),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text('Добавить бренд'),
+            content: TextField(
+              controller: _brandController,
+              decoration: const InputDecoration(
+                hintText: 'Название бренда',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  ref
+                      .read(preferencesProvider.notifier)
+                      .addBrand(_brandController.text.trim());
+                  _brandController.clear();
+                  Navigator.pop(context);
+                },
+                child: const Text('Добавить'),
+              ),
+            ],
           ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
-          ),
-          FilledButton(
-            onPressed: () {
-              ref.read(preferencesProvider.notifier).addBrand(_brandController.text.trim());
-              _brandController.clear();
-              Navigator.pop(context);
-            },
-            child: const Text('Добавить'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -300,11 +328,12 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
     );
 
     try {
-      final success = await ref.read(preferencesProvider.notifier).savePreferences();
-      
+      final success =
+          await ref.read(preferencesProvider.notifier).savePreferences();
+
       if (mounted) {
         Navigator.of(context).pop(); // Закрываем индикатор
-        
+
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -326,10 +355,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -362,224 +388,262 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
             ),
         ],
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Размер одежды
-                _buildSection(
-                  context,
-                  title: 'Размер одежды',
-                  icon: Icons.checkroom,
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: ClothingSizeUI.values.map((size) {
-                      final isSelected = state.size == size;
-                      return FilterChip(
-                        label: Text(size.label),
-                        selected: isSelected,
-                        onSelected: (_) {
-                          ref.read(preferencesProvider.notifier).updateSize(
-                            isSelected ? null : size,
-                          );
-                        },
-                        selectedColor: theme.colorScheme.primaryContainer,
-                        checkmarkColor: theme.colorScheme.onPrimaryContainer,
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Предпочитаемые стили
-                _buildSection(
-                  context,
-                  title: 'Предпочитаемые стили',
-                  icon: Icons.style,
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: StylePreferenceUI.values.map((style) {
-                      final isSelected = state.styles.contains(style);
-                      return FilterChip(
-                        avatar: Text(style.emoji, style: const TextStyle(fontSize: 16)),
-                        label: Text(style.label),
-                        selected: isSelected,
-                        onSelected: (_) {
-                          ref.read(preferencesProvider.notifier).toggleStyle(style);
-                        },
-                        selectedColor: theme.colorScheme.primaryContainer,
-                        checkmarkColor: theme.colorScheme.onPrimaryContainer,
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Любимые бренды
-                _buildSection(
-                  context,
-                  title: 'Любимые бренды',
-                  icon: Icons.shopping_bag,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (state.brands.isNotEmpty) ...[
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: state.brands.map((brand) {
-                            return Chip(
-                              label: Text(brand),
-                              deleteIcon: const Icon(Icons.close, size: 18),
-                              onDeleted: () {
-                                ref.read(preferencesProvider.notifier).removeBrand(brand);
-                              },
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      // Популярные бренды
-                      Wrap(
+      body:
+          state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ResponsiveMaxWidthContainer(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // Размер одежды
+                    _buildSection(
+                      context,
+                      title: 'Размер одежды',
+                      icon: Icons.checkroom,
+                      child: Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: _popularBrands
-                            .where((b) => !state.brands.contains(b))
-                            .take(6)
-                            .map((brand) {
-                          return ActionChip(
-                            label: Text(brand),
-                            onPressed: () {
-                              ref.read(preferencesProvider.notifier).addBrand(brand);
-                            },
-                          );
-                        }).toList(),
+                        children:
+                            ClothingSizeUI.values.map((size) {
+                              final isSelected = state.size == size;
+                              return FilterChip(
+                                label: Text(size.label),
+                                selected: isSelected,
+                                onSelected: (_) {
+                                  ref
+                                      .read(preferencesProvider.notifier)
+                                      .updateSize(isSelected ? null : size);
+                                },
+                                selectedColor:
+                                    theme.colorScheme.primaryContainer,
+                                checkmarkColor:
+                                    theme.colorScheme.onPrimaryContainer,
+                              );
+                            }).toList(),
                       ),
-                      const SizedBox(height: 12),
-                      // Поиск бренда
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Найти бренд...',
-                          prefixIcon: const Icon(Icons.search, size: 20),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: _showAddBrandDialog,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                        ),
-                        onChanged: (value) {
-                          // Поиск брендов
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Цветовые предпочтения
-                _buildSection(
-                  context,
-                  title: 'Цветовые предпочтения',
-                  icon: Icons.palette,
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _availableColors.map((color) {
-                      final isSelected = state.colors.contains(color);
-                      return FilterChip(
-                        label: Text(color),
-                        selected: isSelected,
-                        onSelected: (_) {
-                          ref.read(preferencesProvider.notifier).toggleColor(color);
-                        },
-                        selectedColor: theme.colorScheme.primaryContainer,
-                        checkmarkColor: theme.colorScheme.onPrimaryContainer,
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Бюджет
-                _buildSection(
-                  context,
-                  title: 'Бюджет на вещи',
-                  icon: Icons.attach_money,
-                  child: Column(
-                    children: [
-                      RangeSlider(
-                        values: RangeValues(
-                          state.minBudget.toDouble(),
-                          state.maxBudget.toDouble(),
-                        ),
-                        min: 0,
-                        max: 100000,
-                        divisions: 100,
-                        labels: RangeLabels(
-                          '${state.minBudget}₽',
-                          '${state.maxBudget}₽',
-                        ),
-                        onChanged: (values) {
-                          ref.read(preferencesProvider.notifier).updateBudget(
-                            values.start.round(),
-                            values.end.round(),
-                          );
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${state.minBudget}₽',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            Text(
-                              '${state.maxBudget}₽',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Кнопка сохранения
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _savePreferences,
-                    icon: state.isSaving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
-                        : const Icon(Icons.save),
-                    label: const Text('Сохранить предпочтения'),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                  ),
+                    const SizedBox(height: 16),
+
+                    // Предпочитаемые стили
+                    _buildSection(
+                      context,
+                      title: 'Предпочитаемые стили',
+                      icon: Icons.style,
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            StylePreferenceUI.values.map((style) {
+                              final isSelected = state.styles.contains(style);
+                              return FilterChip(
+                                avatar: Text(
+                                  style.emoji,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                                label: Text(style.label),
+                                selected: isSelected,
+                                onSelected: (_) {
+                                  ref
+                                      .read(preferencesProvider.notifier)
+                                      .toggleStyle(style);
+                                },
+                                selectedColor:
+                                    theme.colorScheme.primaryContainer,
+                                checkmarkColor:
+                                    theme.colorScheme.onPrimaryContainer,
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Любимые бренды
+                    _buildSection(
+                      context,
+                      title: 'Любимые бренды',
+                      icon: Icons.shopping_bag,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (state.brands.isNotEmpty) ...[
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children:
+                                  state.brands.map((brand) {
+                                    return Chip(
+                                      label: Text(brand),
+                                      deleteIcon: const Icon(
+                                        Icons.close,
+                                        size: 18,
+                                      ),
+                                      onDeleted: () {
+                                        ref
+                                            .read(preferencesProvider.notifier)
+                                            .removeBrand(brand);
+                                      },
+                                    );
+                                  }).toList(),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          // Популярные бренды
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                _popularBrands
+                                    .where((b) => !state.brands.contains(b))
+                                    .take(6)
+                                    .map((brand) {
+                                      return ActionChip(
+                                        label: Text(brand),
+                                        onPressed: () {
+                                          ref
+                                              .read(
+                                                preferencesProvider.notifier,
+                                              )
+                                              .addBrand(brand);
+                                        },
+                                      );
+                                    })
+                                    .toList(),
+                          ),
+                          const SizedBox(height: 12),
+                          // Поиск бренда
+                          TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Найти бренд...',
+                              prefixIcon: const Icon(Icons.search, size: 20),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: _showAddBrandDialog,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              // Поиск брендов
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Цветовые предпочтения
+                    _buildSection(
+                      context,
+                      title: 'Цветовые предпочтения',
+                      icon: Icons.palette,
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            _availableColors.map((color) {
+                              final isSelected = state.colors.contains(color);
+                              return FilterChip(
+                                label: Text(color),
+                                selected: isSelected,
+                                onSelected: (_) {
+                                  ref
+                                      .read(preferencesProvider.notifier)
+                                      .toggleColor(color);
+                                },
+                                selectedColor:
+                                    theme.colorScheme.primaryContainer,
+                                checkmarkColor:
+                                    theme.colorScheme.onPrimaryContainer,
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Бюджет
+                    _buildSection(
+                      context,
+                      title: 'Бюджет на вещи',
+                      icon: Icons.attach_money,
+                      child: Column(
+                        children: [
+                          RangeSlider(
+                            values: RangeValues(
+                              state.minBudget.toDouble(),
+                              state.maxBudget.toDouble(),
+                            ),
+                            min: 0,
+                            max: 100000,
+                            divisions: 100,
+                            labels: RangeLabels(
+                              '${state.minBudget}₽',
+                              '${state.maxBudget}₽',
+                            ),
+                            onChanged: (values) {
+                              ref
+                                  .read(preferencesProvider.notifier)
+                                  .updateBudget(
+                                    values.start.round(),
+                                    values.end.round(),
+                                  );
+                            },
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${state.minBudget}₽',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                Text(
+                                  '${state.maxBudget}₽',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Кнопка сохранения
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _savePreferences,
+                        icon:
+                            state.isSaving
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                                : const Icon(Icons.save),
+                        label: const Text('Сохранить предпочтения'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
     );
   }
 

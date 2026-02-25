@@ -36,6 +36,7 @@ type AuthService interface {
 	ValidateAccessToken(ctx context.Context, accessToken string) (domain.ID, domain.ID, error)
 	ValidateTokenForSilentLogin(ctx context.Context, accessToken string) (*domain.User, error)
 	SilentLogin(ctx context.Context, accessToken string, device services.DeviceInfo) (*services.LoginResult, error)
+	GoogleClientID() string
 }
 
 // AccountLockout интерфейс защиты от brute-force
@@ -313,6 +314,9 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 
 	var req googleSignInRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.logger.Error("Google Sign-In: ошибка парсинга запроса",
+			zap.Error(err),
+		)
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
 		return
 	}
@@ -322,6 +326,9 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	validation.ValidateStringLength(v, req.IDToken, 1, 2048, "id_token", "ID token")
 
 	if !v.Valid() {
+		h.logger.Error("Google Sign-In: валидация не пройдена",
+			zap.Any("errors", v.Errors),
+		)
 		resp.ValidationError(w, v.Errors)
 		return
 	}
@@ -334,6 +341,8 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	h.logger.Info("Google Sign-In запрос",
 		zap.Int("token_length", len(req.IDToken)),
 		zap.String("token_prefix", tokenPrefix+"..."),
+		zap.String("remote_addr", r.RemoteAddr),
+		zap.String("user_agent", r.UserAgent()),
 	)
 
 	device := services.DeviceInfo{
@@ -344,12 +353,15 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 		device.UserAgent = &ua
 	}
 
-	h.logger.Info("Вызов AuthService.GoogleSignIn")
+	h.logger.Info("Вызов AuthService.GoogleSignIn",
+		zap.String("client_id", h.auth.GoogleClientID()),
+	)
 	out, err := h.auth.GoogleSignIn(r.Context(), req.IDToken, device)
 	if err != nil {
 		h.logger.Error("Ошибка Google Sign-In",
 			zap.String("error", err.Error()),
 			zap.String("error_type", fmt.Sprintf("%T", err)),
+			zap.String("remote_addr", r.RemoteAddr),
 		)
 		resp.Error(w, http.StatusUnauthorized, err)
 		return
@@ -358,6 +370,8 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	h.logger.Info("Google Sign-In успешен",
 		zap.String("user_id", out.User.ID.String()),
 		zap.String("email", out.User.Email),
+		zap.String("display_name", out.User.GetDisplayName()),
+		zap.Bool("is_new_user", out.User.CreatedAt.IsZero() || time.Since(out.User.CreatedAt) < time.Second),
 	)
 	resp.Success(w, out)
 }

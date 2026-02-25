@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../ui/widgets/max_width_container.dart';
 import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/notification_dialog.dart';
 import 'screens/preferences_screen.dart';
@@ -23,9 +24,10 @@ class PermissionState extends StateNotifier<Map<String, bool>> {
   }
 }
 
-final permissionStateProvider = StateNotifierProvider<PermissionState, Map<String, bool>>((ref) {
-  return PermissionState();
-});
+final permissionStateProvider =
+    StateNotifierProvider<PermissionState, Map<String, bool>>((ref) {
+      return PermissionState();
+    });
 
 /// Экран настроек приложения
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -59,15 +61,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _weatherNotifications = prefs.getBool('weather_notifications') ?? true;
-      _newArrivalsNotifications = prefs.getBool('new_arrivals_notifications') ?? true;
-      _recommendationNotifications = prefs.getBool('recommendation_notifications') ?? true;
+      _newArrivalsNotifications =
+          prefs.getBool('new_arrivals_notifications') ?? true;
+      _recommendationNotifications =
+          prefs.getBool('recommendation_notifications') ?? true;
     });
   }
 
   Future<void> _loadNotificationDialogFlag() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _notificationDialogShown = prefs.getBool('notificationDialogShown') ?? false;
+      _notificationDialogShown =
+          prefs.getBool('notificationDialogShown') ?? false;
     });
   }
 
@@ -101,24 +106,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => NotificationPermissionDialog(
-        onEnable: () async {
-          Navigator.of(context).pop();
-          await _saveNotificationDialogFlag();
-          await _requestNotificationPermission();
-        },
-        onLater: () {
-          Navigator.of(context).pop();
-          _saveNotificationDialogFlag();
-          NotificationSnackbar.show(
-            context: context,
-            title: 'Уведомления отложены',
-            message: 'Вы можете включить уведомления в любое время',
-            icon: Icons.notifications_none,
-            duration: const Duration(seconds: 3),
-          );
-        },
-      ),
+      builder:
+          (context) => NotificationPermissionDialog(
+            onEnable: () async {
+              Navigator.of(context).pop();
+              await _saveNotificationDialogFlag();
+              await _requestNotificationPermission();
+            },
+            onLater: () {
+              Navigator.of(context).pop();
+              _saveNotificationDialogFlag();
+              NotificationSnackbar.show(
+                context: context,
+                title: 'Уведомления отложены',
+                message: 'Вы можете включить уведомления в любое время',
+                icon: Icons.notifications_none,
+                duration: const Duration(seconds: 3),
+              );
+            },
+          ),
     );
   }
 
@@ -155,39 +161,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        icon: Icon(
-          Icons.settings_outlined,
-          size: 48,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        title: const Text(
-          'Открыть настройки?',
-          textAlign: TextAlign.center,
-        ),
-        content: const Text(
-          'Уведомления были отключены навсегда. '
-          'Откройте настройки приложения, чтобы включить их.',
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Отмена'),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            icon: Icon(
+              Icons.settings_outlined,
+              size: 48,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            title: const Text(
+              'Открыть настройки?',
+              textAlign: TextAlign.center,
+            ),
+            content: const Text(
+              'Уведомления были отключены навсегда. '
+              'Откройте настройки приложения, чтобы включить их.',
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  openAppSettings();
+                },
+                child: const Text('Настройки'),
+              ),
+            ],
+            actionsPadding: const EdgeInsets.all(16),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              openAppSettings();
-            },
-            child: const Text('Настройки'),
-          ),
-        ],
-        actionsPadding: const EdgeInsets.all(16),
-      ),
     );
   }
 
@@ -209,7 +216,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('✅ Геолокация: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}'),
+              content: Text(
+                '✅ Геолокация: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -244,39 +253,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final themeController = ref.read(themeModeProvider.notifier);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Заголовок
-          SliverToBoxAdapter(
-            child: _buildHeader(context),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          // Профиль
-          SliverToBoxAdapter(
-            child: _buildProfileCard(context),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          // Основные настройки
-          SliverToBoxAdapter(
-            child: _buildMainSettings(context),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          // Уведомления
-          SliverToBoxAdapter(
-            child: _buildNotificationsSection(context),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          // Геолокация
-          SliverToBoxAdapter(
-            child: _buildLocationSection(context),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          // Тема
-          SliverToBoxAdapter(
-            child: _buildThemeSection(context, themeMode, themeController),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 80)),
-        ],
+      body: ResponsiveMaxWidthContainer(
+        child: CustomScrollView(
+          slivers: [
+            // Заголовок
+            SliverToBoxAdapter(child: _buildHeader(context)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            // Профиль
+            SliverToBoxAdapter(child: _buildProfileCard(context)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            // Основные настройки
+            SliverToBoxAdapter(child: _buildMainSettings(context)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            // Уведомления
+            SliverToBoxAdapter(child: _buildNotificationsSection(context)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            // Геолокация
+            SliverToBoxAdapter(child: _buildLocationSection(context)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            // Тема
+            SliverToBoxAdapter(
+              child: _buildThemeSection(context, themeMode, themeController),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+          ],
+        ),
       ),
     );
   }
@@ -301,7 +302,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProfileSettingsScreen()),
+          MaterialPageRoute(
+            builder: (context) => const ProfileSettingsScreen(),
+          ),
         );
       },
       borderRadius: BorderRadius.circular(20),
@@ -324,7 +327,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             CircleAvatar(
               radius: 32,
               backgroundColor: theme.colorScheme.primary,
-              child: Icon(Icons.person, color: theme.colorScheme.onPrimary, size: 32),
+              child: Icon(
+                Icons.person,
+                color: theme.colorScheme.onPrimary,
+                size: 32,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -374,7 +381,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PreferencesScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const PreferencesScreen(),
+                ),
               );
             },
           ),
@@ -390,7 +399,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const NotificationSettingsScreen(),
+                ),
               );
             },
           ),
@@ -406,7 +417,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AchievementsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const AchievementsPage(),
+                ),
               );
             },
           ),
@@ -508,21 +521,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: _notificationsEnabled
-              ? [
-                  theme.colorScheme.primary.withValues(alpha: 0.2),
-                  theme.colorScheme.secondary.withValues(alpha: 0.1),
-                ]
-              : [
-                  theme.colorScheme.surface,
-                  theme.colorScheme.surfaceContainerHighest,
-                ],
+          colors:
+              _notificationsEnabled
+                  ? [
+                    theme.colorScheme.primary.withValues(alpha: 0.2),
+                    theme.colorScheme.secondary.withValues(alpha: 0.1),
+                  ]
+                  : [
+                    theme.colorScheme.surface,
+                    theme.colorScheme.surfaceContainerHighest,
+                  ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _notificationsEnabled
-              ? theme.colorScheme.primary.withValues(alpha: 0.3)
-              : theme.colorScheme.outline.withValues(alpha: 0.2),
+          color:
+              _notificationsEnabled
+                  ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -534,9 +549,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: _notificationsEnabled
-                        ? [theme.colorScheme.primary, theme.colorScheme.secondary]
-                        : [Colors.grey.shade400, Colors.grey.shade600],
+                    colors:
+                        _notificationsEnabled
+                            ? [
+                              theme.colorScheme.primary,
+                              theme.colorScheme.secondary,
+                            ]
+                            : [Colors.grey.shade400, Colors.grey.shade600],
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -560,9 +579,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     Text(
-                      _notificationsEnabled
-                          ? 'Включены'
-                          : 'Отключены',
+                      _notificationsEnabled ? 'Включены' : 'Отключены',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -573,7 +590,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Switch(
                 value: _notificationsEnabled,
                 onChanged: (_) => _requestNotificationPermission(),
-                thumbColor: WidgetStateProperty.resolveWith((states) { if (states.contains(WidgetState.selected)) { return theme.colorScheme.primary; } return null; }),
+                thumbColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return theme.colorScheme.primary;
+                  }
+                  return null;
+                }),
               ),
             ],
           ),
@@ -635,10 +657,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       dense: true,
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-      title: Text(
-        title,
-        style: theme.textTheme.bodyMedium,
-      ),
+      title: Text(title, style: theme.textTheme.bodyMedium),
       subtitle: Text(
         subtitle,
         style: theme.textTheme.bodySmall?.copyWith(
@@ -649,7 +668,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         value: value,
         onChanged: onChanged,
         activeTrackColor: theme.colorScheme.primary.withValues(alpha: 0.5),
-        thumbColor: WidgetStateProperty.resolveWith((states) { if (states.contains(WidgetState.selected)) { return theme.colorScheme.primary; } return null; }),
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return theme.colorScheme.primary;
+          }
+          return null;
+        }),
       ),
     );
   }
@@ -668,18 +692,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: _locationEnabled
-                  ? theme.colorScheme.primary.withValues(alpha: 0.2)
-                  : theme.colorScheme.error.withValues(alpha: 0.1),
+              color:
+                  _locationEnabled
+                      ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                      : theme.colorScheme.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               _locationEnabled
                   ? Icons.location_on
                   : Icons.location_off_outlined,
-              color: _locationEnabled
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.error,
+              color:
+                  _locationEnabled
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.error,
               size: 24,
             ),
           ),
@@ -708,7 +734,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Switch(
             value: _locationEnabled,
             onChanged: (_) => _requestLocationPermission(),
-            thumbColor: WidgetStateProperty.resolveWith((states) { if (states.contains(WidgetState.selected)) { return theme.colorScheme.primary; } return null; }),
+            thumbColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return theme.colorScheme.primary;
+              }
+              return null;
+            }),
           ),
         ],
       ),
@@ -786,7 +817,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return switch (themeMode) {
       ThemeMode.light => 'Светлая тема всегда активна',
       ThemeMode.dark => 'Тёмная тема всегда активна',
-      ThemeMode.system => 'Тема автоматически подстраивается под настройки системы',
+      ThemeMode.system =>
+        'Тема автоматически подстраивается под настройки системы',
     };
   }
 }
