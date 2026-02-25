@@ -386,7 +386,7 @@ func main() {
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
-	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration, redisClient, userRepo, smtpService)
+	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration, redisClient, userRepo, smtpService, logger)
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)
 	subLimiter := middleware.NewSubscriptionLimiter(subService)
