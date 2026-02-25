@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
 	"outfitstyle/server/internal/core/application/repositories"
@@ -36,6 +37,7 @@ type AuthService struct {
 	sessionRepo repositories.SessionRepository // Репозиторий сессий
 	tokenSvc    TokenServiceInterface          // Сервис токенов
 	google      *external.GoogleAuthClient     // Клиент Google аутентификации
+	logger      *zap.Logger                    // Логгер
 }
 
 // RegisterResult результат регистрации пользователя
@@ -57,12 +59,14 @@ func NewAuthService(
 	sessionRepo repositories.SessionRepository,
 	tokenSvc TokenServiceInterface,
 	google *external.GoogleAuthClient,
+	logger *zap.Logger,
 ) *AuthService {
 	return &AuthService{
 		userRepo:    userRepo,
 		sessionRepo: sessionRepo,
 		tokenSvc:    tokenSvc,
 		google:      google,
+		logger:      logger,
 	}
 }
 
@@ -199,10 +203,22 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 // GoogleSignIn выполняет вход через Google
 func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device DeviceInfo) (*LoginResult, error) {
 	// 1. Валидируем токен через Google
+	s.logger.Info("GoogleSignIn: валидация токена",
+		"token_length", len(idToken),
+		"client_id", s.google.(*GoogleAuthClient).ClientID(),
+	)
 	gUser, err := s.google.Verify(ctx, idToken)
 	if err != nil {
+		s.logger.Error("GoogleSignIn: ошибка верификации токена",
+			"error", err.Error(),
+		)
 		return nil, ErrInvalidCredentials // Или более специфичная ошибка
 	}
+
+	s.logger.Info("GoogleSignIn: токен верифицирован",
+		"email", gUser.Email,
+		"email_verified", gUser.EmailVerified,
+	)
 
 	if !gUser.EmailVerified {
 		return nil, errors.New("email в Google не подтвержден")

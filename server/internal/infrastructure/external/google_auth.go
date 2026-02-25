@@ -23,6 +23,11 @@ func NewGoogleAuthClient(clientID string) *GoogleAuthClient {
 	return &GoogleAuthClient{clientID: clientID}
 }
 
+// ClientID возвращает client ID для отладки
+func (c *GoogleAuthClient) ClientID() string {
+	return c.clientID
+}
+
 func (c *GoogleAuthClient) Verify(ctx context.Context, tokenString string) (*GoogleUser, error) {
 	payload, err := idtoken.Validate(ctx, tokenString, c.clientID)
 	if err != nil {

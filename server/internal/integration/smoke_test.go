@@ -164,7 +164,7 @@ func TestSmoke_AuthWardrobeRecommendation(t *testing.T) {
 	// Clients/services
 	tokenSvc := services.NewTokenService(cfg.Security.JWTSecret, cfg.Security.AccessTokenTTL, cfg.Security.RefreshTokenTTL)
 	googleClient := external.NewGoogleAuthClient(cfg.Security.GoogleClientID)
-	authSvc := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient)
+	authSvc := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, logger)
 
 	// Account lockout stub для тестов
 	accountLockout := &mockAccountLockout{}
