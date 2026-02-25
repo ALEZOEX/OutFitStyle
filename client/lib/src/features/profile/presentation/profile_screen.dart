@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/auth_repository.dart';
 import '../../../presentation/routing/router.dart';
+import '../../../presentation/theme/theme_controller.dart';
 import '../../achievements/data/repositories/achievements_repository.dart';
 import '../../achievements/presentation/providers/achievements_providers.dart';
 import 'providers/profile_provider.dart';
@@ -35,7 +36,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           // Меню настроек
           SliverToBoxAdapter(
-            child: _buildSettingsMenu(context),
+            child: _buildSettingsMenu(context, ref),
           ),
           const SliverToBoxAdapter(
             child: SizedBox(height: 24),
@@ -405,8 +406,9 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Меню настроек
-  Widget _buildSettingsMenu(BuildContext context) {
+  Widget _buildSettingsMenu(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final themeMode = ref.watch(themeModeProvider);
 
     final menuItems = <Map<String, dynamic>>[
       {
@@ -433,12 +435,6 @@ class ProfileScreen extends ConsumerWidget {
         'route': '/achievements',
         'color': Colors.green,
       },
-      {
-        'icon': Icons.help_outline,
-        'label': 'Помощь и поддержка',
-        'route': '/support',
-        'color': Colors.teal,
-      },
     ];
 
     return Container(
@@ -458,63 +454,178 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
       child: Column(
-        children: menuItems.map((item) {
-          final index = menuItems.indexOf(item);
-          final isLast = index == menuItems.length - 1;
+        children: [
+          // Переключатель темы
+          _buildThemeTile(context, themeMode, ref),
+          // Остальные пункты меню
+          ...menuItems.map((item) {
+            final index = menuItems.indexOf(item);
+            final isLast = index == menuItems.length - 1;
 
-          return InkWell(
-            onTap: () {
-              // Для несуществующих маршрутов показываем заглушку
-              if (item['route'] == '/notifications' ||
-                  item['route'] == '/support') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Раздел "${item['label']}" скоро будет доступен'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              } else {
+            return InkWell(
+              onTap: () {
                 context.push(item['route'] as String);
-              }
-            },
-            borderRadius: BorderRadius.vertical(
-              top: index == 0 ? const Radius.circular(20) : Radius.zero,
-              bottom: isLast ? const Radius.circular(20) : Radius.zero,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: (item['color'] as Color).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      item['icon'] as IconData,
-                      color: item['color'] as Color,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      item['label'] as String,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurface,
+              },
+              borderRadius: BorderRadius.vertical(
+                top: index == 0 ? const Radius.circular(20) : Radius.zero,
+                bottom: isLast ? const Radius.circular(20) : Radius.zero,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: (item['color'] as Color).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        item['icon'] as IconData,
+                        color: item['color'] as Color,
+                        size: 22,
                       ),
                     ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        item['label'] as String,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  /// Плитка переключателя темы
+  Widget _buildThemeTile(BuildContext context, ThemeMode themeMode, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final themeText = switch (themeMode) {
+      ThemeMode.dark => 'Тёмная',
+      ThemeMode.light => 'Светлая',
+      ThemeMode.system => 'Системная',
+    };
+
+    return InkWell(
+      onTap: () {
+        _showThemeSelectionDialog(context, ref);
+      },
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.brightness_6,
+                color: theme.colorScheme.onPrimaryContainer,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Тема',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: theme.colorScheme.onSurfaceVariant,
+                  Text(
+                    themeText,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
             ),
-          );
-        }).toList(),
+            Icon(
+              Icons.chevron_right,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Диалог выбора темы
+  void _showThemeSelectionDialog(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.read(themeModeProvider);
+    final notifier = ref.read(themeModeProvider.notifier);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Выберите тему'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<ThemeMode>(
+              title: const Text('Светлая'),
+              subtitle: const Text('Всегда светлая тема'),
+              value: ThemeMode.light,
+              groupValue: themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  notifier.setLight();
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('Тёмная'),
+              subtitle: const Text('Всегда тёмная тема'),
+              value: ThemeMode.dark,
+              groupValue: themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  notifier.setDark();
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('Системная'),
+              subtitle: const Text('Автоматически от настроек устройства'),
+              value: ThemeMode.system,
+              groupValue: themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  notifier.setSystem();
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
+          ),
+        ],
       ),
     );
   }
@@ -524,9 +635,10 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     final options = <Map<String, dynamic>>[
-      {'icon': Icons.security_outlined, 'label': 'Безопасность'},
-      {'icon': Icons.language_outlined, 'label': 'Язык'},
-      {'icon': Icons.info_outline, 'label': 'О приложении'},
+      {'icon': Icons.security_outlined, 'label': 'Безопасность', 'route': '/settings/security'},
+      {'icon': Icons.privacy_tip_outlined, 'label': 'Конфиденциальность', 'route': '/settings/privacy'},
+      {'icon': Icons.language_outlined, 'label': 'Язык', 'route': '/settings/language'},
+      {'icon': Icons.info_outline, 'label': 'О приложении', 'route': '/settings/about'},
     ];
 
     return Container(
@@ -552,13 +664,7 @@ class ProfileScreen extends ConsumerWidget {
 
           return InkWell(
             onTap: () {
-              // Показываем сообщение о том, что раздел скоро будет доступен
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Раздел "${option['label']}" скоро будет доступен'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              context.push(option['route'] as String);
             },
             borderRadius: BorderRadius.vertical(
               top: index == 0 ? const Radius.circular(20) : Radius.zero,
