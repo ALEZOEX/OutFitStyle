@@ -92,6 +92,8 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
+          build-args: |
+            BUILDKIT_INLINE_CACHE=0
 
       - name: Build and push ml-service
         uses: docker/build-push-action@v6
