@@ -203,7 +203,39 @@ docker-logs:
 	docker-compose -f docker-compose.dev.yml logs -f
 
 # ============================================
-# Database Migrations
+# Import Catalog
+# ============================================
+
+# Импорт каталога из NDJSON файла (Python)
+import-catalog:
+	python scripts/import_synthetic_catalog.py --file $(or $(FILE),data/synthetic_catalog.ndjson) --batch $(or $(BATCH),300)
+
+# Импорт каталога из NDJSON файла (Go)
+import-catalog-go:
+	cd server/scripts/import_catalog && go run main.go \
+		-file $(or $(FILE),../../../data/synthetic_catalog.ndjson) \
+		-dsn $(or $(DSN),postgres://postgres:postgres@localhost:5433/outfitstyle?sslmode=disable) \
+		-batch $(or $(BATCH),300)
+
+# Валидация NDJSON файла
+validate-ndjson:
+	python -c "import json,sys; [json.loads(l) for l in open('$(or $(FILE),data/synthetic_catalog.ndjson)','r',encoding='utf-8')]; print('NDJSON validation: OK')"
+
+# Перегенерация рекомендаций
+regenerate-recommendations:
+	bash scripts/regenerate_recommendations.sh $(if $(FULL),--full) $(if $(USERS),--users $(USERS))
+
+# Установка cron jobs
+install-cron:
+	crontab scripts/cronjobs
+	@echo "Cron jobs installed. Verify with: crontab -l"
+
+# Просмотр логов рекомендаций
+logs-recommendations:
+	tail -f data/logs/regenerate_recommendations.log
+
+# ============================================
+# Database
 # ============================================
 
 # Run migrations
@@ -215,11 +247,3 @@ migrate-up:
 migrate-down:
 	@echo "📉 Rolling back database migrations..."
 	cd server && go run cmd/migrate/main.go down
-
-# ============================================
-# Import Catalog
-# ============================================
-
-# Импорт каталога из NDJSON файла
-import-catalog:
-	go run server/scripts/import_catalog/main.go -file $(FILE) -dsn $(DSN) -batch $(or $(BATCH),300)

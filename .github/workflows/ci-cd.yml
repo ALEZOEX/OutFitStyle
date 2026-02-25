@@ -38,6 +38,29 @@ jobs:
           cache: 'pip'
           cache-dependency-path: ml-service/requirements.txt
 
+      - name: Install Python dependencies for import script
+        run: pip install psycopg2-binary
+
+      - name: Validate synthetic catalog NDJSON
+        run: |
+          python -c "
+          import json
+          import sys
+          errors = 0
+          with open('data/synthetic_catalog.ndjson', 'r', encoding='utf-8') as f:
+              for i, line in enumerate(f, 1):
+                  try:
+                      json.loads(line)
+                  except json.JSONDecodeError as e:
+                      print(f'Line {i}: Invalid JSON - {e}')
+                      errors += 1
+                      if errors >= 5:
+                          break
+          if errors > 0:
+              sys.exit(1)
+          print('NDJSON validation passed')
+          "
+
       - name: Build and test Go service
         working-directory: server
         run: |

@@ -1,0 +1,58 @@
+# Cron jobs для OutfitStyle
+# Установка: crontab scripts/cronjobs
+#
+# Формат:
+# ┌───── минута (0-59)
+# │ ┌───── час (0-23)
+# │ │ ┌───── день месяца (1-31)
+# │ │ │ ┌───── месяц (1-12)
+# │ │ │ │ ┌───── день недели (0-7, 0 и 7 = воскресенье)
+# │ │ │ │ │
+# * * * * * команда
+
+# Переменные окружения
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=""
+
+# =============================================================================
+# КАТАЛОГ ВЕЩЕЙ
+# =============================================================================
+
+# Переимпорт синтетического каталога (еженедельно, воскресенье в 03:00)
+# Только если есть изменения в data/synthetic_catalog.ndjson
+0 3 * * 0 cd /opt/outfitstyle && python3 scripts/import_synthetic_catalog.py >> data/logs/import_catalog.log 2>&1
+
+# =============================================================================
+# РЕКОМЕНДАЦИИ
+# =============================================================================
+
+# Генерация рекомендаций для пользователей без рекомендаций за 7 дней (каждые 6 часов)
+0 */6 * * * cd /opt/outfitstyle && DB_DSN="$DATABASE_URL" ML_SERVICE_URL="http://localhost:8000" bash scripts/regenerate_recommendations.sh >> data/logs/regenerate_recommendations.log 2>&1
+
+# Полная перегенерация всех рекомендаций (каждое воскресенье в 04:00)
+0 4 * * 0 cd /opt/outfitstyle && DB_DSN="$DATABASE_URL" FULL_REGENERATE=true bash scripts/regenerate_recommendations.sh >> data/logs/regenerate_recommendations_full.log 2>&1
+
+# =============================================================================
+# ОЧИСТКА И ОБСЛУЖИВАНИЕ
+# =============================================================================
+
+# Очистка старых логов (старше 30 дней)
+0 5 * * * find /opt/outfitstyle/data/logs -name "*.log" -mtime +30 -delete
+
+# Очистка старого кэша переводов (старше 7 дней)
+0 5 * * 1 cd /opt/outfitstyle && psql "$DATABASE_URL" -c "DELETE FROM translation_cache WHERE expires_at < NOW();"
+
+# VACUUM ANALYZE для таблиц (каждую ночь в 05:00)
+0 5 * * * cd /opt/outfitstyle && psql "$DATABASE_URL" -c "VACUUM ANALYZE clothing_items; VACUUM ANALYZE recommendations; VACUUM ANALYZE recommendation_items;"
+
+# =============================================================================
+# МОНИТОРИНГ
+# =============================================================================
+
+# Проверка здоровья сервисов (каждую минуту)
+* * * * * curl -f http://localhost:8080/healthz || echo "Server health check failed" >> data/logs/health_checks.log 2>&1
+* * * * * curl -f http://localhost:8000/health || echo "ML service health check failed" >> data/logs/health_checks.log 2>&1
+
+# Сбор метрик для Prometheus (каждые 15 секунд)
+*/1 * * * * curl -s http://localhost:8080/metrics > /dev/null 2>&1
