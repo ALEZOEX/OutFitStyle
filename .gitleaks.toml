@@ -1,0 +1,18 @@
+# Gitleaks configuration for OutFitStyle
+# https://github.com/gitleaks/gitleaks
+
+[allowlist]
+description = "Ignore Firebase and known false positives"
+
+# Игнорируем Firebase конфигурацию (API keys публичные по дизайну)
+paths = [
+    '''firebase_options\.dart''',
+    '''google-services\.json''',
+    '''GoogleService-Info\.plist''',
+]
+
+# Игнорируем тестовые файлы
+paths = [
+    '''test/.*\.dart''',
+    '''tests/.*\.go''',
+]
