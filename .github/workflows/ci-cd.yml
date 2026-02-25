@@ -136,9 +136,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 10m
           envs: LANG,LC_ALL
+          envs-format: "true"
           script: |
             export LANG=en_US.UTF-8
             export LC_ALL=en_US.UTF-8
+            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
             cd /root/OutFitStyle
             git fetch origin main
             git reset --hard origin/main
