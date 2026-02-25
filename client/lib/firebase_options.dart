@@ -65,7 +65,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCf4ePEMDigZuvniagDut8uWgc0O2NbSdk',
-    appId: '1:242419520610:ios:4a7393ff88f9727ecc2d3b',
+    appId: '1:242419520610:ios:26124d674d243ce0cc2d3b',
     messagingSenderId: '242419520610',
     projectId: 'outfitstyle-ce15f',
     storageBucket: 'outfitstyle-ce15f.firebasestorage.app',
