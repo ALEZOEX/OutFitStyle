@@ -1,4 +1,5 @@
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 
 import '../models/token_pair.dart';
@@ -11,6 +12,7 @@ class AuthService {
   final AuthStorage authStorage;
   final Dio _dio;
   final GoogleSignIn _googleSignIn;
+  final FirebaseAuth _firebaseAuth;
 
   AuthService({
     required this.apiBase,
@@ -28,28 +30,29 @@ class AuthService {
          clientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
          // Server client ID для верификации на бэкенде
          serverClientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
-       );
+         // Явно указываем redirect URI
+         redirectUri: 'https://app.outfitstyle.ru/',
+       ),
+       _firebaseAuth = FirebaseAuth.instance;
 
   Future<TokenPair> loginWithGoogle() async {
     try {
-      // 1. Запускаем окно входа
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      // 1. Используем Firebase Auth для Google Sign-In на вебе
+      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+      googleProvider.addScope('email');
+      googleProvider.addScope('profile');
 
-      if (googleUser == null) {
-        // Пользователь нажал "Назад" / отменил вход
-        throw Exception('Вход отменен пользователем');
-      }
+      // 2. Запускаем вход через Firebase (использует redirect)
+      final UserCredential userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
 
-      // 2. Получаем токены (нам нужен idToken)
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final String? idToken = googleAuth.idToken;
+      // 3. Получаем ID токен
+      final String? idToken = await userCredential.user?.getIdToken();
 
       if (idToken == null) {
         throw Exception('Не удалось получить Google ID Token');
       }
 
-      // 3. Отправляем idToken на наш Go-бэкенд
+      // 4. Отправляем idToken на наш Go-бэкенд
       final response = await _dio.post(
         '/api/v1/auth/google',
         data: {'id_token': idToken},
@@ -67,7 +70,7 @@ class AuthService {
         final tokens =
             TokenPair.fromJson(data['tokens'] as Map<String, dynamic>);
 
-        // 4. Сохраняем сессию
+        // 5. Сохраняем сессию
         await authStorage.writeTokenPair(tokens);
 
         return tokens;
@@ -75,8 +78,12 @@ class AuthService {
         throw Exception(
             'Неверный формат ответа от сервера: отсутствуют токены');
       }
+    } on FirebaseAuthException catch (e) {
+      // Если ошибка Firebase Auth
+      await _googleSignIn.signOut();
+      throw Exception('Ошибка Firebase Auth: ${e.message}');
     } catch (e) {
-      // Если ошибка, разлогиниваем гугл, чтобы в след. раз можно было выбрать аккаунт снова
+      // Если другая ошибка
       await _googleSignIn.signOut();
       rethrow;
     }
