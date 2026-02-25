@@ -50,25 +50,25 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyBLgPQvZs3JFCDn9Gm5ZJYmS1XZ6xPYqKg',
     appId: '1:242419520610:web:8a2f8b5c9d3e4f6a7b8c9d',
     messagingSenderId: '242419520610',
-    projectId: 'outfitstyle-96c24',
-    authDomain: 'outfitstyle-96c24.firebaseapp.com',
-    storageBucket: 'outfitstyle-96c24.appspot.com',
+    projectId: 'outfitstyle-ce15f',
+    authDomain: 'outfitstyle-ce15f.firebaseapp.com',
+    storageBucket: 'outfitstyle-ce15f.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBLgPQvZs3JFCDn9Gm5ZJYmS1XZ6xPYqKg',
     appId: '1:242419520610:android:8a2f8b5c9d3e4f6a7b8c9d',
     messagingSenderId: '242419520610',
-    projectId: 'outfitstyle-96c24',
-    storageBucket: 'outfitstyle-96c24.appspot.com',
+    projectId: 'outfitstyle-ce15f',
+    storageBucket: 'outfitstyle-ce15f.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBLgPQvZs3JFCDn9Gm5ZJYmS1XZ6xPYqKg',
     appId: '1:242419520610:ios:8a2f8b5c9d3e4f6a7b8c9d',
     messagingSenderId: '242419520610',
-    projectId: 'outfitstyle-96c24',
-    storageBucket: 'outfitstyle-96c24.appspot.com',
+    projectId: 'outfitstyle-ce15f',
+    storageBucket: 'outfitstyle-ce15f.appspot.com',
     iosBundleId: 'com.app.outfitstyle',
   );
 }
