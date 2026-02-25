@@ -87,8 +87,16 @@ spec:
               value: "outfitstyle"
             - name: DB_USER
               value: "outfitstyle"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: db-password
             - name: GOOGLE_CLIENT_ID
-              value: "242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com"
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: google-client-id
           resources:
             requests:
               cpu: 100m
