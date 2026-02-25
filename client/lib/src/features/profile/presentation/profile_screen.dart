@@ -10,6 +10,7 @@ import '../../achievements/data/repositories/achievements_repository.dart';
 import '../../achievements/presentation/providers/achievements_providers.dart';
 import 'providers/profile_provider.dart';
 import '../../admin/presentation/providers/admin_auth_provider.dart';
+import '../../../domain/providers/theme_mode_provider.dart';
 
 /// Экран профиля пользователя
 class ProfileScreen extends ConsumerWidget {
