@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
 	"outfitstyle/server/internal/core/application/repositories"
@@ -229,7 +230,7 @@ func TestAuthService_Register(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, zap.NewNop())
 
 	// Тестовые данные
 	input := domain.UserRegistration{
@@ -269,7 +270,7 @@ func TestAuthService_Login_Success(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, zap.NewNop())
 
 	// Тестовые данные
 	password := "password123"
