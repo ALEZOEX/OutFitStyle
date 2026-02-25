@@ -163,7 +163,7 @@ func main() {
 	}
 
 	googleClient := ext.NewGoogleAuthClient(cfg.Security.GoogleClientID)
-	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient)
+	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, logger)
 
 	// ---------- Rate limit violation repository ----------
 	rateLimitRepo := pg.NewRateLimitViolationRepository(db.Pool())
