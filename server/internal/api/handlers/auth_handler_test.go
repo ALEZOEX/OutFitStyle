@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/middleware"
 	"outfitstyle/server/internal/core/application/services"
@@ -214,6 +215,9 @@ func createTestHandler() (*AuthHandler, *MockAuthService, *MockAccountLockout, *
 	mockLockout := new(MockAccountLockout)
 	mockUserRepo := new(MockUserRepositoryForHandler)
 
+	// Создаем тестовый logger
+	logger, _ := zap.NewDevelopment()
+
 	// Создаем обработчик с моками
 	handler := &AuthHandler{
 		auth:            mockAuth,
@@ -222,6 +226,7 @@ func createTestHandler() (*AuthHandler, *MockAuthService, *MockAccountLockout, *
 		redis:           nil,
 		userRepo:        mockUserRepo,
 		smtp:            nil,
+		logger:          logger,
 	}
 
 	return handler, mockAuth, mockLockout, mockUserRepo
