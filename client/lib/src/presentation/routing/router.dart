@@ -20,6 +20,7 @@ import '../../features/settings/presentation/screens/security_screen.dart';
 import '../../features/settings/presentation/screens/language_screen.dart';
 import '../../features/settings/presentation/screens/about_screen.dart';
 import '../../features/settings/presentation/screens/notification_settings_screen.dart';
+import '../../features/settings/presentation/screens/privacy_screen.dart';
 import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/achievements/presentation/pages/achievement_detail_page.dart';
 import '../../features/auth/presentation/auth_screen.dart';
@@ -329,6 +330,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings/notifications',
         name: 'notification_settings',
         builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      // Конфиденциальность
+      GoRoute(
+        path: '/settings/privacy',
+        name: 'privacy',
+        builder: (context, state) => const PrivacySettingsScreen(),
       ),
       // Достижения
       GoRoute(
