@@ -322,6 +322,12 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Логирование для отладки
+	h.logger.Info("Google Sign-In запрос",
+		"token_length", len(req.IDToken),
+		"token_prefix", req.IDToken[:min(50, len(req.IDToken))],
+	)
+
 	device := services.DeviceInfo{
 		IPAddress: services.ExtractIP(r.RemoteAddr),
 	}
@@ -330,12 +336,21 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 		device.UserAgent = &ua
 	}
 
+	h.logger.Info("Вызов AuthService.GoogleSignIn")
 	out, err := h.auth.GoogleSignIn(r.Context(), req.IDToken, device)
 	if err != nil {
+		h.logger.Error("Ошибка Google Sign-In",
+			"error", err.Error(),
+			"error_type", fmt.Sprintf("%T", err),
+		)
 		resp.Error(w, http.StatusUnauthorized, err)
 		return
 	}
 
+	h.logger.Info("Google Sign-In успешен",
+		"user_id", out.User.ID,
+		"email", out.User.Email,
+	)
 	resp.Success(w, out)
 }
 
