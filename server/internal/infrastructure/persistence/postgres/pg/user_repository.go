@@ -46,6 +46,8 @@ func (r *UserRepository) GetUser(ctx context.Context, id domain.ID) (*domain.Use
 	var defaultLocation *string
 	var defaultLatitude *float64
 	var defaultLongitude *float64
+	var timezone *string
+	var locale *string
 	var bodyMeasurementsJSON []byte
 	var preferencesJSON []byte
 	var verifiedAt *time.Time
@@ -66,8 +68,8 @@ func (r *UserRepository) GetUser(ctx context.Context, id domain.ID) (*domain.Use
 		&defaultLocation,
 		&defaultLatitude,
 		&defaultLongitude,
-		&user.Timezone,
-		&user.Locale,
+		&timezone,
+		&locale,
 		&bodyMeasurementsJSON,
 		&preferencesJSON,
 		&user.IsActive,
@@ -95,6 +97,8 @@ func (r *UserRepository) GetUser(ctx context.Context, id domain.ID) (*domain.Use
 	user.DefaultLocation = defaultLocation
 	user.DefaultLatitude = defaultLatitude
 	user.DefaultLongitude = defaultLongitude
+	user.Timezone = timezone
+	user.Locale = locale
 	user.VerifiedAt = verifiedAt
 	user.OAuthProvider = oauthProvider
 	user.OAuthID = oauthID
@@ -140,6 +144,8 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 	var defaultLocation *string
 	var defaultLatitude *float64
 	var defaultLongitude *float64
+	var timezone *string
+	var locale *string
 	var bodyMeasurementsJSON []byte
 	var preferencesJSON []byte
 	var verifiedAt *time.Time
@@ -160,8 +166,8 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 		&defaultLocation,
 		&defaultLatitude,
 		&defaultLongitude,
-		&user.Timezone,
-		&user.Locale,
+		&timezone,
+		&locale,
 		&bodyMeasurementsJSON,
 		&preferencesJSON,
 		&user.IsActive,
@@ -189,6 +195,8 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 	user.DefaultLocation = defaultLocation
 	user.DefaultLatitude = defaultLatitude
 	user.DefaultLongitude = defaultLongitude
+	user.Timezone = timezone
+	user.Locale = locale
 	user.VerifiedAt = verifiedAt
 	user.OAuthProvider = oauthProvider
 	user.OAuthID = oauthID
@@ -383,10 +391,10 @@ func (r *UserRepository) UpdateUserProfile(ctx context.Context, userID domain.ID
 		currentUser.DefaultLongitude = patch.DefaultLongitude
 	}
 	if patch.Timezone != nil {
-		currentUser.Timezone = *patch.Timezone
+		currentUser.Timezone = patch.Timezone
 	}
 	if patch.Locale != nil {
-		currentUser.Locale = *patch.Locale
+		currentUser.Locale = patch.Locale
 	}
 
 	// Update the user
