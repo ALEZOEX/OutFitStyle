@@ -103,14 +103,6 @@ class _NotificationSettingsScreenState
                         ),
                         _buildToggle(
                           context,
-                          icon: Icons.flight_takeoff,
-                          title: 'Поездки',
-                          subtitle: 'Обновления и напоминания о поездках',
-                          value: state.settings.tripUpdates,
-                          onChanged: notifier.updateTripUpdates,
-                        ),
-                        _buildToggle(
-                          context,
                           icon: Icons.calendar_today,
                           title: 'Напоминания',
                           subtitle: 'Напоминания о планировании образов',

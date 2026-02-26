@@ -33,10 +33,6 @@ import '../../features/admin/presentation/pages/admin_user_detail_page.dart';
 import '../../features/outfit_details/presentation/outfit_details_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
-import '../../features/trip/presentation/pages/trip_list_page.dart';
-import '../../features/trip/presentation/pages/trip_detail_page.dart';
-import '../../features/trip/presentation/pages/trip_create_page.dart';
-import '../../features/trip/presentation/pages/add_items_page.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_config.dart';
@@ -390,38 +386,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/notifications',
         name: 'notifications',
         builder: (context, state) => const NotificationsPage(),
-      ),
-      // Поездки
-      GoRoute(
-        path: '/trips',
-        name: 'trips',
-        builder: (context, state) => const TripListPage(),
-      ),
-      GoRoute(
-        path: '/trips/create',
-        name: 'trip_create',
-        builder: (context, state) => const TripCreatePage(),
-      ),
-      GoRoute(
-        path: '/trips/:id',
-        name: 'trip_detail',
-        builder: (context, state) => TripDetailPage(
-          tripId: state.pathParameters['id']!,
-        ),
-      ),
-      GoRoute(
-        path: '/trips/:id/edit',
-        name: 'trip_edit',
-        builder: (context, state) => TripCreatePage(
-          tripId: state.pathParameters['id']!,
-        ),
-      ),
-      GoRoute(
-        path: '/trips/:id/add-items',
-        name: 'trip_add_items',
-        builder: (context, state) => AddItemsToTripPage(
-          tripId: state.pathParameters['id']!,
-        ),
       ),
     ],
   );
