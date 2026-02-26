@@ -74,7 +74,7 @@ class ResponsiveMaxWidthContainer extends StatelessWidget {
                 ? math.min(maxWidth * 0.9, constraints.maxWidth)
                 : maxWidth;
 
-        final effectivePadding = isMobile ? mobilePadding : desktopPadding;
+        final effectivePadding = isMobile ? mobilePadding! : desktopPadding!;
 
         return Center(
           child: ConstrainedBox(
