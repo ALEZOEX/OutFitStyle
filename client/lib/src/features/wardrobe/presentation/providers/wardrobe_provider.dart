@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../data/remote/wardrobe_api_service.dart';
-import '../../../../services/auth_storage.dart';
 import '../../../../domain/entities/catalog_entity.dart';
 import '../../data/repositories/wardrobe_repository.dart';
 import '../../../../domain/entities/wardrobe_item.dart';
 import '../../../../domain/entities/wardrobe_request_entities.dart';
+import '../../../../presentation/routing/router.dart';
 
 /// Состояние гардероба
 enum WardrobeLoadStatus {
@@ -72,7 +72,7 @@ class WardrobeState {
   int get favoritesCount => items.where((item) => item.isFavorite == true).length;
 }
 
-/// Провайдер ApiClient
+/// Провайдер ApiClient (использует глобальный AuthStorage)
 final apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(authStorageProvider);
   return ApiClient(storage: storage);
@@ -287,9 +287,4 @@ final wardrobeCategoriesProvider = Provider<Map<String, int>>((ref) {
     'all': state.totalCount,
     ...state.categoryCounts,
   };
-});
-
-/// Провайдер хранилища авторизации
-final authStorageProvider = Provider<AuthStorage>((ref) {
-  return AuthStorage();
 });

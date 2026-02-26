@@ -4,8 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/api/api_client.dart';
-import '../../../../services/auth_storage.dart';
+import '../../../../presentation/routing/router.dart';
 import '../../data/repositories/notification_settings_repository.dart';
 import '../../domain/entities/notification_settings.dart';
 
@@ -329,20 +328,11 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettingsSta
   }
 }
 
-// Провайдеры для создания зависимостей
-
-final _authStorageProvider = Provider<AuthStorage>((ref) {
-  return AuthStorage();
-});
-
-final _apiClientProvider = Provider<ApiClient>((ref) {
-  final storage = ref.watch(_authStorageProvider);
-  return ApiClient(storage: storage);
-});
+// Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
 
 final _notificationSettingsRepositoryProvider =
     Provider<NotificationSettingsRepository>((ref) {
-  final apiClient = ref.watch(_apiClientProvider);
+  final apiClient = ref.watch(apiClientProvider);
   return NotificationSettingsRepository(apiClient: apiClient);
 });
 

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../services/auth_storage.dart';
+import '../../../../presentation/routing/router.dart';
 import '../../data/repositories/preferences_repository.dart';
 
 /// Модели предпочтений (UI enum)
@@ -215,14 +215,9 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
   }
 }
 
-// Провайдеры для создания зависимостей
-final _authStorageProvider = Provider<AuthStorage>((ref) {
-  return AuthStorage();
-});
-
+// Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
 final _apiClientProvider = Provider<ApiClient>((ref) {
-  final storage = ref.watch(_authStorageProvider);
-  return ApiClient(storage: storage);
+  return ref.watch(apiClientProvider);
 });
 
 final _preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {
