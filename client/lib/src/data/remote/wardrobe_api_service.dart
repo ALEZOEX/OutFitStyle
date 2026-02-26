@@ -7,12 +7,12 @@ import '../../domain/entities/wardrobe_item.dart';
 import '../../domain/entities/wardrobe_request_entities.dart';
 
 /// Сервис для работы с API гардероба
-/// 
+///
 /// Эндпоинты:
-/// - GET /api/wardrobe — получить все вещи
-/// - POST /api/wardrobe — добавить вещь
-/// - PUT /api/wardrobe/{id} — обновить вещь
-/// - DELETE /api/wardrobe/{id} — удалить вещь
+/// - GET /api/v1/wardrobe — получить все вещи
+/// - POST /api/v1/wardrobe — добавить вещь
+/// - PUT /api/v1/wardrobe/{id} — обновить вещь
+/// - DELETE /api/v1/wardrobe/{id} — удалить вещь
 class WardrobeApiService {
   final ApiClient _apiClient;
 
@@ -55,7 +55,7 @@ class WardrobeApiService {
       params['search'] = search;
     }
 
-    final response = await _apiClient.get('/api/wardrobe', params: params);
+    final response = await _apiClient.get('/api/v1/wardrobe', params: params);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
@@ -99,7 +99,7 @@ class WardrobeApiService {
   /// Создать новую вещь в гардеробе
   Future<WardrobeItem> createWardrobeItem(WardrobeItemCreateRequest request) async {
     final response = await _apiClient.post(
-      '/api/wardrobe',
+      '/api/v1/wardrobe',
       data: jsonEncode(request.toJson()),
     );
 
@@ -120,7 +120,7 @@ class WardrobeApiService {
   /// Обновить вещь в гардеробе
   Future<WardrobeItem> updateWardrobeItem(String id, WardrobeItemUpdateRequest request) async {
     final response = await _apiClient.put(
-      '/api/wardrobe/$id',
+      '/api/v1/wardrobe/$id',
       data: jsonEncode(request.toJson()),
     );
 
