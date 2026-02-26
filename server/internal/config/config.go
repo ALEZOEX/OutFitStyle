@@ -199,8 +199,8 @@ func Load() (*AppConfig, error) {
 			JWTPrivateKeyPath:  getEnvFirst([]string{"JWT_PRIVATE_KEY_PATH"}, "config/jwt/private.pem"),
 			JWTPublicKeyPath:   getEnvFirst([]string{"JWT_PUBLIC_KEY_PATH"}, "config/jwt/public.pem"),
 			UseRS256:           getEnvBool("JWT_USE_RS256", false),
-			AccessTokenTTL:     getEnvDurationFirst([]string{"JWT_ACCESS_TOKEN_TTL"}, 15*time.Minute),
-			RefreshTokenTTL:    getEnvDurationFirst([]string{"JWT_REFRESH_TOKEN_TTL"}, 720*time.Hour),
+			AccessTokenTTL:     getEnvDurationFirst([]string{"JWT_ACCESS_TOKEN_TTL"}, 1*time.Hour),
+			RefreshTokenTTL:    getEnvDurationFirst([]string{"JWT_REFRESH_TOKEN_TTL"}, 2160*time.Hour), // 90 дней
 			CORSAllowedOrigins: splitCSV(getEnvFirst([]string{"CORS_ALLOWED_ORIGINS", "CORS_ALLOWED_ORIGIN"}, "")),
 			RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", getEnvInt("RATE_LIMIT", 100, 1, 100000), 1, 100000),
 			GoogleClientID:     getEnvFirst([]string{"GOOGLE_CLIENT_ID"}, ""),
