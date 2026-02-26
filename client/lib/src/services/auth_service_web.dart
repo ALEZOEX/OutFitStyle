@@ -15,6 +15,7 @@ class AuthService {
   final FirebaseAuth _firebaseAuth;
 
   /// Web OAuth 2.0 Client ID для браузера (должен совпадать с GOOGLE_CLIENT_ID на бэкенде)
+  /// Этот Client ID должен быть типа "Web application" в Google Cloud Console
   static const _webClientId = '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com';
 
   AuthService({
@@ -27,6 +28,8 @@ class AuthService {
          receiveTimeout: const Duration(seconds: 30),
          headers: {'Content-Type': 'application/json'},
        )),
+       // Для Web google_sign_in использует Firebase Auth flow автоматически
+       // Redirect URI настраивается в Firebase Console и Google Cloud Console
        _googleSignIn = GoogleSignIn(
          scopes: ['email', 'profile'],
          // Web OAuth 2.0 Client ID для браузера

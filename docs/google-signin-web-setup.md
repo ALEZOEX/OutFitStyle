@@ -1,63 +1,88 @@
 # Настройка Google Sign-In для Web
 
 ## Проблема
-Google Sign-In на веб-сайте возвращал ошибку 401, токены не сохранялись после входа.
+Google Sign-In на веб-сайте возвращал ошибку 400 `redirect_uri_mismatch`.
+
+## Причина проблемы
+
+Пакет `google_sign_in` для Flutter Web использует Firebase Auth OAuth flow. 
+Redirect URI определяется автоматически и имеет формат:
+```
+https://<project-id>.firebaseapp.com/__/auth/handler
+```
+
+Для локальной разработки также может использоваться:
+```
+http://localhost:<port>/__auth__/callback
+```
 
 ## Решение
 
-### 1. Изменения в Flutter Web
+### 1. Настройка Google Cloud Console (КРИТИЧНО)
 
-#### AuthStorage для Web
-- Создан отдельный файл `auth_storage_web.dart` с использованием `dart:html localStorage`
-- `flutter_secure_storage` не работает на вебе по умолчанию
-- Токены теперь сохраняются в `localStorage` с префиксом `os_`
+#### Пошаговая инструкция:
 
-#### AuthService для Web
-- **Критично**: Используется `GoogleSignIn.signIn()` для получения **Google ID Token**, а не Firebase ID Token
-- Firebase Auth `getIdToken()` возвращает Firebase токен, который не подходит для бэкенда
-- Бэкенд ожидает Google ID Token для верификации через `google.golang.org/api/idtoken`
+1. **Откройте Google Cloud Console**
+   - Перейдите на https://console.cloud.google.com/
+   - Выберите проект **outfitstyle-ce15f** (или создайте новый)
 
-### 2. Настройка Google Cloud Console
+2. **Перейдите к Credentials**
+   - В левом меню: **APIs & Services** → **Credentials**
+   - Или напрямую: https://console.cloud.google.com/apis/credentials
 
-#### Требуемые настройки OAuth 2.0
+3. **Найдите OAuth 2.0 Client ID**
+   - Найдите существующий Client ID типа **Web application**
+   - Или создайте новый: **CREATE CREDENTIALS** → **OAuth client ID**
+   - Тип приложения: **Web application**
 
-1. Откройте [Google Cloud Console](https://console.cloud.google.com/)
-2. Перейдите в **APIs & Services** > **Credentials**
-3. Создайте или отредактируйте **OAuth 2.0 Client ID** типа **Web application**
+4. **Добавьте Authorized JavaScript origins**
+   ```
+   http://localhost:8080
+   http://localhost:3000
+   https://outfitstyle.app
+   https://www.outfitstyle.app
+   https://outfitstyle-ce15f.firebaseapp.com
+   ```
 
-#### Обязательные поля:
+5. **Добавьте Authorized redirect URIs** (самое важное!)
+   ```
+   # Firebase Auth handler (основной для google_sign_in)
+   https://outfitstyle-ce15f.firebaseapp.com/__/auth/handler
+   
+   # Локальная разработка (может использоваться для popup flow)
+   http://localhost:8080/__auth__/callback
+   http://localhost:3000/__auth__/callback
+   
+   # Продакшен
+   https://outfitstyle.app/__auth__/callback
+   https://www.outfitstyle.app/__auth__/callback
+   ```
 
-**Authorized JavaScript origins:**
-```
-http://localhost:8080
-http://localhost:3000
-https://outfitstyle.app
-https://www.outfitstyle.app
-```
+6. **Сохраните изменения**
+   - Нажмите **SAVE**
+   - Скопируйте **Client ID** (должен совпадать с используемым в коде)
 
-**Authorized redirect URIs:**
-```
-http://localhost:8080/auth/callback
-http://localhost:3000/auth/callback
-https://outfitstyle.app/auth/callback
-https://www.outfitstyle.app/auth/callback
-```
+> **Важно:** Изменения в Google Cloud Console могут применяться до 5 минут.
 
-#### Client ID для приложения:
-```
-242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com
-```
+### 2. Настройка Firebase Console
 
-### 3. Настройка Firebase Console
+1. **Откройте Firebase Console**
+   - Перейдите на https://console.firebase.google.com/
+   - Выберите проект **outfitstyle-ce15f**
 
-1. Откройте [Firebase Console](https://console.firebase.google.com/)
-2. Выберите проект **outfitstyle-ce15f**
-3. Перейдите в **Authentication** > **Sign-in method**
-4. Включите **Google** провайдер
-5. Добавьте домен в **Authorized domains**:
-   - `outfitstyle-ce15f.firebaseapp.com`
-   - `localhost` (для разработки)
-   - `outfitstyle.app` (для продакшена)
+2. **Настройте Authentication**
+   - Перейдите в **Authentication** → **Sign-in method**
+   - Включите провайдер **Google**
+   - Добавьте **Web SDK configuration**:
+     - Client ID: `242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com`
+     - Client Secret: (получить в Google Cloud Console)
+
+3. **Добавьте Authorized domains**
+   - Перейдите во вкладку **Authorized domains**
+   - Добавьте домены:
+     - `localhost` (для разработки)
+     - `outfitstyle-ce15f.firebaseapp.com`
+     - `outfitstyle.app` (для продакшена)
 
 ### 4. Настройка Бэкенда (Go)
 
@@ -210,3 +235,115 @@ server/internal/
    ```
 
 6. **Обновите страницу** - сессия должна сохраниться
+
+## Чеклист: Быстрая диагностика redirect_uri_mismatch
+
+### Шаг 1: Проверка Google Cloud Console
+
+- [ ] Откройте https://console.cloud.google.com/apis/credentials
+- [ ] Найдите OAuth 2.0 Client ID: `242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com`
+- [ ] Проверьте **Authorized redirect URIs** - должны включать:
+  - [ ] `https://outfitstyle-ce15f.firebaseapp.com/__/auth/handler` (основной для google_sign_in)
+  - [ ] `http://localhost:8080/__auth__/callback` (для локальной разработки)
+- [ ] Проверьте **Authorized JavaScript origins**:
+  - [ ] `http://localhost:8080`
+  - [ ] `https://outfitstyle-ce15f.firebaseapp.com`
+- [ ] Тип Client ID: **Web application**
+
+### Шаг 2: Проверка кода Flutter
+
+- [ ] Откройте `client/lib/src/services/auth_service_web.dart`
+- [ ] Проверьте `_webClientId`: `242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com`
+- [ ] Убедитесь что `clientId` и `serverClientId` установлены в `_webClientId`
+- [ ] Проверьте что не используется параметр `redirectUri` (не поддерживается в web)
+
+### Шаг 3: Проверка Firebase Console
+
+- [ ] Откройте https://console.firebase.google.com/project/outfitstyle-ce15f/authentication/providers
+- [ ] Проверьте что **Google** провайдер включён
+- [ ] Проверьте **Web SDK configuration**:
+  - Client ID: `242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com`
+  - Client Secret: (должен быть указан)
+- [ ] Проверьте **Authorized domains**:
+  - [ ] `localhost`
+  - [ ] `outfitstyle-ce15f.firebaseapp.com`
+
+### Шаг 4: Проверка бэкенда
+
+- [ ] Проверьте `.env` файл сервера:
+  ```bash
+  GOOGLE_CLIENT_ID=242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com
+  ```
+- [ ] Перезапустите сервер после изменений
+
+### Шаг 5: Тестирование
+
+1. Очистите кэш браузера: `Ctrl+Shift+Delete` → Clear cache
+2. Откройте DevTools Console (F12)
+3. Попробуйте войти через Google
+4. Проверьте консоль на ошибки
+
+## Диагностика ошибок
+
+### Ошибка: redirect_uri_mismatch
+
+**Симптомы:**
+- Google возвращает ошибку 400 с `error=redirect_uri_mismatch`
+- Popup закрывается сразу после открытия
+- В консоли браузера ошибка OAuth2
+
+**Причины:**
+1. Redirect URI в Google Cloud Console не совпадает с используемым
+2. Не добавлен Firebase Auth handler URI
+3. Неправильный проект Firebase связан с Google Cloud
+
+**Решение:**
+```
+1. Откройте Google Cloud Console:
+   https://console.cloud.google.com/apis/credentials
+
+2. Найдите OAuth 2.0 Client ID:
+   242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com
+
+3. Добавьте Authorized redirect URIs:
+   → https://outfitstyle-ce15f.firebaseapp.com/__/auth/handler
+   → http://localhost:8080/__auth__/callback
+
+4. Проверьте Firebase Console:
+   https://console.firebase.google.com/project/outfitstyle-ce15f/authentication/providers
+   → Google → Web SDK configuration
+   → Client ID должен совпадать
+
+5. Подождите 2-5 минут (применение настроек Google)
+
+6. Очистите кэш браузера и попробуйте снова
+```
+
+### Ошибка: invalid_client
+
+**Причины:**
+- Неверный Client ID
+- Client ID не типа "Web application"
+- Client Secret не указан в Firebase
+
+**Решение:**
+- Проверьте что Client ID в коде совпадает с Google Cloud Console
+- Убедитесь что тип приложения: **Web application**
+- Проверьте что Client Secret указан в Firebase Console
+
+### Ошибка: access_denied
+
+**Причины:**
+- Пользователь отменил вход
+- Popup заблокирован браузером
+
+**Решение:**
+- Разрешите popup для `localhost:8080`
+- Проверьте настройки блокировщиков рекламы
+
+## Ссылки
+
+- [Google Cloud Console - Credentials](https://console.cloud.google.com/apis/credentials)
+- [Firebase Console - Authentication](https://console.firebase.google.com/project/outfitstyle-ce15f/authentication)
+- [google_sign_in package documentation](https://pub.dev/packages/google_sign_in)
+- [FlutterFire Authentication](https://firebase.flutter.dev/docs/auth/overview)
