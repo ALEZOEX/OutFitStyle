@@ -13,9 +13,9 @@ class AuthStorage {
   Future<void> writeTokenPair(TokenPair pair) async {
     print('[AuthStorage Web] Сохраняем токен: ${_maskToken(pair.accessToken)}');
     try {
-      _localStorage[_kAccessToken] = pair.accessToken;
-      _localStorage[_kRefreshToken] = pair.refreshToken;
-      _localStorage[_kExpiresAt] = pair.expiresAt.toIso8601String();
+      _localStorage.setItem(_kAccessToken, pair.accessToken);
+      _localStorage.setItem(_kRefreshToken, pair.refreshToken);
+      _localStorage.setItem(_kExpiresAt, pair.expiresAt.toIso8601String());
       print('[AuthStorage Web] Токен сохранён успешно');
     } catch (e) {
       print('[AuthStorage Web] Ошибка сохранения токена: $e');
@@ -38,9 +38,9 @@ class AuthStorage {
   /// Читает пару токенов из localStorage
   Future<TokenPair?> readTokenPair() async {
     try {
-      final access = _localStorage[_kAccessToken];
-      final refresh = _localStorage[_kRefreshToken];
-      final expiresAtStr = _localStorage[_kExpiresAt];
+      final access = _localStorage.getItem(_kAccessToken);
+      final refresh = _localStorage.getItem(_kRefreshToken);
+      final expiresAtStr = _localStorage.getItem(_kExpiresAt);
 
       print('[AuthStorage Web] Чтение токена: access=${access != null ? "present" : "null"}, refresh=${refresh != null ? "present" : "null"}');
 
