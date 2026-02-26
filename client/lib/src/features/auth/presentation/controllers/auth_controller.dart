@@ -1,64 +1,34 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../domain/states/auth_state.dart';
 import '../../../../domain/repositories/i_auth_repository.dart';
-import '../../../../data/remote/api_client.dart';
 
 /// Контроллер аутентификации
+/// 
+/// Использует [IAuthRepository] для всех операций аутентификации.
+/// Репозиторий делегирует вызовы в [AuthService], который использует:
+/// - Firebase Auth (signInWithPopup) на Web
+/// - google_sign_in на мобильных платформах (iOS/Android)
 class AuthController extends StateNotifier<AuthState> {
   final IAuthRepository _authRepository;
-  final ApiClient _apiClient;
-  final GoogleSignIn _googleSignIn;
 
   AuthController({
     required IAuthRepository authRepository,
-    required ApiClient apiClient,
-    GoogleSignIn? googleSignIn,
   })  : _authRepository = authRepository,
-        _apiClient = apiClient,
-        _googleSignIn = googleSignIn ?? GoogleSignIn(
-          scopes: const ['email', 'profile'],
-        ),
         super(const AuthState());
 
   /// Вход с помощью Google
+  /// 
+  /// Делегирует вызов в [IAuthRepository.signInWithGoogle()],
+  /// который использует [AuthService.loginWithGoogle()].
   Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // Инициируем вход через Google
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Вход через Google отменён',
-        );
-        return;
-      }
-
-      // Получаем аутентификационные данные
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      final accessToken = googleAuth.accessToken;
-      final idToken = googleAuth.idToken;
-
-      if (accessToken == null && idToken == null) {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Не удалось получить токены Google',
-        );
-        return;
-      }
-
-      // Отправляем токены на наш сервер для обмена на наши токены
-      final response = await _apiClient.post(
-        '/auth/google',
-        body: {
-          'access_token': accessToken,
-          'id_token': idToken,
-        },
-      );
-
-      if (response.statusCode == 200) {
+      // AuthService сам определит платформу и использует правильный метод:
+      // - Web: firebase_auth.signInWithPopup()
+      // - Mobile: google_sign_in.signIn()
+      final success = await _authRepository.signInWithGoogle();
+      
+      if (success) {
         final user = await _authRepository.getCurrentUser();
         state = state.copyWith(
           isLoading: false,
@@ -84,9 +54,7 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> signOut() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // Выход из Google
-      await _googleSignIn.signOut();
-      // Выход из приложения
+      // AuthService сам выполнит выход из Firebase Auth / Google Sign-In
       await _authRepository.logout();
       state = state.copyWith(
         isLoading: false,
