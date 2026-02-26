@@ -3,16 +3,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/api/api_client.dart';
-import '../../../../services/auth_storage.dart';
+import '../../../../presentation/routing/router.dart';
 import '../../data/datasources/notification_remote_data_source.dart';
 import '../../data/models/notification_dto.dart';
 import '../../data/repositories/notification_repository.dart';
 
-/// Провайдер для NotificationRepository
+/// Провайдер для NotificationRepository (использует глобальный ApiClient и AuthStorage)
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
-  final authStorage = AuthStorage();
-  final apiClient = ApiClient(storage: authStorage);
+  final apiClient = ref.watch(apiClientProvider);
   final remoteDataSource = NotificationRemoteDataSource(apiClient);
   return NotificationRepository(remoteDataSource: remoteDataSource);
 });

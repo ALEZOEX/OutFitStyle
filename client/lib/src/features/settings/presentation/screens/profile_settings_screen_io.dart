@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
-import '../../../../services/auth_storage.dart';
+import '../../../../presentation/routing/router.dart';
 import '../../data/repositories/profile_repository.dart';
 
 /// Провайдер для состояния профиля
@@ -181,24 +181,19 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 }
 
-// Провайдеры для создания зависимостей
-final _authStorageProvider = Provider<AuthStorage>((ref) {
-  return AuthStorage();
-});
-
+// Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
 final _apiClientProvider = Provider<ApiClient>((ref) {
-  final storage = ref.watch(_authStorageProvider);
-  return ApiClient(storage: storage);
+  return ref.watch(apiClientProvider);
 });
 
 final _uploadServiceProvider = Provider<UploadService>((ref) {
-  final storage = ref.watch(_authStorageProvider);
+  final storage = ref.watch(authStorageProvider);
   return UploadService(authStorage: storage);
 });
 
 final _profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   final apiClient = ref.watch(_apiClientProvider);
-  final storage = ref.watch(_authStorageProvider);
+  final storage = ref.watch(authStorageProvider);
   return ProfileRepository(apiClient: apiClient, authStorage: storage);
 });
 

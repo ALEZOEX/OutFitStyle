@@ -39,10 +39,21 @@ import '../../core/api/api_config.dart';
 import '../../services/auth_storage.dart';
 import '../../core/di/di.dart';
 
+/// Глобальный провайдер для AuthStorage (единый экземпляр для всего приложения)
+final authStorageProvider = Provider<AuthStorage>((ref) {
+  return AuthStorage();
+});
+
+/// Глобальный провайдер для ApiClient (использует единый AuthStorage)
+final apiClientProvider = Provider<ApiClient>((ref) {
+  final storage = ref.watch(authStorageProvider);
+  return ApiClient(storage: storage);
+});
+
 /// Провайдер для AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final authStorage = AuthStorage();
-  final apiClient = ApiClient(storage: authStorage);
+  final authStorage = ref.watch(authStorageProvider);
+  final apiClient = ref.watch(apiClientProvider);
   final config = ApiConfig(apiBase: ApiConfig.baseUrl);
   return AuthRepository(config, authStorage, apiClient);
 });
