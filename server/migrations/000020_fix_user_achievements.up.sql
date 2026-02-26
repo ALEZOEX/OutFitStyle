@@ -3,12 +3,18 @@
 -- Добавление поля status для отслеживания статуса достижения
 
 -- Добавляем поле status
-ALTER TABLE user_achievements
-ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'locked';
+DO $$ BEGIN
+  ALTER TABLE user_achievements ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'locked';
+EXCEPTION
+  WHEN duplicate_column THEN NULL;
+END $$;
 
 -- Добавляем поле code для денормализации (чтобы не делать JOIN с achievements)
-ALTER TABLE user_achievements
-ADD COLUMN IF NOT EXISTS code VARCHAR(50);
+DO $$ BEGIN
+  ALTER TABLE user_achievements ADD COLUMN code VARCHAR(50);
+EXCEPTION
+  WHEN duplicate_column THEN NULL;
+END $$;
 
 -- Заполняем code из связанной таблицы achievements
 UPDATE user_achievements ua
@@ -37,6 +43,9 @@ COMMENT ON COLUMN user_achievements.status IS 'Статус достижения
 COMMENT ON COLUMN user_achievements.code IS 'Денормализованный код достижения для быстрого доступа';
 
 -- Проверочный constraint
-ALTER TABLE user_achievements
-ADD CONSTRAINT IF NOT EXISTS check_achievement_status
-CHECK (status IN ('locked', 'in_progress', 'unlocked'));
+DO $$ BEGIN
+  ALTER TABLE user_achievements ADD CONSTRAINT check_achievement_status
+    CHECK (status IN ('locked', 'in_progress', 'unlocked'));
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
