@@ -1,69 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
 import '../../../../domain/entities/outfit_recommendation.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../presentation/routing/router.dart';
 
-/// Mock данные для рекомендаций
-final mockRecommendations = <OutfitRecommendation>[
-  OutfitRecommendation(
-    id: '1',
-    title: 'Повседневный образ для прохладной погоды',
-    description: 'Комфортный outfit для прогулки в прохладный день. Сочетание стиля и практичности.',
-    imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600',
-    recommendedItems: ['Худи серое', 'Джинсы Slim Fit', 'Кроссовки белые'],
-    temperature: 12.0,
-    weatherCondition: 'cloudy',
-    createdAt: DateTime(2024, 2, 15),
-  ),
-  OutfitRecommendation(
-    id: '2',
-    title: 'Деловой стиль для офиса',
-    description: 'Классический образ для рабочей встречи. Элегантность и профессионализм.',
-    imageUrl: 'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600',
-    recommendedItems: ['Рубашка оксфорд', 'Брюки классические', 'Ботинки кожаные'],
-    temperature: 18.0,
-    weatherCondition: 'sunny',
-    createdAt: DateTime(2024, 2, 14),
-  ),
-  OutfitRecommendation(
-    id: '3',
-    title: 'Зимний комплект',
-    description: 'Тёплый и стильный образ для холодной зимней погоды.',
-    imageUrl: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=600',
-    recommendedItems: ['Куртка зимняя', 'Пальто шерстяное', 'Шапка вязаная', 'Шарф шерстяной'],
-    temperature: -5.0,
-    weatherCondition: 'snowy',
-    createdAt: DateTime(2024, 2, 13),
-  ),
-  OutfitRecommendation(
-    id: '4',
-    title: 'Спортивный образ для выходного',
-    description: 'Удобный outfit для активного отдыха на свежем воздухе.',
-    imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600',
-    recommendedItems: ['Белая футболка Basic', 'Шорты летние', 'Кроссовки белые', 'Кепка бейсбольная'],
-    temperature: 25.0,
-    weatherCondition: 'sunny',
-    createdAt: DateTime(2024, 2, 12),
-  ),
-  OutfitRecommendation(
-    id: '5',
-    title: 'Вечерний выход',
-    description: 'Изысканный образ для особого случая. Будьте в центре внимания.',
-    imageUrl: 'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600',
-    recommendedItems: ['Рубашка оксфорд', 'Пальто шерстяное', 'Ботинки кожаные'],
-    temperature: 10.0,
-    weatherCondition: 'partly_cloudy',
-    createdAt: DateTime(2024, 2, 11),
-  ),
-  OutfitRecommendation(
-    id: '6',
-    title: 'Дождливый день',
-    description: 'Практичный outfit для дождливой погоды. Оставайтесь сухим и стильным.',
-    imageUrl: 'https://images.unsplash.com/photo-1512413914633-b5043f4041ea?w=600',
-    recommendedItems: ['Куртка зимняя', 'Джинсы Slim Fit', 'Ботинки кожаные'],
-    temperature: 8.0,
-    weatherCondition: 'rainy',
-    createdAt: DateTime(2024, 2, 10),
-  ),
-];
+/// Заглушка для демонстрации UI (удалить после подключения реального API)
+final mockRecommendations = <OutfitRecommendation>[];
 
 /// Запись запланированного образа
 class PlannedOutfit {
@@ -177,33 +119,58 @@ class RecommendationsState {
   }
 }
 
-/// Провайдер рекомендаций
+/// Провайдер рекомендаций (использует глобальный ApiClient)
 final recommendationsProvider =
     StateNotifierProvider<RecommendationsNotifier, RecommendationsState>((ref) {
-  return RecommendationsNotifier();
+  final apiClient = ref.watch(apiClientProvider);
+  return RecommendationsNotifier(apiClient: apiClient);
 });
 
 class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
-  RecommendationsNotifier() : super(const RecommendationsState()) {
+  final ApiClient _apiClient;
+
+  RecommendationsNotifier({required ApiClient apiClient})
+      : _apiClient = apiClient,
+        super(const RecommendationsState()) {
     _loadRecommendations();
   }
 
-  /// Загрузить рекомендации (с mock данными)
+  /// Загрузить рекомендации с API
   Future<void> _loadRecommendations() async {
     state = state.copyWith(status: RecommendationsLoadStatus.loading);
 
     try {
-      // Имитация задержки загрузки
-      await Future.delayed(const Duration(milliseconds: 1000));
+      // GET /api/v1/recommendations - получаем рекомендации
+      final response = await _apiClient.get('/api/v1/recommendations');
 
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.data.toString()) as Map<String, dynamic>;
+        final items = data['recommendations'] as List<dynamic>? ?? 
+                      data['items'] as List<dynamic>? ?? 
+                      [];
+        
+        final recommendations = items
+            .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+            .toList();
+
+        state = state.copyWith(
+          recommendations: recommendations.isNotEmpty ? recommendations : mockRecommendations,
+          status: RecommendationsLoadStatus.success,
+        );
+      } else {
+        // Если API вернуло ошибку - используем mock для демонстрации
+        state = state.copyWith(
+          recommendations: mockRecommendations,
+          status: RecommendationsLoadStatus.success,
+          error: 'API вернуло статус ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      // При ошибке показываем mock данные
       state = state.copyWith(
         recommendations: mockRecommendations,
-        status: RecommendationsLoadStatus.success,
-      );
-    } catch (e) {
-      state = state.copyWith(
         status: RecommendationsLoadStatus.error,
-        error: 'Ошибка загрузки: $e',
+        error: 'Ошибка: $e',
       );
     }
   }

@@ -46,17 +46,17 @@ class ApiClient {
               if (refreshed) {
                 print('[ApiClient] Токен обновлён, повторяем запрос...');
                 // Повторяем оригинальный запрос с новым токеном
-                final originalRequest = err.requestOptions;
+                final RequestOptions originalRequest = err.requestOptions;
                 final tokenPair = await storage.readTokenPair();
                 final newToken = tokenPair?.accessToken;
-                
+
                 if (newToken != null) {
-                  final response = await _dio.request(
-                    originalRequest.method,
-                    originalRequest.path,
-                    data: originalRequest.data,
-                    queryParameters: originalRequest.queryParameters,
-                    options: Options(
+                  final response = await _dio.fetch(
+                    RequestOptions(
+                      method: originalRequest.method,
+                      path: originalRequest.path,
+                      data: originalRequest.data,
+                      queryParameters: originalRequest.queryParameters,
                       headers: {
                         ...originalRequest.headers,
                         'Authorization': 'Bearer $newToken',
