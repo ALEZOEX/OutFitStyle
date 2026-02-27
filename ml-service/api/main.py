@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
+from collections import Counter
 import time
 import logging
 import os
@@ -22,12 +23,41 @@ from model.outfit_generator import generate_outfits
 
 from contracts.rank_contract import MLRankRequest, MLRankResponse, RankedItem
 from contracts.tz_rank_contract import TZRankRequest, TZRankResponse, TZRankedItem
-from contracts.translation_contracts import TranslationRequest, TranslationResponse, BatchTranslationRequest, BatchTranslationResponse
+from contracts.translation_contracts import (
+    TranslationRequest,
+    TranslationResponse,
+    BatchTranslationRequest,
+    BatchTranslationResponse,
+)
+from contracts.recommend_contract import (
+    RecommendRequest,
+    RecommendResponse,
+    RecommendOutfit,
+    RecommendContext,
+)
 from model.enhanced_predictor import EnhancedPredictor
 from model.features_with_priorities import build_feature_frame
-from model.internal_schema import InternalRequest, InternalItem, InternalContext, InternalWeatherData, InternalUserProfile, InternalSourceType
+from model.internal_schema import (
+    InternalRequest,
+    InternalItem,
+    InternalContext,
+    InternalWeatherData,
+    InternalUserProfile,
+    InternalSourceType,
+)
 from contracts.event_contract import ActionEvent, ActionEventResponse
 from model.event_logger import log_rank_impression, log_outfits_impression, log_action
+
+from app.filter import WeatherContext, generate_combinations, get_stats
+
+
+# ═══════════════════════════════════════════
+# GLOBAL VARIABLES WITH TYPE HINTS
+# ═══════════════════════════════════════════
+
+predictor: Optional["ThreadSafePredictor"] = None
+prediction_pool: Optional[ThreadPoolExecutor] = None
+redis_client: Optional[redis.Redis] = None
 
 
 def adapt_ml_request_to_internal(external_request: MLRankRequest) -> InternalRequest:
@@ -49,7 +79,7 @@ def adapt_ml_request_to_internal(external_request: MLRankRequest) -> InternalReq
             season=item.season,
             base_colour=item.base_colour,
             formality_level=item.formality,  # Преобразование
-            warmth_level=item.warmth,       # Преобразование
+            warmth_level=item.warmth,  # Преобразование
             min_temp=item.min_temp,
             max_temp=item.max_temp,
             materials=item.materials,
@@ -59,7 +89,7 @@ def adapt_ml_request_to_internal(external_request: MLRankRequest) -> InternalReq
             source=InternalSourceType(item.source.value),
             is_owned=item.is_owned,
             created_at=item.created_at,
-            source_priority=item.source_priority
+            source_priority=item.source_priority,
         )
         internal_candidates.append(internal_item)
 
@@ -80,22 +110,22 @@ def adapt_ml_request_to_internal(external_request: MLRankRequest) -> InternalReq
             gender=external_request.context.user_profile.gender,
         ),
         preferences=external_request.context.preferences,
-        location=external_request.context.location
+        location=external_request.context.location,
     )
 
-    return InternalRequest(
-        context=internal_context,
-        candidates=internal_candidates
-    )
+    return InternalRequest(context=internal_context, candidates=internal_candidates)
 
 
-# Global thread pool for model predictions to avoid blocking
-prediction_pool = ThreadPoolExecutor(max_workers=int(os.getenv("PREDICTION_WORKERS", "4")))
+# ═══════════════════════════════════════════
+# THREAD POOL & PREDICTOR
+# ═══════════════════════════════════════════
+
 
 class ThreadSafePredictor:
     """
     Thread-safe wrapper for the predictor to handle concurrent requests
     """
+
     def __init__(self, model_path: str):
         self._lock = threading.RLock()
         self._predictor = EnhancedPredictor(model_path)
@@ -104,17 +134,38 @@ class ThreadSafePredictor:
         with self._lock:
             return self._predictor.get_model_version()
 
-    def predict(self, feature_df):
-        # Perform prediction in a thread-safe manner
+    def predict(self, feature_df: Any) -> List[float]:
+        """
+        Выполняет предсказание в потокобезопасном режиме.
+
+        Args:
+            feature_df: DataFrame с признаками
+
+        Returns:
+            Список оценок для каждого элемента
+        """
         with self._lock:
-            return self._predictor.predict(feature_df)
+            result = self._predictor.predict(feature_df)
+            return result if isinstance(result, list) else list(result)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    global predictor
-    model_path = os.getenv("MODEL_PATH", "models/model.pkl")  # путь к модели для загрузки
-    
+    """
+    Управление жизненным циклом приложения:
+    - Загрузка ML модели при старте
+    - Инициализация пула потоков
+    - Корректное завершение при shutdown
+    """
+    global predictor, prediction_pool
+
+    # Инициализация пула потоков для предсказаний
+    prediction_pool = ThreadPoolExecutor(
+        max_workers=int(os.getenv("PREDICTION_WORKERS", "4"))
+    )
+
+    model_path = os.getenv("MODEL_PATH", "models/model.pkl")
+
     # Проверяем существование модели
     if not os.path.exists(model_path):
         logging.warning(f"ML model not found at {model_path}. Running without model.")
@@ -126,54 +177,91 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logging.error(f"Failed to load ML model: {e}")
             predictor = None
-    
+
     yield
-    # Shutdown
-    if predictor is not None:
+
+    # Shutdown: корректное завершение пула потоков
+    if prediction_pool is not None:
         prediction_pool.shutdown(wait=True)
+        logging.info("Prediction pool shutdown complete")
 
 
 app = FastAPI(
-    title="OutfitStyle ML Ranking Service",
-    version="1.0.0",
-    lifespan=lifespan
+    title="OutfitStyle ML Ranking Service", version="1.0.0", lifespan=lifespan
 )
 
-# Настройка логирования
+# ═══════════════════════════════════════════
+# LOGGING & CONFIG
+# ═══════════════════════════════════════════
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Глобальный инстанс модели
-predictor = None
+TRANSLATION_CACHE_TTL = int(
+    os.getenv("TRANSLATION_CACHE_TTL", "86400")
+)  # 24 hours in seconds
 
-# Initialize Redis client for translation caching
-redis_client = None
-TRANSLATION_CACHE_TTL = int(os.getenv("TRANSLATION_CACHE_TTL", "86400"))  # 24 hours in seconds
-try:
-    redis_host = os.getenv("REDIS_HOST", os.getenv("TRANSLATION_REDIS_HOST", "redis"))
-    redis_port = int(os.getenv("REDIS_PORT", os.getenv("TRANSLATION_REDIS_PORT", "6379")))
-    redis_password = os.getenv("REDIS_PASSWORD", "")
+# Lazy Redis initialization for translation caching
+_redis_initialized = False
 
-    # Build Redis connection URL based on availability of password
-    if redis_password:
-        redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True, socket_connect_timeout=5)
-    else:
-        redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True, socket_connect_timeout=5)
 
-    redis_client.ping()  # Test connection
-    logger.info(f"Connected to Redis at {redis_host}:{redis_port} for translation caching")
-except Exception as e:
-    logger.warning(f"Could not connect to Redis for translation caching: {e}")
-    redis_client = None
+def _init_redis_client() -> Optional[redis.Redis]:
+    """
+    Инициализирует Redis клиент для кэширования переводов.
+    Вызывается лениво при первом обращении.
+    """
+    global redis_client, _redis_initialized
+
+    if _redis_initialized:
+        return redis_client
+
+    try:
+        redis_host = os.getenv(
+            "REDIS_HOST", os.getenv("TRANSLATION_REDIS_HOST", "redis")
+        )
+        redis_port = int(
+            os.getenv("REDIS_PORT", os.getenv("TRANSLATION_REDIS_PORT", "6379"))
+        )
+        redis_password = os.getenv("REDIS_PASSWORD", "")
+
+        if redis_password:
+            redis_client = redis.Redis(
+                host=redis_host,
+                port=redis_port,
+                password=redis_password,
+                decode_responses=True,
+                socket_connect_timeout=5,
+            )
+        else:
+            redis_client = redis.Redis(
+                host=redis_host,
+                port=redis_port,
+                decode_responses=True,
+                socket_connect_timeout=5,
+            )
+
+        redis_client.ping()
+        logger.info(
+            f"Connected to Redis at {redis_host}:{redis_port} for translation caching"
+        )
+    except Exception as e:
+        logger.warning(f"Could not connect to Redis for translation caching: {e}")
+        redis_client = None
+
+    _redis_initialized = True
+    return redis_client
+
 
 # Yandex Translate API configuration
-YANDEX_TRANSLATE_API_URL = os.getenv("YANDEX_TRANSLATE_API_URL", "https://translate.api.cloud.yandex.net/translate/v2/translate")
+YANDEX_TRANSLATE_API_URL = os.getenv(
+    "YANDEX_TRANSLATE_API_URL",
+    "https://translate.api.cloud.yandex.net/translate/v2/translate",
+)
 YANDEX_API_KEY = os.getenv("YANDEX_TRANSLATE_API_KEY")
 YANDEX_FOLDER_ID = os.getenv("YANDEX_FOLDER_ID")
 
 # Thread pool for translation requests
 translation_executor = ThreadPoolExecutor(max_workers=10)
-
 
 
 @app.get("/health")
@@ -189,7 +277,9 @@ async def readiness_check():
 
 
 @app.post("/api/rank", response_model=MLRankResponse)
-async def rank_candidates(request: MLRankRequest, http_request: Request, response: Response) -> MLRankResponse:
+async def rank_candidates(
+    request: MLRankRequest, http_request: Request, response: Response
+) -> MLRankResponse:
     """
     Rank clothing candidates based on context and ML model.
 
@@ -204,20 +294,22 @@ async def rank_candidates(request: MLRankRequest, http_request: Request, respons
     # Генерация/получение request_id
     request_id = http_request.headers.get("X-Request-Id") or str(uuid.uuid4())
     response.headers["X-Request-Id"] = request_id
-    user_id = http_request.headers.get("X-User-Id", "anonymous")  # если у вас есть такой заголовок
+    user_id = http_request.headers.get(
+        "X-User-Id", "anonymous"
+    )  # если у вас есть такой заголовок
 
     try:
         if len(request.candidates) == 0:
             return MLRankResponse(
                 ranked=[],
                 model_version=predictor.get_model_version() if predictor else "unknown",
-                processing_time_ms=0.0
+                processing_time_ms=0.0,
             )
 
         if len(request.candidates) > 250:
             raise HTTPException(
                 status_code=422,
-                detail=f"Too many candidates: {len(request.candidates)}, maximum allowed: 250"
+                detail=f"Too many candidates: {len(request.candidates)}, maximum allowed: 250",
             )
 
         # Проверка, что модель загружена
@@ -242,20 +334,21 @@ async def rank_candidates(request: MLRankRequest, http_request: Request, respons
                 "formality_preference": request.context.user_profile.formality_preference,
                 "gender": request.context.user_profile.gender,
             },
-            items=items
+            items=items,
         )
 
         # Выполняем предсказание в пуле потоков для избежания блокировки
         loop = asyncio.get_event_loop()
-        scores = await loop.run_in_executor(prediction_pool, predictor.predict, feature_df)
+        scores = await loop.run_in_executor(
+            prediction_pool, predictor.predict, feature_df
+        )
 
         # Сопоставление оценок с кандидатами (используем оригинальные id из внешнего запроса)
         ranked_items = []
         for i, score in enumerate(scores):
-            ranked_items.append(RankedItem(
-                id=request.candidates[i].id,
-                score=float(score)
-            ))
+            ranked_items.append(
+                RankedItem(id=request.candidates[i].id, score=float(score))
+            )
 
         # Сортировка по оценке (от максимальной к минимальной)
         ranked_items.sort(key=lambda x: x.score, reverse=True)
@@ -277,22 +370,24 @@ async def rank_candidates(request: MLRankRequest, http_request: Request, respons
                 "temperature_sensitivity": request.context.user_profile.temperature_sensitivity,
                 "formality_preference": request.context.user_profile.formality_preference,
                 "gender": request.context.user_profile.gender,
-            }
+            },
         }
 
-        candidates_for_log = [{
-            "id": c.id,
-            "category": c.category,
-            "subcategory": c.subcategory,
-            "source": str(c.source),
-            "source_priority": c.source_priority,
-        } for c in request.candidates]
+        candidates_for_log = [
+            {
+                "id": c.id,
+                "category": c.category,
+                "subcategory": c.subcategory,
+                "source": str(c.source),
+                "source_priority": c.source_priority,
+            }
+            for c in request.candidates
+        ]
 
-        ranked_for_log = [{
-            "id": ri.id,
-            "score": ri.score,
-            "position": idx
-        } for idx, ri in enumerate(ranked_items, start=1)]
+        ranked_for_log = [
+            {"id": ri.id, "score": ri.score, "position": idx}
+            for idx, ri in enumerate(ranked_items, start=1)
+        ]
 
         log_rank_impression(
             request_id=request_id,
@@ -307,7 +402,7 @@ async def rank_candidates(request: MLRankRequest, http_request: Request, respons
         return MLRankResponse(
             ranked=ranked_items,
             model_version=predictor.get_model_version(),
-            processing_time_ms=processing_time
+            processing_time_ms=processing_time,
         )
 
     except ValidationError as ve:
@@ -320,24 +415,214 @@ async def rank_candidates(request: MLRankRequest, http_request: Request, respons
             ranked=[],
             model_version=predictor.get_model_version() if predictor else "unknown",
             processing_time_ms=processing_time,
-            error=str(e)
+            error=str(e),
+        )
+
+
+@app.post("/api/recommend", response_model=RecommendResponse)
+async def recommend_outfits(
+    request: RecommendRequest,
+    http_request: Request,
+    response: Response,
+) -> RecommendResponse:
+    """
+    Полный пайплайн: фильтрация → генерация комбинаций → скоринг → Top-K.
+
+    В отличие от /api/rank, этот endpoint:
+    1. Принимает гардероб (списки вещей по категориям)
+    2. Фильтрует абсурдные комбинации (двухуровневая фильтрация)
+    3. Генерирует комбинации из отфильтрованных категорий
+    4. Скорит комбинации через CatBoost
+    5. Возвращает Top-K рекомендаций
+
+    Args:
+        request: RecommendRequest с контекстом и гардеробом
+        http_request: FastAPI request для заголовков
+        response: FastAPI response для заголовков
+
+    Returns:
+        RecommendResponse с рекомендациями и статистикой
+    """
+    start_time = time.time()
+
+    # Генерация/получение request_id
+    request_id = http_request.headers.get("X-Request-Id") or str(uuid.uuid4())
+    response.headers["X-Request-Id"] = request_id
+    user_id = http_request.headers.get("X-User-Id", "anonymous")
+
+    try:
+        # Проверка, что модель загружена
+        if predictor is None:
+            raise HTTPException(status_code=503, detail="ML model not available")
+
+        # 1. Создаём контекст для фильтрации
+        filter_context = WeatherContext(
+            temperature=request.context.temperature,
+            humidity=request.context.humidity,
+            weather_condition=request.context.weather_condition,
+            location=request.context.location,
+            activity=request.context.activity,
+            gender=request.context.gender,
+            duration=request.context.duration,
+        )
+
+        # 2. Статистика фильтрации (для лога)
+        stats = get_stats(
+            filter_context,
+            request.available_tops,
+            request.available_bottoms,
+            request.available_outerwears,
+            request.available_footwears,
+        )
+
+        # 3. Генерация комбинаций (фильтрация L1 + L2)
+        candidates = generate_combinations(
+            filter_context,
+            request.available_tops,
+            request.available_bottoms,
+            request.available_outerwears,
+            request.available_footwears,
+        )
+
+        if not candidates:
+            logger.warning(
+                f"No valid combinations for user {user_id}: "
+                f"{stats['total_raw']} raw → 0 after filtering"
+            )
+            return RecommendResponse(
+                outfits=[],
+                total_candidates=0,
+                filtered_from=stats["total_raw"],
+                context=request.context.model_dump(),
+                model_version=predictor.get_model_version() if predictor else "unknown",
+                processing_time_ms=0.0,
+            )
+
+        # 4. Построение feature frame для CatBoost
+        # build_feature_frame_v2 ожидает items с полями category/subcategory
+        # Для комбинаций создаём синтетические items
+        feature_df = build_feature_frame_v2(
+            weather_data={
+                "temperature": request.context.temperature,
+                "feels_like": request.context.temperature,  # нет данных
+                "humidity": request.context.humidity,
+                "wind_speed": 0.0,  # нет данных
+                "weather": request.context.weather_condition,
+            },
+            user_profile={
+                "age_range": "adult",
+                "style_preference": "casual",
+                "temperature_sensitivity": "normal",
+                "formality_preference": "normal",
+                "gender": request.context.gender,
+            },
+            items=[
+                {
+                    "category": "outfit",
+                    "subcategory": "full_look",
+                    "item_name": f"{combo['top']}+{combo['bottom']}+{combo['outerwear']}+{combo['footwear']}",
+                }
+                for combo in candidates
+            ],
+        )
+
+        # 5. Предсказание CatBoost в пуле потоков (неблокирующе)
+        loop = asyncio.get_event_loop()
+        scores = await loop.run_in_executor(
+            prediction_pool, predictor.predict, feature_df
+        )
+
+        # 6. Ранжирование по убыванию score
+        scored: List[Tuple[dict, float]] = list(zip(candidates, scores))
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        # 7. Diversification: не более 2 одинаковых top **подряд**
+        # Это обеспечивает разнообразие в выдаче
+        result_outfits: List[RecommendOutfit] = []
+        prev_tops: List[str] = []  # последние 2 top для проверки "подряд"
+
+        for combo, score in scored:
+            if len(result_outfits) >= request.top_k:
+                break
+
+            t = combo["top"]
+
+            # Проверка "не более 2 одинаковых подряд"
+            if len(prev_tops) >= 2 and prev_tops[-1] == t and prev_tops[-2] == t:
+                # Пропускаем этот combo — уже 2 одинаковых top подряд
+                continue
+
+            result_outfits.append(
+                RecommendOutfit(
+                    top=combo["top"],
+                    bottom=combo["bottom"],
+                    outerwear=combo["outerwear"],
+                    footwear=combo["footwear"],
+                    score=round(float(score), 4),
+                )
+            )
+            prev_tops.append(t)
+            if len(prev_tops) > 2:
+                prev_tops.pop(0)
+
+        processing_time = (time.time() - start_time) * 1000
+
+        # 8. Логирование с метриками
+        logger.info(
+            f"[recommend] request_id={request_id} user={user_id} "
+            f"{stats['total_raw']} raw → {stats['after_level1']} L1 → {stats['after_level2']} L2 → "
+            f"Top-{len(result_outfits)} returned, "
+            f"reduction={stats['total_reduction']} processing_time={processing_time:.2f}ms"
+        )
+
+        return RecommendResponse(
+            outfits=result_outfits,
+            total_candidates=stats["after_level2"],
+            filtered_from=stats["total_raw"],
+            context=request.context.model_dump(),
+            model_version=predictor.get_model_version() if predictor else "unknown",
+            processing_time_ms=processing_time,
+        )
+
+    except ValidationError as ve:
+        logger.error(f"[recommend] Validation error: {ve}")
+        raise HTTPException(status_code=422, detail=f"Validation error: {str(ve)}")
+    except Exception as e:
+        logger.exception(f"[recommend] Unexpected error: {e}")
+        processing_time = (time.time() - start_time) * 1000
+        return RecommendResponse(
+            outfits=[],
+            total_candidates=0,
+            filtered_from=0,
+            context=request.context.model_dump(),
+            model_version=predictor.get_model_version() if predictor else "unknown",
+            processing_time_ms=processing_time,
+            error=str(e),
         )
 
 
 @app.post("/api/v1/rank", response_model=TZRankResponse)
-async def rank_candidates_v1(request: TZRankRequest, http_request: Request, response: Response) -> TZRankResponse:
+async def rank_candidates_v1(
+    request: TZRankRequest, http_request: Request, response: Response
+) -> TZRankResponse:
     start_time = time.time()
 
     # Генерация/получение request_id
     request_id = request.request_id
     response.headers["X-Request-Id"] = request_id
-    user_id = getattr(request, 'user_id', None) or http_request.headers.get("X-User-Id", "anonymous")
+    user_id = getattr(request, "user_id", None) or http_request.headers.get(
+        "X-User-Id", "anonymous"
+    )
 
     if predictor is None:
         raise HTTPException(status_code=503, detail="ML model not available")
 
     # Map user prefs to legacy user_profile schema for your feature builder
-    preferred_style = (request.user_preferences.preferred_styles[0] if request.user_preferences.preferred_styles else "casual")
+    preferred_style = (
+        request.user_preferences.preferred_styles[0]
+        if request.user_preferences.preferred_styles
+        else "casual"
+    )
 
     # temperature_sensitivity int -> label
     ts = request.user_preferences.temperature_sensitivity
@@ -352,28 +637,30 @@ async def rank_candidates_v1(request: TZRankRequest, http_request: Request, resp
     items = []
     for c in request.candidates:
         f = c.features
-        items.append({
-            "id": c.id,
-            "name": "",  # not used by model
-            "category": c.category,
-            "subcategory": c.subcategory,
-            "gender": "unisex",
-            "style": f.style,
-            "usage": "daily",
-            "season": "all",
-            "base_colour": f.base_colour or "black",
-            "formality_level": f.formality_level,
-            "warmth_level": f.warmth_level,
-            "min_temp": f.min_temp,
-            "max_temp": f.max_temp,
-            "materials": [],
-            "fit": "regular",
-            "pattern": f.pattern or "solid",
-            "icon_emoji": "",
-            "source": c.source,
-            "is_owned": True if c.source == "user" else False,
-            "source_priority": c.source_priority,
-        })
+        items.append(
+            {
+                "id": c.id,
+                "name": "",  # not used by model
+                "category": c.category,
+                "subcategory": c.subcategory,
+                "gender": "unisex",
+                "style": f.style,
+                "usage": "daily",
+                "season": "all",
+                "base_colour": f.base_colour or "black",
+                "formality_level": f.formality_level,
+                "warmth_level": f.warmth_level,
+                "min_temp": f.min_temp,
+                "max_temp": f.max_temp,
+                "materials": [],
+                "fit": "regular",
+                "pattern": f.pattern or "solid",
+                "icon_emoji": "",
+                "source": c.source,
+                "is_owned": True if c.source == "user" else False,
+                "source_priority": c.source_priority,
+            }
+        )
 
     feature_df = build_feature_frame_v2(
         weather_data={
@@ -387,10 +674,12 @@ async def rank_candidates_v1(request: TZRankRequest, http_request: Request, resp
             "age_range": "25-35",
             "style_preference": preferred_style,
             "temperature_sensitivity": ts_label,
-            "formality_preference": "business" if request.context.formality >= 4 else "casual",
+            "formality_preference": "business"
+            if request.context.formality >= 4
+            else "casual",
             "gender": "unisex",
         },
-        items=items
+        items=items,
     )
 
     # Выполняем предсказание в пуле потоков для избежания блокировки
@@ -401,12 +690,14 @@ async def rank_candidates_v1(request: TZRankRequest, http_request: Request, resp
     rankings: Dict[str, List[TZRankedItem]] = {}
     for i, score in enumerate(scores):
         cat = request.candidates[i].category
-        rankings.setdefault(cat, []).append(TZRankedItem(
-            id=request.candidates[i].id,
-            score=float(score),
-            confidence=float(min(1.0, max(0.0, score))),
-            factors={"source_priority": request.candidates[i].source_priority}
-        ))
+        rankings.setdefault(cat, []).append(
+            TZRankedItem(
+                id=request.candidates[i].id,
+                score=float(score),
+                confidence=float(min(1.0, max(0.0, score))),
+                factors={"source_priority": request.candidates[i].source_priority},
+            )
+        )
 
     for cat in rankings:
         rankings[cat].sort(key=lambda x: x.score, reverse=True)
@@ -427,27 +718,27 @@ async def rank_candidates_v1(request: TZRankRequest, http_request: Request, resp
         "humidity": request.context.humidity,
         "wind_speed": request.context.wind_speed,
         "weather_code": request.context.weather_code,
-        "occasion": getattr(request.context, 'occasion', None),
-        "formality": getattr(request.context, 'formality', None),
+        "occasion": getattr(request.context, "occasion", None),
+        "formality": getattr(request.context, "formality", None),
     }
 
-    candidates_for_log = [{
-        "id": c.id,
-        "category": c.category,
-        "subcategory": c.subcategory,
-        "source": c.source,
-        "source_priority": c.source_priority,
-    } for c in request.candidates]
+    candidates_for_log = [
+        {
+            "id": c.id,
+            "category": c.category,
+            "subcategory": c.subcategory,
+            "source": c.source,
+            "source_priority": c.source_priority,
+        }
+        for c in request.candidates
+    ]
 
     flat_ranked = []
     for cat, items_list in rankings.items():
         for pos, it in enumerate(items_list, start=1):
-            flat_ranked.append({
-                "id": it.id,
-                "score": it.score,
-                "position": pos,
-                "category": cat
-            })
+            flat_ranked.append(
+                {"id": it.id, "score": it.score, "position": pos, "category": cat}
+            )
 
     log_rank_impression(
         request_id=request_id,
@@ -471,7 +762,9 @@ async def rank_candidates_v1(request: TZRankRequest, http_request: Request, resp
 
 
 @app.post("/api/outfits", response_model=OutfitsResponse)
-async def outfits(request: MLRankRequest, http_request: Request, response: Response) -> OutfitsResponse:
+async def outfits(
+    request: MLRankRequest, http_request: Request, response: Response
+) -> OutfitsResponse:
     start = time.time()
 
     # Генерация/получение request_id
@@ -487,7 +780,7 @@ async def outfits(request: MLRankRequest, http_request: Request, response: Respo
             return OutfitsResponse(
                 outfits=[],
                 model_version=predictor.get_model_version(),
-                processing_time_ms=0.0
+                processing_time_ms=0.0,
             )
 
         if len(request.candidates) > 250:
@@ -510,12 +803,14 @@ async def outfits(request: MLRankRequest, http_request: Request, response: Respo
                 "formality_preference": request.context.user_profile.formality_preference,
                 "gender": request.context.user_profile.gender,
             },
-            items=items
+            items=items,
         )
 
         # Выполняем предсказание в пуле потоков для избежания блокировки
         loop = asyncio.get_event_loop()
-        scores = await loop.run_in_executor(prediction_pool, predictor.predict, feature_df)
+        scores = await loop.run_in_executor(
+            prediction_pool, predictor.predict, feature_df
+        )
 
         scores_by_id = {items[i]["id"]: float(scores[i]) for i in range(len(items))}
 
@@ -534,13 +829,19 @@ async def outfits(request: MLRankRequest, http_request: Request, response: Respo
 
         resp = []
         for o in outfits_list:
-            resp_items = {cat: OutfitItem(id=it["id"], score=float(scores_by_id.get(it["id"], 0.0)))
-                          for cat, it in o.items.items()}
-            resp.append(Outfit(
-                outfit_score=float(o.outfit_score),
-                breakdown=o.breakdown,
-                items=resp_items
-            ))
+            resp_items = {
+                cat: OutfitItem(
+                    id=it["id"], score=float(scores_by_id.get(it["id"], 0.0))
+                )
+                for cat, it in o.items.items()
+            }
+            resp.append(
+                Outfit(
+                    outfit_score=float(o.outfit_score),
+                    breakdown=o.breakdown,
+                    items=resp_items,
+                )
+            )
 
         # Логирование импрессии outfits
         context_for_log = {
@@ -554,21 +855,25 @@ async def outfits(request: MLRankRequest, http_request: Request, response: Respo
             "user_profile": {
                 "style_preference": request.context.user_profile.style_preference,
                 "formality_preference": request.context.user_profile.formality_preference,
-            }
+            },
         }
 
         # outfit_id можно сделать детерминированным: "upper=1|lower=2|footwear=3"
         outfits_for_log = []
         for pos, o in enumerate(resp, start=1):
             items_map = {cat: str(item.id) for cat, item in o.items.items()}
-            outfit_id = "|".join([f"{k}={items_map[k]}" for k in sorted(items_map.keys())])
-            outfits_for_log.append({
-                "outfit_id": outfit_id,
-                "outfit_score": o.outfit_score,
-                "position": pos,
-                "items": items_map,
-                "breakdown": o.breakdown,
-            })
+            outfit_id = "|".join(
+                [f"{k}={items_map[k]}" for k in sorted(items_map.keys())]
+            )
+            outfits_for_log.append(
+                {
+                    "outfit_id": outfit_id,
+                    "outfit_score": o.outfit_score,
+                    "position": pos,
+                    "items": items_map,
+                    "breakdown": o.breakdown,
+                }
+            )
 
         log_outfits_impression(
             request_id=request_id,
@@ -583,7 +888,7 @@ async def outfits(request: MLRankRequest, http_request: Request, response: Respo
         return OutfitsResponse(
             outfits=resp,
             model_version=predictor.get_model_version(),
-            processing_time_ms=ms
+            processing_time_ms=ms,
         )
 
     except Exception as e:
@@ -592,7 +897,7 @@ async def outfits(request: MLRankRequest, http_request: Request, response: Respo
             outfits=[],
             model_version=predictor.get_model_version() if predictor else "unknown",
             processing_time_ms=ms,
-            error=str(e)
+            error=str(e),
         )
 
 
@@ -619,11 +924,6 @@ async def get_metrics():
 
 if __name__ == "__main__":
     import uvicorn
+
     port = int(os.getenv("PORT", "8000"))
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=port,
-        reload=True,
-        log_level="info"
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True, log_level="info")
