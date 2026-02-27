@@ -61,7 +61,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                 child: CitySelectorWidget(
                   onCitySelected: (city) {
                     // Перезагрузить рекомендации с новым городом
-                    ref.invalidate(dailyRecommendationsProvider);
+                    ref.invalidate(recommendationsProvider);
                   },
                 ),
               ),
@@ -90,7 +90,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                           icon: const Icon(Icons.edit),
                           onPressed: () {
                             ref.read(selectedCityProvider.notifier).state = null;
-                            ref.invalidate(dailyRecommendationsProvider);
+                            ref.invalidate(recommendationsProvider);
                           },
                           tooltip: 'Изменить город',
                         ),
