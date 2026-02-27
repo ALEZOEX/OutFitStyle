@@ -89,6 +89,27 @@ services:
       timeout: 10s
       retries: 3
 
+  vault:
+    image: vault:1.15
+    container_name: outfitstyle-vault
+    ports:
+      - "8200:8200"
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_ROOT_TOKEN:-outfitstyle-vault-token}
+      - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+    volumes:
+      - vault-data:/vault/data
+    networks:
+      - outfitstyle-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "vault", "status", "-format=json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    cap_add:
+      - IPC_LOCK
+
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -125,6 +146,7 @@ volumes:
   postgres-data:
   redis-data:
   ml-models:
+  vault-data:
   prometheus-data:
   grafana-data:
 
