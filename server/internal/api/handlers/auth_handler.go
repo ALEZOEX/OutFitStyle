@@ -425,12 +425,9 @@ func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 }
 
 // RefreshToken обрабатывает запрос на обновление токена
-// Заглушка для функции, которая может быть реализована позже
+// Делегирует методу Refresh для совместимости
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
-	// Заглушка для RefreshToken
-	resp.Error(w, http.StatusNotImplemented, errors.New("RefreshToken not implemented"))
+	h.Refresh(w, r)
 }
 
 // forgotPasswordRequest запрос на восстановление пароля
