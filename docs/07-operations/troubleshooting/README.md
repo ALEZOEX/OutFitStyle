@@ -155,8 +155,8 @@ Error: token is expired
 ```bash
 # Проверить настройки JWT в .env
 JWT_SECRET=your_super_secret_jwt_key_that_is_at_least_32_characters_long
-JWT_ACCESS_TOKEN_TTL=15m
-JWT_REFRESH_TOKEN_TTL=720h
+JWT_ACCESS_TOKEN_TTL=1h          # Access токен живёт 1 час
+JWT_REFRESH_TOKEN_TTL=2160h      # Refresh токен живёт 90 дней
 
 # Для RS256 проверить наличие ключей
 ls -la config/jwt/
