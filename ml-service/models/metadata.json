@@ -1,53 +1,83 @@
 {
   "format": "catboost_cbm",
-  "model_kind": "classifier",
-  "cbm_path": "model.cbm",
-  "version": "20260218_022319",
-  "cat_features": [
-    "weather_condition",
-    "season",
-    "age_range",
-    "style_preference",
-    "temperature_sensitivity",
-    "formality_preference",
-    "item_name",
-    "category",
-    "subcategory",
-    "style",
-    "base_colour",
-    "pattern",
-    "fit",
-    "usage"
-  ],
+  "model_kind": "fashion_classifier",
+  "model_path": "fashion_model.cbm",
+  "version": "20260227_204255",
   "feature_columns": [
-    "temperature",
-    "feels_like",
-    "humidity",
-    "wind_speed",
+    "gender",
     "weather_condition",
-    "season",
-    "age_range",
-    "style_preference",
-    "temperature_sensitivity",
-    "formality_preference",
-    "item_name",
-    "category",
-    "subcategory",
-    "style",
-    "usage",
-    "base_colour",
-    "formality_level",
-    "warmth_level",
-    "min_temp",
-    "max_temp",
-    "fit",
-    "pattern",
-    "is_owned",
-    "source_priority"
+    "location",
+    "activity",
+    "top",
+    "bottom",
+    "outerwear",
+    "footwear",
+    "temperature",
+    "humidity",
+    "duration"
   ],
-  "metrics": {
-    "auc": 1.0,
-    "logloss": 0.09769899183721749
+  "label_encoders": {
+    "gender": [
+      "Laki-laki",
+      "Perempuan"
+    ],
+    "weather_condition": [
+      "Berawan",
+      "Cerah",
+      "Gerimis",
+      "Hujan",
+      "Mendung"
+    ],
+    "location": [
+      "Indoor",
+      "Outdoor"
+    ],
+    "activity": [
+      "Bekerja",
+      "Berjalan",
+      "Kondangan",
+      "Olahraga",
+      "Santai"
+    ],
+    "top": [
+      "Blouse",
+      "Jas",
+      "Kaos",
+      "Kemeja"
+    ],
+    "bottom": [
+      "Celana Olahraga",
+      "Celana Panjang",
+      "Celana Pendek",
+      "Legging",
+      "Rok"
+    ],
+    "outerwear": [
+      "Hoodie",
+      "Jaket",
+      "Tanpa Pakaian Luar"
+    ],
+    "footwear": [
+      "Sandal",
+      "Sepatu Bot",
+      "Sepatu Hak",
+      "Sepatu Pantofel",
+      "Sneakers"
+    ]
   },
-  "created_at": "2026-02-18T02:14:08.167942"
+  "metrics": {
+    "accuracy": 0.9525,
+    "auc_roc": 0.989425,
+    "precision": 0.95662100456621,
+    "recall": 0.9525,
+    "f1_score": 0.9523925857716472
+  },
+  "dataset": {
+    "name": "Season Fashion Dataset (multilabel)",
+    "source": "Kaggle",
+    "language": "Indonesian",
+    "samples": 1001,
+    "negative_samples_generated": 1000
+  },
+  "created_at": "2026-02-27T20:42:55.656382"
 }
