@@ -20,8 +20,13 @@ Authorization: Bearer <jwt_token>
 
 ### Типы токенов
 
-- **Access Token** — короткоживущий токен (15 минут)
-- **Refresh Token** — долгоживущий токен (30 дней) для обновления access token
+- **Access Token** — короткоживущий токен (1 час) для авторизации запросов
+- **Refresh Token** — долгоживущий токен (90 дней) для автоматического обновления access token
+
+Автоматическое обновление:
+- При получении 401 ошибки клиент автоматически запрашивает новый access token через `/api/v1/auth/refresh`
+- Refresh токен обновляется при каждом использовании (rotation)
+- При истечении refresh токена требуется повторная аутентификация
 
 ## Конечные точки
 
@@ -223,6 +228,60 @@ Authorization: Bearer <jwt_token>
 **Ответ:**
 ```json
 {
+  "recommendation": {
+    "id": "rec_id",
+    "items": [...],
+    "total_score": 0.95,
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+#### GET /api/v1/recommendations/by-city
+Получить рекомендации для конкретного города (координат)
+
+**Параметры запроса:**
+- `lat` (обязательно): Широта города
+- `lon` (обязательно): Долгота города
+- `occasion` (необязательно): Тип события (daily, work, sport, evening)
+
+**Ответ:** Аналогичен `GET /api/v1/recommendations`
+
+#### POST /api/v1/recommendations/{id}/regenerate
+Пересгенерировать рекомендацию с тем же ID
+
+**Параметры пути:**
+- `id`: ID рекомендации для пересоздания
+
+**Тело запроса:** (опционально)
+```json
+{
+  "exclude_items": ["item_id_1", "item_id_2"]
+}
+```
+
+**Ответ:** Аналогичен `POST /api/v1/recommendations/generate`
+
+#### POST /api/v1/recommendations/{id}/favorite
+Добавить рекомендацию в избранное
+
+**Параметры пути:**
+- `id`: ID рекомендации
+
+**Тело запроса:**
+```json
+{
+  "favorite": true
+}
+```
+
+**Ответ:**
+```json
+{
+  "success": true,
+  "message": "Recommendation added to favorites"
+}
+```
   "recommendation": {
     "id": "rec_id",
     "items": [

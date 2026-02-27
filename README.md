@@ -1,8 +1,8 @@
 # OutfitStyle - Платформа умных рекомендаций одежды
 
 [![Лицензия: MIT](https://img.shields.io/badge/Лицензия-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go&logoColor=white)](https://golang.org/)
-[![Flutter](https://img.shields.io/badge/Flutter-3.16+-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev/)
+[![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat&logo=go&logoColor=white)](https://golang.org/)
+[![Flutter](https://img.shields.io/badge/Flutter-3.24+-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org/)
 
 ## 🌟 Обзор
@@ -180,7 +180,8 @@ python -m pytest tests/ -v
 
 ### Аутентификация и авторизация
 - Токены JWT с алгоритмом RS256
-- OAuth 2.0 с входом через Google
+- OAuth 2.0 с входом через Google (Firebase Auth для Web, google_sign_in для Mobile)
+- Refresh токены с автоматическим обновлением (Access: 1 час, Refresh: 90 дней)
 - Ограничение скорости на пользователя/IP
 - Проверка ввода на всех концах
 
@@ -212,6 +213,17 @@ python -m pytest tests/ -v
 - Подход "сначала кэш" для улучшения UX
 - Разрешение конфликтов для офлайн изменений
 - SyncManager для управления синхронизацией данных
+
+### Выбор города (Web)
+- CitySelectorWidget для выбора города вместо геолокации
+- Поиск городов через Nominatim OpenStreetMap API
+- Список популярных городов России (Москва, СПб, Казань и др.)
+- Автоматическое обновление рекомендаций с учётом погоды в выбранном городе
+
+### Требования к платформам
+- **Android**: API уровень 23+ (Android 6.0+)
+- **iOS**: iOS 14.0+
+- **Web**: Современные браузеры с поддержкой Flutter Web
 
 ### SyncManager - Синхронизация данных
 - **Архитектура синхронизации**: Управляет синхронизацией всех данных приложения, включая пользовательские настройки, элементы гардероба, рекомендации и отзывы
