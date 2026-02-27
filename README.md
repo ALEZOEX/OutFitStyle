@@ -1,8 +1,8 @@
 # OutfitStyle - Платформа умных рекомендаций одежды
 
 [![Лицензия: MIT](https://img.shields.io/badge/Лицензия-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat&logo=go&logoColor=white)](https://golang.org/)
-[![Flutter](https://img.shields.io/badge/Flutter-3.24+-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev/)
+[![Go](https://img.shields.io/badge/Go-1.24.12-00ADD8?style=flat&logo=go&logoColor=white)](https://golang.org/)
+[![Flutter](https://img.shields.io/badge/Flutter-3.7.0+-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org/)
 
 ## 🌟 Обзор
