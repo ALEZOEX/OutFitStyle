@@ -23,6 +23,11 @@ class AuthStorage {
     }
   }
 
+  /// Алиас для writeTokenPair (совместимость с api_client.dart)
+  Future<void> saveTokenPair(TokenPair pair) async {
+    await writeTokenPair(pair);
+  }
+
   /// Читает access токен
   Future<String?> readAccessToken() async {
     final tokenPair = await readTokenPair();
