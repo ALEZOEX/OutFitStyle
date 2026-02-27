@@ -2,7 +2,7 @@
   "format": "catboost_cbm",
   "model_kind": "fashion_classifier",
   "model_path": "fashion_model.cbm",
-  "version": "20260227_204255",
+  "version": "20260227_210635",
   "feature_columns": [
     "gender",
     "weather_condition",
@@ -72,6 +72,14 @@
     "recall": 0.9525,
     "f1_score": 0.9523925857716472
   },
+  "inference_times": {
+    "single_p50_ms": 0.5049000028520823,
+    "single_p95_ms": 0.6508000078611076,
+    "single_p99_ms": 0.7605999999213964,
+    "batch_p50_ms": 0.8749999979045242,
+    "batch_p95_ms": 1.0560000082477927,
+    "batch_p99_ms": 2.9332999838516116
+  },
   "dataset": {
     "name": "Season Fashion Dataset (multilabel)",
     "source": "Kaggle",
@@ -79,5 +87,5 @@
     "samples": 1001,
     "negative_samples_generated": 1000
   },
-  "created_at": "2026-02-27T20:42:55.656382"
+  "created_at": "2026-02-27T21:06:35.519813"
 }

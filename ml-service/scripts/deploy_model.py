@@ -57,6 +57,7 @@ def deploy_model():
         'cat_features': list(metadata.get('label_encoders', {}).keys()),
         'feature_columns': metadata.get('feature_columns', []),
         'metrics': metadata.get('metrics', {}),
+        'inference_times': metadata.get('inference_times', {}),
         'deployed_at': datetime.now().isoformat()
     }
     
@@ -76,6 +77,15 @@ def deploy_model():
     print("="*60)
     for key, value in manifest['metrics'].items():
         print(f"  {key}: {value:.4f}")
+    
+    if manifest.get('inference_times'):
+        print(f"\n" + "="*60)
+        print("Время инференса:")
+        print("="*60)
+        print(f"  Single prediction:")
+        print(f"    p95: {manifest['inference_times'].get('single_p95_ms', 0):.2f}ms")
+        print(f"  Batch (100 комбинаций):")
+        print(f"    p95: {manifest['inference_times'].get('batch_p95_ms', 0):.2f}ms")
     
     print(f"\n" + "="*60)
     print("OK Деплой завершён!")

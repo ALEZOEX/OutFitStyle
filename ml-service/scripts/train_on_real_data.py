@@ -217,6 +217,7 @@ def save_model_and_metadata(
     label_encoders: dict,
     feature_columns: list,
     metrics: dict,
+    inference_times: dict,
     output_dir: str
 ):
     """Сохранение модели и метаданных"""
@@ -251,6 +252,14 @@ def save_model_and_metadata(
             'recall': float(metrics['classification_report']['weighted avg']['recall']),
             'f1_score': float(metrics['classification_report']['weighted avg']['f1-score'])
         },
+        'inference_times': {
+            'single_p50_ms': float(inference_times['single_p50']),
+            'single_p95_ms': float(inference_times['single_p95']),
+            'single_p99_ms': float(inference_times['single_p99']),
+            'batch_p50_ms': float(inference_times['batch_p50']),
+            'batch_p95_ms': float(inference_times['batch_p95']),
+            'batch_p99_ms': float(inference_times['batch_p99'])
+        },
         'dataset': {
             'name': 'Season Fashion Dataset (multilabel)',
             'source': 'Kaggle',
@@ -272,7 +281,68 @@ def save_model_and_metadata(
     for key, value in metadata['metrics'].items():
         print(f"  {key}: {value:.4f}")
     
+    print("\n" + "="*60)
+    print("Время инференса:")
+    print("="*60)
+    print(f"  Single prediction:")
+    print(f"    p50: {inference_times['single_p50']:.2f}ms")
+    print(f"    p95: {inference_times['single_p95']:.2f}ms")
+    print(f"    p99: {inference_times['single_p99']:.2f}ms")
+    print(f"  Batch prediction (100 комбинаций):")
+    print(f"    p50: {inference_times['batch_p50']:.2f}ms")
+    print(f"    p95: {inference_times['batch_p95']:.2f}ms")
+    print(f"    p99: {inference_times['batch_p99']:.2f}ms")
+    
     return metadata
+
+
+def measure_inference_time(model: CatBoostClassifier, X_test: pd.DataFrame):
+    """Замер времени инференса"""
+    import time
+    import numpy as np
+    
+    print("\n" + "="*60)
+    print("Замер времени инференса...")
+    print("="*60)
+    
+    # Один пример (как в production)
+    sample = X_test.iloc[[0]]
+    
+    times = []
+    for _ in range(1000):
+        start = time.perf_counter()
+        model.predict_proba(sample)
+        times.append((time.perf_counter() - start) * 1000)
+    
+    times = sorted(times)
+    print(f"\nSingle prediction (1 комбинация):")
+    print(f"  p50: {times[500]:.2f}ms")
+    print(f"  p95: {times[950]:.2f}ms")
+    print(f"  p99: {times[990]:.2f}ms")
+    
+    # Батч (100 комбинаций, как реальный запрос)
+    batch = X_test.iloc[:100]
+    
+    batch_times = []
+    for _ in range(100):
+        start = time.perf_counter()
+        model.predict_proba(batch)
+        batch_times.append((time.perf_counter() - start) * 1000)
+    
+    batch_times = sorted(batch_times)
+    print(f"\nBatch prediction (100 комбинаций):")
+    print(f"  p50: {batch_times[50]:.2f}ms")
+    print(f"  p95: {batch_times[95]:.2f}ms")
+    print(f"  p99: {batch_times[99]:.2f}ms")
+    
+    return {
+        'single_p50': times[500],
+        'single_p95': times[950],
+        'single_p99': times[990],
+        'batch_p50': batch_times[50],
+        'batch_p95': batch_times[95],
+        'batch_p99': batch_times[99]
+    }
 
 
 def main():
@@ -313,12 +383,17 @@ def main():
         categorical_indices
     )
     
-    # 6. Сохранение
-    save_model_and_metadata(
+    # 6. Замер времени инференса
+    inference_times = measure_inference_time(metrics['model'], X_test)
+    metrics['inference_times'] = inference_times
+    
+    # 7. Сохранение
+    metadata = save_model_and_metadata(
         metrics['model'],
         label_encoders,
         feature_columns,
         metrics,
+        inference_times,
         output_dir
     )
     
