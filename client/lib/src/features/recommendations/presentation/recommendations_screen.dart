@@ -61,8 +61,42 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                 child: CitySelectorWidget(
                   onCitySelected: (city) {
                     // Перезагрузить рекомендации с новым городом
-                    ref.invalidate(recommendationsProvider);
+                    ref.invalidate(dailyRecommendationsProvider);
                   },
+                ),
+              ),
+            )
+          else
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Card(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Город: ${selectedCity.name}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            ref.read(selectedCityProvider.notifier).state = null;
+                            ref.invalidate(dailyRecommendationsProvider);
+                          },
+                          tooltip: 'Изменить город',
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
