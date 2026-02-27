@@ -55,15 +55,15 @@ def main():
     for col, le in label_encoders.items():
         print(f"  {col}: {list(le.classes_)}")
     
-    # Примеры комбинаций для контекста: +3°C, дождь, outdoor, прогулка
+    # Примеры комбинаций для контекста: +12°C, дождь, outdoor, прогулка
     samples = [
         {
             'gender': 'Perempuan',
             'weather_condition': 'Hujan',
-            'temperature': 3,
+            'temperature': 12,
             'humidity': 85,
             'location': 'Outdoor',
-            'activity': 'Jalan-jalan',
+            'activity': 'Santai',
             'duration': 2,
             'top': 'Kemeja',
             'bottom': 'Celana Panjang',
@@ -73,23 +73,10 @@ def main():
         {
             'gender': 'Perempuan',
             'weather_condition': 'Hujan',
-            'temperature': 3,
+            'temperature': 12,
             'humidity': 85,
             'location': 'Outdoor',
-            'activity': 'Jalan-jalan',
-            'duration': 2,
-            'top': 'Blouse',
-            'bottom': 'Celana Panjang',
-            'outerwear': 'Hoodie',
-            'footwear': 'Sepatu Bot'
-        },
-        {
-            'gender': 'Perempuan',
-            'weather_condition': 'Hujan',
-            'temperature': 3,
-            'humidity': 85,
-            'location': 'Outdoor',
-            'activity': 'Jalan-jalan',
+            'activity': 'Santai',
             'duration': 2,
             'top': 'Kaos',
             'bottom': 'Celana Panjang',
@@ -99,28 +86,41 @@ def main():
         {
             'gender': 'Perempuan',
             'weather_condition': 'Hujan',
-            'temperature': 3,
+            'temperature': 12,
             'humidity': 85,
             'location': 'Outdoor',
-            'activity': 'Jalan-jalan',
-            'duration': 2,
-            'top': 'Kaos',
-            'bottom': 'Celana Pendek',
-            'outerwear': 'Tanpa Pakaian Luar',
-            'footwear': 'Sandal'
-        },
-        {
-            'gender': 'Perempuan',
-            'weather_condition': 'Hujan',
-            'temperature': 3,
-            'humidity': 85,
-            'location': 'Outdoor',
-            'activity': 'Jalan-jalan',
+            'activity': 'Santai',
             'duration': 2,
             'top': 'Jas',
             'bottom': 'Celana Panjang',
             'outerwear': 'Hoodie',
             'footwear': 'Sneakers'
+        },
+        {
+            'gender': 'Perempuan',
+            'weather_condition': 'Hujan',
+            'temperature': 12,
+            'humidity': 85,
+            'location': 'Outdoor',
+            'activity': 'Santai',
+            'duration': 2,
+            'top': 'Blouse',
+            'bottom': 'Celana Panjang',
+            'outerwear': 'Hoodie',
+            'footwear': 'Sepatu Bot'
+        },
+        {
+            'gender': 'Perempuan',
+            'weather_condition': 'Hujan',
+            'temperature': 12,
+            'humidity': 85,
+            'location': 'Outdoor',
+            'activity': 'Santai',
+            'duration': 2,
+            'top': 'Kaos',
+            'bottom': 'Celana Pendek',
+            'outerwear': 'Tanpa Pakaian Luar',
+            'footwear': 'Sandal'
         }
     ]
     
