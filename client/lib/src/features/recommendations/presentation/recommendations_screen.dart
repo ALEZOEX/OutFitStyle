@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../presentation/providers/recommendations_provider.dart';
 import '../widgets/recommendation_card.dart';
+import '../../../ui/widgets/city_selector_widget.dart';
 
 /// Экран персональных рекомендаций
 /// Без социальной функциональности — только персональные подборки
@@ -43,6 +44,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
   Widget build(BuildContext context) {
     final state = ref.watch(recommendationsProvider);
     final stats = ref.watch(recommendationsStatsProvider);
+    final selectedCity = ref.watch(selectedCityProvider);
 
     return Scaffold(
       body: CustomScrollView(
@@ -51,6 +53,19 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           SliverToBoxAdapter(
             child: _buildHeader(context, state, stats),
           ),
+          // Виджет выбора города для Web
+          if (selectedCity == null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: CitySelectorWidget(
+                  onCitySelected: (city) {
+                    // Перезагрузить рекомендации с новым городом
+                    ref.invalidate(recommendationsProvider);
+                  },
+                ),
+              ),
+            ),
           // Быстрые действия
           SliverToBoxAdapter(
             child: _buildQuickActions(context),
