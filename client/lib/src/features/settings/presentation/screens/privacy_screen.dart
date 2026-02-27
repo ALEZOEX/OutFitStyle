@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../ui/widgets/max_width_container.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../services/auth_storage.dart';
+import '../../../../presentation/routing/router.dart';
 
 /// Экран настроек конфиденциальности
 ///
@@ -26,10 +29,16 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   bool _wardrobeVisibility = false; // Приватный гардероб
   bool _allowDataCollection = true; // Сбор анонимных данных
   bool _showOnlineStatus = true; // Показывать статус "онлайн"
+  
+  // API клиент и хранилище
+  late final ApiClient _apiClient;
+  late final AuthStorage _authStorage;
 
   @override
   void initState() {
     super.initState();
+    _authStorage = AuthStorage();
+    _apiClient = ApiClient(storage: _authStorage);
     _loadSettings();
   }
 
@@ -329,17 +338,33 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<void> _exportData() async {
-    // TODO: Реализовать экспорт данных через API
-    // Покажем уведомление о начале процесса
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Подготовка данных... Вы получите уведомление по завершении',
+    try {
+      // Экспорт данных через API
+      final response = await _apiClient.post('/api/v1/user/export-data');
+      
+      if (response.statusCode == 200 || response.statusCode == 202) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Данные подготовлены! Ссылка для скачивания отправлена на email',
+              ),
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+      } else {
+        throw Exception('Ошибка экспорта данных');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка экспорта данных: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
-          duration: Duration(seconds: 4),
-        ),
-      );
+        );
+      }
     }
   }
 
@@ -380,14 +405,36 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    // TODO: Реализовать удаление аккаунта через API
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Запрос на удаление отправлен'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+    try {
+      // Удаление аккаунта через API
+      final response = await _apiClient.delete('/api/v1/user/delete-account');
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Выход из системы и очистка сессии
+        await _authStorage.clearSession();
+        
+        if (mounted) {
+          // Перенаправление на экран входа
+          ref.read(appRouterProvider).go('/auth');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Аккаунт успешно удалён'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        throw Exception('Ошибка удаления аккаунта');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка удаления аккаунта: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 }
