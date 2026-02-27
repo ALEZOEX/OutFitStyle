@@ -16,7 +16,7 @@ class ApiClient {
       headers: {'Content-Type': 'application/json'},
     ));
 
-    // Interceptor для авторизации
+    // Interceptor для авторизации и refresh токена
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final tokenPair = await storage.readTokenPair();
@@ -29,12 +29,87 @@ class ApiClient {
         }
         return handler.next(options);
       },
-      onError: (DioException err, handler) {
+      onError: (DioException err, ErrorInterceptorHandler handler) async {
         // Логируем ошибки для отладки
         print('[ApiClient] Error: ${err.type} ${err.requestOptions.path} - ${err.response?.statusCode}');
+
+        // Если 401 и это не запрос к auth endpoint - пробуем refresh
+        if (err.response?.statusCode == 401) {
+          final path = err.requestOptions.path;
+          
+          // Не пытаемся refresh для auth endpoints чтобы избежать бесконечного цикла
+          if (!path.contains('/auth/')) {
+            try {
+              print('[ApiClient] Попытка refresh токена...');
+              final refreshed = await _refreshToken();
+              
+              if (refreshed) {
+                print('[ApiClient] Токен обновлён, повторяем запрос...');
+                // Повторяем оригинальный запрос с новым токеном
+                final originalRequest = err.requestOptions;
+                final tokenPair = await storage.readTokenPair();
+                final newToken = tokenPair?.accessToken;
+                
+                if (newToken != null) {
+                  final response = await _dio.request(
+                    originalRequest.method,
+                    originalRequest.path,
+                    data: originalRequest.data,
+                    queryParameters: originalRequest.queryParameters,
+                    options: Options(
+                      headers: {
+                        ...originalRequest.headers,
+                        'Authorization': 'Bearer $newToken',
+                      },
+                    ),
+                  );
+                  return handler.resolve(response);
+                }
+              }
+            } catch (refreshError) {
+              print('[ApiClient] Ошибка refresh: $refreshError');
+              // Если refresh не удался - очищаем сессию
+              await storage.clearSession();
+            }
+          }
+        }
+        
         return handler.next(err);
       },
     ));
+  }
+
+  /// Refresh токена
+  Future<bool> _refreshToken() async {
+    try {
+      final refreshToken = await storage.readRefreshToken();
+      if (refreshToken == null || refreshToken.isEmpty) {
+        print('[ApiClient] Нет refresh токена');
+        return false;
+      }
+
+      final response = await _dio.post(
+        '/api/v1/auth/refresh',
+        data: {'refresh_token': refreshToken},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final tokens = data['tokens'] as Map<String, dynamic>?;
+        
+        if (tokens != null) {
+          final newTokenPair = TokenPair.fromJson(tokens);
+          await storage.saveTokenPair(newTokenPair);
+          print('[ApiClient] Токен успешно обновлён');
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (e) {
+      print('[ApiClient] Ошибка refresh токена: $e');
+      return false;
+    }
   }
 
   /// Внутренний конструктор для использования с кастомным Dio
