@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../data/models/product.dart';
-import '../presentation/providers/cart_provider.dart';
-import '../data/market_api_client.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/cart.dart';
+import 'package:outfitstyle_client/src/features/market/presentation/providers/cart_provider.dart';
+import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Product detail screen
 class ProductDetailScreen extends ConsumerStatefulWidget {

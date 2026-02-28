@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../presentation/providers/cart_provider.dart';
-import '../widgets/cart_item_card.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:outfitstyle_client/src/features/market/presentation/providers/cart_provider.dart';
+import 'package:outfitstyle_client/src/features/market/widgets/cart_item_card.dart';
+import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Cart screen
 class CartScreen extends ConsumerWidget {
@@ -16,12 +16,11 @@ class CartScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Корзина'),
         actions: [
-          cartAsync.value?.isNotEmpty == true
-              ? TextButton(
-                  onPressed: () => _showClearConfirmation(context, ref),
-                  child: const Text('Очистить'),
-                )
-              : null,
+          if (cartAsync.value?.isNotEmpty == true)
+            TextButton(
+              onPressed: () => _showClearConfirmation(context, ref),
+              child: const Text('Очистить'),
+            ),
         ],
       ),
       body: cartAsync.when(
