@@ -189,6 +189,7 @@ services:
       - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_secret_password_change_in_production}@redis:6379
       - ML_SERVICE_URL=http://ml-service:8000
       - API_SERVICE_URL=http://api:8080
+      - SCRAPER_API_URL=http://scraper-api:8000
       - LOG_LEVEL=info
       - PORT=8001
     depends_on:
@@ -200,6 +201,8 @@ services:
         condition: service_started
       api:
         condition: service_started
+      scraper-api:
+        condition: service_started
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8001/health', timeout=5)"]
       interval: 30s
@@ -208,6 +211,27 @@ services:
       start_period: 10s
     profiles:
       - market
+    restart: unless-stopped
+
+  scraper-api:
+    build:
+      context: ./scraper-api
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./scraper-api/artifacts:/app/artifacts
+    networks:
+      - default
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
 
 volumes:

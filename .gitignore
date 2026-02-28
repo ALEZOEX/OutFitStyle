@@ -222,9 +222,12 @@ gha-creds-*.json
 client/build/
 
 # Локальные файлы (не для публикации)
-POSTER_LOCAL.md  
+POSTER_LOCAL.md
 secret-edit.yaml
 *.secret.yaml
+
+# Scraper API artifacts
+scraper-api/artifacts/*.json
 
 # Но разрешаем model.pkl для ml-service (manifest для CatBoost)
 !ml-service/models/model.pkl
