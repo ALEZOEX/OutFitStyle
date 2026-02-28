@@ -90,6 +90,14 @@ HUMIDITY_LOW: float = 25.0
 # Длительность (часы)
 DURATION_LONG: float = 4.0
 
+# ═══════════════════════════════════════════
+# БЮДЖЕТНЫЕ ПОРОГИ (₽)
+# ═══════════════════════════════════════════
+
+BUDGET_ECONOMY_MAX: float = 3000.0    # Economy: до 3000₽
+BUDGET_MEDIUM_MAX: float = 10000.0   # Medium: 3000-10000₽
+# Premium: 10000+₽
+
 
 # ═══════════════════════════════════════════
 # УРОВЕНЬ 2: Запрещённые комбинации (пары)
@@ -149,6 +157,21 @@ class WeatherContext:
     activity: str
     gender: str
     duration: float = 2.0
+
+
+@dataclass
+class UserPreferences:
+    """
+    Предпочтения пользователя для персонализации фильтрации.
+
+    Attributes:
+        style_preferences: Список предпочитаемых стилей (casual, sport, classic, etc.)
+        budget_range: Диапазон бюджета (economy, medium, premium)
+        favorite_brands: Список любимых брендов (Nike, Adidas, Zara, etc.)
+    """
+    style_preferences: Optional[List[str]] = None
+    budget_range: Optional[str] = None
+    favorite_brands: Optional[List[str]] = None
 
 
 # ═══════════════════════════════════════════
@@ -741,3 +764,220 @@ def _get_comfort_level(temp: float) -> str:
         return "hot"
     else:
         return "very_hot"
+
+
+# ═══════════════════════════════════════════
+# ФИЛЬТРАЦИЯ ПО ПРЕДПОЧТЕНИЯМ ПОЛЬЗОВАТЕЛЯ
+# ═══════════════════════════════════════════
+
+
+def filter_by_budget(
+    combinations: List[Dict[str, str]],
+    budget_range: Optional[str],
+    item_prices: Optional[Dict[str, float]] = None,
+) -> List[Dict[str, str]]:
+    """
+    Фильтрация комбинаций по бюджету.
+
+    Args:
+        combinations: Список комбинаций одежды
+        budget_range: Диапазон бюджета (economy, medium, premium)
+        item_prices: Словарь цен предметов {item_name: price}
+
+    Returns:
+        Отфильтрованный список комбинаций
+
+    Логика:
+        - economy: общая стоимость комплекта ≤ 3000₽
+        - medium: общая стоимость комплекта ≤ 10000₽
+        - premium: без ограничений
+    """
+    if budget_range is None or item_prices is None:
+        return combinations
+
+    # Определяем максимальный бюджет
+    if budget_range == "economy":
+        max_budget = BUDGET_ECONOMY_MAX
+    elif budget_range == "medium":
+        max_budget = BUDGET_MEDIUM_MAX
+    else:  # premium
+        return combinations  # Без ограничений
+
+    filtered = []
+    for combo in combinations:
+        total_price = 0.0
+        items = [combo.get("top"), combo.get("bottom"), combo.get("outerwear"), combo.get("footwear")]
+        
+        for item in items:
+            if item and item in item_prices:
+                total_price += item_prices[item]
+            elif item:
+                # Если цена неизвестна, используем среднюю для категории
+                # Это позволяет не отбрасывать комбинации без данных о цене
+                total_price += 2500.0  # Средняя цена по умолчанию
+
+        if total_price <= max_budget:
+            filtered.append(combo)
+
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(
+        f"Фильтрация по бюджету ({budget_range}): "
+        f"{len(combinations)} → {len(filtered)} (max={max_budget}₽)"
+    )
+
+    return filtered if filtered else combinations  # Fallback: если всё отфильтровалось, возвращаем всё
+
+
+def filter_by_styles(
+    combinations: List[Dict[str, str]],
+    style_preferences: Optional[List[str]],
+    item_styles: Optional[Dict[str, List[str]]] = None,
+) -> List[Dict[str, str]]:
+    """
+    Фильтрация комбинаций по стилям.
+
+    Args:
+        combinations: Список комбинаций одежды
+        style_preferences: Предпочитаемые стили пользователя
+        item_styles: Словарь стилей предметов {item_name: [styles]}
+
+    Returns:
+        Отфильтрованный список комбинаций
+
+    Логика:
+        - Если стиль предмета совпадает с предпочтением — оставляем
+        - Если нет данных о стиле — оставляем (нейтральный предмет)
+    """
+    if not style_preferences or not item_styles:
+        return combinations
+
+    # Нормализуем стили к нижнему регистру
+    preferred_styles_lower = {s.lower() for s in style_preferences}
+
+    filtered = []
+    for combo in combinations:
+        items = [combo.get("top"), combo.get("bottom"), combo.get("outerwear"), combo.get("footwear")]
+        
+        # Проверяем каждый предмет на соответствие стилю
+        has_preferred_style = False
+        has_non_preferred = False
+        
+        for item in items:
+            if item and item in item_styles:
+                item_style_list = item_styles.get(item, [])
+                item_styles_lower = {s.lower() for s in item_style_list}
+                
+                if item_styles_lower & preferred_styles_lower:
+                    has_preferred_style = True
+                elif item_styles_lower:
+                    has_non_preferred = True
+        
+        # Оставляем если есть хотя бы один предмет предпочитаемого стиля
+        # или если нет данных о стилях
+        if has_preferred_style or not (has_preferred_style or has_non_preferred):
+            filtered.append(combo)
+
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(
+        f"Фильтрация по стилям ({style_preferences}): "
+        f"{len(combinations)} → {len(filtered)}"
+    )
+
+    return filtered if filtered else combinations
+
+
+def filter_by_brands(
+    combinations: List[Dict[str, str]],
+    favorite_brands: Optional[List[str]],
+    item_brands: Optional[Dict[str, str]] = None,
+) -> List[Dict[str, str]]:
+    """
+    Фильтрация комбинаций по брендам.
+
+    Args:
+        combinations: Список комбинаций одежды
+        favorite_brands: Любимые бренды пользователя
+        item_brands: Словарь брендов предметов {item_name: brand}
+
+    Returns:
+        Отфильтрованный список комбинаций
+
+    Логика:
+        - Приоритет предметам из любимых брендов
+        - Если бренд неизвестен — оставляем (нейтральный предмет)
+        - Не отбрасываем полностью, только приоритезируем
+    """
+    if not favorite_brands or not item_brands:
+        return combinations
+
+    # Нормализуем бренды к нижнему регистру
+    favorite_brands_lower = {b.lower() for b in favorite_brands}
+
+    # Сортируем комбинации: сначала с любимыми брендами
+    def brand_score(combo: Dict[str, str]) -> int:
+        items = [combo.get("top"), combo.get("bottom"), combo.get("outerwear"), combo.get("footwear")]
+        score = 0
+        for item in items:
+            if item and item in item_brands:
+                brand = item_brands.get(item, "").lower()
+                if brand in favorite_brands_lower:
+                    score += 1
+        return score
+
+    sorted_combos = sorted(combinations, key=brand_score, reverse=True)
+    
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(
+        f"Сортировка по брендам ({favorite_brands}): "
+        f"{len(combinations)} комбинаций отсортировано"
+    )
+
+    return sorted_combos
+
+
+def apply_preferences_filter(
+    combinations: List[Dict[str, str]],
+    preferences: Optional[UserPreferences],
+    item_prices: Optional[Dict[str, float]] = None,
+    item_styles: Optional[Dict[str, List[str]]] = None,
+    item_brands: Optional[Dict[str, str]] = None,
+) -> List[Dict[str, str]]:
+    """
+    Комплексная фильтрация по предпочтениям пользователя.
+
+    Применяет фильтры в порядке:
+    1. Бюджет (жёсткий фильтр)
+    2. Стили (мягкий фильтр)
+    3. Бренды (сортировка)
+
+    Args:
+        combinations: Список комбинаций одежды
+        preferences: Предпочтения пользователя
+        item_prices: Словарь цен предметов
+        item_styles: Словарь стилей предметов
+        item_brands: Словарь брендов предметов
+
+    Returns:
+        Отфильтрованный и отсортированный список комбинаций
+    """
+    if not preferences:
+        return combinations
+
+    result = combinations
+
+    # 1. Фильтрация по бюджету (жёсткий фильтр)
+    if preferences.budget_range:
+        result = filter_by_budget(result, preferences.budget_range, item_prices)
+
+    # 2. Фильтрация по стилям (мягкий фильтр)
+    if preferences.style_preferences:
+        result = filter_by_styles(result, preferences.style_preferences, item_styles)
+
+    # 3. Сортировка по брендам (приоритезация)
+    if preferences.favorite_brands:
+        result = filter_by_brands(result, preferences.favorite_brands, item_brands)
+
+    return result

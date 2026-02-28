@@ -1,5 +1,6 @@
 import '../../../../core/api/api_client.dart';
 import '../../../../domain/entities/outfit_recommendation.dart';
+import '../../../../domain/entities/user_preference.dart';
 import 'package:dio/dio.dart';
 
 /// Репозиторий для работы с ежедневными рекомендациями
@@ -107,6 +108,8 @@ class DailyRecommendationsRepository {
   /// [latitude] - широта
   /// [longitude] - долгота
   /// [occasion] - повод
+  /// [location] - локация
+  /// [userPreferences] - предпочтения пользователя для персонализации
   ///
   /// Endpoint: POST /api/v1/recommendations
   Future<OutfitRecommendation> createRecommendation({
@@ -114,6 +117,7 @@ class DailyRecommendationsRepository {
     double? longitude,
     String? occasion,
     String? location,
+    UserPreference? userPreferences,
   }) async {
     try {
       final body = <String, dynamic>{};
@@ -122,6 +126,19 @@ class DailyRecommendationsRepository {
       if (longitude != null) body['longitude'] = longitude;
       if (occasion != null) body['occasion'] = occasion;
       if (location != null) body['location'] = location;
+      
+      // Добавляем предпочтения пользователя для персонализации рекомендаций
+      if (userPreferences != null) {
+        body['user_preferences'] = {
+          'style_preferences': userPreferences.preferredStyles.isNotEmpty 
+              ? userPreferences.preferredStyles 
+              : null,
+          'budget_range': _calculateBudgetRange(userPreferences.maxBudget),
+          'favorite_brands': userPreferences.preferredBrands.isNotEmpty 
+              ? userPreferences.preferredBrands 
+              : null,
+        }.removeNulls();
+      }
 
       final response = await _apiClient.post('/api/v1/recommendations', data: body);
 
@@ -247,10 +264,38 @@ class DailyRecommendationsRepository {
 
   String? _extractErrorMessage(dynamic data) {
     if (data is Map<String, dynamic>) {
-      return data['message'] as String? ?? 
+      return data['message'] as String? ??
              data['error'] as String?;
     }
     return null;
+  }
+
+  /// Рассчитать диапазон бюджета на основе maxBudget
+  ///
+  /// economy: до 3000₽
+  /// medium: 3000-10000₽
+  /// premium: 10000+₽
+  String? _calculateBudgetRange(double? maxBudget) {
+    if (maxBudget == null || maxBudget <= 0) {
+      return null;
+    }
+    
+    if (maxBudget <= 3000) {
+      return 'economy';
+    } else if (maxBudget <= 10000) {
+      return 'medium';
+    } else {
+      return 'premium';
+    }
+  }
+}
+
+/// Extension для удаления null значений из Map
+extension RemoveNullsExtension<K, V> on Map<K, V?> {
+  Map<K, V> removeNulls() {
+    return Map.fromEntries(
+      entries.where((e) => e.value != null).map((e) => MapEntry(e.key, e.value as V)),
+    );
   }
 }
 

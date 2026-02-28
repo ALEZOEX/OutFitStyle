@@ -1,5 +1,11 @@
 """
 Contracts для endpoint /api/recommend с фильтрацией
+
+ИЗМЕНЕНИЯ:
+- Добавлены поля предпочтений пользователя в RecommendRequest
+- style_preferences: список предпочитаемых стилей (casual, sport, classic, etc.)
+- budget_range: диапазон бюджета (economy, medium, premium)
+- favorite_brands: список любимых брендов
 """
 
 from pydantic import BaseModel, Field, field_validator
@@ -24,6 +30,42 @@ class RecommendContext(BaseModel):
     )
 
 
+class UserPreferences(BaseModel):
+    """
+    Предпочтения пользователя для персонализации рекомендаций.
+    
+    Attributes:
+        style_preferences: Список предпочитаемых стилей (casual, sport, classic, streetwear, etc.)
+        budget_range: Диапазон бюджета (economy, medium, premium)
+        favorite_brands: Список любимых брендов (Nike, Adidas, Zara, etc.)
+    """
+    style_preferences: Optional[List[str]] = Field(
+        default=None,
+        description="Предпочитаемые стили: casual, sport, classic, streetwear, bohemian, minimal"
+    )
+    budget_range: Optional[str] = Field(
+        default=None,
+        description="Диапазон бюджета: economy (до 3000₽), medium (3000-10000₽), premium (10000+₽)"
+    )
+    favorite_brands: Optional[List[str]] = Field(
+        default=None,
+        description="Любимые бренды для повышения приоритета"
+    )
+
+    @field_validator("budget_range")
+    @classmethod
+    def validate_budget_range(cls, v: Optional[str]) -> Optional[str]:
+        """Валидация budget_range: допустимые значения"""
+        if v is None:
+            return v
+        allowed_values = {"economy", "medium", "premium"}
+        if v.lower() not in allowed_values:
+            raise ValueError(
+                f"budget_range должен быть одним из: {allowed_values}, получено: {v}"
+            )
+        return v.lower()
+
+
 class RecommendRequest(BaseModel):
     """Запрос на рекомендации с фильтрацией"""
 
@@ -33,6 +75,12 @@ class RecommendRequest(BaseModel):
     available_outerwears: Optional[List[str]] = None
     available_footwears: Optional[List[str]] = None
     top_k: int = Field(default=5, description="Количество рекомендаций", ge=1, le=50)
+    
+    # Предпочтения пользователя для персонализации
+    user_preferences: Optional[UserPreferences] = Field(
+        default=None,
+        description="Предпочтения пользователя для персонализации рекомендаций"
+    )
 
     @field_validator("top_k")
     @classmethod
