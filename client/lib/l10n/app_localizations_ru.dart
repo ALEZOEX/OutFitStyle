@@ -90,107 +90,52 @@ class AppLocalizationsRu extends AppLocalizations {
   String get savePreferences => 'Сохранить предпочтения';
 
   @override
-  String get onboardingWelcomeTitle => 'Добро пожаловать в OutfitStyle!';
+  String get completeProfileTitle => 'Заполните профиль';
 
   @override
-  String get onboardingWelcomeSubtitle => 'Ваш персональный помощник по стилю';
+  String get letsGetAcquainted => 'Давайте познакомимся!';
 
   @override
-  String get onboardingWelcomeDescription =>
-      'Получайте персональные рекомендации одежды на основе погоды и ваших предпочтений';
+  String get fillProfileForPersonalized =>
+      'Заполните информацию о себе для персонализированных рекомендаций';
 
   @override
-  String get onboardingCityTitle => 'Выберите ваш город';
+  String get addPhoto => 'Добавить фото';
 
   @override
-  String get onboardingCityDescription => 'Для точных рекомендаций по погоде';
+  String get selectFromGallery => 'Выбрать из галереи';
 
   @override
-  String get onboardingCitySearchHint => 'Введите название города...';
+  String get name => 'Имя';
 
   @override
-  String get onboardingCityDetectByIp => 'Определить автоматически';
+  String get nameRequired => 'Введите имя';
 
   @override
-  String get onboardingCityRequired => 'Пожалуйста, выберите город';
+  String get nameMinLength => 'Минимум 2 символа';
 
   @override
-  String get onboardingStylesTitle => 'Какие стили вам нравятся?';
+  String get howToAddressYou => 'Как к вам обращаться?';
 
   @override
-  String get onboardingStylesDescription => 'Выберите минимум 3 стиля';
+  String get saveAndContinue => 'Сохранить и продолжить';
 
   @override
-  String get onboardingStylesMinimum => 'Выберите хотя бы 3 стиля';
+  String get saving => 'Сохранение...';
 
   @override
-  String get onboardingPreferencesTitle => 'Ваши предпочтения';
+  String get youCanChangeLater =>
+      'Вы сможете изменить эти данные в настройках профиля';
 
   @override
-  String get onboardingPreferencesDescription =>
-      'Помогите нам подобрать рекомендации для вас';
+  String get errorSaving => 'Ошибка при сохранении: ';
 
   @override
-  String get onboardingBudgetLabel => 'Диапазон бюджета';
+  String get errorSelectingPhoto => 'Ошибка при выборе фото: ';
 
   @override
-  String get onboardingBrandsLabel => 'Любимые бренды (необязательно)';
+  String get profileUpdated => 'Профиль успешно обновлен';
 
   @override
-  String get onboardingBrandsHint => 'Например, Zara, H&M, Nike...';
-
-  @override
-  String get onboardingCompleteTitle => 'Готово!';
-
-  @override
-  String get onboardingCompleteDescription =>
-      'Мы подобрали для вас первые рекомендации';
-
-  @override
-  String get onboardingStartButton => 'Начать';
-
-  @override
-  String get onboardingNextButton => 'Далее';
-
-  @override
-  String get onboardingBackButton => 'Назад';
-
-  @override
-  String get onboardingSkipButton => 'Пропустить';
-
-  @override
-  String get onboardingFinishButton => 'Завершить';
-
-  @override
-  String get styleCasual => 'Casual';
-
-  @override
-  String get styleSport => 'Sport';
-
-  @override
-  String get styleClassic => 'Classic';
-
-  @override
-  String get styleStreetwear => 'Streetwear';
-
-  @override
-  String get styleBusiness => 'Business';
-
-  @override
-  String get styleMinimalist => 'Minimalist';
-
-  @override
-  String get styleBoho => 'Boho';
-
-  @override
-  String get stylePreppy => 'Preppy';
-
-  @override
-  String get budgetEconomy => 'Эконом';
-
-  @override
-  String get budgetMedium => 'Средний';
-
-  @override
-  String get budgetPremium => 'Премиум';
+  String get avatarUpdated => 'Аватар успешно обновлен';
 }

@@ -57,6 +57,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       if (success) {
         print('✅ Google Sign-In успешен! Обновляем состояние авторизации...');
 
+        // Получаем данные пользователя
+        final userData = await authRepo.getCurrentUser();
+        String? email;
+        String? name;
+        bool isNewUser = true;
+
+        if (userData != null) {
+          final user = userData['user'] as Map<String, dynamic>? ?? userData;
+          email = user['email'] as String?;
+          name = user['display_name'] as String? ?? user['name'] as String?;
+          
+          // Проверяем, заполнен ли профиль (есть имя)
+          isNewUser = name == null || name.isEmpty;
+        }
+
         // Обновляем состояние авторизации в роутере
         final authStateNotifier = ref.read(authStateProvider.notifier);
         await authStateNotifier.checkAuth();
@@ -66,9 +81,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         refreshStream.notifyAuthChanged();
 
         if (mounted) {
-          print('✅ Выполняем навигацию на /home...');
-          context.go('/home');
-          print('✅ Навигация выполнена');
+          // Если новый пользователь - показываем экран заполнения профиля
+          if (isNewUser && email != null) {
+            print('✅ Новый пользователь, переходим на экран заполнения профиля...');
+            context.go(
+              '/complete-profile',
+              extra: {'email': email, 'name': name},
+            );
+          } else {
+            print('✅ Существующий пользователь, переходим на /home...');
+            context.go('/home');
+          }
         }
       } else {
         throw Exception('Google Sign-In не удался');
