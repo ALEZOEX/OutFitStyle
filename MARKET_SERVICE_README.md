@@ -156,11 +156,63 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8001
 | GET | `/api/v1/market/products` | Каталог товаров |
 | GET | `/api/v1/market/products/{id}` | Детали товара |
 | GET | `/api/v1/market/products/categories` | Категории |
+| POST | `/api/v1/market/products/import` | Импорт товара по ссылке (WB/Ozon) |
 
 **Пример запроса:**
 ```bash
 curl http://localhost:8001/api/v1/market/products?category=top&page_size=10
 ```
+
+### Импорт товаров по ссылке
+
+Распарсить товар с Wildberries или Ozon и сохранить в каталог.
+
+**API:**
+
+```
+POST /api/v1/market/products/import
+```
+
+**Headers:**
+- `Content-Type: application/json`
+
+**Body:**
+```json
+{
+  "url": "https://www.wildberries.ru/catalog/12345678/detail.aspx",
+  "marketplace": "auto"
+}
+```
+
+**Параметры:**
+- `url` (required) — Ссылка на товар
+- `marketplace` (optional) — Маркетплейс: `auto`, `wb`, `ozon` (по умолчанию `auto`)
+
+**Response:**
+```json
+{
+  "status": "success",
+  "product": {
+    "id": "uuid",
+    "name": "Название товара",
+    "brand": "Бренд",
+    "price": 1999.00,
+    "category": "top",
+    "image_urls": ["https://..."],
+    "in_stock": true
+  },
+  "message": "Товар из wildberries успешно импортирован"
+}
+```
+
+**Пример:**
+```bash
+curl -X POST http://localhost:8001/api/v1/market/products/import \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.wildberries.ru/catalog/8685970/detail.aspx"}'
+```
+
+**Таймаут:** 60 секунд
 
 ### Cart (Корзина)
 
@@ -223,6 +275,7 @@ pytest tests/test_products.py -v
 | `REDIS_URL` | Redis URL | `redis://:password@redis:6379` |
 | `ML_SERVICE_URL` | ML сервис URL | `http://ml-service:8000` |
 | `API_SERVICE_URL` | Go API URL | `http://api:8080` |
+| `SCRAPER_API_URL` | Scraper API URL (парсинг WB/Ozon) | `http://scraper-api:8000` |
 | `PORT` | Порт сервиса | `8001` |
 | `LOG_LEVEL` | Уровень логов | `INFO` |
 
@@ -343,6 +396,64 @@ kubectl delete -f k8s/market-service.yaml
 # Откат миграций
 alembic downgrade base
 ```
+
+## 🔌 Scraper API (Парсинг WB/Ozon)
+
+### Обзор
+
+Scraper API — отдельный сервис для парсинга товаров с маркетплейсов Wildberries и Ozon.
+Использует [WildSearch Crawler](https://github.com/MichaelZav/Wildberries-API) на базе Scrapy.
+
+### Архитектура
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Market Service │───►│  Scraper API    │───►│  WildSearch     │
+│   (FastAPI)     │    │  (FastAPI)      │    │  Crawler        │
+│                 │    │                 │    │  (Scrapy)       │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                       ┌─────────────────┐
+                       │  WB / Ozon      │
+                       │  (парсинг)      │
+                       └─────────────────┘
+```
+
+### Запуск Scraper API
+
+```bash
+# Docker Compose
+docker-compose up -d scraper-api
+
+# Проверка
+curl http://localhost:8002/health
+```
+
+### API Scraper API
+
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| POST | `/api/v1/scraper/parse` | Распарсить товар по ссылке |
+| GET | `/health` | Проверка здоровья |
+| GET | `/ready` | Проверка готовности |
+
+**Пример запроса:**
+```bash
+curl -X POST http://localhost:8002/api/v1/scraper/parse \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.wildberries.ru/catalog/8685970/detail.aspx"}'
+```
+
+### Поддерживаемые маркетплейсы
+
+- **Wildberries** (wildberries.ru, wb.ru)
+- **Ozon** (ozon.ru)
+
+### Таймауты
+
+- Парсинг: 60 секунд
+- Retry attempts: 2
 
 ## 📄 Лицензия
 

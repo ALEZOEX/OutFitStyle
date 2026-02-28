@@ -36,7 +36,11 @@ class Settings(BaseSettings):
     # Main API Service Integration (для проверки пользователей)
     API_SERVICE_URL: str = "http://localhost:8080"
     API_SERVICE_TIMEOUT: int = 10
-    
+
+    # Scraper API Integration (для парсинга WB/Ozon)
+    SCRAPER_API_URL: str = "http://scraper-api:8000"
+    SCRAPER_TIMEOUT: int = 60
+
     # Payment Integration
     PAYMENT_ENABLED: bool = False
     YOOKASSA_SHOP_ID: Optional[str] = None
