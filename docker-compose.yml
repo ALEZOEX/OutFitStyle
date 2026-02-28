@@ -191,6 +191,8 @@ services:
       - API_SERVICE_URL=http://api:8080
       - LOG_LEVEL=info
       - PORT=8001
+      - PYRUSTSCRAPERAPI_TOKEN=${PYRUSTSCRAPERAPI_TOKEN:-}
+      - PRODUCT_IMPORT_LIMIT_PER_DAY=${PRODUCT_IMPORT_LIMIT_PER_DAY:-10}
     depends_on:
       postgres:
         condition: service_healthy

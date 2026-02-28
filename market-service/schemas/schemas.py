@@ -203,6 +203,23 @@ class RecommendationResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════
+# PRODUCT IMPORT SCHEMAS
+# ═══════════════════════════════════════════
+
+class ProductImportRequest(BaseModel):
+    """Запрос на импорт товара по URL."""
+    url: str = Field(..., min_length=1, max_length=2048, description="URL товара на WB/Ozon")
+
+
+class ProductImportResponse(BaseModel):
+    """Ответ импорта товара."""
+    status: str = Field(..., description="status: success/error")
+    product: Optional[ProductResponse] = None
+    message: str = Field(..., description="Сообщение о результате")
+    remaining_imports: Optional[int] = Field(None, description="Оставшееся количество импортов на сегодня")
+
+
+# ═══════════════════════════════════════════
 # ERROR SCHEMAS
 # ═══════════════════════════════════════════
 
