@@ -242,19 +242,4 @@ class MarketApiClient {
     final data = response.data as List<dynamic>;
     return data.map((item) => Product.fromJson(item as Map<String, dynamic>)).toList();
   }
-
-  // ═══════════════════════════════════════════
-  // PRODUCT IMPORT
-  // ═══════════════════════════════════════════
-
-  /// Import product from marketplace URL (WB/Ozon)
-  /// Returns a map with status, product, message, and remaining_imports
-  Future<Map<String, dynamic>> importProductFromUrl(String url) async {
-    final response = await _dio.post(
-      '/api/v1/market/products/import',
-      data: {'url': url},
-    );
-
-    return Map<String, dynamic>.from(response.data);
-  }
 }

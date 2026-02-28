@@ -198,68 +198,6 @@ curl -X POST http://localhost:8001/api/v1/market/cart/items \
 | GET | `/api/v1/market/recommendations` | Персональные рекомендации |
 | GET | `/api/v1/market/recommendations/similar/{id}` | Похожие товары |
 
-### Product Import (Импорт товаров)
-
-Импорт товаров с маркетплейсов Wildberries и Ozon по ссылке.
-
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| POST | `/api/v1/market/products/import` | Импортировать товар по URL |
-
-**Требуется заголовок:** `X-User-Id: <user_id>`
-
-**Поддерживаемые форматы URL:**
-- `https://www.wildberries.ru/catalog/...`
-- `https://www.ozon.ru/product/...`
-- `wb/12345678` (короткая ссылка WB)
-- `oz/12345678` (короткая ссылка Ozon)
-
-**Лимиты:** 10 импортов в день на пользователя (настраивается через `PRODUCT_IMPORT_LIMIT_PER_DAY`)
-
-**Пример запроса:**
-```bash
-curl -X POST http://localhost:8001/api/v1/market/products/import \
-  -H "X-User-Id: 12345" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://www.wildberries.ru/catalog/12345678/detail.aspx"}'
-```
-
-**Пример ответа (успех):**
-```json
-{
-  "status": "success",
-  "product": {
-    "id": "uuid",
-    "name": "Футболка базовая",
-    "brand": "BrandName",
-    "price": 1500.00,
-    "currency": "RUB",
-    "category": "top",
-    "image_urls": ["https://..."],
-    "in_stock": true,
-    "created_at": "2026-02-28T10:00:00",
-    "updated_at": "2026-02-28T10:00:00"
-  },
-  "message": "Товар из wildberries успешно импортирован",
-  "remaining_imports": 9
-}
-```
-
-**Пример ответа (ошибка):**
-```json
-{
-  "status": "error",
-  "product": null,
-  "message": "Неподдерживаемый маркетплейс. URL: https://example.com/...",
-  "remaining_imports": 10
-}
-```
-
-**Коды ошибок HTTP:**
-- `400` — Некорректный URL или отсутствует заголовок X-User-Id
-- `429` — Превышен лимит импортов
-- `500` — Ошибка парсинга или сервера
-
 ## 🧪 Тестирование
 
 ```bash
@@ -287,28 +225,6 @@ pytest tests/test_products.py -v
 | `API_SERVICE_URL` | Go API URL | `http://api:8080` |
 | `PORT` | Порт сервиса | `8001` |
 | `LOG_LEVEL` | Уровень логов | `INFO` |
-| `PYRUSTSCRAPERAPI_TOKEN` | Токен для pyRustScraperApi | `None` (бесплатный доступ) |
-| `PRODUCT_IMPORT_LIMIT_PER_DAY` | Лимит импортов в день | `10` |
-
-### Получение токена pyRustScraperApi
-
-Для парсинга товаров с Wildberries и Ozon используется библиотека `pyRustScraperApi`.
-
-**Варианты:**
-
-1. **Бесплатный тестовый доступ** — работает без токена с ограничениями
-2. **Платный доступ** — получите токен на сайте [pyRustScraperApi](https://pyrustscraperapi.com/)
-
-**Настройка:**
-```bash
-# В .env файле market-service
-PYRUSTSCRAPERAPI_TOKEN=your_token_here
-```
-
-**Установка зависимости:**
-```bash
-pip install pyRustScraperApi beautifulsoup4
-```
 
 ## 📦 Миграции БД
 
