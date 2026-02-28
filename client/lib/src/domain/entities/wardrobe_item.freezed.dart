@@ -15,7 +15,36 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WardrobeItem {
 
- String? get id; String? get name; String? get category; String? get subcategory; String? get brand; String? get color; String? get size; String? get imageUrl; String? get iconEmoji; String? get blurHash; double? get minTemp; double? get maxTemp; int? get warmthLevel; bool? get rainOk; bool? get snowOk; bool? get windOk; int? get usage; List<String>? get materials; String? get gender; String? get fit; String? get pattern; String? get localImagePath; String? get style; bool? get isFavorite; bool? get isArchived; String? get season; String? get serverId; bool? get dirty; DateTime? get lastSyncedAt;
+/// Уникальный идентификатор
+ String? get id;/// Название предмета (например, "Белая футболка Basic")
+ String? get name;/// Категория: top, bottom, shoes, outerwear, accessories, headwear
+@JsonKey(name: 'category') String? get category;/// Подкатегория: tshirt, jeans, sneakers и т.д.
+@JsonKey(name: 'subcategory') String? get subcategory;/// Бренд
+ String? get brand;/// Цвет
+ String? get color;/// Размер (S, M, L, XL, 42, 44 и т.д.)
+ String? get size;/// URL изображения
+ String? get imageUrl;/// Emoji иконка для предмета
+ String? get iconEmoji;/// BlurHash для плейсхолдера изображения
+ String? get blurHash;/// Минимальная температура для носки (°C)
+@JsonKey(name: 'min_temp') double? get minTemp;/// Максимальная температура для носки (°C)
+@JsonKey(name: 'max_temp') double? get maxTemp;/// Уровень теплоты (1-5, где 5 - самый теплый)
+@JsonKey(name: 'warmth_level') int? get warmthLevel;/// Подходит для дождя
+@JsonKey(name: 'rain_ok') bool? get rainOk;/// Подходит для снега
+@JsonKey(name: 'snow_ok') bool? get snowOk;/// Подходит для ветреной погоды
+@JsonKey(name: 'wind_ok') bool? get windOk;/// Количество использований
+ int? get usage;/// Материалы (например, ["cotton", "polyester"])
+ List<String>? get materials;/// Пол: unisex, male, female
+ String? get gender;/// Крой: slim, regular, loose, oversized
+ String? get fit;/// Узор: solid, striped, checked, printed
+ String? get pattern;/// Локальный путь к изображению
+ String? get localImagePath;/// Стиль: casual, formal, sport, streetwear
+ String? get style;/// Избранное
+@JsonKey(name: 'is_favorite') bool? get isFavorite;/// Архивировано
+@JsonKey(name: 'is_archived') bool? get isArchived;/// Сезон: all_season, spring, summer, autumn, winter
+ String? get season;/// ID на сервере
+@JsonKey(name: 'server_id') String? get serverId;/// Есть ли несохраненные изменения
+ bool? get dirty;/// Дата последней синхронизации
+@JsonKey(name: 'last_synced_at') DateTime? get lastSyncedAt;
 /// Create a copy of WardrobeItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +77,7 @@ abstract mixin class $WardrobeItemCopyWith<$Res>  {
   factory $WardrobeItemCopyWith(WardrobeItem value, $Res Function(WardrobeItem) _then) = _$WardrobeItemCopyWithImpl;
 @useResult
 $Res call({
- String? id, String? name, String? category, String? subcategory, String? brand, String? color, String? size, String? imageUrl, String? iconEmoji, String? blurHash, double? minTemp, double? maxTemp, int? warmthLevel, bool? rainOk, bool? snowOk, bool? windOk, int? usage, List<String>? materials, String? gender, String? fit, String? pattern, String? localImagePath, String? style, bool? isFavorite, bool? isArchived, String? season, String? serverId, bool? dirty, DateTime? lastSyncedAt
+ String? id, String? name,@JsonKey(name: 'category') String? category,@JsonKey(name: 'subcategory') String? subcategory, String? brand, String? color, String? size, String? imageUrl, String? iconEmoji, String? blurHash,@JsonKey(name: 'min_temp') double? minTemp,@JsonKey(name: 'max_temp') double? maxTemp,@JsonKey(name: 'warmth_level') int? warmthLevel,@JsonKey(name: 'rain_ok') bool? rainOk,@JsonKey(name: 'snow_ok') bool? snowOk,@JsonKey(name: 'wind_ok') bool? windOk, int? usage, List<String>? materials, String? gender, String? fit, String? pattern, String? localImagePath, String? style,@JsonKey(name: 'is_favorite') bool? isFavorite,@JsonKey(name: 'is_archived') bool? isArchived, String? season,@JsonKey(name: 'server_id') String? serverId, bool? dirty,@JsonKey(name: 'last_synced_at') DateTime? lastSyncedAt
 });
 
 
@@ -181,7 +210,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String? name,  String? category,  String? subcategory,  String? brand,  String? color,  String? size,  String? imageUrl,  String? iconEmoji,  String? blurHash,  double? minTemp,  double? maxTemp,  int? warmthLevel,  bool? rainOk,  bool? snowOk,  bool? windOk,  int? usage,  List<String>? materials,  String? gender,  String? fit,  String? pattern,  String? localImagePath,  String? style,  bool? isFavorite,  bool? isArchived,  String? season,  String? serverId,  bool? dirty,  DateTime? lastSyncedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String? name, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'subcategory')  String? subcategory,  String? brand,  String? color,  String? size,  String? imageUrl,  String? iconEmoji,  String? blurHash, @JsonKey(name: 'min_temp')  double? minTemp, @JsonKey(name: 'max_temp')  double? maxTemp, @JsonKey(name: 'warmth_level')  int? warmthLevel, @JsonKey(name: 'rain_ok')  bool? rainOk, @JsonKey(name: 'snow_ok')  bool? snowOk, @JsonKey(name: 'wind_ok')  bool? windOk,  int? usage,  List<String>? materials,  String? gender,  String? fit,  String? pattern,  String? localImagePath,  String? style, @JsonKey(name: 'is_favorite')  bool? isFavorite, @JsonKey(name: 'is_archived')  bool? isArchived,  String? season, @JsonKey(name: 'server_id')  String? serverId,  bool? dirty, @JsonKey(name: 'last_synced_at')  DateTime? lastSyncedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WardrobeItem() when $default != null:
 return $default(_that.id,_that.name,_that.category,_that.subcategory,_that.brand,_that.color,_that.size,_that.imageUrl,_that.iconEmoji,_that.blurHash,_that.minTemp,_that.maxTemp,_that.warmthLevel,_that.rainOk,_that.snowOk,_that.windOk,_that.usage,_that.materials,_that.gender,_that.fit,_that.pattern,_that.localImagePath,_that.style,_that.isFavorite,_that.isArchived,_that.season,_that.serverId,_that.dirty,_that.lastSyncedAt);case _:
@@ -202,7 +231,7 @@ return $default(_that.id,_that.name,_that.category,_that.subcategory,_that.brand
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String? name,  String? category,  String? subcategory,  String? brand,  String? color,  String? size,  String? imageUrl,  String? iconEmoji,  String? blurHash,  double? minTemp,  double? maxTemp,  int? warmthLevel,  bool? rainOk,  bool? snowOk,  bool? windOk,  int? usage,  List<String>? materials,  String? gender,  String? fit,  String? pattern,  String? localImagePath,  String? style,  bool? isFavorite,  bool? isArchived,  String? season,  String? serverId,  bool? dirty,  DateTime? lastSyncedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String? name, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'subcategory')  String? subcategory,  String? brand,  String? color,  String? size,  String? imageUrl,  String? iconEmoji,  String? blurHash, @JsonKey(name: 'min_temp')  double? minTemp, @JsonKey(name: 'max_temp')  double? maxTemp, @JsonKey(name: 'warmth_level')  int? warmthLevel, @JsonKey(name: 'rain_ok')  bool? rainOk, @JsonKey(name: 'snow_ok')  bool? snowOk, @JsonKey(name: 'wind_ok')  bool? windOk,  int? usage,  List<String>? materials,  String? gender,  String? fit,  String? pattern,  String? localImagePath,  String? style, @JsonKey(name: 'is_favorite')  bool? isFavorite, @JsonKey(name: 'is_archived')  bool? isArchived,  String? season, @JsonKey(name: 'server_id')  String? serverId,  bool? dirty, @JsonKey(name: 'last_synced_at')  DateTime? lastSyncedAt)  $default,) {final _that = this;
 switch (_that) {
 case _WardrobeItem():
 return $default(_that.id,_that.name,_that.category,_that.subcategory,_that.brand,_that.color,_that.size,_that.imageUrl,_that.iconEmoji,_that.blurHash,_that.minTemp,_that.maxTemp,_that.warmthLevel,_that.rainOk,_that.snowOk,_that.windOk,_that.usage,_that.materials,_that.gender,_that.fit,_that.pattern,_that.localImagePath,_that.style,_that.isFavorite,_that.isArchived,_that.season,_that.serverId,_that.dirty,_that.lastSyncedAt);case _:
@@ -222,7 +251,7 @@ return $default(_that.id,_that.name,_that.category,_that.subcategory,_that.brand
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String? name,  String? category,  String? subcategory,  String? brand,  String? color,  String? size,  String? imageUrl,  String? iconEmoji,  String? blurHash,  double? minTemp,  double? maxTemp,  int? warmthLevel,  bool? rainOk,  bool? snowOk,  bool? windOk,  int? usage,  List<String>? materials,  String? gender,  String? fit,  String? pattern,  String? localImagePath,  String? style,  bool? isFavorite,  bool? isArchived,  String? season,  String? serverId,  bool? dirty,  DateTime? lastSyncedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String? name, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'subcategory')  String? subcategory,  String? brand,  String? color,  String? size,  String? imageUrl,  String? iconEmoji,  String? blurHash, @JsonKey(name: 'min_temp')  double? minTemp, @JsonKey(name: 'max_temp')  double? maxTemp, @JsonKey(name: 'warmth_level')  int? warmthLevel, @JsonKey(name: 'rain_ok')  bool? rainOk, @JsonKey(name: 'snow_ok')  bool? snowOk, @JsonKey(name: 'wind_ok')  bool? windOk,  int? usage,  List<String>? materials,  String? gender,  String? fit,  String? pattern,  String? localImagePath,  String? style, @JsonKey(name: 'is_favorite')  bool? isFavorite, @JsonKey(name: 'is_archived')  bool? isArchived,  String? season, @JsonKey(name: 'server_id')  String? serverId,  bool? dirty, @JsonKey(name: 'last_synced_at')  DateTime? lastSyncedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _WardrobeItem() when $default != null:
 return $default(_that.id,_that.name,_that.category,_that.subcategory,_that.brand,_that.color,_that.size,_that.imageUrl,_that.iconEmoji,_that.blurHash,_that.minTemp,_that.maxTemp,_that.warmthLevel,_that.rainOk,_that.snowOk,_that.windOk,_that.usage,_that.materials,_that.gender,_that.fit,_that.pattern,_that.localImagePath,_that.style,_that.isFavorite,_that.isArchived,_that.season,_that.serverId,_that.dirty,_that.lastSyncedAt);case _:
@@ -237,27 +266,46 @@ return $default(_that.id,_that.name,_that.category,_that.subcategory,_that.brand
 @JsonSerializable()
 
 class _WardrobeItem implements WardrobeItem {
-  const _WardrobeItem({this.id, this.name, this.category, this.subcategory, this.brand, this.color, this.size, this.imageUrl, this.iconEmoji, this.blurHash, this.minTemp, this.maxTemp, this.warmthLevel, this.rainOk, this.snowOk, this.windOk, this.usage, final  List<String>? materials, this.gender, this.fit, this.pattern, this.localImagePath, this.style, this.isFavorite, this.isArchived, this.season, this.serverId, this.dirty, this.lastSyncedAt}): _materials = materials;
+  const _WardrobeItem({this.id, this.name, @JsonKey(name: 'category') this.category, @JsonKey(name: 'subcategory') this.subcategory, this.brand, this.color, this.size, this.imageUrl, this.iconEmoji, this.blurHash, @JsonKey(name: 'min_temp') this.minTemp, @JsonKey(name: 'max_temp') this.maxTemp, @JsonKey(name: 'warmth_level') this.warmthLevel, @JsonKey(name: 'rain_ok') this.rainOk, @JsonKey(name: 'snow_ok') this.snowOk, @JsonKey(name: 'wind_ok') this.windOk, this.usage, final  List<String>? materials, this.gender, this.fit, this.pattern, this.localImagePath, this.style, @JsonKey(name: 'is_favorite') this.isFavorite, @JsonKey(name: 'is_archived') this.isArchived, this.season, @JsonKey(name: 'server_id') this.serverId, this.dirty, @JsonKey(name: 'last_synced_at') this.lastSyncedAt}): _materials = materials;
   factory _WardrobeItem.fromJson(Map<String, dynamic> json) => _$WardrobeItemFromJson(json);
 
+/// Уникальный идентификатор
 @override final  String? id;
+/// Название предмета (например, "Белая футболка Basic")
 @override final  String? name;
-@override final  String? category;
-@override final  String? subcategory;
+/// Категория: top, bottom, shoes, outerwear, accessories, headwear
+@override@JsonKey(name: 'category') final  String? category;
+/// Подкатегория: tshirt, jeans, sneakers и т.д.
+@override@JsonKey(name: 'subcategory') final  String? subcategory;
+/// Бренд
 @override final  String? brand;
+/// Цвет
 @override final  String? color;
+/// Размер (S, M, L, XL, 42, 44 и т.д.)
 @override final  String? size;
+/// URL изображения
 @override final  String? imageUrl;
+/// Emoji иконка для предмета
 @override final  String? iconEmoji;
+/// BlurHash для плейсхолдера изображения
 @override final  String? blurHash;
-@override final  double? minTemp;
-@override final  double? maxTemp;
-@override final  int? warmthLevel;
-@override final  bool? rainOk;
-@override final  bool? snowOk;
-@override final  bool? windOk;
+/// Минимальная температура для носки (°C)
+@override@JsonKey(name: 'min_temp') final  double? minTemp;
+/// Максимальная температура для носки (°C)
+@override@JsonKey(name: 'max_temp') final  double? maxTemp;
+/// Уровень теплоты (1-5, где 5 - самый теплый)
+@override@JsonKey(name: 'warmth_level') final  int? warmthLevel;
+/// Подходит для дождя
+@override@JsonKey(name: 'rain_ok') final  bool? rainOk;
+/// Подходит для снега
+@override@JsonKey(name: 'snow_ok') final  bool? snowOk;
+/// Подходит для ветреной погоды
+@override@JsonKey(name: 'wind_ok') final  bool? windOk;
+/// Количество использований
 @override final  int? usage;
+/// Материалы (например, ["cotton", "polyester"])
  final  List<String>? _materials;
+/// Материалы (например, ["cotton", "polyester"])
 @override List<String>? get materials {
   final value = _materials;
   if (value == null) return null;
@@ -266,17 +314,28 @@ class _WardrobeItem implements WardrobeItem {
   return EqualUnmodifiableListView(value);
 }
 
+/// Пол: unisex, male, female
 @override final  String? gender;
+/// Крой: slim, regular, loose, oversized
 @override final  String? fit;
+/// Узор: solid, striped, checked, printed
 @override final  String? pattern;
+/// Локальный путь к изображению
 @override final  String? localImagePath;
+/// Стиль: casual, formal, sport, streetwear
 @override final  String? style;
-@override final  bool? isFavorite;
-@override final  bool? isArchived;
+/// Избранное
+@override@JsonKey(name: 'is_favorite') final  bool? isFavorite;
+/// Архивировано
+@override@JsonKey(name: 'is_archived') final  bool? isArchived;
+/// Сезон: all_season, spring, summer, autumn, winter
 @override final  String? season;
-@override final  String? serverId;
+/// ID на сервере
+@override@JsonKey(name: 'server_id') final  String? serverId;
+/// Есть ли несохраненные изменения
 @override final  bool? dirty;
-@override final  DateTime? lastSyncedAt;
+/// Дата последней синхронизации
+@override@JsonKey(name: 'last_synced_at') final  DateTime? lastSyncedAt;
 
 /// Create a copy of WardrobeItem
 /// with the given fields replaced by the non-null parameter values.
@@ -311,7 +370,7 @@ abstract mixin class _$WardrobeItemCopyWith<$Res> implements $WardrobeItemCopyWi
   factory _$WardrobeItemCopyWith(_WardrobeItem value, $Res Function(_WardrobeItem) _then) = __$WardrobeItemCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String? name, String? category, String? subcategory, String? brand, String? color, String? size, String? imageUrl, String? iconEmoji, String? blurHash, double? minTemp, double? maxTemp, int? warmthLevel, bool? rainOk, bool? snowOk, bool? windOk, int? usage, List<String>? materials, String? gender, String? fit, String? pattern, String? localImagePath, String? style, bool? isFavorite, bool? isArchived, String? season, String? serverId, bool? dirty, DateTime? lastSyncedAt
+ String? id, String? name,@JsonKey(name: 'category') String? category,@JsonKey(name: 'subcategory') String? subcategory, String? brand, String? color, String? size, String? imageUrl, String? iconEmoji, String? blurHash,@JsonKey(name: 'min_temp') double? minTemp,@JsonKey(name: 'max_temp') double? maxTemp,@JsonKey(name: 'warmth_level') int? warmthLevel,@JsonKey(name: 'rain_ok') bool? rainOk,@JsonKey(name: 'snow_ok') bool? snowOk,@JsonKey(name: 'wind_ok') bool? windOk, int? usage, List<String>? materials, String? gender, String? fit, String? pattern, String? localImagePath, String? style,@JsonKey(name: 'is_favorite') bool? isFavorite,@JsonKey(name: 'is_archived') bool? isArchived, String? season,@JsonKey(name: 'server_id') String? serverId, bool? dirty,@JsonKey(name: 'last_synced_at') DateTime? lastSyncedAt
 });
 
 
