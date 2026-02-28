@@ -34,6 +34,7 @@ from contracts.recommend_contract import (
     RecommendResponse,
     RecommendOutfit,
     RecommendContext,
+    UserPreferences,
 )
 from model.enhanced_predictor import EnhancedPredictor
 from model.features_with_priorities import build_feature_frame
@@ -48,7 +49,7 @@ from model.internal_schema import (
 from contracts.event_contract import ActionEvent, ActionEventResponse
 from model.event_logger import log_rank_impression, log_outfits_impression, log_action
 
-from app.filter import WeatherContext, generate_combinations, get_stats
+from app.filter import WeatherContext, generate_combinations, get_stats, apply_preferences_filter, UserPreferences as FilterUserPreferences
 
 
 # ═══════════════════════════════════════════
@@ -434,6 +435,7 @@ async def recommend_outfits(
     3. Генерирует комбинации из отфильтрованных категорий
     4. Скорит комбинации через CatBoost
     5. Возвращает Top-K рекомендаций
+    6. Применяет предпочтения пользователя (стили, бренды, бюджет)
 
     Args:
         request: RecommendRequest с контекстом и гардеробом
@@ -498,6 +500,35 @@ async def recommend_outfits(
                 processing_time_ms=0.0,
             )
 
+        # 3.1. Применяем предпочтения пользователя (если указаны)
+        preferences_applied = False
+        if request.user_preferences:
+            # Конвертируем UserPreferences из контракта в FilterUserPreferences
+            filter_prefs = FilterUserPreferences(
+                style_preferences=request.user_preferences.style_preferences,
+                budget_range=request.user_preferences.budget_range,
+                favorite_brands=request.user_preferences.favorite_brands,
+            )
+            
+            # Применяем фильтрацию по предпочтениям
+            # Примечание: item_prices, item_styles, item_brands должны быть переданы
+            # из каталога товаров. Пока используем None для обратной совместимости.
+            candidates = apply_preferences_filter(
+                combinations=candidates,
+                preferences=filter_prefs,
+                item_prices=None,  # TODO: загрузить из каталога
+                item_styles=None,  # TODO: загрузить из каталога
+                item_brands=None,  # TODO: загрузить из каталога
+            )
+            preferences_applied = True
+            
+            logger.info(
+                f"[recommend] preferences applied for user {user_id}: "
+                f"styles={request.user_preferences.style_preferences}, "
+                f"budget={request.user_preferences.budget_range}, "
+                f"brands={request.user_preferences.favorite_brands}"
+            )
+
         # 4. Построение feature frame для CatBoost
         # build_feature_frame_v2 ожидает items с полями category/subcategory
         # Для комбинаций создаём синтетические items
@@ -511,7 +542,7 @@ async def recommend_outfits(
             },
             user_profile={
                 "age_range": "adult",
-                "style_preference": "casual",
+                "style_preference": request.user_preferences.style_preferences[0] if request.user_preferences and request.user_preferences.style_preferences else "casual",
                 "temperature_sensitivity": "normal",
                 "formality_preference": "normal",
                 "gender": request.context.gender,
