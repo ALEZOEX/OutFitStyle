@@ -57,7 +57,7 @@ ALL_FOOTWEAR: List[str] = [
 
 # Общие пороги
 TEMP_FREEZING: float = 0.0      # Заморозки
-TEMP_VERY_COLD: float = 5.0     # Очень холодно
+TEMP_VERY_COLD: float = 10.0    # Очень холодно (Sneakers запрещены)
 TEMP_COLD: float = 10.0         # Холодно
 TEMP_COOL: float = 15.0         # Прохладно
 TEMP_MODERATE: float = 20.0     # Умеренно
