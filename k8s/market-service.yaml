@@ -1,0 +1,196 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: market-service
+  namespace: outfitstyle
+  labels:
+    app: market-service
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: market-service
+  template:
+    metadata:
+      labels:
+        app: market-service
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+        prometheus.io/path: "/metrics"
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: market-service
+          image: ghcr.io/alezoex/outfitstyle-market:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+              name: http
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: APP_NAME
+              value: "OutfitStyle Market Service"
+            - name: APP_VERSION
+              value: "1.0.0"
+            - name: DEBUG
+              value: "false"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "8001"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: market-service-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: market-service-secrets
+                  key: redis-url
+            - name: ML_SERVICE_URL
+              value: "http://ml-service:80"
+            - name: API_SERVICE_URL
+              value: "http://api:80"
+            - name: DATABASE_POOL_SIZE
+              value: "10"
+            - name: DATABASE_MAX_OVERFLOW
+              value: "20"
+            - name: REDIS_CACHE_TTL
+              value: "300"
+            - name: REDIS_CART_TTL
+              value: "86400"
+            - name: ML_SERVICE_TIMEOUT
+              value: "30"
+            - name: API_SERVICE_TIMEOUT
+              value: "10"
+            - name: CORS_ORIGINS
+              value: '["*"]'
+            - name: RATE_LIMIT_PER_MINUTE
+              value: "100"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - market-service
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: market-service
+  namespace: outfitstyle
+  labels:
+    app: market-service
+spec:
+  selector:
+    app: market-service
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8001
+  type: ClusterIP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: market-service-pdb
+  namespace: outfitstyle
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: market-service
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: market-service-hpa
+  namespace: outfitstyle
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: market-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
+      selectPolicy: Max
