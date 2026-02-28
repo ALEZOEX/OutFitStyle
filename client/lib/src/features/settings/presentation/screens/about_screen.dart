@@ -70,102 +70,6 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
     );
   }
 
-  void _showTeamDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text(
-          'Команда разработчиков',
-          textAlign: TextAlign.center,
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildTeamMember(
-              'Александр Петров',
-              'Lead Developer',
-              Icons.code,
-            ),
-            const Divider(),
-            _buildTeamMember(
-              'Мария Иванова',
-              'UI/UX Designer',
-              Icons.palette,
-            ),
-            const Divider(),
-            _buildTeamMember(
-              'Дмитрий Сидоров',
-              'ML Engineer',
-              Icons.psychology,
-            ),
-            const Divider(),
-            _buildTeamMember(
-              'Елена Козлова',
-              'Backend Developer',
-              Icons.storage,
-            ),
-            const Divider(),
-            _buildTeamMember(
-              'Алексей Новиков',
-              'Mobile Developer',
-              Icons.phone_android,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Закрыть'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTeamMember(String name, String role, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              icon,
-              color: Theme.of(context).colorScheme.primary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                ),
-              ),
-              Text(
-                role,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -202,13 +106,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
             child: _buildDocumentsSection(context, theme),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          
-          // Команда
-          SliverToBoxAdapter(
-            child: _buildTeamSection(context, theme),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          
+
           // Лицензии
           SliverToBoxAdapter(
             child: _buildLicensesSection(context, theme),
@@ -223,12 +121,25 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-      child: Text(
-        'О приложении',
-        style: theme.textTheme.headlineMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurface,
-        ),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(
+              Icons.arrow_back,
+              color: theme.colorScheme.onSurface,
+            ),
+            tooltip: 'Назад',
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'О приложении',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -250,6 +161,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
       ),
       child: Column(
         children: [
+          // Логотип OutfitStyle
           Container(
             width: 96,
             height: 96,
@@ -272,7 +184,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               ],
             ),
             child: const Icon(
-              Icons.style,
+              Icons.checkroom,
               color: Colors.white,
               size: 56,
             ),
@@ -395,21 +307,17 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
             context,
             theme,
             title: 'Telegram',
-            subtitle: '@outfitstyle',
+            subtitle: 'Скоро открытие',
             icon: Icons.send,
-            onTap: () => _launchUrl('https://t.me/outfitstyle'),
-          ),
-          Divider(
-            height: 1,
-            color: theme.colorScheme.outline.withValues(alpha: 0.1),
-          ),
-          _buildSocialTile(
-            context,
-            theme,
-            title: 'VK',
-            subtitle: 'vk.com/outfitstyle',
-            icon: Icons.share,
-            onTap: () => _launchUrl('https://vk.com/outfitstyle'),
+            onTap: () {
+              // Пока не доступен
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Telegram канал скоро будет доступен'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
           ),
           const SizedBox(height: 8),
         ],
@@ -540,62 +448,6 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
         size: 18,
       ),
       onTap: onTap,
-    );
-  }
-
-  Widget _buildTeamSection(BuildContext context, ThemeData theme) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.groups,
-                  color: theme.colorScheme.primary,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Команда',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Познакомьтесь с нашей командой разработчиков',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: _showTeamDialog,
-                icon: const Icon(Icons.people),
-                label: const Text('Показать команду'),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
     );
   }
 
