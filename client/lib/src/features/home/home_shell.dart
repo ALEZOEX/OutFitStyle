@@ -9,6 +9,8 @@ import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
 import '../../features/notifications/presentation/widgets/notification_icon.dart';
 import '../../theme/theme_controller.dart';
+import '../../../presentation/providers/user_location_provider.dart';
+import '../../../ui/widgets/city_selector_dialog.dart';
 
 /// Wrapper для главного экрана с навигацией
 class HomeShellWrapper extends ConsumerStatefulWidget {
@@ -44,6 +46,7 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(unreadCountProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final userLocation = ref.watch(userLocationProvider);
 
     return HomeShell(
       title: _getTitle(_currentIndex),
@@ -57,6 +60,18 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
       showBottomNav: true,
       showAppBar: true,
       appBarActions: [
+        // Кнопка местоположения
+        IconButton(
+          icon: Icon(
+            Icons.location_on_outlined,
+            color:
+                _currentIndex == 0
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+          ),
+          onPressed: () => _showCitySelector(context),
+          tooltip: userLocation.cityName ?? 'Выбрать город',
+        ),
         // Кнопка смены темы
         IconButton(
           icon: Icon(_getThemeIcon(themeMode)),
@@ -82,6 +97,19 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
             tooltip: 'Настройки',
           ),
       ],
+    );
+  }
+
+  void _showCitySelector(BuildContext context) {
+    showDialog<CityData>(
+      context: context,
+      builder:
+          (context) => CitySelectorDialog(
+            onCitySelected: (city) {
+              // Инвалидируем провайдеры для обновления данных
+              ref.invalidateAll();
+            },
+          ),
     );
   }
 
@@ -178,14 +206,15 @@ class HomeShell extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: showAppBar
-          ? AppBar(
-              title: Text(title),
-              centerTitle: false,
-              scrolledUnderElevation: 0,
-              actions: appBarActions ?? const [],
-            )
-          : null,
+      appBar:
+          showAppBar
+              ? AppBar(
+                title: Text(title),
+                centerTitle: false,
+                scrolledUnderElevation: 0,
+                actions: appBarActions ?? const [],
+              )
+              : null,
       body: body,
     );
   }

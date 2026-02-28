@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../wardrobe/presentation/providers/wardrobe_provider.dart';
 import '../recommendations/presentation/providers/recommendations_provider.dart';
-import '../../presentation/providers/weather_provider.dart';
-import '../../presentation/providers/user_preferences_provider.dart';
-import '../../ui/widgets/weather_card.dart';
-import '../../ui/widgets/empty_state.dart';
+import '../../../presentation/providers/weather_provider.dart';
+import '../../../presentation/providers/user_location_provider.dart';
+import '../../../ui/widgets/weather_card.dart';
+import '../../../ui/widgets/empty_state.dart';
+import '../../../domain/entities/outfit_recommendation.dart';
 
 /// Главный экран: погода + персональные рекомендации + гардероб
+///
+/// Структура:
+/// 1. Верхняя часть: погода, город с кнопкой изменения
+/// 2. Основная часть: основной образ + альтернативные варианты
+/// 3. Нижняя часть: статистика + кнопка "Сгенерировать еще"
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,15 +25,19 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  // Координаты по умолчанию (Москва)
-  static const _defaultLocation = (lat: 55.7558, lon: 37.6173);
+  int _currentAlternativeIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    final weatherAsync = ref.watch(weatherProvider(_defaultLocation));
+    final userLocation = ref.watch(userLocationProvider);
+    final weatherAsync = ref.watch(
+      weatherProvider((
+        lat: userLocation.latitude,
+        lon: userLocation.longitude,
+      )),
+    );
     final wardrobeState = ref.watch(wardrobeProvider);
     final recommendationsState = ref.watch(recommendationsProvider);
-    final userPreferences = ref.watch(userPreferencesProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -41,28 +52,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Приветствие
-              _buildHeader(context, userPreferences),
+              // Погода и город
+              _buildWeatherSection(context, weatherAsync, userLocation),
 
               const SizedBox(height: 20),
 
-              // Карточка погоды
-              _buildWeatherSection(context, weatherAsync),
+              // Основной образ на сегодня
+              _buildMainOutfitSection(context, recommendationsState),
 
               const SizedBox(height: 20),
 
-              // Образ на сегодня
-              _buildDailyOutfitSection(context, recommendationsState),
+              // Альтернативные образы
+              _buildAlternativeOutfitsSection(context, recommendationsState),
 
               const SizedBox(height: 20),
 
-              // Гардероб
-              _buildWardrobeSection(context, wardrobeState),
+              // Статистика
+              _buildStatsSection(context, wardrobeState, recommendationsState),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              // Быстрые действия
-              _buildQuickActions(context),
+              // Кнопка "Сгенерировать еще"
+              _buildGenerateMoreButton(context, recommendationsState),
 
               const SizedBox(height: 100), // Отступ для bottom navigation
             ],
@@ -72,62 +83,69 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Заголовок с приветствием
-  Widget _buildHeader(BuildContext context, userPreferences) {
-    final hour = DateTime.now().hour;
-    final greeting = hour < 12
-        ? 'Доброе утро'
-        : hour < 18
-            ? 'Добрый день'
-            : 'Добрый вечер';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$greeting!',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Создайте свой идеальный образ сегодня',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
-        ),
-      ],
-    );
-  }
-
-  /// Секция погоды
+  /// Секция погоды с городом
   Widget _buildWeatherSection(
     BuildContext context,
     AsyncValue<dynamic> weatherAsync,
+    UserLocation userLocation,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Заголовок с городом
+        Row(
+          children: [
+            Icon(
+              Icons.location_on,
+              color: Theme.of(context).colorScheme.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              userLocation.cityName ?? 'Город не выбран',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const Spacer(),
+            // Кнопка изменения города
+            TextButton.icon(
+              onPressed: () => _showCitySelector(context),
+              icon: const Icon(Icons.edit, size: 16),
+              label: const Text('Изменить'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Карточка погоды
         weatherAsync.when(
-          data: (weather) => WeatherCard(
-            weatherData: weather,
-            forecast: [], // Можно добавить прогноз через weatherForecastProvider
-            onTap: () => ref.invalidate(weatherProvider),
-            onRefresh: () => ref.invalidate(weatherProvider),
-          ),
+          data:
+              (weather) => WeatherCard(
+                weatherData: weather,
+                forecast: [],
+                onTap: () => ref.invalidate(weatherProvider),
+                onRefresh: () => ref.invalidate(weatherProvider),
+              ),
           loading: () => _buildLoadingCard(),
-          error: (error, stack) => _buildErrorCard(
-            message: 'Не удалось загрузить погоду',
-            onRetry: () => ref.invalidate(weatherProvider),
-          ),
+          error:
+              (error, stack) => _buildErrorCard(
+                message: 'Не удалось загрузить погоду',
+                onRetry: () => ref.invalidate(weatherProvider),
+              ),
         ),
       ],
     );
   }
 
-  /// Секция образа на сегодня
-  Widget _buildDailyOutfitSection(
+  /// Секция основного образа
+  Widget _buildMainOutfitSection(
     BuildContext context,
     RecommendationsState recommendationsState,
   ) {
@@ -141,86 +159,206 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Ваш образ на сегодня',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              'Основной образ на сегодня',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (hasRecommendations)
               TextButton(
-                onPressed: () {
-                  // Переключаем на вкладку рекомендаций через HomeShellWrapper
-                  GoRouter.of(context).go('/home', extra: 2); // 2 - индекс рекомендаций
-                },
+                onPressed: () => context.go('/home', extra: 2),
                 child: const Text('Все'),
               ),
           ],
         ),
         const SizedBox(height: 12),
-        if (!hasRecommendations || recommendationsState.status == RecommendationsLoadStatus.loading)
+
+        if (!hasRecommendations ||
+            recommendationsState.status == RecommendationsLoadStatus.loading)
           EmptyState(
             icon: Icons.checkroom_outlined,
             title: 'Нет рекомендаций',
-            subtitle: 'Получите персональные рекомендации на основе погоды и вашего гардероба',
+            subtitle:
+                'Получите персональные рекомендации на основе погоды и вашего гардероба',
             actionLabel: 'Получить рекомендацию',
-            onAction: () => GoRouter.of(context).go('/home', extra: 2),
+            onAction: () => context.go('/home', extra: 2),
           )
         else
-          _buildRecommendationCard(context, recommendations.first),
+          _buildFullOutfitCard(context, recommendations.first),
       ],
     );
   }
 
-  /// Карточка рекомендации
-  Widget _buildRecommendationCard(BuildContext context, recommendation) {
+  /// Карточка полного комплекта одежды
+  Widget _buildFullOutfitCard(
+    BuildContext context,
+    OutfitRecommendation recommendation,
+  ) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: () => GoRouter.of(context).go('/home', extra: 2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors:
+                isDarkMode
+                    ? [
+                      theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                      theme.colorScheme.secondaryContainer.withValues(
+                        alpha: 0.2,
+                      ),
+                    ]
+                    : [
+                      theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                      theme.colorScheme.secondaryContainer.withValues(
+                        alpha: 0.3,
+                      ),
+                    ],
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                recommendation.title ?? 'Ваш образ',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+              // Заголовок
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      recommendation.title ?? 'Ваш образ',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                  ),
+                  // Оценка погоды
+                  if (recommendation.temperature != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.thermometer,
+                            size: 16,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${recommendation.temperature!.round()}°C',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
-              if (recommendation.description != null) ...[
+
+              if (recommendation.description != null &&
+                  recommendation.description!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
                   recommendation.description!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-              const SizedBox(height: 12),
+
+              const SizedBox(height: 20),
+
+              // Полный комплект одежды
               Text(
-                'Вещи в образе',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
-                    ),
-              ),
-              const SizedBox(height: 8),
-              if (recommendation.recommendedItems?.isNotEmpty == true) ...[
-                Column(
-                  children: recommendation.recommendedItems!
-                      .map<Widget>((item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: _buildOutfitItem(item, context),
-                          ))
-                      .toList(),
+                'Комплект одежды',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
+              ),
+              const SizedBox(height: 12),
+
+              // Категории одежды
+              _buildOutfitCategory(
+                context,
+                category: 'Верх',
+                icon: Icons.checkroom,
+                items: _getItemsByCategory(recommendation, 'top'),
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 12),
+
+              _buildOutfitCategory(
+                context,
+                category: 'Низ',
+                icon: Icons.checkroom_outlined,
+                items: _getItemsByCategory(recommendation, 'bottom'),
+                color: Colors.green,
+              ),
+              const SizedBox(height: 12),
+
+              _buildOutfitCategory(
+                context,
+                category: 'Обувь',
+                icon: Icons.bolt,
+                items: _getItemsByCategory(recommendation, 'shoes'),
+                color: Colors.orange,
+              ),
+              const SizedBox(height: 12),
+
+              _buildOutfitCategory(
+                context,
+                category: 'Аксессуары',
+                icon: Icons.shopping_bag,
+                items: _getItemsByCategory(recommendation, 'accessories'),
+                color: Colors.purple,
+              ),
+
+              // Кнопки действий
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showDetails(context, recommendation),
+                      icon: const Icon(Icons.visibility),
+                      label: const Text('Детали'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () => _planOutfit(context, recommendation),
+                      icon: const Icon(Icons.calendar_today),
+                      label: const Text('Запланировать'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -228,15 +366,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildOutfitItem(String item, BuildContext context) {
-    final emoji = _getItemEmoji(item);
+  /// Категория одежды в комплекте
+  Widget _buildOutfitCategory(
+    BuildContext context, {
+    required String category,
+    required IconData icon,
+    required List<String> items,
+    required Color color,
+  }) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color:
+            isDarkMode
+                ? color.withValues(alpha: 0.15)
+                : color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+          color:
+              isDarkMode
+                  ? color.withValues(alpha: 0.3)
+                  : color.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -244,18 +397,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(emoji, style: const TextStyle(fontSize: 20)),
+            child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              item,
-              style: Theme.of(context).textTheme.bodyMedium,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  category,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                if (items.isNotEmpty)
+                  Text(
+                    items.join(', '),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                else
+                  Text(
+                    'Не выбрано',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
@@ -263,33 +442,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  String _getItemEmoji(String item) {
-    final itemLower = item.toLowerCase();
-    if (itemLower.contains('футболк')) return '👕';
-    if (itemLower.contains('рубашк')) return '👔';
-    if (itemLower.contains('джинс') || itemLower.contains('брюк')) return '👖';
-    if (itemLower.contains('шорт')) return '🩳';
-    if (itemLower.contains('плать')) return '👗';
-    if (itemLower.contains('пиджак') || itemLower.contains('жакет')) return '🧥';
-    if (itemLower.contains('пальт')) return '🧥';
-    if (itemLower.contains('курт')) return '🧥';
-    if (itemLower.contains('свитер') || itemLower.contains('кофт')) return '🧶';
-    if (itemLower.contains('обув') || itemLower.contains('ботинк') || itemLower.contains('кроссовк')) return '👟';
-    if (itemLower.contains('кепок') || itemLower.contains('шапк')) return '🧢';
-    if (itemLower.contains('сумк')) return '👜';
-    if (itemLower.contains('очк')) return '🕶️';
-    if (itemLower.contains('ремен')) return '👖';
-    return '👔';
-  }
-
-  /// Секция гардероба
-  Widget _buildWardrobeSection(
+  /// Секция альтернативных образов
+  Widget _buildAlternativeOutfitsSection(
     BuildContext context,
-    WardrobeState wardrobeState,
+    RecommendationsState recommendationsState,
   ) {
-    final totalCount = wardrobeState.totalCount;
-    final categoryCounts = wardrobeState.categoryCounts;
-    final favoritesCount = wardrobeState.favoritesCount;
+    final recommendations = recommendationsState.recommendations;
+
+    // Показываем альтернативы если есть больше 1 рекомендации
+    if (recommendations.length < 2) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,197 +461,542 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Гардероб',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              'Альтернативные образы',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            TextButton(
-              onPressed: () => context.push('/wardrobe'),
-              child: const Text('Все'),
+            Text(
+              '${_currentAlternativeIndex + 1} из ${recommendations.length - 1}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        if (totalCount == 0)
-          EmptyState(
-            icon: Icons.checkroom_outlined,
-            title: 'Гардероб пуст',
-            subtitle: 'Добавьте свои вещи, чтобы получать персональные рекомендации',
-            actionLabel: 'Добавить вещь',
-            onAction: () => context.push('/wardrobe/add'),
-          )
-        else
-          Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Общая статистика
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStatItem(
-                        context,
-                        icon: Icons.checkroom,
-                        value: totalCount.toString(),
-                        label: 'Всего вещей',
-                      ),
-                      _buildDivider(),
-                      _buildStatItem(
-                        context,
-                        icon: Icons.favorite,
-                        value: favoritesCount.toString(),
-                        label: 'Избранное',
-                      ),
-                      _buildDivider(),
-                      _buildStatItem(
-                        context,
-                        icon: Icons.category,
-                        value: categoryCounts.length.toString(),
-                        label: 'Категорий',
-                      ),
-                    ],
-                  ),
-                  // Категории
-                  if (categoryCounts.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: categoryCounts.entries.map((entry) {
-                        return Chip(
-                          avatar: Icon(
-                            _getCategoryIcon(entry.key),
-                            size: 18,
-                          ),
-                          label: Text(
-                            '${_getCategoryName(entry.key)}: ${entry.value}',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          padding: EdgeInsets.zero,
-                          visualDensity: VisualDensity.compact,
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 
-  /// Элемент статистики
-  Widget _buildStatItem(
-    BuildContext context, {
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Container(
-      height: 40,
-      width: 1,
-      color: Colors.grey[300],
-    );
-  }
-
-  /// Быстрые действия
-  Widget _buildQuickActions(BuildContext context) {
-    final actions = [
-      (
-        icon: Icons.add,
-        label: 'Добавить',
-        color: Colors.blue,
-        route: '/wardrobe/add',
-      ),
-      (
-        icon: Icons.auto_awesome,
-        label: 'Рекомендации',
-        color: Colors.purple,
-        route: '/recommendations',
-      ),
-      (
-        icon: Icons.checkroom,
-        label: 'Гардероб',
-        color: Colors.green,
-        route: '/wardrobe',
-      ),
-      (
-        icon: Icons.person,
-        label: 'Профиль',
-        color: Colors.pink,
-        route: '/profile',
-      ),
-    ].toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Быстрые действия',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 12),
+        // Горизонтальный список альтернатив
         SizedBox(
-          height: 100, // Увеличили высоту для предотвращения overflow
-          child: ListView.separated(
+          height: 280,
+          child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(vertical: 5), // Добавили padding
-            itemCount: actions.length,
-            // ignore: unnecessary_underscores
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (_, index) {
-              final action = actions[index];
-              return _QuickActionItem(
-                icon: action.icon,
-                label: action.label,
-                color: action.color,
-                onTap: () => context.push(action.route),
+            itemCount: recommendations.length - 1,
+            itemBuilder: (context, index) {
+              final outfit =
+                  recommendations[index + 1]; // Пропускаем первый (основной)
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: SizedBox(
+                  width: 280,
+                  child: _buildAlternativeOutfitCard(context, outfit),
+                ),
               );
             },
           ),
         ),
       ],
     );
+  }
+
+  /// Карточка альтернативного образа
+  Widget _buildAlternativeOutfitCard(
+    BuildContext context,
+    OutfitRecommendation outfit,
+  ) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: () => _showDetails(context, outfit),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors:
+                  isDarkMode
+                      ? [
+                        theme.colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.5,
+                        ),
+                        theme.colorScheme.surface.withValues(alpha: 0.3),
+                      ]
+                      : [
+                        theme.colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.3,
+                        ),
+                        theme.colorScheme.surface,
+                      ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Миниатюры одежды
+                Expanded(child: _buildOutfitPreview(context, outfit)),
+
+                const SizedBox(height: 12),
+
+                // Название
+                Text(
+                  outfit.title ?? 'Образ',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 8),
+
+                // Кнопки оценки
+                Row(
+                  children: [
+                    IconButton.filledTonal(
+                      onPressed: () => _rateOutfit(outfit, true),
+                      icon: const Icon(Icons.thumb_up),
+                      tooltip: 'Нравится',
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.green.withValues(alpha: 0.2),
+                        foregroundColor: Colors.green,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      onPressed: () => _rateOutfit(outfit, false),
+                      icon: const Icon(Icons.thumb_down),
+                      tooltip: 'Не нравится',
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.red.withValues(alpha: 0.2),
+                        foregroundColor: Colors.red,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton.filledTonal(
+                      onPressed: () => _planOutfit(context, outfit),
+                      icon: const Icon(Icons.calendar_today),
+                      tooltip: 'Запланировать',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Предварительный просмотр комплекта
+  Widget _buildOutfitPreview(
+    BuildContext context,
+    OutfitRecommendation outfit,
+  ) {
+    final topItems = _getItemsByCategory(outfit, 'top');
+    final bottomItems = _getItemsByCategory(outfit, 'bottom');
+    final shoesItems = _getItemsByCategory(outfit, 'shoes');
+    final accessoryItems = _getItemsByCategory(outfit, 'accessories');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildPreviewRow(
+          context,
+          'Верх',
+          topItems,
+          Icons.checkroom,
+          Colors.blue,
+        ),
+        const SizedBox(height: 8),
+        _buildPreviewRow(
+          context,
+          'Низ',
+          bottomItems,
+          Icons.checkroom_outlined,
+          Colors.green,
+        ),
+        const SizedBox(height: 8),
+        _buildPreviewRow(
+          context,
+          'Обувь',
+          shoesItems,
+          Icons.bolt,
+          Colors.orange,
+        ),
+        if (accessoryItems.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _buildPreviewRow(
+            context,
+            'Аксессуары',
+            accessoryItems,
+            Icons.shopping_bag,
+            Colors.purple,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPreviewRow(
+    BuildContext context,
+    String label,
+    List<String> items,
+    IconData icon,
+    Color color,
+  ) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            items.isNotEmpty ? items.first : '—',
+            style: theme.textTheme.bodySmall,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Секция статистики
+  Widget _buildStatsSection(
+    BuildContext context,
+    WardrobeState wardrobeState,
+    RecommendationsState recommendationsState,
+  ) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final plannedOutfits = recommendationsState.getAllPlannedOutfits();
+
+    // Статистика на сегодня
+    final today = DateTime.now();
+    final todayOutfits =
+        plannedOutfits
+            .where(
+              (o) =>
+                  o.date.year == today.year &&
+                  o.date.month == today.month &&
+                  o.date.day == today.day,
+            )
+            .length;
+
+    // Статистика на неделю
+    final weekOutfits =
+        plannedOutfits.where((o) {
+          final diff = o.date.difference(today).inDays;
+          return diff >= 0 && diff < 7;
+        }).length;
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Статистика',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem(
+                  context,
+                  icon: Icons.today,
+                  value: todayOutfits.toString(),
+                  label: 'На сегодня',
+                  color: Colors.blue,
+                ),
+                _buildStatDivider(),
+                _buildStatItem(
+                  context,
+                  icon: Icons.calendar_week,
+                  value: weekOutfits.toString(),
+                  label: 'На неделю',
+                  color: Colors.purple,
+                ),
+                _buildStatDivider(),
+                _buildStatItem(
+                  context,
+                  icon: Icons.checkroom,
+                  value: wardrobeState.totalCount.toString(),
+                  label: 'В гардеробе',
+                  color: Colors.green,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+    BuildContext context, {
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color color,
+  }) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatDivider() {
+    return Container(
+      height: 40,
+      width: 1,
+      color: Colors.grey.withValues(alpha: 0.3),
+    );
+  }
+
+  /// Кнопка "Сгенерировать еще"
+  Widget _buildGenerateMoreButton(
+    BuildContext context,
+    RecommendationsState recommendationsState,
+  ) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed:
+            recommendationsState.isGenerating
+                ? null
+                : () => _generateMoreRecommendations(context),
+        icon:
+            recommendationsState.isGenerating
+                ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                )
+                : const Icon(Icons.auto_awesome),
+        label: Text(
+          recommendationsState.isGenerating
+              ? 'Генерация...'
+              : 'Сгенерировать еще варианты',
+        ),
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+      ),
+    );
+  }
+
+  // ==================== Helper Methods ====================
+
+  /// Получить предметы по категории
+  List<String> _getItemsByCategory(
+    OutfitRecommendation outfit,
+    String category,
+  ) {
+    final items = outfit.recommendedItems ?? [];
+    final result = <String>[];
+
+    for (final item in items) {
+      final itemLower = item.toLowerCase();
+
+      // Определяем категорию по ключевым словам
+      switch (category) {
+        case 'top':
+          if (itemLower.contains('футболк') ||
+              itemLower.contains('рубашк') ||
+              itemLower.contains('худи') ||
+              itemLower.contains('свитер') ||
+              itemLower.contains('кофт') ||
+              itemLower.contains('топ') ||
+              itemLower.contains('блуз')) {
+            result.add(item);
+          }
+          break;
+        case 'bottom':
+          if (itemLower.contains('джинс') ||
+              itemLower.contains('брюк') ||
+              itemLower.contains('штан') ||
+              itemLower.contains('шорт') ||
+              itemLower.contains('юбк') ||
+              itemLower.contains('леггинс')) {
+            result.add(item);
+          }
+          break;
+        case 'shoes':
+          if (itemLower.contains('кроссовк') ||
+              itemLower.contains('ботинк') ||
+              itemLower.contains('туфел') ||
+              itemLower.contains('сандали') ||
+              itemLower.contains('обув') ||
+              itemLower.contains('кед') ||
+              itemLower.contains('сапог')) {
+            result.add(item);
+          }
+          break;
+        case 'accessories':
+          if (itemLower.contains('куртк') ||
+              itemLower.contains('пальт') ||
+              itemLower.contains('жакет') ||
+              itemLower.contains('пиджак') ||
+              itemLower.contains('шапк') ||
+              itemLower.contains('шарф') ||
+              itemLower.contains('перчатк') ||
+              itemLower.contains('сумк') ||
+              itemLower.contains('ремен') ||
+              itemLower.contains('очк')) {
+            result.add(item);
+          }
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  void _showCitySelector(BuildContext context) {
+    showDialog<CityData>(
+      context: context,
+      builder:
+          (context) => CitySelectorDialog(
+            onCitySelected: (city) {
+              ref.invalidateAll();
+            },
+          ),
+    );
+  }
+
+  void _showDetails(BuildContext context, OutfitRecommendation outfit) {
+    // TODO: Навигация на экран деталей
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Детали: ${outfit.title}')));
+  }
+
+  void _planOutfit(BuildContext context, OutfitRecommendation outfit) {
+    final notifier = ref.read(recommendationsProvider.notifier);
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Запланировать образ'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Образ: ${outfit.title}'),
+                const SizedBox(height: 16),
+                Text(
+                  'Выберите дату:',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                // Простой выбор даты - сегодня/завтра
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ChoiceChip(
+                      label: const Text('Сегодня'),
+                      selected: true,
+                      onSelected: (selected) {},
+                    ),
+                    ChoiceChip(
+                      label: const Text('Завтра'),
+                      selected: false,
+                      onSelected: (selected) {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  notifier.planOutfit(
+                    recommendationId: outfit.id ?? '',
+                    date: DateTime.now(),
+                  );
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Образ запланирован')),
+                  );
+                },
+                child: const Text('Запланировать'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _rateOutfit(OutfitRecommendation outfit, bool liked) {
+    // TODO: Сохранение оценки
+    // Для демонстрации просто показываем сообщение
+  }
+
+  Future<void> _generateMoreRecommendations(BuildContext context) async {
+    final notifier = ref.read(recommendationsProvider.notifier);
+
+    final result = await notifier.generateRecommendation(
+      temperature: 15,
+      weatherCondition: 'sunny',
+      occasion: 'casual',
+    );
+
+    if (context.mounted && result != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Новая рекомендация сгенерирована!'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+        ),
+      );
+    }
   }
 
   /// Карточка загрузки
@@ -507,10 +1015,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                'Загрузка...',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
+              Text('Загрузка...', style: TextStyle(color: Colors.grey[600])),
             ],
           ),
         ),
@@ -519,21 +1024,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// Карточка ошибки
-  Widget _buildErrorCard({
-    required String message,
-    VoidCallback? onRetry,
-  }) {
+  Widget _buildErrorCard({required String message, VoidCallback? onRetry}) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               message,
@@ -548,107 +1046,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: const Text('Повторить'),
               ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Иконка для категории
-  IconData _getCategoryIcon(String category) {
-    switch (category.toLowerCase()) {
-      case 'top':
-        return Icons.checkroom;
-      case 'bottom':
-        return Icons.checkroom_outlined;
-      case 'shoes':
-        return Icons.bolt;
-      case 'outerwear':
-        return Icons.sunny_snowing;
-      case 'headwear':
-        return Icons.face;
-      case 'accessory':
-        return Icons.attach_money;
-      default:
-        return Icons.category;
-    }
-  }
-
-  /// Название категории
-  String _getCategoryName(String category) {
-    switch (category.toLowerCase()) {
-      case 'top':
-        return 'Верх';
-      case 'bottom':
-        return 'Низ';
-      case 'shoes':
-        return 'Обувь';
-      case 'outerwear':
-        return 'Верхняя одежда';
-      case 'headwear':
-        return 'Головные уборы';
-      case 'accessory':
-        return 'Аксессуары';
-      default:
-        return category;
-    }
-  }
-}
-
-/// Элемент быстрого действия
-class _QuickActionItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _QuickActionItem({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: 84,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(height: 6),
-            Flexible(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: color,
-                    ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
           ],
         ),
       ),
