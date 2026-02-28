@@ -164,8 +164,55 @@ services:
       - prometheus
     restart: unless-stopped
 
+  market-db-migrate:
+    build:
+      context: ./market-service
+      dockerfile: Dockerfile
+    command: alembic upgrade head
+    environment:
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@postgres:5432/market
+      - LOG_LEVEL=info
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - market
+
+  market-service:
+    build:
+      context: ./market-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@postgres:5432/market
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_secret_password_change_in_production}@redis:6379
+      - ML_SERVICE_URL=http://ml-service:8000
+      - API_SERVICE_URL=http://api:8080
+      - LOG_LEVEL=info
+      - PORT=8001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+      api:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8001/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - market
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
   prometheus_data:
   grafana_data:
+  market_db_data:
