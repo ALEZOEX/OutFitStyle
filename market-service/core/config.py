@@ -48,7 +48,12 @@ class Settings(BaseSettings):
     
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 100
-    
+
+    # Product Scraper (pyRustScraperApi)
+    PYRUSTSCRAPERAPI_TOKEN: Optional[str] = None
+    PYRUSTSCRAPERAPI_TIMEOUT: int = 30
+    PRODUCT_IMPORT_LIMIT_PER_DAY: int = 10
+
     # Pagination
     DEFAULT_PAGE_SIZE: int = 20
     MAX_PAGE_SIZE: int = 100
