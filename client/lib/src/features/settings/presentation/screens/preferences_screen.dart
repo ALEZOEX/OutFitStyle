@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../../ui/widgets/max_width_container.dart';
+import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../presentation/routing/router.dart';
 import '../../data/repositories/preferences_repository.dart';
@@ -41,7 +40,7 @@ enum StylePreferenceUI {
   const StylePreferenceUI(this.apiValue, this.emoji);
 
   /// Получить отображаемое название стиля через локализацию
-  String getDisplayName(AppLocalizations l10n) {
+  String getDisplayName() {
     switch (this) {
       case StylePreferenceUI.casual:
         return 'Кэжуал';
@@ -379,11 +378,10 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(preferencesProvider);
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.preferences),
+        title: const Text('Предпочтения'),
         centerTitle: true,
         actions: [
           if (state.isSaving)
@@ -399,7 +397,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: _savePreferences,
-              tooltip: l10n.save,
+              tooltip: 'Сохранить',
             ),
         ],
       ),
@@ -413,7 +411,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     // Размер одежды
                     _buildSection(
                       context,
-                      title: l10n.clothingSize,
+                      title: 'Размер одежды',
                       icon: Icons.checkroom,
                       child: Wrap(
                         spacing: 8,
@@ -442,7 +440,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     // Предпочитаемые стили (с локализацией)
                     _buildSection(
                       context,
-                      title: l10n.preferredStyles,
+                      title: 'Предпочитаемые стили',
                       icon: Icons.style,
                       child: Wrap(
                         spacing: 8,
@@ -455,7 +453,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                                   style.emoji,
                                   style: const TextStyle(fontSize: 16),
                                 ),
-                                label: Text(style.getDisplayName(l10n)),
+                                label: Text(style.getDisplayName()),
                                 selected: isSelected,
                                 onSelected: (_) {
                                   ref
@@ -475,7 +473,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     // Любимые бренды
                     _buildSection(
                       context,
-                      title: l10n.favoriteBrands,
+                      title: 'Любимые бренды',
                       icon: Icons.shopping_bag,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,7 +558,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     // Цветовые предпочтения
                     _buildSection(
                       context,
-                      title: l10n.colorPreferences,
+                      title: 'Цветовые предпочтения',
                       icon: Icons.palette,
                       child: Wrap(
                         spacing: 8,
@@ -589,7 +587,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     // Бюджет (скоро)
                     _buildSection(
                       context,
-                      title: '${l10n.budget} (скоро)',
+                      title: 'Бюджет (скоро)',
                       icon: Icons.attach_money,
                       child: Column(
                         children: [
@@ -713,7 +711,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                                   ),
                                 )
                                 : const Icon(Icons.save),
-                        label: Text(l10n.savePreferences),
+                        label: const Text('Сохранить предпочтения'),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),

@@ -106,6 +106,7 @@ class SessionDevice {
       // Форматируем дату
       final day = lastUsedAt.day.toString().padLeft(2, '0');
       final month = lastUsedAt.month.toString().padLeft(2, '0');
+      final year = lastUsedAt.year;
       return '$day.$month.$year';
     }
   }

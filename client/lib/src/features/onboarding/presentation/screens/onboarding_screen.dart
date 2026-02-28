@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math' as math;
 
-import '../../../../l10n/app_localizations.dart';
-import '../../../../ui/widgets/city_selector_dialog.dart';
+import 'package:outfitstyle_client/l10n/app_localizations.dart';
+import 'package:outfitstyle_client/src/ui/widgets/city_selector_dialog.dart';
 import '../../data/models/onboarding_data.dart';
 import '../providers/onboarding_provider.dart';
 
