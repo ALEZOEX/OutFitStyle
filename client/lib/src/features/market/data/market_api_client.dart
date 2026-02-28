@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import '../models/product.dart';
-import '../models/cart.dart';
-import '../models/order.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/cart.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/order.dart';
 
 /// API client for market service
 class MarketApiClient {
@@ -20,7 +20,7 @@ class MarketApiClient {
               headers: {
                 'Content-Type': 'application/json',
               },
-            })) {
+            )) {
     // Add interceptors
     _dio.interceptors.add(LogInterceptor(
       requestBody: true,

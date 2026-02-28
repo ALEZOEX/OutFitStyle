@@ -4,6 +4,8 @@ library;
 // Data
 export 'data/market_api_client.dart';
 export 'data/market_repository.dart';
+
+// Models
 export 'data/models/product.dart';
 export 'data/models/cart.dart';
 export 'data/models/order.dart';
