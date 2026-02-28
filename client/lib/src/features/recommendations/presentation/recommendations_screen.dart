@@ -224,16 +224,30 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     required Color color,
   }) {
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: isDarkMode 
+            ? color.withValues(alpha: 0.2) 
+            : color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withValues(alpha: 0.2),
+          color: isDarkMode
+              ? color.withValues(alpha: 0.3)
+              : color.withValues(alpha: 0.2),
           width: 1,
         ),
+        boxShadow: isDarkMode
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.15),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                ),
+              ]
+            : null,
       ),
       child: Column(
         children: [
@@ -249,7 +263,9 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: isDarkMode
+                  ? theme.colorScheme.onSurface.withOpacity(0.8)
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -293,6 +309,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
   /// Карточка генерации рекомендации
   Widget _buildGenerateCard(BuildContext context, RecommendationsState state) {
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -300,8 +317,8 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
         opacity: _fadeAnimation,
         child: Card(
           clipBehavior: Clip.antiAlias,
-          elevation: 3,
-          shadowColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+          elevation: isDarkMode ? 6 : 3,
+          shadowColor: theme.colorScheme.primary.withValues(alpha: isDarkMode ? 0.4 : 0.2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -312,10 +329,15 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary.withValues(alpha: 0.8),
-                    theme.colorScheme.secondary.withValues(alpha: 0.9),
-                  ],
+                  colors: isDarkMode
+                      ? [
+                          theme.colorScheme.primary.withValues(alpha: 0.95),
+                          theme.colorScheme.secondary.withValues(alpha: 1.0),
+                        ]
+                      : [
+                          theme.colorScheme.primary.withValues(alpha: 0.8),
+                          theme.colorScheme.secondary.withValues(alpha: 0.9),
+                        ],
                 ),
               ),
               padding: const EdgeInsets.all(20),
@@ -340,7 +362,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                               ? 'Подбираем идеальный outfit...'
                               : 'На основе погоды и предпочтений',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
+                            color: theme.colorScheme.onPrimary.withValues(alpha: 0.95),
                           ),
                         ),
                       ],
@@ -351,8 +373,17 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
+                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.25),
                       shape: BoxShape.circle,
+                      boxShadow: isDarkMode
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                spreadRadius: 2,
+                              ),
+                            ]
+                          : null,
                     ),
                     child: state.isGenerating
                         ? Padding(
