@@ -19,6 +19,9 @@ class RecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 16),
@@ -37,7 +40,7 @@ class RecommendationCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     recommendation.title ?? 'Рекомендация',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                     overflow: TextOverflow.ellipsis,
@@ -50,13 +53,17 @@ class RecommendationCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue[100],
+                      color: isDarkMode 
+                          ? theme.colorScheme.primaryContainer 
+                          : Colors.blue[100],
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       recommendation.weatherCondition!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.blue[800],
+                      style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDarkMode
+                                ? theme.colorScheme.onPrimaryContainer
+                                : Colors.blue[800],
                           ),
                     ),
                   ),
@@ -69,7 +76,7 @@ class RecommendationCard extends StatelessWidget {
                 recommendation.recommendedItems!.isNotEmpty) ...[
               Text(
                 'Рекомендуемые вещи:',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
               ),
@@ -92,14 +99,22 @@ class RecommendationCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  border: Border.all(color: Colors.green[200]!),
+                  color: isDarkMode
+                      ? theme.colorScheme.secondaryContainer.withOpacity(0.3)
+                      : Colors.green[50],
+                  border: Border.all(
+                    color: isDarkMode
+                        ? theme.colorScheme.secondaryContainer
+                        : Colors.green[200]!,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   recommendation.description!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.green[800],
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isDarkMode
+                            ? theme.colorScheme.onSecondaryContainer
+                            : Colors.green[800],
                       ),
                 ),
               ),
@@ -109,14 +124,22 @@ class RecommendationCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  border: Border.all(color: Colors.blue[200]!),
+                  color: isDarkMode
+                      ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                      : Colors.blue[50],
+                  border: Border.all(
+                    color: isDarkMode
+                        ? theme.colorScheme.primaryContainer
+                        : Colors.blue[200]!,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   'Совет: ${_getRecommendationTip(recommendation.id ?? '')}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.blue[800],
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isDarkMode
+                            ? theme.colorScheme.onPrimaryContainer
+                            : Colors.blue[800],
                       ),
                 ),
               ),
@@ -128,19 +151,19 @@ class RecommendationCard extends StatelessWidget {
               children: [
                 _buildActionButton(
                   icon: Icons.calendar_today,
-                  color: Colors.blue,
+                  color: isDarkMode ? theme.colorScheme.primary : Colors.blue,
                   label: 'Запланировать',
                   onPressed: onPlanPressed,
                 ),
                 _buildActionButton(
                   icon: Icons.visibility,
-                  color: Colors.green,
+                  color: isDarkMode ? theme.colorScheme.secondary : Colors.green,
                   label: 'Детали',
                   onPressed: onDetailsPressed ?? () {},
                 ),
                 _buildActionButton(
                   icon: Icons.check,
-                  color: Colors.orange,
+                  color: isDarkMode ? theme.colorScheme.tertiary : Colors.orange,
                   label: 'Использовать',
                   onPressed: onUsePressed,
                 ),
