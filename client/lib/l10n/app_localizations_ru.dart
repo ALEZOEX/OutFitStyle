@@ -138,4 +138,78 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get avatarUpdated => 'Аватар успешно обновлен';
+
+  @override
+  String get onboardingWelcomeTitle => 'Добро пожаловать в OutfitStyle!';
+
+  @override
+  String get onboardingWelcomeSubtitle => 'Ваш персональный помощник по стилю';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Мы поможем вам создать идеальный гардероб с учётом погоды, предпочтений и актуальных трендов';
+
+  @override
+  String get onboardingCityTitle => 'Выберите город';
+
+  @override
+  String get onboardingCityDescription =>
+      'Мы будем показывать погоду и рекомендации для вашего города';
+
+  @override
+  String get onboardingCityDetectByIp => 'Определить автоматически';
+
+  @override
+  String get onboardingCitySearchHint => 'Выбрать город';
+
+  @override
+  String get onboardingStylesTitle => 'Предпочтения стилей';
+
+  @override
+  String get onboardingStylesDescription =>
+      'Выберите минимум 3 стиля, которые вам нравятся';
+
+  @override
+  String get onboardingPreferencesTitle => 'Настройки';
+
+  @override
+  String get onboardingPreferencesDescription =>
+      'Укажите ваши предпочтения для более точных рекомендаций';
+
+  @override
+  String get onboardingBudgetLabel => 'Бюджет';
+
+  @override
+  String get onboardingBrandsLabel => 'Любимые бренды';
+
+  @override
+  String get onboardingBrandsHint => 'Например: Zara, H&M, Uniqlo';
+
+  @override
+  String get onboardingCompleteTitle => 'Готово!';
+
+  @override
+  String get onboardingCompleteDescription =>
+      'Теперь вы будете получать персонализированные рекомендации каждый день';
+
+  @override
+  String get onboardingNextButton => 'Далее';
+
+  @override
+  String get onboardingBackButton => 'Назад';
+
+  @override
+  String get onboardingStartButton => 'Начать';
+
+  @override
+  String get onboardingFinishButton => 'Завершить';
+
+  @override
+  String get budgetEconomy => 'Эконом';
+
+  @override
+  String get budgetMedium => 'Средний';
+
+  @override
+  String get budgetPremium => 'Премиум';
 }

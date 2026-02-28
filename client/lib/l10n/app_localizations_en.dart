@@ -138,4 +138,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get avatarUpdated => 'Avatar updated successfully';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to OutfitStyle!';
+
+  @override
+  String get onboardingWelcomeSubtitle => 'Your personal style assistant';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'We\'ll help you create the perfect wardrobe considering weather, preferences, and current trends';
+
+  @override
+  String get onboardingCityTitle => 'Select Your City';
+
+  @override
+  String get onboardingCityDescription =>
+      'We\'ll show weather and recommendations for your city';
+
+  @override
+  String get onboardingCityDetectByIp => 'Detect Automatically';
+
+  @override
+  String get onboardingCitySearchHint => 'Select City';
+
+  @override
+  String get onboardingStylesTitle => 'Style Preferences';
+
+  @override
+  String get onboardingStylesDescription => 'Choose at least 3 styles you like';
+
+  @override
+  String get onboardingPreferencesTitle => 'Settings';
+
+  @override
+  String get onboardingPreferencesDescription =>
+      'Specify your preferences for more accurate recommendations';
+
+  @override
+  String get onboardingBudgetLabel => 'Budget';
+
+  @override
+  String get onboardingBrandsLabel => 'Favorite Brands';
+
+  @override
+  String get onboardingBrandsHint => 'e.g., Zara, H&M, Uniqlo';
+
+  @override
+  String get onboardingCompleteTitle => 'You\'re All Set!';
+
+  @override
+  String get onboardingCompleteDescription =>
+      'Now you\'ll receive personalized recommendations every day';
+
+  @override
+  String get onboardingNextButton => 'Next';
+
+  @override
+  String get onboardingBackButton => 'Back';
+
+  @override
+  String get onboardingStartButton => 'Start';
+
+  @override
+  String get onboardingFinishButton => 'Finish';
+
+  @override
+  String get budgetEconomy => 'Economy';
+
+  @override
+  String get budgetMedium => 'Medium';
+
+  @override
+  String get budgetPremium => 'Premium';
 }

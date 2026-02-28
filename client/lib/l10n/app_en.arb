@@ -170,5 +170,97 @@
   "avatarUpdated": "Avatar updated successfully",
   "@avatarUpdated": {
     "description": "Avatar update success message"
+  },
+  "onboardingWelcomeTitle": "Welcome to OutfitStyle!",
+  "@onboardingWelcomeTitle": {
+    "description": "Onboarding welcome screen title"
+  },
+  "onboardingWelcomeSubtitle": "Your personal style assistant",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Onboarding welcome screen subtitle"
+  },
+  "onboardingWelcomeDescription": "We'll help you create the perfect wardrobe considering weather, preferences, and current trends",
+  "@onboardingWelcomeDescription": {
+    "description": "Onboarding welcome screen description"
+  },
+  "onboardingCityTitle": "Select Your City",
+  "@onboardingCityTitle": {
+    "description": "City selection screen title"
+  },
+  "onboardingCityDescription": "We'll show weather and recommendations for your city",
+  "@onboardingCityDescription": {
+    "description": "City selection screen subtitle"
+  },
+  "onboardingCityDetectByIp": "Detect Automatically",
+  "@onboardingCityDetectByIp": {
+    "description": "Auto-detect city by IP button"
+  },
+  "onboardingCitySearchHint": "Select City",
+  "@onboardingCitySearchHint": {
+    "description": "City selection button hint"
+  },
+  "onboardingStylesTitle": "Style Preferences",
+  "@onboardingStylesTitle": {
+    "description": "Style selection screen title"
+  },
+  "onboardingStylesDescription": "Choose at least 3 styles you like",
+  "@onboardingStylesDescription": {
+    "description": "Style selection screen subtitle"
+  },
+  "onboardingPreferencesTitle": "Settings",
+  "@onboardingPreferencesTitle": {
+    "description": "Settings screen title"
+  },
+  "onboardingPreferencesDescription": "Specify your preferences for more accurate recommendations",
+  "@onboardingPreferencesDescription": {
+    "description": "Settings screen subtitle"
+  },
+  "onboardingBudgetLabel": "Budget",
+  "@onboardingBudgetLabel": {
+    "description": "Budget selection label"
+  },
+  "onboardingBrandsLabel": "Favorite Brands",
+  "@onboardingBrandsLabel": {
+    "description": "Favorite brands field label"
+  },
+  "onboardingBrandsHint": "e.g., Zara, H&M, Uniqlo",
+  "@onboardingBrandsHint": {
+    "description": "Favorite brands field hint"
+  },
+  "onboardingCompleteTitle": "You're All Set!",
+  "@onboardingCompleteTitle": {
+    "description": "Completion screen title"
+  },
+  "onboardingCompleteDescription": "Now you'll receive personalized recommendations every day",
+  "@onboardingCompleteDescription": {
+    "description": "Completion screen subtitle"
+  },
+  "onboardingNextButton": "Next",
+  "@onboardingNextButton": {
+    "description": "Next step button"
+  },
+  "onboardingBackButton": "Back",
+  "@onboardingBackButton": {
+    "description": "Previous step button"
+  },
+  "onboardingStartButton": "Start",
+  "@onboardingStartButton": {
+    "description": "Start using button"
+  },
+  "onboardingFinishButton": "Finish",
+  "@onboardingFinishButton": {
+    "description": "Finish onboarding button"
+  },
+  "budgetEconomy": "Economy",
+  "@budgetEconomy": {
+    "description": "Economy budget range"
+  },
+  "budgetMedium": "Medium",
+  "@budgetMedium": {
+    "description": "Medium budget range"
+  },
+  "budgetPremium": "Premium",
+  "@budgetPremium": {
+    "description": "Premium budget range"
   }
 }
