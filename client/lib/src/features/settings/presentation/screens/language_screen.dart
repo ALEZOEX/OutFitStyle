@@ -69,10 +69,18 @@ class AppLanguage {
     AppLanguage(code: 'fr', name: 'Français', flag: '🇫🇷', nativeName: 'Français'),
     AppLanguage(code: 'de', name: 'Deutsch', flag: '🇩🇪', nativeName: 'Deutsch'),
     AppLanguage(code: 'it', name: 'Italiano', flag: '🇮🇹', nativeName: 'Italiano'),
+    AppLanguage(code: 'pt', name: 'Português', flag: '🇵🇹', nativeName: 'Português'),
     AppLanguage(code: 'zh', name: '中文', flag: '🇨🇳', nativeName: '中文'),
     AppLanguage(code: 'ja', name: '日本語', flag: '🇯🇵', nativeName: '日本語'),
-    AppLanguage(code: 'pt', name: 'Português', flag: '🇵🇹', nativeName: 'Português'),
+    AppLanguage(code: 'ko', name: '한국어', flag: '🇰🇷', nativeName: '한국어'),
+    AppLanguage(code: 'ar', name: 'العربية', flag: '🇸🇦', nativeName: 'العربية'),
+    AppLanguage(code: 'hi', name: 'हिन्दी', flag: '🇮🇳', nativeName: 'हिन्दी'),
     AppLanguage(code: 'tr', name: 'Türkçe', flag: '🇹🇷', nativeName: 'Türkçe'),
+    AppLanguage(code: 'pl', name: 'Polski', flag: '🇵🇱', nativeName: 'Polski'),
+    AppLanguage(code: 'uk', name: 'Українська', flag: '🇺🇦', nativeName: 'Українська'),
+    AppLanguage(code: 'be', name: 'Беларуская', flag: '🇧🇾', nativeName: 'Беларуская'),
+    AppLanguage(code: 'kk', name: 'Қазақша', flag: '🇰🇿', nativeName: 'Қазақша'),
+    AppLanguage(code: 'az', name: 'Azərbaycan', flag: '🇦🇿', nativeName: 'Azərbaycan'),
   ];
 }
 
@@ -115,12 +123,25 @@ class LanguageScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-      child: Text(
-        'Язык',
-        style: theme.textTheme.headlineMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurface,
-        ),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(
+              Icons.arrow_back,
+              color: theme.colorScheme.onSurface,
+            ),
+            tooltip: 'Назад',
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Язык',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -140,8 +161,8 @@ class LanguageScreen extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: autoLanguage
               ? [
-                  theme.colorScheme.primary.withValues(alpha: 0.2),
-                  theme.colorScheme.secondary.withValues(alpha: 0.1),
+                  theme.colorScheme.primary.withValues(alpha: 0.15),
+                  theme.colorScheme.secondary.withValues(alpha: 0.08),
                 ]
               : [
                   theme.colorScheme.surface,
@@ -151,8 +172,9 @@ class LanguageScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: autoLanguage
-              ? theme.colorScheme.primary.withValues(alpha: 0.3)
+              ? theme.colorScheme.primary.withValues(alpha: 0.4)
               : theme.colorScheme.outline.withValues(alpha: 0.2),
+          width: 2,
         ),
       ),
       child: Row(
@@ -166,6 +188,15 @@ class LanguageScreen extends ConsumerWidget {
                     : [Colors.grey.shade400, Colors.grey.shade600],
               ),
               borderRadius: BorderRadius.circular(12),
+              boxShadow: autoLanguage
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: Icon(
               autoLanguage
@@ -184,6 +215,9 @@ class LanguageScreen extends ConsumerWidget {
                   'Авто-определение',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: autoLanguage
+                        ? theme.colorScheme.onPrimaryContainer
+                        : null,
                   ),
                 ),
                 Text(
@@ -191,7 +225,9 @@ class LanguageScreen extends ConsumerWidget {
                       ? 'Использовать язык системы'
                       : 'Выберите язык вручную',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: autoLanguage
+                        ? theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -205,9 +241,15 @@ class LanguageScreen extends ConsumerWidget {
             },
             thumbColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return theme.colorScheme.primary;
+                return theme.colorScheme.onPrimary;
               }
               return null;
+            }),
+            trackColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return theme.colorScheme.primary;
+              }
+              return theme.colorScheme.outline;
             }),
           ),
         ],
