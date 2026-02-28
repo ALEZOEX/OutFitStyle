@@ -3,6 +3,110 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../ui/widgets/max_width_container.dart';
+import '../../../../core/api/api_client.dart';
+import '../../../../services/auth_storage.dart';
+import '../../data/repositories/sessions_repository.dart';
+import '../../data/models/session_device.dart';
+
+/// Провайдер API клиента
+final _apiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient(storage: AuthStorage());
+});
+
+/// Провайдер репозитория сессий
+final _sessionsRepositoryProvider = Provider<SessionsRepository>((ref) {
+  final apiClient = ref.watch(_apiClientProvider);
+  return SessionsRepository(apiClient: apiClient);
+});
+
+/// Состояние загрузчика сессий
+class SessionsState {
+  final List<SessionDevice> sessions;
+  final bool isLoading;
+  final String? error;
+  final String? deletingSessionId;
+
+  const SessionsState({
+    this.sessions = const [],
+    this.isLoading = false,
+    this.error,
+    this.deletingSessionId,
+  });
+
+  SessionsState copyWith({
+    List<SessionDevice>? sessions,
+    bool? isLoading,
+    String? error,
+    String? deletingSessionId,
+  }) {
+    return SessionsState(
+      sessions: sessions ?? this.sessions,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      deletingSessionId: deletingSessionId ?? this.deletingSessionId,
+    );
+  }
+}
+
+/// Нотификер сессий
+class SessionsNotifier extends StateNotifier<SessionsState> {
+  final SessionsRepository _repository;
+
+  SessionsNotifier({required SessionsRepository repository})
+    : _repository = repository,
+      super(const SessionsState()) {
+    loadSessions();
+  }
+
+  /// Загрузить сессии с сервера
+  Future<void> loadSessions() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final sessions = await _repository.getSessions();
+      // Сортируем: текущая сессия первая, затем по lastUsedAt
+      sessions.sort((a, b) {
+        if (a.isCurrent) return -1;
+        if (b.isCurrent) return 1;
+        return b.lastUsedAt.compareTo(a.lastUsedAt);
+      });
+      state = state.copyWith(sessions: sessions, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Ошибка загрузки сессий: $e',
+      );
+    }
+  }
+
+  /// Удалить сессию
+  Future<bool> deleteSession(String sessionId) async {
+    state = state.copyWith(deletingSessionId: sessionId, error: null);
+    try {
+      await _repository.deleteSession(sessionId);
+      // Обновляем список сессий
+      final sessions = state.sessions.where((s) => s.id != sessionId).toList();
+      state = state.copyWith(sessions: sessions, deletingSessionId: null);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        deletingSessionId: null,
+        error: 'Ошибка удаления сессии: $e',
+      );
+      return false;
+    }
+  }
+
+  void clearError() {
+    state = state.copyWith(error: null);
+  }
+}
+
+final sessionsProvider = StateNotifierProvider<SessionsNotifier, SessionsState>(
+  (ref) {
+    final repository = ref.watch(_sessionsRepositoryProvider);
+    return SessionsNotifier(repository: repository);
+  },
+);
 
 /// Экран настроек безопасности
 class SecurityScreen extends ConsumerStatefulWidget {
@@ -24,19 +128,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   // Двухфакторная аутентификация
   bool _twoFactorEnabled = false;
 
-  // Активные сессии - ТОЛЬКО ТЕКУЩАЯ (до загрузки через API)
-  // TODO: Загружать через GET /api/v1/user/sessions
-  final _activeSessions = [
-    SessionDevice(
-      device: 'Текущее устройство',
-      location: 'Москва',
-      isActive: true,
-      lastActive: 'Сейчас',
-      icon: Icons.devices,
-    ),
-  ];
-
-  // История входов
+  // История входов (mock, пока нет API)
   final _loginHistory = [
     LoginHistoryItem(
       device: 'iPhone 15 Pro',
@@ -234,7 +326,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
       return;
     }
 
-    // Имитация смены пароля
+    // Имитация смены пароля (пока нет API)
     await Future.delayed(const Duration(milliseconds: 500));
     _showSnackBar('Пароль успешно изменен');
 
@@ -296,31 +388,42 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             title: Row(
               children: [
                 Icon(
-                  session.icon,
+                  _getIconData(session.iconCode),
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Expanded(child: Text(session.device)),
+                Expanded(child: Text(session.deviceName)),
               ],
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow('Местоположение', session.location),
-                _buildInfoRow('Последняя активность', session.lastActive),
+                _buildInfoRow('Тип устройства', session.deviceTypeLabel),
+                if (session.ipAddress != null)
+                  _buildInfoRow('IP-адрес', session.ipAddress!),
+                _buildInfoRow('Последняя активность', session.lastActiveLabel),
                 _buildInfoRow(
                   'Статус',
-                  session.isActive ? 'Активная сессия' : 'Неактивна',
+                  session.isCurrent
+                      ? 'Текущая сессия'
+                      : session.isActive
+                      ? 'Активная'
+                      : 'Неактивна',
                 ),
+                if (session.expiresAt != null)
+                  _buildInfoRow(
+                    'Истекает',
+                    _formatExpiresAt(session.expiresAt!),
+                  ),
               ],
             ),
             actions: [
-              if (!session.isActive)
+              if (!session.isCurrent && session.isActive)
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    _showSnackBar('Сессия завершена');
+                    _confirmDeleteSession(session);
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.error,
@@ -336,6 +439,92 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     );
   }
 
+  void _confirmDeleteSession(SessionDevice session) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            icon: Icon(
+              Icons.logout,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            title: const Text('Завершить сессию?', textAlign: TextAlign.center),
+            content: Text(
+              'Вы уверены, что хотите завершить сессию на устройстве "${session.deviceName}"?',
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Отмена'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _deleteSession(session);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text('Завершить'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _deleteSession(SessionDevice session) async {
+    final success = await ref
+        .read(sessionsProvider.notifier)
+        .deleteSession(session.id);
+
+    if (mounted) {
+      if (success) {
+        _showSnackBar('Сессия завершена');
+      } else {
+        final state = ref.read(sessionsProvider);
+        _showSnackBar(state.error ?? 'Ошибка удаления сессии', isError: true);
+      }
+    }
+  }
+
+  IconData _getIconData(String iconCode) {
+    // Преобразуем строковый код в IconData
+    switch (iconCode) {
+      case 'phone_iphone':
+        return Icons.phone_iphone;
+      case 'tablet_mac':
+        return Icons.tablet_mac;
+      case 'desktop_mac':
+        return Icons.desktop_mac;
+      case 'language':
+        return Icons.language;
+      default:
+        return Icons.devices;
+    }
+  }
+
+  String _formatExpiresAt(DateTime expiresAt) {
+    final now = DateTime.now();
+    final difference = expiresAt.difference(now);
+
+    if (difference.isNegative) {
+      return 'Истекла';
+    } else if (difference.inDays < 1) {
+      return 'Сегодня в ${expiresAt.hour.toString().padLeft(2, '0')}:${expiresAt.minute.toString().padLeft(2, '0')}';
+    } else if (difference.inDays < 7) {
+      return 'Через ${difference.inDays} дн.';
+    } else {
+      final day = expiresAt.day.toString().padLeft(2, '0');
+      final month = expiresAt.month.toString().padLeft(2, '0');
+      return '$day.$month.$year';
+    }
+  }
+
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -343,7 +532,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 140,
+            width: 120,
             child: Text(
               label,
               style: TextStyle(
@@ -417,6 +606,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final sessionsState = ref.watch(sessionsProvider);
 
     return Scaffold(
       body: ResponsiveMaxWidthContainer(
@@ -435,7 +625,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
             // Активные сессии
-            SliverToBoxAdapter(child: _buildSessionsSection(context, theme)),
+            SliverToBoxAdapter(
+              child: _buildSessionsSection(context, theme, sessionsState),
+            ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
             // История входов
@@ -625,7 +817,11 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     );
   }
 
-  Widget _buildSessionsSection(BuildContext context, ThemeData theme) {
+  Widget _buildSessionsSection(
+    BuildContext context,
+    ThemeData theme,
+    SessionsState state,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -648,85 +844,142 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  '${_activeSessions.length}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ..._activeSessions.asMap().entries.map((entry) {
-            final index = entry.key;
-            final session = entry.value;
-            return Column(
-              children: [
-                if (index > 0)
-                  Divider(
-                    height: 1,
-                    color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                  ),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color:
-                          session.isActive
-                              ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                              : theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      session.icon,
-                      color:
-                          session.isActive
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant,
-                      size: 22,
-                    ),
-                  ),
-                  title: Text(
-                    session.device,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text(
-                    '${session.location} • ${session.lastActive}',
+                if (state.isLoading)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  Text(
+                    '${state.sessions.length}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  trailing:
-                      session.isActive
-                          ? Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.1,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              'Активная',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          )
-                          : const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                  onTap: () => _showSessionDetails(session),
-                ),
               ],
-            );
-          }),
+            ),
+          ),
+          // Ошибка загрузки
+          if (state.error != null)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: theme.colorScheme.error,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      state.error!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      ref.read(sessionsProvider.notifier).clearError();
+                      ref.read(sessionsProvider.notifier).loadSessions();
+                    },
+                    child: const Text('Повторить'),
+                  ),
+                ],
+              ),
+            ),
+          // Список сессий
+          if (state.sessions.isEmpty && !state.isLoading && state.error == null)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: Text('Нет активных сессий')),
+            )
+          else
+            ...state.sessions.asMap().entries.map((entry) {
+              final index = entry.key;
+              final session = entry.value;
+              final isDeleting = state.deletingSessionId == session.id;
+
+              return Column(
+                children: [
+                  if (index > 0)
+                    Divider(
+                      height: 1,
+                      color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                    ),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color:
+                            session.isCurrent
+                                ? theme.colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                )
+                                : theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child:
+                          isDeleting
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Icon(
+                                _getIconData(session.iconCode),
+                                color:
+                                    session.isCurrent
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurfaceVariant,
+                                size: 22,
+                              ),
+                    ),
+                    title: Text(
+                      session.deviceName,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      '${session.deviceTypeLabel} • ${session.lastActiveLabel}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    trailing:
+                        session.isCurrent
+                            ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'Текущая',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            )
+                            : const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                    onTap: () => _showSessionDetails(session),
+                  ),
+                ],
+              );
+            }),
           const SizedBox(height: 8),
         ],
       ),
@@ -1007,23 +1260,6 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
       ),
     );
   }
-}
-
-/// Модель сессии устройства
-class SessionDevice {
-  final String device;
-  final String location;
-  final bool isActive;
-  final String lastActive;
-  final IconData icon;
-
-  SessionDevice({
-    required this.device,
-    required this.location,
-    required this.isActive,
-    required this.lastActive,
-    required this.icon,
-  });
 }
 
 /// Модель истории входов

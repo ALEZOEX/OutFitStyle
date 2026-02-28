@@ -64,4 +64,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get preferences => 'Preferences';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get clothingSize => 'Clothing Size';
+
+  @override
+  String get preferredStyles => 'Preferred Styles';
+
+  @override
+  String get favoriteBrands => 'Favorite Brands';
+
+  @override
+  String get colorPreferences => 'Color Preferences';
+
+  @override
+  String get budget => 'Budget';
+
+  @override
+  String get savePreferences => 'Save Preferences';
 }

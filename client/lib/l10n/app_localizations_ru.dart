@@ -64,4 +64,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get somethingWentWrong => 'Что-то пошло не так';
+
+  @override
+  String get preferences => 'Предпочтения';
+
+  @override
+  String get save => 'Сохранить';
+
+  @override
+  String get clothingSize => 'Размер одежды';
+
+  @override
+  String get preferredStyles => 'Предпочитаемые стили';
+
+  @override
+  String get favoriteBrands => 'Любимые бренды';
+
+  @override
+  String get colorPreferences => 'Цветовые предпочтения';
+
+  @override
+  String get budget => 'Бюджет';
+
+  @override
+  String get savePreferences => 'Сохранить предпочтения';
 }
