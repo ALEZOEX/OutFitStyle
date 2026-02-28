@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
@@ -28,25 +29,43 @@ enum ClothingSizeUI {
 }
 
 enum StylePreferenceUI {
-  casual('Casual', '👕'),
-  classic('Classic', '👔'),
-  sport('Sport', '👟'),
-  streetwear('Streetwear', '🧢'),
-  bohemian('Bohemian', '🌸'),
-  minimal('Minimal', '⚫');
+  casual('casual', '👕'),
+  classic('classic', '👔'),
+  sport('sport', '👟'),
+  streetwear('streetwear', '🧢'),
+  bohemian('bohemian', '🌸'),
+  minimal('minimal', '⚫');
 
-  final String label;
+  final String apiValue;
   final String emoji;
-  const StylePreferenceUI(this.label, this.emoji);
+  const StylePreferenceUI(this.apiValue, this.emoji);
+
+  /// Получить отображаемое название стиля через локализацию
+  String getDisplayName(AppLocalizations l10n) {
+    switch (this) {
+      case StylePreferenceUI.casual:
+        return 'Кэжуал';
+      case StylePreferenceUI.classic:
+        return 'Классический';
+      case StylePreferenceUI.sport:
+        return 'Спортивный';
+      case StylePreferenceUI.streetwear:
+        return 'Стритвир';
+      case StylePreferenceUI.bohemian:
+        return 'Бохо';
+      case StylePreferenceUI.minimal:
+        return 'Минимализм';
+    }
+  }
 
   static List<String> toStyleList(List<StylePreferenceUI> styles) {
-    return styles.map((s) => s.label.toLowerCase()).toList();
+    return styles.map((s) => s.apiValue).toList();
   }
 
   static List<StylePreferenceUI> fromStyleList(List<String> styles) {
     return styles.map((s) {
       return StylePreferenceUI.values.firstWhere(
-        (e) => e.label.toLowerCase() == s.toLowerCase(),
+        (e) => e.apiValue.toLowerCase() == s.toLowerCase(),
         orElse: () => StylePreferenceUI.casual,
       );
     }).toList();
@@ -360,10 +379,11 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(preferencesProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Предпочтения'),
+        title: Text(l10n.preferences),
         centerTitle: true,
         actions: [
           if (state.isSaving)
@@ -379,7 +399,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: _savePreferences,
-              tooltip: 'Сохранить',
+              tooltip: l10n.save,
             ),
         ],
       ),
@@ -393,7 +413,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     // Размер одежды
                     _buildSection(
                       context,
-                      title: 'Размер одежды',
+                      title: l10n.clothingSize,
                       icon: Icons.checkroom,
                       child: Wrap(
                         spacing: 8,
@@ -419,10 +439,10 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Предпочитаемые стили
+                    // Предпочитаемые стили (с локализацией)
                     _buildSection(
                       context,
-                      title: 'Предпочитаемые стили',
+                      title: l10n.preferredStyles,
                       icon: Icons.style,
                       child: Wrap(
                         spacing: 8,
@@ -435,7 +455,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                                   style.emoji,
                                   style: const TextStyle(fontSize: 16),
                                 ),
-                                label: Text(style.label),
+                                label: Text(style.getDisplayName(l10n)),
                                 selected: isSelected,
                                 onSelected: (_) {
                                   ref
@@ -455,7 +475,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     // Любимые бренды
                     _buildSection(
                       context,
-                      title: 'Любимые бренды',
+                      title: l10n.favoriteBrands,
                       icon: Icons.shopping_bag,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -483,6 +503,13 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                             const SizedBox(height: 12),
                           ],
                           // Популярные бренды
+                          Text(
+                            'Популярные бренды:',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
@@ -533,7 +560,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     // Цветовые предпочтения
                     _buildSection(
                       context,
-                      title: 'Цветовые предпочтения',
+                      title: l10n.colorPreferences,
                       icon: Icons.palette,
                       child: Wrap(
                         spacing: 8,
@@ -559,33 +586,89 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Бюджет
+                    // Бюджет (скоро)
                     _buildSection(
                       context,
-                      title: 'Бюджет на вещи',
+                      title: '${l10n.budget} (скоро)',
                       icon: Icons.attach_money,
                       child: Column(
                         children: [
-                          RangeSlider(
-                            values: RangeValues(
-                              state.minBudget.toDouble(),
-                              state.maxBudget.toDouble(),
+                          // Индикатор "скоро"
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: theme.colorScheme.outline.withValues(
+                                  alpha: 0.3,
+                                ),
+                              ),
                             ),
-                            min: 0,
-                            max: 100000,
-                            divisions: 100,
-                            labels: RangeLabels(
-                              '${state.minBudget}₽',
-                              '${state.maxBudget}₽',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.hourglass_empty,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Настройка бюджета',
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      Text(
+                                        'Возможность будет доступна в следующем обновлении',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color:
+                                                  theme
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            onChanged: (values) {
-                              ref
-                                  .read(preferencesProvider.notifier)
-                                  .updateBudget(
-                                    values.start.round(),
-                                    values.end.round(),
-                                  );
-                            },
+                          ),
+                          // Неактивный RangeSlider для визуализации
+                          const SizedBox(height: 16),
+                          Opacity(
+                            opacity: 0.5,
+                            child: AbsorbPointer(
+                              child: RangeSlider(
+                                values: RangeValues(
+                                  state.minBudget.toDouble(),
+                                  state.maxBudget.toDouble(),
+                                ),
+                                min: 0,
+                                max: 100000,
+                                divisions: 100,
+                                labels: RangeLabels(
+                                  '${state.minBudget}₽',
+                                  '${state.maxBudget}₽',
+                                ),
+                                onChanged: (values) {
+                                  ref
+                                      .read(preferencesProvider.notifier)
+                                      .updateBudget(
+                                        values.start.round(),
+                                        values.end.round(),
+                                      );
+                                },
+                              ),
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -630,7 +713,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                                   ),
                                 )
                                 : const Icon(Icons.save),
-                        label: const Text('Сохранить предпочтения'),
+                        label: Text(l10n.savePreferences),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),

@@ -74,5 +74,37 @@
   "somethingWentWrong": "Что-то пошло не так",
   "@somethingWentWrong": {
     "description": "Общее сообщение об ошибке"
+  },
+  "preferences": "Предпочтения",
+  "@preferences": {
+    "description": "Заголовок экрана предпочтений"
+  },
+  "save": "Сохранить",
+  "@save": {
+    "description": "Текст кнопки сохранения"
+  },
+  "clothingSize": "Размер одежды",
+  "@clothingSize": {
+    "description": "Заголовок секции размера одежды"
+  },
+  "preferredStyles": "Предпочитаемые стили",
+  "@preferredStyles": {
+    "description": "Заголовок секции предпочитаемых стилей"
+  },
+  "favoriteBrands": "Любимые бренды",
+  "@favoriteBrands": {
+    "description": "Заголовок секции любимых брендов"
+  },
+  "colorPreferences": "Цветовые предпочтения",
+  "@colorPreferences": {
+    "description": "Заголовок секции цветовых предпочтений"
+  },
+  "budget": "Бюджет",
+  "@budget": {
+    "description": "Заголовок секции бюджета"
+  },
+  "savePreferences": "Сохранить предпочтения",
+  "@savePreferences": {
+    "description": "Текст кнопки сохранения предпочтений"
   }
 }

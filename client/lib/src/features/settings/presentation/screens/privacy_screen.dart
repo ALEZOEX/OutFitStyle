@@ -10,10 +10,8 @@ import '../../../../presentation/routing/router.dart';
 /// Экран настроек конфиденциальности
 ///
 /// Позволяет пользователю управлять настройками приватности:
-/// - Видимость профиля
-/// - Видимость статистики
-/// - Видимость гардероба
-/// - Управление данными
+/// - Сбор анонимных данных для аналитики
+/// - Управление данными (экспорт/удаление)
 class PrivacySettingsScreen extends ConsumerStatefulWidget {
   const PrivacySettingsScreen({super.key});
 
@@ -24,12 +22,9 @@ class PrivacySettingsScreen extends ConsumerStatefulWidget {
 
 class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   // Настройки приватности
-  bool _profileVisibility = true; // Публичный профиль
-  bool _statsVisibility = true; // Публичная статистика
-  bool _wardrobeVisibility = false; // Приватный гардероб
-  bool _allowDataCollection = true; // Сбор анонимных данных
-  bool _showOnlineStatus = true; // Показывать статус "онлайн"
-  
+  bool _allowDataCollection =
+      false; // Сбор анонимных данных (отключено по умолчанию)
+
   // API клиент и хранилище
   late final ApiClient _apiClient;
   late final AuthStorage _authStorage;
@@ -45,11 +40,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _profileVisibility = prefs.getBool('profile_visibility') ?? true;
-      _statsVisibility = prefs.getBool('stats_visibility') ?? true;
-      _wardrobeVisibility = prefs.getBool('wardrobe_visibility') ?? false;
-      _allowDataCollection = prefs.getBool('allow_data_collection') ?? true;
-      _showOnlineStatus = prefs.getBool('show_online_status') ?? true;
+      _allowDataCollection = prefs.getBool('allow_data_collection') ?? false;
     });
   }
 
@@ -72,64 +63,6 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Видимость профиля
-            _buildSection(
-              context,
-              title: 'Видимость профиля',
-              icon: Icons.person_outline,
-              child: Column(
-                children: [
-                  _buildToggle(
-                    context,
-                    title: 'Публичный профиль',
-                    subtitle: 'Другие пользователи могут видеть ваш профиль',
-                    value: _profileVisibility,
-                    onChanged:
-                        (value) => _saveSetting('profile_visibility', value),
-                  ),
-                  _buildToggle(
-                    context,
-                    title: 'Показывать статус "онлайн"',
-                    subtitle: 'Другие видят, когда вы в сети',
-                    value: _showOnlineStatus,
-                    onChanged:
-                        (value) => _saveSetting('show_online_status', value),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Видимость контента
-            _buildSection(
-              context,
-              title: 'Видимость контента',
-              icon: Icons.visibility,
-              child: Column(
-                children: [
-                  _buildToggle(
-                    context,
-                    title: 'Публичная статистика',
-                    subtitle: 'Показывать количество образов и лайков',
-                    value: _statsVisibility,
-                    onChanged:
-                        (value) => _saveSetting('stats_visibility', value),
-                  ),
-                  _buildToggle(
-                    context,
-                    title: 'Публичный гардероб',
-                    subtitle: 'Другие могут смотреть ваш гардероб',
-                    value: _wardrobeVisibility,
-                    onChanged:
-                        (value) => _saveSetting('wardrobe_visibility', value),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
             // Данные и аналитика
             _buildSection(
               context,
@@ -141,7 +74,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                     context,
                     title: 'Анонимная аналитика',
                     subtitle:
-                        'Помочь улучшить приложение, отправляя анонимные данные',
+                        'Помочь улучшить приложение, отправляя анонимные данные об использовании',
                     value: _allowDataCollection,
                     onChanged:
                         (value) => _saveSetting('allow_data_collection', value),
@@ -150,7 +83,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Управление данными
             Card(
@@ -162,12 +95,12 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.errorContainer,
+                        color: theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
                         Icons.download,
-                        color: theme.colorScheme.onErrorContainer,
+                        color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
                     title: const Text('Экспорт данных'),
@@ -231,8 +164,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Мы уважаем вашу конфиденциальность и защищаем ваши данные. '
-                      'Настройки приватности позволяют контролировать, кто может видеть '
-                      'ваш профиль и контент.',
+                      'Анонимная аналитика помогает нам улучшать приложение, '
+                      'не собирая при этом персональную информацию.',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.hintColor,
                       ),
@@ -317,7 +250,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
             title: const Text('Экспорт данных'),
             content: const Text(
               'Мы подготовим архив со всеми вашими данными: профиль, гардероб, '
-              'рекомендации, история действий. Это может занять несколько минут.',
+              'рекомендации, история действий. Это может занять несколько минут. '
+              'Ссылка для скачивания будет отправлена на ваш email.',
             ),
             actions: [
               TextButton(
@@ -341,7 +275,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
     try {
       // Экспорт данных через API
       final response = await _apiClient.post('/api/v1/user/export-data');
-      
+
       if (response.statusCode == 200 || response.statusCode == 202) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -408,11 +342,11 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
     try {
       // Удаление аккаунта через API
       final response = await _apiClient.delete('/api/v1/user/delete-account');
-      
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         // Выход из системы и очистка сессии
         await _authStorage.clearSession();
-        
+
         if (mounted) {
           // Перенаправление на экран входа
           ref.read(appRouterProvider).go('/auth');

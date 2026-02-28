@@ -74,5 +74,37 @@
   "somethingWentWrong": "Something went wrong",
   "@somethingWentWrong": {
     "description": "Generic error message"
+  },
+  "preferences": "Preferences",
+  "@preferences": {
+    "description": "Preferences screen title"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  "clothingSize": "Clothing Size",
+  "@clothingSize": {
+    "description": "Clothing size section title"
+  },
+  "preferredStyles": "Preferred Styles",
+  "@preferredStyles": {
+    "description": "Preferred styles section title"
+  },
+  "favoriteBrands": "Favorite Brands",
+  "@favoriteBrands": {
+    "description": "Favorite brands section title"
+  },
+  "colorPreferences": "Color Preferences",
+  "@colorPreferences": {
+    "description": "Color preferences section title"
+  },
+  "budget": "Budget",
+  "@budget": {
+    "description": "Budget section title"
+  },
+  "savePreferences": "Save Preferences",
+  "@savePreferences": {
+    "description": "Save preferences button text"
   }
 }
