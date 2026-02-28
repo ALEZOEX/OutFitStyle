@@ -223,3 +223,5 @@ client/build/
 
 # Локальные файлы (не для публикации)
 POSTER_LOCAL.md  
+secret-edit.yaml
+*.secret.yaml
