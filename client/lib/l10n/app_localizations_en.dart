@@ -88,4 +88,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get savePreferences => 'Save Preferences';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to OutfitStyle!';
+
+  @override
+  String get onboardingWelcomeSubtitle => 'Your personal style assistant';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Get personalized outfit recommendations based on weather and your preferences';
+
+  @override
+  String get onboardingCityTitle => 'Select your city';
+
+  @override
+  String get onboardingCityDescription => 'For accurate weather-based recommendations';
+
+  @override
+  String get onboardingCitySearchHint => 'Enter city name...';
+
+  @override
+  String get onboardingCityDetectByIp => 'Detect automatically';
+
+  @override
+  String get onboardingCityRequired => 'Please select a city';
+
+  @override
+  String get onboardingStylesTitle => 'What styles do you like?';
+
+  @override
+  String get onboardingStylesDescription => 'Choose at least 3 styles';
+
+  @override
+  String get onboardingStylesMinimum => 'Select at least 3 styles';
+
+  @override
+  String get onboardingPreferencesTitle => 'Your preferences';
+
+  @override
+  String get onboardingPreferencesDescription =>
+      'Help us tailor recommendations for you';
+
+  @override
+  String get onboardingBudgetLabel => 'Budget range';
+
+  @override
+  String get onboardingBrandsLabel => 'Favorite brands (optional)';
+
+  @override
+  String get onboardingBrandsHint => 'e.g., Zara, H&M, Nike...';
+
+  @override
+  String get onboardingCompleteTitle => 'Ready!';
+
+  @override
+  String get onboardingCompleteDescription =>
+      'We\'ve prepared your first recommendations';
+
+  @override
+  String get onboardingStartButton => 'Start';
+
+  @override
+  String get onboardingNextButton => 'Next';
+
+  @override
+  String get onboardingBackButton => 'Back';
+
+  @override
+  String get onboardingSkipButton => 'Skip';
+
+  @override
+  String get onboardingFinishButton => 'Finish';
+
+  @override
+  String get styleCasual => 'Casual';
+
+  @override
+  String get styleSport => 'Sport';
+
+  @override
+  String get styleClassic => 'Classic';
+
+  @override
+  String get styleStreetwear => 'Streetwear';
+
+  @override
+  String get styleBusiness => 'Business';
+
+  @override
+  String get styleMinimalist => 'Minimalist';
+
+  @override
+  String get styleBoho => 'Boho';
+
+  @override
+  String get stylePreppy => 'Preppy';
+
+  @override
+  String get budgetEconomy => 'Economy';
+
+  @override
+  String get budgetMedium => 'Medium';
+
+  @override
+  String get budgetPremium => 'Premium';
 }

@@ -1,15 +1,19 @@
+// Re-export провайдеров онбординга
+export 'presentation/providers/onboarding_provider.dart';
+
+// Для обратной совместимости
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../onboarding/onboarding_storage.dart';
+import 'onboarding_storage.dart';
 
-final onboardingStorageProvider = Provider((ref) => OnboardingStorage());
+final onboardingStorageProviderLegacy = Provider((ref) => OnboardingStorage());
 
-final onboardingDoneProvider = FutureProvider<bool>((ref) async {
-  final storage = ref.read(onboardingStorageProvider);
+final onboardingDoneProviderLegacy = FutureProvider<bool>((ref) async {
+  final storage = ref.read(onboardingStorageProviderLegacy);
   return storage.isDone();
 });
 
-final isOnboardingDoneProvider = Provider<bool>((ref) {
-  final result = ref.watch(onboardingDoneProvider);
+final isOnboardingDoneProviderLegacy = Provider<bool>((ref) {
+  final result = ref.watch(onboardingDoneProviderLegacy);
   return result.when(
     data: (done) => done,
     error: (_, __) => false,

@@ -88,4 +88,109 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get savePreferences => 'Сохранить предпочтения';
+
+  @override
+  String get onboardingWelcomeTitle => 'Добро пожаловать в OutfitStyle!';
+
+  @override
+  String get onboardingWelcomeSubtitle => 'Ваш персональный помощник по стилю';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Получайте персональные рекомендации одежды на основе погоды и ваших предпочтений';
+
+  @override
+  String get onboardingCityTitle => 'Выберите ваш город';
+
+  @override
+  String get onboardingCityDescription => 'Для точных рекомендаций по погоде';
+
+  @override
+  String get onboardingCitySearchHint => 'Введите название города...';
+
+  @override
+  String get onboardingCityDetectByIp => 'Определить автоматически';
+
+  @override
+  String get onboardingCityRequired => 'Пожалуйста, выберите город';
+
+  @override
+  String get onboardingStylesTitle => 'Какие стили вам нравятся?';
+
+  @override
+  String get onboardingStylesDescription => 'Выберите минимум 3 стиля';
+
+  @override
+  String get onboardingStylesMinimum => 'Выберите хотя бы 3 стиля';
+
+  @override
+  String get onboardingPreferencesTitle => 'Ваши предпочтения';
+
+  @override
+  String get onboardingPreferencesDescription =>
+      'Помогите нам подобрать рекомендации для вас';
+
+  @override
+  String get onboardingBudgetLabel => 'Диапазон бюджета';
+
+  @override
+  String get onboardingBrandsLabel => 'Любимые бренды (необязательно)';
+
+  @override
+  String get onboardingBrandsHint => 'Например, Zara, H&M, Nike...';
+
+  @override
+  String get onboardingCompleteTitle => 'Готово!';
+
+  @override
+  String get onboardingCompleteDescription =>
+      'Мы подобрали для вас первые рекомендации';
+
+  @override
+  String get onboardingStartButton => 'Начать';
+
+  @override
+  String get onboardingNextButton => 'Далее';
+
+  @override
+  String get onboardingBackButton => 'Назад';
+
+  @override
+  String get onboardingSkipButton => 'Пропустить';
+
+  @override
+  String get onboardingFinishButton => 'Завершить';
+
+  @override
+  String get styleCasual => 'Casual';
+
+  @override
+  String get styleSport => 'Sport';
+
+  @override
+  String get styleClassic => 'Classic';
+
+  @override
+  String get styleStreetwear => 'Streetwear';
+
+  @override
+  String get styleBusiness => 'Business';
+
+  @override
+  String get styleMinimalist => 'Minimalist';
+
+  @override
+  String get styleBoho => 'Boho';
+
+  @override
+  String get stylePreppy => 'Preppy';
+
+  @override
+  String get budgetEconomy => 'Эконом';
+
+  @override
+  String get budgetMedium => 'Средний';
+
+  @override
+  String get budgetPremium => 'Премиум';
 }
