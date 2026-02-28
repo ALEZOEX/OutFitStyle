@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/outfit_recommendation.dart';
 
-/// Карточка персональной рекомендации
-/// Без социальной функциональности (лайки, комментарии, лента)
+/// Карточка персональной рекомендации с полным комплектом одежды
+///
+/// Обязательные элементы:
+/// - Верх (top): футболка, рубашка, худи, свитер и т.д.
+/// - Низ (bottom): штаны, джинсы, брюки, шорты
+/// - Обувь (shoes): кроссовки, ботинки, туфли
+/// - Аксессуары (accessories): куртка, пальто, шапка, шарф (опционально)
 class RecommendationCard extends StatelessWidget {
   final OutfitRecommendation recommendation;
   final VoidCallback? onDetailsPressed;
   final VoidCallback? onPlanPressed;
   final VoidCallback? onUsePressed;
+  final VoidCallback? onLikePressed;
+  final VoidCallback? onDislikePressed;
 
   const RecommendationCard({
     super.key,
@@ -15,6 +22,8 @@ class RecommendationCard extends StatelessWidget {
     this.onDetailsPressed,
     this.onPlanPressed,
     this.onUsePressed,
+    this.onLikePressed,
+    this.onDislikePressed,
   });
 
   @override
@@ -22,18 +31,22 @@ class RecommendationCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
+    // Получаем предметы по категориям
+    final topItems = _getItemsByCategory('top');
+    final bottomItems = _getItemsByCategory('bottom');
+    final shoesItems = _getItemsByCategory('shoes');
+    final accessoryItems = _getItemsByCategory('accessories');
+
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with weather
+            // Header with weather and title
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -41,8 +54,9 @@ class RecommendationCard extends StatelessWidget {
                   child: Text(
                     recommendation.title ?? 'Рекомендация',
                     style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -53,119 +67,189 @@ class RecommendationCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: isDarkMode 
-                          ? theme.colorScheme.primaryContainer 
-                          : Colors.blue[100],
+                      color:
+                          isDarkMode
+                              ? theme.colorScheme.primaryContainer
+                              : Colors.blue[100],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      recommendation.weatherCondition!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDarkMode
-                                ? theme.colorScheme.onPrimaryContainer
-                                : Colors.blue[800],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.thermostat,
+                          size: 14,
+                          color:
+                              isDarkMode
+                                  ? theme.colorScheme.onPrimaryContainer
+                                  : Colors.blue[800],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${recommendation.temperature?.round() ?? 0}°C',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color:
+                                isDarkMode
+                                    ? theme.colorScheme.onPrimaryContainer
+                                    : Colors.blue[800],
                           ),
+                        ),
+                      ],
                     ),
                   ),
               ],
             ),
             const SizedBox(height: 8),
 
-            // Outfit items
-            if (recommendation.recommendedItems != null &&
-                recommendation.recommendedItems!.isNotEmpty) ...[
-              Text(
-                'Рекомендуемые вещи:',
-                style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: recommendation.recommendedItems!
-                    .take(6)
-                    .map((item) => _buildOutfitItem(item, context))
-                    .toList(),
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            // Description
+            // Описание
             if (recommendation.description != null &&
                 recommendation.description!.isNotEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? theme.colorScheme.secondaryContainer.withOpacity(0.3)
-                      : Colors.green[50],
+                  color:
+                      isDarkMode
+                          ? theme.colorScheme.secondaryContainer.withOpacity(
+                            0.3,
+                          )
+                          : Colors.green[50],
                   border: Border.all(
-                    color: isDarkMode
-                        ? theme.colorScheme.secondaryContainer
-                        : Colors.green[200]!,
+                    color:
+                        isDarkMode
+                            ? theme.colorScheme.secondaryContainer
+                            : Colors.green[200]!,
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   recommendation.description!,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDarkMode
+                    color:
+                        isDarkMode
                             ? theme.colorScheme.onSecondaryContainer
                             : Colors.green[800],
-                      ),
-                ),
-              ),
-            if (recommendation.description == null ||
-                recommendation.description!.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-                      : Colors.blue[50],
-                  border: Border.all(
-                    color: isDarkMode
-                        ? theme.colorScheme.primaryContainer
-                        : Colors.blue[200]!,
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Совет: ${_getRecommendationTip(recommendation.id ?? '')}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDarkMode
-                            ? theme.colorScheme.onPrimaryContainer
-                            : Colors.blue[800],
-                      ),
                 ),
               ),
+
+            const SizedBox(height: 16),
+
+            // Полный комплект одежды
+            Text(
+              'Комплект одежды',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 12),
 
-            // Action buttons - персональные действия
+            // Верх
+            _buildOutfitCategory(
+              context,
+              category: 'Верх',
+              icon: Icons.checkroom,
+              items: topItems,
+              color: Colors.blue,
+              required: true,
+            ),
+            const SizedBox(height: 10),
+
+            // Низ
+            _buildOutfitCategory(
+              context,
+              category: 'Низ',
+              icon: Icons.checkroom_outlined,
+              items: bottomItems,
+              color: Colors.green,
+              required: true,
+            ),
+            const SizedBox(height: 10),
+
+            // Обувь
+            _buildOutfitCategory(
+              context,
+              category: 'Обувь',
+              icon: Icons.bolt,
+              items: shoesItems,
+              color: Colors.orange,
+              required: true,
+            ),
+            const SizedBox(height: 10),
+
+            // Аксессуары (опционально)
+            if (accessoryItems.isNotEmpty)
+              _buildOutfitCategory(
+                context,
+                category: 'Аксессуары',
+                icon: Icons.shopping_bag,
+                items: accessoryItems,
+                color: Colors.purple,
+                required: false,
+              ),
+
+            const SizedBox(height: 16),
+
+            // Кнопки действий
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildActionButton(
-                  icon: Icons.calendar_today,
-                  color: isDarkMode ? theme.colorScheme.primary : Colors.blue,
-                  label: 'Запланировать',
-                  onPressed: onPlanPressed,
+                // Дизлайк
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onDislikePressed,
+                    icon: const Icon(Icons.thumb_down, color: Colors.red),
+                    label: const Text('Не нравится'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      foregroundColor: Colors.red,
+                    ),
+                  ),
                 ),
-                _buildActionButton(
-                  icon: Icons.visibility,
-                  color: isDarkMode ? theme.colorScheme.secondary : Colors.green,
-                  label: 'Детали',
-                  onPressed: onDetailsPressed ?? () {},
+                const SizedBox(width: 8),
+                // Лайк
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onLikePressed,
+                    icon: const Icon(Icons.thumb_up, color: Colors.green),
+                    label: const Text('Нравится'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      foregroundColor: Colors.green,
+                    ),
+                  ),
                 ),
-                _buildActionButton(
-                  icon: Icons.check,
-                  color: isDarkMode ? theme.colorScheme.tertiary : Colors.orange,
-                  label: 'Использовать',
-                  onPressed: onUsePressed,
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Запланировать
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: onPlanPressed,
+                    icon: Icon(
+                      Icons.calendar_today,
+                      color: theme.colorScheme.primary,
+                    ),
+                    label: const Text('Запланировать'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Использовать
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onUsePressed,
+                    icon: const Icon(Icons.check),
+                    label: const Text('Использовать'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -175,43 +259,107 @@ class RecommendationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton({
+  /// Категория одежды в комплекте
+  Widget _buildOutfitCategory(
+    BuildContext context, {
+    required String category,
     required IconData icon,
-    required Color? color,
-    required String label,
-    required VoidCallback? onPressed,
+    required List<String> items,
+    required Color color,
+    required bool required,
   }) {
-    return Expanded(
-      child: TextButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, color: color),
-        label: Text(label),
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color:
+            isDarkMode
+                ? color.withValues(alpha: 0.15)
+                : color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color:
+              isDarkMode
+                  ? color.withValues(alpha: 0.3)
+                  : color.withValues(alpha: 0.2),
         ),
       ),
-    );
-  }
-
-  Widget _buildOutfitItem(String item, BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.checkroom, size: 14, color: Colors.grey[600]),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              item,
-              style:
-                  Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
-              overflow: TextOverflow.ellipsis,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      category,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (required)
+                      Container(
+                        margin: const EdgeInsets.only(left: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'обязательно',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                if (items.isNotEmpty)
+                  Text(
+                    items.join(', '),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                else if (required)
+                  Text(
+                    '⚠️ Требуется предмет',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  )
+                else
+                  Text(
+                    'Не выбрано',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
@@ -219,20 +367,104 @@ class RecommendationCard extends StatelessWidget {
     );
   }
 
-  String _getRecommendationTip(String? outfitId) {
-    final tips = [
-      'Добавьте легкую куртку на случай похолодания',
-      'Выберите натуральные ткани для комфорта',
-      'Не забудьте головной убор при ярком солнце',
-      'Обувь должна быть удобной для долгой ходьбы',
-      'Следите за уровнем влажности при выборе одежды',
-      'Учитывайте ветер при выборе верхней одежды',
-      'Выбирайте одежду по размеру для лучшего комфорта',
-      'Создайте слои одежды для адаптации к температуре',
-      'Выберите водонепроницаемую одежду при дожде',
-      'Предпочитайте светлые тона в жаркую погоду',
-    ];
+  /// Получить предметы по категории
+  List<String> _getItemsByCategory(String category) {
+    final items = recommendation.recommendedItems ?? [];
+    final result = <String>[];
 
-    return tips[(outfitId ?? '').hashCode.abs() % tips.length];
+    for (final item in items) {
+      final itemLower = item.toLowerCase();
+
+      switch (category) {
+        case 'top':
+          if (itemLower.contains('футболк') ||
+              itemLower.contains('рубашк') ||
+              itemLower.contains('худи') ||
+              itemLower.contains('свитер') ||
+              itemLower.contains('кофт') ||
+              itemLower.contains('топ') ||
+              itemLower.contains('блуз') ||
+              itemLower.contains('лонгслив') ||
+              itemLower.contains('водолазк') ||
+              itemLower.contains('майк') ||
+              itemLower.contains('поло')) {
+            result.add(item);
+          }
+          break;
+        case 'bottom':
+          if (itemLower.contains('джинс') ||
+              itemLower.contains('брюк') ||
+              itemLower.contains('штан') ||
+              itemLower.contains('шорт') ||
+              itemLower.contains('юбк') ||
+              itemLower.contains('леггинс') ||
+              itemLower.contains('карго') ||
+              itemLower.contains('чинос')) {
+            result.add(item);
+          }
+          break;
+        case 'shoes':
+          if (itemLower.contains('кроссовк') ||
+              itemLower.contains('ботинк') ||
+              itemLower.contains('туфел') ||
+              itemLower.contains('сандали') ||
+              itemLower.contains('обув') ||
+              itemLower.contains('кед') ||
+              itemLower.contains('сапог') ||
+              itemLower.contains('полуботинк') ||
+              itemLower.contains('мокасин') ||
+              itemLower.contains('лофер')) {
+            result.add(item);
+          }
+          break;
+        case 'accessories':
+          if (itemLower.contains('куртк') ||
+              itemLower.contains('пальт') ||
+              itemLower.contains('жакет') ||
+              itemLower.contains('пиджак') ||
+              itemLower.contains('ветровк') ||
+              itemLower.contains('дождевик') ||
+              itemLower.contains('жилет') ||
+              itemLower.contains('шапк') ||
+              itemLower.contains('шарф') ||
+              itemLower.contains('перчатк') ||
+              itemLower.contains('сумк') ||
+              itemLower.contains('ремен') ||
+              itemLower.contains('очк') ||
+              itemLower.contains('кепк') ||
+              itemLower.contains('сноуд') ||
+              itemLower.contains('капюшон')) {
+            result.add(item);
+          }
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  /// Получить иконку для предмета одежды
+  IconData _getItemIcon(String item) {
+    final itemLower = item.toLowerCase();
+
+    if (itemLower.contains('футболк')) return Icons.checkroom;
+    if (itemLower.contains('рубашк')) return Icons.person;
+    if (itemLower.contains('худи') || itemLower.contains('свитер'))
+      return Icons.cottage;
+    if (itemLower.contains('джинс') || itemLower.contains('брюк'))
+      return Icons.checkroom_outlined;
+    if (itemLower.contains('шорт')) return Icons.surfing;
+    if (itemLower.contains('кроссовк') || itemLower.contains('кед'))
+      return Icons.sports_soccer;
+    if (itemLower.contains('ботинк') || itemLower.contains('сапог'))
+      return Icons.hiking;
+    if (itemLower.contains('туфел')) return Icons.sports_martial_arts;
+    if (itemLower.contains('куртк') || itemLower.contains('пальт'))
+      return Icons.sunny_snowing;
+    if (itemLower.contains('шапк')) return Icons.face;
+    if (itemLower.contains('шарф')) return Icons.waves;
+    if (itemLower.contains('сумк')) return Icons.shopping_bag;
+
+    return Icons.checkroom;
   }
 }
