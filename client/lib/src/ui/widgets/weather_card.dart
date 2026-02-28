@@ -429,26 +429,38 @@ class WeatherCard extends StatelessWidget {
   IconData _getWeatherIcon(String description) {
     final desc = description.toLowerCase();
 
-    if (desc.contains('ясно') || desc.contains('sunny') || desc.contains('clear')) {
+    // Ясно / Солнечно
+    if (desc.contains('ясно') || desc.contains('sunny') || desc.contains('clear') || desc.contains('преимущ')) {
       return Icons.wb_sunny;
-    } else if (desc.contains('облач') || desc.contains('cloud')) {
+    } 
+    // Облачно / Пасмурно
+    else if (desc.contains('облач') || desc.contains('cloud') || desc.contains('пасмурно') || desc.contains('overcast')) {
       if (desc.contains('перемен')) {
         return Icons.cloud_queue;
       }
       return Icons.cloud;
-    } else if (desc.contains('дожд') || desc.contains('rain')) {
+    } 
+    // Дождь / Гроза
+    else if (desc.contains('дожд') || desc.contains('rain') || desc.contains('морось')) {
       if (desc.contains('гром') || desc.contains('thunder')) {
         return Icons.thunderstorm;
       }
       return Icons.grain;
-    } else if (desc.contains('снег') || desc.contains('snow')) {
+    } 
+    // Снег
+    else if (desc.contains('снег') || desc.contains('snow')) {
       return Icons.ac_unit;
-    } else if (desc.contains('туман') || desc.contains('fog')) {
+    } 
+    // Туман
+    else if (desc.contains('туман') || desc.contains('fog')) {
       return Icons.foggy;
-    } else if (desc.contains('ветр') || desc.contains('wind')) {
+    } 
+    // Ветер
+    else if (desc.contains('ветр') || desc.contains('wind')) {
       return Icons.air;
     }
 
+    // По умолчанию - ясно
     return Icons.wb_sunny;
   }
 
