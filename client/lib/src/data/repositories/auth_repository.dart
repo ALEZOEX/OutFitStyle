@@ -107,8 +107,9 @@ class AuthRepository implements IAuthRepository {
         return false;
       }
 
+      // Используем /api/auth/refresh вместо /auth/refresh
       final response = await apiClient.post(
-        '/auth/refresh',
+        '/api/auth/refresh',
         data: {
           'refresh_token': tokens.refreshToken,
         },
