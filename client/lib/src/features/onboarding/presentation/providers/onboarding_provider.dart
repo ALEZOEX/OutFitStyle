@@ -1,12 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/api/api_client.dart';
-import '../../../../core/api/api_config.dart';
 import '../../../../services/auth_storage.dart';
-import '../../../../data/repositories/auth_repository.dart';
-import 'data/models/onboarding_data.dart';
-import 'data/repositories/onboarding_repository.dart';
-import 'onboarding_storage.dart';
+import '../../data/models/onboarding_data.dart';
+import '../../data/repositories/onboarding_repository.dart';
+import '../../onboarding_storage.dart';
 
 /// Провайдер хранилища онбординга
 final onboardingStorageProvider = Provider<OnboardingStorage>((ref) {

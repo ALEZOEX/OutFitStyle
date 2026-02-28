@@ -9,8 +9,8 @@ import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
 import '../../features/notifications/presentation/widgets/notification_icon.dart';
 import '../../theme/theme_controller.dart';
-import '../../../presentation/providers/user_location_provider.dart';
-import '../../../ui/widgets/city_selector_dialog.dart';
+import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
+import 'package:outfitstyle_client/src/ui/widgets/city_selector_dialog.dart';
 
 /// Wrapper для главного экрана с навигацией
 class HomeShellWrapper extends ConsumerStatefulWidget {

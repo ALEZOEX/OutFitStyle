@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../ui/widgets/max_width_container.dart';
+import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../services/auth_storage.dart';
 import '../../data/repositories/sessions_repository.dart';
@@ -521,6 +521,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     } else {
       final day = expiresAt.day.toString().padLeft(2, '0');
       final month = expiresAt.month.toString().padLeft(2, '0');
+      final year = expiresAt.year;
       return '$day.$month.$year';
     }
   }

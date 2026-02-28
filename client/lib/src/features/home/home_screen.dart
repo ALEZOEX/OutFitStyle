@@ -5,11 +5,11 @@ import 'package:intl/intl.dart';
 
 import '../wardrobe/presentation/providers/wardrobe_provider.dart';
 import '../recommendations/presentation/providers/recommendations_provider.dart';
-import '../../../presentation/providers/weather_provider.dart';
-import '../../../presentation/providers/user_location_provider.dart';
-import '../../../ui/widgets/weather_card.dart';
-import '../../../ui/widgets/empty_state.dart';
-import '../../../domain/entities/outfit_recommendation.dart';
+import 'package:outfitstyle_client/src/presentation/providers/weather_provider.dart';
+import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
+import 'package:outfitstyle_client/src/ui/widgets/weather_card.dart';
+import 'package:outfitstyle_client/src/ui/widgets/empty_state.dart';
+import 'package:outfitstyle_client/src/domain/entities/outfit_recommendation.dart';
 
 /// Главный экран: погода + персональные рекомендации + гардероб
 ///
