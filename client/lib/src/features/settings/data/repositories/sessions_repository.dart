@@ -80,7 +80,6 @@ class SessionsRepository {
     }
 
     final statusCode = e.response?.statusCode;
-    final errorMessage = _extractErrorMessage(e.response?.data);
 
     switch (statusCode) {
       case 401:
