@@ -8,6 +8,7 @@ import '../../features/recommendations/presentation/recommendations_screen.dart'
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
 import '../../features/notifications/presentation/widgets/notification_icon.dart';
+import '../../theme/theme_controller.dart';
 
 /// Wrapper для главного экрана с навигацией
 class HomeShellWrapper extends ConsumerStatefulWidget {
@@ -42,6 +43,7 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
   @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(unreadCountProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return HomeShell(
       title: _getTitle(_currentIndex),
@@ -55,6 +57,14 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
       showBottomNav: true,
       showAppBar: true,
       appBarActions: [
+        // Кнопка смены темы
+        IconButton(
+          icon: Icon(_getThemeIcon(themeMode)),
+          onPressed: () {
+            ref.read(themeModeProvider.notifier).toggle();
+          },
+          tooltip: _getThemeTooltip(themeMode),
+        ),
         // Кнопка уведомлений с badge
         NotificationIconButton(
           unreadCount: unreadCount,
@@ -73,6 +83,22 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
           ),
       ],
     );
+  }
+
+  IconData _getThemeIcon(ThemeMode mode) {
+    return switch (mode) {
+      ThemeMode.dark => Icons.dark_mode,
+      ThemeMode.light => Icons.light_mode,
+      ThemeMode.system => Icons.brightness_auto,
+    };
+  }
+
+  String _getThemeTooltip(ThemeMode mode) {
+    return switch (mode) {
+      ThemeMode.dark => 'Тёмная тема',
+      ThemeMode.light => 'Светлая тема',
+      ThemeMode.system => 'Системная тема',
+    };
   }
 
   String _getTitle(int index) {
