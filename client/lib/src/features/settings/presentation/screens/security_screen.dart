@@ -24,28 +24,15 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   // Двухфакторная аутентификация
   bool _twoFactorEnabled = false;
 
-  // Активные сессии
+  // Активные сессии - ТОЛЬКО ТЕКУЩАЯ (до загрузки через API)
+  // TODO: Загружать через GET /api/v1/user/sessions
   final _activeSessions = [
     SessionDevice(
-      device: 'iPhone 15 Pro',
+      device: 'Текущее устройство',
       location: 'Москва',
       isActive: true,
       lastActive: 'Сейчас',
-      icon: Icons.phone_iphone,
-    ),
-    SessionDevice(
-      device: 'MacBook Pro',
-      location: 'Москва',
-      isActive: false,
-      lastActive: '2 часа назад',
-      icon: Icons.laptop_mac,
-    ),
-    SessionDevice(
-      device: 'Windows PC',
-      location: 'Санкт-Петербург',
-      isActive: false,
-      lastActive: 'Вчера',
-      icon: Icons.desktop_windows,
+      icon: Icons.devices,
     ),
   ];
 
