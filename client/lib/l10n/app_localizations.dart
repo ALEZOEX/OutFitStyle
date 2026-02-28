@@ -355,6 +355,144 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Аватар успешно обновлен'**
   String get avatarUpdated;
+
+  /// Заголовок экрана приветствия онбординга
+  ///
+  /// In ru, this message translates to:
+  /// **'Добро пожаловать в OutfitStyle!'**
+  String get onboardingWelcomeTitle;
+
+  /// Подзаголовок экрана приветствия онбординга
+  ///
+  /// In ru, this message translates to:
+  /// **'Ваш персональный помощник по стилю'**
+  String get onboardingWelcomeSubtitle;
+
+  /// Описание на экране приветствия онбординга
+  ///
+  /// In ru, this message translates to:
+  /// **'Мы поможем вам создать идеальный гардероб с учётом погоды, предпочтений и актуальных трендов'**
+  String get onboardingWelcomeDescription;
+
+  /// Заголовок экрана выбора города
+  ///
+  /// In ru, this message translates to:
+  /// **'Выберите город'**
+  String get onboardingCityTitle;
+
+  /// Подзаголовок экрана выбора города
+  ///
+  /// In ru, this message translates to:
+  /// **'Мы будем показывать погоду и рекомендации для вашего города'**
+  String get onboardingCityDescription;
+
+  /// Кнопка автоопределения города по IP
+  ///
+  /// In ru, this message translates to:
+  /// **'Определить автоматически'**
+  String get onboardingCityDetectByIp;
+
+  /// Подсказка кнопки выбора города
+  ///
+  /// In ru, this message translates to:
+  /// **'Выбрать город'**
+  String get onboardingCitySearchHint;
+
+  /// Заголовок экрана выбора стилей
+  ///
+  /// In ru, this message translates to:
+  /// **'Предпочтения стилей'**
+  String get onboardingStylesTitle;
+
+  /// Подзаголовок экрана выбора стилей
+  ///
+  /// In ru, this message translates to:
+  /// **'Выберите минимум 3 стиля, которые вам нравятся'**
+  String get onboardingStylesDescription;
+
+  /// Заголовок экрана настроек
+  ///
+  /// In ru, this message translates to:
+  /// **'Настройки'**
+  String get onboardingPreferencesTitle;
+
+  /// Подзаголовок экрана настроек
+  ///
+  /// In ru, this message translates to:
+  /// **'Укажите ваши предпочтения для более точных рекомендаций'**
+  String get onboardingPreferencesDescription;
+
+  /// Метка выбора бюджета
+  ///
+  /// In ru, this message translates to:
+  /// **'Бюджет'**
+  String get onboardingBudgetLabel;
+
+  /// Метка поля любимых брендов
+  ///
+  /// In ru, this message translates to:
+  /// **'Любимые бренды'**
+  String get onboardingBrandsLabel;
+
+  /// Подсказка поля любимых брендов
+  ///
+  /// In ru, this message translates to:
+  /// **'Например: Zara, H&M, Uniqlo'**
+  String get onboardingBrandsHint;
+
+  /// Заголовок экрана завершения
+  ///
+  /// In ru, this message translates to:
+  /// **'Готово!'**
+  String get onboardingCompleteTitle;
+
+  /// Подзаголовок экрана завершения
+  ///
+  /// In ru, this message translates to:
+  /// **'Теперь вы будете получать персонализированные рекомендации каждый день'**
+  String get onboardingCompleteDescription;
+
+  /// Кнопка перехода к следующему шагу
+  ///
+  /// In ru, this message translates to:
+  /// **'Далее'**
+  String get onboardingNextButton;
+
+  /// Кнопка возврата к предыдущему шагу
+  ///
+  /// In ru, this message translates to:
+  /// **'Назад'**
+  String get onboardingBackButton;
+
+  /// Кнопка начала использования
+  ///
+  /// In ru, this message translates to:
+  /// **'Начать'**
+  String get onboardingStartButton;
+
+  /// Кнопка завершения онбординга
+  ///
+  /// In ru, this message translates to:
+  /// **'Завершить'**
+  String get onboardingFinishButton;
+
+  /// Диапазон эконом бюджета
+  ///
+  /// In ru, this message translates to:
+  /// **'Эконом'**
+  String get budgetEconomy;
+
+  /// Средний диапазон бюджета
+  ///
+  /// In ru, this message translates to:
+  /// **'Средний'**
+  String get budgetMedium;
+
+  /// Премиум диапазон бюджета
+  ///
+  /// In ru, this message translates to:
+  /// **'Премиум'**
+  String get budgetPremium;
 }
 
 class _AppLocalizationsDelegate

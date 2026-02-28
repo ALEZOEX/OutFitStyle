@@ -7,8 +7,8 @@ import 'dart:math' as math;
 
 import 'package:outfitstyle_client/l10n/app_localizations.dart';
 import 'package:outfitstyle_client/src/ui/widgets/city_selector_dialog.dart';
-import '../../data/models/onboarding_data.dart';
-import '../providers/onboarding_provider.dart';
+import 'package:outfitstyle_client/src/features/onboarding/data/models/onboarding_data.dart';
+import 'package:outfitstyle_client/src/features/onboarding/presentation/providers/onboarding_provider.dart';
 
 /// Экран онбординга для новых пользователей
 /// Состоит из 5 страниц:

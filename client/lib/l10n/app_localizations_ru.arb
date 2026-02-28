@@ -170,5 +170,97 @@
   "avatarUpdated": "Аватар успешно обновлен",
   "@avatarUpdated": {
     "description": "Сообщение об успешном обновлении аватара"
+  },
+  "onboardingWelcomeTitle": "Добро пожаловать в OutfitStyle!",
+  "@onboardingWelcomeTitle": {
+    "description": "Заголовок экрана приветствия онбординга"
+  },
+  "onboardingWelcomeSubtitle": "Ваш персональный помощник по стилю",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Подзаголовок экрана приветствия онбординга"
+  },
+  "onboardingWelcomeDescription": "Мы поможем вам создать идеальный гардероб с учётом погоды, предпочтений и актуальных трендов",
+  "@onboardingWelcomeDescription": {
+    "description": "Описание на экране приветствия онбординга"
+  },
+  "onboardingCityTitle": "Выберите город",
+  "@onboardingCityTitle": {
+    "description": "Заголовок экрана выбора города"
+  },
+  "onboardingCityDescription": "Мы будем показывать погоду и рекомендации для вашего города",
+  "@onboardingCityDescription": {
+    "description": "Подзаголовок экрана выбора города"
+  },
+  "onboardingCityDetectByIp": "Определить автоматически",
+  "@onboardingCityDetectByIp": {
+    "description": "Кнопка автоопределения города по IP"
+  },
+  "onboardingCitySearchHint": "Выбрать город",
+  "@onboardingCitySearchHint": {
+    "description": "Подсказка кнопки выбора города"
+  },
+  "onboardingStylesTitle": "Предпочтения стилей",
+  "@onboardingStylesTitle": {
+    "description": "Заголовок экрана выбора стилей"
+  },
+  "onboardingStylesDescription": "Выберите минимум 3 стиля, которые вам нравятся",
+  "@onboardingStylesDescription": {
+    "description": "Подзаголовок экрана выбора стилей"
+  },
+  "onboardingPreferencesTitle": "Настройки",
+  "@onboardingPreferencesTitle": {
+    "description": "Заголовок экрана настроек"
+  },
+  "onboardingPreferencesDescription": "Укажите ваши предпочтения для более точных рекомендаций",
+  "@onboardingPreferencesDescription": {
+    "description": "Подзаголовок экрана настроек"
+  },
+  "onboardingBudgetLabel": "Бюджет",
+  "@onboardingBudgetLabel": {
+    "description": "Метка выбора бюджета"
+  },
+  "onboardingBrandsLabel": "Любимые бренды",
+  "@onboardingBrandsLabel": {
+    "description": "Метка поля любимых брендов"
+  },
+  "onboardingBrandsHint": "Например: Zara, H&M, Uniqlo",
+  "@onboardingBrandsHint": {
+    "description": "Подсказка поля любимых брендов"
+  },
+  "onboardingCompleteTitle": "Готово!",
+  "@onboardingCompleteTitle": {
+    "description": "Заголовок экрана завершения"
+  },
+  "onboardingCompleteDescription": "Теперь вы будете получать персонализированные рекомендации каждый день",
+  "@onboardingCompleteDescription": {
+    "description": "Подзаголовок экрана завершения"
+  },
+  "onboardingNextButton": "Далее",
+  "@onboardingNextButton": {
+    "description": "Кнопка перехода к следующему шагу"
+  },
+  "onboardingBackButton": "Назад",
+  "@onboardingBackButton": {
+    "description": "Кнопка возврата к предыдущему шагу"
+  },
+  "onboardingStartButton": "Начать",
+  "@onboardingStartButton": {
+    "description": "Кнопка начала использования"
+  },
+  "onboardingFinishButton": "Завершить",
+  "@onboardingFinishButton": {
+    "description": "Кнопка завершения онбординга"
+  },
+  "budgetEconomy": "Эконом",
+  "@budgetEconomy": {
+    "description": "Диапазон эконом бюджета"
+  },
+  "budgetMedium": "Средний",
+  "@budgetMedium": {
+    "description": "Средний диапазон бюджета"
+  },
+  "budgetPremium": "Премиум",
+  "@budgetPremium": {
+    "description": "Премиум диапазон бюджета"
   }
 }

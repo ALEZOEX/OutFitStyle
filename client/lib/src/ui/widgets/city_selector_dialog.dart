@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../../../presentation/providers/user_location_provider.dart';
+import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
 
 /// Данные города
 class CityData {
@@ -137,7 +137,6 @@ class _CitySelectorDialogState extends ConsumerState<CitySelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
