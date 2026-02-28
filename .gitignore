@@ -223,3 +223,8 @@ client/build/
 
 # Локальные файлы (не для публикации)
 POSTER_LOCAL.md  
+secret-edit.yaml
+*.secret.yaml
+
+# Но разрешаем model.pkl для ml-service (manifest для CatBoost)
+!ml-service/models/model.pkl
