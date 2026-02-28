@@ -88,15 +88,16 @@ class ApiClient {
         return false;
       }
 
+      // Используем /api/auth/refresh (не /api/v1/auth/refresh)
       final response = await _dio.post(
-        '/api/v1/auth/refresh',
+        '/api/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final tokens = data['tokens'] as Map<String, dynamic>?;
-        
+
         if (tokens != null) {
           final newTokenPair = TokenPair.fromJson(tokens);
           await storage.saveTokenPair(newTokenPair);

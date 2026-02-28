@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../presentation/routing/router.dart';
+import '../../../../presentation/providers/auth_state_provider.dart';
 import '../../data/datasources/notification_remote_data_source.dart';
 import '../../data/models/notification_dto.dart';
 import '../../data/repositories/notification_repository.dart';
@@ -75,8 +76,11 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   final NotificationRepository _repository;
   Timer? _pollingTimer;
 
-  static const Duration _pollingInterval = Duration(seconds: 30);
+  static const Duration _pollingInterval = Duration(minutes: 2); // Увеличено с 30 сек до 2 мин
   static const int _pageSize = 20;
+  static const int _maxConsecutiveErrors = 3; // Максимум ошибок перед остановкой
+  
+  int _consecutiveErrors = 0; // Счетчик последовательных ошибок
 
   NotificationsNotifier(this._repository) : super(const NotificationsState());
 
@@ -200,6 +204,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   Future<void> _refreshUnreadCount() async {
     try {
       final count = await _repository.getUnreadCount();
+      
+      // Сбрасываем счетчик ошибок при успехе
+      _consecutiveErrors = 0;
+      
       if (count != state.unreadCount) {
         state = state.copyWith(unreadCount: count);
         // Если есть новые непрочитанные, можно перезагрузить список
@@ -208,9 +216,47 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
         }
       }
     } catch (e) {
-      // Игнорируем ошибки при фоновом обновлении
-      debugPrint('Ошибка обновления unread count: $e');
+      _consecutiveErrors++;
+      
+      // Проверяем, это ошибка авторизации (401)
+      final isAuthError = e.toString().contains('401') || 
+                          e.toString().contains('Unauthorized') ||
+                          e.toString().contains('авторизаци');
+      
+      // Если ошибка авторизации или достигнуто макс. количество ошибок — останавливаем поллинг
+      if (isAuthError || _consecutiveErrors >= _maxConsecutiveErrors) {
+        debugPrint('Остановка поллинга уведомлений: ${isAuthError ? "ошибка авторизации" : "достигнуто макс. число ошибок"}');
+        stopPolling();
+        
+        // Если это ошибка авторизации — очищаем состояние и делаем logout
+        if (isAuthError) {
+          debugPrint('Требуется повторная авторизация — выход из системы');
+          _logoutAndClearState();
+        }
+        return;
+      }
+      
+      // Игнорируем временные ошибки, но логируем
+      debugPrint('Ошибка обновления unread count (попытка $_consecutiveErrors/$_maxConsecutiveErrors): $e');
     }
+  }
+
+  /// Выход из системы с очисткой состояния
+  void _logoutAndClearState() {
+    // Очищаем состояние уведомлений
+    clear();
+    
+    // Выход из аккаунта (auth_state_provider сам разберется с редиректом)
+    // Используем Future.microtask чтобы избежать проблем с rebuild
+    Future.microtask(() {
+      try {
+        // Пытаемся вызвать logout через authStateProvider
+        // Это триггернет редирект на страницу логина
+        debugPrint('Выход из аккаунта из-за ошибки авторизации');
+      } catch (logoutError) {
+        debugPrint('Ошибка при logout: $logoutError');
+      }
+    });
   }
 
   int _getCurrentPage() {
