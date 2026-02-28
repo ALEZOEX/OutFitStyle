@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../data/models/order.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/order.dart';
+import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Order card widget for orders list
 class OrderCard extends StatelessWidget {

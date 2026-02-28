@@ -1,20 +1,37 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../services/auth_service.dart';
-import '../data/market_api_client.dart';
-import '../data/market_repository.dart';
-import '../data/models/product.dart';
+import 'package:outfitstyle_client/src/services/auth_service.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/core/api/api_config.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
+import 'package:outfitstyle_client/src/features/market/data/market_api_client.dart';
+import 'package:outfitstyle_client/src/features/market/data/market_repository.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
+
+/// Auth storage provider
+final authStorageProvider = Provider<AuthStorage>((ref) {
+  return AuthStorage();
+});
+
+/// API client provider (core)
+final coreApiClientProvider = Provider<ApiClient>((ref) {
+  final authStorage = ref.watch(authStorageProvider);
+  return ApiClient(storage: authStorage);
+});
+
+/// Auth service provider
+final authServiceProvider = Provider<AuthService>((ref) {
+  final authStorage = ref.watch(authStorageProvider);
+  final apiClient = ref.watch(coreApiClientProvider);
+  return AuthService(
+    apiBase: ApiConfig.baseUrl,
+    authStorage: authStorage,
+    dio: apiClient.raw,
+  );
+});
 
 /// Market API client provider
 final marketApiClientProvider = Provider<MarketApiClient>((ref) {
-  final authService = ref.watch(authServiceProvider);
   final client = MarketApiClient(baseUrl: 'http://localhost:8001');
-  
-  // Set user ID from auth
-  final userId = authService.currentUserId;
-  if (userId != null) {
-    client.setUserId(userId);
-  }
-  
   return client;
 });
 
@@ -84,8 +101,8 @@ final categoriesProvider = FutureProvider<List<Map<String, String>>>((ref) async
   return repository.getCategories();
 });
 
-/// Product detail provider
-final productDetailProvider = FutureProvider<Product>((ref, String productId) async {
+/// Product detail provider family
+final productDetailProvider = FutureProvider.family<Product, String>((ref, productId) async {
   final repository = ref.watch(marketRepositoryProvider);
   return repository.getProduct(productId);
 });

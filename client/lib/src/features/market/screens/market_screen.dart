@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../presentation/providers/market_provider.dart';
-import '../widgets/product_card.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:outfitstyle_client/src/features/market/presentation/providers/market_provider.dart';
+import 'package:outfitstyle_client/src/features/market/widgets/product_card.dart';
+import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Market screen - products catalog
 class MarketScreen extends ConsumerStatefulWidget {

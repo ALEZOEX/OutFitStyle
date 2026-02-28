@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../data/models/cart.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/cart.dart';
+import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Cart item card widget
 class CartItemCard extends StatelessWidget {

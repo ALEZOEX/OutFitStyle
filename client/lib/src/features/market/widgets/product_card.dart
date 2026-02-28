@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../data/models/product.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
+import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Product card widget for grid display
 class ProductCard extends StatelessWidget {

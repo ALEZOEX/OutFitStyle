@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/market_repository.dart';
-import '../data/models/cart.dart';
-import '../data/market_api_client.dart';
+import 'package:outfitstyle_client/src/features/market/data/market_repository.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/cart.dart';
+import 'package:outfitstyle_client/src/features/market/presentation/providers/market_provider.dart';
 
 /// Cart state notifier
 class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
   final MarketRepository _repository;
 
-  CartNotifier(this._repository) : super(const AsyncValue.data(Cart(
+  CartNotifier(this._repository) : super(AsyncValue.data(Cart(
     userId: 0,
     items: [],
     totalAmount: 0,
