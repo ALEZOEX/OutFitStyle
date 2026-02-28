@@ -106,5 +106,69 @@
   "savePreferences": "Сохранить предпочтения",
   "@savePreferences": {
     "description": "Текст кнопки сохранения предпочтений"
+  },
+  "completeProfileTitle": "Заполните профиль",
+  "@completeProfileTitle": {
+    "description": "Заголовок экрана заполнения профиля"
+  },
+  "letsGetAcquainted": "Давайте познакомимся!",
+  "@letsGetAcquainted": {
+    "description": "Приветствие на экране заполнения профиля"
+  },
+  "fillProfileForPersonalized": "Заполните информацию о себе для персонализированных рекомендаций",
+  "@fillProfileForPersonalized": {
+    "description": "Подзаголовок экрана заполнения профиля"
+  },
+  "addPhoto": "Добавить фото",
+  "@addPhoto": {
+    "description": "Текст кнопки добавления фото"
+  },
+  "selectFromGallery": "Выбрать из галереи",
+  "@selectFromGallery": {
+    "description": "Текст кнопки выбора фото из галереи"
+  },
+  "name": "Имя",
+  "@name": {
+    "description": "Метка поля имени"
+  },
+  "nameRequired": "Введите имя",
+  "@nameRequired": {
+    "description": "Сообщение об ошибке, если имя не заполнено"
+  },
+  "nameMinLength": "Минимум 2 символа",
+  "@nameMinLength": {
+    "description": "Сообщение об ошибке, если имя слишком короткое"
+  },
+  "howToAddressYou": "Как к вам обращаться?",
+  "@howToAddressYou": {
+    "description": "Подсказка к полю имени"
+  },
+  "saveAndContinue": "Сохранить и продолжить",
+  "@saveAndContinue": {
+    "description": "Текст кнопки сохранения профиля"
+  },
+  "saving": "Сохранение...",
+  "@saving": {
+    "description": "Текст кнопки при сохранении"
+  },
+  "youCanChangeLater": "Вы сможете изменить эти данные в настройках профиля",
+  "@youCanChangeLater": {
+    "description": "Подсказка о возможности изменения данных"
+  },
+  "errorSaving": "Ошибка при сохранении: ",
+  "@errorSaving": {
+    "description": "Сообщение об ошибке сохранения"
+  },
+  "errorSelectingPhoto": "Ошибка при выборе фото: ",
+  "@errorSelectingPhoto": {
+    "description": "Сообщение об ошибке выбора фото"
+  },
+  "profileUpdated": "Профиль успешно обновлен",
+  "@profileUpdated": {
+    "description": "Сообщение об успешном обновлении профиля"
+  },
+  "avatarUpdated": "Аватар успешно обновлен",
+  "@avatarUpdated": {
+    "description": "Сообщение об успешном обновлении аватара"
   }
 }

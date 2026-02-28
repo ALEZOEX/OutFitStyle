@@ -1,6 +1,12 @@
-import '../../../../core/api/api_client.dart';
-import '../../../../services/auth_storage.dart';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart' as path;
+
+import '../../../../core/api/api_client.dart';
+import '../../../../core/api/api_config.dart';
+import '../../../../services/auth_storage.dart';
 
 /// Репозиторий для работы с профилем пользователя
 ///
@@ -150,6 +156,75 @@ class ProfileRepository {
     } catch (e) {
       if (e is ProfileException) rethrow;
       throw ProfileException('Ошибка загрузки аватара: $e');
+    }
+  }
+
+  /// Загрузить аватар из файла
+  ///
+  /// [avatarFile] - файл аватара (Image)
+  ///
+  /// Endpoint: POST /api/v1/users/avatar (multipart/form-data)
+  Future<Map<String, dynamic>> uploadAvatarFile(File avatarFile) async {
+    try {
+      final fileName = path.basename(avatarFile.path);
+      final mediaType = _getMediaType(fileName);
+
+      // Создаем multipart запрос
+      final formData = FormData.fromMap({
+        'avatar': await MultipartFile.fromFile(
+          avatarFile.path,
+          filename: fileName,
+          contentType: mediaType,
+        ),
+      });
+
+      // Создаем отдельный Dio для multipart запроса с авторизацией
+      final dio = Dio(BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 60),
+        headers: {'Content-Type': 'multipart/form-data'},
+      ));
+
+      // Добавляем токен авторизации
+      final token = await _authStorage.readAccessToken();
+      if (token != null && token.isNotEmpty) {
+        dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+
+      final response = await dio.post('/api/v1/users/avatar', data: formData);
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final userData = data['user'] as Map<String, dynamic>? ?? data;
+        return userData;
+      } else {
+        throw ProfileException('Ошибка загрузки аватара: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      _handleDioError(e);
+      rethrow;
+    } catch (e) {
+      if (e is ProfileException) rethrow;
+      throw ProfileException('Ошибка загрузки аватара: $e');
+    }
+  }
+
+  /// Получить тип контента по расширению файла
+  MediaType _getMediaType(String fileName) {
+    final ext = path.extension(fileName).toLowerCase();
+    switch (ext) {
+      case '.jpg':
+      case '.jpeg':
+        return MediaType('image', 'jpeg');
+      case '.png':
+        return MediaType('image', 'png');
+      case '.gif':
+        return MediaType('image', 'gif');
+      case '.webp':
+        return MediaType('image', 'webp');
+      default:
+        return MediaType('image', 'octet-stream');
     }
   }
 

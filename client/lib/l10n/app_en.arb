@@ -106,5 +106,69 @@
   "savePreferences": "Save Preferences",
   "@savePreferences": {
     "description": "Save preferences button text"
+  },
+  "completeProfileTitle": "Complete Profile",
+  "@completeProfileTitle": {
+    "description": "Complete profile screen title"
+  },
+  "letsGetAcquainted": "Let's Get Acquainted!",
+  "@letsGetAcquainted": {
+    "description": "Greeting on complete profile screen"
+  },
+  "fillProfileForPersonalized": "Fill in your information for personalized recommendations",
+  "@fillProfileForPersonalized": {
+    "description": "Subtitle on complete profile screen"
+  },
+  "addPhoto": "Add Photo",
+  "@addPhoto": {
+    "description": "Add photo button text"
+  },
+  "selectFromGallery": "Select from Gallery",
+  "@selectFromGallery": {
+    "description": "Select photo from gallery button text"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Name field label"
+  },
+  "nameRequired": "Enter your name",
+  "@nameRequired": {
+    "description": "Error message when name is empty"
+  },
+  "nameMinLength": "Minimum 2 characters",
+  "@nameMinLength": {
+    "description": "Error message when name is too short"
+  },
+  "howToAddressYou": "How should we address you?",
+  "@howToAddressYou": {
+    "description": "Helper text for name field"
+  },
+  "saveAndContinue": "Save & Continue",
+  "@saveAndContinue": {
+    "description": "Save profile button text"
+  },
+  "saving": "Saving...",
+  "@saving": {
+    "description": "Button text while saving"
+  },
+  "youCanChangeLater": "You can change this data in profile settings",
+  "@youCanChangeLater": {
+    "description": "Hint about ability to change data later"
+  },
+  "errorSaving": "Error saving: ",
+  "@errorSaving": {
+    "description": "Error message prefix"
+  },
+  "errorSelectingPhoto": "Error selecting photo: ",
+  "@errorSelectingPhoto": {
+    "description": "Error selecting photo message"
+  },
+  "profileUpdated": "Profile updated successfully",
+  "@profileUpdated": {
+    "description": "Profile update success message"
+  },
+  "avatarUpdated": "Avatar updated successfully",
+  "@avatarUpdated": {
+    "description": "Avatar update success message"
   }
 }

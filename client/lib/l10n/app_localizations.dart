@@ -62,15 +62,17 @@ import 'app_localizations_ru.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
-  static AppLocalizations? of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,387 +84,281 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('ru')
+    Locale('ru'),
   ];
 
-  /// The name of the application
+  /// Название приложения
   ///
-  /// In en, this message translates to:
+  /// In ru, this message translates to:
   /// **'OutfitStyle'**
   String get appName;
 
-  /// Welcome message displayed to the user
+  /// Приветственное сообщение, отображаемое пользователю
   ///
-  /// In en, this message translates to:
-  /// **'Welcome to OutfitStyle!'**
+  /// In ru, this message translates to:
+  /// **'Добро пожаловать в OutfitStyle!'**
   String get welcomeMessage;
 
-  /// Loading indicator text
+  /// Текст индикатора загрузки
   ///
-  /// In en, this message translates to:
-  /// **'Loading...'**
+  /// In ru, this message translates to:
+  /// **'Загрузка...'**
   String get loading;
 
-  /// Generic error text
+  /// Общий текст ошибки
   ///
-  /// In en, this message translates to:
-  /// **'Error'**
+  /// In ru, this message translates to:
+  /// **'Ошибка'**
   String get error;
 
-  /// Retry button text
+  /// Текст кнопки повтора
   ///
-  /// In en, this message translates to:
-  /// **'Retry'**
+  /// In ru, this message translates to:
+  /// **'Повторить'**
   String get retry;
 
-  /// Recommendations tab title
+  /// Заголовок вкладки рекомендаций
   ///
-  /// In en, this message translates to:
-  /// **'Recommendations'**
+  /// In ru, this message translates to:
+  /// **'Рекомендации'**
   String get recommendations;
 
-  /// Saved recommendations tab title
+  /// Заголовок вкладки сохраненных рекомендаций
   ///
-  /// In en, this message translates to:
-  /// **'Saved'**
+  /// In ru, this message translates to:
+  /// **'Сохраненные'**
   String get saved;
 
-  /// History tab title
+  /// Заголовок вкладки истории
   ///
-  /// In en, this message translates to:
-  /// **'History'**
+  /// In ru, this message translates to:
+  /// **'История'**
   String get history;
 
-  /// Weather related text
+  /// Текст, связанный с погодой
   ///
-  /// In en, this message translates to:
-  /// **'Weather'**
+  /// In ru, this message translates to:
+  /// **'Погода'**
   String get weather;
 
-  /// Outfit related text
+  /// Текст, связанный с нарядом
   ///
-  /// In en, this message translates to:
-  /// **'Outfit'**
+  /// In ru, this message translates to:
+  /// **'Настрой'**
   String get outfit;
 
-  /// Profile related text
+  /// Текст, связанный с профилем
   ///
-  /// In en, this message translates to:
-  /// **'Profile'**
+  /// In ru, this message translates to:
+  /// **'Профиль'**
   String get profile;
 
-  /// Settings related text
+  /// Текст, связанный с настройками
   ///
-  /// In en, this message translates to:
-  /// **'Settings'**
+  /// In ru, this message translates to:
+  /// **'Настройки'**
   String get settings;
 
-  /// Login button text
+  /// Текст кнопки входа
   ///
-  /// In en, this message translates to:
-  /// **'Login'**
+  /// In ru, this message translates to:
+  /// **'Вход'**
   String get login;
 
-  /// Logout button text
+  /// Текст кнопки выхода
   ///
-  /// In en, this message translates to:
-  /// **'Logout'**
+  /// In ru, this message translates to:
+  /// **'Выход'**
   String get logout;
 
-  /// Email field label
+  /// Метка поля электронной почты
   ///
-  /// In en, this message translates to:
-  /// **'Email'**
+  /// In ru, this message translates to:
+  /// **'Электронная почта'**
   String get email;
 
-  /// Password field label
+  /// Метка поля пароля
   ///
-  /// In en, this message translates to:
-  /// **'Password'**
+  /// In ru, this message translates to:
+  /// **'Пароль'**
   String get password;
 
-  /// Google sign in button text
+  /// Текст кнопки входа через Google
   ///
-  /// In en, this message translates to:
-  /// **'Sign in with Google'**
+  /// In ru, this message translates to:
+  /// **'Войти через Google'**
   String get signInWithGoogle;
 
-  /// Message displayed when no internet connection
+  /// Сообщение, отображаемое при отсутствии подключения к интернету
   ///
-  /// In en, this message translates to:
-  /// **'No internet connection'**
+  /// In ru, this message translates to:
+  /// **'Нет подключения к интернету'**
   String get noInternetConnection;
 
-  /// Generic error message
+  /// Общее сообщение об ошибке
   ///
-  /// In en, this message translates to:
-  /// **'Something went wrong'**
+  /// In ru, this message translates to:
+  /// **'Что-то пошло не так'**
   String get somethingWentWrong;
 
-  /// Preferences screen title
+  /// Заголовок экрана предпочтений
   ///
-  /// In en, this message translates to:
-  /// **'Preferences'**
+  /// In ru, this message translates to:
+  /// **'Предпочтения'**
   String get preferences;
 
-  /// Save button text
+  /// Текст кнопки сохранения
   ///
-  /// In en, this message translates to:
-  /// **'Save'**
+  /// In ru, this message translates to:
+  /// **'Сохранить'**
   String get save;
 
-  /// Clothing size section title
+  /// Заголовок секции размера одежды
   ///
-  /// In en, this message translates to:
-  /// **'Clothing Size'**
+  /// In ru, this message translates to:
+  /// **'Размер одежды'**
   String get clothingSize;
 
-  /// Preferred styles section title
+  /// Заголовок секции предпочитаемых стилей
   ///
-  /// In en, this message translates to:
-  /// **'Preferred Styles'**
+  /// In ru, this message translates to:
+  /// **'Предпочитаемые стили'**
   String get preferredStyles;
 
-  /// Favorite brands section title
+  /// Заголовок секции любимых брендов
   ///
-  /// In en, this message translates to:
-  /// **'Favorite Brands'**
+  /// In ru, this message translates to:
+  /// **'Любимые бренды'**
   String get favoriteBrands;
 
-  /// Color preferences section title
+  /// Заголовок секции цветовых предпочтений
   ///
-  /// In en, this message translates to:
-  /// **'Color Preferences'**
+  /// In ru, this message translates to:
+  /// **'Цветовые предпочтения'**
   String get colorPreferences;
 
-  /// Budget section title
+  /// Заголовок секции бюджета
   ///
-  /// In en, this message translates to:
-  /// **'Budget'**
+  /// In ru, this message translates to:
+  /// **'Бюджет'**
   String get budget;
 
-  /// Save preferences button text
+  /// Текст кнопки сохранения предпочтений
   ///
-  /// In en, this message translates to:
-  /// **'Save Preferences'**
+  /// In ru, this message translates to:
+  /// **'Сохранить предпочтения'**
   String get savePreferences;
 
-  /// Onboarding: Welcome title
+  /// Заголовок экрана заполнения профиля
   ///
-  /// In en, this message translates to:
-  /// **'Welcome to OutfitStyle!'**
-  String get onboardingWelcomeTitle;
+  /// In ru, this message translates to:
+  /// **'Заполните профиль'**
+  String get completeProfileTitle;
 
-  /// Onboarding: Welcome subtitle
+  /// Приветствие на экране заполнения профиля
   ///
-  /// In en, this message translates to:
-  /// **'Your personal style assistant'**
-  String get onboardingWelcomeSubtitle;
+  /// In ru, this message translates to:
+  /// **'Давайте познакомимся!'**
+  String get letsGetAcquainted;
 
-  /// Onboarding: Welcome description
+  /// Подзаголовок экрана заполнения профиля
   ///
-  /// In en, this message translates to:
-  /// **'Get personalized outfit recommendations based on weather and your preferences'**
-  String get onboardingWelcomeDescription;
+  /// In ru, this message translates to:
+  /// **'Заполните информацию о себе для персонализированных рекомендаций'**
+  String get fillProfileForPersonalized;
 
-  /// Onboarding: City selection title
+  /// Текст кнопки добавления фото
   ///
-  /// In en, this message translates to:
-  /// **'Select your city'**
-  String get onboardingCityTitle;
+  /// In ru, this message translates to:
+  /// **'Добавить фото'**
+  String get addPhoto;
 
-  /// Onboarding: City selection description
+  /// Текст кнопки выбора фото из галереи
   ///
-  /// In en, this message translates to:
-  /// **'For accurate weather-based recommendations'**
-  String get onboardingCityDescription;
+  /// In ru, this message translates to:
+  /// **'Выбрать из галереи'**
+  String get selectFromGallery;
 
-  /// Onboarding: City search hint
+  /// Метка поля имени
   ///
-  /// In en, this message translates to:
-  /// **'Enter city name...'**
-  String get onboardingCitySearchHint;
+  /// In ru, this message translates to:
+  /// **'Имя'**
+  String get name;
 
-  /// Onboarding: City detect by IP
+  /// Сообщение об ошибке, если имя не заполнено
   ///
-  /// In en, this message translates to:
-  /// **'Detect automatically'**
-  String get onboardingCityDetectByIp;
+  /// In ru, this message translates to:
+  /// **'Введите имя'**
+  String get nameRequired;
 
-  /// Onboarding: City required error
+  /// Сообщение об ошибке, если имя слишком короткое
   ///
-  /// In en, this message translates to:
-  /// **'Please select a city'**
-  String get onboardingCityRequired;
+  /// In ru, this message translates to:
+  /// **'Минимум 2 символа'**
+  String get nameMinLength;
 
-  /// Onboarding: Styles title
+  /// Подсказка к полю имени
   ///
-  /// In en, this message translates to:
-  /// **'What styles do you like?'**
-  String get onboardingStylesTitle;
+  /// In ru, this message translates to:
+  /// **'Как к вам обращаться?'**
+  String get howToAddressYou;
 
-  /// Onboarding: Styles description
+  /// Текст кнопки сохранения профиля
   ///
-  /// In en, this message translates to:
-  /// **'Choose at least 3 styles'**
-  String get onboardingStylesDescription;
+  /// In ru, this message translates to:
+  /// **'Сохранить и продолжить'**
+  String get saveAndContinue;
 
-  /// Onboarding: Styles minimum error
+  /// Текст кнопки при сохранении
   ///
-  /// In en, this message translates to:
-  /// **'Select at least 3 styles'**
-  String get onboardingStylesMinimum;
+  /// In ru, this message translates to:
+  /// **'Сохранение...'**
+  String get saving;
 
-  /// Onboarding: Preferences title
+  /// Подсказка о возможности изменения данных
   ///
-  /// In en, this message translates to:
-  /// **'Your preferences'**
-  String get onboardingPreferencesTitle;
+  /// In ru, this message translates to:
+  /// **'Вы сможете изменить эти данные в настройках профиля'**
+  String get youCanChangeLater;
 
-  /// Onboarding: Preferences description
+  /// Сообщение об ошибке сохранения
   ///
-  /// In en, this message translates to:
-  /// **'Help us tailor recommendations for you'**
-  String get onboardingPreferencesDescription;
+  /// In ru, this message translates to:
+  /// **'Ошибка при сохранении: '**
+  String get errorSaving;
 
-  /// Onboarding: Budget label
+  /// Сообщение об ошибке выбора фото
   ///
-  /// In en, this message translates to:
-  /// **'Budget range'**
-  String get onboardingBudgetLabel;
+  /// In ru, this message translates to:
+  /// **'Ошибка при выборе фото: '**
+  String get errorSelectingPhoto;
 
-  /// Onboarding: Brands label
+  /// Сообщение об успешном обновлении профиля
   ///
-  /// In en, this message translates to:
-  /// **'Favorite brands (optional)'**
-  String get onboardingBrandsLabel;
+  /// In ru, this message translates to:
+  /// **'Профиль успешно обновлен'**
+  String get profileUpdated;
 
-  /// Onboarding: Brands hint
+  /// Сообщение об успешном обновлении аватара
   ///
-  /// In en, this message translates to:
-  /// **'e.g., Zara, H&M, Nike...'**
-  String get onboardingBrandsHint;
-
-  /// Onboarding: Complete title
-  ///
-  /// In en, this message translates to:
-  /// **'Ready!'**
-  String get onboardingCompleteTitle;
-
-  /// Onboarding: Complete description
-  ///
-  /// In en, this message translates to:
-  /// **'We've prepared your first recommendations'**
-  String get onboardingCompleteDescription;
-
-  /// Onboarding: Start button
-  ///
-  /// In en, this message translates to:
-  /// **'Start'**
-  String get onboardingStartButton;
-
-  /// Onboarding: Next button
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get onboardingNextButton;
-
-  /// Onboarding: Back button
-  ///
-  /// In en, this message translates to:
-  /// **'Back'**
-  String get onboardingBackButton;
-
-  /// Onboarding: Skip button
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get onboardingSkipButton;
-
-  /// Onboarding: Finish button
-  ///
-  /// In en, this message translates to:
-  /// **'Finish'**
-  String get onboardingFinishButton;
-
-  /// Onboarding: Style Casual
-  ///
-  /// In en, this message translates to:
-  /// **'Casual'**
-  String get styleCasual;
-
-  /// Onboarding: Style Sport
-  ///
-  /// In en, this message translates to:
-  /// **'Sport'**
-  String get styleSport;
-
-  /// Onboarding: Style Classic
-  ///
-  /// In en, this message translates to:
-  /// **'Classic'**
-  String get styleClassic;
-
-  /// Onboarding: Style Streetwear
-  ///
-  /// In en, this message translates to:
-  /// **'Streetwear'**
-  String get styleStreetwear;
-
-  /// Onboarding: Style Business
-  ///
-  /// In en, this message translates to:
-  /// **'Business'**
-  String get styleBusiness;
-
-  /// Onboarding: Style Minimalist
-  ///
-  /// In en, this message translates to:
-  /// **'Minimalist'**
-  String get styleMinimalist;
-
-  /// Onboarding: Style Boho
-  ///
-  /// In en, this message translates to:
-  /// **'Boho'**
-  String get styleBoho;
-
-  /// Onboarding: Style Preppy
-  ///
-  /// In en, this message translates to:
-  /// **'Preppy'**
-  String get stylePreppy;
-
-  /// Onboarding: Budget Economy
-  ///
-  /// In en, this message translates to:
-  /// **'Economy'**
-  String get budgetEconomy;
-
-  /// Onboarding: Budget Medium
-  ///
-  /// In en, this message translates to:
-  /// **'Medium'**
-  String get budgetMedium;
-
-  /// Onboarding: Budget Premium
-  ///
-  /// In en, this message translates to:
-  /// **'Premium'**
-  String get budgetPremium;
+  /// In ru, this message translates to:
+  /// **'Аватар успешно обновлен'**
+  String get avatarUpdated;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -471,25 +367,26 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'ru'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'ru'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'ru': return AppLocalizationsRu();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'ru':
+      return AppLocalizationsRu();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

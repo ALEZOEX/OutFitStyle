@@ -25,6 +25,7 @@ import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/achievements/presentation/pages/achievement_detail_page.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/complete_profile_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/onboarding/onboarding_providers.dart' as onboarding_providers;
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
@@ -238,6 +239,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/forgot-password',
         name: 'forgot_password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      // Экран заполнения профиля (после регистрации через Google)
+      GoRoute(
+        path: '/complete-profile',
+        name: 'complete_profile',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final email = extra?['email'] as String? ?? '';
+          final name = extra?['name'] as String?;
+          return CompleteProfileScreen(
+            email: email,
+            googleName: name,
+          );
+        },
       ),
       // Главный экран с shell навигацией
       GoRoute(

@@ -90,107 +90,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savePreferences => 'Save Preferences';
 
   @override
-  String get onboardingWelcomeTitle => 'Welcome to OutfitStyle!';
+  String get completeProfileTitle => 'Complete Profile';
 
   @override
-  String get onboardingWelcomeSubtitle => 'Your personal style assistant';
+  String get letsGetAcquainted => 'Let\'s Get Acquainted!';
 
   @override
-  String get onboardingWelcomeDescription =>
-      'Get personalized outfit recommendations based on weather and your preferences';
+  String get fillProfileForPersonalized =>
+      'Fill in your information for personalized recommendations';
 
   @override
-  String get onboardingCityTitle => 'Select your city';
+  String get addPhoto => 'Add Photo';
 
   @override
-  String get onboardingCityDescription => 'For accurate weather-based recommendations';
+  String get selectFromGallery => 'Select from Gallery';
 
   @override
-  String get onboardingCitySearchHint => 'Enter city name...';
+  String get name => 'Name';
 
   @override
-  String get onboardingCityDetectByIp => 'Detect automatically';
+  String get nameRequired => 'Enter your name';
 
   @override
-  String get onboardingCityRequired => 'Please select a city';
+  String get nameMinLength => 'Minimum 2 characters';
 
   @override
-  String get onboardingStylesTitle => 'What styles do you like?';
+  String get howToAddressYou => 'How should we address you?';
 
   @override
-  String get onboardingStylesDescription => 'Choose at least 3 styles';
+  String get saveAndContinue => 'Save & Continue';
 
   @override
-  String get onboardingStylesMinimum => 'Select at least 3 styles';
+  String get saving => 'Saving...';
 
   @override
-  String get onboardingPreferencesTitle => 'Your preferences';
+  String get youCanChangeLater =>
+      'You can change this data in profile settings';
 
   @override
-  String get onboardingPreferencesDescription =>
-      'Help us tailor recommendations for you';
+  String get errorSaving => 'Error saving: ';
 
   @override
-  String get onboardingBudgetLabel => 'Budget range';
+  String get errorSelectingPhoto => 'Error selecting photo: ';
 
   @override
-  String get onboardingBrandsLabel => 'Favorite brands (optional)';
+  String get profileUpdated => 'Profile updated successfully';
 
   @override
-  String get onboardingBrandsHint => 'e.g., Zara, H&M, Nike...';
-
-  @override
-  String get onboardingCompleteTitle => 'Ready!';
-
-  @override
-  String get onboardingCompleteDescription =>
-      'We\'ve prepared your first recommendations';
-
-  @override
-  String get onboardingStartButton => 'Start';
-
-  @override
-  String get onboardingNextButton => 'Next';
-
-  @override
-  String get onboardingBackButton => 'Back';
-
-  @override
-  String get onboardingSkipButton => 'Skip';
-
-  @override
-  String get onboardingFinishButton => 'Finish';
-
-  @override
-  String get styleCasual => 'Casual';
-
-  @override
-  String get styleSport => 'Sport';
-
-  @override
-  String get styleClassic => 'Classic';
-
-  @override
-  String get styleStreetwear => 'Streetwear';
-
-  @override
-  String get styleBusiness => 'Business';
-
-  @override
-  String get styleMinimalist => 'Minimalist';
-
-  @override
-  String get styleBoho => 'Boho';
-
-  @override
-  String get stylePreppy => 'Preppy';
-
-  @override
-  String get budgetEconomy => 'Economy';
-
-  @override
-  String get budgetMedium => 'Medium';
-
-  @override
-  String get budgetPremium => 'Premium';
+  String get avatarUpdated => 'Avatar updated successfully';
 }
