@@ -26,7 +26,7 @@ import '../../features/achievements/presentation/pages/achievement_detail_page.d
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
-import '../../features/onboarding/onboarding_storage.dart' as onboarding_storage;
+import '../../features/onboarding/onboarding_providers.dart' as onboarding_providers;
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/admin/presentation/pages/admin_users_page.dart';
 import '../../features/admin/presentation/pages/admin_user_detail_page.dart';
@@ -37,7 +37,6 @@ import '../../data/repositories/auth_repository.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_config.dart';
 import '../../services/auth_storage.dart';
-import '../../core/di/di.dart';
 
 /// Глобальный провайдер для AuthStorage (единый экземпляр для всего приложения)
 final authStorageProvider = Provider<AuthStorage>((ref) {
@@ -136,7 +135,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (BuildContext context, GoRouterState state) {
       final path = state.uri.toString();
       final authState = ref.read(authStateProvider);
-      final onboardingDone = ref.read(onboardingDoneProvider);
+      final onboardingDone = ref.read(onboarding_providers.isOnboardingDoneProvider);
 
       // Splash экран - всегда разрешаем
       if (path == '/splash') {
@@ -219,12 +218,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         name: 'onboarding',
         builder: (context, state) {
-          final onboardingStorage = onboarding_storage.OnboardingStorage();
           return OnboardingScreen(
             onComplete: () async {
-              await onboardingStorage.setDone();
-              // Обновляем состояние в ди
-              ref.read(onboardingDoneProvider.notifier).setDone();
+              // Флаг уже установлен в onboardingNotifier
               if (!context.mounted) return;
               // После онбординга переходим на авторизацию
               context.go('/auth');

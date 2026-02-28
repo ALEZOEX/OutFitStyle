@@ -256,6 +256,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save Preferences'**
   String get savePreferences;
+
+  /// Onboarding: Welcome title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to OutfitStyle!'**
+  String get onboardingWelcomeTitle;
+
+  /// Onboarding: Welcome subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Your personal style assistant'**
+  String get onboardingWelcomeSubtitle;
+
+  /// Onboarding: Welcome description
+  ///
+  /// In en, this message translates to:
+  /// **'Get personalized outfit recommendations based on weather and your preferences'**
+  String get onboardingWelcomeDescription;
+
+  /// Onboarding: City selection title
+  ///
+  /// In en, this message translates to:
+  /// **'Select your city'**
+  String get onboardingCityTitle;
+
+  /// Onboarding: City selection description
+  ///
+  /// In en, this message translates to:
+  /// **'For accurate weather-based recommendations'**
+  String get onboardingCityDescription;
+
+  /// Onboarding: City search hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter city name...'**
+  String get onboardingCitySearchHint;
+
+  /// Onboarding: City detect by IP
+  ///
+  /// In en, this message translates to:
+  /// **'Detect automatically'**
+  String get onboardingCityDetectByIp;
+
+  /// Onboarding: City required error
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a city'**
+  String get onboardingCityRequired;
+
+  /// Onboarding: Styles title
+  ///
+  /// In en, this message translates to:
+  /// **'What styles do you like?'**
+  String get onboardingStylesTitle;
+
+  /// Onboarding: Styles description
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least 3 styles'**
+  String get onboardingStylesDescription;
+
+  /// Onboarding: Styles minimum error
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least 3 styles'**
+  String get onboardingStylesMinimum;
+
+  /// Onboarding: Preferences title
+  ///
+  /// In en, this message translates to:
+  /// **'Your preferences'**
+  String get onboardingPreferencesTitle;
+
+  /// Onboarding: Preferences description
+  ///
+  /// In en, this message translates to:
+  /// **'Help us tailor recommendations for you'**
+  String get onboardingPreferencesDescription;
+
+  /// Onboarding: Budget label
+  ///
+  /// In en, this message translates to:
+  /// **'Budget range'**
+  String get onboardingBudgetLabel;
+
+  /// Onboarding: Brands label
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite brands (optional)'**
+  String get onboardingBrandsLabel;
+
+  /// Onboarding: Brands hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Zara, H&M, Nike...'**
+  String get onboardingBrandsHint;
+
+  /// Onboarding: Complete title
+  ///
+  /// In en, this message translates to:
+  /// **'Ready!'**
+  String get onboardingCompleteTitle;
+
+  /// Onboarding: Complete description
+  ///
+  /// In en, this message translates to:
+  /// **'We've prepared your first recommendations'**
+  String get onboardingCompleteDescription;
+
+  /// Onboarding: Start button
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get onboardingStartButton;
+
+  /// Onboarding: Next button
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNextButton;
+
+  /// Onboarding: Back button
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onboardingBackButton;
+
+  /// Onboarding: Skip button
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkipButton;
+
+  /// Onboarding: Finish button
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get onboardingFinishButton;
+
+  /// Onboarding: Style Casual
+  ///
+  /// In en, this message translates to:
+  /// **'Casual'**
+  String get styleCasual;
+
+  /// Onboarding: Style Sport
+  ///
+  /// In en, this message translates to:
+  /// **'Sport'**
+  String get styleSport;
+
+  /// Onboarding: Style Classic
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get styleClassic;
+
+  /// Onboarding: Style Streetwear
+  ///
+  /// In en, this message translates to:
+  /// **'Streetwear'**
+  String get styleStreetwear;
+
+  /// Onboarding: Style Business
+  ///
+  /// In en, this message translates to:
+  /// **'Business'**
+  String get styleBusiness;
+
+  /// Onboarding: Style Minimalist
+  ///
+  /// In en, this message translates to:
+  /// **'Minimalist'**
+  String get styleMinimalist;
+
+  /// Onboarding: Style Boho
+  ///
+  /// In en, this message translates to:
+  /// **'Boho'**
+  String get styleBoho;
+
+  /// Onboarding: Style Preppy
+  ///
+  /// In en, this message translates to:
+  /// **'Preppy'**
+  String get stylePreppy;
+
+  /// Onboarding: Budget Economy
+  ///
+  /// In en, this message translates to:
+  /// **'Economy'**
+  String get budgetEconomy;
+
+  /// Onboarding: Budget Medium
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get budgetMedium;
+
+  /// Onboarding: Budget Premium
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get budgetPremium;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
