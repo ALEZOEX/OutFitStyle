@@ -416,12 +416,10 @@ func (h *AuthHandler) ValidateToken(w http.ResponseWriter, r *http.Request) {
 }
 
 // VerifyCode обрабатывает запрос на проверку кода аутентификации
-// Заглушка для функции, которая может быть реализована позже
+// В настоящее время не используется — восстановление пароля через email с кодом
 func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
-	// Заглушка для VerifyCode
-	resp.Error(w, http.StatusNotImplemented, errors.New("VerifyCode not implemented"))
+	resp.Error(w, http.StatusNotImplemented, errors.New("VerifyCode endpoint is deprecated. Use /auth/reset-password instead"))
 }
 
 // RefreshToken обрабатывает запрос на обновление токена
@@ -596,10 +594,8 @@ func generateResetCode() (string, error) {
 }
 
 // GoogleLogin обрабатывает запрос на вход через Google
-// Заглушка для функции, которая может быть реализована позже
+// Устаревший endpoint — используйте /auth/google вместо этого
 func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
-	// Заглушка для GoogleLogin
-	resp.Error(w, http.StatusNotImplemented, errors.New("GoogleLogin not implemented"))
+	resp.Error(w, http.StatusNotImplemented, errors.New("GoogleLogin is deprecated. Use POST /auth/google instead"))
 }

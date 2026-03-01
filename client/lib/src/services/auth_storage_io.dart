@@ -12,23 +12,28 @@ class AuthStorage implements core.AuthStorage {
 
   AuthStorage() : _storage = const FlutterSecureStorage();
 
+  @override
   Future<void> saveToken(TokenPair token) async {
     await writeTokenPair(token);
   }
 
+  @override
   Future<void> saveTokenPair(TokenPair pair) async {
     await writeTokenPair(pair);
   }
 
+  @override
   Future<TokenPair?> getToken() async {
     return readTokenPair();
   }
 
+  @override
   Future<void> clear() async {
     await clearSession();
   }
 
   /// Сохраняет пару токенов в защищённое хранилище
+  @override
   Future<void> writeTokenPair(TokenPair pair) async {
     print('[AuthStorage Mobile] Сохраняем токен: ${_maskToken(pair.accessToken)}');
     try {
@@ -44,18 +49,21 @@ class AuthStorage implements core.AuthStorage {
   }
 
   /// Читает access токен
+  @override
   Future<String?> readAccessToken() async {
     final tokenPair = await readTokenPair();
     return tokenPair?.accessToken;
   }
 
   /// Читает refresh токен
+  @override
   Future<String?> readRefreshToken() async {
     final tokenPair = await readTokenPair();
     return tokenPair?.refreshToken;
   }
 
   /// Читает пару токенов из защищённого хранилища
+  @override
   Future<TokenPair?> readTokenPair() async {
     try {
       final access = await _storage.read(key: _kAccessToken);
@@ -91,6 +99,7 @@ class AuthStorage implements core.AuthStorage {
   }
 
   /// Очищает сессию из защищённого хранилища
+  @override
   Future<void> clearSession() async {
     try {
       print('[AuthStorage Mobile] Очистка сессии');
@@ -104,6 +113,7 @@ class AuthStorage implements core.AuthStorage {
   }
 
   /// Читает время истечения токена
+  @override
   Future<DateTime?> readExpiresAt() async {
     final tokenPair = await readTokenPair();
     return tokenPair?.expiresAt;

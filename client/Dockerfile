@@ -14,7 +14,7 @@ RUN flutter pub run build_runner build --delete-conflicting-outputs
 # Для production используем '' (пустая строка, запросы будут относительными: /api/v1/...)
 # nginx проксирует /api/v1/* на backend
 ARG API_BASE_URL=
-RUN flutter build web --release --no-tree-shake-icons --dart-define=API_BASE_URL=${API_BASE_URL}
+RUN flutter build web --release --no-tree-shake-icons --dart-define=API_BASE_URL=${API_BASE_URL} --no-wasm-dry-run
 
 # Runtime stage
 FROM nginx:alpine

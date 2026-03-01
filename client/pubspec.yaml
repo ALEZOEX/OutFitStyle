@@ -51,7 +51,7 @@ dependencies:
   geocoding: ^4.0.0
   permission_handler: ^12.0.1
   image_picker: ^1.0.7
-  image_cropper: ^5.0.1
+  image_cropper: ^8.1.0
 
   # Additional dependencies
   confetti: ^0.8.0

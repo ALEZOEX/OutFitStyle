@@ -23,7 +23,7 @@ def mock_predictor():
 @pytest.fixture
 def client(mock_predictor):
     """Create test client with mocked predictor"""
-    with patch('main.predictor', mock_predictor):
+    with patch('api.main.predictor', mock_predictor):
         from api.main import app
         with TestClient(app) as client:
             yield client
@@ -34,7 +34,7 @@ class TestHealthEndpoints:
 
     def test_health_check(self, mock_predictor):
         """Test health endpoint"""
-        with patch('main.predictor', mock_predictor):
+        with patch('api.main.predictor', mock_predictor):
             from api.main import app
             with TestClient(app) as client:
                 response = client.get("/health")
@@ -45,7 +45,7 @@ class TestHealthEndpoints:
 
     def test_readiness_check(self, mock_predictor):
         """Test readiness endpoint"""
-        with patch('main.predictor', mock_predictor):
+        with patch('api.main.predictor', mock_predictor):
             from api.main import app
             with TestClient(app) as client:
                 response = client.get("/ready")
@@ -55,7 +55,7 @@ class TestHealthEndpoints:
 
     def test_readiness_check_model_not_loaded(self):
         """Test readiness endpoint when model not loaded"""
-        with patch('main.predictor', None):
+        with patch('api.main.predictor', None):
             from api.main import app
             with TestClient(app) as client:
                 response = client.get("/ready")
@@ -113,7 +113,7 @@ class TestRankEndpoint:
             ]
         }
 
-        with patch('main.predictor', mock_predictor):
+        with patch('api.main.predictor', mock_predictor):
             from api.main import app
             with TestClient(app) as client:
                 response = client.post("/api/rank", json=request_data)
@@ -147,7 +147,7 @@ class TestRankEndpoint:
             "candidates": []
         }
 
-        with patch('main.predictor', mock_predictor):
+        with patch('api.main.predictor', mock_predictor):
             from api.main import app
             with TestClient(app) as client:
                 response = client.post("/api/rank", json=request_data)
@@ -206,7 +206,7 @@ class TestRankEndpoint:
             "candidates": candidates
         }
 
-        with patch('main.predictor', mock_predictor):
+        with patch('api.main.predictor', mock_predictor):
             from api.main import app
             with TestClient(app) as client:
                 response = client.post("/api/rank", json=request_data)
@@ -236,7 +236,7 @@ class TestRankEndpoint:
             "candidates": [{"id": 1, "name": "Test", "category": "upper", "subcategory": "tshirt", "gender": "unisex", "style": "casual", "usage": "daily", "season": "all", "base_colour": "white", "formality": 2, "warmth": 3, "min_temp": 15, "max_temp": 25, "materials": ["cotton"], "fit": "regular", "pattern": "solid", "icon_emoji": "👕", "source": "user", "is_owned": True, "created_at": "2024-01-01T00:00:00Z", "source_priority": 1}]
         }
 
-        with patch('main.predictor', None):
+        with patch('api.main.predictor', None):
             from api.main import app
             with TestClient(app) as client:
                 response = client.post("/api/rank", json=request_data)
@@ -248,7 +248,7 @@ class TestMetricsEndpoint:
 
     def test_metrics(self, mock_predictor):
         """Test metrics endpoint"""
-        with patch('main.predictor', mock_predictor):
+        with patch('api.main.predictor', mock_predictor):
             from api.main import app
             with TestClient(app) as client:
                 response = client.get("/metrics")
@@ -306,7 +306,7 @@ class TestRequestHeaders:
             }]
         }
 
-        with patch('main.predictor', mock_predictor):
+        with patch('api.main.predictor', mock_predictor):
             from api.main import app
             with TestClient(app) as client:
                 response = client.post(

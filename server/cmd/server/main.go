@@ -1,8 +1,45 @@
 // Package main OutfitStyle API.
 //
-// @title       OutfitStyle API
-// @version     1.0
-// @BasePath    /api/v1
+// @title           OutfitStyle API
+// @version         2.0
+// @description     Платформа умных рекомендаций одежды с учётом погоды, предпочтений пользователя и контекста
+// @description
+// @description     ## Основные возможности:
+// @description     - **Аутентификация**: Регистрация, вход, Google OAuth, восстановление пароля
+// @description     - **Рекомендации**: Персонализированные рекомендации одежды на основе погоды и ML
+// @description     - **Гардероб**: Управление личными вещами пользователя
+// @description     - **Каталог**: Просмотр доступных предметов одежды
+// @description     - **Оценки**: Оценка рекомендаций для улучшения ML модели
+// @description     - **Уведомления**: Push и email уведомления
+// @description     - **Подписки**: Управление платными подписками
+// @description     - **Администрирование**: Статистика, управление пользователями, feature flags
+// @description
+// @description     ## Аутентификация
+// @description     Большинство endpoints требуют JWT токен в заголовке `Authorization: Bearer <token>`
+// @description     Также поддерживается аутентификация через API ключ: `X-API-Key: <key>`
+// @description
+// @description     ## Координаты
+// @description     Для получения рекомендаций необходимы координаты местоположения (широта/долгота)
+// @description     Координаты можно установить в профиле пользователя или передавать в запросе
+// @description
+// @BasePath        /api/v1
+// @schemes         http https
+//
+// @contact.name   OutfitStyle Support
+// @contact.email  support@outfitstyle.app
+//
+// @license.name   MIT
+// @license.url    https://opensource.org/licenses/MIT
+//
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description JWT Bearer token или API Key
+//
+// @securityDefinitions.apikey XApiKey
+// @in header
+// @name X-API-Key
+// @description Business API key для партнёров
 package main
 
 import (
@@ -307,10 +344,10 @@ func main() {
 		pushNotificationService = nil
 	}
 
-	// subService закомментирован до исправления PromoRepository
+	// ---------- Subscription service ----------
+	// Сервис подписок требует доработки PromoRepository (см. issue #XXX)
 	// subService := services.NewSubscriptionService(...)
 	var subService *services.SubscriptionService
-	_ = subService
 
 	// ---------- Payment gateways ----------
 	// Используем только dummy gateway для разработки
@@ -323,6 +360,7 @@ func main() {
 
 	// ---------- Billing service (updated to support multiple gateways) ----------
 	billingRepo := pg.NewBillingRepository(db.Pool(), logger)
+	// Billing service инициализирован, но пока не используется в роутах
 	_ = services.NewBillingService(billingRepo, promoRepo, gateways)
 
 	// ---------- S3 storage ----------
@@ -356,9 +394,8 @@ func main() {
 	uploadedRepo := pg.NewUploadedFilesRepository(db.Pool())
 	exportRepo := pg.NewExportRepository(db.Pool())
 
-	// ---------- Rating repository уже объявлен выше
-
-	// ---------- Subscription service - закомментировано до исправления PromoRepository
+	// ---------- Subscription repositories (требуют доработки, см. issue #XXX) ----------
+	// Эти репозитории объявлены, но сервис подписок пока не активирован
 	_ = subPlanRepo
 	_ = userSubRepo
 	_ = usageRepo
@@ -373,6 +410,7 @@ func main() {
 	accountService := services.NewAccountService(userRepo, sessionRepo)
 
 	// ---------- Rating service ----------
+	// Rating service инициализирован, используется в recommendationHandler
 	ratingService := services.NewRatingService(
 		ratingRepo,
 		recommendationRepo,
@@ -380,7 +418,7 @@ func main() {
 		eventPublisher,
 		logger,
 	)
-	_ = ratingService
+	_ = ratingService // TODO: подключить к HTTP handler при необходимости
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)

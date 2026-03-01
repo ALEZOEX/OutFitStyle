@@ -256,7 +256,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.device_thermometer,
+                            Icons.thermostat,
                             size: 16,
                             color: theme.colorScheme.onPrimaryContainer,
                           ),
@@ -977,9 +977,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Сохранение оценки пользователя через rating provider
     final ratingProvider = ref.read(ratingApiServiceProvider);
     ratingProvider.rateOutfit(
-      recommendationId: outfit.id,
+      recommendationId: outfit.id ?? '',
       rating: liked ? 5 : 1,
-      outfitItems: outfit.items.map((e) => e.id).toList(),
+      outfitItems: null,
     );
     
     // Визуальная обратная связь

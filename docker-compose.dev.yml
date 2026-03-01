@@ -29,10 +29,13 @@ services:
 
   redis:
     image: redis:7-alpine
+    command: redis-server --requirepass dev_redis_password_change_in_production
     ports:
       - "127.0.0.1:6379:6379"
+    environment:
+      - REDIS_PASSWORD=dev_redis_password_change_in_production
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "dev_redis_password_change_in_production", "ping"]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -129,8 +132,8 @@ services:
       - DATABASE_URL=postgres://postgres@postgres:5432/outfitstyle?sslmode=disable
       - DATABASE_MAX_CONNECTIONS=5
       - DATABASE_MAX_IDLE_CONNECTIONS=2
-      - REDIS_URL=redis://redis:6379
-      - REDIS_PASSWORD=
+      - REDIS_URL=redis://:dev_redis_password_change_in_production@redis:6379
+      - REDIS_PASSWORD=dev_redis_password_change_in_production
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ACCESS_TOKEN_TTL=15m
       - JWT_REFRESH_TOKEN_TTL=720h
