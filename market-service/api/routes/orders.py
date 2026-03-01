@@ -240,12 +240,28 @@ async def cancel_order(
     order.status = OrderStatus.CANCELLED
     await session.commit()
     await session.refresh(order)
-    
+
     logger.info(f"Order cancelled: {order_id} by user {user_id}")
-    
+
     # Возврат средств (если заказ был оплачен)
     if order.status == OrderStatus.PAID:
-        # TODO: Вызов payment_integration_service.refund_payment
-        logger.info(f"Refund initiated for order {order_id}")
-    
+        # Вызов payment integration service для возврата средств
+        try:
+            refund_result = await payment_integration_service.refund_payment(
+                order_id=order_id,
+                amount=order.total_amount,
+                payment_id=order.payment_id,  # Предполагается, что поле есть в модели
+            )
+            logger.info(
+                f"Refund processed for order {order_id}: "
+                f"amount={order.total_amount}, status={refund_result}"
+            )
+        except Exception as refund_error:
+            # Логирование ошибки возврата, но не отмена отмены заказа
+            logger.error(
+                f"Refund failed for order {order_id}: {refund_error}",
+                exc_info=True,
+            )
+            # Здесь можно добавить уведомление администратора о ручном возврате
+
     return OrderResponse.model_validate(order)

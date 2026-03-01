@@ -2,6 +2,7 @@
 API routes для рекомендаций товаров.
 """
 import logging
+import os
 from typing import List, Optional, Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Header, Query
@@ -83,7 +84,8 @@ async def get_recommendations(
             user_preferences=user_preferences,
             limit=limit,
         )
-        model_version = "ml-v1.0"  # TODO: Получать из ML сервиса
+        # Версия модели конфигурируется через env переменную ML_MODEL_VERSION
+        model_version = os.getenv("ML_MODEL_VERSION", "ml-v1.0")
     except Exception as e:
         logger.error(f"ML service error, using fallback: {e}")
         # Fallback: просто возвращаем популярные товары

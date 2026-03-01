@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../wardrobe/presentation/providers/wardrobe_provider.dart';
 import '../recommendations/presentation/providers/recommendations_provider.dart';
+import '../recommendations/presentation/providers/rating_provider.dart' show ratingApiServiceProvider;
 import 'package:outfitstyle_client/src/presentation/providers/weather_provider.dart';
 import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
 import 'package:outfitstyle_client/src/ui/widgets/weather_card.dart';
@@ -908,10 +909,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showDetails(BuildContext context, OutfitRecommendation outfit) {
-    // TODO: Навигация на экран деталей
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Детали: ${outfit.title}')));
+    // Навигация на экран деталей образа через GoRouter
+    context.push('/outfit/${outfit.id}');
   }
 
   void _planOutfit(BuildContext context, OutfitRecommendation outfit) {
@@ -975,8 +974,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _rateOutfit(OutfitRecommendation outfit, bool liked) {
-    // TODO: Сохранение оценки
-    // Для демонстрации просто показываем сообщение
+    // Сохранение оценки пользователя через rating provider
+    final ratingProvider = ref.read(ratingApiServiceProvider);
+    ratingProvider.rateOutfit(
+      recommendationId: outfit.id,
+      rating: liked ? 5 : 1,
+      outfitItems: outfit.items.map((e) => e.id).toList(),
+    );
+    
+    // Визуальная обратная связь
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(liked ? '✅ Образ понравился!' : '👎 Образ не понравился'),
+        backgroundColor: liked ? Colors.green : Colors.orange,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _generateMoreRecommendations(BuildContext context) async {

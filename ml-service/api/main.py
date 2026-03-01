@@ -53,6 +53,69 @@ from app.filter import WeatherContext, generate_combinations, get_stats, apply_p
 
 
 # ═══════════════════════════════════════════
+# MARKET SERVICE CONFIGURATION
+# ═══════════════════════════════════════════
+
+MARKET_SERVICE_URL = os.getenv("MARKET_SERVICE_URL", "http://localhost:8001")
+
+# Кэш для данных каталога (TTL 5 минут)
+_catalog_cache: Dict[str, Any] = {}
+_catalog_cache_timestamp: float = 0
+_CATALOG_CACHE_TTL = 300  # секунд
+
+
+def _get_catalog_data() -> Tuple[Dict[str, float], Dict[str, str], Dict[str, str]]:
+    """
+    Загружает данные о товарах из Market Service для фильтрации предпочтений.
+    Возвращает кортеж: (item_prices, item_styles, item_brands)
+    
+    Данные кэшируются на 5 минут для снижения нагрузки на Market Service.
+    """
+    global _catalog_cache, _catalog_cache_timestamp
+    
+    current_time = time.time()
+    
+    # Проверка кэша
+    if current_time - _catalog_cache_timestamp < _CATALOG_CACHE_TTL and _catalog_cache:
+        return (
+            _catalog_cache.get("prices", {}),
+            _catalog_cache.get("styles", {}),
+            _catalog_cache.get("brands", {}),
+        )
+    
+    try:
+        # Запрос к Market Service API
+        response = requests.get(
+            f"{MARKET_SERVICE_URL}/api/v1/products/catalog-data",
+            timeout=5,
+        )
+        response.raise_for_status()
+        data = response.json()
+        
+        # Кэширование данных
+        _catalog_cache = {
+            "prices": data.get("prices", {}),
+            "styles": data.get("styles", {}),
+            "brands": data.get("brands", {}),
+        }
+        _catalog_cache_timestamp = current_time
+        
+        logger.info(f"Catalog data loaded from Market Service: {len(data)} items")
+        
+    except requests.RequestException as e:
+        logger.warning(f"Failed to load catalog data from Market Service: {e}")
+        # Возвращаем пустые данные при ошибке
+        _catalog_cache = {"prices": {}, "styles": {}, "brands": {}}
+        _catalog_cache_timestamp = current_time
+    
+    return (
+        _catalog_cache.get("prices", {}),
+        _catalog_cache.get("styles", {}),
+        _catalog_cache.get("brands", {}),
+    )
+
+
+# ═══════════════════════════════════════════
 # GLOBAL VARIABLES WITH TYPE HINTS
 # ═══════════════════════════════════════════
 
@@ -509,19 +572,20 @@ async def recommend_outfits(
                 budget_range=request.user_preferences.budget_range,
                 favorite_brands=request.user_preferences.favorite_brands,
             )
-            
+
+            # Загружаем данные о товарах из Market Service для фильтрации
+            item_prices, item_styles, item_brands = _get_catalog_data()
+
             # Применяем фильтрацию по предпочтениям
-            # Примечание: item_prices, item_styles, item_brands должны быть переданы
-            # из каталога товаров. Пока используем None для обратной совместимости.
             candidates = apply_preferences_filter(
                 combinations=candidates,
                 preferences=filter_prefs,
-                item_prices=None,  # TODO: загрузить из каталога
-                item_styles=None,  # TODO: загрузить из каталога
-                item_brands=None,  # TODO: загрузить из каталога
+                item_prices=item_prices,
+                item_styles=item_styles,
+                item_brands=item_brands,
             )
             preferences_applied = True
-            
+
             logger.info(
                 f"[recommend] preferences applied for user {user_id}: "
                 f"styles={request.user_preferences.style_preferences}, "

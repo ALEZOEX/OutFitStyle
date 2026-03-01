@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:outfitstyle_client/src/features/market/data/models/order.dart';
+import 'package:outfitstyle_client/src/features/market/presentation/providers/market_provider.dart';
 import 'package:outfitstyle_client/src/features/market/widgets/order_card.dart';
 import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
@@ -14,12 +16,45 @@ class OrdersScreen extends ConsumerStatefulWidget {
 
 class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   String? _selectedStatus;
+  AsyncValue<List<Order>> _orders = const AsyncValue.loading();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadOrders();
+    });
+  }
+
+  Future<void> _loadOrders() async {
+    setState(() {
+      _orders = const AsyncValue.loading();
+    });
+
+    try {
+      final repository = ref.read(marketRepositoryProvider);
+      final ordersList = await repository.getOrders(status: _selectedStatus);
+      setState(() {
+        _orders = AsyncValue.data(ordersList);
+      });
+    } catch (e, stack) {
+      setState(() {
+        _orders = AsyncValue.error(e, stack);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Мои заказы'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadOrders,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -36,6 +71,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     setState(() {
                       _selectedStatus = null;
                     });
+                    _loadOrders();
                   },
                 ),
                 ...OrderStatus.values.map((status) => Padding(
@@ -47,6 +83,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                       setState(() {
                         _selectedStatus = selected ? status.name : null;
                       });
+                      _loadOrders();
                     },
                   ),
                 )),
@@ -56,33 +93,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
           // Orders list
           Expanded(
-            child: FutureBuilder<List<Order>>(
-              future: _loadOrders(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, size: 48, color: AppColors.error),
-                        const SizedBox(height: 16),
-                        Text('Ошибка загрузки: ${snapshot.error}'),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () => setState(() {}),
-                          child: const Text('Повторить'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                final orders = snapshot.data ?? [];
-
+            child: _orders.when(
+              data: (orders) {
                 if (orders.isEmpty) {
                   return _buildEmptyOrders(context);
                 }
@@ -94,22 +106,34 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     return OrderCard(
                       order: orders[index],
                       onTap: () => _navigateToOrderDetails(orders[index]),
-                      onCancel: () => _cancelOrder(orders[index]),
+                      onCancel: orders[index].status == OrderStatus.pending
+                          ? () => _cancelOrder(orders[index])
+                          : null,
                     );
                   },
                 );
               },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const SizedBox(height: 16),
+                    Text('Ошибка загрузки: $error'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadOrders,
+                      child: const Text('Повторить'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  Future<List<Order>> _loadOrders() async {
-    // TODO: Use repository
-    // return ref.read(marketRepositoryProvider).getOrders(status: _selectedStatus);
-    return [];
   }
 
   Widget _buildEmptyOrders(BuildContext context) {
@@ -135,7 +159,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           ElevatedButton(
             onPressed: () {
               // Navigate to market
-              Navigator.pop(context);
+              context.go('/market');
             },
             child: const Text('Перейти в каталог'),
           ),
@@ -145,13 +169,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   }
 
   void _navigateToOrderDetails(Order order) {
-    // TODO: Navigate to order details screen
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => OrderDetailScreen(order: order),
-    //   ),
-    // );
+    // Навигация на экран деталей заказа через GoRouter
+    context.push('/order/${order.id}');
   }
 
   Future<void> _cancelOrder(Order order) async {
@@ -177,8 +196,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     if (confirmed != true) return;
 
     try {
-      // TODO: Cancel order via repository
-      // await ref.read(marketRepositoryProvider).cancelOrder(order.id);
+      // Отмена заказа через repository
+      final repository = ref.read(marketRepositoryProvider);
+      await repository.cancelOrder(order.id);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -187,7 +207,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        setState(() {}); // Refresh
+        _loadOrders(); // Refresh
       }
     } catch (e) {
       if (mounted) {
