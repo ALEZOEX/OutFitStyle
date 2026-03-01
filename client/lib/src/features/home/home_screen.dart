@@ -9,6 +9,7 @@ import 'package:outfitstyle_client/src/presentation/providers/weather_provider.d
 import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
 import 'package:outfitstyle_client/src/ui/widgets/weather_card.dart';
 import 'package:outfitstyle_client/src/ui/widgets/empty_state.dart';
+import 'package:outfitstyle_client/src/ui/widgets/city_selector_dialog.dart';
 import 'package:outfitstyle_client/src/domain/entities/outfit_recommendation.dart';
 
 /// Главный экран: погода + персональные рекомендации + гардероб
@@ -254,7 +255,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.thermometer,
+                            Icons.device_thermometer,
                             size: 16,
                             color: theme.colorScheme.onPrimaryContainer,
                           ),
@@ -724,7 +725,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _buildStatDivider(),
                 _buildStatItem(
                   context,
-                  icon: Icons.calendar_week,
+                  icon: Icons.calendar_month,
                   value: weekOutfits.toString(),
                   label: 'На неделю',
                   color: Colors.purple,
@@ -899,7 +900,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder:
           (context) => CitySelectorDialog(
             onCitySelected: (city) {
-              ref.invalidateAll();
+              ref.invalidate(userLocationProvider);
+              ref.invalidate(weatherProvider);
             },
           ),
     );

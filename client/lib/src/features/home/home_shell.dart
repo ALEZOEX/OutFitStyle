@@ -107,7 +107,8 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
           (context) => CitySelectorDialog(
             onCitySelected: (city) {
               // Инвалидируем провайдеры для обновления данных
-              ref.invalidateAll();
+              ref.invalidate(userLocationProvider);
+              ref.invalidate(weatherProvider);
             },
           ),
     );
