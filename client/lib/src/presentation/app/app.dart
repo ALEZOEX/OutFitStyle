@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/app_theme.dart';
 import '../../theme/theme_controller.dart';
+import '../providers/auth_provider.dart';
 import '../routing/router.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
 

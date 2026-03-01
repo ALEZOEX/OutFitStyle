@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../presentation/routing/router.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 import '../../data/repositories/preferences_repository.dart';
 
 /// Модели предпочтений (UI enum)

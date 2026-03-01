@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import '../../../../domain/entities/outfit_recommendation.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../presentation/routing/router.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 
 /// Заглушка для демонстрации UI (удалить после подключения реального API)
 final mockRecommendations = <OutfitRecommendation>[];

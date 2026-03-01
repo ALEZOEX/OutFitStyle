@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/auth_repository.dart';
-import '../../../presentation/routing/router.dart';
+import '../../../presentation/providers/auth_provider.dart';
 import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/max_width_container.dart';
 import '../../achievements/data/repositories/achievements_repository.dart';

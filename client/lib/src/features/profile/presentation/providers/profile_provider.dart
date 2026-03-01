@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/repositories/auth_repository.dart';
-import '../../../../presentation/routing/router.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 import '../../../wardrobe/presentation/providers/wardrobe_provider.dart';
 
 /// Состояние профиля пользователя

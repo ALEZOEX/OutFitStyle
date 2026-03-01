@@ -9,10 +9,9 @@ class MarketApiClient {
   final String baseUrl;
 
   MarketApiClient({
-    required String baseUrl,
+    required this.baseUrl,
     Dio? dio,
-  })  : baseUrl = baseUrl,
-        _dio = dio ??
+  })  : _dio = dio ??
             Dio(BaseOptions(
               baseUrl: baseUrl,
               connectTimeout: const Duration(seconds: 30),

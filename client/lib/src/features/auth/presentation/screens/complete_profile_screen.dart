@@ -9,7 +9,7 @@ import 'package:image_cropper/image_cropper.dart';
 import '../../../../storage/profile_storage.dart';
 import '../../../../storage/local_storage.dart';
 import '../../../settings/data/repositories/profile_repository.dart';
-import '../../../../presentation/routing/router.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 
 /// Провайдер для ProfileRepository
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
@@ -77,6 +77,9 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
 
   /// Выбрать фото из галереи
   Future<void> _pickImage() async {
+    // Сохраняем тему до всех await
+    final theme = Theme.of(context);
+    
     try {
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: ImageSource.gallery,
@@ -94,7 +97,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
         uiSettings: [
           AndroidUiSettings(
             toolbarTitle: 'Выберите фото',
-            toolbarColor: Theme.of(context).colorScheme.primary,
+            toolbarColor: theme.colorScheme.primary,
             toolbarWidgetColor: Colors.white,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: true,
@@ -115,9 +118,8 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        _showError('Ошибка при выборе фото: $e');
-      }
+      if (!mounted) return;
+      _showError('Ошибка при выборе фото: $e');
     }
   }
 

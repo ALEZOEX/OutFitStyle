@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../domain/entities/achievement.dart';
 import '../../../../domain/entities/achievement_category.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 import '../../../wardrobe/presentation/providers/wardrobe_provider.dart';
 import '../../data/models/achievement_dto.dart';
 import '../../data/repositories/achievements_repository.dart';

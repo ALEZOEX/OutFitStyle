@@ -104,11 +104,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   title: const Text('Банковская карта'),
                   subtitle: const Text('Visa, Mastercard, МИР'),
                   value: 'card',
+                  // ignore: deprecated_member_use
                   groupValue: _paymentMethod,
-                  onChanged: (value) {
-                    setState(() {
-                      _paymentMethod = value!;
-                    });
+                  // ignore: deprecated_member_use
+                  onChanged: (String? value) {
+                    if (value != null) {
+                      setState(() {
+                        _paymentMethod = value;
+                      });
+                    }
                   },
                 ),
 
@@ -116,11 +120,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   title: const Text('YooKassa'),
                   subtitle: const Text('Онлайн платеж'),
                   value: 'yookassa',
+                  // ignore: deprecated_member_use
                   groupValue: _paymentMethod,
-                  onChanged: (value) {
-                    setState(() {
-                      _paymentMethod = value!;
-                    });
+                  // ignore: deprecated_member_use
+                  onChanged: (String? value) {
+                    if (value != null) {
+                      setState(() {
+                        _paymentMethod = value;
+                      });
+                    }
                   },
                 ),
 
@@ -128,11 +136,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   title: const Text('При получении'),
                   subtitle: const Text('Наличными или картой'),
                   value: 'cash',
+                  // ignore: deprecated_member_use
                   groupValue: _paymentMethod,
-                  onChanged: (value) {
-                    setState(() {
-                      _paymentMethod = value!;
-                    });
+                  // ignore: deprecated_member_use
+                  onChanged: (String? value) {
+                    if (value != null) {
+                      setState(() {
+                        _paymentMethod = value;
+                      });
+                    }
                   },
                 ),
                 const SizedBox(height: 24),
@@ -242,30 +254,30 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
       final order = await ref.read(marketRepositoryProvider).createOrder(request);
 
-      if (mounted) {
-        // Clear cart
-        await ref.read(cartProvider.notifier).clear();
+      // Clear cart
+      await ref.read(cartProvider.notifier).clear();
 
-        // Show success
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Заказ #${order.id.substring(0, 8)} создан!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+      if (!mounted) return;
 
-        // Navigate back or to order details
-        Navigator.pop(context);
-      }
+      // Show success
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Заказ #${order.id.substring(0, 8)} создан!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navigate back or to order details
+      Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка создания заказа: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка создания заказа: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 }

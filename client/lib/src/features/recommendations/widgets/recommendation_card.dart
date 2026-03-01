@@ -110,8 +110,8 @@ class RecommendationCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color:
                       isDarkMode
-                          ? theme.colorScheme.secondaryContainer.withOpacity(
-                            0.3,
+                          ? theme.colorScheme.secondaryContainer.withValues(
+                            alpha: 0.3,
                           )
                           : Colors.green[50],
                   border: Border.all(
