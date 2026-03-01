@@ -139,6 +139,7 @@ class WardrobeSubcategories {
 
 @freezed
 abstract class WardrobeItem with _$WardrobeItem {
+  // ignore: invalid_annotation_target
   const factory WardrobeItem({
     /// Уникальный идентификатор
     String? id,
@@ -147,9 +148,11 @@ abstract class WardrobeItem with _$WardrobeItem {
     String? name,
 
     /// Категория: top, bottom, shoes, outerwear, accessories, headwear
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'category') String? category,
 
     /// Подкатегория: tshirt, jeans, sneakers и т.д.
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'subcategory') String? subcategory,
 
     /// Бренд
@@ -171,21 +174,27 @@ abstract class WardrobeItem with _$WardrobeItem {
     String? blurHash,
 
     /// Минимальная температура для носки (°C)
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'min_temp') double? minTemp,
 
     /// Максимальная температура для носки (°C)
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'max_temp') double? maxTemp,
 
     /// Уровень теплоты (1-5, где 5 - самый теплый)
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'warmth_level') int? warmthLevel,
 
     /// Подходит для дождя
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'rain_ok') bool? rainOk,
 
     /// Подходит для снега
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'snow_ok') bool? snowOk,
 
     /// Подходит для ветреной погоды
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'wind_ok') bool? windOk,
 
     /// Количество использований
@@ -210,21 +219,25 @@ abstract class WardrobeItem with _$WardrobeItem {
     String? style,
 
     /// Избранное
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'is_favorite') bool? isFavorite,
 
     /// Архивировано
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'is_archived') bool? isArchived,
 
     /// Сезон: all_season, spring, summer, autumn, winter
     String? season,
 
     /// ID на сервере
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'server_id') String? serverId,
 
     /// Есть ли несохраненные изменения
     bool? dirty,
 
     /// Дата последней синхронизации
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'last_synced_at') DateTime? lastSyncedAt,
   }) = _WardrobeItem;
 
