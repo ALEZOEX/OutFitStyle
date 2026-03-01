@@ -17,6 +17,10 @@ class AuthStorage implements core.AuthStorage {
       encryptedSharedPreferences: true,
       preferencesKeyPrefix: 'os_sec_',
     ),
+    // Настройки для iOS
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
   );
 
   @override
