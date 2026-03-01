@@ -128,32 +128,8 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   // Двухфакторная аутентификация
   bool _twoFactorEnabled = false;
 
-  // История входов (mock, пока нет API)
-  final _loginHistory = [
-    LoginHistoryItem(
-      device: 'iPhone 15 Pro',
-      time: 'Сегодня, 14:30',
-      isSuccess: true,
-      icon: Icons.phone_iphone,
-    ),
-    LoginHistoryItem(
-      device: 'MacBook Pro',
-      time: 'Вчера, 09:15',
-      isSuccess: true,
-      icon: Icons.laptop_mac,
-    ),
-    LoginHistoryItem(
-      device: 'Неизвестное устройство',
-      time: '15 фев, 22:45',
-      isSuccess: false,
-      icon: Icons.device_unknown,
-    ),
-  ];
-
-  // Привязанные аккаунты
-  bool _googleLinked = true;
-  bool _appleLinked = false;
-  bool _vkLinked = false;
+  // Привязанные аккаунты (только Google)
+  bool _googleLinked = false;
 
   @override
   void initState() {
@@ -165,9 +141,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _twoFactorEnabled = prefs.getBool('two_factor_enabled') ?? false;
-      _googleLinked = prefs.getBool('google_linked') ?? true;
-      _appleLinked = prefs.getBool('apple_linked') ?? false;
-      _vkLinked = prefs.getBool('vk_linked') ?? false;
+      _googleLinked = prefs.getBool('google_linked') ?? false;
     });
   }
 
@@ -177,11 +151,6 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     setState(() {
       _twoFactorEnabled = value;
     });
-  }
-
-  Future<void> _saveSocialLink(String social, bool linked) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('${social}_linked', linked);
   }
 
   @override
@@ -631,12 +600,6 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-            // История входов
-            SliverToBoxAdapter(
-              child: _buildLoginHistorySection(context, theme),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
             // Привязанные аккаунты
             SliverToBoxAdapter(
               child: _buildSocialAccountsSection(context, theme),
@@ -987,95 +950,6 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     );
   }
 
-  Widget _buildLoginHistorySection(BuildContext context, ThemeData theme) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Icon(Icons.history, color: theme.colorScheme.primary, size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  'История входов',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ..._loginHistory.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return Column(
-              children: [
-                if (index > 0)
-                  Divider(
-                    height: 1,
-                    color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                  ),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color:
-                          item.isSuccess
-                              ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                              : theme.colorScheme.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      item.icon,
-                      color:
-                          item.isSuccess
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.error,
-                      size: 22,
-                    ),
-                  ),
-                  title: Text(
-                    item.device,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: item.isSuccess ? null : theme.colorScheme.error,
-                    ),
-                  ),
-                  subtitle: Text(
-                    item.time,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  trailing:
-                      item.isSuccess
-                          ? Icon(
-                            Icons.check_circle,
-                            color: theme.colorScheme.primary,
-                            size: 20,
-                          )
-                          : Icon(
-                            Icons.error_outline,
-                            color: theme.colorScheme.error,
-                            size: 20,
-                          ),
-                ),
-              ],
-            );
-          }),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSocialAccountsSection(BuildContext context, ThemeData theme) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -1109,48 +983,10 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             icon: Icons.g_mobiledata,
             isLinked: _googleLinked,
             onToggle: (value) {
-              _saveSocialLink('google', value);
               setState(() => _googleLinked = value);
+              _saveGoogleLink(value);
               _showSnackBar(
                 value ? 'Google аккаунт привязан' : 'Google аккаунт отвязан',
-              );
-            },
-          ),
-          Divider(
-            height: 1,
-            color: theme.colorScheme.outline.withValues(alpha: 0.1),
-          ),
-          // Apple
-          _buildSocialTile(
-            context,
-            theme,
-            name: 'Apple',
-            icon: Icons.apple,
-            isLinked: _appleLinked,
-            onToggle: (value) {
-              _saveSocialLink('apple', value);
-              setState(() => _appleLinked = value);
-              _showSnackBar(
-                value ? 'Apple аккаунт привязан' : 'Apple аккаунт отвязан',
-              );
-            },
-          ),
-          Divider(
-            height: 1,
-            color: theme.colorScheme.outline.withValues(alpha: 0.1),
-          ),
-          // VK
-          _buildSocialTile(
-            context,
-            theme,
-            name: 'VK',
-            icon: Icons.share,
-            isLinked: _vkLinked,
-            onToggle: (value) {
-              _saveSocialLink('vk', value);
-              setState(() => _vkLinked = value);
-              _showSnackBar(
-                value ? 'VK аккаунт привязан' : 'VK аккаунт отвязан',
               );
             },
           ),
@@ -1158,6 +994,11 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _saveGoogleLink(bool linked) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('google_linked', linked);
   }
 
   Widget _buildSocialTile(
