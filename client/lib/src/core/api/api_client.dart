@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import '../../models/token_pair.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:web/web.dart' as web show window;
 
 class ApiClient {
   final AuthStorage storage;
@@ -68,12 +70,17 @@ class ApiClient {
               }
             } catch (refreshError) {
               print('[ApiClient] Ошибка refresh: $refreshError');
-              // Если refresh не удался - очищаем сессию
+              // Если refresh не удался - очищаем сессию и перезагружаем страницу
               await storage.clearSession();
+              // Перезагрузка страницы для web или редирект на login
+              if (kIsWeb) {
+                // Для web - перезагрузка страницы
+                web.window.location.reload();
+              }
             }
           }
         }
-        
+
         return handler.next(err);
       },
     ));
