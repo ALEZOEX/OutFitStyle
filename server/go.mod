@@ -1,6 +1,6 @@
 module outfitstyle/server
 
-go 1.24.12
+go 1.21.0
 
 require (
 	// Security
