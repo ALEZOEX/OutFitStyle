@@ -64,7 +64,7 @@ void main() {
 
       final client = AuthenticatedHttpClient(mockClient, apiConfig, authStorage);
 
-      final response = await client.get(Uri.parse('https://api.example.com/test'));
+      await client.get(Uri.parse('https://api.example.com/test'));
 
       // Первый запрос вернет 401, затем будет попытка refresh и повторный запрос
       // После успешного refresh statusCode должен быть 200 (повторный запрос успешен)
