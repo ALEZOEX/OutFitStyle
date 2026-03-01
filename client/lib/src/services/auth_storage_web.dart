@@ -12,22 +12,23 @@ class AuthStorage implements core.AuthStorage {
 
   AuthStorage() : _localStorage = web.window.localStorage;
 
-  /// Сохраняет токен (обёртка)
+  @override
   Future<void> saveToken(TokenPair token) async {
     await writeTokenPair(token);
   }
 
-  /// Получает токен (обёртка)
+  @override
   Future<TokenPair?> getToken() async {
     return readTokenPair();
   }
 
-  /// Очищает всё
+  @override
   Future<void> clear() async {
     await clearSession();
   }
 
   /// Сохраняет пару токенов в localStorage
+  @override
   Future<void> writeTokenPair(TokenPair pair) async {
     print('[AuthStorage Web] Сохраняем токен: ${_maskToken(pair.accessToken)}');
     try {
@@ -42,23 +43,27 @@ class AuthStorage implements core.AuthStorage {
   }
 
   /// Алиас для writeTokenPair (совместимость с api_client.dart)
+  @override
   Future<void> saveTokenPair(TokenPair pair) async {
     await writeTokenPair(pair);
   }
 
   /// Читает access токен
+  @override
   Future<String?> readAccessToken() async {
     final tokenPair = await readTokenPair();
     return tokenPair?.accessToken;
   }
 
   /// Читает refresh токен
+  @override
   Future<String?> readRefreshToken() async {
     final tokenPair = await readTokenPair();
     return tokenPair?.refreshToken;
   }
 
   /// Читает пару токенов из localStorage
+  @override
   Future<TokenPair?> readTokenPair() async {
     try {
       final access = _localStorage.getItem(_kAccessToken);
@@ -95,6 +100,7 @@ class AuthStorage implements core.AuthStorage {
   }
 
   /// Очищает сессию из localStorage
+  @override
   Future<void> clearSession() async {
     try {
       print('[AuthStorage Web] Очистка сессии');
@@ -108,6 +114,7 @@ class AuthStorage implements core.AuthStorage {
   }
 
   /// Читает время истечения токена
+  @override
   Future<DateTime?> readExpiresAt() async {
     final tokenPair = await readTokenPair();
     return tokenPair?.expiresAt;

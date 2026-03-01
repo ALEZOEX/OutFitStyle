@@ -10,6 +10,8 @@ import '../../features/notifications/presentation/providers/notification_provide
 import '../../features/notifications/presentation/widgets/notification_icon.dart';
 import '../../theme/theme_controller.dart';
 import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
+import 'package:outfitstyle_client/src/presentation/providers/weather_provider.dart'
+    show weatherProvider;
 import 'package:outfitstyle_client/src/ui/widgets/city_selector_dialog.dart';
 
 /// Wrapper для главного экрана с навигацией

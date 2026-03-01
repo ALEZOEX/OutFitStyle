@@ -4,6 +4,8 @@ import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/models/onboarding_data.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/repositories/onboarding_repository.dart';
 import 'package:outfitstyle_client/src/features/onboarding/onboarding_storage.dart';
+import 'package:outfitstyle_client/src/presentation/routing/router.dart'
+    show authStorageProvider, apiClientProvider;
 
 /// Провайдер хранилища онбординга
 final onboardingStorageProvider = Provider<OnboardingStorage>((ref) {

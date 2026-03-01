@@ -1,5 +1,6 @@
 -- 000012_performance_optimization.up.sql
 -- Добавление индексов для оптимизации производительности
+-- Примечание: некоторые индексы дублируются в 000014, используем IF NOT EXISTS
 
 -- Индексы для clothing_items
 CREATE INDEX IF NOT EXISTS idx_clothing_items_owner_active ON clothing_items(owner_id, is_active) WHERE owner_id IS NOT NULL AND is_active = true;
@@ -12,6 +13,7 @@ CREATE INDEX IF NOT EXISTS idx_wardrobe_items_user_active ON wardrobe_items(user
 CREATE INDEX IF NOT EXISTS idx_wardrobe_items_clothing_user ON wardrobe_items(clothing_item_id, user_id);
 
 -- Индексы для recommendations
+-- Примечание: idx_recommendations_ml_powered будет пересоздан в 000014 с другим определением
 CREATE INDEX IF NOT EXISTS idx_recommendations_ml_powered ON recommendations(ml_powered);
 CREATE INDEX IF NOT EXISTS idx_recommendations_algorithm ON recommendations(algorithm_used);
 
@@ -26,4 +28,5 @@ CREATE INDEX IF NOT EXISTS idx_recommendation_sessions_user_model ON recommendat
 CREATE INDEX IF NOT EXISTS idx_clothing_items_materials_gin ON clothing_items USING gin(materials);
 
 -- Индекс для ускорения поиска по тегам в wardrobe_items
+-- Примечание: этот индекс также создаётся в 000014, IF NOT EXISTS предотвратит ошибку
 CREATE INDEX IF NOT EXISTS idx_wardrobe_items_tags_gin ON wardrobe_items USING gin(tags);
