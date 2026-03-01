@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
 import 'package:outfitstyle_client/src/features/market/data/models/cart.dart';
 import 'package:outfitstyle_client/src/features/market/presentation/providers/cart_provider.dart';
+import 'package:outfitstyle_client/src/features/market/presentation/providers/favorite_provider.dart';
 import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Product detail screen
@@ -28,20 +29,23 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
+    final isFavorite = ref.watch(favoriteProvider).contains(product.id);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(product.name),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border),
+            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+            color: isFavorite ? Colors.red : null,
             onPressed: () {
-              // TODO: Реализовать добавление в избранное (v2.0)
-              // Требуется: API endpoint, UI диалог, интеграция с профилем
+              ref.read(favoriteProvider.notifier).toggleFavorite(product.id);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Функция избранных товаров будет доступна в v2.0'),
-                  backgroundColor: Colors.orange,
+                SnackBar(
+                  content: Text(
+                    isFavorite ? 'Удалено из избранного' : 'Добавлено в избранное',
+                  ),
+                  duration: const Duration(seconds: 1),
                 ),
               );
             },
