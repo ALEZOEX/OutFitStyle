@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../presentation/providers/recommendations_provider.dart';
 import '../widgets/recommendation_card.dart';
 import '../../../ui/widgets/city_selector_widget.dart';
+import '../../../ui/widgets/max_width_container.dart';
 
 /// Экран персональных рекомендаций
 /// Без социальной функциональности — только персональные подборки
@@ -51,7 +52,10 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
         slivers: [
           // Заголовок
           SliverToBoxAdapter(
-            child: _buildHeader(context, state, stats),
+            child: ResponsiveMaxWidthContainer(
+              maxWidth: 800,
+              child: _buildHeader(context, state, stats),
+            ),
           ),
           // Виджет выбора города для Web
           if (selectedCity == null)
@@ -102,11 +106,17 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
             ),
           // Быстрые действия
           SliverToBoxAdapter(
-            child: _buildQuickActions(context),
+            child: ResponsiveMaxWidthContainer(
+              maxWidth: 800,
+              child: _buildQuickActions(context),
+            ),
           ),
           // Кнопка генерации
           SliverToBoxAdapter(
-            child: _buildGenerateCard(context, state),
+            child: ResponsiveMaxWidthContainer(
+              maxWidth: 800,
+              child: _buildGenerateCard(context, state),
+            ),
           ),
           // Список рекомендаций
           _buildRecommendationsList(context, state),
@@ -461,20 +471,23 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     }
 
     return SliverPadding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final recommendation = state.recommendations[index];
             return FadeTransition(
               opacity: _fadeAnimation,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: RecommendationCard(
-                  recommendation: recommendation,
-                  onDetailsPressed: () => context.push('/recommendations/${recommendation.id}'),
-                  onPlanPressed: () => _planRecommendation(context, recommendation.id),
-                  onUsePressed: () => _useRecommendation(context, recommendation.id),
+              child: ResponsiveMaxWidthContainer(
+                maxWidth: 800,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: RecommendationCard(
+                    recommendation: recommendation,
+                    onDetailsPressed: () => context.push('/recommendations/${recommendation.id}'),
+                    onPlanPressed: () => _planRecommendation(context, recommendation.id),
+                    onUsePressed: () => _useRecommendation(context, recommendation.id),
+                  ),
                 ),
               ),
             );

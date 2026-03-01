@@ -18,13 +18,11 @@ class MockSessionsRepository extends Mock implements SessionsRepository {}
 void main() {
   group('SecurityScreen Widget Tests', () {
     late MockApiClient mockApiClient;
-    late MockAuthStorage mockAuthStorage;
     late MockSessionsRepository mockSessionsRepository;
 
     setUp(() {
       SharedPreferences.setMockInitialValues({});
       mockApiClient = MockApiClient();
-      mockAuthStorage = MockAuthStorage();
       mockSessionsRepository = MockSessionsRepository();
       
       // Мокаем метод getSessions чтобы возвращал пустой список
