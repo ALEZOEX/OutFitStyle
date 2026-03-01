@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
+import 'package:outfitstyle_client/src/features/market/data/models/cart.dart';
+import 'package:outfitstyle_client/src/features/market/presentation/providers/cart_provider.dart';
+import 'package:outfitstyle_client/src/features/market/presentation/providers/favorite_provider.dart';
 import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Product card widget for grid display
-class ProductCard extends StatelessWidget {
+class ProductCard extends ConsumerWidget {
   final Product product;
   final VoidCallback? onTap;
 
@@ -15,7 +19,9 @@ class ProductCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFavorite = ref.watch(favoriteProvider).contains(product.id);
+
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
@@ -65,14 +71,21 @@ class ProductCard extends StatelessWidget {
                     top: 8,
                     right: 8,
                     child: IconButton(
-                      icon: const Icon(Icons.favorite_border),
-                      color: Colors.white,
+                      icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                      color: isFavorite ? Colors.red : Colors.white,
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.black54,
                       ),
                       onPressed: () {
-                        // TODO: Реализовать добавление в избранное (v2.0)
-                        // Требуется: API endpoint, UI диалог, интеграция с профилем
+                        ref.read(favoriteProvider.notifier).toggleFavorite(product.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isFavorite ? 'Удалено из избранного' : 'Добавлено в избранное',
+                            ),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -123,11 +136,7 @@ class ProductCard extends StatelessWidget {
                       // Add to cart button
                       if (product.inStock)
                         IconButton(
-                          onPressed: () {
-                            // TODO: Реализовать быстрое добавление в корзину (v2.0)
-                            // Требуется: выбор размера, подтверждение, интеграция с cart_service
-                            // Сейчас: только через детальную страницу
-                          },
+                          onPressed: () => _quickAddToCart(context, ref),
                           icon: const Icon(Icons.shopping_cart_outlined),
                           color: AppColors.primary,
                           padding: EdgeInsets.zero,
@@ -152,5 +161,87 @@ class ProductCard extends StatelessWidget {
     //     builder: (context) => ProductDetailScreen(product: product),
     //   ),
     // );
+  }
+
+  Future<void> _quickAddToCart(BuildContext context, WidgetRef ref) async {
+    // Если только один размер, добавляем сразу
+    if (product.sizes.length == 1) {
+      final request = AddToCartRequest(
+        productId: product.id,
+        quantity: 1,
+        size: product.sizes.first,
+        color: product.colors.firstOrNull,
+      );
+      
+      try {
+        await ref.read(cartProvider.notifier).addToCart(request);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Товар добавлен в корзину'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Ошибка: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } else {
+      // Показываем диалог выбора размера
+      final selectedSize = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Выберите размер'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: product.sizes.map((size) {
+              return ListTile(
+                title: Text(size),
+                onTap: () => Navigator.pop(context, size),
+              );
+            }).toList(),
+          ),
+        ),
+      );
+
+      if (selectedSize != null) {
+        final request = AddToCartRequest(
+          productId: product.id,
+          quantity: 1,
+          size: selectedSize,
+          color: product.colors.firstOrNull,
+        );
+
+        try {
+          await ref.read(cartProvider.notifier).addToCart(request);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Товар добавлен в корзину'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Ошибка: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+    }
   }
 }
