@@ -28,13 +28,17 @@ CORS(app)
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "postgres"),
     "port": os.getenv("DB_PORT", "5432"),
-    "user": os.getenv("DB_USER", "Admin"),
-    "password": os.getenv("DB_PASSWORD", "password"),
+    "user": os.getenv("DB_USER", "outfitstyle"),
+    "password": os.getenv("DB_PASSWORD"),  # Требуется установка DB_PASSWORD
     "database": os.getenv("DB_NAME", "outfitstyle"),
 }
 
 
 def get_db_connection():
+    if not DB_CONFIG["password"]:
+        logger.error("DB_PASSWORD environment variable is not set")
+        raise ValueError("DB_PASSWORD environment variable is required")
+    
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         return conn

@@ -4,9 +4,10 @@ import 'package:outfitstyle_client/src/core/services/auth_storage.dart' as core;
 
 /// Веб-версия хранилища аутентификации с использованием localStorage
 class AuthStorage implements core.AuthStorage {
-  static const _kAccessToken = 'os_access_token';
-  static const _kRefreshToken = 'os_refresh_token';
-  static const _kExpiresAt = 'os_expires_at';
+  // Используем обфусцированные ключи для безопасности
+  static const _kAccessToken = 'os_t8x3k9m2';  // obfuscated: access_token
+  static const _kRefreshToken = 'os_r5n7p1q4';  // obfuscated: refresh_token
+  static const _kExpiresAt = 'os_e6w2y8z0';      // obfuscated: expires_at
 
   final web.Storage _localStorage;
 

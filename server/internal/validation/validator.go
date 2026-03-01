@@ -115,8 +115,39 @@ func ValidateEmail(v *Validator, email string) {
 // ValidatePasswordPlaintext проверяет требования к паролю
 func ValidatePasswordPlaintext(v *Validator, password string) {
 	v.Check(password != "", "password", "must be provided")
-	v.Check(len(password) >= 8, "password", "must be at least 8 characters long")
+	v.Check(len(password) >= 12, "password", "must be at least 12 characters long")
 	v.Check(len(password) <= 72, "password", "must not be more than 72 characters long")
+	
+	// Проверка сложности пароля
+	hasUpper := false
+	hasLower := false
+	hasDigit := false
+	hasSpecial := false
+	
+	for _, char := range password {
+		switch {
+		case char >= 'A' && char <= 'Z':
+			hasUpper = true
+		case char >= 'a' && char <= 'z':
+			hasLower = true
+		case char >= '0' && char <= '9':
+			hasDigit = true
+		case char == '!' || char == '@' || char == '#' || char == '$' || 
+		     char == '%' || char == '^' || char == '&' || char == '*' || 
+		     char == '(' || char == ')' || char == '-' || char == '_' || 
+		     char == '=' || char == '+' || char == '[' || char == ']' || 
+		     char == '{' || char == '}' || char == '|' || char == ';' || 
+		     char == ':' || char == '"' || char == '\'' || char == '<' || 
+		     char == '>' || char == ',' || char == '.' || char == '/' || 
+		     char == '?' || char == '`' || char == '~' || char == '\\':
+			hasSpecial = true
+		}
+	}
+	
+	v.Check(hasUpper, "password", "must contain at least one uppercase letter")
+	v.Check(hasLower, "password", "must contain at least one lowercase letter")
+	v.Check(hasDigit, "password", "must contain at least one number")
+	v.Check(hasSpecial, "password", "must contain at least one special character")
 }
 
 // ValidateUser проверяет поля пользователя

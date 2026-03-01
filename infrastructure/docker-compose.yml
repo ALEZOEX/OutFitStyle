@@ -49,34 +49,31 @@ services:
     env_file:
       - ../.env
     environment:
-      ENVIRONMENT: development
+      ENVIRONMENT: ${ENVIRONMENT:-development}
 
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: "8080"
 
-      DATABASE_URL: postgres://outfitstyle:outfitstyle@postgres:5432/outfitstyle?sslmode=disable
+      DATABASE_URL: ${DATABASE_URL:-postgres://outfitstyle:outfitstyle@postgres:5432/outfitstyle?sslmode=disable}
 
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
 
-      JWT_SECRET: "dev-secret-dev-secret-dev-secret-dev-secret"
+      # JWT_SECRET должен быть установлен в .env файле!
+      JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_TOKEN_TTL: 15m
       JWT_REFRESH_TOKEN_TTL: 720h
 
-      # Use dummy key if not set in .env for dev purposes
-      OPENWEATHER_API_KEY: "${WEATHER_API_KEY:-dummy_weather_key_for_dev}"
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
       OPENWEATHER_CACHE_TTL: 10m
       OPENWEATHER_BASE_URL: "https://api.openweathermap.org/data/2.5"
 
       ML_SERVICE_URL: http://ml-service:8000
       ML_SERVICE_TIMEOUT: 30s
 
-      SENTRY_DSN: "${SENTRY_DSN:-}"
+      SENTRY_DSN: ${SENTRY_DSN:-}
 
-      API_KEY_PEPPER: "dev-pepper"
-
-      ADMIN_API_KEY: "dev-admin-key"
-
-      # queue uses same redis
+      API_KEY_PEPPER: ${API_KEY_PEPPER}
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
     ports:
       - "8080:8080"
     depends_on:

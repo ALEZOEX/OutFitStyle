@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     PORT: int = 8001
     
     # Database
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/market"
+    DATABASE_URL: str
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
     
