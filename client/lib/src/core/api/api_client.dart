@@ -88,9 +88,9 @@ class ApiClient {
         return false;
       }
 
-      // Используем /api/auth/refresh (не /api/v1/auth/refresh)
+      // Используем /api/v1/auth/refresh
       final response = await _dio.post(
-        '/api/auth/refresh',
+        '/api/v1/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
 
