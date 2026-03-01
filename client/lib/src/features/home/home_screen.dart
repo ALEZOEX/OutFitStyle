@@ -11,6 +11,7 @@ import 'package:outfitstyle_client/src/presentation/providers/user_location_prov
 import 'package:outfitstyle_client/src/ui/widgets/weather_card.dart';
 import 'package:outfitstyle_client/src/ui/widgets/empty_state.dart';
 import 'package:outfitstyle_client/src/ui/widgets/city_selector_dialog.dart';
+import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import 'package:outfitstyle_client/src/domain/entities/outfit_recommendation.dart';
 
 /// Главный экран: погода + персональные рекомендации + гардероб
@@ -50,35 +51,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: SafeArea(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Погода и город
-              _buildWeatherSection(context, weatherAsync, userLocation),
+          child: ResponsiveMaxWidthContainer(
+            maxWidth: 800,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                
+                // Погода и город
+                _buildWeatherSection(context, weatherAsync, userLocation),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Основной образ на сегодня
-              _buildMainOutfitSection(context, recommendationsState),
+                // Основной образ на сегодня
+                _buildMainOutfitSection(context, recommendationsState),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Альтернативные образы
-              _buildAlternativeOutfitsSection(context, recommendationsState),
+                // Альтернативные образы
+                _buildAlternativeOutfitsSection(context, recommendationsState),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Статистика
-              _buildStatsSection(context, wardrobeState, recommendationsState),
+                // Статистика
+                _buildStatsSection(context, wardrobeState, recommendationsState),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Кнопка "Сгенерировать еще"
-              _buildGenerateMoreButton(context, recommendationsState),
+                // Кнопка "Сгенерировать еще"
+                _buildGenerateMoreButton(context, recommendationsState),
 
-              const SizedBox(height: 100), // Отступ для bottom navigation
-            ],
+                const SizedBox(height: 100), // Отступ для bottom navigation
+              ],
+            ),
           ),
         ),
       ),

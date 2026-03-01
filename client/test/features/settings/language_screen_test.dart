@@ -289,8 +289,8 @@ void main() {
     });
 
     test('AppLanguage availableLanguages contains all languages', () {
-      expect(AppLanguage.availableLanguages.length, 10);
-      
+      expect(AppLanguage.availableLanguages.length, 18);
+
       final codes = AppLanguage.availableLanguages.map((l) => l.code).toList();
       expect(codes, contains('ru'));
       expect(codes, contains('en'));

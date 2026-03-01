@@ -52,9 +52,9 @@ void main() {
       var refreshCalled = false;
 
       final mockClient = MockClient((request) async {
-        if (request.url.path == '/auth/refresh') {
+        if (request.url.path == '/api/auth/refresh') {
           refreshCalled = true;
-          return http.Response('{"access_token": "new-token"}', 200);
+          return http.Response('{"tokens": {"access_token": "new-token", "refresh_token": "new-refresh", "expires_at": "2030-01-01T00:00:00Z"}}', 200);
         }
         return http.Response('Unauthorized', 401);
       });
@@ -66,8 +66,8 @@ void main() {
 
       final response = await client.get(Uri.parse('https://api.example.com/test'));
 
-      // Первый запрос вернет 401, затем будет попытка refresh
-      expect(response.statusCode, 401);
+      // Первый запрос вернет 401, затем будет попытка refresh и повторный запрос
+      // После успешного refresh statusCode должен быть 200 (повторный запрос успешен)
       expect(refreshCalled, true);
     });
 

@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/core/services/auth_storage.dart' as core;
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/data/repositories/auth_repository.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart' as impl;
+import 'package:outfitstyle_client/src/core/api/api_config.dart';
 
 /// Глобальный провайдер для AuthStorage (единый экземпляр для всего приложения)
-final authStorageProvider = Provider<AuthStorage>((ref) {
-  return AuthStorage();
+final authStorageProvider = Provider<core.AuthStorage>((ref) {
+  return impl.AuthStorage();
 });
 
 /// Глобальный провайдер для ApiClient (использует единый AuthStorage)
@@ -18,8 +20,11 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final authStorage = ref.watch(authStorageProvider);
   final apiClient = ref.watch(apiClientProvider);
-  final config = ApiConfig(apiBase: ApiConfig.baseUrl);
-  return AuthRepository(config, authStorage, apiClient);
+  return AuthRepository(
+    ApiConfig(apiBase: ApiConfig.baseUrl),
+    authStorage,
+    apiClient,
+  );
 });
 
 /// Провайдер для получения userId пользователя
@@ -49,7 +54,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> signOut() async {
-    await _authRepository.signOut();
+    await _authRepository.logout();
     state = const AuthState.unauthenticated();
   }
 }
@@ -67,6 +72,6 @@ class AuthState {
 /// Провайдер для проверки прав администратора
 final adminAccessProvider = FutureProvider<bool>((ref) async {
   final authRepo = ref.read(authRepositoryProvider);
-  final user = await authRepo.getUser();
-  return user?.role == 'admin';
+  final user = await authRepo.getCurrentUser();
+  return user?['role'] == 'admin';
 });
