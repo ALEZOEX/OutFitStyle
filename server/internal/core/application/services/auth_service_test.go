@@ -235,7 +235,7 @@ func TestAuthService_Register(t *testing.T) {
 	// Тестовые данные
 	input := domain.UserRegistration{
 		Email:    "test@example.com",
-		Password: "password123",
+		Password: "SecureP@ssw0rd123",  // 12+ символов: uppercase, lowercase, digit, special
 	}
 
 	// Ожидания
@@ -273,7 +273,7 @@ func TestAuthService_Login_Success(t *testing.T) {
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, zap.NewNop())
 
 	// Тестовые данные
-	password := "password123"
+	password := "SecureP@ssw0rd123"  // 12+ символов: uppercase, lowercase, digit, special
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		t.Fatalf("Failed to generate password hash: %v", err)

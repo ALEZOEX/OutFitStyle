@@ -28,7 +28,7 @@ func TestAuthService_Register_DuplicateEmail(t *testing.T) {
 
 	input := domain.UserRegistration{
 		Email:    "existing@example.com",
-		Password: "password123",
+		Password: "SecureP@ssw0rd123",  // 12+ символов для новой политики паролей
 	}
 
 	existingUser := &domain.User{
@@ -78,7 +78,7 @@ func TestAuthService_Login_UserNotFound(t *testing.T) {
 
 	loginInput := domain.UserLogin{
 		Email:    "nonexistent@example.com",
-		Password: "password123",
+		Password: "SecureP@ssw0rd123",  // 12+ символов для новой политики паролей
 	}
 
 	mockUserRepo.On("GetUserByEmail", mock.Anything, "nonexistent@example.com").Return(nil, repositories.ErrNotFound)
@@ -100,7 +100,7 @@ func TestAuthService_Login_WrongPassword(t *testing.T) {
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, testLogger)
 
-	password := "password123"
+	password := "SecureP@ssw0rd123"  // 12+ символов для новой политики паролей
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	require.NoError(t, err)
 
@@ -114,7 +114,7 @@ func TestAuthService_Login_WrongPassword(t *testing.T) {
 
 	loginInput := domain.UserLogin{
 		Email:    "test@example.com",
-		Password: "wrongpassword",
+		Password: "WrongP@ssw0rd456",  // 12+ символов, но неверный пароль
 	}
 
 	mockUserRepo.On("GetUserByEmail", mock.Anything, "test@example.com").Return(user, nil)
