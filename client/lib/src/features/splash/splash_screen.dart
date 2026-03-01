@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/di/di.dart';
 import '../onboarding/onboarding_storage.dart' as onboarding_storage;
-import '../../services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 
 /// Провайдер для отслеживания состояния проверки onboarding
 final splashInitProvider = FutureProvider<String>((ref) async {

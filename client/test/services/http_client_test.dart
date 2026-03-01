@@ -5,7 +5,7 @@ import 'package:http/testing.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:outfitstyle_client/src/services/http_client.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 
 // Mock для AuthStorage
 class MockAuthStorage extends Mock implements AuthStorage {}

@@ -37,7 +37,7 @@ import '../../features/notifications/presentation/pages/notifications_page.dart'
 import '../../data/repositories/auth_repository.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/api_config.dart';
-import '../../services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 
 /// Глобальный провайдер для AuthStorage (единый экземпляр для всего приложения)
 final authStorageProvider = Provider<AuthStorage>((ref) {

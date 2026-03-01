@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
-import '../../services/auth_storage.dart';
+import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import '../../models/token_pair.dart';
 
 class ApiClient {
@@ -212,6 +212,9 @@ class _NoOpAuthStorage extends AuthStorage {
 
   @override
   Future<void> saveTokenPair(TokenPair pair) async {}
+
+  @override
+  Future<void> writeTokenPair(TokenPair pair) async {}
 
   @override
   Future<String?> readAccessToken() async => null;

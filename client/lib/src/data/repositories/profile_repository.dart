@@ -1,6 +1,6 @@
 import '../../core/api/api_client.dart';
 import '../../core/api/api_config.dart';
-import '../../services/auth_storage.dart';
+import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 
 /// Репозиторий профиля пользователя
 class ProfileRepository {

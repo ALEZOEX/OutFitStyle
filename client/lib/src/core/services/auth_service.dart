@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../models/token_pair.dart';
-import '../../services/auth_storage.dart';
+import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 
 /// Сервис аутентификации (обертка над AuthStorage для совместимости)
 class AuthService {
