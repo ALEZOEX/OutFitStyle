@@ -71,7 +71,8 @@ class ProductCard extends StatelessWidget {
                         backgroundColor: Colors.black54,
                       ),
                       onPressed: () {
-                        // TODO: Add to favorites
+                        // ОТЛОЖЕНО (v2.0): Добавить в избранное
+                        // См. TODO.md раздел 4.2
                       },
                     ),
                   ),
@@ -123,7 +124,9 @@ class ProductCard extends StatelessWidget {
                       if (product.inStock)
                         IconButton(
                           onPressed: () {
-                            // TODO: Quick add to cart
+                            // ОТЛОЖЕНО (v2.0): Быстрое добавление в корзину
+                            // См. TODO.md раздел 4.3
+                            // Достаточно добавления через детальную страницу
                           },
                           icon: const Icon(Icons.shopping_cart_outlined),
                           color: AppColors.primary,

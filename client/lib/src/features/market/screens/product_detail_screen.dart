@@ -36,7 +36,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           IconButton(
             icon: const Icon(Icons.favorite_border),
             onPressed: () {
-              // TODO: Add to favorites
+              // ОТЛОЖЕНО (v2.0): Добавить в избранное
+              // См. TODO.md раздел 4.1
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Функция избранных товаров будет доступна в v2.0'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
             },
           ),
         ],
