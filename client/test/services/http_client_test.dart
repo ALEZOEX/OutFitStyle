@@ -52,7 +52,7 @@ void main() {
       var refreshCalled = false;
 
       final mockClient = MockClient((request) async {
-        if (request.url.path == '/api/auth/refresh') {
+        if (request.url.path == '/api/v1/auth/refresh') {
           refreshCalled = true;
           return http.Response('{"tokens": {"access_token": "new-token", "refresh_token": "new-refresh", "expires_at": "2030-01-01T00:00:00Z"}}', 200);
         }
