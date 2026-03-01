@@ -9,13 +9,13 @@ import '../../data/repositories/sessions_repository.dart';
 import '../../data/models/session_device.dart';
 
 /// Провайдер API клиента
-final _apiClientProvider = Provider<ApiClient>((ref) {
+final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(storage: AuthStorage());
 });
 
 /// Провайдер репозитория сессий
-final _sessionsRepositoryProvider = Provider<SessionsRepository>((ref) {
-  final apiClient = ref.watch(_apiClientProvider);
+final sessionsRepositoryProvider = Provider<SessionsRepository>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
   return SessionsRepository(apiClient: apiClient);
 });
 
@@ -103,7 +103,7 @@ class SessionsNotifier extends StateNotifier<SessionsState> {
 
 final sessionsProvider = StateNotifierProvider<SessionsNotifier, SessionsState>(
   (ref) {
-    final repository = ref.watch(_sessionsRepositoryProvider);
+    final repository = ref.watch(sessionsRepositoryProvider);
     return SessionsNotifier(repository: repository);
   },
 );

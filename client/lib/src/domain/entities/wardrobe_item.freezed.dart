@@ -18,7 +18,9 @@ mixin _$WardrobeItem {
 /// Уникальный идентификатор
  String? get id;/// Название предмета (например, "Белая футболка Basic")
  String? get name;/// Категория: top, bottom, shoes, outerwear, accessories, headwear
+// ignore: invalid_annotation_target
 @JsonKey(name: 'category') String? get category;/// Подкатегория: tshirt, jeans, sneakers и т.д.
+// ignore: invalid_annotation_target
 @JsonKey(name: 'subcategory') String? get subcategory;/// Бренд
  String? get brand;/// Цвет
  String? get color;/// Размер (S, M, L, XL, 42, 44 и т.д.)
@@ -26,11 +28,17 @@ mixin _$WardrobeItem {
  String? get imageUrl;/// Emoji иконка для предмета
  String? get iconEmoji;/// BlurHash для плейсхолдера изображения
  String? get blurHash;/// Минимальная температура для носки (°C)
+// ignore: invalid_annotation_target
 @JsonKey(name: 'min_temp') double? get minTemp;/// Максимальная температура для носки (°C)
+// ignore: invalid_annotation_target
 @JsonKey(name: 'max_temp') double? get maxTemp;/// Уровень теплоты (1-5, где 5 - самый теплый)
+// ignore: invalid_annotation_target
 @JsonKey(name: 'warmth_level') int? get warmthLevel;/// Подходит для дождя
+// ignore: invalid_annotation_target
 @JsonKey(name: 'rain_ok') bool? get rainOk;/// Подходит для снега
+// ignore: invalid_annotation_target
 @JsonKey(name: 'snow_ok') bool? get snowOk;/// Подходит для ветреной погоды
+// ignore: invalid_annotation_target
 @JsonKey(name: 'wind_ok') bool? get windOk;/// Количество использований
  int? get usage;/// Материалы (например, ["cotton", "polyester"])
  List<String>? get materials;/// Пол: unisex, male, female
@@ -39,11 +47,15 @@ mixin _$WardrobeItem {
  String? get pattern;/// Локальный путь к изображению
  String? get localImagePath;/// Стиль: casual, formal, sport, streetwear
  String? get style;/// Избранное
+// ignore: invalid_annotation_target
 @JsonKey(name: 'is_favorite') bool? get isFavorite;/// Архивировано
+// ignore: invalid_annotation_target
 @JsonKey(name: 'is_archived') bool? get isArchived;/// Сезон: all_season, spring, summer, autumn, winter
  String? get season;/// ID на сервере
+// ignore: invalid_annotation_target
 @JsonKey(name: 'server_id') String? get serverId;/// Есть ли несохраненные изменения
  bool? get dirty;/// Дата последней синхронизации
+// ignore: invalid_annotation_target
 @JsonKey(name: 'last_synced_at') DateTime? get lastSyncedAt;
 /// Create a copy of WardrobeItem
 /// with the given fields replaced by the non-null parameter values.
@@ -274,8 +286,10 @@ class _WardrobeItem implements WardrobeItem {
 /// Название предмета (например, "Белая футболка Basic")
 @override final  String? name;
 /// Категория: top, bottom, shoes, outerwear, accessories, headwear
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'category') final  String? category;
 /// Подкатегория: tshirt, jeans, sneakers и т.д.
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'subcategory') final  String? subcategory;
 /// Бренд
 @override final  String? brand;
@@ -290,16 +304,22 @@ class _WardrobeItem implements WardrobeItem {
 /// BlurHash для плейсхолдера изображения
 @override final  String? blurHash;
 /// Минимальная температура для носки (°C)
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'min_temp') final  double? minTemp;
 /// Максимальная температура для носки (°C)
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'max_temp') final  double? maxTemp;
 /// Уровень теплоты (1-5, где 5 - самый теплый)
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'warmth_level') final  int? warmthLevel;
 /// Подходит для дождя
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'rain_ok') final  bool? rainOk;
 /// Подходит для снега
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'snow_ok') final  bool? snowOk;
 /// Подходит для ветреной погоды
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'wind_ok') final  bool? windOk;
 /// Количество использований
 @override final  int? usage;
@@ -325,16 +345,20 @@ class _WardrobeItem implements WardrobeItem {
 /// Стиль: casual, formal, sport, streetwear
 @override final  String? style;
 /// Избранное
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'is_favorite') final  bool? isFavorite;
 /// Архивировано
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'is_archived') final  bool? isArchived;
 /// Сезон: all_season, spring, summer, autumn, winter
 @override final  String? season;
 /// ID на сервере
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'server_id') final  String? serverId;
 /// Есть ли несохраненные изменения
 @override final  bool? dirty;
 /// Дата последней синхронизации
+// ignore: invalid_annotation_target
 @override@JsonKey(name: 'last_synced_at') final  DateTime? lastSyncedAt;
 
 /// Create a copy of WardrobeItem
