@@ -8,6 +8,7 @@ import '../../theme/theme_controller.dart';
 import '../providers/auth_provider.dart';
 import '../routing/router.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
+import '../../features/settings/presentation/screens/language_screen.dart';
 
 /// Виджет для инициализации состояния авторизации
 class AuthInitializer extends ConsumerStatefulWidget {
@@ -48,6 +49,7 @@ class OutfitStyleApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final languageCode = ref.watch(currentLanguageProvider);
 
     // Определяем актуальную тему для настройки статус-бара
     final isDarkMode = themeMode == ThemeMode.dark ||
@@ -73,7 +75,7 @@ class OutfitStyleApp extends ConsumerWidget {
         darkTheme: AppThemes.darkTheme,
         themeMode: themeMode,
         routerConfig: router,
-        locale: const Locale('ru'), // Принудительно русский язык
+        locale: Locale(languageCode),
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
