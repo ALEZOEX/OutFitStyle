@@ -92,9 +92,8 @@ class AuthService {
       }
 
       // Токен истёк, пробуем обновить через refresh
-      // Используем /api/auth/refresh вместо /auth/refresh
       final response = await httpClient.post(
-        Uri.parse('$apiBase/api/auth/refresh'),
+        Uri.parse('$apiBase/api/v1/auth/refresh'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'refresh_token': existingPair.refreshToken,

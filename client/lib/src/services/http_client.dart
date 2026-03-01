@@ -71,8 +71,8 @@ class AuthenticatedHttpClient extends http.BaseClient {
     final refreshToken = await _authStorage.readRefreshToken();
     if (refreshToken == null || refreshToken.isEmpty) return false;
 
-    // Используем /api/auth/refresh вместо /auth/refresh
-    final uri = Uri.parse('${_apiConfig.apiBase}/api/auth/refresh');
+    // Используем /api/v1/auth/refresh
+    final uri = Uri.parse('${_apiConfig.apiBase}/api/v1/auth/refresh');
 
     final resp = await _inner.post(
       uri,
