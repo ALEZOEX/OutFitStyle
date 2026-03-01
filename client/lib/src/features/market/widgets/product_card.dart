@@ -71,8 +71,8 @@ class ProductCard extends StatelessWidget {
                         backgroundColor: Colors.black54,
                       ),
                       onPressed: () {
-                        // ОТЛОЖЕНО (v2.0): Добавить в избранное
-                        // См. TODO.md раздел 4.2
+                        // TODO: Реализовать добавление в избранное (v2.0)
+                        // Требуется: API endpoint, UI диалог, интеграция с профилем
                       },
                     ),
                   ),
@@ -124,9 +124,9 @@ class ProductCard extends StatelessWidget {
                       if (product.inStock)
                         IconButton(
                           onPressed: () {
-                            // ОТЛОЖЕНО (v2.0): Быстрое добавление в корзину
-                            // См. TODO.md раздел 4.3
-                            // Достаточно добавления через детальную страницу
+                            // TODO: Реализовать быстрое добавление в корзину (v2.0)
+                            // Требуется: выбор размера, подтверждение, интеграция с cart_service
+                            // Сейчас: только через детальную страницу
                           },
                           icon: const Icon(Icons.shopping_cart_outlined),
                           color: AppColors.primary,
