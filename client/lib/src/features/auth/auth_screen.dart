@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../presentation/routing/router.dart';
+import '../../presentation/providers/auth_provider.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   final VoidCallback onAuthSuccess;

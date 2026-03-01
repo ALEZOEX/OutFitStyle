@@ -264,7 +264,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
             label,
             style: theme.textTheme.labelSmall?.copyWith(
               color: isDarkMode
-                  ? theme.colorScheme.onSurface.withOpacity(0.8)
+                  ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
                   : theme.colorScheme.onSurfaceVariant,
             ),
           ),

@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
-import '../../../../presentation/routing/router.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 import '../../data/repositories/profile_repository.dart';
 
 /// Провайдер для состояния профиля

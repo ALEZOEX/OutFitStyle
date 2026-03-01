@@ -9,7 +9,8 @@ class SavedRecommendationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = ref.watch(userIdProvider) ?? '';
+    final userIdAsync = ref.watch(userIdProvider);
+    final userId = userIdAsync.valueOrNull ?? '';
 
     // Load saved recommendations when screen is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
