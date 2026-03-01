@@ -1,16 +1,28 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/token_pair.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart' as core;
+import 'dart:math' as math;
 
 /// Мобильная версия хранилища аутентификации с использованием FlutterSecureStorage
 class AuthStorage implements core.AuthStorage {
-  static const _kAccessToken = 'access_token';
-  static const _kRefreshToken = 'refresh_token';
-  static const _kExpiresAt = 'expires_at';
+  // Используем обфусцированные ключи для безопасности
+  static const _kAccessToken = 'os_a7f3c9e1';  // obfuscated: access_token
+  static const _kRefreshToken = 'os_b2d8f4a6';  // obfuscated: refresh_token
+  static const _kExpiresAt = 'os_c5e1g7h9';      // obfuscated: expires_at
 
   final FlutterSecureStorage _storage;
 
-  AuthStorage() : _storage = const FlutterSecureStorage();
+  AuthStorage() : _storage = const FlutterSecureStorage(
+    // Дополнительные настройки безопасности для Android
+    androidOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+      preferencesKeyPrefix: 'os_sec_',
+    ),
+    // Настройки для iOS
+    iOSOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
 
   @override
   Future<void> saveToken(TokenPair token) async {
