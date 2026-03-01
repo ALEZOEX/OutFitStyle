@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_config.dart';
-import '../../../../services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import '../../data/datasources/admin_remote_data_source.dart';
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../../../domain/entities/admin_user.dart';

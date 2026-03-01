@@ -1,8 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/token_pair.dart';
+import 'package:outfitstyle_client/src/core/services/auth_storage.dart' as core;
 
 /// Мобильная версия хранилища аутентификации с использованием FlutterSecureStorage
-class AuthStorage {
+class AuthStorage implements core.AuthStorage {
   static const _kAccessToken = 'access_token';
   static const _kRefreshToken = 'refresh_token';
   static const _kExpiresAt = 'expires_at';

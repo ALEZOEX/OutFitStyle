@@ -1,7 +1,7 @@
 import 'dart:convert';
 import '../../core/api/api_config.dart';
 import '../../core/api/api_client.dart';
-import '../../services/auth_storage.dart';
+import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import '../../services/auth_service.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../../models/token_pair.dart';

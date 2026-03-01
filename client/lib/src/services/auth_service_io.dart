@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'dart:io' show Platform;
 
 import '../models/token_pair.dart';
-import 'auth_storage.dart';
+import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 
 /// Сервис аутентификации с поддержкой Google Sign-In
 class AuthService {
