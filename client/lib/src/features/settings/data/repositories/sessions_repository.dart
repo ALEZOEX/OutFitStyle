@@ -94,13 +94,6 @@ class SessionsRepository {
         throw SessionsException('Ошибка сети: ${e.message}');
     }
   }
-
-  String? _extractErrorMessage(dynamic data) {
-    if (data is Map<String, dynamic>) {
-      return data['message'] as String? ?? data['error'] as String?;
-    }
-    return null;
-  }
 }
 
 /// Исключение репозитория сессий

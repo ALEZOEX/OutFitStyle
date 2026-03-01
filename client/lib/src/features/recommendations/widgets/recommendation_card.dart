@@ -442,29 +442,4 @@ class RecommendationCard extends StatelessWidget {
 
     return result;
   }
-
-  /// Получить иконку для предмета одежды
-  IconData _getItemIcon(String item) {
-    final itemLower = item.toLowerCase();
-
-    if (itemLower.contains('футболк')) return Icons.checkroom;
-    if (itemLower.contains('рубашк')) return Icons.person;
-    if (itemLower.contains('худи') || itemLower.contains('свитер'))
-      return Icons.cottage;
-    if (itemLower.contains('джинс') || itemLower.contains('брюк'))
-      return Icons.checkroom_outlined;
-    if (itemLower.contains('шорт')) return Icons.surfing;
-    if (itemLower.contains('кроссовк') || itemLower.contains('кед'))
-      return Icons.sports_soccer;
-    if (itemLower.contains('ботинк') || itemLower.contains('сапог'))
-      return Icons.hiking;
-    if (itemLower.contains('туфел')) return Icons.sports_martial_arts;
-    if (itemLower.contains('куртк') || itemLower.contains('пальт'))
-      return Icons.sunny_snowing;
-    if (itemLower.contains('шапк')) return Icons.face;
-    if (itemLower.contains('шарф')) return Icons.waves;
-    if (itemLower.contains('сумк')) return Icons.shopping_bag;
-
-    return Icons.checkroom;
-  }
 }
