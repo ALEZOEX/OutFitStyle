@@ -1,7 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/token_pair.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart' as core;
-import 'dart:math' as math;
 
 /// Мобильная версия хранилища аутентификации с использованием FlutterSecureStorage
 class AuthStorage implements core.AuthStorage {
@@ -14,13 +13,9 @@ class AuthStorage implements core.AuthStorage {
 
   AuthStorage() : _storage = const FlutterSecureStorage(
     // Дополнительные настройки безопасности для Android
-    androidOptions: AndroidOptions(
+    aOptions: AndroidOptions(
       encryptedSharedPreferences: true,
       preferencesKeyPrefix: 'os_sec_',
-    ),
-    // Настройки для iOS
-    iOSOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
   );
 
