@@ -1,9 +1,8 @@
 // Базовые провайдеры
-export '../../features/wardrobe/presentation/providers/wardrobe_provider.dart'
-    show apiClientProvider;
-export '../routing/router.dart'
+export 'auth_provider.dart'
     show
         authStorageProvider,
+        apiClientProvider,
         authRepositoryProvider,
         userIdProvider,
         authStateProvider,
