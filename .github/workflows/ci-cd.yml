@@ -117,6 +117,7 @@ jobs:
           sbom: false
           build-args: |
             BUILDKIT_INLINE_CACHE=0
+          no-cache: true
 
       - name: Build and push ml-service
         uses: docker/build-push-action@v6
@@ -131,6 +132,7 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
+          no-cache: true
 
       - name: Build and push marketplace-service
         uses: docker/build-push-action@v6
@@ -145,6 +147,7 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
+          no-cache: true
 
   deploy-k3s:
     needs: build-and-push
