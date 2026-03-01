@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Application ID для OutfitStyle приложения
         applicationId = "com.app.outfitstyle"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -34,8 +34,9 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Подписание debug ключом для тестирования release сборки
+            // Для production необходимо создать release signing config
+            // См. https://docs.flutter.dev/deployment/android#create-a-upload-keystore
             signingConfig = signingConfigs.getByName("debug")
         }
     }

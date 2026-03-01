@@ -418,7 +418,9 @@ func main() {
 		eventPublisher,
 		logger,
 	)
-	_ = ratingService // TODO: подключить к HTTP handler при необходимости
+
+	// ---------- Rating handler ----------
+	ratingHandler := handlers.NewRatingHandler(ratingService, achEngine, logger)
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
@@ -477,7 +479,7 @@ func main() {
 	health.RegisterChecks(checks)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache)
+	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -566,6 +568,7 @@ func setupRouter(
 	db *dbpg.DB,
 	mlClient *ext.MLClient,
 	recCache *cache.RecommendationCache,
+	ratingHandler *handlers.RatingHandler,
 ) *mux.Router {
 	router := mux.NewRouter()
 
@@ -633,9 +636,9 @@ func setupRouter(
 	recommendations := protected.PathPrefix("/recommendations").Subrouter()
 	recommendationHandler.RegisterRoutes(recommendations)
 
-	// /api/v1/ratings/* (регистрируется внутри ratingHandler)
-	// ratings := protected.PathPrefix("/ratings").Subrouter()
-	// ratingHandler.RegisterRoutes(ratings) // ratingHandler закомментирован
+	// /api/v1/ratings/*
+	ratings := protected.PathPrefix("/ratings").Subrouter()
+	ratingHandler.RegisterRoutes(ratings)
 
 	// /api/v1/achievements/*
 	ach := protected.PathPrefix("/achievements").Subrouter()
