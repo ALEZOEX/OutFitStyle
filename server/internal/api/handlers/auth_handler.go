@@ -493,7 +493,16 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		if err := h.smtp.SendPasswordReset(email, code); err != nil {
 			// Логируем ошибку, но не раскрываем пользователю
 			// Код всё равно сохранён в Redis
+			h.logger.Error("failed to send password reset email",
+				zap.String("email", email),
+				zap.Error(err),
+			)
 		}
+	} else {
+		// Логируем, что SMTP не настроен
+		h.logger.Warn("SMTP not configured, password reset email not sent",
+			zap.String("email", email),
+		)
 	}
 
 	// Возвращаем успех (не раскрываем, существует ли пользователь)
