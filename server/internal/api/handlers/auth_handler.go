@@ -5,6 +5,7 @@ package handlers
 import (
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -55,13 +56,7 @@ func sanitizeRegistrationRequest(req *domain.UserRegistration) {
 		sanitized := validation.SanitizeDisplayName(*req.DisplayName)
 		req.DisplayName = &sanitized
 	}
-	if req.Password != "" {
-		// Пароль не санизируем, чтобы не изменить его
-		// Но проверяем на опасные паттерны
-		if validation.ContainsDangerousPattern(req.Password) {
-			req.Password = "" // Очищаем если есть опасные паттерны
-		}
-	}
+	// Пароль не санизируем — он хешируется bcrypt и никогда не выводится
 }
 
 // AuthHandler структура обработчика аутентификации
@@ -454,6 +449,23 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 
 	email := strings.TrimSpace(strings.ToLower(req.Email))
 
+	// Rate limit: 3 запроса на email за 15 минут
+	rateLimitKey := fmt.Sprintf("forgot_password_rate:%s", email)
+	if h.redis != nil {
+		count, err := h.redis.Incr(r.Context(), rateLimitKey).Result()
+		if err != nil {
+			h.logger.Error("failed to check forgot password rate limit", zap.String("email", email), zap.Error(err))
+		}
+		if count == 1 {
+			_, _ = h.redis.Expire(r.Context(), rateLimitKey, 15*time.Minute).Result()
+		}
+		if count > 3 {
+			// Возвращаем success чтобы не раскрывать информацию о лимите
+			resp.Success(w, map[string]any{"success": true})
+			return
+		}
+	}
+
 	// Проверяем, существует ли пользователь
 	_, err := h.userRepo.GetUserByEmail(r.Context(), email)
 	if err != nil {
@@ -559,8 +571,25 @@ func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Сравниваем коды
-	if storedCode != req.Code {
+	// Проверяем количество попыток (rate limiting)
+	attemptsKey := fmt.Sprintf("password_reset_attempts:%s", email)
+	attempts, err := h.redis.Incr(r.Context(), attemptsKey).Result()
+	if err != nil {
+		h.logger.Error("failed to check password reset attempts", zap.String("email", email), zap.Error(err))
+	}
+	if attempts == 1 {
+		// Устанавливаем TTL 15 минут для счётчика попыток
+		_, _ = h.redis.Expire(r.Context(), attemptsKey, 15*time.Minute).Result()
+	}
+	if attempts > 5 {
+		// Слишком много попыток — удаляем код и счётчик
+		_ = h.redis.Del(r.Context(), codeKey, attemptsKey).Err()
+		resp.Error(w, http.StatusTooManyRequests, errors.New("too many attempts, please request a new code"))
+		return
+	}
+
+	// Сравниваем коды используя constant-time comparison (защита от timing-атаки)
+	if subtle.ConstantTimeCompare([]byte(storedCode), []byte(req.Code)) != 1 {
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid code"))
 		return
 	}
@@ -582,8 +611,8 @@ func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Удаляем код из Redis (одноразовый)
-	_ = h.redis.Del(r.Context(), codeKey).Err()
+	// Удаляем код и счётчик попыток из Redis (одноразовый код)
+	_ = h.redis.Del(r.Context(), codeKey, attemptsKey).Err()
 
 	resp.Success(w, map[string]any{"success": true})
 }

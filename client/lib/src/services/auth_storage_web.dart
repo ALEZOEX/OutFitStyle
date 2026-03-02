@@ -13,21 +13,6 @@ class AuthStorage implements core.AuthStorage {
 
   AuthStorage() : _localStorage = web.window.localStorage;
 
-  @override
-  Future<void> saveToken(TokenPair token) async {
-    await writeTokenPair(token);
-  }
-
-  @override
-  Future<TokenPair?> getToken() async {
-    return readTokenPair();
-  }
-
-  @override
-  Future<void> clear() async {
-    await clearSession();
-  }
-
   /// Сохраняет пару токенов в localStorage
   @override
   Future<void> writeTokenPair(TokenPair pair) async {
@@ -41,12 +26,6 @@ class AuthStorage implements core.AuthStorage {
       print('[AuthStorage Web] Ошибка сохранения токена: $e');
       rethrow;
     }
-  }
-
-  /// Алиас для writeTokenPair (совместимость с api_client.dart)
-  @override
-  Future<void> saveTokenPair(TokenPair pair) async {
-    await writeTokenPair(pair);
   }
 
   /// Читает access токен

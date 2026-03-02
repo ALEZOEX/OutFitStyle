@@ -23,26 +23,6 @@ class AuthStorage implements core.AuthStorage {
     ),
   );
 
-  @override
-  Future<void> saveToken(TokenPair token) async {
-    await writeTokenPair(token);
-  }
-
-  @override
-  Future<void> saveTokenPair(TokenPair pair) async {
-    await writeTokenPair(pair);
-  }
-
-  @override
-  Future<TokenPair?> getToken() async {
-    return readTokenPair();
-  }
-
-  @override
-  Future<void> clear() async {
-    await clearSession();
-  }
-
   /// Сохраняет пару токенов в защищённое хранилище
   @override
   Future<void> writeTokenPair(TokenPair pair) async {
