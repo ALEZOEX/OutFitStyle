@@ -95,8 +95,16 @@ class ApiClient {
         return false;
       }
 
+      // Используем отдельный Dio без interceptors для refresh
+      // чтобы избежать рекурсии и конфликтов с interceptor
+      final plainDio = Dio(BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 5),
+        headers: {'Content-Type': 'application/json'},
+      ));
+
       // Используем /api/v1/auth/refresh
-      final response = await _dio.post(
+      final response = await plainDio.post(
         '/api/v1/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
@@ -112,7 +120,7 @@ class ApiClient {
           return true;
         }
       }
-      
+
       return false;
     } catch (e) {
       print('[ApiClient] Ошибка refresh токена: $e');

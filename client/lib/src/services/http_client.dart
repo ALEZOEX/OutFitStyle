@@ -42,12 +42,18 @@ class AuthenticatedHttpClient extends http.BaseClient {
       return response;
     }
 
-    // Теперь мы исходный response НЕ возвращаем, можно освободить соединение
+    // Освобождаем соединение, читаем stream
     await response.stream.drain();
 
     final newToken = await _authStorage.readAccessToken();
     if (newToken == null || newToken.isEmpty) {
-      return response; // тут response уже drained, но это крайний случай; лучше не доходить
+      // Refresh прошёл, но токен не получен — возвращаем 401
+      return http.StreamedResponse(
+        Stream.value(utf8.encode('{"error":"unauthorized"}')),
+        401,
+        request: request,
+        headers: {'Content-Type': 'application/json'},
+      );
     }
 
     if (request is! http.Request) {
