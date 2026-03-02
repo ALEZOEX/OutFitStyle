@@ -426,6 +426,7 @@ func main() {
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
 	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration, redisClient, userRepo, smtpService, logger)
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
+	passwordHandler := handlers.NewPasswordHandler(userRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)
 	subLimiter := middleware.NewSubscriptionLimiter(subService)
 	notifHandler := handlers.NewNotificationHandler(notifService, pushNotificationService, logger)
@@ -479,7 +480,7 @@ func main() {
 	health.RegisterChecks(checks)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler)
+	router := setupRouter(cfg, authHandler, userHandler, passwordHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -544,6 +545,7 @@ func setupRouter(
 	cfg *config.AppConfig,
 	authHandler *handlers.AuthHandler,
 	userHandler *handlers.UserHandler,
+	passwordHandler *handlers.PasswordHandler,
 	weatherHandler *handlers.WeatherHandler,
 	limiter *middleware.RateLimiter,
 	logger *zap.Logger,
@@ -623,6 +625,9 @@ func setupRouter(
 	// /api/v1/user/*
 	user := protected.PathPrefix("/user").Subrouter()
 	userHandler.RegisterRoutes(user)
+
+	// /api/v1/user/set-password, /api/v1/user/change-password
+	passwordHandler.RegisterRoutes(protected)
 
 	// /api/v1/notifications/*
 	notifs := protected.PathPrefix("/notifications").Subrouter()

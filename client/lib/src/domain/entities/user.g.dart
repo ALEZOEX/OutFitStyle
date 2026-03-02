@@ -43,6 +43,9 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   points: (json['points'] as num?)?.toInt(),
   level: json['level'] as String?,
   status: json['status'] as String?,
+  passwordHash: json['password_hash'] as String?,
+  oauthProvider: json['oauth_provider'] as String?,
+  oauthId: json['oauth_id'] as String?,
 );
 
 Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
@@ -72,4 +75,7 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'points': instance.points,
   'level': instance.level,
   'status': instance.status,
+  'password_hash': instance.passwordHash,
+  'oauth_provider': instance.oauthProvider,
+  'oauth_id': instance.oauthId,
 };

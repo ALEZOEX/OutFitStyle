@@ -281,9 +281,9 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) erro
 		SET display_name = $1, avatar_url = $2, gender = $3, birth_date = $4,
 			default_location = $5, default_latitude = $6, default_longitude = $7,
 			timezone = $8, locale = $9, body_measurements = $10, preferences = $11,
-			is_active = $12, is_verified = $13, last_login_at = $14, login_count = $15,
-			updated_at = $16
-		WHERE id = $17
+			is_active = $12, is_verified = $13, oauth_provider = $14, oauth_id = $15,
+			last_login_at = $16, login_count = $17, updated_at = $18
+		WHERE id = $19
 	`
 
 	bodyMeasurementsJSON, err := json.Marshal(user.BodyMeasurements)
@@ -310,6 +310,8 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) erro
 		preferencesJSON,
 		user.IsActive,
 		user.IsVerified,
+		user.OAuthProvider,
+		user.OAuthID,
 		user.LastLoginAt,
 		user.LoginCount,
 		time.Now(),

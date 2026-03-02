@@ -5,12 +5,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
 import 'package:outfitstyle_client/src/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/password_api.dart';
 import '../../data/repositories/sessions_repository.dart';
 import '../../data/models/session_device.dart';
 
 /// Провайдер API клиента
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(storage: AuthStorage());
+});
+
+/// Провайдер PasswordApiService
+final passwordApiProvider = Provider<PasswordApiService>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return PasswordApiService(apiClient: apiClient);
 });
 
 /// Провайдер репозитория сессий
@@ -131,10 +138,39 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   // Привязанные аккаунты (только Google)
   bool _googleLinked = false;
 
+  // Статус пароля
+  bool _hasPassword = false;
+  bool _isLoadingPasswordStatus = true;
+
   @override
   void initState() {
     super.initState();
     _loadSettings();
+    _loadPasswordStatus();
+  }
+
+  Future<void> _loadPasswordStatus() async {
+    setState(() => _isLoadingPasswordStatus = true);
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final response = await apiClient.get('/api/v1/user/me');
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final passwordHash = data['password_hash'] as String?;
+        final oauthProvider = data['oauth_provider'] as String?;
+        
+        setState(() {
+          // Пароль есть, если password_hash не null и не пустой
+          _hasPassword = passwordHash != null && passwordHash.isNotEmpty;
+          // Google связан, если oauth_provider = "google"
+          _googleLinked = oauthProvider == 'google';
+        });
+      }
+    } catch (e) {
+      // Игнорируем ошибку, используем значения по умолчанию
+    } finally {
+      setState(() => _isLoadingPasswordStatus = false);
+    }
   }
 
   Future<void> _loadSettings() async {
@@ -162,6 +198,13 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   }
 
   void _showChangePasswordDialog() {
+    // Очищаем контроллеры перед показом
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
+
+    final isSettingPassword = !_hasPassword;
+
     showDialog(
       context: context,
       builder:
@@ -171,37 +214,38 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  title: const Text('Смена пароля'),
+                  title: Text(isSettingPassword ? 'Установить пароль' : 'Смена пароля'),
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Текущий пароль
-                        TextField(
-                          controller: _currentPasswordController,
-                          obscureText: _obscureCurrentPassword,
-                          decoration: InputDecoration(
-                            labelText: 'Текущий пароль',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureCurrentPassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
+                        // Текущий пароль (только для смены)
+                        if (!isSettingPassword)
+                          TextField(
+                            controller: _currentPasswordController,
+                            obscureText: _obscureCurrentPassword,
+                            decoration: InputDecoration(
+                              labelText: 'Текущий пароль',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureCurrentPassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                ),
+                                onPressed: () {
+                                  setDialogState(() {
+                                    _obscureCurrentPassword =
+                                        !_obscureCurrentPassword;
+                                  });
+                                },
                               ),
-                              onPressed: () {
-                                setDialogState(() {
-                                  _obscureCurrentPassword =
-                                      !_obscureCurrentPassword;
-                                });
-                              },
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                        if (!isSettingPassword) const SizedBox(height: 16),
                         // Новый пароль
                         TextField(
                           controller: _newPasswordController,
@@ -262,10 +306,17 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                     ),
                     FilledButton(
                       onPressed: () {
-                        _changePassword();
+                        if (isSettingPassword) {
+                          _setPassword(
+                            _newPasswordController.text.trim(),
+                            _confirmPasswordController.text.trim(),
+                          );
+                        } else {
+                          _changePassword();
+                        }
                         Navigator.of(context).pop();
                       },
-                      child: const Text('Сохранить'),
+                      child: Text(isSettingPassword ? 'Установить' : 'Сохранить'),
                     ),
                   ],
                 ),
@@ -295,14 +346,61 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
       return;
     }
 
-    // Имитация смены пароля (пока нет API)
-    await Future.delayed(const Duration(milliseconds: 500));
-    _showSnackBar('Пароль успешно изменен');
+    try {
+      final passwordApi = ref.read(passwordApiProvider);
+      final response = await passwordApi.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
 
-    // Очистка полей
-    _currentPasswordController.clear();
-    _newPasswordController.clear();
-    _confirmPasswordController.clear();
+      if (response.success) {
+        _showSnackBar('Пароль успешно изменен');
+        // Очистка полей
+        _currentPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
+      } else {
+        _showSnackBar(response.message, isError: true);
+      }
+    } on ApiException catch (e) {
+      _showSnackBar(e.message, isError: true);
+    } catch (e) {
+      _showSnackBar('Ошибка: $e', isError: true);
+    }
+  }
+
+  /// Установить пароль (для Google-пользователей)
+  Future<void> _setPassword(String newPassword, String confirmPassword) async {
+    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+      _showSnackBar('Заполните все поля', isError: true);
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      _showSnackBar('Пароль должен быть не менее 8 символов', isError: true);
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      _showSnackBar('Пароли не совпадают', isError: true);
+      return;
+    }
+
+    try {
+      final passwordApi = ref.read(passwordApiProvider);
+      final response = await passwordApi.setPassword(newPassword: newPassword);
+
+      if (response.success) {
+        _showSnackBar('Пароль успешно установлен');
+        setState(() => _hasPassword = true);
+      } else {
+        _showSnackBar(response.message, isError: true);
+      }
+    } on ApiException catch (e) {
+      _showSnackBar(e.message, isError: true);
+    } catch (e) {
+      _showSnackBar('Ошибка: $e', isError: true);
+    }
   }
 
   void _showTwoFactorSetupDialog() {
@@ -630,6 +728,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
   }
 
   Widget _buildPasswordSection(BuildContext context, ThemeData theme) {
+    final isLoading = _isLoadingPasswordStatus;
+    final hasPassword = _hasPassword;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
@@ -649,7 +750,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  Icons.lock_outline,
+                  hasPassword ? Icons.lock : Icons.lock_open,
                   color: theme.colorScheme.primary,
                   size: 24,
                 ),
@@ -660,13 +761,15 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Смена пароля',
+                      hasPassword ? 'Пароль установлен' : 'Пароль не установлен',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      'Регулярно меняйте пароль для безопасности',
+                      hasPassword
+                          ? 'Нажмите, чтобы изменить пароль'
+                          : 'Нажмите, чтобы установить пароль',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -674,15 +777,29 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   ],
                 ),
               ),
+              if (isLoading)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                Icon(
+                  hasPassword ? Icons.check_circle : Icons.warning_amber,
+                  color: hasPassword
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.tertiary,
+                  size: 24,
+                ),
             ],
           ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: _showChangePasswordDialog,
-              icon: const Icon(Icons.edit),
-              label: const Text('Изменить пароль'),
+              onPressed: isLoading ? null : _showChangePasswordDialog,
+              icon: Icon(hasPassword ? Icons.edit : Icons.add),
+              label: Text(hasPassword ? 'Изменить пароль' : 'Установить пароль'),
             ),
           ),
         ],

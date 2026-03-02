@@ -257,7 +257,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 			IsActive:      true,
 			IsVerified:    true, // Google уже проверил
 			OAuthProvider: &provider,
-			OAuthID:       nil, // Можно сохранить sub из токена, если нужно
+			OAuthID:       &gUser.ID, // Сохраняем Google sub
 			Locale:        ptr("ru"),
 			Timezone:      ptr("Europe/Moscow"),
 		}
@@ -284,7 +284,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 				IsActive:      u.IsActive,
 				IsVerified:    true,      // Google проверил email
 				OAuthProvider: &provider, // Устанавливаем OAuth-провайдер
-				OAuthID:       nil,
+				OAuthID:       &gUser.ID, // Сохраняем Google sub
 				Locale:        u.Locale,
 				Timezone:      u.Timezone,
 			}
