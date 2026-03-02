@@ -287,7 +287,7 @@ func TestAuthService_Login_Success(t *testing.T) {
 	}
 	loginInput := domain.UserLogin{
 		Email:    "test@example.com",
-		Password: "password123",
+		Password: "SecureP@ssw0rd123",
 	}
 
 	// Ожидания
