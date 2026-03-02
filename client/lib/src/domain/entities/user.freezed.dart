@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- String get id; String get email; String get name; String? get avatarUrl; String? get phoneNumber; String? get bio; String? get location; DateTime? get birthDate; String? get gender; String? get occupation; String? get company; String? get website; bool? get isVerified; bool? get isPremium; DateTime? get joinedAt; DateTime? get lastActiveAt; Map<String, dynamic>? get preferences; List<String>? get interests; String? get profileVisibility; String? get notificationSettings; String? get privacySettings; String? get socialLinks; String? get referralCode; int? get points; String? get level; String? get status;@JsonKey(fromJson: _fromJson, toJson: _toJson) String? get passwordHash;@JsonKey(fromJson: _fromJson, toJson: _toJson) String? get oauthProvider;@JsonKey(fromJson: _fromJson, toJson: _toJson) String? get oauthId;
+ String get id; String get email; String get name; String? get avatarUrl; String? get phoneNumber; String? get bio; String? get location; DateTime? get birthDate; String? get gender; String? get occupation; String? get company; String? get website; bool? get isVerified; bool? get isPremium; DateTime? get joinedAt; DateTime? get lastActiveAt; Map<String, dynamic>? get preferences; List<String>? get interests; String? get profileVisibility; String? get notificationSettings; String? get privacySettings; String? get socialLinks; String? get referralCode; int? get points; String? get level; String? get status; String? get passwordHash; String? get oauthProvider; String? get oauthId;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String name, String? avatarUrl, String? phoneNumber, String? bio, String? location, DateTime? birthDate, String? gender, String? occupation, String? company, String? website, bool? isVerified, bool? isPremium, DateTime? joinedAt, DateTime? lastActiveAt, Map<String, dynamic>? preferences, List<String>? interests, String? profileVisibility, String? notificationSettings, String? privacySettings, String? socialLinks, String? referralCode, int? points, String? level, String? status,@JsonKey(fromJson: _fromJson, toJson: _toJson) String? passwordHash,@JsonKey(fromJson: _fromJson, toJson: _toJson) String? oauthProvider,@JsonKey(fromJson: _fromJson, toJson: _toJson) String? oauthId
+ String id, String email, String name, String? avatarUrl, String? phoneNumber, String? bio, String? location, DateTime? birthDate, String? gender, String? occupation, String? company, String? website, bool? isVerified, bool? isPremium, DateTime? joinedAt, DateTime? lastActiveAt, Map<String, dynamic>? preferences, List<String>? interests, String? profileVisibility, String? notificationSettings, String? privacySettings, String? socialLinks, String? referralCode, int? points, String? level, String? status, String? passwordHash, String? oauthProvider, String? oauthId
 });
 
 
@@ -181,7 +181,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String name,  String? avatarUrl,  String? phoneNumber,  String? bio,  String? location,  DateTime? birthDate,  String? gender,  String? occupation,  String? company,  String? website,  bool? isVerified,  bool? isPremium,  DateTime? joinedAt,  DateTime? lastActiveAt,  Map<String, dynamic>? preferences,  List<String>? interests,  String? profileVisibility,  String? notificationSettings,  String? privacySettings,  String? socialLinks,  String? referralCode,  int? points,  String? level,  String? status, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? passwordHash, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? oauthProvider, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? oauthId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String name,  String? avatarUrl,  String? phoneNumber,  String? bio,  String? location,  DateTime? birthDate,  String? gender,  String? occupation,  String? company,  String? website,  bool? isVerified,  bool? isPremium,  DateTime? joinedAt,  DateTime? lastActiveAt,  Map<String, dynamic>? preferences,  List<String>? interests,  String? profileVisibility,  String? notificationSettings,  String? privacySettings,  String? socialLinks,  String? referralCode,  int? points,  String? level,  String? status,  String? passwordHash,  String? oauthProvider,  String? oauthId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
 return $default(_that.id,_that.email,_that.name,_that.avatarUrl,_that.phoneNumber,_that.bio,_that.location,_that.birthDate,_that.gender,_that.occupation,_that.company,_that.website,_that.isVerified,_that.isPremium,_that.joinedAt,_that.lastActiveAt,_that.preferences,_that.interests,_that.profileVisibility,_that.notificationSettings,_that.privacySettings,_that.socialLinks,_that.referralCode,_that.points,_that.level,_that.status,_that.passwordHash,_that.oauthProvider,_that.oauthId);case _:
@@ -202,7 +202,7 @@ return $default(_that.id,_that.email,_that.name,_that.avatarUrl,_that.phoneNumbe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String name,  String? avatarUrl,  String? phoneNumber,  String? bio,  String? location,  DateTime? birthDate,  String? gender,  String? occupation,  String? company,  String? website,  bool? isVerified,  bool? isPremium,  DateTime? joinedAt,  DateTime? lastActiveAt,  Map<String, dynamic>? preferences,  List<String>? interests,  String? profileVisibility,  String? notificationSettings,  String? privacySettings,  String? socialLinks,  String? referralCode,  int? points,  String? level,  String? status, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? passwordHash, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? oauthProvider, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? oauthId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String name,  String? avatarUrl,  String? phoneNumber,  String? bio,  String? location,  DateTime? birthDate,  String? gender,  String? occupation,  String? company,  String? website,  bool? isVerified,  bool? isPremium,  DateTime? joinedAt,  DateTime? lastActiveAt,  Map<String, dynamic>? preferences,  List<String>? interests,  String? profileVisibility,  String? notificationSettings,  String? privacySettings,  String? socialLinks,  String? referralCode,  int? points,  String? level,  String? status,  String? passwordHash,  String? oauthProvider,  String? oauthId)  $default,) {final _that = this;
 switch (_that) {
 case _User():
 return $default(_that.id,_that.email,_that.name,_that.avatarUrl,_that.phoneNumber,_that.bio,_that.location,_that.birthDate,_that.gender,_that.occupation,_that.company,_that.website,_that.isVerified,_that.isPremium,_that.joinedAt,_that.lastActiveAt,_that.preferences,_that.interests,_that.profileVisibility,_that.notificationSettings,_that.privacySettings,_that.socialLinks,_that.referralCode,_that.points,_that.level,_that.status,_that.passwordHash,_that.oauthProvider,_that.oauthId);case _:
@@ -222,7 +222,7 @@ return $default(_that.id,_that.email,_that.name,_that.avatarUrl,_that.phoneNumbe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String name,  String? avatarUrl,  String? phoneNumber,  String? bio,  String? location,  DateTime? birthDate,  String? gender,  String? occupation,  String? company,  String? website,  bool? isVerified,  bool? isPremium,  DateTime? joinedAt,  DateTime? lastActiveAt,  Map<String, dynamic>? preferences,  List<String>? interests,  String? profileVisibility,  String? notificationSettings,  String? privacySettings,  String? socialLinks,  String? referralCode,  int? points,  String? level,  String? status, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? passwordHash, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? oauthProvider, @JsonKey(fromJson: _fromJson, toJson: _toJson)  String? oauthId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String name,  String? avatarUrl,  String? phoneNumber,  String? bio,  String? location,  DateTime? birthDate,  String? gender,  String? occupation,  String? company,  String? website,  bool? isVerified,  bool? isPremium,  DateTime? joinedAt,  DateTime? lastActiveAt,  Map<String, dynamic>? preferences,  List<String>? interests,  String? profileVisibility,  String? notificationSettings,  String? privacySettings,  String? socialLinks,  String? referralCode,  int? points,  String? level,  String? status,  String? passwordHash,  String? oauthProvider,  String? oauthId)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
 return $default(_that.id,_that.email,_that.name,_that.avatarUrl,_that.phoneNumber,_that.bio,_that.location,_that.birthDate,_that.gender,_that.occupation,_that.company,_that.website,_that.isVerified,_that.isPremium,_that.joinedAt,_that.lastActiveAt,_that.preferences,_that.interests,_that.profileVisibility,_that.notificationSettings,_that.privacySettings,_that.socialLinks,_that.referralCode,_that.points,_that.level,_that.status,_that.passwordHash,_that.oauthProvider,_that.oauthId);case _:
@@ -237,7 +237,7 @@ return $default(_that.id,_that.email,_that.name,_that.avatarUrl,_that.phoneNumbe
 @JsonSerializable()
 
 class _User implements User {
-  const _User({required this.id, required this.email, required this.name, this.avatarUrl, this.phoneNumber, this.bio, this.location, this.birthDate, this.gender, this.occupation, this.company, this.website, this.isVerified, this.isPremium, this.joinedAt, this.lastActiveAt, final  Map<String, dynamic>? preferences, final  List<String>? interests, this.profileVisibility, this.notificationSettings, this.privacySettings, this.socialLinks, this.referralCode, this.points, this.level, this.status, @JsonKey(fromJson: _fromJson, toJson: _toJson) this.passwordHash, @JsonKey(fromJson: _fromJson, toJson: _toJson) this.oauthProvider, @JsonKey(fromJson: _fromJson, toJson: _toJson) this.oauthId}): _preferences = preferences,_interests = interests;
+  const _User({required this.id, required this.email, required this.name, this.avatarUrl, this.phoneNumber, this.bio, this.location, this.birthDate, this.gender, this.occupation, this.company, this.website, this.isVerified, this.isPremium, this.joinedAt, this.lastActiveAt, final  Map<String, dynamic>? preferences, final  List<String>? interests, this.profileVisibility, this.notificationSettings, this.privacySettings, this.socialLinks, this.referralCode, this.points, this.level, this.status, this.passwordHash, this.oauthProvider, this.oauthId}): _preferences = preferences,_interests = interests;
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -282,9 +282,9 @@ class _User implements User {
 @override final  int? points;
 @override final  String? level;
 @override final  String? status;
-@override@JsonKey(fromJson: _fromJson, toJson: _toJson) final  String? passwordHash;
-@override@JsonKey(fromJson: _fromJson, toJson: _toJson) final  String? oauthProvider;
-@override@JsonKey(fromJson: _fromJson, toJson: _toJson) final  String? oauthId;
+@override final  String? passwordHash;
+@override final  String? oauthProvider;
+@override final  String? oauthId;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -319,7 +319,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String name, String? avatarUrl, String? phoneNumber, String? bio, String? location, DateTime? birthDate, String? gender, String? occupation, String? company, String? website, bool? isVerified, bool? isPremium, DateTime? joinedAt, DateTime? lastActiveAt, Map<String, dynamic>? preferences, List<String>? interests, String? profileVisibility, String? notificationSettings, String? privacySettings, String? socialLinks, String? referralCode, int? points, String? level, String? status,@JsonKey(fromJson: _fromJson, toJson: _toJson) String? passwordHash,@JsonKey(fromJson: _fromJson, toJson: _toJson) String? oauthProvider,@JsonKey(fromJson: _fromJson, toJson: _toJson) String? oauthId
+ String id, String email, String name, String? avatarUrl, String? phoneNumber, String? bio, String? location, DateTime? birthDate, String? gender, String? occupation, String? company, String? website, bool? isVerified, bool? isPremium, DateTime? joinedAt, DateTime? lastActiveAt, Map<String, dynamic>? preferences, List<String>? interests, String? profileVisibility, String? notificationSettings, String? privacySettings, String? socialLinks, String? referralCode, int? points, String? level, String? status, String? passwordHash, String? oauthProvider, String? oauthId
 });
 
 
