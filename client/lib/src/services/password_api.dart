@@ -7,7 +7,13 @@ class PasswordApiService {
   PasswordApiService({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Установить пароль (для Google-пользователей без пароля)
-  /// 
+  ///
+  /// Требования к паролю:
+  /// - Минимум 12 символов
+  /// - Буквы верхнего и нижнего регистра
+  /// - Хотя бы одна цифра
+  /// - Хотя бы один специальный символ
+  ///
   /// Для Google-пользователей current_password не требуется.
   /// Для обычных пользователей с паролем требуется проверка текущего пароля.
   Future<SetPasswordResponse> setPassword({
