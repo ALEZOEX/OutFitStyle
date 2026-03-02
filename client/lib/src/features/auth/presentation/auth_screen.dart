@@ -64,16 +64,23 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
 
       final googleAuth = await googleUser.authentication;
+      final accessToken = googleAuth.accessToken;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw Exception('Не удалось получить ID токен Google');
+      }
+
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        accessToken: accessToken,
+        idToken: idToken,
       );
 
       final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final idToken = await userCredential.user?.getIdToken();
+      final backendIdToken = await userCredential.user?.getIdToken();
 
-      if (idToken == null) {
-        throw Exception('Не удалось получить ID токен');
+      if (backendIdToken == null) {
+        throw Exception('Не удалось получить токен для backend');
       }
 
       // Отправляем токен на backend
@@ -82,7 +89,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       
       final response = await apiClient.raw.post(
         '/api/v1/auth/google',
-        data: {'id_token': idToken},
+        data: {'id_token': backendIdToken},
       );
 
       if (response.statusCode == 200) {
@@ -103,7 +110,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           context.go('/home');
         }
       } else {
-        throw Exception('Ошибка аутентификации на сервере');
+        final errorData = response.data as Map<String, dynamic>?;
+        throw Exception(errorData?['message'] ?? 'Ошибка аутентификации на сервере');
       }
     } catch (e) {
       print('❌ Google Sign-In error: $e');
