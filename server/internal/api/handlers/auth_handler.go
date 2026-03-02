@@ -184,10 +184,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Проверяем, не заблокирован ли аккаунт (защита от brute-force)
 	email := strings.TrimSpace(strings.ToLower(req.Email))
-	allowed, remaining, lockedUntil, err := h.lockout.CheckLoginAttempt(r.Context(), email)
-
-	// Добавляем заголовки с информацией о попытках
-	w.Header().Set("X-Login-Attempts-Remaining", fmt.Sprintf("%d", remaining))
+	allowed, _, lockedUntil, err := h.lockout.CheckLoginAttempt(r.Context(), email)
 
 	if !allowed {
 		if lockedUntil != nil {
@@ -203,7 +200,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		// Логгируем ошибку, но не блокируем вход (graceful degradation)
-		// h.logger.Error("Account lockout check error", zap.Error(err))
+		h.logger.Error("account lockout check failed", zap.Error(err))
 	}
 
 	device := services.DeviceInfo{
@@ -358,7 +355,7 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 			zap.String("error_type", fmt.Sprintf("%T", err)),
 			zap.String("remote_addr", r.RemoteAddr),
 		)
-		resp.Error(w, http.StatusUnauthorized, err)
+		resp.Error(w, http.StatusUnauthorized, errors.New("Google authentication failed"))
 		return
 	}
 

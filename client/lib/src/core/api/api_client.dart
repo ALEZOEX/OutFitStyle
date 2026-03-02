@@ -3,6 +3,7 @@ import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import '../../models/token_pair.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:developer' as developer;
 import 'web_utils.dart' if (dart.library.io) 'web_utils_stub.dart' as web_utils;
 
 class ApiClient {
@@ -27,26 +28,32 @@ class ApiClient {
           options.headers['Authorization'] = 'Bearer $token';
         } else {
           // Отладка: нет токена
-          print('[ApiClient] Нет токена для запроса: ${options.method} ${options.path}');
+          developer.log('[ApiClient] Нет токена',
+              name: 'ApiClient',
+              level: 900,
+              error: 'No token for ${options.method} ${options.path}');
         }
         return handler.next(options);
       },
       onError: (DioException err, ErrorInterceptorHandler handler) async {
         // Логируем ошибки для отладки
-        print('[ApiClient] Error: ${err.type} ${err.requestOptions.path} - ${err.response?.statusCode}');
+        developer.log('[ApiClient] Error',
+            name: 'ApiClient',
+            level: 1000,
+            error: '${err.type} ${err.requestOptions.path} - ${err.response?.statusCode}');
 
         // Если 401 и это не запрос к auth endpoint - пробуем refresh
         if (err.response?.statusCode == 401) {
           final path = err.requestOptions.path;
-          
+
           // Не пытаемся refresh для auth endpoints чтобы избежать бесконечного цикла
           if (!path.contains('/auth/')) {
             try {
-              print('[ApiClient] Попытка refresh токена...');
+              developer.log('[ApiClient] Попытка refresh токена', name: 'ApiClient');
               final refreshed = await _refreshToken();
 
               if (refreshed) {
-                print('[ApiClient] Токен обновлён, повторяем запрос...');
+                developer.log('[ApiClient] Токен обновлён, повторяем запрос', name: 'ApiClient');
                 // Повторяем оригинальный запрос с новым токеном
                 // ВАЖНО: переиспользуем RequestOptions из ошибки, чтобы сохранить baseUrl
                 final opts = err.requestOptions;
@@ -60,7 +67,9 @@ class ApiClient {
                 }
               }
             } catch (refreshError) {
-              print('[ApiClient] Ошибка refresh: $refreshError');
+              developer.log('[ApiClient] Ошибка refresh',
+                  name: 'ApiClient',
+                  error: refreshError);
               // Если refresh не удался - очищаем сессию и перезагружаем страницу
               await storage.clearSession();
               // Перезагрузка страницы для web или редирект на login
@@ -82,7 +91,7 @@ class ApiClient {
     try {
       final refreshToken = await storage.readRefreshToken();
       if (refreshToken == null || refreshToken.isEmpty) {
-        print('[ApiClient] Нет refresh токена');
+        developer.log('[ApiClient] Нет refresh токена', name: 'ApiClient');
         return false;
       }
 
@@ -107,14 +116,16 @@ class ApiClient {
         if (tokens != null) {
           final newTokenPair = TokenPair.fromJson(tokens);
           await storage.writeTokenPair(newTokenPair);
-          print('[ApiClient] Токен успешно обновлён');
+          developer.log('[ApiClient] Токен успешно обновлён', name: 'ApiClient');
           return true;
         }
       }
 
       return false;
     } catch (e) {
-      print('[ApiClient] Ошибка refresh токена: $e');
+      developer.log('[ApiClient] Ошибка refresh токена',
+          name: 'ApiClient',
+          error: e);
       return false;
     }
   }
@@ -171,7 +182,7 @@ class ApiClient {
     }
   }
 
-  Object mapError(Object e) {
+  ApiException mapError(Object e) {
     if (e is DioException) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
