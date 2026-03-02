@@ -242,7 +242,7 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 
 	reqBody := domain.UserRegistration{
 		Email:    "test@example.com",
-		Password: "password123",
+		Password: "Password123!",
 	}
 	body, _ := json.Marshal(reqBody)
 
@@ -313,7 +313,7 @@ func TestAuthHandler_Login_Success(t *testing.T) {
 
 	reqBody := domain.UserLogin{
 		Email:    "test@example.com",
-		Password: "password123",
+		Password: "Password123!",
 	}
 	body, _ := json.Marshal(reqBody)
 
@@ -354,7 +354,7 @@ func TestAuthHandler_Login_TooManyAttempts(t *testing.T) {
 
 	reqBody := domain.UserLogin{
 		Email:    "test@example.com",
-		Password: "password123",
+		Password: "Password123!",
 	}
 	body, _ := json.Marshal(reqBody)
 
@@ -381,7 +381,7 @@ func TestAuthHandler_Login_InvalidCredentials(t *testing.T) {
 
 	reqBody := domain.UserLogin{
 		Email:    "test@example.com",
-		Password: "wrongpassword",
+		Password: "WrongPass123!",
 	}
 	body, _ := json.Marshal(reqBody)
 
@@ -606,7 +606,7 @@ func TestAuthHandler_ResetPassword_Success(t *testing.T) {
 	reqBody := map[string]string{
 		"email":        "test@example.com",
 		"code":         "123456",
-		"new_password": "newpassword123",
+		"new_password": "NewPassword123!",
 	}
 	body, _ := json.Marshal(reqBody)
 
@@ -632,7 +632,7 @@ func TestAuthHandler_ResetPassword_InvalidCode(t *testing.T) {
 	reqBody := map[string]string{
 		"email":        "test@example.com",
 		"code":         "12", // Слишком короткий
-		"new_password": "newpassword123",
+		"new_password": "NewPassword123!",
 	}
 	body, _ := json.Marshal(reqBody)
 
