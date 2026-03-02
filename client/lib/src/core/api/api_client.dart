@@ -44,27 +44,18 @@ class ApiClient {
             try {
               print('[ApiClient] Попытка refresh токена...');
               final refreshed = await _refreshToken();
-              
+
               if (refreshed) {
                 print('[ApiClient] Токен обновлён, повторяем запрос...');
                 // Повторяем оригинальный запрос с новым токеном
-                final RequestOptions originalRequest = err.requestOptions;
+                // ВАЖНО: переиспользуем RequestOptions из ошибки, чтобы сохранить baseUrl
+                final opts = err.requestOptions;
                 final tokenPair = await storage.readTokenPair();
                 final newToken = tokenPair?.accessToken;
 
                 if (newToken != null) {
-                  final response = await _dio.fetch(
-                    RequestOptions(
-                      method: originalRequest.method,
-                      path: originalRequest.path,
-                      data: originalRequest.data,
-                      queryParameters: originalRequest.queryParameters,
-                      headers: {
-                        ...originalRequest.headers,
-                        'Authorization': 'Bearer $newToken',
-                      },
-                    ),
-                  );
+                  opts.headers['Authorization'] = 'Bearer $newToken';
+                  final response = await _dio.fetch(opts);
                   return handler.resolve(response);
                 }
               }
@@ -115,7 +106,7 @@ class ApiClient {
 
         if (tokens != null) {
           final newTokenPair = TokenPair.fromJson(tokens);
-          await storage.saveTokenPair(newTokenPair);
+          await storage.writeTokenPair(newTokenPair);
           print('[ApiClient] Токен успешно обновлён');
           return true;
         }
@@ -214,21 +205,6 @@ class _NoOpAuthStorage extends AuthStorage {
   _NoOpAuthStorage();
 
   @override
-  Future<void> saveToken(TokenPair token) async {}
-
-  @override
-  Future<TokenPair?> getToken() async => null;
-
-  @override
-  Future<void> clear() async {}
-
-  @override
-  Future<void> clearSession() async {}
-
-  @override
-  Future<void> saveTokenPair(TokenPair pair) async {}
-
-  @override
   Future<void> writeTokenPair(TokenPair pair) async {}
 
   @override
@@ -242,4 +218,7 @@ class _NoOpAuthStorage extends AuthStorage {
 
   @override
   Future<DateTime?> readExpiresAt() async => null;
+
+  @override
+  Future<void> clearSession() async {}
 }

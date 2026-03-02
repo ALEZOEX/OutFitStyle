@@ -42,7 +42,14 @@ class AuthenticatedHttpClient extends http.BaseClient {
       return response;
     }
 
-    // Освобождаем соединение, читаем stream
+    // Проверяем ДО drain — если не можем повторить, не портим response
+    if (request is! http.Request) {
+      // Не можем клонировать MultipartRequest — возвращаем оригинальный 401
+      // НЕ вызываем drain(), чтобы caller мог прочитать тело ошибки
+      return response;
+    }
+
+    // Теперь точно будем повторять — можно drain
     await response.stream.drain();
 
     final newToken = await _authStorage.readAccessToken();
@@ -54,11 +61,6 @@ class AuthenticatedHttpClient extends http.BaseClient {
         request: request,
         headers: {'Content-Type': 'application/json'},
       );
-    }
-
-    if (request is! http.Request) {
-      // Для MultipartRequest и т.п. нужен отдельный клонер
-      return response;
     }
 
     final retry = http.Request(request.method, request.url)
