@@ -32,10 +32,13 @@ abstract class User with _$User {
     int? points,
     String? level,
     String? status,
-    @JsonKey(name: 'password_hash') String? passwordHash,
-    @JsonKey(name: 'oauth_provider') String? oauthProvider,
-    @JsonKey(name: 'oauth_id') String? oauthId,
+    @JsonKey(fromJson: _fromJson, toJson: _toJson) String? passwordHash,
+    @JsonKey(fromJson: _fromJson, toJson: _toJson) String? oauthProvider,
+    @JsonKey(fromJson: _fromJson, toJson: _toJson) String? oauthId,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
+
+String? _fromJson(dynamic value) => value?.toString();
+String? _toJson(String? value) => value;
