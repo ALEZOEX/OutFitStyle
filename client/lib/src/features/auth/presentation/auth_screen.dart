@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../presentation/providers/auth_provider.dart';
 import '../../../presentation/routing/router.dart';
 import '../../../ui/misc/app_avatar.dart';
+import '../../../models/token_pair.dart';
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
 final authErrorProvider = StateProvider<String?>((ref) => null);
@@ -44,6 +47,74 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     _passwordController.dispose();
     _nameController.dispose();
     super.dispose();
+  }
+
+  /// Вход через Google
+  Future<void> _signInWithGoogle() async {
+    ref.read(authLoadingProvider.notifier).state = true;
+    ref.read(authErrorProvider.notifier).state = null;
+
+    try {
+      final googleSignIn = GoogleSignIn();
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // Пользователь отменил вход
+        ref.read(authLoadingProvider.notifier).state = false;
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final idToken = await userCredential.user?.getIdToken();
+
+      if (idToken == null) {
+        throw Exception('Не удалось получить ID токен');
+      }
+
+      // Отправляем токен на backend
+      final authRepo = ref.read(authRepositoryProvider);
+      final apiClient = ref.read(apiClientProvider);
+      
+      final response = await apiClient.raw.post(
+        '/api/v1/auth/google',
+        data: {'id_token': idToken},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final tokensData = data['tokens'] as Map<String, dynamic>? ?? data;
+        final tokenPair = TokenPair.fromJson(tokensData);
+        await authRepo.authStorage.writeTokenPair(tokenPair);
+
+        // Обновляем состояние авторизации
+        final authStateNotifier = ref.read(authStateProvider.notifier);
+        await authStateNotifier.checkAuth();
+
+        // Уведомляем роутер
+        final refreshStream = ref.read(goRouterRefreshProvider);
+        refreshStream.notifyAuthChanged();
+
+        if (mounted) {
+          context.go('/home');
+        }
+      } else {
+        throw Exception('Ошибка аутентификации на сервере');
+      }
+    } catch (e) {
+      print('❌ Google Sign-In error: $e');
+      if (mounted) {
+        ref.read(authErrorProvider.notifier).state = e.toString();
+      }
+    } finally {
+      if (mounted) {
+        ref.read(authLoadingProvider.notifier).state = false;
+      }
+    }
   }
 
   Future<void> _submit() async {
@@ -289,6 +360,40 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     onPressed: () => context.push('/forgot-password'),
                     child: const Text('Забыли пароль?'),
                   ),
+
+                const SizedBox(height: 32),
+
+                // Разделитель
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: theme.dividerColor)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'или',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                    Expanded(child: Divider(color: theme.dividerColor)),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Кнопка Google
+                OutlinedButton.icon(
+                  onPressed: isLoading ? null : _signInWithGoogle,
+                  icon: Icon(
+                    Icons.g_mobiledata,
+                    size: 28,
+                    color: theme.colorScheme.primary,
+                  ),
+                  label: const Text('Продолжить с Google'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                ),
               ],
               ),
             ),
