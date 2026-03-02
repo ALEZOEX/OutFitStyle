@@ -376,8 +376,8 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
       return;
     }
 
-    if (newPassword.length < 8) {
-      _showSnackBar('Пароль должен быть не менее 8 символов', isError: true);
+    if (newPassword.length < 12) {
+      _showSnackBar('Пароль должен быть не менее 12 символов', isError: true);
       return;
     }
 
