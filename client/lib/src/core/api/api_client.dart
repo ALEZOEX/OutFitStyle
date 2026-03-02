@@ -3,7 +3,7 @@ import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import '../../models/token_pair.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:web/web.dart' as web show window;
+import 'web_utils.dart' if (dart.library.io) 'web_utils_stub.dart' as web_utils;
 
 class ApiClient {
   final AuthStorage storage;
@@ -75,7 +75,7 @@ class ApiClient {
               // Перезагрузка страницы для web или редирект на login
               if (kIsWeb) {
                 // Для web - перезагрузка страницы
-                web.window.location.reload();
+                web_utils.reloadPage();
               }
             }
           }
