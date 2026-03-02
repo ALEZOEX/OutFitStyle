@@ -68,22 +68,6 @@ class AuthRepository implements IAuthRepository {
   }
 
   @override
-  Future<bool> signInWithGoogle() async {
-    try {
-      // Используем AuthService для Google Sign-In
-      await _authService.loginWithGoogle();
-      // Токены уже сохранены в AuthService
-      return true;
-    } on Exception {
-      // Пробрасываем исключения для обработки в UI
-      rethrow;
-    } catch (e) {
-      // Оборачиваем неизвестные ошибки в Exception
-      throw Exception('Ошибка Google Sign-In: ${e.toString()}');
-    }
-  }
-
-  @override
   Future<bool> isLoggedIn() async {
     final tokens = await authStorage.readTokenPair();
     if (tokens == null) {
@@ -117,7 +101,9 @@ class AuthRepository implements IAuthRepository {
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final tokenPair = TokenPair.fromJson(data);
+        // Сервер возвращает {"tokens": {...}}
+        final tokensData = data['tokens'] as Map<String, dynamic>? ?? data;
+        final tokenPair = TokenPair.fromJson(tokensData);
         await authStorage.writeTokenPair(tokenPair);
         return true;
       }

@@ -6,10 +6,6 @@ abstract class IAuthRepository {
   /// Зарегистрироваться
   Future<bool> register(String email, String password, String name);
 
-  /// Войти через Google Sign-In
-  /// Возвращает true при успешном входе, выбрасывает исключение при ошибке
-  Future<bool> signInWithGoogle();
-
   /// Выйти из системы
   Future<void> logout();
 

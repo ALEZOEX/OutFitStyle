@@ -33,34 +33,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.dispose();
   }
 
-  /// Вход через Google
-  /// Использует AuthService.loginWithGoogle() через репозиторий
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final authRepo = ref.read(authRepositoryProvider);
-      final success = await authRepo.signInWithGoogle();
-
-      if (!mounted) return;
-
-      if (success) {
-        widget.onAuthSuccess();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ошибка входа через Google')),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка входа: $e')),
-      );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
   Future<void> _handleEmailLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -327,26 +299,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                   Expanded(child: Divider(color: Colors.grey.shade300)),
                 ],
-              ),
-              const SizedBox(height: 16),
-
-              // Кнопка Google
-              OutlinedButton.icon(
-                onPressed: _isLoading ? null : _handleGoogleSignIn,
-                icon: Image.asset(
-                  'assets/icons/google_logo.png',
-                  width: 24,
-                  height: 24,
-                  errorBuilder: (_, _, _) =>
-                      const Icon(Icons.login, size: 24),
-                ),
-                label: const Text('Войти с Google'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
               ),
               const SizedBox(height: 24),
 
