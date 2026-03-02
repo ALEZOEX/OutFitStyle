@@ -8,6 +8,7 @@ import (
 )
 
 type GoogleUser struct {
+	ID            string // Google sub - уникальный идентификатор пользователя
 	Email         string
 	EmailVerified bool
 	FirstName     string
@@ -39,8 +40,10 @@ func (c *GoogleAuthClient) Verify(ctx context.Context, tokenString string) (*Goo
 	givenName, _ := payload.Claims["given_name"].(string)
 	familyName, _ := payload.Claims["family_name"].(string)
 	picture, _ := payload.Claims["picture"].(string)
+	sub, _ := payload.Claims["sub"].(string) // Google unique ID
 
 	return &GoogleUser{
+		ID:            sub,
 		Email:         email,
 		EmailVerified: verified,
 		FirstName:     givenName,
