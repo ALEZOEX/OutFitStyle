@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import '../../models/token_pair.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 
@@ -7,36 +6,37 @@ import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 class AuthService {
   final String apiBase;
   final AuthStorage authStorage;
-  final http.Client httpClient;
+  final Dio dio;
 
   AuthService({
     required this.apiBase,
     required this.authStorage,
-    required this.httpClient,
+    required this.dio,
   });
 
   /// Вход пользователя по email и паролю
   Future<TokenPair?> login(String email, String password) async {
     try {
-      final response = await httpClient.post(
-        Uri.parse('$apiBase/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await dio.post(
+        '$apiBase/auth/login',
+        data: {
           'email': email,
           'password': password,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final tokenPair = TokenPair.fromJson(data);
+        final data = response.data as Map<String, dynamic>;
+        // Сервер возвращает {"tokens": {...}} или прямой объект
+        final tokensData = data['tokens'] as Map<String, dynamic>? ?? data;
+        final tokenPair = TokenPair.fromJson(tokensData);
         await authStorage.writeTokenPair(tokenPair);
         return tokenPair;
       } else {
-        final error = jsonDecode(response.body) as Map<String, dynamic>?;
+        final error = response.data as Map<String, dynamic>?;
         throw AuthException(error?['message'] ?? 'Ошибка входа');
       }
-    } on http.ClientException catch (e) {
+    } on DioException catch (e) {
       throw AuthException('Ошибка сети: ${e.message}');
     } catch (e) {
       if (e is AuthException) rethrow;
@@ -47,26 +47,26 @@ class AuthService {
   /// Регистрация нового пользователя
   Future<TokenPair?> register(String email, String password, String name) async {
     try {
-      final response = await httpClient.post(
-        Uri.parse('$apiBase/auth/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await dio.post(
+        '$apiBase/auth/register',
+        data: {
           'email': email,
           'password': password,
           'name': name,
-        }),
+        },
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final tokenPair = TokenPair.fromJson(data);
+        final data = response.data as Map<String, dynamic>;
+        final tokensData = data['tokens'] as Map<String, dynamic>? ?? data;
+        final tokenPair = TokenPair.fromJson(tokensData);
         await authStorage.writeTokenPair(tokenPair);
         return tokenPair;
       } else {
-        final error = jsonDecode(response.body) as Map<String, dynamic>?;
+        final error = response.data as Map<String, dynamic>?;
         throw AuthException(error?['message'] ?? 'Ошибка регистрации');
       }
-    } on http.ClientException catch (e) {
+    } on DioException catch (e) {
       throw AuthException('Ошибка сети: ${e.message}');
     } catch (e) {
       if (e is AuthException) rethrow;
@@ -92,24 +92,25 @@ class AuthService {
       }
 
       // Токен истёк, пробуем обновить через refresh
-      final response = await httpClient.post(
-        Uri.parse('$apiBase/api/v1/auth/refresh'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await dio.post(
+        '$apiBase/api/v1/auth/refresh',
+        data: {
           'refresh_token': existingPair.refreshToken,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final tokenPair = TokenPair.fromJson(data);
+        final data = response.data as Map<String, dynamic>;
+        // Сервер возвращает {"tokens": {...}}
+        final tokensData = data['tokens'] as Map<String, dynamic>? ?? data;
+        final tokenPair = TokenPair.fromJson(tokensData);
         await authStorage.writeTokenPair(tokenPair);
         return tokenPair;
       } else {
         await authStorage.clearSession();
         return null;
       }
-    } on http.ClientException catch (e) {
+    } on DioException catch (e) {
       throw AuthException('Ошибка сети: ${e.message}');
     } catch (e) {
       if (e is AuthException) rethrow;
@@ -125,16 +126,17 @@ class AuthService {
         return false;
       }
 
-      final response = await httpClient.get(
-        Uri.parse('$apiBase/auth/validate'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+      final response = await dio.get(
+        '$apiBase/auth/validate',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
       );
 
       return response.statusCode == 200;
-    } on http.ClientException {
+    } on DioException {
       return false;
     } catch (e) {
       return false;
