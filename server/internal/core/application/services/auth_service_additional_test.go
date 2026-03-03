@@ -303,7 +303,7 @@ func TestAuthService_ValidateAccessToken_InvalidToken(t *testing.T) {
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
 
-	mockTokenSvc.On("ValidateAccessToken", "invalid_token").Return(domain.ID{}, domain.ID{}, assert.AnError)
+	mockTokenSvc.On("ValidateAccessToken", "invalid_token").Return(domain.ID{}, domain.ID{}, "", assert.AnError)
 
 	userID, sessionID, err := authService.ValidateAccessToken(context.Background(), "invalid_token")
 
@@ -327,7 +327,8 @@ func TestAuthService_ValidateAccessToken_SessionNotFound(t *testing.T) {
 	userID := domain.NewID()
 	sessionID := domain.NewID()
 
-	mockTokenSvc.On("ValidateAccessToken", "valid_token").Return(userID, sessionID, nil)
+	mockTokenSvc.On("ValidateAccessToken", "valid_token").Return(userID, sessionID, "test-jti", nil)
+	mockBlacklist.On("IsBlacklisted", mock.Anything, "test-jti").Return(false, nil)
 	mockSessionRepo.On("GetByID", mock.Anything, sessionID).Return(nil, repositories.ErrNotFound)
 
 	resultUserID, resultSessionID, err := authService.ValidateAccessToken(context.Background(), "valid_token")
@@ -338,6 +339,7 @@ func TestAuthService_ValidateAccessToken_SessionNotFound(t *testing.T) {
 	assert.Empty(t, resultSessionID)
 
 	mockTokenSvc.AssertExpectations(t)
+	mockBlacklist.AssertExpectations(t)
 	mockSessionRepo.AssertExpectations(t)
 }
 
@@ -364,7 +366,8 @@ func TestAuthService_ValidateAccessToken_Success(t *testing.T) {
 	futureTime := time.Now().Add(time.Hour)
 	session.ExpiresAt = &futureTime
 
-	mockTokenSvc.On("ValidateAccessToken", "valid_token").Return(userID, sessionID, nil)
+	mockTokenSvc.On("ValidateAccessToken", "valid_token").Return(userID, sessionID, "test-jti", nil)
+	mockBlacklist.On("IsBlacklisted", mock.Anything, "test-jti").Return(false, nil)
 	mockSessionRepo.On("GetByID", mock.Anything, sessionID).Return(session, nil)
 	mockSessionRepo.On("Touch", mock.Anything, sessionID).Return(nil)
 
@@ -375,6 +378,7 @@ func TestAuthService_ValidateAccessToken_Success(t *testing.T) {
 	assert.Equal(t, sessionID, resultSessionID)
 
 	mockTokenSvc.AssertExpectations(t)
+	mockBlacklist.AssertExpectations(t)
 	mockSessionRepo.AssertExpectations(t)
 }
 
