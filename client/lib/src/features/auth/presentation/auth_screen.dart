@@ -75,12 +75,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       // 3. Получение authentication
       print('[Google Sign-In] Получение authentication...');
       final googleAuth = await googleUser.authentication;
-      print('[Google Sign-In] googleAuth: ${googleAuth == null ? "null" : "ok"}');
-      
-      if (googleAuth == null) {
-        throw Exception('Не удалось получить Google authentication');
-      }
-      
+      print('[Google Sign-In] googleAuth: ok');
+
       // 4. Проверка токенов
       final idToken = googleAuth.idToken;
       print('[Google Sign-In] idToken: ${idToken == null ? "null" : "ok"}');
