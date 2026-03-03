@@ -444,7 +444,8 @@ func TestAuthHandler_Refresh_EmptyToken(t *testing.T) {
 
 	handler.Refresh(rr, req)
 
-	assert.Equal(t, http.StatusBadRequest, rr.Code)
+	// 401 Unauthorized (нет refresh token), не 400
+	assert.Equal(t, http.StatusUnauthorized, rr.Code)
 }
 
 // TestAuthHandler_Logout_Success тестирует успешный выход
