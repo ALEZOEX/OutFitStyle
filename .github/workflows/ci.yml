@@ -42,7 +42,6 @@ jobs:
   go-vuln-check:
     runs-on: ubuntu-latest
     continue-on-error: true
-    if: false # Отключено до обновления Go 1.24.13
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
