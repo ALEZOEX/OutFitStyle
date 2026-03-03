@@ -178,10 +178,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate input data
+	// Validate input data — только email, НЕ пароль!
+	// Валидация сложности пароля ТОЛЬКО при регистрации/смене пароля.
+	// При логине проверяем только bcrypt hash (любой пароль).
 	v := validation.NewValidator()
 	validation.ValidateEmail(v, req.Email)
-	validation.ValidatePasswordPlaintext(v, req.Password)
 
 	if req.DeviceName != nil {
 		validation.ValidateStringLength(v, *req.DeviceName, 1, 100, "device_name", "device name")
@@ -189,6 +190,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if !v.Valid() {
 		resp.ValidationError(w, v.Errors)
+		return
+	}
+
+	// Проверка пустого пароля (но НЕ сложности!)
+	if req.Password == "" {
+		resp.Error(w, http.StatusBadRequest, errors.New("password required"))
 		return
 	}
 
@@ -256,33 +263,41 @@ type refreshRequest struct {
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	var req refreshRequest
-	
-	// Пробуем получить refresh token из cookie (для веба)
+	var refreshToken string
+
+	// 1. Пробуем получить refresh token из cookie (для веба)
 	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	cookieToken, cookieErr := middleware.GetRefreshTokenFromCookie(r, cookieConfig)
-	
-	if cookieErr == nil && cookieToken != "" {
-		// Refresh token в cookie
-		req.RefreshToken = cookieToken
-	} else {
-		// Refresh token в body
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
-			return
+	cookie, cookieErr := r.Cookie("refresh_token")
+	if cookieErr == nil && cookie != nil && cookie.Value != "" {
+		refreshToken = cookie.Value
+	}
+
+	// 2. Если нет cookie — пробуем из body (для mobile)
+	if refreshToken == "" {
+		var req refreshRequest
+		// Не проверяем ошибку — body может быть пустым (web)
+		_ = json.NewDecoder(r.Body).Decode(&req)
+		if req.RefreshToken != "" {
+			refreshToken = req.RefreshToken
 		}
+	}
+
+	// 3. Если всё ещё нет — ошибка
+	if refreshToken == "" {
+		resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
+		return
 	}
 
 	// Validate input data
 	v := validation.NewValidator()
-	validation.ValidateStringLength(v, req.RefreshToken, 1, 500, "refresh_token", "refresh token")
+	validation.ValidateStringLength(v, refreshToken, 1, 500, "refresh_token", "refresh token")
 
 	if !v.Valid() {
 		resp.ValidationError(w, v.Errors)
 		return
 	}
 
-	pair, err := h.auth.Refresh(r.Context(), req.RefreshToken)
+	pair, err := h.auth.Refresh(r.Context(), refreshToken)
 	if err != nil {
 		// Security: детект replay attack - если refresh token уже использован
 		h.logger.Info("Refresh token error", zap.String("error", err.Error()))
