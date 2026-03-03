@@ -69,6 +69,7 @@ type AuthHandler struct {
 	userRepo        repositories.UserRepository        // Репозиторий пользователей
 	smtp            *email.SMTPService                 // SMTP сервис для отправки email
 	logger          *zap.Logger                        // Логгер для отладки
+	cookieSecure    bool                               // Secure flag для refresh token cookie
 }
 
 // NewAuthHandler создает новый экземпляр обработчика аутентификации
@@ -80,6 +81,7 @@ func NewAuthHandler(
 	userRepo repositories.UserRepository,
 	smtp *email.SMTPService,
 	logger *zap.Logger,
+	cookieSecure bool,
 ) *AuthHandler {
 	return &AuthHandler{
 		auth:            auth,
@@ -89,6 +91,7 @@ func NewAuthHandler(
 		userRepo:        userRepo,
 		smtp:            smtp,
 		logger:          logger,
+		cookieSecure:    cookieSecure,
 	}
 }
 
@@ -156,13 +159,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	// Security: устанавливаем refresh token в httpOnly cookie для веба
 	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	// В development режиме Secure=false для локального тестирования
-	if h.auth.GoogleClientID() != "" { // простой способ определить environment
-		// В production Secure=true
-		cookieConfig.Secure = true
-	} else {
-		cookieConfig.Secure = false // localhost
-	}
+	cookieConfig.Secure = h.cookieSecure // из конфига
 	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
 
 	// Возвращаем access token в ответе (refresh token в cookie)
@@ -240,7 +237,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Security: устанавливаем refresh token в httpOnly cookie для веба
 	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	cookieConfig.Secure = false // localhost для разработки
+	cookieConfig.Secure = h.cookieSecure // из конфига
 	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
 
 	// Возвращаем access token в ответе (refresh token в cookie)
@@ -294,7 +291,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Security: устанавливаем новый refresh token в cookie (rotation)
-	cookieConfig.Secure = false // localhost для разработки
+	cookieConfig.Secure = h.cookieSecure // из конфига
 	middleware.SetRefreshTokenCookie(w, pair.RefreshToken, cookieConfig)
 
 	// Возвращаем access token (refresh в cookie)
@@ -337,7 +334,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	// Security: очищаем refresh token cookie
 	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	cookieConfig.Secure = false // localhost для разработки
+	cookieConfig.Secure = h.cookieSecure // из конфига
 	middleware.ClearRefreshTokenCookie(w, cookieConfig)
 
 	resp.Success(w, map[string]any{"success": true})
@@ -433,7 +430,7 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 
 	// Security: устанавливаем refresh token в httpOnly cookie для веба
 	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	cookieConfig.Secure = false // localhost для разработки
+	cookieConfig.Secure = h.cookieSecure // из конфига
 	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
 
 	resp.Success(w, out)

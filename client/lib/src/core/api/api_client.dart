@@ -29,6 +29,7 @@ class ApiClient {
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json'},
+      extra: {'withCredentials': true}, // Security: для отправки httpOnly cookie на вебе
     ));
 
     // Security: для web включаем отправку cookies через interceptor
@@ -36,6 +37,7 @@ class ApiClient {
       onRequest: (options, handler) async {
         // Security: для web браузер автоматически отправляет cookies (httpOnly cookie для refresh token)
         // при same-origin запросах. Для cross-origin нужно настроить CORS на сервере.
+        // withCredentials уже установлен в BaseOptions
         
         final tokenPair = await storage.readTokenPair();
         final token = tokenPair?.accessToken;
@@ -145,6 +147,7 @@ class ApiClient {
         baseUrl: ApiConfig.baseUrl,
         connectTimeout: const Duration(seconds: 5),
         headers: {'Content-Type': 'application/json'},
+        extra: {'withCredentials': true}, // Security: для отправки httpOnly cookie на вебе
       ));
 
       // Формируем запрос

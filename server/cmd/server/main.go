@@ -429,7 +429,7 @@ func main() {
 
 	// ---------- HTTP‑обработчики ----------
 	recommendationHandler := handlers.NewRecommendationHandlerWithUseCases(recommendationService, achEngine, logger, getRecommendationsUC)
-	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration, redisClient, userRepo, smtpService, logger)
+	authHandler := handlers.NewAuthHandler(authService, accountLockout, lockoutDuration, redisClient, userRepo, smtpService, logger, cfg.Security.CookieSecure)
 	userHandler := handlers.NewUserHandler(userService, fileService, exportService, accountService, sessionRepo, logger)
 	passwordHandler := handlers.NewPasswordHandler(userRepo, logger)
 	weatherHandler := handlers.NewWeatherHandler(weatherService, userRepo, logger)
