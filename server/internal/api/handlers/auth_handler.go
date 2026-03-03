@@ -32,7 +32,7 @@ type AuthService interface {
 	Register(ctx context.Context, input domain.UserRegistration, device services.DeviceInfo) (*services.RegisterResult, error)
 	Login(ctx context.Context, input domain.UserLogin, device services.DeviceInfo) (*services.LoginResult, error)
 	Refresh(ctx context.Context, refreshToken string) (domain.TokenPair, error)
-	Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool) error
+	Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool, accessToken string) error
 	GoogleSignIn(ctx context.Context, idToken string, device services.DeviceInfo) (*services.LoginResult, error)
 	ValidateAccessToken(ctx context.Context, accessToken string) (domain.ID, domain.ID, error)
 	ValidateTokenForSilentLogin(ctx context.Context, accessToken string) (*domain.User, error)
@@ -154,6 +154,19 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Security: устанавливаем refresh token в httpOnly cookie для веба
+	cookieConfig := middleware.DefaultRefreshCookieConfig()
+	// В development режиме Secure=false для локального тестирования
+	if h.auth.GoogleClientID() != "" { // простой способ определить environment
+		// В production Secure=true
+		cookieConfig.Secure = true
+	} else {
+		cookieConfig.Secure = false // localhost
+	}
+	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
+
+	// Возвращаем access token в ответе (refresh token в cookie)
+	// Для веба клиент не должен сохранять refresh token
 	resp.Success(w, out)
 }
 
@@ -225,6 +238,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Успешный вход — сбрасываем счётчик попыток
 	_ = h.lockout.Reset(r.Context(), email)
 
+	// Security: устанавливаем refresh token в httpOnly cookie для веба
+	cookieConfig := middleware.DefaultRefreshCookieConfig()
+	cookieConfig.Secure = false // localhost для разработки
+	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
+
+	// Возвращаем access token в ответе (refresh token в cookie)
 	resp.Success(w, out)
 }
 
@@ -235,13 +254,26 @@ type refreshRequest struct {
 
 // Refresh обрабатывает запрос на обновление токена доступа
 // Использует рефреш-токен для получения новой пары токенов
+// Security: устанавливает новый refresh token в cookie, инвалидируя старый (rotation)
+// Поддерживает refresh token как из body, так и из httpOnly cookie
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var req refreshRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
-		return
+	
+	// Пробуем получить refresh token из cookie (для веба)
+	cookieConfig := middleware.DefaultRefreshCookieConfig()
+	cookieToken, cookieErr := middleware.GetRefreshTokenFromCookie(r, cookieConfig)
+	
+	if cookieErr == nil && cookieToken != "" {
+		// Refresh token в cookie
+		req.RefreshToken = cookieToken
+	} else {
+		// Refresh token в body
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+			return
+		}
 	}
 
 	// Validate input data
@@ -255,10 +287,17 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	pair, err := h.auth.Refresh(r.Context(), req.RefreshToken)
 	if err != nil {
+		// Security: детект replay attack - если refresh token уже использован
+		h.logger.Info("Refresh token error", zap.String("error", err.Error()))
 		resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
 		return
 	}
 
+	// Security: устанавливаем новый refresh token в cookie (rotation)
+	cookieConfig.Secure = false // localhost для разработки
+	middleware.SetRefreshTokenCookie(w, pair.RefreshToken, cookieConfig)
+
+	// Возвращаем access token (refresh в cookie)
 	resp.Success(w, map[string]any{"tokens": pair})
 }
 
@@ -269,6 +308,7 @@ type logoutRequest struct {
 
 // Logout обрабатывает запрос на выход из системы
 // Может производить выход со всех устройств пользователя
+// Security: добавляет access token в blacklist для немедленной инвалидации
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -286,12 +326,31 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.auth.Logout(r.Context(), userID, sessionID, req.AllDevices); err != nil {
+	// Извлекаем access token из заголовка для добавления в blacklist
+	accessToken := extractAccessToken(r)
+
+	if err := h.auth.Logout(r.Context(), userID, sessionID, req.AllDevices, accessToken); err != nil {
 		resp.Error(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	resp.Success(w, map[string]any{"success": true})
+}
+
+// extractAccessToken извлекает access token из заголовка Authorization
+func extractAccessToken(r *http.Request) string {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return ""
+	}
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	if token == authHeader {
+		token = strings.TrimPrefix(authHeader, "Token ")
+		if token == authHeader {
+			return ""
+		}
+	}
+	return token
 }
 
 // googleSignInRequest структура для запроса входа через Google
@@ -365,6 +424,12 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 		zap.String("display_name", out.User.GetDisplayName()),
 		zap.Bool("is_new_user", out.User.CreatedAt.IsZero() || time.Since(out.User.CreatedAt) < time.Second),
 	)
+
+	// Security: устанавливаем refresh token в httpOnly cookie для веба
+	cookieConfig := middleware.DefaultRefreshCookieConfig()
+	cookieConfig.Secure = false // localhost для разработки
+	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
+
 	resp.Success(w, out)
 }
 

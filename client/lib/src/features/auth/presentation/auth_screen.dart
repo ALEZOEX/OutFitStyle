@@ -50,6 +50,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   /// Вход через Google
+  /// Примечание: на вебе googleAuth.accessToken всегда null, используем только idToken
   Future<void> _signInWithGoogle() async {
     ref.read(authLoadingProvider.notifier).state = true;
     ref.read(authErrorProvider.notifier).state = null;
@@ -64,15 +65,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
 
       final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
       final idToken = googleAuth.idToken;
 
-      if (idToken == null) {
+      // Security: на вебе accessToken всегда null, используем только idToken
+      if (idToken == null || idToken.isEmpty) {
         throw Exception('Не удалось получить ID токен Google');
       }
 
+      // Security: accessToken nullable — на вебе Google не возвращает access token
       final credential = GoogleAuthProvider.credential(
-        accessToken: accessToken,
+        accessToken: googleAuth.accessToken, // nullable — OK для веба
         idToken: idToken,
       );
 
@@ -282,8 +284,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Введите пароль';
                           }
-                          if (value.length < 6) {
-                            return 'Минимум 6 символов';
+                          // Security: минимум 12 символов для соответствия backend
+                          if (value.length < 12) {
+                            return 'Минимум 12 символов';
                           }
                           return null;
                         },

@@ -73,6 +73,7 @@ import (
 	"outfitstyle/server/internal/infrastructure/observability"
 	dbpg "outfitstyle/server/internal/infrastructure/persistence/postgres"
 	pg "outfitstyle/server/internal/infrastructure/persistence/postgres/pg"
+	redisrepo "outfitstyle/server/internal/infrastructure/persistence/redis"
 	"outfitstyle/server/internal/infrastructure/push"
 	"outfitstyle/server/internal/infrastructure/queue"
 	"outfitstyle/server/internal/pkg/health"
@@ -199,7 +200,11 @@ func main() {
 	}
 
 	googleClient := ext.NewGoogleAuthClient(cfg.Security.GoogleClientID)
-	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, logger)
+	
+	// Создаём blacklist репозиторий для отзыв токенов
+	tokenBlacklist := redisrepo.NewTokenBlacklistRepository(redisClient)
+	
+	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, tokenBlacklist, logger)
 
 	// ---------- Rate limit violation repository ----------
 	rateLimitRepo := pg.NewRateLimitViolationRepository(db.Pool())

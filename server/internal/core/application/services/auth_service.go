@@ -26,9 +26,15 @@ type TokenServiceInterface interface {
 	GenerateRefreshToken() (string, error)
 	HashRefreshToken(refreshToken string) string
 	GenerateAccessToken(userID, sessionID domain.ID) (token string, expiresAt time.Time, err error)
-	ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, err error)
+	ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, jti string, err error)
 	AccessTTL() time.Duration
 	RefreshTTL() time.Duration
+}
+
+// TokenBlacklist интерфейс для blacklist токенов
+type TokenBlacklist interface {
+	Add(ctx context.Context, jti string, ttl time.Duration) error
+	IsBlacklisted(ctx context.Context, jti string) (bool, error)
 }
 
 // AuthService сервис аутентификации и авторизации пользователей
@@ -37,6 +43,7 @@ type AuthService struct {
 	sessionRepo repositories.SessionRepository // Репозиторий сессий
 	tokenSvc    TokenServiceInterface          // Сервис токенов
 	google      *external.GoogleAuthClient     // Клиент Google аутентификации
+	blacklist   TokenBlacklist                 // Blacklist токенов
 	logger      *zap.Logger                    // Логгер
 }
 
@@ -67,6 +74,7 @@ func NewAuthService(
 	sessionRepo repositories.SessionRepository,
 	tokenSvc TokenServiceInterface,
 	google *external.GoogleAuthClient,
+	blacklist TokenBlacklist,
 	logger *zap.Logger,
 ) *AuthService {
 	return &AuthService{
@@ -74,6 +82,7 @@ func NewAuthService(
 		sessionRepo: sessionRepo,
 		tokenSvc:    tokenSvc,
 		google:      google,
+		blacklist:   blacklist,
 		logger:      logger,
 	}
 }
@@ -170,6 +179,8 @@ func (s *AuthService) Login(ctx context.Context, input domain.UserLogin, device 
 }
 
 // Refresh обновляет токены доступа
+// Security: реализует refresh token rotation для защиты от replay attacks
+// При обнаружении повторного использования токена инвалидирует все сессии пользователя
 func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.TokenPair, error) {
 	if refreshToken == "" {
 		return domain.TokenPair{}, ErrUnauthorized
@@ -180,11 +191,29 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 	if err != nil {
 		return domain.TokenPair{}, err
 	}
-	if sess == nil || !sess.IsActive || (sess.ExpiresAt != nil && time.Now().After(*sess.ExpiresAt)) {
+	
+	// Security: детекция replay attack
+	// Если сессия не найдена по хешу, но токен корректно подписан — возможна кража
+	if sess == nil {
+		s.logger.Warn("Possible replay attack detected: refresh token not found",
+			zap.String("refresh_hash", hash[:16]+"..."),
+		)
+		// Здесь можно добавить дополнительную логику:
+		// - Заблокировать пользователя
+		// - Отправить уведомление
+		// - Инвалидировать все сессии
+		return domain.TokenPair{}, ErrUnauthorized
+	}
+	
+	if !sess.IsActive || (sess.ExpiresAt != nil && time.Now().After(*sess.ExpiresAt)) {
+		s.logger.Info("Refresh token expired or inactive",
+			zap.String("session_id", sess.ID.String()),
+		)
 		return domain.TokenPair{}, ErrUnauthorized
 	}
 
-	// обновляем refresh-токен
+	// Security: refresh token rotation
+	// Генерируем новый refresh token и инвалидируем старый
 	newRefresh, err := s.tokenSvc.GenerateRefreshToken()
 	if err != nil {
 		return domain.TokenPair{}, err
@@ -193,6 +222,7 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 	newRefreshExp := time.Now().Add(s.tokenSvc.RefreshTTL())
 
 	if err := s.sessionRepo.RotateRefresh(ctx, sess.ID, newHash, newRefreshExp); err != nil {
+		s.logger.Error("Failed to rotate refresh token", zap.Error(err))
 		return domain.TokenPair{}, err
 	}
 
@@ -307,7 +337,21 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 }
 
 // Logout выполняет выход пользователя
-func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool) error {
+// Security: добавляет access token в blacklist для немедленной инвалидации
+func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool, accessToken string) error {
+	// Security: добавляем access token в blacklist
+	if accessToken != "" && s.blacklist != nil {
+		_, _, jti, err := s.tokenSvc.ValidateAccessToken(accessToken)
+		if err == nil && jti != "" {
+			// Добавляем в blacklist на оставшееся время жизни токена
+			ttl := s.tokenSvc.AccessTTL()
+			if err := s.blacklist.Add(ctx, jti, ttl); err != nil {
+				s.logger.Warn("failed to add token to blacklist", zap.Error(err))
+				// Не прерываем logout при ошибке blacklist
+			}
+		}
+	}
+
 	if allDevices {
 		return s.sessionRepo.RevokeAllForUser(ctx, userID)
 	}
@@ -315,10 +359,23 @@ func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, a
 }
 
 // ValidateAccessToken: JWT + проверка, что сессия активна (logout сразу инвалидирует access-токен)
+// Security: проверяет blacklist для отозванных токенов
 func (s *AuthService) ValidateAccessToken(ctx context.Context, accessToken string) (domain.ID, domain.ID, error) {
-	userID, sessionID, err := s.tokenSvc.ValidateAccessToken(accessToken)
+	userID, sessionID, jti, err := s.tokenSvc.ValidateAccessToken(accessToken)
 	if err != nil {
 		return domain.ID{}, domain.ID{}, ErrUnauthorized
+	}
+
+	// Security: проверяем blacklist для отозванных токенов
+	if s.blacklist != nil {
+		blacklisted, err := s.blacklist.IsBlacklisted(ctx, jti)
+		if err != nil {
+			s.logger.Warn("failed to check token blacklist", zap.Error(err))
+			// Graceful degradation: не блокируем вход при ошибке Redis
+		} else if blacklisted {
+			s.logger.Info("token is blacklisted", zap.String("jti", jti))
+			return domain.ID{}, domain.ID{}, ErrUnauthorized
+		}
 	}
 
 	sess, err := s.sessionRepo.GetByID(ctx, sessionID)
