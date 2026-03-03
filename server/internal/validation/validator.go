@@ -113,9 +113,11 @@ func ValidateEmail(v *Validator, email string) {
 }
 
 // ValidatePasswordPlaintext проверяет требования к паролю
+// Security: минимальная длина 8 символов (баланс между безопасностью и UX)
+// Максимальная длина 72 символа (ограничение bcrypt)
 func ValidatePasswordPlaintext(v *Validator, password string) {
 	v.Check(password != "", "password", "must be provided")
-	v.Check(len(password) >= 12, "password", "must be at least 12 characters long")
+	v.Check(len(password) >= 8, "password", "must be at least 8 characters long")
 	v.Check(len(password) <= 72, "password", "must not be more than 72 characters long")
 	
 	// Проверка сложности пароля

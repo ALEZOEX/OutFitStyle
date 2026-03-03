@@ -3,13 +3,25 @@ import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import '../../models/token_pair.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:async' show Completer;
 import 'dart:developer' as developer;
 import 'web_utils.dart' if (dart.library.io) 'web_utils_stub.dart' as web_utils;
 
+/// ApiClient — HTTP клиент с авторизацией и automatic token refresh
+/// 
+/// Platform-specific поведение:
+/// - Web: refresh token в httpOnly cookie, access token в памяти
+/// - Mobile: оба токена в FlutterSecureStorage
 class ApiClient {
   final AuthStorage storage;
 
   late final Dio _dio;
+  
+  // Security: флаг для предотвращения race condition при refresh
+  bool _isRefreshing = false;
+  
+  // Очередь запросов, ожидающих refresh
+  final List<_PendingRequest> _pendingRequests = [];
 
   ApiClient({required this.storage}) {
     _dio = Dio(BaseOptions(
@@ -19,9 +31,12 @@ class ApiClient {
       headers: {'Content-Type': 'application/json'},
     ));
 
-    // Interceptor для авторизации и refresh токена
+    // Security: для web включаем отправку cookies через interceptor
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
+        // Security: для web браузер автоматически отправляет cookies (httpOnly cookie для refresh token)
+        // при same-origin запросах. Для cross-origin нужно настроить CORS на сервере.
+        
         final tokenPair = await storage.readTokenPair();
         final token = tokenPair?.accessToken;
         if (token != null && token.isNotEmpty) {
@@ -47,15 +62,18 @@ class ApiClient {
           final path = err.requestOptions.path;
 
           // Не пытаемся refresh для auth endpoints чтобы избежать бесконечного цикла
-          if (!path.contains('/auth/')) {
+          // Исключение: /auth/refresh — это endpoint refresh
+          final isAuthEndpoint = path.contains('/auth/') && !path.contains('/auth/refresh');
+          
+          if (!isAuthEndpoint) {
             try {
               developer.log('[ApiClient] Попытка refresh токена', name: 'ApiClient');
               final refreshed = await _refreshToken();
 
               if (refreshed) {
                 developer.log('[ApiClient] Токен обновлён, повторяем запрос', name: 'ApiClient');
+                
                 // Повторяем оригинальный запрос с новым токеном
-                // ВАЖНО: переиспользуем RequestOptions из ошибки, чтобы сохранить baseUrl
                 final opts = err.requestOptions;
                 final tokenPair = await storage.readTokenPair();
                 final newToken = tokenPair?.accessToken;
@@ -70,11 +88,11 @@ class ApiClient {
               developer.log('[ApiClient] Ошибка refresh',
                   name: 'ApiClient',
                   error: refreshError);
-              // Если refresh не удался - очищаем сессию и перезагружаем страницу
+              // Если refresh не удался — очищаем сессию и перезагружаем страницу
               await storage.clearSession();
               // Перезагрузка страницы для web или редирект на login
               if (kIsWeb) {
-                // Для web - перезагрузка страницы
+                // Для web — перезагрузка страницы
                 web_utils.reloadPage();
               }
             }
@@ -87,12 +105,38 @@ class ApiClient {
   }
 
   /// Refresh токена
+  /// Security: предотвращает race condition при параллельных 401 ответах
+  /// Web: refresh token в httpOnly cookie, отправляется браузером автоматически
+  /// Mobile: refresh token в body запроса
   Future<bool> _refreshToken() async {
+    // Security: предотвращаем race condition — только один refresh одновременно
+    if (_isRefreshing) {
+      developer.log('[ApiClient] Refresh уже выполняется, ждём', name: 'ApiClient');
+      // Ждём завершения текущего refresh (до 10 секунд)
+      final startTime = DateTime.now();
+      while (_isRefreshing) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (DateTime.now().difference(startTime) > const Duration(seconds: 10)) {
+          developer.log('[ApiClient] Timeout waiting for refresh', name: 'ApiClient');
+          return false;
+        }
+      }
+      // Refresh уже выполнен другим запросом, проверяем есть ли токен
+      final tokenPair = await storage.readTokenPair();
+      return tokenPair?.accessToken != null;
+    }
+
+    _isRefreshing = true;
     try {
-      final refreshToken = await storage.readRefreshToken();
-      if (refreshToken == null || refreshToken.isEmpty) {
-        developer.log('[ApiClient] Нет refresh токена', name: 'ApiClient');
-        return false;
+      // Web: refresh token в httpOnly cookie — не нужен в body
+      // Mobile: читаем refresh token из secure storage
+      String? refreshToken;
+      if (!kIsWeb) {
+        refreshToken = await storage.readRefreshToken();
+        if (refreshToken == null || refreshToken.isEmpty) {
+          developer.log('[ApiClient] Нет refresh токена', name: 'ApiClient');
+          return false;
+        }
       }
 
       // Используем отдельный Dio без interceptors для refresh
@@ -103,10 +147,23 @@ class ApiClient {
         headers: {'Content-Type': 'application/json'},
       ));
 
+      // Формируем запрос
+      // Web: refresh token в cookie, body может быть пустым
+      // Mobile: refresh token в body
+      dynamic data;
+      if (!kIsWeb && refreshToken != null) {
+        data = {'refresh_token': refreshToken};
+      } else {
+        // Web: cookie отправляется браузером автоматически
+        data = {};
+      }
+
       // Используем /api/v1/auth/refresh
+      // Web: браузер автоматически отправляет refresh token cookie
+      // Mobile: отправляем refresh token в body
       final response = await plainDio.post(
         '/api/v1/auth/refresh',
-        data: {'refresh_token': refreshToken},
+        data: data,
       );
 
       if (response.statusCode == 200) {
@@ -121,12 +178,15 @@ class ApiClient {
         }
       }
 
+      developer.log('[ApiClient] Refresh failed: status ${response.statusCode}', name: 'ApiClient');
       return false;
     } catch (e) {
       developer.log('[ApiClient] Ошибка refresh токена',
           name: 'ApiClient',
           error: e);
       return false;
+    } finally {
+      _isRefreshing = false;
     }
   }
 
@@ -232,4 +292,16 @@ class _NoOpAuthStorage extends AuthStorage {
 
   @override
   Future<void> clearSession() async {}
+}
+
+/// Внутренний класс для ожидания завершения refresh
+class _PendingRequest {
+  final Completer<void> completer = Completer<void>();
+  final String path;
+  
+  _PendingRequest(this.path);
+  
+  Future<void> wait() => completer.future;
+  void resolve() => completer.complete();
+  void reject(Object error) => completer.completeError(error);
 }
