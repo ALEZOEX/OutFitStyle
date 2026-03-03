@@ -1,6 +1,6 @@
 module outfitstyle/server
 
-go 1.24.13
+go 1.24.12
 
 toolchain go1.24.6
 
