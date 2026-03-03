@@ -42,6 +42,7 @@ type SecurityConfig struct {
 	CORSAllowedOrigins []string
 	RateLimitPerMinute int
 	GoogleClientID     string
+	CookieSecure       bool // Secure flag для refresh token cookie
 }
 
 type MLServiceConfig struct {
@@ -204,6 +205,7 @@ func Load() (*AppConfig, error) {
 			CORSAllowedOrigins: splitCSV(getEnvFirst([]string{"CORS_ALLOWED_ORIGINS", "CORS_ALLOWED_ORIGIN"}, "")),
 			RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", getEnvInt("RATE_LIMIT", 100, 1, 100000), 1, 100000),
 			GoogleClientID:     getEnvFirst([]string{"GOOGLE_CLIENT_ID"}, ""),
+			CookieSecure:       getEnvBool("COOKIE_SECURE", true), // Secure cookie по умолчанию для production
 		},
 		MLService: MLServiceConfig{
 			BaseURL: getEnvFirst([]string{"ML_SERVICE_URL"}, "http://ml-service:8000"),
