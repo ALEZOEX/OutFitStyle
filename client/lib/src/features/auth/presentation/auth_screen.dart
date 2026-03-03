@@ -52,53 +52,94 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   /// Вход через Google
   /// Примечание: на вебе googleAuth.accessToken всегда null, используем только idToken
   Future<void> _signInWithGoogle() async {
+    print('[Google Sign-In] Начало входа...');
     ref.read(authLoadingProvider.notifier).state = true;
     ref.read(authErrorProvider.notifier).state = null;
 
     try {
+      // 1. Инициализация GoogleSignIn
+      print('[Google Sign-In] Инициализация GoogleSignIn...');
       final googleSignIn = GoogleSignIn();
+      
+      // 2. Вызов signIn()
+      print('[Google Sign-In] Вызов signIn()...');
       final googleUser = await googleSignIn.signIn();
+      print('[Google Sign-In] googleUser: ${googleUser == null ? "null (отмена)" : "ok"}');
+      
       if (googleUser == null) {
-        // Пользователь отменил вход
+        print('[Google Sign-In] Пользователь отменил вход');
         ref.read(authLoadingProvider.notifier).state = false;
         return;
       }
 
+      // 3. Получение authentication
+      print('[Google Sign-In] Получение authentication...');
       final googleAuth = await googleUser.authentication;
+      print('[Google Sign-In] googleAuth: ${googleAuth == null ? "null" : "ok"}');
+      
+      if (googleAuth == null) {
+        throw Exception('Не удалось получить Google authentication');
+      }
+      
+      // 4. Проверка токенов
       final idToken = googleAuth.idToken;
+      print('[Google Sign-In] idToken: ${idToken == null ? "null" : "ok"}');
+      print('[Google Sign-In] accessToken: ${googleAuth.accessToken == null ? "null (OK для веба)" : "ok"}');
 
-      // Security: на вебе accessToken всегда null, используем только idToken
       if (idToken == null || idToken.isEmpty) {
         throw Exception('Не удалось получить ID токен Google');
       }
 
-      // Security: accessToken nullable — на вебе Google не возвращает access token
+      // 5. Создание credential
+      print('[Google Sign-In] Создание GoogleAuthProvider.credential...');
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken, // nullable — OK для веба
         idToken: idToken,
       );
 
+      // 6. Вход через Firebase
+      print('[Google Sign-In] Вызов signInWithCredential...');
       final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final backendIdToken = await userCredential.user?.getIdToken();
+      print('[Google Sign-In] userCredential.user: ${userCredential.user == null ? "null" : "ok"}');
+      
+      if (userCredential.user == null) {
+        throw Exception('Пользователь не авторизован после signInWithCredential');
+      }
+      
+      final backendIdToken = await userCredential.user!.getIdToken();
+      print('[Google Sign-In] backendIdToken: ${backendIdToken == null ? "null" : "ok"}');
 
       if (backendIdToken == null) {
         throw Exception('Не удалось получить токен для backend');
       }
 
-      // Отправляем токен на backend
+      // 7. Отправка на backend
+      print('[Google Sign-In] Отправка токена на backend...');
       final authRepo = ref.read(authRepositoryProvider);
       final apiClient = ref.read(apiClientProvider);
-      
+
       final response = await apiClient.raw.post(
         '/api/v1/auth/google',
         data: {'id_token': backendIdToken},
       );
+      
+      print('[Google Sign-In] Ответ backend: status=${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final tokensData = data['tokens'] as Map<String, dynamic>? ?? data;
+        print('[Google Sign-In] Данные ответа: ${data.keys.join(", ")}');
+        
+        final tokensData = data['tokens'] as Map<String, dynamic>?;
+        if (tokensData == null) {
+          print('[Google Sign-In] ОШИБКА: tokensData null');
+          throw Exception('Неверный формат ответа от сервера: отсутствуют токены');
+        }
+        
         final tokenPair = TokenPair.fromJson(tokensData);
+        print('[Google Sign-In] Токены получены');
+        
         await authRepo.authStorage.writeTokenPair(tokenPair);
+        print('[Google Sign-In] Сессия сохранена');
 
         // Обновляем состояние авторизации
         final authStateNotifier = ref.read(authStateProvider.notifier);
@@ -109,14 +150,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         refreshStream.notifyAuthChanged();
 
         if (mounted) {
+          print('[Google Sign-In] Переход на /home');
           context.go('/home');
         }
       } else {
         final errorData = response.data as Map<String, dynamic>?;
+        print('[Google Sign-In] ОШИБКА backend: ${errorData?['message']}');
         throw Exception(errorData?['message'] ?? 'Ошибка аутентификации на сервере');
       }
-    } catch (e) {
-      print('❌ Google Sign-In error: $e');
+    } catch (e, stackTrace) {
+      print('[Google Sign-In] ❌ ОШИБКА: $e');
+      print('[Google Sign-In] Stack trace: $stackTrace');
       if (mounted) {
         ref.read(authErrorProvider.notifier).state = e.toString();
       }
