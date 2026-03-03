@@ -309,6 +309,7 @@ type logoutRequest struct {
 // Logout обрабатывает запрос на выход из системы
 // Может производить выход со всех устройств пользователя
 // Security: добавляет access token в blacklist для немедленной инвалидации
+// Security: очищает refresh token cookie
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -333,6 +334,11 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		resp.Error(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	// Security: очищаем refresh token cookie
+	cookieConfig := middleware.DefaultRefreshCookieConfig()
+	cookieConfig.Secure = false // localhost для разработки
+	middleware.ClearRefreshTokenCookie(w, cookieConfig)
 
 	resp.Success(w, map[string]any{"success": true})
 }

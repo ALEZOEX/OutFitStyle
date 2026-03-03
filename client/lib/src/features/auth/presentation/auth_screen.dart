@@ -284,9 +284,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Введите пароль';
                           }
-                          // Security: минимум 12 символов для соответствия backend
-                          if (value.length < 12) {
-                            return 'Минимум 12 символов';
+                          // Security: минимум 8 символов (соответствует backend)
+                          if (value.length < 8) {
+                            return 'Минимум 8 символов';
                           }
                           return null;
                         },

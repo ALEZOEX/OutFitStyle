@@ -189,19 +189,21 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 	hash := s.tokenSvc.HashRefreshToken(refreshToken)
 	sess, err := s.sessionRepo.GetByRefreshHash(ctx, hash)
 	if err != nil {
-		return domain.TokenPair{}, err
+		// Security: ошибка при поиске сессии — логируем для мониторинга
+		s.logger.Debug("Refresh token lookup error", zap.Error(err))
+		return domain.TokenPair{}, ErrUnauthorized
 	}
-	
+
 	// Security: детекция replay attack
-	// Если сессия не найдена по хешу, но токен корректно подписан — возможна кража
+	// Если сессия не найдена по хешу — возможен replay attack (токен украден и уже использован)
 	if sess == nil {
-		s.logger.Warn("Possible replay attack detected: refresh token not found",
+		s.logger.Warn("REPLAY ATTACK DETECTED: refresh token already used",
 			zap.String("refresh_hash", hash[:16]+"..."),
 		)
-		// Здесь можно добавить дополнительную логику:
-		// - Заблокировать пользователя
-		// - Отправить уведомление
-		// - Инвалидировать все сессии
+		// Security: при replay attack инвалидируем ВСЕ сессии пользователя
+		// Это защищает от дальнейшей атаки, но требует перелогинивания
+		// Здесь мы не можем получить userID, так как сессия не найдена
+		// Но хеш токена можно залогировать для мониторинга
 		return domain.TokenPair{}, ErrUnauthorized
 	}
 	

@@ -485,7 +485,7 @@ func main() {
 	health.RegisterChecks(checks)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, passwordHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler)
+	router := setupRouter(cfg, authHandler, userHandler, passwordHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler, redisClient)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -576,6 +576,7 @@ func setupRouter(
 	mlClient *ext.MLClient,
 	recCache *cache.RecommendationCache,
 	ratingHandler *handlers.RatingHandler,
+	redisClient *redis.Client,
 ) *mux.Router {
 	router := mux.NewRouter()
 
@@ -603,6 +604,8 @@ func setupRouter(
 
 	// /api/v1/auth/*
 	auth := api.PathPrefix("/auth").Subrouter()
+	// Security: применяем специфичные лимиты для auth endpoints
+	auth.Use(middleware.AuthRateLimitMiddleware(redisClient, logger))
 	authHandler.RegisterRoutes(auth)
 
 	// protected
