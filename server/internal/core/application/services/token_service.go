@@ -40,6 +40,7 @@ type TokenService struct {
 type AccessClaims struct {
 	jwt.RegisteredClaims
 	SessionID string `json:"sid"`
+	JTI       string `json:"jti"` // JWT ID для возможности отзыва токена
 }
 
 // TokenServiceConfig конфигурация TokenService
@@ -152,13 +153,21 @@ func (s *TokenService) GenerateAccessToken(userID, sessionID domain.ID) (token s
 	now := time.Now()
 	expiresAt = now.Add(s.accessTTL)
 
+	// Security: генерируем уникальный JTI для возможности отзыва токена
+	jti, err := generateJTI()
+	if err != nil {
+		return "", time.Time{}, fmt.Errorf("failed to generate JTI: %w", err)
+	}
+
 	claims := AccessClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userID.String(),
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
+			ID:        jti, // JTI для blacklist
 		},
 		SessionID: sessionID.String(),
+		JTI:       jti,
 	}
 
 	var t *jwt.Token
@@ -169,12 +178,21 @@ func (s *TokenService) GenerateAccessToken(userID, sessionID domain.ID) (token s
 		t = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		token, err = t.SignedString(s.secret)
 	}
-	
+
 	return token, expiresAt, err
 }
 
-// ValidateAccessToken валидирует access токен и возвращает userID и sessionID
-func (s *TokenService) ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, err error) {
+// generateJTI генерирует уникальный идентификатор токена
+func generateJTI() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
+// ValidateAccessToken валидирует access токен и возвращает userID, sessionID и JTI
+func (s *TokenService) ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, jti string, err error) {
 	var methodName string
 
 	if s.useRS256 {
@@ -198,23 +216,23 @@ func (s *TokenService) ValidateAccessToken(tokenString string) (userID domain.ID
 		return s.secret, nil
 	})
 	if err != nil {
-		return domain.ID{}, domain.ID{}, err
+		return domain.ID{}, domain.ID{}, "", err
 	}
 
 	if claims.Subject == "" || claims.SessionID == "" {
-		return domain.ID{}, domain.ID{}, errors.New("missing claims")
+		return domain.ID{}, domain.ID{}, "", errors.New("missing claims")
 	}
 
 	userID, err = domain.ParseID(claims.Subject)
 	if err != nil {
-		return domain.ID{}, domain.ID{}, err
+		return domain.ID{}, domain.ID{}, "", err
 	}
 	sessionID, err = domain.ParseID(claims.SessionID)
 	if err != nil {
-		return domain.ID{}, domain.ID{}, err
+		return domain.ID{}, domain.ID{}, "", err
 	}
 
-	return userID, sessionID, nil
+	return userID, sessionID, claims.JTI, nil
 }
 
 // GenerateRefreshToken генерирует новый refresh токен
