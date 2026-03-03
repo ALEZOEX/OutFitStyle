@@ -154,6 +154,13 @@ apply_manifests() {
 
     log_success "Все манифесты применены!"
 
+    # Принудительный рестарт deployments для применения новых image
+    log_info "Принудительный рестарт deployments..."
+    kubectl rollout restart deployment/backend -n ${NAMESPACE}
+    kubectl rollout restart deployment/frontend -n ${NAMESPACE}
+    kubectl rollout restart deployment/ml-service -n ${NAMESPACE}
+    log_success "Deployments перезапущены"
+
     # Ожидание готовности подов
     log_info "Ожидание готовности подов..."
     wait_for_pods
