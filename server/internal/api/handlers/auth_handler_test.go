@@ -46,8 +46,8 @@ func (m *MockAuthService) Refresh(ctx context.Context, refreshToken string) (dom
 	return args.Get(0).(domain.TokenPair), args.Error(1)
 }
 
-func (m *MockAuthService) Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool) error {
-	args := m.Called(ctx, userID, sessionID, allDevices)
+func (m *MockAuthService) Logout(ctx context.Context, userID, sessionID domain.ID, allDevices bool, accessToken string) error {
+	args := m.Called(ctx, userID, sessionID, allDevices, accessToken)
 	return args.Error(0)
 }
 
@@ -468,7 +468,7 @@ func TestAuthHandler_Logout_Success(t *testing.T) {
 	ctx = middleware.WithSessionID(ctx, sessionID)
 	req = req.WithContext(ctx)
 
-	mockAuth.On("Logout", mock.Anything, userID, sessionID, false).Return(nil)
+	mockAuth.On("Logout", mock.Anything, userID, sessionID, false, mock.Anything).Return(nil)
 
 	handler.Logout(rr, req)
 

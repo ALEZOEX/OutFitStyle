@@ -32,7 +32,7 @@ func TestTokenService_HS256_GenerateAndValidate(t *testing.T) {
 	assert.WithinDuration(t, time.Now().Add(15*time.Minute), expiresAt, 2*time.Second)
 
 	// Валидация токена
-	validatedUserID, validatedSessionID, err := service.ValidateAccessToken(token)
+	validatedUserID, validatedSessionID, _, err := service.ValidateAccessToken(token)
 	require.NoError(t, err)
 	assert.Equal(t, userID, validatedUserID)
 	assert.Equal(t, sessionID, validatedSessionID)
@@ -50,11 +50,11 @@ func TestTokenService_HS256_InvalidToken(t *testing.T) {
 	require.NoError(t, err)
 
 	// Неверный токен
-	_, _, err = service.ValidateAccessToken("invalid.token.here")
+	_, _, _, err = service.ValidateAccessToken("invalid.token.here")
 	assert.Error(t, err)
 
 	// Пустой токен
-	_, _, err = service.ValidateAccessToken("")
+	_, _, _, err = service.ValidateAccessToken("")
 	assert.Error(t, err)
 }
 
@@ -78,7 +78,7 @@ func TestTokenService_HS256_ExpiredToken(t *testing.T) {
 	// Ждём истечения токена
 	time.Sleep(10 * time.Millisecond)
 
-	_, _, err = service.ValidateAccessToken(token)
+	_, _, _, err = service.ValidateAccessToken(token)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "expired")
 }
@@ -183,7 +183,7 @@ func TestTokenService_TokenClaims(t *testing.T) {
 	require.NoError(t, err)
 
 	// Проверяем, что токен содержит правильные claims
-	validatedUserID, validatedSessionID, err := service.ValidateAccessToken(token)
+	validatedUserID, validatedSessionID, _, err := service.ValidateAccessToken(token)
 	require.NoError(t, err)
 
 	assert.Equal(t, userID.String(), validatedUserID.String())
@@ -213,10 +213,10 @@ func TestTokenService_DifferentUsers(t *testing.T) {
 	require.NoError(t, err)
 
 	// Валидируем токены
-	validatedUserID1, _, err := service.ValidateAccessToken(token1)
+	validatedUserID1, _, _, err := service.ValidateAccessToken(token1)
 	require.NoError(t, err)
 
-	validatedUserID2, _, err := service.ValidateAccessToken(token2)
+	validatedUserID2, _, _, err := service.ValidateAccessToken(token2)
 	require.NoError(t, err)
 
 	// Пользователи должны быть разными

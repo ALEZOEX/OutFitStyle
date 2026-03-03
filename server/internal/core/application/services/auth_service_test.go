@@ -183,6 +183,26 @@ func (m *MockSessionRepository) ListByUser(ctx context.Context, userID domain.ID
 	return args.Get(0).([]repositories.Session), args.Error(1)
 }
 
+// MockTokenBlacklist - мок-реализация TokenBlacklist для тестов
+type MockTokenBlacklist struct {
+	mock.Mock
+}
+
+func (m *MockTokenBlacklist) IsBlacklisted(ctx context.Context, jti string) (bool, error) {
+	args := m.Called(ctx, jti)
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockTokenBlacklist) Add(ctx context.Context, jti string, ttl time.Duration) error {
+	args := m.Called(ctx, jti, ttl)
+	return args.Error(0)
+}
+
+func (m *MockTokenBlacklist) Remove(ctx context.Context, jti string) error {
+	args := m.Called(ctx, jti)
+	return args.Error(0)
+}
+
 func (m *MockSessionRepository) UpdateDeviceInfo(ctx context.Context, sessionID domain.ID, p repositories.UpdateDeviceInfoParams) error {
 	args := m.Called(ctx, sessionID, p)
 	return args.Error(0)
@@ -208,9 +228,9 @@ func (m *MockTokenService) GenerateAccessToken(userID, sessionID domain.ID) (tok
 	return args.String(0), args.Get(1).(time.Time), args.Error(2)
 }
 
-func (m *MockTokenService) ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, err error) {
+func (m *MockTokenService) ValidateAccessToken(tokenString string) (userID domain.ID, sessionID domain.ID, jti string, err error) {
 	args := m.Called(tokenString)
-	return args.Get(0).(domain.ID), args.Get(1).(domain.ID), args.Error(2)
+	return args.Get(0).(domain.ID), args.Get(1).(domain.ID), args.String(2), args.Error(3)
 }
 
 func (m *MockTokenService) AccessTTL() time.Duration {
@@ -230,7 +250,7 @@ func TestAuthService_Register(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, zap.NewNop())
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, new(MockTokenBlacklist), zap.NewNop())
 
 	// Тестовые данные
 	input := domain.UserRegistration{
@@ -270,7 +290,7 @@ func TestAuthService_Login_Success(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, zap.NewNop())
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, new(MockTokenBlacklist), zap.NewNop())
 
 	// Тестовые данные
 	password := "SecureP@ssw0rd123"  // 12+ символов: uppercase, lowercase, digit, special
