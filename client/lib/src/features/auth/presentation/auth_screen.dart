@@ -59,7 +59,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     try {
       // 1. Инициализация GoogleSignIn
       print('[Google Sign-In] Инициализация GoogleSignIn...');
-      final googleSignIn = GoogleSignIn();
+      // Web client ID из Firebase Console → Project Settings → General → Your apps → Web app
+      // Временно используем Android client ID (нужно получить Web client ID)
+      final googleSignIn = GoogleSignIn(
+        clientId: '242419520610-9o9n26d2qko4amt6h7g6as7m0t4icpf8.apps.googleusercontent.com',
+      );
       
       // 2. Вызов signIn()
       print('[Google Sign-In] Вызов signIn()...');
