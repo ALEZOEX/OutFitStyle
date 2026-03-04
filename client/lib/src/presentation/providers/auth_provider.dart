@@ -29,13 +29,14 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 /// Провайдер для получения userId пользователя
 final userIdProvider = FutureProvider<String?>((ref) async {
-  final authRepo = ref.read(authRepositoryProvider);
+  final authRepo = ref.watch(authRepositoryProvider);
   return authRepo.getUserId();
 });
 
 /// Провайдер состояния авторизации
 final authStateProvider = StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
-  return AuthStateNotifier(ref.read(authRepositoryProvider));
+  final authRepository = ref.watch(authRepositoryProvider);
+  return AuthStateNotifier(authRepository);
 });
 
 class AuthStateNotifier extends StateNotifier<AuthState> {
@@ -71,7 +72,7 @@ class AuthState {
 
 /// Провайдер для проверки прав администратора
 final adminAccessProvider = FutureProvider<bool>((ref) async {
-  final authRepo = ref.read(authRepositoryProvider);
+  final authRepo = ref.watch(authRepositoryProvider);
   final user = await authRepo.getCurrentUser();
   return user?['role'] == 'admin';
 });
