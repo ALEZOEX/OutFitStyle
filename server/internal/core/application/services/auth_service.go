@@ -293,6 +293,8 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 			OAuthID:       &gUser.ID, // Сохраняем Google sub
 			Locale:        ptr("ru"),
 			Timezone:      ptr("Europe/Moscow"),
+			CreatedAt:     time.Now(), // Устанавливаем время создания
+			UpdatedAt:     time.Now(), // Устанавливаем время обновления
 		}
 
 		if err := s.userRepo.CreateUser(ctx, newUser); err != nil {
