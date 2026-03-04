@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../presentation/providers/auth_provider.dart';
 import '../../../presentation/routing/router.dart';
 import '../../../ui/misc/app_avatar.dart';
-import '../../../models/token_pair.dart';
 import '../../../services/auth_service.dart' as auth_service;
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
@@ -52,8 +51,34 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   /// Для Web используется Firebase Auth signInWithPopup (не требует redirect_uri)
   Future<void> _signInWithGoogle() async {
     print('[Google Sign-In] Начало входа через Firebase Auth...');
-    ref.read(authLoadingProvider.notifier).state = true;
-    ref.read(authErrorProvider.notifier).state = null;
+    
+    // Показываем модальное окно ожидания
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Нельзя закрыть кликом вне
+      builder: (context) => PopScope(
+        canPop: false, // Нельзя закрыть кнопкой назад
+        child: AlertDialog(
+          title: const Text('Вход через Google'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Откройте окно Google для входа...'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Отмена'),
+            ),
+          ],
+        ),
+      ),
+    );
 
     try {
       // Используем AuthService который корректно работает на Web
@@ -65,6 +90,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       print('[Google Sign-In] Вызов loginWithGoogle()...');
       final tokenPair = await authService.loginWithGoogle();
       print('[Google Sign-In] Токены получены успешно');
+
+      // Закрываем модальное окно
+      if (mounted) Navigator.of(context).pop(true);
 
       // Обновляем состояние авторизации
       final authRepo = ref.read(authRepositoryProvider);
@@ -84,12 +112,28 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     } catch (e, stackTrace) {
       print('[Google Sign-In] ❌ ОШИБКА: $e');
       print('[Google Sign-In] Stack trace: $stackTrace');
+      
+      // Закрываем модальное окно
+      if (mounted) Navigator.of(context).pop(false);
+      
+      // Показываем ошибку
       if (mounted) {
         ref.read(authErrorProvider.notifier).state = e.toString();
-      }
-    } finally {
-      if (mounted) {
-        ref.read(authLoadingProvider.notifier).state = false;
+        
+        // Показываем диалог с ошибкой
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Ошибка входа'),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       }
     }
   }
