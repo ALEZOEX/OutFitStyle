@@ -77,21 +77,24 @@ class AuthRepository implements IAuthRepository {
     // Проверяем, не истёк ли токен
     if (tokens.isExpired) {
       // Пробуем обновить токен
-      return _refreshToken();
+      return refreshToken();
     }
 
     return true;
   }
 
-  /// Обновление токена
-  Future<bool> _refreshToken() async {
+  @override
+  Future<bool> refreshToken() async {
     try {
+      print('[AuthRepository] Refresh токена...');
       final tokens = await authStorage.readTokenPair();
       if (tokens == null) {
+        print('[AuthRepository] Нет токенов для refresh');
         return false;
       }
 
       // Используем /api/v1/auth/refresh
+      print('[AuthRepository] Запрос к /api/v1/auth/refresh');
       final response = await apiClient.post(
         '/api/v1/auth/refresh',
         data: {
@@ -105,12 +108,15 @@ class AuthRepository implements IAuthRepository {
         final tokensData = data['tokens'] as Map<String, dynamic>? ?? data;
         final tokenPair = TokenPair.fromJson(tokensData);
         await authStorage.writeTokenPair(tokenPair);
+        print('[AuthRepository] Refresh успешен');
         return true;
       }
 
+      print('[AuthRepository] Refresh вернул ${response.statusCode}');
       await authStorage.clearSession();
       return false;
     } catch (e) {
+      print('[AuthRepository] Ошибка refresh: $e');
       await authStorage.clearSession();
       return false;
     }

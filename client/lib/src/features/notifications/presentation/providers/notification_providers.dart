@@ -11,8 +11,12 @@ import '../../data/repositories/notification_repository.dart';
 /// Провайдер для NotificationRepository (использует глобальный ApiClient и AuthStorage)
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
+  final authStorage = ref.watch(authStorageProvider);
   final remoteDataSource = NotificationRemoteDataSource(apiClient);
-  return NotificationRepository(remoteDataSource: remoteDataSource);
+  return NotificationRepository(
+    remoteDataSource: remoteDataSource,
+    authStorage: authStorage,
+  );
 });
 
 /// Состояние списка уведомлений
@@ -182,7 +186,16 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   /// Запустить поллинг для обновления количества непрочитанных
-  void startPolling() {
+  /// Запускается только если пользователь авторизован
+  Future<void> startPolling() async {
+    // Проверяем, авторизован ли пользователь
+    final tokens = await _repository.authStorage.readTokenPair();
+    if (tokens == null || tokens.isExpired) {
+      debugPrint('startPolling: пользователь не авторизован — поллинг не запускается');
+      return;
+    }
+
+    debugPrint('startPolling: запуск поллинга уведомлений');
     _stopPolling();
     _pollingTimer = Timer.periodic(_pollingInterval, (_) {
       _refreshUnreadCount();
