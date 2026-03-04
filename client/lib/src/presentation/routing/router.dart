@@ -35,13 +35,16 @@ import '../../features/notifications/presentation/pages/notifications_page.dart'
 import '../providers/auth_provider.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authStateProvider);
+  final onboardingDone = ref.watch(onboarding_providers.isOnboardingDoneProvider);
+  final isAdminAsync = ref.watch(adminAccessProvider);
+  final refreshListenable = ref.watch(goRouterRefreshProvider);
+
   return GoRouter(
     initialLocation: '/splash',
-    refreshListenable: ref.read(goRouterRefreshProvider),
+    refreshListenable: refreshListenable,
     redirect: (BuildContext context, GoRouterState state) {
       final path = state.uri.toString();
-      final authState = ref.read(authStateProvider);
-      final onboardingDone = ref.read(onboarding_providers.isOnboardingDoneProvider);
 
       // Splash экран - всегда разрешаем
       if (path == '/splash') {
@@ -87,8 +90,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return '/auth?redirect=/admin';
         }
         // Проверяем роль администратора
-        // adminAccessProvider возвращает AsyncValue<bool>, поэтому используем .valueOrNull
-        final isAdminAsync = ref.read(adminAccessProvider);
         final isAdmin = isAdminAsync.valueOrNull ?? false;
         if (!isAdmin) {
           return '/home'; // или специальная страница "доступ запрещён"
