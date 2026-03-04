@@ -12,31 +12,16 @@ import '../../features/notifications/presentation/providers/notification_provide
 /// 2. Если refresh 200 → сохраняем access в память → запускаем загрузку данных
 /// 3. Если refresh 401 → НЕ считаем ошибкой → показываем login screen
 /// 4. Notifications polling запускаем только когда access token != null
-class AuthGate extends ConsumerWidget {
+class AuthGate extends ConsumerStatefulWidget {
   final Widget child;
 
   const AuthGate({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Инициализируем при первом build
-    return _AuthGateInitializer(
-      child: child,
-    );
-  }
+  ConsumerState<AuthGate> createState() => _AuthGateState();
 }
 
-/// Внутренний виджет для инициализации
-class _AuthGateInitializer extends ConsumerStatefulWidget {
-  final Widget child;
-
-  const _AuthGateInitializer({required this.child});
-
-  @override
-  ConsumerState<_AuthGateInitializer> createState() => _AuthGateInitializerState();
-}
-
-class _AuthGateInitializerState extends ConsumerState<_AuthGateInitializer> {
+class _AuthGateState extends ConsumerState<AuthGate> {
   bool _isInitialized = false;
   bool _isRefreshed = false;
 
@@ -82,10 +67,12 @@ class _AuthGateInitializerState extends ConsumerState<_AuthGateInitializer> {
       print('[AuthGate] Ошибка при refresh: $e');
       // НЕ считаем это ошибкой — просто показываем login screen
     } finally {
-      setState(() {
-        _isInitialized = true;
-        _isRefreshed = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+          _isRefreshed = true;
+        });
+      }
     }
   }
 
