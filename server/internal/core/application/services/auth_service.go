@@ -282,6 +282,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 		provider := "google"
 
 		newUser := &domain.User{
+			ID:            domain.NewID(), // Генерируем новый UUID
 			Email:         gUser.Email,
 			PasswordHash:  "", // Пароля нет - пустая строка
 			DisplayName:   &displayName,
