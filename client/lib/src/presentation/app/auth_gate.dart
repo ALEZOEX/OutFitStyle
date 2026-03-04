@@ -6,7 +6,7 @@ import '../routing/router.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
 
 /// AuthGate контролирует startup flow приложения
-/// 
+///
 /// Flow:
 /// 1. При старте вызывается refresh (1 раз)
 /// 2. Если refresh 200 → сохраняем access в память → запускаем загрузку данных
@@ -23,33 +23,40 @@ class AuthGate extends ConsumerStatefulWidget {
 
 class _AuthGateState extends ConsumerState<AuthGate> {
   bool _isInitialized = false;
+  bool _isRefreshed = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeAuth();
+    // Откладываем инициализацию до следующего кадра
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAuth();
+    });
   }
 
   Future<void> _initializeAuth() async {
+    // Проверяем, не инициализировали ли уже
+    if (!mounted || _isRefreshed) return;
+
     print('[AuthGate] Инициализация...');
-    
+
     try {
       // Пытаемся обновить токен через refresh endpoint
       // Refresh token в httpOnly cookie, отправляется автоматически
       final authRepo = ref.read(authRepositoryProvider);
       final refreshed = await authRepo.refreshToken();
-      
+
       if (refreshed) {
         print('[AuthGate] Refresh успешен — access token обновлён');
-        
+
         // Обновляем состояние авторизации
         final authStateNotifier = ref.read(authStateProvider.notifier);
         await authStateNotifier.checkAuth();
-        
+
         // Уведомляем роутер
         final refreshStream = ref.read(goRouterRefreshProvider);
         refreshStream.notifyAuthChanged();
-        
+
         // Запускаем загрузку данных и polling только если авторизованы
         _startDataLoading();
       } else {
@@ -62,17 +69,18 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     } finally {
       setState(() {
         _isInitialized = true;
+        _isRefreshed = true;
       });
     }
   }
 
   void _startDataLoading() {
     print('[AuthGate] Запуск загрузки данных...');
-    
+
     // Загружаем уведомления
     final notificationsNotifier = ref.read(notificationsProvider.notifier);
     notificationsNotifier.loadNotifications(refresh: true);
-    
+
     // Запускаем polling
     notificationsNotifier.startPolling();
   }
