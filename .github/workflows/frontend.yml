@@ -45,6 +45,9 @@ jobs:
             ghcr.io/alezoex/outfitstyle-frontend:${{ github.sha }}
           build-args: |
             API_BASE_URL=
+            COMMIT_SHA=${{ github.sha }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            APP_VERSION=1.0.0
           provenance: false
           sbom: false
 
