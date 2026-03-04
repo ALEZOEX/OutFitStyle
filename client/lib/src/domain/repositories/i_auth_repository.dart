@@ -15,6 +15,9 @@ abstract class IAuthRepository {
   /// Проверить, авторизован ли пользователь (алиас для isLoggedIn)
   Future<bool> isAuthed() => isLoggedIn();
 
+  /// Обновить access токен через refresh endpoint
+  Future<bool> refreshToken();
+
   /// Получить ID пользователя
   Future<String?> getUserId();
 

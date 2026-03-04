@@ -3,45 +3,45 @@ import '../models/token_pair.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart' as core;
 
 /// Веб-версия хранилища аутентификации
-/// Security: Access token хранится в localStorage, refresh token — в httpOnly cookie
+/// Security: Access token хранится ТОЛЬКО в памяти (не в localStorage), refresh token — в httpOnly cookie
+/// Это защищает от XSS атак — токен нельзя украсть через JavaScript
 class AuthStorage implements core.AuthStorage {
-  // Используем обфусцированные ключи для безопасности
-  static const _kAccessToken = 'os_at_l5g8k2';  // access token в localStorage
-  static const _kExpiresAt = 'os_e6w2y8z0';      // obfuscated: expires_at
+  // Используем обфусцированные ключи только для expiresAt (не секрет)
+  static const _kExpiresAt = 'os_e6w2y8z0';  // obfuscated: expires_at
 
   final web.Storage _localStorage;
+
+  // Security: Access token храним только в памяти
+  String? _accessTokenInMemory;
+  DateTime? _expiresAtInMemory;
 
   AuthStorage() : _localStorage = web.window.localStorage;
 
   /// Сохраняет пару токенов
-  /// Security: Access token — в localStorage, refresh token — в httpOnly cookie (устанавливается сервером)
+  /// Security: Access token — только в памяти, refresh token — в httpOnly cookie (устанавливается сервером)
   @override
   Future<void> writeTokenPair(TokenPair pair) async {
-    print('[AuthStorage Web] Сохраняем токен: access=localStorage, refresh=httpOnly_cookie');
+    print('[AuthStorage Web] Сохраняем токен: access=in_memory, refresh=httpOnly_cookie');
     try {
-      // Access token — в localStorage
-      _localStorage.setItem(_kAccessToken, pair.accessToken);
+      // Access token — только в памяти
+      _accessTokenInMemory = pair.accessToken;
+      _expiresAtInMemory = pair.expiresAt;
 
       // ExpiresAt — в localStorage (не секрет, можно для проверки истечения)
       _localStorage.setItem(_kExpiresAt, pair.expiresAt.toIso8601String());
 
       // Refresh token НЕ сохраняем здесь — он приходит в httpOnly cookie от сервера
-      // Cookie устанавливается через заголовок Set-Cookie с флагами:
-      // - HttpOnly (недоступен для JavaScript)
-      // - Secure (только HTTPS)
-      // - SameSite=Strict (защита от CSRF)
-
-      print('[AuthStorage Web] Токен сохранён успешно (access в localStorage, refresh в cookie)');
+      print('[AuthStorage Web] Токен сохранён успешно (access в памяти, refresh в cookie)');
     } catch (e) {
       print('[AuthStorage Web] Ошибка сохранения токена: $e');
       rethrow;
     }
   }
 
-  /// Читает access токен из localStorage
+  /// Читает access токен из памяти
   @override
   Future<String?> readAccessToken() async {
-    return _localStorage.getItem(_kAccessToken);
+    return _accessTokenInMemory;
   }
 
   /// Читает refresh токен
@@ -56,17 +56,17 @@ class AuthStorage implements core.AuthStorage {
   }
 
   /// Читает пару токенов
-  /// Access token — из localStorage, refresh token — null (cookie)
+  /// Access token — из памяти, refresh token — null (cookie)
   @override
   Future<TokenPair?> readTokenPair() async {
     try {
-      final access = _localStorage.getItem(_kAccessToken);
+      final access = _accessTokenInMemory;
       final expiresAtStr = _localStorage.getItem(_kExpiresAt);
 
       print('[AuthStorage Web] Чтение токена: access=${access != null ? "present" : "null"}');
 
       if (access == null) {
-        print('[AuthStorage Web] Access token не найден в localStorage');
+        print('[AuthStorage Web] Access token не найден в памяти');
         return null;
       }
 
@@ -91,14 +91,14 @@ class AuthStorage implements core.AuthStorage {
   Future<void> clearSession() async {
     try {
       print('[AuthStorage Web] Очистка сессии');
-      // Очищаем access token из localStorage
-      _localStorage.removeItem(_kAccessToken);
+      // Очищаем access token из памяти
+      _accessTokenInMemory = null;
+      _expiresAtInMemory = null;
 
       // Очищаем expiresAt из localStorage
       _localStorage.removeItem(_kExpiresAt);
 
       // Очищаем refresh token cookie (устанавливаем expired cookie)
-      // Cookie будет удалён браузером
       web.document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; Secure; SameSite=Strict';
 
       print('[AuthStorage Web] Сессия очищена');

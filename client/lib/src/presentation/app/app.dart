@@ -5,42 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/app_theme.dart';
 import '../../theme/theme_controller.dart';
-import '../providers/auth_provider.dart';
 import '../routing/router.dart';
-import '../../features/notifications/presentation/providers/notification_providers.dart';
+import 'auth_gate.dart';
 import '../../features/settings/presentation/screens/language_screen.dart';
-
-/// Виджет для инициализации состояния авторизации
-class AuthInitializer extends ConsumerStatefulWidget {
-  final Widget child;
-
-  const AuthInitializer({super.key, required this.child});
-
-  @override
-  ConsumerState<AuthInitializer> createState() => _AuthInitializerState();
-}
-
-class _AuthInitializerState extends ConsumerState<AuthInitializer> {
-  @override
-  void initState() {
-    super.initState();
-    // Инициализируем состояние авторизации при запуске
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authStateNotifier = ref.read(authStateProvider.notifier);
-      authStateNotifier.checkAuth();
-
-      // Инициализируем загрузку уведомлений и запускаем polling
-      final notificationsNotifier = ref.read(notificationsProvider.notifier);
-      notificationsNotifier.loadNotifications(refresh: true);
-      notificationsNotifier.startPolling();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-}
 
 class OutfitStyleApp extends ConsumerWidget {
   const OutfitStyleApp({super.key});
@@ -67,7 +34,11 @@ class OutfitStyleApp extends ConsumerWidget {
       ),
     );
 
-    return AuthInitializer(
+    // AuthGate контролирует startup flow:
+    // 1. Refresh при старте (1 раз)
+    // 2. Запуск polling только при авторизованном пользователе
+    // 3. Нет 401-спама при старте
+    return AuthGate(
       child: MaterialApp.router(
         title: 'OutfitStyle',
         debugShowCheckedModeBanner: false,

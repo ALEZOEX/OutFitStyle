@@ -6,9 +6,13 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
 import 'src/presentation/app/app.dart';
+import 'src/core/config/build_stamp.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Выводим build stamp
+  BuildStamp.printStamp();
 
   // Инициализируем Firebase на web и mobile
   if (kIsWeb) {
