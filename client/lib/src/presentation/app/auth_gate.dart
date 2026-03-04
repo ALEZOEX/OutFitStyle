@@ -12,16 +12,31 @@ import '../../features/notifications/presentation/providers/notification_provide
 /// 2. Если refresh 200 → сохраняем access в память → запускаем загрузку данных
 /// 3. Если refresh 401 → НЕ считаем ошибкой → показываем login screen
 /// 4. Notifications polling запускаем только когда access token != null
-class AuthGate extends ConsumerStatefulWidget {
+class AuthGate extends ConsumerWidget {
   final Widget child;
 
   const AuthGate({super.key, required this.child});
 
   @override
-  ConsumerState<AuthGate> createState() => _AuthGateState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Инициализируем при первом build
+    return _AuthGateInitializer(
+      child: child,
+    );
+  }
 }
 
-class _AuthGateState extends ConsumerState<AuthGate> {
+/// Внутренний виджет для инициализации
+class _AuthGateInitializer extends ConsumerStatefulWidget {
+  final Widget child;
+
+  const _AuthGateInitializer({required this.child});
+
+  @override
+  ConsumerState<_AuthGateInitializer> createState() => _AuthGateInitializerState();
+}
+
+class _AuthGateInitializerState extends ConsumerState<_AuthGateInitializer> {
   bool _isInitialized = false;
   bool _isRefreshed = false;
 
@@ -42,7 +57,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
     try {
       // Пытаемся обновить токен через refresh endpoint
-      // Refresh token в httpOnly cookie, отправляется автоматически
+      // Refresh token в httpOnly cookie, отправляется браузером автоматически
       final authRepo = ref.read(authRepositoryProvider);
       final refreshed = await authRepo.refreshToken();
 
