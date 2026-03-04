@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../core/api/api_config.dart';
 import '../../core/api/api_client.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
@@ -93,13 +94,20 @@ class AuthRepository implements IAuthRepository {
         return false;
       }
 
+      // На Web refresh token в httpOnly cookie, отправляется браузером автоматически
+      // На Mobile refresh token в body запроса
+      final refreshToken = tokens.refreshToken;
+      if (refreshToken.isEmpty) {
+        print('[AuthRepository] Нет refresh токена (web: cookie / mobile: storage)');
+        // На Web это нормально — cookie отправится автоматически
+        // На Mobile — пользователь не авторизован
+      }
+
       // Используем /api/v1/auth/refresh
       print('[AuthRepository] Запрос к /api/v1/auth/refresh');
       final response = await apiClient.post(
         '/api/v1/auth/refresh',
-        data: {
-          'refresh_token': tokens.refreshToken,
-        },
+        data: kIsWeb ? null : {'refresh_token': refreshToken},
       );
 
       if (response.statusCode == 200) {
