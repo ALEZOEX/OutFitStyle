@@ -51,11 +51,23 @@ class SessionManager {
   final SharedPreferences _sharedPreferences;
 
   UserSession? _currentUserSession;
-  StreamController<UserSession?>? _sessionStreamController;
+  late final StreamController<UserSession?> _sessionStreamController;
+  StreamSubscription<User?>? _authSubscription;
 
   SessionManager(this._firebaseAuth, this._sharedPreferences) {
+    _sessionStreamController = StreamController<UserSession?>.broadcast();
     _initializeSession();
     _setupAuthStateListener();
+  }
+
+  /// Маскирование email для логирования
+  String _maskEmail(String email) {
+    final parts = email.split('@');
+    if (parts.length != 2) return '***';
+    final name = parts[0];
+    final domain = parts[1];
+    if (name.length <= 2) return '*@$domain';
+    return '${name[0]}${'*' * (name.length - 2)}${name[name.length - 1]}@$domain';
   }
 
   /// Инициализация сессии из сохраненного состояния
@@ -68,19 +80,9 @@ class SessionManager {
             jsonDecode(sessionJson) as Map,
           ),
         );
-
-        // Проверяем, не истекла ли сессия (по умолчанию 24 часа)
-        final now = DateTime.now();
-        final sessionAge = now.difference(session.loginTime);
-        if (sessionAge.inHours < 24) {
-          _currentUserSession = session;
-        } else {
-          // Сессия истекла, очищаем
-          AppLogger.info('Session expired for user: ${session.uid}');
-          _clearSession();
-        }
+        _currentUserSession = session;
+        AppLogger.info('Session restored for user: ${_maskEmail(session.email ?? 'unknown')}');
       } catch (e) {
-        // Ошибка при десериализации сессии, очищаем
         AppLogger.error('Error deserializing session: $e', e);
         _clearSession();
       }
@@ -89,15 +91,15 @@ class SessionManager {
 
   /// Установка слушателя состояния аутентификации
   void _setupAuthStateListener() {
-    _firebaseAuth.authStateChanges().listen((firebaseUser) {
+    _authSubscription = _firebaseAuth.authStateChanges().listen((firebaseUser) {
       if (firebaseUser == null) {
         // Пользователь вышел, очищаем сессию
         AppLogger.info('User signed out, clearing session');
         _clearSession();
       } else {
-        // Обновляем сессию, если пользователь вошел
+        // Обновляем сессию только если UID изменился
         if (_currentUserSession?.uid != firebaseUser.uid) {
-          AppLogger.info('User authenticated: ${firebaseUser.uid}');
+          AppLogger.info('User authenticated: ${_maskEmail(firebaseUser.email ?? 'unknown')}');
           _updateSessionFromFirebase(firebaseUser);
         }
       }
@@ -108,17 +110,13 @@ class SessionManager {
   UserSession? get currentUserSession => _currentUserSession;
 
   /// Проверка, вошел ли пользователь
-  bool get isAuthenticated => _currentUserSession != null;
+  bool get isAuthenticated => _firebaseAuth.currentUser != null;
 
   /// Получение UID текущего пользователя
-  String? get currentUserId => _currentUserSession?.uid;
+  String? get currentUserId => _firebaseAuth.currentUser?.uid;
 
   /// Поток обновлений сессии
-  Stream<UserSession?> get sessionStream {
-    _sessionStreamController ??= StreamController<UserSession?>.broadcast()
-      ..add(_currentUserSession);
-    return _sessionStreamController!.stream;
-  }
+  Stream<UserSession?> get sessionStream => _sessionStreamController.stream;
 
   /// Обновление сессии из Firebase
   Future<void> _updateSessionFromFirebase(User firebaseUser) async {
@@ -138,14 +136,14 @@ class SessionManager {
     );
 
     // Уведомляем подписчиков о новой сессии
-    _sessionStreamController?.add(_currentUserSession);
-    AppLogger.info('Session updated for user: ${firebaseUser.uid}');
+    _sessionStreamController.add(_currentUserSession);
+    AppLogger.info('Session updated for user: ${_maskEmail(firebaseUser.email ?? 'unknown')}');
   }
 
   /// Вход пользователя
   Future<bool> signIn({String? email, String? password}) async {
     try {
-      AppLogger.info('Attempting sign in for user: $email');
+      AppLogger.info('Attempting sign in for user: ${_maskEmail(email ?? 'unknown')}');
       UserCredential credential;
 
       if (email != null && password != null) {
@@ -165,12 +163,17 @@ class SessionManager {
         AppLogger.warning('No user in credential after sign in');
         throw Exception('Не удалось получить данные пользователя');
       }
+
+      // _updateSessionFromFirebase вызовется через authStateChanges
+      // Ждем немного чтобы authStateChanges успел сработать
+      await Future.delayed(const Duration(milliseconds: 100));
       
-      await _updateSessionFromFirebase(user);
       AppLogger.info('Sign in successful for user: ${user.uid}');
       return true;
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Sign in error: ${e.code} - ${e.message}', e);
+      return false;
     } catch (e) {
-      // Логирование ошибки входа
       AppLogger.error('Sign in error: $e', e);
       return false;
     }
@@ -182,10 +185,9 @@ class SessionManager {
       final userId = _currentUserSession?.uid;
       AppLogger.info('Signing out user: $userId');
       await _firebaseAuth.signOut();
-      _clearSession();
+      await _clearSession();
       AppLogger.info('Sign out completed for user: $userId');
     } catch (e) {
-      // Логирование ошибки выхода
       AppLogger.error('Sign out error: $e', e);
     }
   }
@@ -193,7 +195,7 @@ class SessionManager {
   /// Регистрация нового пользователя
   Future<bool> signUp(String email, String password) async {
     try {
-      AppLogger.info('Attempting sign up for user: $email');
+      AppLogger.info('Attempting sign up for user: ${_maskEmail(email)}');
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -204,51 +206,62 @@ class SessionManager {
         AppLogger.warning('No user in credential after sign up');
         throw Exception('Не удалось получить данные пользователя');
       }
+
+      // _updateSessionFromFirebase вызовется через authStateChanges
+      // Ждем немного чтобы authStateChanges успел сработать
+      await Future.delayed(const Duration(milliseconds: 100));
       
-      await _updateSessionFromFirebase(user);
       AppLogger.info('Sign up successful for user: ${user.uid}');
       return true;
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Sign up error: ${e.code} - ${e.message}', e);
+      return false;
     } catch (e) {
-      // Логирование ошибки регистрации
       AppLogger.error('Sign up error: $e', e);
       return false;
     }
   }
 
   /// Обновление данных пользователя
-  Future<bool> updateUserProfile(
-      {String? displayName, String? photoUrl}) async {
+  Future<bool> updateUserProfile({String? displayName, String? photoUrl}) async {
     try {
       final user = _firebaseAuth.currentUser;
-      if (user != null) {
-        AppLogger.info('Updating profile for user: ${user.uid}');
-        await user.updateDisplayName(displayName);
-        if (photoUrl != null) {
-          await user.updatePhotoURL(photoUrl);
-        }
-
-        // Обновляем сессию с новыми данными
-        _currentUserSession = UserSession(
-          uid: user.uid,
-          email: user.email,
-          displayName: displayName ?? user.displayName,
-          photoUrl: photoUrl ?? user.photoURL,
-          loginTime: _currentUserSession!.loginTime,
-          isEmailVerified: user.emailVerified,
-        );
-
-        // Сохраняем обновленную сессию
-        await _sharedPreferences.setString(
-          'user_session',
-          jsonEncode(_currentUserSession!.toJson()),
-        );
-
-        // Уведомляем подписчиков
-        _sessionStreamController?.add(_currentUserSession);
-        AppLogger.info('Profile updated for user: ${user.uid}');
-        return true;
+      final currentSession = _currentUserSession;
+      
+      if (user == null || currentSession == null) {
+        AppLogger.warning('No user or session for profile update');
+        return false;
       }
-      return false;
+
+      AppLogger.info('Updating profile for user: ${user.uid}');
+      
+      if (displayName != null) {
+        await user.updateDisplayName(displayName);
+      }
+      if (photoUrl != null) {
+        await user.updatePhotoURL(photoUrl);
+      }
+
+      // Обновляем сессию с новыми данными
+      _currentUserSession = UserSession(
+        uid: user.uid,
+        email: user.email,
+        displayName: displayName ?? user.displayName,
+        photoUrl: photoUrl ?? user.photoURL,
+        loginTime: currentSession.loginTime,
+        isEmailVerified: user.emailVerified,
+      );
+
+      // Сохраняем обновленную сессию
+      await _sharedPreferences.setString(
+        'user_session',
+        jsonEncode(_currentUserSession!.toJson()),
+      );
+
+      // Уведомляем подписчиков
+      _sessionStreamController.add(_currentUserSession);
+      AppLogger.info('Profile updated for user: ${user.uid}');
+      return true;
     } catch (e) {
       AppLogger.error('Error updating profile: $e', e);
       return false;
@@ -260,38 +273,41 @@ class SessionManager {
     try {
       final user = _firebaseAuth.currentUser;
       if (user != null) {
-        AppLogger.info('Sending email verification to: ${user.email}');
+        AppLogger.info('Sending email verification to: ${_maskEmail(user.email ?? 'unknown')}');
         await user.sendEmailVerification();
-        AppLogger.info('Email verification sent to: ${user.email}');
+        AppLogger.info('Email verification sent');
       }
     } catch (e) {
       AppLogger.error('Error sending email verification: $e', e);
+      rethrow;
     }
   }
 
   /// Сброс пароля
   Future<void> resetPassword(String email) async {
     try {
-      AppLogger.info('Resetting password for: $email');
+      AppLogger.info('Resetting password for: ${_maskEmail(email)}');
       await _firebaseAuth.sendPasswordResetEmail(email: email);
-      AppLogger.info('Password reset email sent to: $email');
+      AppLogger.info('Password reset email sent');
     } catch (e) {
       AppLogger.error('Error resetting password: $e', e);
+      rethrow;
     }
   }
 
   /// Очистка сессии
-  void _clearSession() {
+  Future<void> _clearSession() async {
     final userId = _currentUserSession?.uid;
     _currentUserSession = null;
-    _sharedPreferences.remove('user_session');
-    _sessionStreamController?.add(null);
+    await _sharedPreferences.remove('user_session');
+    _sessionStreamController.add(null);
     AppLogger.info('Session cleared for user: $userId');
   }
 
   /// Закрытие потока сессии
   void dispose() {
-    _sessionStreamController?.close();
+    _authSubscription?.cancel();
+    _sessionStreamController.close();
     AppLogger.info('Session manager disposed');
   }
 }
