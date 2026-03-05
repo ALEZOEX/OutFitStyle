@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../auth/session_manager.dart';
 import '../../../presentation/providers/session_provider.dart';
 import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/max_width_container.dart';
@@ -9,7 +10,6 @@ import '../../achievements/data/repositories/achievements_repository.dart';
 import '../../achievements/presentation/providers/achievements_providers.dart';
 import 'providers/profile_provider.dart';
 import '../../admin/presentation/providers/admin_auth_provider.dart';
-import '../../../../auth/session_manager.dart';
 
 /// Экран профиля пользователя
 class ProfileScreen extends ConsumerWidget {
