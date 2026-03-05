@@ -8,22 +8,21 @@ import 'firebase_options.dart';
 import 'src/presentation/app/app.dart';
 import 'src/core/config/build_stamp.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Выводим build stamp
-  BuildStamp.printStamp();
-
-  // Инициализируем Firebase на web и mobile
+/// Provider для инициализации Firebase
+final firebaseInitProvider = FutureProvider<void>((ref) async {
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
     debugPrint('📝 Web-версия: Firebase инициализирован');
-  } else {
-    // Mobile будет инициализирован в AuthService
-    debugPrint('📱 Mobile-версия: Firebase будет инициализирован в AuthService');
   }
+});
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Выводим build stamp
+  BuildStamp.printStamp();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -32,7 +31,23 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      child: const OutfitStyleApp(),
+      child: const _FirebaseInitWrapper(
+        child: OutfitStyleApp(),
+      ),
     ),
   );
+}
+
+/// Виджет для инициализации Firebase внутри ProviderScope
+class _FirebaseInitWrapper extends ConsumerWidget {
+  final Widget child;
+
+  const _FirebaseInitWrapper({required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Инициализируем Firebase асинхронно
+    ref.watch(firebaseInitProvider);
+    return child;
+  }
 }
