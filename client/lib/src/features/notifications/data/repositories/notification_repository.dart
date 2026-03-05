@@ -1,5 +1,5 @@
 import '../../../../core/api/api_client.dart';
-import '../../../../core/services/auth_storage.dart';
+import '../../../../services/auth_storage.dart';
 import '../datasources/notification_remote_data_source.dart';
 import '../models/notification_dto.dart';
 

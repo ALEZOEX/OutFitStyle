@@ -43,6 +43,8 @@ class SyncManager {
     }
 
     try {
+      // Получаем userId из Firebase Auth через FirebaseAuth.instance
+      // SessionManager не доступен здесь (циклическая зависимость)
       _cachedUserId = FirebaseAuth.instance.currentUser?.uid;
       return _cachedUserId;
     } catch (e, stackTrace) {

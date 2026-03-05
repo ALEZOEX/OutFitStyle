@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,14 +15,27 @@ final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async 
 ///
 /// Пример использования:
 /// ```dart
-/// // Через async/await:
-/// final sessionManager = await ref.read(sessionManagerProvider.future);
+/// final sessionManager = ref.read(sessionManagerProvider);
 /// ```
-final sessionManagerProvider = FutureProvider<SessionManager>((ref) async {
-  final firebaseAuth = FirebaseAuth.instance;
-  final sharedPreferences = await ref.watch(sharedPreferencesProvider.future);
-
-  return SessionManager(firebaseAuth, sharedPreferences);
+final sessionManagerProvider = Provider<SessionManager>((ref) {
+  // Получаем SharedPreferences асинхронно через FutureProvider
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  
+  return prefsAsync.when(
+    data: (prefs) {
+      final manager = SessionManager(FirebaseAuth.instance, prefs);
+      // ✅ Правильная очистка при уничтожении провайдера
+      ref.onDispose(() => manager.dispose());
+      return manager;
+    },
+    loading: () {
+      // Возвращаем временный SessionManager (не используется)
+      throw StateError('SharedPreferences не инициализированы');
+    },
+    error: (e, st) {
+      throw StateError('Ошибка инициализации SharedPreferences: $e');
+    },
+  );
 });
 
 /// Провайдер состояния авторизации (StreamProvider\<bool\>)
@@ -40,23 +51,6 @@ final sessionManagerProvider = FutureProvider<SessionManager>((ref) async {
 /// );
 /// ```
 final authStateProvider = StreamProvider<bool>((ref) {
-  // Создаём контроллер для трансляции authStateChanges
-  final controller = StreamController<bool>.broadcast();
-  
-  // Подписываемся на SessionManager асинхронно
-  ref.watch(sessionManagerProvider.future).then((sessionManager) {
-    final subscription = sessionManager.authStateChanges.listen(
-      controller.add,
-      onError: controller.addError,
-      onDone: controller.close,
-    );
-    
-    // Отменяем подписку при уничтожении провайдера
-    ref.onDispose(() => subscription.cancel());
-  }).catchError((error) {
-    controller.addError(error);
-    controller.close();
-  });
-  
-  return controller.stream;
+  final sessionManager = ref.watch(sessionManagerProvider);
+  return sessionManager.authStateChanges;
 });

@@ -1,5 +1,5 @@
 import 'package:outfitstyle_client/src/core/models/token_pair.dart';
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import 'package:dio/dio.dart';
 
 /// Сервис аутентификации для Market Service API

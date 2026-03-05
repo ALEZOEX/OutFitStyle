@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 import '../core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/models/token_pair.dart';
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 
 class AuthenticatedHttpClient extends http.BaseClient {
   final http.Client _inner;

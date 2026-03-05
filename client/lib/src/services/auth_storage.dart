@@ -1,9 +1,18 @@
 import 'package:outfitstyle_client/src/core/models/token_pair.dart';
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Хранилище токенов для Market Service API
+/// Абстрактный класс хранилища токенов для Market Service API
+abstract class AuthStorage {
+  Future<void> writeTokenPair(TokenPair pair);
+  Future<String?> readAccessToken();
+  Future<String?> readRefreshToken();
+  Future<TokenPair?> readTokenPair();
+  Future<DateTime?> readExpiresAt();
+  Future<void> clearSession();
+}
+
+/// Реализация хранилища токенов для Market Service API
 ///
 /// Используется ТОЛЬКО для хранения JWT токенов Market Service.
 /// НЕ используется для пользовательской аутентификации (Firebase Auth).
@@ -14,11 +23,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Пользовательская аутентификация: SessionManager (Firebase Auth)
 /// Market Service API: AuthStorage (JWT токены)
-class AuthStorage {
+class AuthStorageImpl implements AuthStorage {
   final SharedPreferences _prefs;
   String? _memoryAccessToken; // Для web: access token в памяти
 
-  AuthStorage(this._prefs);
+  AuthStorageImpl(this._prefs);
 
   @override
   Future<void> writeTokenPair(TokenPair pair) async {

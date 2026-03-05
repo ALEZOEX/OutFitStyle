@@ -43,7 +43,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
     try {
       // Получаем SessionManager и подписываемся на authStateChanges
-      final sessionManager = await ref.read(sessionManagerProvider.future);
+      final sessionManager = ref.read(sessionManagerProvider);
 
       _authSubscription = sessionManager.authStateChanges.listen(
         (isAuthenticated) {
