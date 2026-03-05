@@ -200,11 +200,24 @@ func main() {
 	}
 
 	googleClient := ext.NewGoogleAuthClient(cfg.Security.GoogleClientID)
-	
+
 	// Создаём blacklist репозиторий для отзыв токенов
 	tokenBlacklist := redisrepo.NewTokenBlacklistRepository(redisClient)
-	
+
 	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, tokenBlacklist, logger)
+
+	// ---------- Firebase Admin Client (для проверки Firebase ID Token) ----------
+	ctx := context.Background()
+	var firebaseAuthClient middleware.FirebaseAuthClient
+	var firebaseErr error
+	firebaseAuthClient, firebaseErr = middleware.NewFirebaseAdminClient(ctx)
+	if firebaseErr != nil {
+		logger.Warn("Firebase Admin SDK initialization failed, Firebase ID Token auth disabled",
+			zap.Error(firebaseErr))
+		firebaseAuthClient = nil
+	} else {
+		logger.Info("Firebase Admin SDK initialized successfully")
+	}
 
 	// ---------- Rate limit violation repository ----------
 	rateLimitRepo := pg.NewRateLimitViolationRepository(db.Pool())
@@ -610,7 +623,7 @@ func setupRouter(
 
 	// protected
 	protected := api.NewRoute().Subrouter()
-	protected.Use(middleware.AuthMiddleware(authService, apiKeyService))
+	protected.Use(middleware.NewAuthMiddlewareWithFirebase(cfg.Security.JWTSecret, firebaseAuthClient, logger).Handler)
 
 	// Business API-key policies
 	protected.Use(middleware.APIKeyPolicyMiddleware())
