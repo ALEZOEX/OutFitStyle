@@ -1,52 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Провайдер для текущего языка
-final currentLanguageProvider = StateNotifierProvider<LanguageNotifier, String>((ref) {
-  return LanguageNotifier();
-});
-
-class LanguageNotifier extends StateNotifier<String> {
-  LanguageNotifier() : super('ru') {
-    _loadLanguage();
-  }
-
-  Future<void> _loadLanguage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedLanguage = prefs.getString('app_language') ?? 'ru';
-    state = savedLanguage;
-  }
-
-  Future<void> setLanguage(String languageCode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('app_language', languageCode);
-    state = languageCode;
-  }
-}
-
-/// Провайдер для авто-определения языка
-final autoLanguageProvider = StateNotifierProvider<AutoLanguageNotifier, bool>((ref) {
-  return AutoLanguageNotifier();
-});
-
-class AutoLanguageNotifier extends StateNotifier<bool> {
-  AutoLanguageNotifier() : super(true) {
-    _loadAutoLanguage();
-  }
-
-  Future<void> _loadAutoLanguage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final autoLanguage = prefs.getBool('auto_language') ?? true;
-    state = autoLanguage;
-  }
-
-  Future<void> setAutoLanguage(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('auto_language', value);
-    state = value;
-  }
-}
+import '../../providers/language_provider.dart';
 
 /// Модель языка
 class AppLanguage {
@@ -77,7 +32,7 @@ class AppLanguage {
     AppLanguage(code: 'hi', name: 'हिन्दी', flag: '🇮🇳', nativeName: 'हिन्दी'),
     AppLanguage(code: 'tr', name: 'Türkçe', flag: '🇹🇷', nativeName: 'Türkçe'),
     AppLanguage(code: 'pl', name: 'Polski', flag: '🇵🇱', nativeName: 'Polski'),
-    AppLanguage(code: 'uk', name: 'Українська', flag: '🇺🇦', nativeName: 'Українська'),
+    AppLanguage(code: 'uk', name: 'Українская', flag: '🇺🇦', nativeName: 'Українська'),
     AppLanguage(code: 'be', name: 'Беларуская', flag: '🇧🇾', nativeName: 'Беларуская'),
     AppLanguage(code: 'kk', name: 'Қазақша', flag: '🇰🇿', nativeName: 'Қазақша'),
     AppLanguage(code: 'az', name: 'Azərbaycan', flag: '🇦🇿', nativeName: 'Azərbaycan'),
@@ -102,13 +57,13 @@ class LanguageScreen extends ConsumerWidget {
             child: _buildHeader(context),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          
+
           // Авто-определение
           SliverToBoxAdapter(
             child: _buildAutoLanguageSection(context, theme, ref, autoLanguage),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          
+
           // Список языков
           SliverToBoxAdapter(
             child: _buildLanguagesSection(context, theme, ref, currentLanguage, autoLanguage),
@@ -295,7 +250,7 @@ class LanguageScreen extends ConsumerWidget {
           ...AppLanguage.availableLanguages.map((language) {
             final isSelected = currentLanguage == language.code;
             final isDisabled = autoLanguage;
-            
+
             return Column(
               children: [
                 if (AppLanguage.availableLanguages.first != language)

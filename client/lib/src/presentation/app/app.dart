@@ -7,7 +7,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/theme_controller.dart';
 import '../routing/router.dart';
 import 'auth_gate.dart';
-import '../../features/settings/presentation/screens/language_screen.dart';
+import '../../features/settings/providers/language_provider.dart';
 
 class OutfitStyleApp extends ConsumerWidget {
   const OutfitStyleApp({super.key});
@@ -18,45 +18,39 @@ class OutfitStyleApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final languageCode = ref.watch(currentLanguageProvider);
 
-    // Определяем актуальную тему для настройки статус-бара
-    final isDarkMode = themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system &&
-            WidgetsBinding.instance.platformDispatcher.platformBrightness ==
-                Brightness.dark);
+    return MaterialApp.router(
+      title: 'OutfitStyle',
+      debugShowCheckedModeBanner: false,
+      theme: AppThemes.lightTheme,
+      darkTheme: AppThemes.darkTheme,
+      themeMode: themeMode,
+      routerConfig: router,
+      locale: Locale(languageCode),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ru'),
+        Locale('en'),
+      ],
+      builder: (context, child) {
+        final brightness = MediaQuery.platformBrightnessOf(context);
+        final isDark = themeMode == ThemeMode.dark ||
+            (themeMode == ThemeMode.system && brightness == Brightness.dark);
 
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            isDarkMode ? Brightness.light : Brightness.dark,
-        statusBarBrightness:
-            isDarkMode ? Brightness.dark : Brightness.light,
-      ),
-    );
-
-    // AuthGate контролирует startup flow:
-    // 1. Refresh при старте (1 раз)
-    // 2. Запуск polling только при авторизованном пользователе
-    // 3. Нет 401-спама при старте
-    return AuthGate(
-      child: MaterialApp.router(
-        title: 'OutfitStyle',
-        debugShowCheckedModeBanner: false,
-        theme: AppThemes.lightTheme,
-        darkTheme: AppThemes.darkTheme,
-        themeMode: themeMode,
-        routerConfig: router,
-        locale: Locale(languageCode),
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('ru'), // Русский
-          Locale('en'), // Английский
-        ],
-      ),
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness:
+                isDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness:
+                isDark ? Brightness.dark : Brightness.light,
+          ),
+          child: AuthGate(child: child!),
+        );
+      },
     );
   }
 }
