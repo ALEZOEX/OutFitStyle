@@ -21,11 +21,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final authState = ref.read(authStateNotifierProvider);
-      if (authState.currentUser != null) {
+      final userId = authState.currentUser?.uid;
+      if (userId != null) {
         ref
             .read(profileStateNotifierProvider.notifier)
-            .loadUserProfile(authState.currentUser!.uid);
+            .loadUserProfile(userId);
       }
     });
   }
@@ -72,10 +74,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          if (authState.currentUser != null) {
+          final userId = authState.currentUser?.uid;
+          if (userId != null) {
             await ref
                 .read(profileStateNotifierProvider.notifier)
-                .loadUserProfile(authState.currentUser!.uid);
+                .loadUserProfile(userId);
           }
         },
         child: SingleChildScrollView(
