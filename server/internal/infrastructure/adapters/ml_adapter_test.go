@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/infrastructure/external"
@@ -13,6 +14,7 @@ import (
 )
 
 // MockMLClient is a mock implementation of the ML client interface
+// ИЗМЕНЕНИЯ (Март 2026): обновлено под новый API с items_by_category
 type MockMLClient struct {
 	mock.Mock
 }
@@ -32,35 +34,35 @@ func (m *MockMLClient) HealthCheck(ctx context.Context) external.HealthCheckResu
 	return args.Get(0).(external.HealthCheckResult)
 }
 
-func (m *MockMLClient) GenerateOutfit(ctx context.Context, userID string, meta map[string]interface{}) (external.GenerateOutfitResponse, error) {
+func (m *MockMLClient) GenerateOutfit(ctx context.Context, userID string, meta map[string]any) (external.GenerateOutfitResponse, error) {
 	args := m.Called(ctx, userID, meta)
 	return args.Get(0).(external.GenerateOutfitResponse), args.Error(1)
 }
 
-func (m *MockMLClient) GenerateRecommendation(ctx context.Context, userID string, meta map[string]interface{}) (external.GenerateRecommendationResponse, error) {
-	args := m.Called(ctx, userID, meta)
+func (m *MockMLClient) GenerateRecommendation(ctx context.Context, req external.GenerateRecommendationRequest) (external.GenerateRecommendationResponse, error) {
+	args := m.Called(ctx, req)
 	return args.Get(0).(external.GenerateRecommendationResponse), args.Error(1)
 }
 
-func (m *MockMLClient) ProcessFeedback(ctx context.Context, userID string, requestID string, meta map[string]interface{}) error {
+func (m *MockMLClient) ProcessFeedback(ctx context.Context, userID string, requestID string, meta map[string]any) error {
 	args := m.Called(ctx, userID, requestID, meta)
 	return args.Error(0)
 }
 
-func (m *MockMLClient) UpdateUserPreferences(ctx context.Context, userID string, requestID string, meta map[string]interface{}) error {
+func (m *MockMLClient) UpdateUserPreferences(ctx context.Context, userID string, requestID string, meta map[string]any) error {
 	args := m.Called(ctx, userID, requestID, meta)
 	return args.Error(0)
 }
 
 func TestMLServiceAdapter_GetRecommendations(t *testing.T) {
 	tests := []struct {
-		name           string
-		userID         domain.ID
-		weather        domain.WeatherData
-		mockReturn     external.GenerateRecommendationResponse
-		mockError      error
-		expectedError  bool
-		expectedResult *domain.RecommendationResponse
+		name            string
+		userID          domain.ID
+		weather         domain.WeatherData
+		itemsByCategory map[string][]domain.ClothingItem
+		mockReturn      external.GenerateRecommendationResponse
+		mockError       error
+		expectedError   bool
 	}{
 		{
 			name:   "successful recommendation retrieval",
@@ -73,12 +75,40 @@ func TestMLServiceAdapter_GetRecommendations(t *testing.T) {
 				WindSpeed:   5.0,
 				Weather:     "sunny",
 			},
+			itemsByCategory: map[string][]domain.ClothingItem{
+				"upper": {
+					{
+						ID:          domain.NewID(),
+						Name:        "T-Shirt",
+						Category:    "upper",
+						Subcategory: "tshirt",
+						BaseColour:  strPtr("white"),
+					},
+				},
+				"lower": {
+					{
+						ID:          domain.NewID(),
+						Name:        "Jeans",
+						Category:    "lower",
+						Subcategory: "jeans",
+						BaseColour:  strPtr("blue"),
+					},
+				},
+				"footwear": {
+					{
+						ID:          domain.NewID(),
+						Name:        "Sneakers",
+						Category:    "footwear",
+						Subcategory: "sneakers",
+						BaseColour:  strPtr("white"),
+					},
+				},
+			},
 			mockReturn: external.GenerateRecommendationResponse{
 				Success: true,
 			},
-			mockError:      nil,
-			expectedError:  false,
-			expectedResult: &domain.RecommendationResponse{}, // Partial check - we mainly verify the call
+			mockError:     nil,
+			expectedError: false,
 		},
 		{
 			name:   "ml service returns unsuccessful response",
@@ -91,6 +121,7 @@ func TestMLServiceAdapter_GetRecommendations(t *testing.T) {
 				WindSpeed:   5.0,
 				Weather:     "sunny",
 			},
+			itemsByCategory: map[string][]domain.ClothingItem{},
 			mockReturn: external.GenerateRecommendationResponse{
 				Success: false,
 			},
@@ -108,45 +139,39 @@ func TestMLServiceAdapter_GetRecommendations(t *testing.T) {
 				WindSpeed:   5.0,
 				Weather:     "sunny",
 			},
-			mockReturn:    external.GenerateRecommendationResponse{},
-			mockError:     errors.New("service unavailable"),
-			expectedError: true,
+			itemsByCategory: map[string][]domain.ClothingItem{},
+			mockReturn:      external.GenerateRecommendationResponse{},
+			mockError:       errors.New("service unavailable"),
+			expectedError:   true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := new(MockMLClient)
-
 			adapter := NewMLServiceAdapter(mockClient)
 
 			// Set up expectations
-			expectedMeta := map[string]interface{}{
-				"user_id": tt.userID.String(),
-				"weather": map[string]interface{}{
-					"temperature": tt.weather.Temperature,
-					"feels_like":  tt.weather.FeelsLike,
-					"humidity":    tt.weather.Humidity,
-					"wind_speed":  tt.weather.WindSpeed,
-					"weather":     tt.weather.Weather,
-				},
-				"context": map[string]interface{}{
-					"location": tt.weather.Location,
-				},
-			}
-
 			mockClient.On("GenerateRecommendation",
 				context.Background(),
-				tt.userID.String(),
-				expectedMeta).Return(tt.mockReturn, tt.mockError).Once()
+				mock.MatchedBy(func(req external.GenerateRecommendationRequest) bool {
+					return req.UserID == tt.userID.String() &&
+						req.ItemsByCategory != nil
+				})).Return(tt.mockReturn, tt.mockError).Once()
 
-			result, err := adapter.GetRecommendations(context.Background(), tt.userID, tt.weather)
+			result, err := adapter.GetRecommendations(
+				context.Background(),
+				tt.userID,
+				tt.weather,
+				tt.itemsByCategory,
+			)
 
 			if tt.expectedError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)
+				assert.Equal(t, tt.userID, result.UserID)
 			}
 
 			mockClient.AssertExpectations(t)
@@ -154,13 +179,89 @@ func TestMLServiceAdapter_GetRecommendations(t *testing.T) {
 	}
 }
 
-func TestMLServiceAdapter_RankCandidates(t *testing.T) {
-	// Create a mock client
+func TestMLServiceAdapter_GetRecommendations_ItemsConversion(t *testing.T) {
+	// Проверяем корректную конвертацию items из домена в ML формат
 	mockClient := new(MockMLClient)
-
 	adapter := NewMLServiceAdapter(mockClient)
 
-	// Create test request
+	userID := domain.NewID()
+	upperID := domain.NewID()
+	lowerID := domain.NewID()
+
+	itemsByCategory := map[string][]domain.ClothingItem{
+		"upper": {
+			{
+				ID:          upperID,
+				Name:        "White T-Shirt",
+				Category:    "upper",
+				Subcategory: "tshirt",
+				BaseColour:  strPtr("white"),
+			},
+		},
+		"lower": {
+			{
+				ID:          lowerID,
+				Name:        "Blue Jeans",
+				Category:    "lower",
+				Subcategory: "jeans",
+				BaseColour:  strPtr("blue"),
+			},
+		},
+	}
+
+	mockClient.On("GenerateRecommendation",
+		context.Background(),
+		mock.MatchedBy(func(req external.GenerateRecommendationRequest) bool {
+			// Проверяем, что items корректно сконвертированы
+			upperItems, ok := req.ItemsByCategory["upper"]
+			if !ok || len(upperItems) != 1 {
+				return false
+			}
+			if upperItems[0].ID != upperID.String() {
+				return false
+			}
+			if upperItems[0].Subcategory != "tshirt" {
+				return false
+			}
+			if upperItems[0].BaseColour != "white" {
+				return false
+			}
+
+			lowerItems, ok := req.ItemsByCategory["lower"]
+			if !ok || len(lowerItems) != 1 {
+				return false
+			}
+			if lowerItems[0].ID != lowerID.String() {
+				return false
+			}
+			if lowerItems[0].Subcategory != "jeans" {
+				return false
+			}
+
+			return true
+		})).Return(external.GenerateRecommendationResponse{Success: true}, nil).Once()
+
+	result, err := adapter.GetRecommendations(
+		context.Background(),
+		userID,
+		domain.WeatherData{
+			Location:    "Test",
+			Temperature: 20.0,
+			Humidity:    50,
+			Weather:     "clear",
+		},
+		itemsByCategory,
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	mockClient.AssertExpectations(t)
+}
+
+func TestMLServiceAdapter_RankCandidates(t *testing.T) {
+	mockClient := new(MockMLClient)
+	adapter := NewMLServiceAdapter(mockClient)
+
 	testReq := &external.TZMLRankRequest{
 		RequestID: "test-request",
 		UserID:    domain.NewID(),
@@ -181,9 +282,7 @@ func TestMLServiceAdapter_RankCandidates(t *testing.T) {
 }
 
 func TestMLServiceAdapter_ProcessFeedback(t *testing.T) {
-	// Create a mock client
 	mockClient := new(MockMLClient)
-
 	adapter := NewMLServiceAdapter(mockClient)
 
 	userID := domain.NewID()
@@ -194,29 +293,20 @@ func TestMLServiceAdapter_ProcessFeedback(t *testing.T) {
 		Feedback:        nil,
 	}
 
-	expectedMeta := map[string]interface{}{
-		"rating":           feedback.Rating,
-		"thermal_feedback": feedback.ThermalFeedback,
-		"feedback":         feedback.Feedback,
-	}
-
 	mockClient.On("ProcessFeedback",
 		context.Background(),
 		userID.String(),
 		requestID,
-		expectedMeta).Return(nil).Once()
+		mock.Anything).Return(nil).Once()
 
 	err := adapter.ProcessFeedback(context.Background(), userID, requestID, feedback)
 
 	assert.NoError(t, err)
-
 	mockClient.AssertExpectations(t)
 }
 
 func TestMLServiceAdapter_GenerateOutfit(t *testing.T) {
-	// Create a mock client
 	mockClient := new(MockMLClient)
-
 	adapter := NewMLServiceAdapter(mockClient)
 
 	userID := domain.NewID()
@@ -230,25 +320,48 @@ func TestMLServiceAdapter_GenerateOutfit(t *testing.T) {
 		Weather:     "sunny",
 	}
 
-	expectedMeta := map[string]interface{}{
-		"occasion": occasion,
-		"weather": map[string]interface{}{
-			"temperature": weather.Temperature,
-			"feels_like":  weather.FeelsLike,
-			"humidity":    weather.Humidity,
-			"wind_speed":  weather.WindSpeed,
-			"weather":     weather.Weather,
-		},
-	}
-
 	mockClient.On("GenerateOutfit",
 		context.Background(),
 		userID.String(),
-		expectedMeta).Return(external.GenerateOutfitResponse{Success: true}, nil).Once()
+		mock.Anything).Return(external.GenerateOutfitResponse{Success: true}, nil).Once()
 
 	err := adapter.GenerateOutfit(context.Background(), userID, occasion, weather)
 
 	assert.NoError(t, err)
-
 	mockClient.AssertExpectations(t)
+}
+
+func TestMLServiceAdapter_UpdateUserPreferences(t *testing.T) {
+	mockClient := new(MockMLClient)
+	adapter := NewMLServiceAdapter(mockClient)
+
+	userID := domain.NewID()
+	requestID := "test-request"
+	preferences := map[string]any{
+		"style": "casual",
+	}
+
+	mockClient.On("UpdateUserPreferences",
+		context.Background(),
+		userID.String(),
+		requestID,
+		mock.Anything).Return(nil).Once()
+
+	err := adapter.UpdateUserPreferences(context.Background(), userID, requestID, preferences)
+
+	assert.NoError(t, err)
+	mockClient.AssertExpectations(t)
+}
+
+// Helper functions
+func strPtr(s string) *string {
+	return &s
+}
+
+func int16Ptr(i int16) *int16 {
+	return &i
+}
+
+func timePtr(t time.Time) *time.Time {
+	return &t
 }

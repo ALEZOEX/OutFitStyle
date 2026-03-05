@@ -33,8 +33,10 @@ from contracts.recommend_contract import (
     RecommendRequest,
     RecommendResponse,
     RecommendOutfit,
+    RecommendOutfitItem,
     RecommendContext,
     UserPreferences,
+    Item,
 )
 from model.enhanced_predictor import EnhancedPredictor
 from model.features_with_priorities import build_feature_frame
@@ -49,7 +51,14 @@ from model.internal_schema import (
 from contracts.event_contract import ActionEvent, ActionEventResponse
 from model.event_logger import log_rank_impression, log_outfits_impression, log_action
 
-from app.filter import WeatherContext, generate_combinations, get_stats, apply_preferences_filter, UserPreferences as FilterUserPreferences
+from app.filter import (
+    WeatherContext,
+    filter_categories,
+    generate_combinations,
+    get_stats,
+    apply_preferences_filter,
+    UserPreferences as FilterUserPreferences,
+)
 
 
 # ═══════════════════════════════════════════
@@ -493,15 +502,15 @@ async def recommend_outfits(
     Полный пайплайн: фильтрация → генерация комбинаций → скоринг → Top-K.
 
     В отличие от /api/rank, этот endpoint:
-    1. Принимает гардероб (списки вещей по категориям)
-    2. Фильтрует абсурдные комбинации (двухуровневая фильтрация)
-    3. Генерирует комбинации из отфильтрованных категорий
+    1. Принимает предметы по категориям (items_by_category)
+    2. Фильтрует категории по погоде (filter_categories)
+    3. Генерирует комбинации из отфильтрованных предметов
     4. Скорит комбинации через CatBoost
     5. Возвращает Top-K рекомендаций
     6. Применяет предпочтения пользователя (стили, бренды, бюджет)
 
     Args:
-        request: RecommendRequest с контекстом и гардеробом
+        request: RecommendRequest с контекстом и items_by_category
         http_request: FastAPI request для заголовков
         response: FastAPI response для заголовков
 
@@ -531,42 +540,39 @@ async def recommend_outfits(
             duration=request.context.duration,
         )
 
-        # 2. Статистика фильтрации (для лога)
-        stats = get_stats(
-            filter_context,
-            request.available_tops,
-            request.available_bottoms,
-            request.available_outerwears,
-            request.available_footwears,
-        )
+        # 2. Конвертируем Pydantic Item в dict для filter.py
+        items_by_category_dict: Dict[str, List[Dict[str, Any]]] = {}
+        for category, items in request.items_by_category.items():
+            items_by_category_dict[category] = [item.model_dump() for item in items]
 
-        # 3. Генерация комбинаций (фильтрация L1 + L2)
-        candidates = generate_combinations(
-            filter_context,
-            request.available_tops,
-            request.available_bottoms,
-            request.available_outerwears,
-            request.available_footwears,
-        )
+        # 3. Статистика до фильтрации
+        stats_before = get_stats(filter_context, items_by_category_dict)
+
+        # 4. Фильтрация по категориям (Уровень 1)
+        filtered_items = filter_categories(filter_context, items_by_category_dict)
+
+        # 5. Статистика после фильтрации
+        stats_after = get_stats(filter_context, filtered_items)
+
+        # 6. Генерация комбинаций (Уровень 2 — стилевые конфликты)
+        candidates = generate_combinations(filtered_items, filter_context)
 
         if not candidates:
             logger.warning(
                 f"No valid combinations for user {user_id}: "
-                f"{stats['total_raw']} raw → 0 after filtering"
+                f"{stats_before['total_items']} items → 0 combinations"
             )
             return RecommendResponse(
                 outfits=[],
-                total_candidates=0,
-                filtered_from=stats["total_raw"],
+                total_combinations=0,
+                filtered_from=stats_before["total_items"],
                 context=request.context.model_dump(),
                 model_version=predictor.get_model_version() if predictor else "unknown",
                 processing_time_ms=0.0,
             )
 
-        # 3.1. Применяем предпочтения пользователя (если указаны)
-        preferences_applied = False
+        # 7. Применяем предпочтения пользователя (если указаны)
         if request.user_preferences:
-            # Конвертируем UserPreferences из контракта в FilterUserPreferences
             filter_prefs = FilterUserPreferences(
                 style_preferences=request.user_preferences.style_preferences,
                 budget_range=request.user_preferences.budget_range,
@@ -576,7 +582,8 @@ async def recommend_outfits(
             # Загружаем данные о товарах из Market Service для фильтрации
             item_prices, item_styles, item_brands = _get_catalog_data()
 
-            # Применяем фильтрацию по предпочтениям
+            # Конвертируем item_prices/item_styles/item_brands по ID
+            # item_prices: {item_id: price}, item_styles: {item_id: [styles]}, item_brands: {item_id: brand}
             candidates = apply_preferences_filter(
                 combinations=candidates,
                 preferences=filter_prefs,
@@ -584,7 +591,6 @@ async def recommend_outfits(
                 item_styles=item_styles,
                 item_brands=item_brands,
             )
-            preferences_applied = True
 
             logger.info(
                 f"[recommend] preferences applied for user {user_id}: "
@@ -593,9 +599,8 @@ async def recommend_outfits(
                 f"brands={request.user_preferences.favorite_brands}"
             )
 
-        # 4. Построение feature frame для CatBoost
+        # 8. Построение feature frame для CatBoost
         # build_feature_frame_v2 ожидает items с полями category/subcategory
-        # Для комбинаций создаём синтетические items
         feature_df = build_feature_frame_v2(
             weather_data={
                 "temperature": request.context.temperature,
@@ -606,7 +611,11 @@ async def recommend_outfits(
             },
             user_profile={
                 "age_range": "adult",
-                "style_preference": request.user_preferences.style_preferences[0] if request.user_preferences and request.user_preferences.style_preferences else "casual",
+                "style_preference": (
+                    request.user_preferences.style_preferences[0]
+                    if request.user_preferences and request.user_preferences.style_preferences
+                    else "casual"
+                ),
                 "temperature_sensitivity": "normal",
                 "formality_preference": "normal",
                 "gender": request.context.gender,
@@ -615,65 +624,90 @@ async def recommend_outfits(
                 {
                     "category": "outfit",
                     "subcategory": "full_look",
-                    "item_name": f"{combo['top']}+{combo['bottom']}+{combo['outerwear']}+{combo['footwear']}",
+                    "item_name": _combo_to_name(combo),
                 }
                 for combo in candidates
             ],
         )
 
-        # 5. Предсказание CatBoost в пуле потоков (неблокирующе)
+        # 9. Предсказание CatBoost в пуле потоков (неблокирующе)
         loop = asyncio.get_event_loop()
         scores = await loop.run_in_executor(
             prediction_pool, predictor.predict, feature_df
         )
 
-        # 6. Ранжирование по убыванию score
-        scored: List[Tuple[dict, float]] = list(zip(candidates, scores))
+        # 10. Ранжирование по убыванию score
+        scored: List[Tuple[Dict[str, Any], float]] = list(zip(candidates, scores))
         scored.sort(key=lambda x: x[1], reverse=True)
 
-        # 7. Diversification: не более 2 одинаковых top **подряд**
-        # Это обеспечивает разнообразие в выдаче
+        # 11. Формирование результата (Top-K с diversification)
         result_outfits: List[RecommendOutfit] = []
-        prev_tops: List[str] = []  # последние 2 top для проверки "подряд"
+        prev_subcategories: List[str] = []  # последние 2 subcategory для diversification
 
         for combo, score in scored:
             if len(result_outfits) >= request.top_k:
                 break
 
-            t = combo["top"]
-
-            # Проверка "не более 2 одинаковых подряд"
-            if len(prev_tops) >= 2 and prev_tops[-1] == t and prev_tops[-2] == t:
-                # Пропускаем этот combo — уже 2 одинаковых top подряд
+            # Diversification: не более 2 одинаковых subcategory подряд
+            upper_sub = combo["upper"].get("subcategory", "")
+            if len(prev_subcategories) >= 2 and prev_subcategories[-1] == upper_sub and prev_subcategories[-2] == upper_sub:
                 continue
 
             result_outfits.append(
                 RecommendOutfit(
-                    top=combo["top"],
-                    bottom=combo["bottom"],
-                    outerwear=combo["outerwear"],
-                    footwear=combo["footwear"],
+                    upper=RecommendOutfitItem(
+                        id=combo["upper"]["id"],
+                        category=combo["upper"]["category"],
+                        subcategory=combo["upper"]["subcategory"],
+                        name=combo["upper"]["name"],
+                        base_colour=combo["upper"]["base_colour"],
+                    ),
+                    lower=RecommendOutfitItem(
+                        id=combo["lower"]["id"],
+                        category=combo["lower"]["category"],
+                        subcategory=combo["lower"]["subcategory"],
+                        name=combo["lower"]["name"],
+                        base_colour=combo["lower"]["base_colour"],
+                    ),
+                    footwear=RecommendOutfitItem(
+                        id=combo["footwear"]["id"],
+                        category=combo["footwear"]["category"],
+                        subcategory=combo["footwear"]["subcategory"],
+                        name=combo["footwear"]["name"],
+                        base_colour=combo["footwear"]["base_colour"],
+                    ),
+                    outerwear=(
+                        RecommendOutfitItem(
+                            id=combo["outerwear"]["id"],
+                            category=combo["outerwear"]["category"],
+                            subcategory=combo["outerwear"]["subcategory"],
+                            name=combo["outerwear"]["name"],
+                            base_colour=combo["outerwear"]["base_colour"],
+                        )
+                        if combo.get("outerwear")
+                        else None
+                    ),
                     score=round(float(score), 4),
                 )
             )
-            prev_tops.append(t)
-            if len(prev_tops) > 2:
-                prev_tops.pop(0)
+            prev_subcategories.append(upper_sub)
+            if len(prev_subcategories) > 2:
+                prev_subcategories.pop(0)
 
         processing_time = (time.time() - start_time) * 1000
 
-        # 8. Логирование с метриками
+        # 12. Логирование с метриками
         logger.info(
             f"[recommend] request_id={request_id} user={user_id} "
-            f"{stats['total_raw']} raw → {stats['after_level1']} L1 → {stats['after_level2']} L2 → "
-            f"Top-{len(result_outfits)} returned, "
-            f"reduction={stats['total_reduction']} processing_time={processing_time:.2f}ms"
+            f"{stats_before['total_items']} items → {stats_after['total_items']} after filter → "
+            f"{len(candidates)} combinations → Top-{len(result_outfits)} returned, "
+            f"processing_time={processing_time:.2f}ms"
         )
 
         return RecommendResponse(
             outfits=result_outfits,
-            total_candidates=stats["after_level2"],
-            filtered_from=stats["total_raw"],
+            total_combinations=len(candidates),
+            filtered_from=stats_before["total_items"],
             context=request.context.model_dump(),
             model_version=predictor.get_model_version() if predictor else "unknown",
             processing_time_ms=processing_time,
@@ -687,13 +721,27 @@ async def recommend_outfits(
         processing_time = (time.time() - start_time) * 1000
         return RecommendResponse(
             outfits=[],
-            total_candidates=0,
+            total_combinations=0,
             filtered_from=0,
             context=request.context.model_dump(),
             model_version=predictor.get_model_version() if predictor else "unknown",
             processing_time_ms=processing_time,
             error=str(e),
         )
+
+
+def _combo_to_name(combo: Dict[str, Any]) -> str:
+    """Создаёт читаемое название комбинации для ML модели."""
+    parts = []
+    if combo.get("upper"):
+        parts.append(combo["upper"].get("subcategory", "upper"))
+    if combo.get("lower"):
+        parts.append(combo["lower"].get("subcategory", "lower"))
+    if combo.get("outerwear"):
+        parts.append(combo["outerwear"].get("subcategory", "outerwear"))
+    if combo.get("footwear"):
+        parts.append(combo["footwear"].get("subcategory", "footwear"))
+    return "+".join(parts) if parts else "outfit"
 
 
 @app.post("/api/v1/rank", response_model=TZRankResponse)

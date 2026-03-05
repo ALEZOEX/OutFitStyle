@@ -185,8 +185,15 @@ func (d WorkerDeps) handleRecommendation(ctx context.Context, p tasks.MLActionPa
 	}
 
 	// Вызываем ML-сервис для генерации рекомендации
-	// В реальной реализации здесь будет вызов соответствующего метода ML-клиента
-	_, err := d.ML.GenerateRecommendation(ctx, p.UserID, p.Meta)
+	// ИЗМЕНЕНИЯ (Март 2026): новый API с items_by_category
+	req := external.GenerateRecommendationRequest{
+		RequestID:       p.RequestID,
+		UserID:          p.UserID,
+		ItemsByCategory: make(map[string][]external.Item), // items должны приходить из payload
+		Context:         p.Meta,
+	}
+
+	_, err := d.ML.GenerateRecommendation(ctx, req)
 	if err != nil {
 		d.Logger.Error("Failed to generate recommendation with ML",
 			zap.String("request_id", p.RequestID),

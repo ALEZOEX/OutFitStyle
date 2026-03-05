@@ -1,11 +1,9 @@
 """
 Contracts для endpoint /api/recommend с фильтрацией
 
-ИЗМЕНЕНИЯ:
-- Добавлены поля предпочтений пользователя в RecommendRequest
-- style_preferences: список предпочитаемых стилей (casual, sport, classic, etc.)
-- budget_range: диапазон бюджета (economy, medium, premium)
-- favorite_brands: список любимых брендов
+ИЗМЕНЕНИЯ (Март 2026):
+- Переход на items_by_category вместо available_*
+- Формат предметов из БД: {"id": "uuid", "category": "upper", "subcategory": "tshirt", ...}
 """
 
 from pydantic import BaseModel, Field, field_validator
@@ -33,7 +31,7 @@ class RecommendContext(BaseModel):
 class UserPreferences(BaseModel):
     """
     Предпочтения пользователя для персонализации рекомендаций.
-    
+
     Attributes:
         style_preferences: Список предпочитаемых стилей (casual, sport, classic, streetwear, etc.)
         budget_range: Диапазон бюджета (economy, medium, premium)
@@ -66,16 +64,34 @@ class UserPreferences(BaseModel):
         return v.lower()
 
 
+class Item(BaseModel):
+    """
+    Предмет одежды из БД.
+
+    Attributes:
+        id: UUID предмета
+        category: категория (upper, lower, footwear, outerwear, accessory)
+        subcategory: подкатегория (tshirt, jeans, sneakers, etc.)
+        base_colour: базовый цвет
+        name: название предмета
+    """
+    id: str = Field(..., description="UUID предмета")
+    category: str = Field(..., description="Категория: upper, lower, footwear, outerwear, accessory")
+    subcategory: str = Field(..., description="Подкатегория: tshirt, jeans, sneakers, etc.")
+    base_colour: str = Field(..., description="Базовый цвет")
+    name: str = Field(..., description="Название предмета")
+
+
 class RecommendRequest(BaseModel):
     """Запрос на рекомендации с фильтрацией"""
 
     context: RecommendContext
-    available_tops: Optional[List[str]] = None
-    available_bottoms: Optional[List[str]] = None
-    available_outerwears: Optional[List[str]] = None
-    available_footwears: Optional[List[str]] = None
+    items_by_category: Dict[str, List[Item]] = Field(
+        ...,
+        description="Предметы по категориям: {'upper': [...], 'lower': [...], ...}"
+    )
     top_k: int = Field(default=5, description="Количество рекомендаций", ge=1, le=50)
-    
+
     # Предпочтения пользователя для персонализации
     user_preferences: Optional[UserPreferences] = Field(
         default=None,
@@ -93,22 +109,31 @@ class RecommendRequest(BaseModel):
         return v
 
 
-class RecommendOutfit(BaseModel):
-    """Один вариант одежды"""
+class RecommendOutfitItem(BaseModel):
+    """Предмет в составе outfit"""
+    id: str
+    category: str
+    subcategory: str
+    name: str
+    base_colour: str
 
-    top: str
-    bottom: str
-    outerwear: str
-    footwear: str
-    score: float = Field(..., ge=0.0)
+
+class RecommendOutfit(BaseModel):
+    """Один вариант одежды (outfit)"""
+
+    upper: RecommendOutfitItem
+    lower: RecommendOutfitItem
+    footwear: RecommendOutfitItem
+    outerwear: Optional[RecommendOutfitItem] = None
+    score: float = Field(..., ge=0.0, description="Оценка CatBoost модели")
 
 
 class RecommendResponse(BaseModel):
     """Ответ с рекомендациями"""
 
     outfits: List[RecommendOutfit]
-    total_candidates: int
-    filtered_from: int
+    total_combinations: int = Field(..., description="Количество сгенерированных комбинаций")
+    filtered_from: int = Field(..., description="Количество комбинаций после фильтрации")
     context: Dict[str, Any]
     model_version: str
     processing_time_ms: float
