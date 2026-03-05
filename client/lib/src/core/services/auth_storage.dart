@@ -1,6 +1,7 @@
-import 'package:outfitstyle_client/src/models/token_pair.dart';
+import 'package:outfitstyle_client/src/core/models/token_pair.dart';
 
-/// Хранилище токенов аутентификации
+/// Хранилище токенов аутентификации (заглушка для обратной совместимости)
+/// @Deprecated Используйте Firebase Auth через SessionManager
 abstract class AuthStorage {
   /// Сохранить пару токенов
   Future<void> writeTokenPair(TokenPair pair);

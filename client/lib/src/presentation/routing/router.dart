@@ -35,7 +35,7 @@ import '../../features/notifications/presentation/pages/notifications_page.dart'
 import '../providers/auth_provider.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
+  final authState = ref.watch(authStateCompatProvider);
   final onboardingDone = ref.watch(onboarding_providers.isOnboardingDoneProvider);
   final isAdminAsync = ref.watch(adminAccessProvider);
   final refreshListenable = ref.watch(goRouterRefreshProvider);
@@ -323,12 +323,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 /// Используется ChangeNotifierProvider для уведомления роутера
 final goRouterRefreshProvider = ChangeNotifierProvider((ref) {
   final notifier = GoRouterRefreshStream();
-  
+
   // Слушаем изменения authState и уведомляем роутер
-  ref.listen<AuthState>(authStateProvider, (prev, next) {
+  ref.listen<AuthState>(authStateCompatProvider, (prev, next) {
     notifier.notifyAuthChanged();
   });
-  
+
   return notifier;
 });
 

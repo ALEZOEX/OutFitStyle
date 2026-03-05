@@ -89,9 +89,12 @@ class SessionManager {
     }
   }
 
+  /// Поток изменений состояния аутентификации (для тестирования и явного ожидания)
+  Stream<User?> get _authStateChanges => _firebaseAuth.authStateChanges();
+
   /// Установка слушателя состояния аутентификации
   void _setupAuthStateListener() {
-    _authSubscription = _firebaseAuth.authStateChanges().listen((firebaseUser) {
+    _authSubscription = _authStateChanges.listen((firebaseUser) {
       if (firebaseUser == null) {
         // Пользователь вышел, очищаем сессию
         AppLogger.info('User signed out, clearing session');
@@ -114,6 +117,11 @@ class SessionManager {
 
   /// Получение UID текущего пользователя
   String? get currentUserId => _firebaseAuth.currentUser?.uid;
+
+  /// Поток изменений состояния аутентификации (Stream [bool])
+  ///
+  /// Возвращает true, если пользователь авторизован, и false в противном случае
+  Stream<bool> get authStateChanges => _firebaseAuth.authStateChanges().map((user) => user != null);
 
   /// Поток обновлений сессии
   Stream<UserSession?> get sessionStream => _sessionStreamController.stream;
@@ -164,10 +172,14 @@ class SessionManager {
         throw Exception('Не удалось получить данные пользователя');
       }
 
-      // _updateSessionFromFirebase вызовется через authStateChanges
-      // Ждем немного чтобы authStateChanges успел сработать
-      await Future.delayed(const Duration(milliseconds: 100));
-      
+      // Явно ждём событие authStateChanges, подтверждающее вход
+      await _authStateChanges.firstWhere(
+        (firebaseUser) => firebaseUser?.uid == user.uid,
+      ).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('Auth state change timeout'),
+      );
+
       AppLogger.info('Sign in successful for user: ${user.uid}');
       return true;
     } on FirebaseAuthException catch (e) {
@@ -175,6 +187,54 @@ class SessionManager {
       return false;
     } catch (e) {
       AppLogger.error('Sign in error: $e', e);
+      return false;
+    }
+  }
+
+  /// Вход через Google с использованием Firebase Auth
+  ///
+  /// Flow:
+  /// 1. Открываем popup для Google OAuth (Web) или нативное окно (Mobile)
+  /// 2. Получаем UserCredential из Firebase
+  /// 3. SessionManager автоматически обновит сессию через _setupAuthStateListener
+  ///
+  /// Возвращает true при успешном входе, false при ошибке или отмене
+  Future<bool> signInWithGoogle() async {
+    try {
+      AppLogger.info('Starting Google Sign-In via Firebase Auth...');
+
+      // Создаём Google Auth Provider с нужными скоупами
+      final provider = GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+
+      // Открываем popup для входа через Google
+      // На Web: signInWithPopup, на Mobile: нативное окно
+      final UserCredential credential = await _firebaseAuth.signInWithPopup(provider);
+
+      final User? user = credential.user;
+      if (user == null) {
+        AppLogger.warning('Google Sign-In cancelled by user');
+        return false;
+      }
+
+      AppLogger.info('Google Sign-In successful: ${_maskEmail(user.email ?? 'unknown')}');
+
+      // Явно ждём событие authStateChanges, подтверждающее вход
+      await _authStateChanges.firstWhere(
+        (firebaseUser) => firebaseUser?.uid == user.uid,
+      ).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('Auth state change timeout'),
+      );
+
+      AppLogger.info('Google Sign-In completed for user: ${user.uid}');
+      return true;
+    } on FirebaseAuthException catch (e) {
+      AppLogger.error('Google Sign-In error: ${e.code} - ${e.message}', e);
+      return false;
+    } catch (e) {
+      AppLogger.error('Google Sign-In error: $e', e);
       return false;
     }
   }
@@ -207,10 +267,14 @@ class SessionManager {
         throw Exception('Не удалось получить данные пользователя');
       }
 
-      // _updateSessionFromFirebase вызовется через authStateChanges
-      // Ждем немного чтобы authStateChanges успел сработать
-      await Future.delayed(const Duration(milliseconds: 100));
-      
+      // Явно ждём событие authStateChanges, подтверждающее вход
+      await _authStateChanges.firstWhere(
+        (firebaseUser) => firebaseUser?.uid == user.uid,
+      ).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('Auth state change timeout'),
+      );
+
       AppLogger.info('Sign up successful for user: ${user.uid}');
       return true;
     } on FirebaseAuthException catch (e) {
@@ -304,10 +368,11 @@ class SessionManager {
     AppLogger.info('Session cleared for user: $userId');
   }
 
-  /// Закрытие потока сессии
-  void dispose() {
-    _authSubscription?.cancel();
-    _sessionStreamController.close();
+  /// Закрытие потока сессии и отмена подписок
+  Future<void> dispose() async {
+    await _authSubscription?.cancel();
+    _authSubscription = null;
+    await _sessionStreamController.close();
     AppLogger.info('Session manager disposed');
   }
 }

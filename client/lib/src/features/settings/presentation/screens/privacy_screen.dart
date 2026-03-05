@@ -4,14 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
+import '../../../../core/services/auth_storage.dart';
+import '../../../../presentation/providers/auth_provider.dart' show authStorageProvider;
 import '../../../../presentation/routing/router.dart';
 
 /// Экран настроек конфиденциальности
-///
-/// Позволяет пользователю управлять настройками приватности:
-/// - Сбор анонимных данных для аналитики
-/// - Управление данными (экспорт/удаление)
 class PrivacySettingsScreen extends ConsumerStatefulWidget {
   const PrivacySettingsScreen({super.key});
 
@@ -22,8 +19,7 @@ class PrivacySettingsScreen extends ConsumerStatefulWidget {
 
 class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   // Настройки приватности
-  bool _allowDataCollection =
-      false; // Сбор анонимных данных (отключено по умолчанию)
+  bool _allowDataCollection = false;
 
   // API клиент и хранилище
   late final ApiClient _apiClient;
@@ -32,9 +28,13 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _authStorage = AuthStorage();
-    _apiClient = ApiClient(storage: _authStorage);
+    _initDependencies();
     _loadSettings();
+  }
+
+  Future<void> _initDependencies() async {
+    _authStorage = ref.read(authStorageProvider);
+    _apiClient = ApiClient(storage: _authStorage);
   }
 
   Future<void> _loadSettings() async {

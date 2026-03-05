@@ -1,16 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:outfitstyle_client/src/services/auth_service.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/features/market/data/market_api_client.dart';
 import 'package:outfitstyle_client/src/features/market/data/market_repository.dart';
 import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
-
-/// Auth storage provider
-final authStorageProvider = Provider<AuthStorage>((ref) {
-  return AuthStorage();
-});
+import '../../../../presentation/providers/auth_provider.dart' show authStorageProvider;
 
 /// API client provider (core)
 final coreApiClientProvider = Provider<ApiClient>((ref) {

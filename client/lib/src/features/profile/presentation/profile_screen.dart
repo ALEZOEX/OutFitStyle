@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../data/repositories/auth_repository.dart';
-import '../../../presentation/providers/auth_provider.dart';
+import '../../../presentation/providers/session_provider.dart';
 import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/max_width_container.dart';
 import '../../achievements/data/repositories/achievements_repository.dart';
 import '../../achievements/presentation/providers/achievements_providers.dart';
 import 'providers/profile_provider.dart';
 import '../../admin/presentation/providers/admin_auth_provider.dart';
+import '../../../../auth/session_manager.dart';
 
 /// Экран профиля пользователя
 class ProfileScreen extends ConsumerWidget {
@@ -17,7 +17,6 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authRepository = ref.read(authRepositoryProvider);
     final profileState = ref.watch(profileDataProvider);
     final stats = ref.watch(profileStatsProvider);
 
@@ -41,7 +40,7 @@ class ProfileScreen extends ConsumerWidget {
             SliverToBoxAdapter(child: _buildAdditionalOptions(context)),
             // Кнопка выхода
             SliverToBoxAdapter(
-              child: _buildLogoutButton(context, authRepository),
+              child: _buildLogoutButtonFromRef(context, ref),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 32)),
           ],
@@ -766,10 +765,34 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  /// Кнопка выхода (обёртка для получения SessionManager из ref)
+  Widget _buildLogoutButtonFromRef(
+    BuildContext context,
+    WidgetRef ref,
+  ) {
+    // Получаем SessionManager асинхронно
+    return Consumer(
+      builder: (context, ref, _) {
+        final sessionManagerAsync = ref.watch(sessionManagerProvider);
+        return sessionManagerAsync.when(
+          data: (sessionManager) => _buildLogoutButton(context, sessionManager),
+          loading: () => Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, _) => Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text('Ошибка: $error'),
+          ),
+        );
+      },
+    );
+  }
+
   /// Кнопка выхода
   Widget _buildLogoutButton(
     BuildContext context,
-    AuthRepository authRepository,
+    SessionManager sessionManager,
   ) {
     final theme = Theme.of(context);
 
@@ -778,7 +801,7 @@ class ProfileScreen extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.only(bottom: 16),
         child: OutlinedButton.icon(
-          onPressed: () => _showLogoutDialog(context, authRepository),
+          onPressed: () => _showLogoutDialog(context, sessionManager),
           icon: const Icon(Icons.logout),
           label: const Text('Выйти из аккаунта'),
           style: OutlinedButton.styleFrom(
@@ -797,7 +820,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Диалог подтверждения выхода
-  void _showLogoutDialog(BuildContext context, AuthRepository authRepository) {
+  void _showLogoutDialog(BuildContext context, SessionManager sessionManager) {
     showDialog(
       context: context,
       builder:
@@ -828,7 +851,7 @@ class ProfileScreen extends ConsumerWidget {
               ),
               FilledButton(
                 onPressed: () async {
-                  await authRepository.logout();
+                  await sessionManager.signOut();
                   if (context.mounted) {
                     context.go('/auth');
                   }

@@ -4,14 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
+import '../../../../presentation/providers/auth_provider.dart' show authStorageProvider;
 import 'package:outfitstyle_client/src/services/password_api.dart';
 import '../../data/repositories/sessions_repository.dart';
 import '../../data/models/session_device.dart';
 
 /// Провайдер API клиента
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(storage: AuthStorage());
+  final storage = ref.watch(authStorageProvider);
+  return ApiClient(storage: storage);
 });
 
 /// Провайдер PasswordApiService

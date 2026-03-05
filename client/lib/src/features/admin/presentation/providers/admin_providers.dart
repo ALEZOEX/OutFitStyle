@@ -1,18 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_config.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import '../../data/datasources/admin_remote_data_source.dart';
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../../../domain/entities/admin_user.dart';
 import '../../../../domain/enums/user_role.dart';
 import '../../../../domain/repositories/admin_repository.dart';
+import '../../../../presentation/providers/auth_provider.dart' show authStorageProvider;
 
 /// Провайдер AdminRemoteDataSource
 final adminRemoteDataSourceProvider = Provider<AdminRemoteDataSource>((ref) {
   final config = const ApiConfig(
     apiBase: ApiConfig.baseUrl,
   );
-  final storage = AuthStorage();
+  final storage = ref.watch(authStorageProvider);
   return AdminRemoteDataSource(config: config, storage: storage);
 });
 
