@@ -1,65 +1,57 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart' as core;
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
-import 'package:outfitstyle_client/src/data/repositories/auth_repository.dart';
 import 'package:outfitstyle_client/src/services/auth_storage.dart' as impl;
-import 'package:outfitstyle_client/src/core/api/api_config.dart';
+import 'session_provider.dart';
 
-/// Глобальный провайдер для AuthStorage (единый экземпляр для всего приложения)
-final authStorageProvider = Provider<core.AuthStorage>((ref) {
-  return impl.AuthStorage();
+// ============================================================================
+// FIREBASE AUTH ПРОВАЙДЕРЫ (основные)
+// ============================================================================
+
+/// Провайдер для получения userId пользователя через SessionManager
+final userIdProvider = Provider<String?>((ref) {
+  return ref.watch(sessionManagerProvider).value?.currentUserId;
 });
 
-/// Глобальный провайдер для ApiClient (использует единый AuthStorage)
+/// Провайдер состояния авторизации (Stream<bool>)
+final authStateProvider = StreamProvider<bool>((ref) {
+  final sessionManagerAsync = ref.watch(sessionManagerProvider);
+
+  return sessionManagerAsync.whenData(
+    (sessionManager) => sessionManager.authStateChanges,
+  ).value ??
+      Stream.value(false);
+});
+
+/// Провайдер для проверки прав администратора
+final adminAccessProvider = FutureProvider<bool>((ref) async {
+  return false;
+});
+
+// ============================================================================
+// ПРОВАЙДЕРЫ СОВМЕСТИМОСТИ (для постепенной миграции)
+// ============================================================================
+
+/// Провайдер для AuthStorage (заглушка для обратной совместимости)
+/// @Deprecated Используйте SessionManager
+final authStorageProvider = Provider<impl.AuthStorage>((ref) {
+  // Используем async/await для получения SharedPreferences
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  return prefsAsync.when(
+    data: (prefs) => impl.AuthStorage(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, _) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
+});
+
+/// Провайдер для ApiClient (заглушка для обратной совместимости)
+/// @Deprecated Используйте SessionManager
 final apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(authStorageProvider);
   return ApiClient(storage: storage);
 });
 
-/// Провайдер для AuthRepository
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final authStorage = ref.watch(authStorageProvider);
-  final apiClient = ref.watch(apiClientProvider);
-  return AuthRepository(
-    ApiConfig(apiBase: ApiConfig.baseUrl),
-    authStorage,
-    apiClient,
-  );
-});
-
-/// Провайдер для получения userId пользователя
-final userIdProvider = FutureProvider<String?>((ref) async {
-  final authRepo = ref.watch(authRepositoryProvider);
-  return authRepo.getUserId();
-});
-
-/// Провайдер состояния авторизации
-final authStateProvider = StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return AuthStateNotifier(authRepository);
-});
-
-class AuthStateNotifier extends StateNotifier<AuthState> {
-  final AuthRepository _authRepository;
-
-  AuthStateNotifier(this._authRepository) : super(const AuthState.loading());
-
-  Future<void> checkAuth() async {
-    state = const AuthState.loading();
-    try {
-      final isLoggedIn = await _authRepository.isLoggedIn();
-      state = isLoggedIn ? const AuthState.authenticated() : const AuthState.unauthenticated();
-    } catch (e) {
-      state = const AuthState.unauthenticated();
-    }
-  }
-
-  Future<void> signOut() async {
-    await _authRepository.logout();
-    state = const AuthState.unauthenticated();
-  }
-}
-
+/// Класс состояния авторизации (для обратной совместимости)
+/// @Deprecated Используйте authStateProvider напрямую
 class AuthState {
   final bool isLoading;
   final bool isAuthenticated;
@@ -70,9 +62,16 @@ class AuthState {
   const AuthState.unauthenticated() : this._(isLoading: false, isAuthenticated: false);
 }
 
-/// Провайдер для проверки прав администратора
-final adminAccessProvider = FutureProvider<bool>((ref) async {
-  final authRepo = ref.watch(authRepositoryProvider);
-  final user = await authRepo.getCurrentUser();
-  return user?['role'] == 'admin';
+/// Вспомогательный провайдер для router.dart (обратная совместимость)
+/// @Deprecated Будет удалён после рефакторинга router.dart
+final authStateCompatProvider = Provider<AuthState>((ref) {
+  final authStateAsync = ref.watch(authStateProvider);
+
+  return authStateAsync.when(
+    data: (isAuthenticated) => isAuthenticated
+        ? const AuthState.authenticated()
+        : const AuthState.unauthenticated(),
+    loading: () => const AuthState.loading(),
+    error: (_, __) => const AuthState.unauthenticated(),
+  );
 });

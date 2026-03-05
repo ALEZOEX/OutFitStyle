@@ -1,14 +1,19 @@
 // Базовые провайдеры
+export 'session_provider.dart'
+    show
+        sharedPreferencesProvider,
+        sessionManagerProvider,
+        authStateProvider;
 export 'auth_provider.dart'
     show
+        // Firebase провайдеры
+        userIdProvider,
+        adminAccessProvider,
+        // Провайдеры совместимости (для постепенной миграции)
         authStorageProvider,
         apiClientProvider,
-        authRepositoryProvider,
-        userIdProvider,
-        authStateProvider,
-        adminAccessProvider,
         AuthState,
-        AuthStateNotifier;
+        authStateCompatProvider;
 export 'weather_provider.dart';
 export 'user_preferences_provider.dart';
 export 'user_location_provider.dart';

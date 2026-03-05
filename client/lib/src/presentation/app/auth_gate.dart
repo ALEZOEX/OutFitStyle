@@ -1,17 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../routing/router.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
-import '../providers/auth_provider.dart';
+import '../providers/session_provider.dart';
 
-/// AuthGate контролирует startup flow приложения
+/// AuthGate контролирует startup flow приложения для Firebase Auth
 ///
 /// Flow:
-/// 1. При старте вызывается refresh (1 раз)
-/// 2. Если refresh 200 → сохраняем access в память → запускаем загрузку данных
-/// 3. Если refresh 401 → НЕ считаем ошибкой → показываем login screen
-/// 4. Notifications polling запускаем только когда access token != null
+/// 1. Firebase Auth автоматически управляет сессией (refresh внутри SDK)
+/// 2. Слушаем authStateChanges из SessionManager
+/// 3. При авторизации → запускаем notifications polling
+/// 4. При разавторизации → останавливаем polling
 class AuthGate extends ConsumerStatefulWidget {
   final Widget child;
 
@@ -23,7 +24,8 @@ class AuthGate extends ConsumerStatefulWidget {
 
 class _AuthGateState extends ConsumerState<AuthGate> {
   bool _isInitialized = false;
-  bool _isRefreshed = false;
+  bool _isAuthenticated = false;
+  StreamSubscription<bool>? _authSubscription;
 
   @override
   void initState() {
@@ -35,41 +37,48 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   }
 
   Future<void> _initializeAuth() async {
-    // Проверяем, не инициализировали ли уже
-    if (!mounted || _isRefreshed) return;
+    if (!mounted || _isInitialized) return;
 
     print('[AuthGate] Инициализация...');
 
     try {
-      // Используем ref.read() — в ConsumerState это безопасно
-      final authRepo = ref.read(authRepositoryProvider);
-      final refreshed = await authRepo.refreshToken();
+      // Получаем SessionManager и подписываемся на authStateChanges
+      final sessionManager = await ref.read(sessionManagerProvider.future);
 
-      if (refreshed) {
-        print('[AuthGate] Refresh успешен — access token обновлён');
+      _authSubscription = sessionManager.authStateChanges.listen(
+        (isAuthenticated) {
+          if (!mounted) return;
 
-        // Обновляем состояние авторизации
-        final authStateNotifier = ref.read(authStateProvider.notifier);
-        await authStateNotifier.checkAuth();
+          print('[AuthGate] Auth state changed: $isAuthenticated');
+          setState(() => _isAuthenticated = isAuthenticated);
 
-        // Уведомляем роутер
-        final refreshStream = ref.read(goRouterRefreshProvider);
-        refreshStream.notifyAuthChanged();
+          if (isAuthenticated) {
+            _startDataLoading();
+          } else {
+            _stopDataLoading();
+          }
+        },
+        onError: (error) {
+          print('[AuthGate] Ошибка auth stream: $error');
+        },
+      );
 
-        // Запускаем загрузку данных и polling только если авторизованы
+      // Получаем текущее состояние (может быть уже авторизован)
+      final currentAuth = sessionManager.isAuthenticated;
+      setState(() {
+        _isAuthenticated = currentAuth;
+        _isInitialized = true;
+      });
+
+      if (currentAuth) {
         _startDataLoading();
-      } else {
-        print('[AuthGate] Refresh не удался (пользователь не авторизован)');
-        // НЕ считаем это ошибкой — просто показываем login screen
       }
     } catch (e) {
-      print('[AuthGate] Ошибка при refresh: $e');
-      // НЕ считаем это ошибкой — просто показываем login screen
-    } finally {
+      print('[AuthGate] Ошибка при инициализации: $e');
       if (mounted) {
         setState(() {
           _isInitialized = true;
-          _isRefreshed = true;
+          _isAuthenticated = false;
         });
       }
     }
@@ -86,28 +95,33 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     notificationsNotifier.startPolling();
   }
 
+  void _stopDataLoading() {
+    print('[AuthGate] Остановка загрузки данных...');
+
+    // Останавливаем polling
+    final notificationsNotifier = ref.read(notificationsProvider.notifier);
+    notificationsNotifier.stopPolling();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Показывем loading пока не инициализировались
+    // Показываем loading пока не инициализировались
     if (!_isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
+      return const Center(
+        child: CircularProgressIndicator(),
       );
     }
 
-    // Показываем основное приложение
+    // Возвращаем child (основное приложение)
+    // Роутер внутри child сам разберётся с auth state через GoRouter redirect
     return widget.child;
   }
 
   @override
   void dispose() {
-    // Останавливаем polling при уничтожении
-    if (_isInitialized) {
-      final notificationsNotifier = ref.read(notificationsProvider.notifier);
-      notificationsNotifier.stopPolling();
-    }
+    // Останавливаем polling и отменяем подписку при уничтожении
+    _stopDataLoading();
+    _authSubscription?.cancel();
     super.dispose();
   }
 }

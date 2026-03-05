@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../storage/profile_storage.dart';
 import '../../../../storage/local_storage.dart';
 import '../../../settings/data/repositories/profile_repository.dart';
-import '../../../../presentation/providers/auth_provider.dart';
+import '../../../../presentation/providers/auth_provider.dart' show apiClientProvider, authStorageProvider;
 
 /// Провайдер для ProfileRepository
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
@@ -145,7 +146,6 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
     try {
       final profileRepository = ref.read(profileRepositoryProvider);
       final profileStorage = ref.read(profileStorageProvider);
-      final authRepository = ref.read(authRepositoryProvider);
 
       final displayName = _nameController.text.trim();
       final email = widget.email;
@@ -180,8 +180,8 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
       await profileStorage.saveProfileData(profileData);
       await profileStorage.setProfileComplete(true);
 
-      // 4. Получаем userId и сохраняем
-      final userId = await authRepository.getUserId();
+      // 4. Получаем userId из Firebase Auth и сохраняем
+      final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
         await profileStorage.saveUserId(userId);
       }

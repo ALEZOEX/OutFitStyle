@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/di/di.dart';
 import '../onboarding/onboarding_storage.dart' as onboarding_storage;
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
+import '../../presentation/providers/auth_provider.dart' show authStorageProvider;
 
 /// Провайдер для отслеживания состояния проверки onboarding
 final splashInitProvider = FutureProvider<String>((ref) async {
@@ -16,11 +16,11 @@ final splashInitProvider = FutureProvider<String>((ref) async {
   final notifier = ref.read(onboardingDoneProvider.notifier);
   notifier.updateState(onboardingDone);
 
-  // Проверяем авторизацию напрямую через токен
-  final authStorage = AuthStorage();
+  // Проверяем авторизацию через AuthStorage
+  final authStorage = ref.read(authStorageProvider);
   final token = await authStorage.readAccessToken();
   final isAuthenticated = token != null && token.isNotEmpty;
-  
+
   // Возвращаем маршрут для редиректа
   if (!onboardingDone) {
     return '/onboarding';

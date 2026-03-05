@@ -1,24 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../auth/session_manager.dart';
 import '../../../../domain/states/auth_state.dart';
-import '../../../../domain/repositories/i_auth_repository.dart';
 
 /// Контроллер аутентификации
 ///
-/// Использует [IAuthRepository] для всех операций аутентификации.
+/// Использует [SessionManager] для всех операций аутентификации через Firebase Auth.
 class AuthController extends StateNotifier<AuthState> {
-  final IAuthRepository _authRepository;
+  final SessionManager _sessionManager;
 
   AuthController({
-    required IAuthRepository authRepository,
-  })  : _authRepository = authRepository,
+    required SessionManager sessionManager,
+  })  : _sessionManager = sessionManager,
         super(const AuthState());
 
   /// Выход из системы
   Future<void> signOut() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // AuthService сам выполнит выход из Firebase Auth / Google Sign-In
-      await _authRepository.logout();
+      await _sessionManager.signOut();
       state = state.copyWith(
         isLoading: false,
         isAuthenticated: false,
@@ -37,13 +36,20 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> checkAuthStatus() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final isAuthed = await _authRepository.isAuthed();
+      final isAuthed = _sessionManager.isAuthenticated;
       if (isAuthed) {
-        final user = await _authRepository.getCurrentUser();
+        final session = _sessionManager.currentUserSession;
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: isAuthed,
-          user: user,
+          user: session != null
+              ? {
+                  'id': session.uid,
+                  'email': session.email,
+                  'displayName': session.displayName,
+                  'photoUrl': session.photoUrl,
+                }
+              : null,
         );
       } else {
         state = state.copyWith(
@@ -64,13 +70,20 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> loginWithEmail(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final success = await _authRepository.login(email, password);
+      final success = await _sessionManager.signIn(email: email, password: password);
       if (success) {
-        final user = await _authRepository.getCurrentUser();
+        final session = _sessionManager.currentUserSession;
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: true,
-          user: user,
+          user: session != null
+              ? {
+                  'id': session.uid,
+                  'email': session.email,
+                  'displayName': session.displayName,
+                  'photoUrl': session.photoUrl,
+                }
+              : null,
         );
       } else {
         state = state.copyWith(
@@ -91,13 +104,23 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> registerWithEmail(String email, String password, String name) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final success = await _authRepository.register(email, password, name);
+      final success = await _sessionManager.signUp(email, password);
       if (success) {
-        final user = await _authRepository.getCurrentUser();
+        // Обновляем displayName после регистрации
+        await _sessionManager.updateUserProfile(displayName: name);
+        
+        final session = _sessionManager.currentUserSession;
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: true,
-          user: user,
+          user: session != null
+              ? {
+                  'id': session.uid,
+                  'email': session.email,
+                  'displayName': session.displayName,
+                  'photoUrl': session.photoUrl,
+                }
+              : null,
         );
       } else {
         state = state.copyWith(

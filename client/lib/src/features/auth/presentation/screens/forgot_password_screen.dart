@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../presentation/providers/auth_provider.dart';
+import '../../../../presentation/providers/session_provider.dart';
 
 /// Экран восстановления пароля с 3 шагами:
 /// 1. Ввод email
@@ -48,23 +48,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      final authRepo = ref.read(authRepositoryProvider);
-      final success = await authRepo.forgotPassword(_emailController.text.trim());
+      final sessionManager = await ref.read(sessionManagerProvider.future);
+      final email = _emailController.text.trim();
+      
+      // Firebase отправляет письмо для сброса пароля
+      await sessionManager.resetPassword(email);
 
       if (!mounted) return;
 
-      if (success) {
-        setState(() {
-          _currentStep = _Step.code;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _error = 'Не удалось отправить код. Проверьте email.';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
+      // Успех — переходим к шагу ввода кода
+      setState(() {
+        _currentStep = _Step.code;
+        _isLoading = false;
+      });
+    } on Exception catch (e) {
       if (!mounted) return;
       setState(() {
         _error = 'Ошибка: ${e.toString()}';
@@ -112,41 +109,32 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      final authRepo = ref.read(authRepositoryProvider);
-      final success = await authRepo.resetPassword(
-        _emailController.text.trim(),
-        _codeController.text.trim(),
-        _newPasswordController.text,
-      );
-
+      // Firebase не поддерживает сброс пароля по коду из email напрямую
+      // Код отправляется через resetPassword, а здесь мы просто показываем инструкцию
+      // Для полноценного сброса пользователь должен перейти по ссылке из письма
+      
       if (!mounted) return;
 
-      if (success) {
-        // Показываем диалог успеха и переходим на экран авторизации
-        await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Пароль сброшен'),
-            content: const Text(
-              'Ваш пароль успешно изменён. Теперь вы можете войти с новым паролем.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  context.go('/auth');
-                },
-                child: const Text('Войти'),
-              ),
-            ],
+      // Показываем диалог с инструкцией
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Проверьте email'),
+          content: const Text(
+            'Мы отправили инструкцию по сбросу пароля на ваш email. '
+            'Перейдите по ссылке в письме и задайте новый пароль.',
           ),
-        );
-      } else {
-        setState(() {
-          _error = 'Неверный код или ошибка сервера';
-          _isLoading = false;
-        });
-      }
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.go('/auth');
+              },
+              child: const Text('Войти'),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -163,13 +151,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      final authRepo = ref.read(authRepositoryProvider);
-      await authRepo.forgotPassword(_emailController.text.trim());
+      final sessionManager = await ref.read(sessionManagerProvider.future);
+      await sessionManager.resetPassword(_emailController.text.trim());
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Код отправлен повторно')),
+        const SnackBar(content: Text('Письмо отправлено повторно')),
       );
 
       setState(() {

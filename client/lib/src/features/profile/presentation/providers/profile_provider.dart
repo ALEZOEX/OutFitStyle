@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../data/repositories/auth_repository.dart';
-import '../../../../presentation/providers/auth_provider.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../../wardrobe/presentation/providers/wardrobe_provider.dart';
 
 /// Состояние профиля пользователя
@@ -11,7 +10,7 @@ enum ProfileLoadStatus {
   error,
 }
 
-/// Данные профиля пользователя
+/// Данные профиля пользователя из Firebase Auth
 class ProfileData {
   final String userId;
   final String displayName;
@@ -27,43 +26,17 @@ class ProfileData {
     this.createdAt,
   });
 
-  /// Создать из [Map<String, dynamic>]
-  factory ProfileData.fromMap(Map<String, dynamic>? data) {
-    if (data == null) {
-      throw const ProfileException('Данные профиля недоступны');
-    }
-
-    // Сервер возвращает {"user": {...}, "stats": {...}}
-    // Извлекаем данные пользователя из вложенного объекта
-    final userData = data['user'] as Map<String, dynamic>? ?? data;
-
-    // Извлекаем имя: displayName или name или email
-    final name = userData['display_name'] as String? ??
-                 userData['name'] as String? ??
-                 userData['email'] as String? ??
-                 'Пользователь';
-
-    // Извлекаем email
-    final email = userData['email'] as String? ?? '';
-
-    // Извлекаем фото
-    final photoUrl = userData['photo_url'] as String? ??
-                     userData['avatar_url'] as String?;
-
-    // Дата создания аккаунта
-    DateTime? createdAt;
-    final createdAtStr = userData['created_at'] as String?;
-    if (createdAtStr != null) {
-      try {
-        createdAt = DateTime.parse(createdAtStr);
-      } catch (_) {
-        // Игнорируем ошибку парсинга
-      }
-    }
-
+  /// Создать из данных Firebase User
+  factory ProfileData.fromFirebase({
+    required String uid,
+    required String displayName,
+    required String email,
+    String? photoUrl,
+    DateTime? createdAt,
+  }) {
     return ProfileData(
-      userId: userData['id'] as String? ?? userData['user_id'] as String? ?? '',
-      displayName: name,
+      userId: uid,
+      displayName: displayName,
       email: email,
       photoUrl: photoUrl,
       createdAt: createdAt,
@@ -109,8 +82,7 @@ class ProfileStats {
 
 /// Провайдер данных профиля
 final profileDataProvider = StateNotifierProvider<ProfileDataNotifier, AsyncValue<ProfileData>>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return ProfileDataNotifier(authRepository: authRepository);
+  return ProfileDataNotifier(ref: ref);
 });
 
 /// Провайдер статистики профиля
@@ -120,21 +92,29 @@ final profileStatsProvider = Provider<ProfileStats>((ref) {
 });
 
 class ProfileDataNotifier extends StateNotifier<AsyncValue<ProfileData>> {
-  final AuthRepository _authRepository;
+  final Ref _ref;
 
-  ProfileDataNotifier({required AuthRepository authRepository})
-      : _authRepository = authRepository,
+  ProfileDataNotifier({required Ref ref})
+      : _ref = ref,
         super(const AsyncValue.loading()) {
     _loadProfile();
   }
 
-  /// Загрузить данные профиля
+  /// Загрузить данные профиля из Firebase Auth через SessionManager
   Future<void> _loadProfile() async {
     state = const AsyncValue.loading();
     try {
-      final userData = await _authRepository.getCurrentUser();
-      if (userData != null) {
-        final profileData = ProfileData.fromMap(userData);
+      final sessionManager = await _ref.read(sessionManagerProvider.future);
+      final userSession = sessionManager.currentUserSession;
+
+      if (userSession != null) {
+        final profileData = ProfileData.fromFirebase(
+          uid: userSession.uid,
+          displayName: userSession.displayName ?? userSession.email?.split('@').first ?? 'Пользователь',
+          email: userSession.email ?? '',
+          photoUrl: userSession.photoUrl,
+          createdAt: null, // Firebase не предоставляет created_at напрямую
+        );
         state = AsyncValue.data(profileData);
       } else {
         state = AsyncValue.error(

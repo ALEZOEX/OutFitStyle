@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../data/repositories/profile_repository.dart';
 import '../../data/repositories/wardrobe_repository.dart';
-import '../../data/repositories/auth_repository.dart';
 import '../../data/sync/sync_worker.dart';
 import '../../domain/entities/wardrobe_item.dart' as domain;
 import '../../domain/entities/outfit_recommendation.dart';
@@ -32,19 +32,18 @@ class SyncManager {
   late SyncWorker _syncWorker;
   late ProfileRepository _profileRepository;
   late WardrobeRepository _wardrobeRepository;
-  late AuthRepository _authRepository;
 
   /// Кэш userId для избежания повторных запросов
   String? _cachedUserId;
 
-  /// Получает userId из AuthRepository с кэшированием
+  /// Получает userId из Firebase Auth с кэшированием
   Future<String?> _getUserId() async {
     if (_cachedUserId != null) {
       return _cachedUserId;
     }
 
     try {
-      _cachedUserId = await _authRepository.getUserId();
+      _cachedUserId = FirebaseAuth.instance.currentUser?.uid;
       return _cachedUserId;
     } catch (e, stackTrace) {
       _logWarning('Failed to get user ID: $e', null, stackTrace);
@@ -57,12 +56,10 @@ class SyncManager {
     required SyncWorker syncWorker,
     required ProfileRepository profileRepository,
     required WardrobeRepository wardrobeRepository,
-    required AuthRepository authRepository,
   }) async {
     _syncWorker = syncWorker;
     _profileRepository = profileRepository;
     _wardrobeRepository = wardrobeRepository;
-    _authRepository = authRepository;
 
     await _updateConnectivityStatus();
 

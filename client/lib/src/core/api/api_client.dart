@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
-import '../../models/token_pair.dart';
+import 'package:outfitstyle_client/src/core/models/token_pair.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async' show Completer;
 import 'dart:developer' as developer;
