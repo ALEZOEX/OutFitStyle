@@ -12,7 +12,7 @@ final userIdProvider = Provider<String?>((ref) {
   return ref.watch(sessionManagerProvider).value?.currentUserId;
 });
 
-/// Провайдер состояния авторизации (Stream<bool>)
+/// Провайдер состояния авторизации (StreamProvider\<bool\>)
 final authStateProvider = StreamProvider<bool>((ref) {
   final sessionManagerAsync = ref.watch(sessionManagerProvider);
 
