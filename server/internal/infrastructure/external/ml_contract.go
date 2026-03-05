@@ -2,6 +2,29 @@ package external
 
 import "outfitstyle/server/internal/core/domain"
 
+// Item представляет предмет одежды из БД для передачи в ML сервис
+type Item struct {
+	ID          string `json:"id"`
+	Category    string `json:"category"`     // "upper", "lower", "footwear", "outerwear", "accessory"
+	Subcategory string `json:"subcategory"`  // "tshirt", "jeans", "sneakers", etc.
+	BaseColour  string `json:"base_colour"`  // базовый цвет
+	Name        string `json:"name"`         // название предмета
+}
+
+// GenerateRecommendationRequest структура запроса для генерации рекомендации
+// ИЗМЕНЕНИЯ (Март 2026): добавлено поле ItemsByCategory
+type GenerateRecommendationRequest struct {
+	RequestID       string            `json:"request_id"`
+	UserID          string            `json:"user_id"`
+	ItemsByCategory map[string][]Item `json:"items_by_category"` // предметы по категориям
+	Context         map[string]any    `json:"context"`            // погода и контекст
+}
+
+// GenerateRecommendationResponse структура ответа для генерации рекомендации
+type GenerateRecommendationResponse struct {
+	Success bool `json:"success"`
+}
+
 type TZMLRankRequest struct {
 	RequestID string    `json:"request_id"`
 	UserID    domain.ID `json:"user_id"`

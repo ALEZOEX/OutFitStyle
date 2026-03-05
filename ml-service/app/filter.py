@@ -6,10 +6,10 @@
 
 Пороги обоснованы анализом Season Fashion Dataset.
 
-ИЗМЕНЕНИЯ:
-- Добавлена обязательная проверка категорий (top, bottom, shoes)
-- Улучшена логика для холодной погоды (1°C и ниже)
-- Добавлены температурные пороги для каждого типа одежды
+ИЗМЕНЕНИЯ (Март 2026):
+- Переход на фильтрацию по категориям БД (upper, lower, footwear, outerwear, accessory)
+- Убраны индонезийские subcategory (Kaos, Kemeja, Celana, etc.)
+- Фильтр работает на уровне предметов из БД (Dict[str, List[Dict]])
 """
 
 from dataclasses import dataclass
@@ -18,70 +18,17 @@ from typing import List, Optional, Set, Tuple, Dict, Any
 
 
 # ═══════════════════════════════════════════
-# КОНСТАНТЫ
-# ═══════════════════════════════════════════
-
-# Все возможные предметы по категориям
-ALL_TOPS: List[str] = [
-    "Kaos",  # Футболка
-    "Kemeja",  # Рубашка
-    "Blouse",  # Блузка
-    "Jas",  # Пиджак
-]
-
-ALL_BOTTOMS: List[str] = [
-    "Celana Panjang",  # Брюки/джинсы
-    "Celana Pendek",  # Шорты
-    "Rok",  # Юбка
-    "Celana Jogger",  # Джоггеры
-    "Celana Cargo",  # Карго
-]
-
-ALL_OUTERWEAR: List[str] = [
-    "Hoodie",  # Худи
-    "Jaket",  # Куртка
-    "Tanpa Pakaian Luar",  # Без верхней одежды
-]
-
-ALL_FOOTWEAR: List[str] = [
-    "Sneakers",  # Кроссовки
-    "Sepatu Bot",  # Ботинки
-    "Sandal",  # Сандали
-    "Sepatu Formal",  # Туфли
-    "Sepatu Olahraga",  # Спортивная обувь
-]
-
-# ═══════════════════════════════════════════
 # ТЕМПЕРАТУРНЫЕ ПОРОГИ (°C)
 # ═══════════════════════════════════════════
 
-# Общие пороги
-TEMP_FREEZING: float = 0.0      # Заморозки
-TEMP_VERY_COLD: float = 10.0    # Очень холодно (Sneakers запрещены)
-TEMP_COLD: float = 10.0         # Холодно
-TEMP_COOL: float = 15.0         # Прохладно
-TEMP_MODERATE: float = 20.0     # Умеренно
-TEMP_WARM: float = 25.0         # Тепло
-TEMP_HOT: float = 30.0          # Жарко
-TEMP_VERY_HOT: float = 35.0     # Очень жарко
-
-# Пороги для верхней одежды (outerwear)
-OUTERWEAR_JACKET_REQUIRED: float = 10.0    # Куртка обязательна
-OUTERWEAR_HOODIE_ALLOWED: float = 18.0     # Худи допустимо
-OUTERWEAR_NONE_ALLOWED: float = 22.0       # Без верхней одежды допустимо
-
-# Пороги для обуви
-FOOTWEAR_BOOTS_REQUIRED: float = 5.0       # Ботинки обязательны
-FOOTWEAR_CLOSED_REQUIRED: float = 12.0     # Закрытая обувь обязательна
-FOOTWEAR_SANDALS_ALLOWED: float = 20.0     # Сандали допустимы
-
-# Пороги для низа
-BOTTOM_SHORTS_ALLOWED: float = 20.0        # Шорты допустимы
-BOTTOM_LONG_REQUIRED: float = 15.0         # Длинные брюки обязательны
-
-# Пороги для верха
-TOP_LAYERS_REQUIRED: float = 10.0          # Многослойность обязательна
-TOP_LONG_SLEEVE_REQUIRED: float = 15.0     # Длинный рукав обязателен
+TEMP_FREEZING: float = 0.0       # Заморозки
+TEMP_VERY_COLD: float = 5.0      # Очень холодно (ботинки обязательны)
+TEMP_COLD: float = 10.0          # Холодно (куртка обязательна)
+TEMP_COOL: float = 15.0          # Прохладно (outerwear рекомендована)
+TEMP_MODERATE: float = 20.0      # Умеренно
+TEMP_WARM: float = 25.0          # Тепло
+TEMP_HOT: float = 30.0           # Жарко
+TEMP_VERY_HOT: float = 35.0      # Очень жарко
 
 # Пороги влажности (%)
 HUMIDITY_HIGH: float = 85.0
@@ -89,45 +36,6 @@ HUMIDITY_LOW: float = 25.0
 
 # Длительность (часы)
 DURATION_LONG: float = 4.0
-
-# ═══════════════════════════════════════════
-# БЮДЖЕТНЫЕ ПОРОГИ (₽)
-# ═══════════════════════════════════════════
-
-BUDGET_ECONOMY_MAX: float = 3000.0    # Economy: до 3000₽
-BUDGET_MEDIUM_MAX: float = 10000.0   # Medium: 3000-10000₽
-# Premium: 10000+₽
-
-
-# ═══════════════════════════════════════════
-# УРОВЕНЬ 2: Запрещённые комбинации (пары)
-# ═══════════════════════════════════════════
-
-# Стилевые конфликты — абсурд при ЛЮБОЙ погоде
-STYLE_CONFLICTS: Set[Tuple[str, str, str, str]] = {
-    # Пиджак + шорты/джоггеры/карго
-    ("top", "Jas", "bottom", "Celana Pendek"),
-    ("top", "Jas", "bottom", "Celana Jogger"),
-    ("top", "Jas", "bottom", "Celana Cargo"),
-    # Пиджак + худи сверху
-    ("top", "Jas", "outerwear", "Hoodie"),
-    # Пиджак + спортивная/неформальная обувь
-    ("top", "Jas", "footwear", "Sepatu Olahraga"),
-    ("top", "Jas", "footwear", "Sneakers"),
-    ("top", "Jas", "footwear", "Sandal"),
-    # Формальная обувь + шорты/джоггеры/карго
-    ("bottom", "Celana Pendek", "footwear", "Sepatu Formal"),
-    ("bottom", "Celana Jogger", "footwear", "Sepatu Formal"),
-    ("bottom", "Celana Cargo", "footwear", "Sepatu Formal"),
-    # Ботинки + шорты
-    ("bottom", "Celana Pendek", "footwear", "Sepatu Bot"),
-    # Спортивная обувь + юбка
-    ("bottom", "Rok", "footwear", "Sepatu Olahraga"),
-    # Блузка + спортивная обувь/джоггеры/карго
-    ("top", "Blouse", "footwear", "Sepatu Olahraga"),
-    ("top", "Blouse", "bottom", "Celana Jogger"),
-    ("top", "Blouse", "bottom", "Celana Cargo"),
-}
 
 
 # ═══════════════════════════════════════════
@@ -179,155 +87,105 @@ class UserPreferences:
 # ═══════════════════════════════════════════
 
 
-def _level1_category_filter(
+def filter_categories(
     context: WeatherContext,
-    tops: Set[str],
-    bottoms: Set[str],
-    outerwear: Set[str],
-    footwear: Set[str],
-) -> Tuple[Set[str], Set[str], Set[str], Set[str]]:
+    items_by_category: Dict[str, List[Dict[str, Any]]],
+) -> Dict[str, List[Dict[str, Any]]]:
     """
-    Уровень 1: убираем невозможные категории по погоде, активности, гендеру.
+    Фильтрует предметы по категориям на основе погоды.
 
-    КРИТИЧЕСКИЕ ИЗМЕНЕНИЯ:
-    - При температуре < 10°C обязательна куртка + теплый верх + длинные брюки + закрытая обувь
-    - При температуре < 5°C обязательны ботинки
+    Работает на уровне категорий БД:
+    - upper: всегда обязательна
+    - lower: всегда обязателен
+    - footwear: всегда обязательна
+    - outerwear: зависит от температуры
+    - accessory: всегда опционально
 
     Args:
-        context: Контекст погоды
-        tops: Доступные верхние предметы одежды
-        bottoms: Доступные нижние предметы одежды
-        outerwear: Доступная верхняя одежда
-        footwear: Доступная обувь
+        context: погода
+        items_by_category: {"upper": [...], "lower": [...], ...}
+            Каждый предмет: {"id": "uuid", "category": "upper", "subcategory": "tshirt", ...}
 
     Returns:
-        Кортеж (tops, bottoms, outerwear, footwear) с отфильтрованными множествами
+        Отфильтрованные предметы по категориям
     """
-    # Создаём копии для immutability
-    tops = tops.copy()
-    bottoms = bottoms.copy()
-    outerwear = outerwear.copy()
-    footwear = footwear.copy()
-
+    result: Dict[str, List[Dict[str, Any]]] = {}
     t = context.temperature
-    weather = context.weather_condition
     location = context.location
+    weather = context.weather_condition
     activity = context.activity
-    gender = context.gender
     humidity = context.humidity
 
-    # ── Гендер ──
-    if gender == "Laki-laki":
-        tops.discard("Blouse")
-        bottoms.discard("Rok")
+    # upper — всегда обязательна
+    if "upper" in items_by_category:
+        result["upper"] = list(items_by_category["upper"])
 
-    # ── ТЕМПЕРАТУРА + ЛОКАЦИЯ (ОСНОВНАЯ ЛОГИКА) ──
-    if location == "Outdoor":
-        # === ОЧЕНЬ ХОЛОДНО (< 10°C) ===
+    # lower — всегда обязателен
+    if "lower" in items_by_category:
+        result["lower"] = list(items_by_category["lower"])
+
+    # footwear — всегда обязательна
+    if "footwear" in items_by_category:
+        result["footwear"] = list(items_by_category["footwear"])
+
+    # outerwear — зависит от температуры
+    if "outerwear" in items_by_category:
         if t < TEMP_COLD:
-            # Шорты запрещены
-            bottoms.discard("Celana Pendek")
-            # Сандали запрещены
-            footwear.discard("Sandal")
-            # Без верхней одежды запрещено - ОБЯЗАТЕЛЬНА куртка
-            outerwear.discard("Tanpa Pakaian Luar")
-            
-            # При < 5°C обязательны ботинки
-            if t < TEMP_VERY_COLD:
-                footwear.discard("Sandal")
-                footwear.discard("Sneakers")
-                footwear.discard("Sepatu Olahraga")
-                # Оставляем только ботинки
-
-        # === ПРОХЛАДНО (10-15°C) ===
+            # Холодно (< 10°C) — outerwear обязательна
+            result["outerwear"] = list(items_by_category["outerwear"])
         elif t < TEMP_COOL:
-            # Без верхней одежды не рекомендуется
-            outerwear.discard("Tanpa Pakaian Luar")
-            # Шорты не рекомендуются
-            bottoms.discard("Celana Pendek")
-            # Сандали не рекомендуются
-            footwear.discard("Sandal")
-
-        # === УМЕРЕННО (15-20°C) ===
+            # Прохладно (10-15°C) — outerwear рекомендована
+            result["outerwear"] = list(items_by_category["outerwear"])
         elif t < TEMP_MODERATE:
-            # Можно без верхней одежды
-            pass
+            # Умеренно (15-20°C) — outerwear опционально
+            result["outerwear"] = list(items_by_category["outerwear"])
+        else:
+            # Тепло (> 20°C) — outerwear не нужна
+            result["outerwear"] = []
 
-        # === ТЕПЛО (20-25°C) ===
-        elif t < TEMP_WARM:
-            # Куртка не нужна
-            outerwear.discard("Jaket")
+    # accessory — всегда опционально (оставляем как есть)
+    if "accessory" in items_by_category:
+        result["accessory"] = list(items_by_category["accessory"])
 
-        # === ЖАРКО (> 25°C) ===
-        elif t > TEMP_WARM:
-            # Куртка и пиджак не нужны
-            outerwear.discard("Jaket")
-            tops.discard("Jas")
-            # Ботинки слишком жаркие
-            footwear.discard("Sepatu Bot")
+    # ── Дополнительная фильтрация по погоде ──
+    if location == "Outdoor":
+        # Дождь — убираем открытую обувь
+        if weather == "Hujan" and "footwear" in result:
+            result["footwear"] = [
+                item for item in result["footwear"]
+                if item.get("subcategory", "").lower() not in ["sandal", "sandals"]
+            ]
 
-        # === ОЧЕНЬ ЖАРКО (> 30°C) ===
-        if t > TEMP_HOT:
-            # Только легкая одежда
-            outerwear.discard("Jaket")
-            outerwear.discard("Hoodie")
-            tops.discard("Jas")
+        # Очень холодно (< 5°C) — только закрытая обувь
+        if t < TEMP_VERY_COLD and "footwear" in result:
+            result["footwear"] = [
+                item for item in result["footwear"]
+                if item.get("subcategory", "").lower() not in ["sandal", "sandals"]
+            ]
 
-    elif location == "Indoor":
-        # В помещении теплее, но если на улице очень холодно...
-        if t < TEMP_VERY_COLD:
-            # В помещении холодно (нет отопления?)
-            footwear.discard("Sandal")
-
-        if t > TEMP_WARM:
-            outerwear.discard("Jaket")
-            tops.discard("Jas")
-
-    # ── Влажность ──
-    if humidity > HUMIDITY_HIGH and t > HUMIDITY_LOW:
-        # Очень душно — убираем тяжёлое
-        outerwear.discard("Jaket")
-        tops.discard("Jas")
-
-    # ── Погода ──
-    if weather == "Hujan":
-        # Дождь - убираем открытую обувь
-        footwear.discard("Sandal")
-        if location == "Outdoor":
-            # Без верхней одежды нельзя
-            outerwear.discard("Tanpa Pakaian Luar")
-
-    # ── Активность ──
+    # ── Фильтрация по активности ──
     if activity == "Olahraga":
-        # Спорт - убираем формальную одежду
-        tops.discard("Jas")
-        tops.discard("Blouse")
-        bottoms.discard("Rok")
-        footwear.discard("Sepatu Formal")
-        footwear.discard("Sepatu Bot")
+        # Спорт — убираем формальную одежду
+        if "upper" in result:
+            result["upper"] = [
+                item for item in result["upper"]
+                if item.get("subcategory", "").lower() not in ["blazer", "suit"]
+            ]
+        if "footwear" in result:
+            result["footwear"] = [
+                item for item in result["footwear"]
+                if item.get("subcategory", "").lower() not in ["formal_shoes", "boots"]
+            ]
 
     elif activity == "Kerja":
-        # Работа - формальный стиль
-        footwear.discard("Sandal")
-        footwear.discard("Sepatu Olahraga")
-        bottoms.discard("Celana Pendek")
-        bottoms.discard("Celana Jogger")
-        outerwear.discard("Hoodie")
+        # Работа — формальный стиль
+        if "footwear" in result:
+            result["footwear"] = [
+                item for item in result["footwear"]
+                if item.get("subcategory", "").lower() not in ["sandal", "sport_shoes"]
+            ]
 
-    elif activity == "Pesta":
-        # Вечеринка - без спортивного
-        footwear.discard("Sepatu Olahraga")
-        bottoms.discard("Celana Jogger")
-        bottoms.discard("Celana Cargo")
-
-    # ── Длительность ──
-    if context.duration > DURATION_LONG and location == "Outdoor":
-        # Долго на улице — убираем некомфортное
-        if t < TEMP_MODERATE:
-            outerwear.discard("Tanpa Pakaian Luar")
-        footwear.discard("Sepatu Formal")  # неудобно долго
-
-    return tops, bottoms, outerwear, footwear
+    return result
 
 
 # ═══════════════════════════════════════════
@@ -335,140 +193,80 @@ def _level1_category_filter(
 # ═══════════════════════════════════════════
 
 
-def _level2_combination_filter(
-    combo: Dict[str, str],
+def _check_style_conflict(
+    top_item: Dict[str, Any],
+    bottom_item: Dict[str, Any],
+    outerwear_item: Optional[Dict[str, Any]],
+    footwear_item: Dict[str, Any],
     context: WeatherContext,
 ) -> bool:
     """
-    Уровень 2: проверяем конкретную комбинацию на
-    стилевые конфликты и контекстные абсурды.
-
-    КРИТИЧЕСКИЕ ИЗМЕНЕНИЯ:
-    - Проверка обязательных категорий (top, bottom, shoes)
-    - Проверка температуры для каждого предмета
-    - При 1°C: футболка + худи + куртка (многослойность)
+    Проверяет комбинацию на стилевые конфликты.
 
     Возвращает True если комбинация ДОПУСТИМА.
 
     Args:
-        combo: Комбинация одежды {top, bottom, outerwear, footwear}
-        context: Контекст погоды
+        top_item: предмет верхней одежды
+        bottom_item: предмет нижней одежды
+        outerwear_item: предмет верхней одежды (может быть None)
+        footwear_item: обувь
+        context: контекст погоды
 
     Returns:
-        True если комбинация допустима, False иначе
+        True если комбинация допустима
     """
-    top = combo["top"]
-    bottom = combo["bottom"]
-    ow = combo["outerwear"]
-    fw = combo["footwear"]
-
     t = context.temperature
     location = context.location
 
-    # Проверка стилевых конфликтов
-    pairs_to_check: List[Tuple[str, str, str, str]] = [
-        ("top", top, "bottom", bottom),
-        ("top", top, "outerwear", ow),
-        ("top", top, "footwear", fw),
-        ("bottom", bottom, "outerwear", ow),
-        ("bottom", bottom, "footwear", fw),
-        ("outerwear", ow, "footwear", fw),
-    ]
+    top_sub = top_item.get("subcategory", "").lower()
+    bottom_sub = bottom_item.get("subcategory", "").lower()
+    footwear_sub = footwear_item.get("subcategory", "").lower()
+    outerwear_sub = outerwear_item.get("subcategory", "").lower() if outerwear_item else ""
 
-    for pair in pairs_to_check:
-        if pair in STYLE_CONFLICTS:
+    # Стилевые конфликты — формальный верх + неформальный низ
+    formal_tops = ["blazer", "suit", "formal_shirt"]
+    casual_bottoms = ["shorts", "joggers", "cargo"]
+
+    if top_sub in formal_tops and bottom_sub in casual_bottoms:
+        return False
+
+    # Формальная обувь + шорты
+    formal_footwear = ["formal_shoes", "oxford", "loafer"]
+    if footwear_sub in formal_footwear and bottom_sub in ["shorts"]:
+        return False
+
+    # Ботинки + шорты (стилистически спорно)
+    if footwear_sub in ["boots", "ankle_boots"] and bottom_sub in ["shorts"]:
+        return False
+
+    # ── Температурные конфликты ──
+    if location == "Outdoor":
+        # Холодно (< 10°C) — без outerwear нельзя
+        if t < TEMP_COLD and outerwear_item is None:
             return False
 
-    # ═══════════════════════════════════════════
-    # ПРОВЕРКА ТЕМПЕРАТУРНОЙ АДЕКВАТНОСТИ
-    # ═══════════════════════════════════════════
+        # Очень холодно (< 5°C) — только теплая обувь
+        if t < TEMP_VERY_COLD and footwear_sub in ["sandal", "slipper"]:
+            return False
 
-    # === ОЧЕНЬ ХОЛОДНО (< 10°C) ===
-    if t < TEMP_COLD and location == "Outdoor":
-        # Куртка обязательна
-        if ow == "Tanpa Pakaian Luar":
-            return False
-        
-        # Шорты запрещены
-        if bottom == "Celana Pendek":
-            return False
-        
-        # Сандали запрещены
-        if fw == "Sandal":
-            return False
-        
-        # При < 5°C ботинки обязательны
-        if t < TEMP_VERY_COLD:
-            if fw not in ["Sepatu Bot"]:
+        # Жарко (> 28°C) — куртка не нужна
+        if t > 28 and outerwear_item is not None:
+            if outerwear_sub in ["jacket", "coat", "parka"]:
                 return False
-
-    # === ПРОХЛАДНО (10-15°C) ===
-    elif t < TEMP_COOL and location == "Outdoor":
-        # Без верхней одежды нельзя
-        if ow == "Tanpa Pakaian Luar":
-            return False
-        
-        # Шорты не рекомендуются
-        if bottom == "Celana Pendek":
-            return False
-
-    # === ЖАРКО (> 28°C) ===
-    if t > 28 and location == "Outdoor":
-        # Куртка не нужна
-        if ow == "Jaket":
-            return False
-        
-        # Ботинки слишком жаркие
-        if fw == "Sepatu Bot":
-            return False
-
-    # Контекстные абсурды
-    # Шорты + без куртки при < 18°C outdoor
-    if (
-        bottom == "Celana Pendek"
-        and ow == "Tanpa Pakaian Luar"
-        and t < TEMP_MODERATE
-        and location == "Outdoor"
-    ):
-        return False
-
-    # Футболка + без куртки при < 12°C outdoor
-    if (
-        top == "Kaos"
-        and ow == "Tanpa Pakaian Luar"
-        and t < 12
-        and location == "Outdoor"
-    ):
-        return False
-
-    # Сандали + куртка (стилистически абсурдно)
-    if fw == "Sandal" and ow == "Jaket":
-        return False
-
-    # Ботинки + шорты + жарко (> 28°C)
-    if fw == "Sepatu Bot" and bottom == "Celana Pendek" and t > TEMP_WARM:
-        return False
 
     return True
 
 
-# ═══════════════════════════════════════════
-# ПРОВЕРКА ОБЯЗАТЕЛЬНЫХ КАТЕГОРИЙ
-# ═══════════════════════════════════════════
-
-
 def validate_outfit_completeness(
-    combo: Dict[str, str],
+    combo: Dict[str, Optional[Dict[str, Any]]],
     context: WeatherContext,
 ) -> Dict[str, Any]:
     """
     Проверка полноты комплекта одежды.
 
-    Возвращает информацию о missing категориях и рекомендациях.
-
     Args:
-        combo: Комбинация одежды {top, bottom, outerwear, footwear}
-        context: Контекст погоды
+        combo: комбинация предметов {"upper": {...}, "lower": {...}, ...}
+        context: контекст погоды
 
     Returns:
         Dict с информацией о полноте комплекта
@@ -483,34 +281,93 @@ def validate_outfit_completeness(
     t = context.temperature
     location = context.location
 
-    # Проверка наличия всех категорий
-    if not combo.get("top") or combo["top"] == "":
+    # Проверка наличия обязательных категорий
+    if not combo.get("upper"):
         result["complete"] = False
-        result["missing"].append("top")
-        result["recommendations"].append("Добавьте верхнюю одежду (футболка, рубашка, свитер)")
+        result["missing"].append("upper")
+        result["recommendations"].append("Добавьте верхнюю одежду")
 
-    if not combo.get("bottom") or combo["bottom"] == "":
+    if not combo.get("lower"):
         result["complete"] = False
-        result["missing"].append("bottom")
-        result["recommendations"].append("Добавьте низ (джинсы, брюки, шорты)")
+        result["missing"].append("lower")
+        result["recommendations"].append("Добавьте нижнюю одежду")
 
-    if not combo.get("footwear") or combo["footwear"] == "":
+    if not combo.get("footwear"):
         result["complete"] = False
         result["missing"].append("footwear")
-        result["recommendations"].append("Добавьте обувь (кроссовки, ботинки, туфли)")
+        result["recommendations"].append("Добавьте обувь")
 
-    # Проверка верхней одежды по температуре
+    # Проверка outerwear по температуре
     if location == "Outdoor":
-        if t < OUTERWEAR_JACKET_REQUIRED:
-            if combo.get("outerwear") == "Tanpa Pakaian Luar":
-                result["warnings"].append("При такой температуре рекомендуется куртка")
-                result["recommendations"].append("Добавьте куртку или пальто")
-        
-        if t < FOOTWEAR_BOOTS_REQUIRED:
-            if combo.get("footwear") not in ["Sepatu Bot"]:
-                result["warnings"].append("При температуре ниже 5°C рекомендуются ботинки")
+        if t < TEMP_COLD and not combo.get("outerwear"):
+            result["warnings"].append("При такой температуре рекомендуется верхняя одежда")
+            result["recommendations"].append("Добавьте куртку или пальто")
 
     return result
+
+
+# ═══════════════════════════════════════════
+# ГЕНЕРАЦИЯ КОМБИНАЦИЙ
+# ═══════════════════════════════════════════
+
+
+def generate_combinations(
+    filtered_items: Dict[str, List[Dict[str, Any]]],
+    context: WeatherContext,
+) -> List[Dict[str, Optional[Dict[str, Any]]]]:
+    """
+    Генерирует все допустимые комбинации из отфильтрованных предметов.
+
+    Args:
+        filtered_items: отфильтрованные предметы по категориям
+        context: контекст погоды
+
+    Returns:
+        Список комбинаций, каждая: {"upper": {...}, "lower": {...}, "footwear": {...}, "outerwear": {...}}
+    """
+    # Получаем предметы по категориям
+    uppers = filtered_items.get("upper", [])
+    lowers = filtered_items.get("lower", [])
+    footwears = filtered_items.get("footwear", [])
+    outerwears = filtered_items.get("outerwear", [])
+
+    # Если outerwear пуст, добавляем None как опцию
+    if not outerwears:
+        outerwears_to_use: List[Optional[Dict[str, Any]]] = [None]
+    else:
+        outerwears_to_use = list(outerwears)
+
+    combinations: List[Dict[str, Optional[Dict[str, Any]]]] = []
+
+    # Декартово произведение
+    for upper in uppers:
+        for lower in lowers:
+            for footwear in footwears:
+                for outerwear in outerwears_to_use:
+                    combo = {
+                        "upper": upper,
+                        "lower": lower,
+                        "footwear": footwear,
+                        "outerwear": outerwear,
+                    }
+
+                    # Уровень 2: проверка стилевых конфликтов
+                    if _check_style_conflict(upper, lower, outerwear, footwear, context):
+                        combinations.append(combo)
+
+    # Fallback: если все отфильтровалось, возвращаем хотя бы что-то
+    if not combinations and uppers and lowers and footwears:
+        for upper in uppers:
+            for lower in lowers:
+                for footwear in footwears:
+                    combinations.append({
+                        "upper": upper,
+                        "lower": lower,
+                        "footwear": footwear,
+                        "outerwear": None,
+                    })
+
+    return combinations
 
 
 # ═══════════════════════════════════════════
@@ -518,190 +375,42 @@ def validate_outfit_completeness(
 # ═══════════════════════════════════════════
 
 
-def filter_candidates(
-    context: WeatherContext,
-    wardrobe_tops: Optional[List[str]] = None,
-    wardrobe_bottoms: Optional[List[str]] = None,
-    wardrobe_outerwear: Optional[List[str]] = None,
-    wardrobe_footwear: Optional[List[str]] = None,
-) -> Dict[str, List[str]]:
-    """
-    Уровень 1: категориальная фильтрация.
-
-    Возвращает допустимые категории одежды для данного контекста.
-    Использует fallback на полный гардероб если фильтрация оставила 0 вариантов.
-
-    Args:
-        context: Контекст погоды
-        wardrobe_tops: Доступные пользователю топы (или None для всех)
-        wardrobe_bottoms: Доступные пользователю брюки/юбки (или None для всех)
-        wardrobe_outerwear: Доступная пользователю верхняя одежда (или None для всех)
-        wardrobe_footwear: Доступная пользователю обувь (или None для всех)
-
-    Returns:
-        Dict с ключами tops, bottoms, outerwear, footwear
-    """
-    tops = set(wardrobe_tops or ALL_TOPS)
-    bottoms = set(wardrobe_bottoms or ALL_BOTTOMS)
-    outerwear = set(wardrobe_outerwear or ALL_OUTERWEAR)
-    footwear = set(wardrobe_footwear or ALL_FOOTWEAR)
-
-    tops, bottoms, outerwear, footwear = _level1_category_filter(
-        context, tops, bottoms, outerwear, footwear
-    )
-
-    # Fallback: если фильтрация убрала ВСЁ, возвращаем исходный гардероб
-    if not tops:
-        tops = set(wardrobe_tops or ALL_TOPS)
-    if not bottoms:
-        bottoms = set(wardrobe_bottoms or ALL_BOTTOMS)
-    if not outerwear:
-        outerwear = set(wardrobe_outerwear or ALL_OUTERWEAR)
-    if not footwear:
-        footwear = set(wardrobe_footwear or ALL_FOOTWEAR)
-
-    return {
-        "tops": sorted(tops),
-        "bottoms": sorted(bottoms),
-        "outerwear": sorted(outerwear),
-        "footwear": sorted(footwear),
-    }
-
-
-def generate_combinations(
-    context: WeatherContext,
-    wardrobe_tops: Optional[List[str]] = None,
-    wardrobe_bottoms: Optional[List[str]] = None,
-    wardrobe_outerwear: Optional[List[str]] = None,
-    wardrobe_footwear: Optional[List[str]] = None,
-) -> List[Dict[str, str]]:
-    """
-    Полный пайплайн фильтрации:
-    1. Уровень 1 → допустимые категории
-    2. Декартово произведение → все комбинации
-    3. Уровень 2 → убрать абсурдные пары
-    4. Проверка полноты комплекта
-
-    Args:
-        context: Контекст погоды
-        wardrobe_tops: Доступные топы (или None для всех)
-        wardrobe_bottoms: Доступные брюки/юбки (или None для всех)
-        wardrobe_outerwear: Доступная верхняя одежда (или None для всех)
-        wardrobe_footwear: Доступная обувь (или None для всех)
-
-    Returns:
-        Список допустимых комбинаций одежды
-    """
-    # Уровень 1: категориальная фильтрация
-    filtered = filter_candidates(
-        context,
-        wardrobe_tops,
-        wardrobe_bottoms,
-        wardrobe_outerwear,
-        wardrobe_footwear,
-    )
-
-    # Все комбинации (декартово произведение)
-    all_combos: List[Dict[str, str]] = [
-        {"top": t, "bottom": b, "outerwear": o, "footwear": f}
-        for t, b, o, f in cartesian_product(
-            filtered["tops"],
-            filtered["bottoms"],
-            filtered["outerwear"],
-            filtered["footwear"],
-        )
-    ]
-
-    # Уровень 2: фильтрация комбинаций
-    valid = [c for c in all_combos if _level2_combination_filter(c, context)]
-
-    # Fallback: если уровень 2 убрал ВСЁ, возвращаем всё после уровня 1
-    if not valid:
-        valid = all_combos
-
-    # Сортировка по полноте комплекта (предпочитаем полные комплекты)
-    def completeness_score(combo):
-        validation = validate_outfit_completeness(combo, context)
-        score = 0
-        if validation["complete"]:
-            score += 100
-        score -= len(validation["warnings"]) * 10
-        return score
-
-    valid.sort(key=completeness_score, reverse=True)
-
-    return valid
-
-
 def get_stats(
     context: WeatherContext,
-    wardrobe_tops: Optional[List[str]] = None,
-    wardrobe_bottoms: Optional[List[str]] = None,
-    wardrobe_outerwear: Optional[List[str]] = None,
-    wardrobe_footwear: Optional[List[str]] = None,
+    items_by_category: Dict[str, List[Dict[str, Any]]],
 ) -> Dict[str, Any]:
     """
     Статистика фильтрации для отладки и API.
 
     Args:
-        context: Контекст погоды
-        wardrobe_tops: Доступные топы (или None для всех)
-        wardrobe_bottoms: Доступные брюки/юбки (или None для всех)
-        wardrobe_outerwear: Доступная верхняя одежда (или None для всех)
-        wardrobe_footwear: Доступная обувь (или None для всех)
+        context: контекст погоды
+        items_by_category: предметы по категориям
 
     Returns:
         Dict со статистикой фильтрации
     """
-    all_t = wardrobe_tops or ALL_TOPS
-    all_b = wardrobe_bottoms or ALL_BOTTOMS
-    all_o = wardrobe_outerwear or ALL_OUTERWEAR
-    all_f = wardrobe_footwear or ALL_FOOTWEAR
+    # Считаем исходное количество
+    total_raw = sum(len(items) for items in items_by_category.values())
 
-    total_raw = len(all_t) * len(all_b) * len(all_o) * len(all_f)
+    # Фильтрация
+    filtered = filter_categories(context, items_by_category)
+    after_filter = sum(len(items) for items in filtered.values())
 
-    filtered_cats = filter_candidates(
-        context,
-        wardrobe_tops,
-        wardrobe_bottoms,
-        wardrobe_outerwear,
-        wardrobe_footwear,
-    )
-    after_level1 = (
-        len(filtered_cats["tops"])
-        * len(filtered_cats["bottoms"])
-        * len(filtered_cats["outerwear"])
-        * len(filtered_cats["footwear"])
-    )
+    # Генерация комбинаций
+    combinations = generate_combinations(filtered, context)
 
-    valid = generate_combinations(
-        context,
-        wardrobe_tops,
-        wardrobe_bottoms,
-        wardrobe_outerwear,
-        wardrobe_footwear,
-    )
-    after_level2 = len(valid)
-
-    # Статистика полноты комплектов
+    # Статистика полноты
     complete_count = sum(
-        1 for c in valid 
+        1 for c in combinations
         if validate_outfit_completeness(c, context)["complete"]
     )
 
     return {
-        "total_raw": total_raw,
-        "after_level1": after_level1,
-        "after_level2": after_level2,
+        "total_items": total_raw,
+        "after_category_filter": after_filter,
+        "total_combinations": len(combinations),
         "complete_outfits": complete_count,
-        "level1_reduction": (
-            f"{(1 - after_level1 / total_raw) * 100:.0f}%" if total_raw > 0 else "0%"
-        ),
-        "total_reduction": (
-            f"{(1 - after_level2 / total_raw) * 100:.0f}%" if total_raw > 0 else "0%"
-        ),
-        "categories_after_l1": filtered_cats,
-        "temperature_recommendations": get_temperature_recommendations(context),
+        "categories": {cat: len(items) for cat, items in filtered.items()},
     }
 
 
@@ -710,7 +419,7 @@ def get_temperature_recommendations(context: WeatherContext) -> Dict[str, Any]:
     Получить рекомендации по температуре.
 
     Args:
-        context: Контекст погоды
+        context: контекст погоды
 
     Returns:
         Dict с рекомендациями
@@ -772,179 +481,138 @@ def _get_comfort_level(temp: float) -> str:
 
 
 def filter_by_budget(
-    combinations: List[Dict[str, str]],
+    combinations: List[Dict[str, Optional[Dict[str, Any]]]],
     budget_range: Optional[str],
     item_prices: Optional[Dict[str, float]] = None,
-) -> List[Dict[str, str]]:
+) -> List[Dict[str, Optional[Dict[str, Any]]]]:
     """
     Фильтрация комбинаций по бюджету.
 
     Args:
-        combinations: Список комбинаций одежды
-        budget_range: Диапазон бюджета (economy, medium, premium)
-        item_prices: Словарь цен предметов {item_name: price}
+        combinations: список комбинаций одежды
+        budget_range: диапазон бюджета (economy, medium, premium)
+        item_prices: словарь цен предметов {item_id: price}
 
     Returns:
         Отфильтрованный список комбинаций
-
-    Логика:
-        - economy: общая стоимость комплекта ≤ 3000₽
-        - medium: общая стоимость комплекта ≤ 10000₽
-        - premium: без ограничений
     """
     if budget_range is None or item_prices is None:
         return combinations
 
     # Определяем максимальный бюджет
-    if budget_range == "economy":
-        max_budget = BUDGET_ECONOMY_MAX
-    elif budget_range == "medium":
-        max_budget = BUDGET_MEDIUM_MAX
-    else:  # premium
-        return combinations  # Без ограничений
+    budget_limits = {
+        "economy": 3000.0,
+        "medium": 10000.0,
+        "premium": float("inf"),
+    }
+    max_budget = budget_limits.get(budget_range.lower(), float("inf"))
 
     filtered = []
     for combo in combinations:
         total_price = 0.0
-        items = [combo.get("top"), combo.get("bottom"), combo.get("outerwear"), combo.get("footwear")]
-        
+        items = [combo.get("upper"), combo.get("lower"), combo.get("outerwear"), combo.get("footwear")]
+
         for item in items:
-            if item and item in item_prices:
-                total_price += item_prices[item]
-            elif item:
-                # Если цена неизвестна, используем среднюю для категории
-                # Это позволяет не отбрасывать комбинации без данных о цене
-                total_price += 2500.0  # Средняя цена по умолчанию
+            if item:
+                item_id = item.get("id")
+                if item_id and item_id in item_prices:
+                    total_price += item_prices[item_id]
+                else:
+                    # Средняя цена если неизвестна
+                    total_price += 2500.0
 
         if total_price <= max_budget:
             filtered.append(combo)
 
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.info(
-        f"Фильтрация по бюджету ({budget_range}): "
-        f"{len(combinations)} → {len(filtered)} (max={max_budget}₽)"
-    )
-
-    return filtered if filtered else combinations  # Fallback: если всё отфильтровалось, возвращаем всё
+    return filtered if filtered else combinations  # Fallback
 
 
 def filter_by_styles(
-    combinations: List[Dict[str, str]],
+    combinations: List[Dict[str, Optional[Dict[str, Any]]]],
     style_preferences: Optional[List[str]],
     item_styles: Optional[Dict[str, List[str]]] = None,
-) -> List[Dict[str, str]]:
+) -> List[Dict[str, Optional[Dict[str, Any]]]]:
     """
     Фильтрация комбинаций по стилям.
 
     Args:
-        combinations: Список комбинаций одежды
-        style_preferences: Предпочитаемые стили пользователя
-        item_styles: Словарь стилей предметов {item_name: [styles]}
+        combinations: список комбинаций
+        style_preferences: предпочитаемые стили
+        item_styles: стили предметов {item_id: [styles]}
 
     Returns:
         Отфильтрованный список комбинаций
-
-    Логика:
-        - Если стиль предмета совпадает с предпочтением — оставляем
-        - Если нет данных о стиле — оставляем (нейтральный предмет)
     """
     if not style_preferences or not item_styles:
         return combinations
 
-    # Нормализуем стили к нижнему регистру
     preferred_styles_lower = {s.lower() for s in style_preferences}
 
     filtered = []
     for combo in combinations:
-        items = [combo.get("top"), combo.get("bottom"), combo.get("outerwear"), combo.get("footwear")]
-        
-        # Проверяем каждый предмет на соответствие стилю
+        items = [combo.get("upper"), combo.get("lower"), combo.get("outerwear"), combo.get("footwear")]
         has_preferred_style = False
-        has_non_preferred = False
-        
-        for item in items:
-            if item and item in item_styles:
-                item_style_list = item_styles.get(item, [])
-                item_styles_lower = {s.lower() for s in item_style_list}
-                
-                if item_styles_lower & preferred_styles_lower:
-                    has_preferred_style = True
-                elif item_styles_lower:
-                    has_non_preferred = True
-        
-        # Оставляем если есть хотя бы один предмет предпочитаемого стиля
-        # или если нет данных о стилях
-        if has_preferred_style or not (has_preferred_style or has_non_preferred):
-            filtered.append(combo)
 
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.info(
-        f"Фильтрация по стилям ({style_preferences}): "
-        f"{len(combinations)} → {len(filtered)}"
-    )
+        for item in items:
+            if item:
+                item_id = item.get("id")
+                if item_id and item_id in item_styles:
+                    item_style_list = item_styles.get(item_id, [])
+                    item_styles_lower = {s.lower() for s in item_style_list}
+                    if item_styles_lower & preferred_styles_lower:
+                        has_preferred_style = True
+                        break
+
+        # Оставляем если есть предпочитаемый стиль или нет данных
+        if has_preferred_style or not item_styles:
+            filtered.append(combo)
 
     return filtered if filtered else combinations
 
 
 def filter_by_brands(
-    combinations: List[Dict[str, str]],
+    combinations: List[Dict[str, Optional[Dict[str, Any]]]],
     favorite_brands: Optional[List[str]],
     item_brands: Optional[Dict[str, str]] = None,
-) -> List[Dict[str, str]]:
+) -> List[Dict[str, Optional[Dict[str, Any]]]]:
     """
-    Фильтрация комбинаций по брендам.
+    Сортировка комбинаций по брендам.
 
     Args:
-        combinations: Список комбинаций одежды
-        favorite_brands: Любимые бренды пользователя
-        item_brands: Словарь брендов предметов {item_name: brand}
+        combinations: список комбинаций
+        favorite_brands: любимые бренды
+        item_brands: бренды предметов {item_id: brand}
 
     Returns:
-        Отфильтрованный список комбинаций
-
-    Логика:
-        - Приоритет предметам из любимых брендов
-        - Если бренд неизвестен — оставляем (нейтральный предмет)
-        - Не отбрасываем полностью, только приоритезируем
+        Отсортированный список комбинаций
     """
     if not favorite_brands or not item_brands:
         return combinations
 
-    # Нормализуем бренды к нижнему регистру
     favorite_brands_lower = {b.lower() for b in favorite_brands}
 
-    # Сортируем комбинации: сначала с любимыми брендами
-    def brand_score(combo: Dict[str, str]) -> int:
-        items = [combo.get("top"), combo.get("bottom"), combo.get("outerwear"), combo.get("footwear")]
+    def brand_score(combo: Dict[str, Optional[Dict[str, Any]]]) -> int:
+        items = [combo.get("upper"), combo.get("lower"), combo.get("outerwear"), combo.get("footwear")]
         score = 0
         for item in items:
-            if item and item in item_brands:
-                brand = item_brands.get(item, "").lower()
-                if brand in favorite_brands_lower:
-                    score += 1
+            if item:
+                item_id = item.get("id")
+                if item_id and item_id in item_brands:
+                    brand = item_brands.get(item_id, "").lower()
+                    if brand in favorite_brands_lower:
+                        score += 1
         return score
 
-    sorted_combos = sorted(combinations, key=brand_score, reverse=True)
-    
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.info(
-        f"Сортировка по брендам ({favorite_brands}): "
-        f"{len(combinations)} комбинаций отсортировано"
-    )
-
-    return sorted_combos
+    return sorted(combinations, key=brand_score, reverse=True)
 
 
 def apply_preferences_filter(
-    combinations: List[Dict[str, str]],
+    combinations: List[Dict[str, Optional[Dict[str, Any]]]],
     preferences: Optional[UserPreferences],
     item_prices: Optional[Dict[str, float]] = None,
     item_styles: Optional[Dict[str, List[str]]] = None,
     item_brands: Optional[Dict[str, str]] = None,
-) -> List[Dict[str, str]]:
+) -> List[Dict[str, Optional[Dict[str, Any]]]]:
     """
     Комплексная фильтрация по предпочтениям пользователя.
 
@@ -954,29 +622,29 @@ def apply_preferences_filter(
     3. Бренды (сортировка)
 
     Args:
-        combinations: Список комбинаций одежды
-        preferences: Предпочтения пользователя
-        item_prices: Словарь цен предметов
-        item_styles: Словарь стилей предметов
-        item_brands: Словарь брендов предметов
+        combinations: список комбинаций
+        preferences: предпочтения пользователя
+        item_prices: цены предметов
+        item_styles: стили предметов
+        item_brands: бренды предметов
 
     Returns:
-        Отфильтрованный и отсортированный список комбинаций
+        Отфильтрованный и отсортированный список
     """
     if not preferences:
         return combinations
 
     result = combinations
 
-    # 1. Фильтрация по бюджету (жёсткий фильтр)
+    # 1. Бюджет
     if preferences.budget_range:
         result = filter_by_budget(result, preferences.budget_range, item_prices)
 
-    # 2. Фильтрация по стилям (мягкий фильтр)
+    # 2. Стили
     if preferences.style_preferences:
         result = filter_by_styles(result, preferences.style_preferences, item_styles)
 
-    # 3. Сортировка по брендам (приоритезация)
+    # 3. Бренды (сортировка)
     if preferences.favorite_brands:
         result = filter_by_brands(result, preferences.favorite_brands, item_brands)
 

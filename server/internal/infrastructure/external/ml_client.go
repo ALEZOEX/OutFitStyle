@@ -327,11 +327,11 @@ type GenerateOutfitResponse struct {
 }
 
 // GenerateOutfit вызывает ML-сервис для генерации наряда
-func (c *MLClient) GenerateOutfit(ctx context.Context, userID string, meta map[string]interface{}) (GenerateOutfitResponse, error) {
+func (c *MLClient) GenerateOutfit(ctx context.Context, userID string, meta map[string]any) (GenerateOutfitResponse, error) {
 	var out GenerateOutfitResponse
 
 	req := GenerateOutfitRequest{
-		RequestID: "req-" + userID, // В реальной системе это будет нормальный request ID
+		RequestID: "req-" + userID,
 		UserID:    userID,
 		Meta:      meta,
 	}
@@ -364,27 +364,13 @@ func (c *MLClient) GenerateOutfit(ctx context.Context, userID string, meta map[s
 	return out, nil
 }
 
-// GenerateRecommendationRequest структура запроса для генерации рекомендации
-type GenerateRecommendationRequest struct {
-	RequestID string                 `json:"request_id"`
-	UserID    string                 `json:"user_id"`
-	Meta      map[string]interface{} `json:"meta,omitempty"`
-}
-
-// GenerateRecommendationResponse структура ответа для генерации рекомендации
-type GenerateRecommendationResponse struct {
-	Success bool `json:"success"`
-}
-
 // GenerateRecommendation вызывает ML-сервис для генерации рекомендации
-func (c *MLClient) GenerateRecommendation(ctx context.Context, userID string, meta map[string]interface{}) (GenerateRecommendationResponse, error) {
+// ИЗМЕНЕНИЯ (Март 2026): передаёт предметы по категориям вместо meta
+func (c *MLClient) GenerateRecommendation(
+	ctx context.Context,
+	req GenerateRecommendationRequest,
+) (GenerateRecommendationResponse, error) {
 	var out GenerateRecommendationResponse
-
-	req := GenerateRecommendationRequest{
-		RequestID: "req-" + userID, // В реальной системе это будет нормальный request ID
-		UserID:    userID,
-		Meta:      meta,
-	}
 
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -397,6 +383,8 @@ func (c *MLClient) GenerateRecommendation(ctx context.Context, userID string, me
 		return out, errors.Wrap(err, "new request")
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("X-Request-Id", req.RequestID)
+	httpReq.Header.Set("X-User-Id", req.UserID)
 
 	res, err := c.http.Do(httpReq)
 	if err != nil {
@@ -416,9 +404,9 @@ func (c *MLClient) GenerateRecommendation(ctx context.Context, userID string, me
 
 // ProcessFeedbackRequest структура запроса для обработки обратной связи
 type ProcessFeedbackRequest struct {
-	RequestID string                 `json:"request_id"`
-	UserID    string                 `json:"user_id"`
-	Meta      map[string]interface{} `json:"meta,omitempty"`
+	RequestID string          `json:"request_id"`
+	UserID    string          `json:"user_id"`
+	Meta      map[string]any  `json:"meta,omitempty"`
 }
 
 // ProcessFeedbackResponse структура ответа для обработки обратной связи
@@ -427,9 +415,9 @@ type ProcessFeedbackResponse struct {
 }
 
 // ProcessFeedback вызывает ML-сервис для обработки обратной связи
-func (c *MLClient) ProcessFeedback(ctx context.Context, userID string, requestID string, meta map[string]interface{}) error {
+func (c *MLClient) ProcessFeedback(ctx context.Context, userID string, requestID string, meta map[string]any) error {
 	req := ProcessFeedbackRequest{
-		RequestID: requestID, // Используем переданный requestID
+		RequestID: requestID,
 		UserID:    userID,
 		Meta:      meta,
 	}
@@ -461,9 +449,9 @@ func (c *MLClient) ProcessFeedback(ctx context.Context, userID string, requestID
 
 // UpdateUserPreferencesRequest структура запроса для обновления пользовательских предпочтений
 type UpdateUserPreferencesRequest struct {
-	RequestID string                 `json:"request_id"`
-	UserID    string                 `json:"user_id"`
-	Meta      map[string]interface{} `json:"meta,omitempty"`
+	RequestID string          `json:"request_id"`
+	UserID    string          `json:"user_id"`
+	Meta      map[string]any  `json:"meta,omitempty"`
 }
 
 // UpdateUserPreferencesResponse структура ответа для обновления пользовательских предпочтений
@@ -472,9 +460,9 @@ type UpdateUserPreferencesResponse struct {
 }
 
 // UpdateUserPreferences вызывает ML-сервис для обновления пользовательских предпочтений
-func (c *MLClient) UpdateUserPreferences(ctx context.Context, userID string, requestID string, meta map[string]interface{}) error {
+func (c *MLClient) UpdateUserPreferences(ctx context.Context, userID string, requestID string, meta map[string]any) error {
 	req := UpdateUserPreferencesRequest{
-		RequestID: requestID, // Используем переданный requestID
+		RequestID: requestID,
 		UserID:    userID,
 		Meta:      meta,
 	}

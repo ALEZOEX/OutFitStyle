@@ -38,10 +38,14 @@ type WeatherService interface {
 }
 
 // MLService defines the interface for ML service.
+// ИЗМЕНЕНИЯ (Март 2026): добавлен параметр itemsByCategory
 type MLService interface {
-	// В твоём ML клиенте сейчас:
-	// GetRecommendations(ctx context.Context, userID int, weather domain.WeatherData) (*domain.RecommendationResponse, error)
-	GetRecommendations(ctx context.Context, userID domain.ID, weather domain.WeatherData) (*domain.RecommendationResponse, error)
+	GetRecommendations(
+		ctx context.Context,
+		userID domain.ID,
+		weather domain.WeatherData,
+		itemsByCategory map[string][]domain.ClothingItem,
+	) (*domain.RecommendationResponse, error)
 }
 
 // NewGetRecommendationsUseCase creates a new GetRecommendationsUseCase.
@@ -88,10 +92,19 @@ func (uc *getRecommendationsUseCase) Execute(
 		userProfile = nil
 	}
 
-	_ = userProfile // пока профиль не используется, чтобы не было "declared and not used"
+	_ = userProfile // пока профиль не используется
 
-	// Get ML recommendations
-	mlRecommendation, err := uc.mlService.GetRecommendations(ctx, userID, *weather)
+	// Получаем предметы гардероба пользователя по категориям
+	// В реальной реализации здесь будет вызов wardrobeRepo.GetItemsByCategory
+	itemsByCategory := make(map[string][]domain.ClothingItem)
+	// Например:
+	// itemsByCategory, err = uc.wardrobeRepo.GetItemsByCategory(ctx, userID)
+	// if err != nil {
+	//     return nil, fmt.Errorf("failed to get wardrobe items: %w", err)
+	// }
+
+	// Get ML recommendations с предметами гардероба
+	mlRecommendation, err := uc.mlService.GetRecommendations(ctx, userID, *weather, itemsByCategory)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ML recommendations: %w", err)
 	}
