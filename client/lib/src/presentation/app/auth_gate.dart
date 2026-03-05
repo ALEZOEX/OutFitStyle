@@ -12,31 +12,16 @@ import '../providers/auth_provider.dart';
 /// 2. Если refresh 200 → сохраняем access в память → запускаем загрузку данных
 /// 3. Если refresh 401 → НЕ считаем ошибкой → показываем login screen
 /// 4. Notifications polling запускаем только когда access token != null
-class AuthGate extends ConsumerWidget {
+class AuthGate extends ConsumerStatefulWidget {
   final Widget child;
 
   const AuthGate({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return _AuthGateInitializer(
-      ref: ref,
-      child: child,
-    );
-  }
+  ConsumerState<AuthGate> createState() => _AuthGateState();
 }
 
-class _AuthGateInitializer extends StatefulWidget {
-  final Widget child;
-  final WidgetRef ref;
-
-  const _AuthGateInitializer({required this.child, required this.ref});
-
-  @override
-  State<_AuthGateInitializer> createState() => _AuthGateInitializerState();
-}
-
-class _AuthGateInitializerState extends State<_AuthGateInitializer> {
+class _AuthGateState extends ConsumerState<AuthGate> {
   bool _isInitialized = false;
   bool _isRefreshed = false;
 
@@ -56,19 +41,19 @@ class _AuthGateInitializerState extends State<_AuthGateInitializer> {
     print('[AuthGate] Инициализация...');
 
     try {
-      // Используем widget.ref — он доступен в initState!
-      final authRepo = widget.ref.read(authRepositoryProvider);
+      // Используем ref.read() — в ConsumerState это безопасно
+      final authRepo = ref.read(authRepositoryProvider);
       final refreshed = await authRepo.refreshToken();
 
       if (refreshed) {
         print('[AuthGate] Refresh успешен — access token обновлён');
 
         // Обновляем состояние авторизации
-        final authStateNotifier = widget.ref.read(authStateProvider.notifier);
+        final authStateNotifier = ref.read(authStateProvider.notifier);
         await authStateNotifier.checkAuth();
 
         // Уведомляем роутер
-        final refreshStream = widget.ref.read(goRouterRefreshProvider);
+        final refreshStream = ref.read(goRouterRefreshProvider);
         refreshStream.notifyAuthChanged();
 
         // Запускаем загрузку данных и polling только если авторизованы
@@ -94,7 +79,7 @@ class _AuthGateInitializerState extends State<_AuthGateInitializer> {
     print('[AuthGate] Запуск загрузки данных...');
 
     // Загружаем уведомления
-    final notificationsNotifier = widget.ref.read(notificationsProvider.notifier);
+    final notificationsNotifier = ref.read(notificationsProvider.notifier);
     notificationsNotifier.loadNotifications(refresh: true);
 
     // Запускаем polling
@@ -120,7 +105,7 @@ class _AuthGateInitializerState extends State<_AuthGateInitializer> {
   void dispose() {
     // Останавливаем polling при уничтожении
     if (_isInitialized) {
-      final notificationsNotifier = widget.ref.read(notificationsProvider.notifier);
+      final notificationsNotifier = ref.read(notificationsProvider.notifier);
       notificationsNotifier.stopPolling();
     }
     super.dispose();
