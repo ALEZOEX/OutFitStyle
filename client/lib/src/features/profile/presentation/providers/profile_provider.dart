@@ -104,7 +104,7 @@ class ProfileDataNotifier extends StateNotifier<AsyncValue<ProfileData>> {
   Future<void> _loadProfile() async {
     state = const AsyncValue.loading();
     try {
-      final sessionManager = await _ref.read(sessionManagerProvider.future);
+      final sessionManager = _ref.read(sessionManagerProvider);
       final userSession = sessionManager.currentUserSession;
 
       if (userSession != null) {
