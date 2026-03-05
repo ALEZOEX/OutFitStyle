@@ -138,10 +138,14 @@ class SessionManager {
     );
 
     // Сохраняем сессию в SharedPreferences
-    await _sharedPreferences.setString(
-      'user_session',
-      jsonEncode(_currentUserSession!.toJson()),
-    );
+    // Безопасно: _currentUserSession только что установлен выше
+    final sessionJson = _currentUserSession?.toJson();
+    if (sessionJson != null) {
+      await _sharedPreferences.setString(
+        'user_session',
+        jsonEncode(sessionJson),
+      );
+    }
 
     // Уведомляем подписчиков о новой сессии
     _sessionStreamController.add(_currentUserSession);
@@ -317,10 +321,14 @@ class SessionManager {
       );
 
       // Сохраняем обновленную сессию
-      await _sharedPreferences.setString(
-        'user_session',
-        jsonEncode(_currentUserSession!.toJson()),
-      );
+      // Безопасно: _currentUserSession только что установлен выше
+      final sessionJson = _currentUserSession?.toJson();
+      if (sessionJson != null) {
+        await _sharedPreferences.setString(
+          'user_session',
+          jsonEncode(sessionJson),
+        );
+      }
 
       // Уведомляем подписчиков
       _sessionStreamController.add(_currentUserSession);

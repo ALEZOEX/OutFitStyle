@@ -42,9 +42,15 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     print('[AuthGate] Инициализация...');
 
     try {
-      // Получаем SessionManager и подписываемся на authStateChanges
+      // Получаем SessionManager
       final sessionManager = ref.read(sessionManagerProvider);
 
+      // СНАЧАЛА проверяем текущее состояние auth
+      // Это важно: если пользователь уже авторизован до подписки
+      final currentAuth = sessionManager.isAuthenticated;
+      print('[AuthGate] Текущее состояние auth: $currentAuth');
+
+      // Подписываемся на authStateChanges
       _authSubscription = sessionManager.authStateChanges.listen(
         (isAuthenticated) {
           if (!mounted) return;
@@ -61,16 +67,20 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         onError: (error) {
           print('[AuthGate] Ошибка auth stream: $error');
         },
+        onDone: () {
+          print('[AuthGate] Auth stream closed');
+        },
       );
 
-      // Получаем текущее состояние (может быть уже авторизован)
-      final currentAuth = sessionManager.isAuthenticated;
+      // Инициализируем состояние
+      // Если уже авторизован — запускаем загрузку данных
       setState(() {
         _isAuthenticated = currentAuth;
         _isInitialized = true;
       });
 
       if (currentAuth) {
+        print('[AuthGate] Пользователь уже авторизован, запускаем загрузку данных');
         _startDataLoading();
       }
     } catch (e) {
