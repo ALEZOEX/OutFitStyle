@@ -8,21 +8,23 @@ import 'firebase_options.dart';
 import 'src/presentation/app/app.dart';
 import 'src/core/config/build_stamp.dart';
 
-/// Provider для инициализации Firebase
-final firebaseInitProvider = FutureProvider<void>((ref) async {
-  if (kIsWeb) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    debugPrint('📝 Web-версия: Firebase инициализирован');
-  }
-});
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Выводим build stamp
   BuildStamp.printStamp();
+
+  // Инициализируем Firebase ПЕРЕД ProviderScope
+  if (kIsWeb) {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      debugPrint('📝 Web-версия: Firebase инициализирован');
+    } catch (e) {
+      debugPrint('❌ Ошибка инициализации Firebase: $e');
+    }
+  }
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -31,23 +33,7 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      child: const _FirebaseInitWrapper(
-        child: OutfitStyleApp(),
-      ),
+      child: const OutfitStyleApp(),
     ),
   );
-}
-
-/// Виджет для инициализации Firebase внутри ProviderScope
-class _FirebaseInitWrapper extends ConsumerWidget {
-  final Widget child;
-
-  const _FirebaseInitWrapper({required this.child});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Инициализируем Firebase асинхронно
-    ref.watch(firebaseInitProvider);
-    return child;
-  }
 }
