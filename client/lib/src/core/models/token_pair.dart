@@ -1,5 +1,10 @@
-/// Модель пары токенов (заглушка для обратной совместимости)
-/// @Deprecated Используйте Firebase Auth через SessionManager
+/// Модель пары JWT токенов для Market Service API
+///
+/// Используется ТОЛЬКО для Market Service (покупка одежды).
+/// НЕ используется для пользовательской аутентификации (Firebase Auth).
+///
+/// Пользовательская аутентификация: Firebase Auth (ID token)
+/// Market Service API: TokenPair (access + refresh JWT)
 class TokenPair {
   final String accessToken;
   final String refreshToken;

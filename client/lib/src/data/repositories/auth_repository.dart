@@ -3,8 +3,15 @@ import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import 'package:outfitstyle_client/src/core/models/token_pair.dart';
 
-/// Интерфейс репозитория аутентификации (заглушка для обратной совместимости)
-/// @Deprecated Используйте Firebase Auth через SessionManager
+/// Репозиторий аутентификации для Market Service API
+///
+/// Используется ТОЛЬКО для взаимодействия с Market Service (покупка одежды).
+/// НЕ используется для пользовательской аутентификации (вход/выход).
+///
+/// Пользовательская аутентификация: SessionManager (Firebase Auth)
+/// Market Service API: AuthRepository (JWT токены)
+///
+/// @see SessionManager для пользовательской аутентификации
 abstract class IAuthRepository {
   Future<TokenPair?> login(String email, String password);
   Future<TokenPair?> register(String email, String password, String name);

@@ -2,8 +2,15 @@ import 'package:outfitstyle_client/src/core/models/token_pair.dart';
 import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
 import 'package:dio/dio.dart';
 
-/// Сервис аутентификации (заглушка для обратной совместимости)
-/// @Deprecated Используйте Firebase Auth через SessionManager
+/// Сервис аутентификации для Market Service API
+///
+/// Используется ТОЛЬКО для взаимодействия с Market Service (покупка одежды).
+/// НЕ используется для пользовательской аутентификации (вход/выход).
+///
+/// Пользовательская аутентификация: SessionManager (Firebase Auth)
+/// Market Service API: AuthService (JWT токены)
+///
+/// @see SessionManager для пользовательской аутентификации
 class AuthService {
   final String apiBase;
   final AuthStorage authStorage;

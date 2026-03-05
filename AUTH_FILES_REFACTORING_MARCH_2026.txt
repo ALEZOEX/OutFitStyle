@@ -20,17 +20,18 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Firebase Auth                        │
-│  (единая система авторизации с марта 2026)             │
+│              ДВЕ СИСТЕМЫ АВТОРИЗАЦИИ                    │
+│  (оправданы архитектурно)                               │
 └─────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│                  SessionManager                         │
-│  - Управление сессией через FirebaseAuth               │
-│  - Сохранение состояния в SharedPreferences            │
-│  - Stream authStateChanges для реактивности            │
-└─────────────────────────────────────────────────────────┘
+
+1. Пользовательская аутентификация (Firebase Auth)
+   ┌──────────────────────────────────────────────────────┐
+   │  SessionManager                                      │
+   │  - Вход/выход через Firebase Auth                    │
+   │  - Google Sign-In через Firebase                     │
+   │  - Сессия пользователя                               │
+   │  - authStateChanges для реактивности                 │
+   └──────────────────────────────────────────────────────┘
                           │
         ┌─────────────────┼─────────────────┐
         ▼                 ▼                 ▼
@@ -38,14 +39,31 @@
 │  AuthScreen   │ │   AuthGate    │ │ ProfileScreen │
 │  (вход/рег)   │ │ (startup flow)│ │   (logout)    │
 └───────────────┘ └───────────────┘ └───────────────┘
+
+2. Market Service API (JWT токены)
+   ┌──────────────────────────────────────────────────────┐
+   │  AuthService + AuthStorage                           │
+   │  - JWT токены для Market Service API                 │
+   │  - Покупка одежды из рекомендаций                    │
+   │  - Отдельный сервис (http://localhost:8001)          │
+   └──────────────────────────────────────────────────────┘
+                          │
+        ┌─────────────────┼─────────────────┐
+        ▼                 ▼                 ▼
+┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+│ MarketService │ │  HttpClient   │ │  ApiClient    │
+│   (products)  │ │  (with JWT)   │ │  (with JWT)   │
+└───────────────┘ └───────────────┘ └───────────────┘
 ```
 
 ### Ключевые изменения
 
-| Было (JWT) | Стало (Firebase) |
-|------------|------------------|
-| Access token в памяти/cookie | Firebase ID token |
-| Refresh token в httpOnly cookie | Firebase refresh token (внутри SDK) |
+| Было (JWT) | Стало (Firebase + JWT для Market) |
+|------------|-----------------------------------|
+| Две системы авторизации (не связаны) | **Две системы оправданы** |
+| Firebase Auth для пользователя | ✅ Firebase Auth для пользователя |
+| JWT для Market Service API | ✅ JWT для Market Service API |
+| Access token в памяти/cookie | Firebase ID token + JWT для Market |
 | Ручной refresh через `/api/v1/auth/refresh` | Автоматический refresh в Firebase SDK |
 | `AuthRepository.login()` | `SessionManager.signIn()` |
 | `AuthService.loginWithGoogle()` | `SessionManager.signInWithGoogle()` |
