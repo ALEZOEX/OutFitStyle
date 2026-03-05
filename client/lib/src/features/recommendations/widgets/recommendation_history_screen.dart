@@ -9,8 +9,7 @@ class RecommendationHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userIdAsync = ref.watch(userIdProvider);
-    final userId = userIdAsync.valueOrNull ?? '';
+    final userId = ref.watch(userIdProvider) ?? '';
 
     // Load history when screen is built
     WidgetsBinding.instance.addPostFrameCallback((_) {

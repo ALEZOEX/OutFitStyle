@@ -9,8 +9,7 @@ class UserPreferencesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userIdAsync = ref.watch(userIdProvider);
-    final userId = userIdAsync.valueOrNull ?? '';
+    final userId = ref.watch(userIdProvider) ?? '';
 
     // Load user preferences when screen is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -213,8 +212,7 @@ class UserPreferencesScreen extends ConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                final userIdAsync = ref.read(userIdProvider);
-                final userId = userIdAsync.valueOrNull ?? '';
+                final userId = ref.read(userIdProvider) ?? '';
 
                 final updatedPreferences = currentPreferences.copyWith(
                   maxBudget:
