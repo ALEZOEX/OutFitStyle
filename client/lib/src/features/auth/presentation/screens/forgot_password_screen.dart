@@ -48,9 +48,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      final sessionManager = await ref.read(sessionManagerProvider.future);
+      final sessionManager = ref.read(sessionManagerProvider);
       final email = _emailController.text.trim();
-      
+
       // Firebase отправляет письмо для сброса пароля
       await sessionManager.resetPassword(email);
 
@@ -151,7 +151,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      final sessionManager = await ref.read(sessionManagerProvider.future);
+      final sessionManager = ref.read(sessionManagerProvider);
       await sessionManager.resetPassword(_emailController.text.trim());
 
       if (!mounted) return;

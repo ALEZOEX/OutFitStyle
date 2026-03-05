@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../../presentation/providers/session_provider.dart' show sessionManagerProvider;
 import '../../../../storage/profile_storage.dart';
 import '../../../../storage/local_storage.dart';
 import '../../../settings/data/repositories/profile_repository.dart';
@@ -180,8 +180,9 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
       await profileStorage.saveProfileData(profileData);
       await profileStorage.setProfileComplete(true);
 
-      // 4. Получаем userId из Firebase Auth и сохраняем
-      final userId = FirebaseAuth.instance.currentUser?.uid;
+      // 4. Получаем userId из SessionManager и сохраняем
+      final sessionManager = ref.read(sessionManagerProvider);
+      final userId = sessionManager.currentUserId;
       if (userId != null) {
         await profileStorage.saveUserId(userId);
       }

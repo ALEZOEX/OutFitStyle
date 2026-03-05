@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../core/services/auth_storage.dart';
+import '../../../../services/auth_storage.dart';
 import '../../../../presentation/providers/auth_provider.dart' show authStorageProvider;
 import '../../../../presentation/routing/router.dart';
 

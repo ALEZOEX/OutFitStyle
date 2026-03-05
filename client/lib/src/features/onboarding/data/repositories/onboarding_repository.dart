@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/models/onboarding_data.dart';
 
 /// Репозиторий для работы с данными онбординга

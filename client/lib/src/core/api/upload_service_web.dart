@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import 'api_config.dart';
 
 /// Сервис для загрузки изображений на сервер

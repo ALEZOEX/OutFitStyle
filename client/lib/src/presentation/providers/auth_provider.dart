@@ -9,17 +9,14 @@ import 'session_provider.dart';
 
 /// Провайдер для получения userId пользователя через SessionManager
 final userIdProvider = Provider<String?>((ref) {
-  return ref.watch(sessionManagerProvider).value?.currentUserId;
+  final sessionManager = ref.watch(sessionManagerProvider);
+  return sessionManager.currentUserId;
 });
 
 /// Провайдер состояния авторизации (StreamProvider\<bool\>)
 final authStateProvider = StreamProvider<bool>((ref) {
-  final sessionManagerAsync = ref.watch(sessionManagerProvider);
-
-  return sessionManagerAsync.whenData(
-    (sessionManager) => sessionManager.authStateChanges,
-  ).value ??
-      Stream.value(false);
+  final sessionManager = ref.watch(sessionManagerProvider);
+  return sessionManager.authStateChanges;
 });
 
 /// Провайдер для проверки прав администратора
@@ -31,13 +28,13 @@ final adminAccessProvider = FutureProvider<bool>((ref) async {
 // ПРОВАЙДЕРЫ СОВМЕСТИМОСТИ (для постепенной миграции)
 // ============================================================================
 
-/// Провайдер для AuthStorage (заглушка для обратной совместимости)
-/// @Deprecated Используйте SessionManager
+/// Провайдер для AuthStorage (Market Service API)
+/// @Deprecated Используйте SessionManager для пользовательской аутентификации
 final authStorageProvider = Provider<impl.AuthStorage>((ref) {
   // Используем async/await для получения SharedPreferences
   final prefsAsync = ref.watch(sharedPreferencesProvider);
   return prefsAsync.when(
-    data: (prefs) => impl.AuthStorage(prefs),
+    data: (prefs) => impl.AuthStorageImpl(prefs),
     loading: () => throw StateError('SharedPreferences не инициализированы'),
     error: (e, _) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
   );

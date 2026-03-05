@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../core/api/api_config.dart';
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import 'http_client.dart';
 
 class AdminService {

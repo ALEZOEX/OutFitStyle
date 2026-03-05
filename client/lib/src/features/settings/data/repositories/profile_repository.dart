@@ -6,7 +6,7 @@ import 'package:path/path.dart' as path;
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_config.dart';
-import 'package:outfitstyle_client/src/core/services/auth_storage.dart';
+import 'package:outfitstyle_client/src/services/auth_storage.dart';
 
 /// Репозиторий для работы с профилем пользователя
 ///

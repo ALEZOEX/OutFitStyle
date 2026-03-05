@@ -79,7 +79,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     try {
       // Получаем SessionManager
-      final sessionManager = await ref.read(sessionManagerProvider.future);
+      final sessionManager = ref.read(sessionManagerProvider);
 
       print('[Google Sign-In] Вызов sessionManager.signInWithGoogle()...');
       final success = await sessionManager.signInWithGoogle();
@@ -136,7 +136,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       final name = _nameController.text.trim();
 
       // Получаем SessionManager
-      final sessionManager = await ref.read(sessionManagerProvider.future);
+      final sessionManager = ref.read(sessionManagerProvider);
 
       bool success;
       if (_isLogin) {
@@ -145,7 +145,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       } else {
         // Регистрация через email/password
         success = await sessionManager.signUp(email, password);
-        
+
         // После успешной регистрации обновляем профиль (имя)
         if (success && name.isNotEmpty) {
           await sessionManager.updateUserProfile(displayName: name);
