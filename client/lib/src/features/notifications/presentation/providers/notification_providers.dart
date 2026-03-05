@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../presentation/providers/auth_provider.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../data/datasources/notification_remote_data_source.dart';
 import '../../data/models/notification_dto.dart';
 import '../../data/repositories/notification_repository.dart';
@@ -77,15 +78,16 @@ class NotificationsState {
 /// StateNotifier для управления состоянием уведомлений
 class NotificationsNotifier extends StateNotifier<NotificationsState> {
   final NotificationRepository _repository;
+  final Ref _ref;
   Timer? _pollingTimer;
 
   static const Duration _pollingInterval = Duration(minutes: 2); // Увеличено с 30 сек до 2 мин
   static const int _pageSize = 20;
   static const int _maxConsecutiveErrors = 3; // Максимум ошибок перед остановкой
-  
+
   int _consecutiveErrors = 0; // Счетчик последовательных ошибок
 
-  NotificationsNotifier(this._repository) : super(const NotificationsState());
+  NotificationsNotifier(this._repository, this._ref) : super(const NotificationsState());
 
   /// Загрузить уведомления
   Future<void> loadNotifications({bool refresh = false}) async {
@@ -188,9 +190,9 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   /// Запустить поллинг для обновления количества непрочитанных
   /// Запускается только если пользователь авторизован
   Future<void> startPolling() async {
-    // Проверяем, авторизован ли пользователь
-    final tokens = await _repository.authStorage.readTokenPair();
-    if (tokens == null || tokens.isExpired) {
+    // Проверяем, авторизован ли пользователь через SessionManager (Firebase Auth)
+    final sessionManager = _ref.read(sessionManagerProvider);
+    if (!sessionManager.isAuthenticated) {
       debugPrint('startPolling: пользователь не авторизован — поллинг не запускается');
       return;
     }
@@ -291,7 +293,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 /// Провайдер для управления состоянием уведомлений
 final notificationsProvider = StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
   final repository = ref.watch(notificationRepositoryProvider);
-  return NotificationsNotifier(repository);
+  return NotificationsNotifier(repository, ref);
 });
 
 /// Провайдер только для количества непрочитанных уведомлений

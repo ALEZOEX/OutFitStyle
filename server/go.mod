@@ -2,8 +2,6 @@ module outfitstyle/server
 
 go 1.24.12
 
-toolchain go1.24.6
-
 require (
 	// Security
 	github.com/golang-jwt/jwt/v5 v5.2.2
