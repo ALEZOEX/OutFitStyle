@@ -27,7 +27,7 @@ final sessionManagerProvider = FutureProvider<SessionManager>((ref) async {
   return SessionManager(firebaseAuth, sharedPreferences);
 });
 
-/// Провайдер состояния авторизации (Stream<bool>)
+/// Провайдер состояния авторизации (StreamProvider\<bool\>)
 ///
 /// Возвращает поток изменений состояния аутентификации
 ///
