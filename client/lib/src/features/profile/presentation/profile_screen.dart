@@ -770,23 +770,9 @@ class ProfileScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) {
-    // Получаем SessionManager асинхронно
-    return Consumer(
-      builder: (context, ref, _) {
-        final sessionManagerAsync = ref.watch(sessionManagerProvider);
-        return sessionManagerAsync.when(
-          data: (sessionManager) => _buildLogoutButton(context, sessionManager),
-          loading: () => Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            child: const Center(child: CircularProgressIndicator()),
-          ),
-          error: (error, _) => Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text('Ошибка: $error'),
-          ),
-        );
-      },
-    );
+    // Получаем SessionManager
+    final sessionManager = ref.watch(sessionManagerProvider);
+    return _buildLogoutButton(context, sessionManager);
   }
 
   /// Кнопка выхода
