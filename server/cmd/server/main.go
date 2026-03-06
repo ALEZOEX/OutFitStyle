@@ -208,13 +208,15 @@ func main() {
 
 	// ---------- Firebase Admin Client (для проверки Firebase ID Token) ----------
 	ctx := context.Background()
-	firebaseAuthClient, firebaseErr := middleware.NewFirebaseAdminClient(ctx)
+	firebaseAuthClient, firebaseErr := middleware.NewFirebaseAdminClient(ctx, logger)
 	if firebaseErr != nil {
 		logger.Warn("Firebase Admin SDK initialization failed, Firebase ID Token auth disabled",
 			zap.Error(firebaseErr))
 		firebaseAuthClient = nil
-	} else {
+	} else if firebaseAuthClient != nil {
 		logger.Info("Firebase Admin SDK initialized successfully")
+	} else {
+		logger.Info("Firebase Admin SDK not configured, Firebase ID Token auth disabled")
 	}
 
 	// ---------- Rate limit violation repository ----------
