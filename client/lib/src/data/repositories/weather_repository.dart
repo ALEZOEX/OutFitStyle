@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../remote/api_client.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import '../../domain/repositories/i_weather_repository.dart';
 
 /// Репозиторий погоды
@@ -23,7 +23,7 @@ class WeatherRepository implements IWeatherRepository {
       },
     );
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.data) as Map<String, dynamic>;
     }
     throw WeatherException('Не удалось получить текущую погоду');
   }
@@ -38,7 +38,7 @@ class WeatherRepository implements IWeatherRepository {
       },
     );
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.data) as Map<String, dynamic>;
     }
     throw WeatherException('Не удалось получить прогноз погоды');
   }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import '../../../../domain/states/admin_state.dart';
-import '../../../../data/remote/api_client.dart';
 
 /// Контроллер административной панели
 class AdminController extends StateNotifier<AdminState> {
@@ -17,7 +17,7 @@ class AdminController extends StateNotifier<AdminState> {
     try {
       final response = await _apiClient.get('/admin/stats');
       if (response.statusCode == 200) {
-        final stats = jsonDecode(response.body) as Map<String, dynamic>;
+        final stats = jsonDecode(response.data) as Map<String, dynamic>;
         state = state.copyWith(
           isLoading: false,
           stats: stats,
@@ -37,7 +37,7 @@ class AdminController extends StateNotifier<AdminState> {
     try {
       final response = await _apiClient.get('/admin/users');
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(response.data) as Map<String, dynamic>;
         final users = (data['users'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
         state = state.copyWith(
           isLoading: false,

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:logger/logger.dart';
 
-import '../../data/remote/api_client.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import '../../domain/entities/wardrobe_item.dart';
 import '../../domain/repositories/i_wardrobe_repository.dart';
 import '../db/mappers.dart';
@@ -76,7 +76,7 @@ class WardrobeRepository implements IWardrobeRepository {
       try {
         final response = await apiClient.get('/wardrobe/$id');
         if (response.statusCode == 200) {
-          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          final data = jsonDecode(response.data) as Map<String, dynamic>;
           final item = WardrobeItem.fromJson(data);
           await _saveLocal(item);
           return item;
@@ -209,9 +209,9 @@ class WardrobeRepository implements IWardrobeRepository {
     try {
       final params = <String, dynamic>{'include_archived': 'true'};
       final response = await apiClient.get('/wardrobe', params: params);
-      
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(response.data) as Map<String, dynamic>;
         final items = data['items'] as List<dynamic>? ?? data as List<dynamic>;
         
         await database.batch((batch) async {
@@ -309,18 +309,18 @@ class WardrobeRepository implements IWardrobeRepository {
         // Обновление существующего
         await apiClient.put(
           '/wardrobe/${item.serverId}',
-          body: item.toJson(),
+          data: item.toJson(),
         );
         await markAsSynced(item.id ?? item.serverId!, item.serverId!);
       } else {
         // Создание нового
         final response = await apiClient.post(
           '/wardrobe',
-          body: item.toJson(),
+          data: item.toJson(),
         );
-        
+
         if (response.statusCode == 201 || response.statusCode == 200) {
-          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          final data = jsonDecode(response.data) as Map<String, dynamic>;
           final serverId = data['id'] as String? ?? data['server_id'] as String?;
           if (serverId != null) {
             await markAsSynced(item.id ?? '', serverId);

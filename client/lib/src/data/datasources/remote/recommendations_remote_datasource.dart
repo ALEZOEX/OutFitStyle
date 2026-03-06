@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../../remote/api_client.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import '../../../domain/entities/outfit_recommendation.dart';
 
 abstract class IRecommendationsRemoteDataSource {
@@ -25,7 +25,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
   Future<List<OutfitRecommendation>> getUserRecommendations(String userId) async {
     final response = await _apiClient.get('/users/$userId/recommendations');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -38,7 +38,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
   Future<OutfitRecommendation?> getRecommendationById(String id) async {
     final response = await _apiClient.get('/recommendations/$id');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       return OutfitRecommendation.fromJson(data);
     }
     return null;
@@ -48,7 +48,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
   Future<void> saveRecommendation(OutfitRecommendation recommendation) async {
     final response = await _apiClient.post(
       '/recommendations',
-      body: recommendation.toJson(),
+      data: recommendation.toJson(),
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw RecommendationsRemoteException('Не удалось сохранить рекомендацию');
@@ -63,7 +63,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
     }
     final response = await _apiClient.put(
       '/recommendations/$id',
-      body: recommendation.toJson(),
+      data: recommendation.toJson(),
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsRemoteException('Не удалось обновить рекомендацию');
@@ -82,7 +82,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
   Future<void> likeRecommendation(String id, bool liked) async {
     final response = await _apiClient.post(
       '/recommendations/$id/like',
-      body: {'liked': liked},
+      data: {'liked': liked},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsRemoteException('Не удалось лайкнуть рекомендацию');
@@ -93,7 +93,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
   Future<void> saveRecommendationForLater(String id, bool saved) async {
     final response = await _apiClient.post(
       '/recommendations/$id/save',
-      body: {'saved': saved},
+      data: {'saved': saved},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsRemoteException('Не удалось сохранить рекомендацию на потом');
@@ -111,7 +111,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
       },
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -124,7 +124,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
   Future<List<OutfitRecommendation>> getTrendingRecommendations() async {
     final response = await _apiClient.get('/recommendations/trending');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -137,7 +137,7 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
   Future<void> submitFeedback(String recommendationId, String feedback) async {
     final response = await _apiClient.post(
       '/recommendations/$recommendationId/feedback',
-      body: {'feedback': feedback},
+      data: {'feedback': feedback},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsRemoteException('Не удалось отправить отзыв');

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../../remote/api_client.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 
 abstract class IWeatherRemoteDataSource {
   Future<Map<String, dynamic>> getCurrentWeather(double latitude, double longitude);
@@ -21,7 +21,7 @@ class WeatherRemoteDataSource implements IWeatherRemoteDataSource {
       },
     );
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.data) as Map<String, dynamic>;
     }
     throw WeatherRemoteException('Не удалось получить текущую погоду');
   }
@@ -36,7 +36,7 @@ class WeatherRemoteDataSource implements IWeatherRemoteDataSource {
       },
     );
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.data) as Map<String, dynamic>;
     }
     throw WeatherRemoteException('Не удалось получить прогноз погоды');
   }
