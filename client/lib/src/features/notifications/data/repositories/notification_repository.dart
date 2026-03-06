@@ -1,5 +1,4 @@
 import '../../../../core/api/api_client.dart';
-import '../../../../services/auth_storage.dart';
 import '../datasources/notification_remote_data_source.dart';
 import '../models/notification_dto.dart';
 
@@ -7,11 +6,9 @@ import '../models/notification_dto.dart';
 /// Инкапсулирует логику доступа к данным (API)
 class NotificationRepository {
   final NotificationRemoteDataSource _remoteDataSource;
-  final AuthStorage authStorage;
 
   NotificationRepository({
     required NotificationRemoteDataSource remoteDataSource,
-    required this.authStorage,
   }) : _remoteDataSource = remoteDataSource;
 
   /// Получить список уведомлений

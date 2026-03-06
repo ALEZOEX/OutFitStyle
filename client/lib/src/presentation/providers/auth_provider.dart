@@ -47,7 +47,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 });
 
 /// Класс состояния авторизации (для обратной совместимости)
-/// @Deprecated Используйте authStateProvider напрямую (StreamProvider<bool>)
+/// @Deprecated Используйте authStateProvider напрямую [StreamProvider]
 @Deprecated('Используйте authStateProvider напрямую. Будет удалён после миграции router.dart.')
 class AuthState {
   final bool isLoading;

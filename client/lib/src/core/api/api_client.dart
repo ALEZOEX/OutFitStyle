@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
-import 'package:outfitstyle_client/src/core/models/token_pair.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async' show Completer;
@@ -13,8 +11,6 @@ import 'web_utils.dart' if (dart.library.io) 'web_utils_stub.dart' as web_utils;
 /// Отправляет Firebase ID Token в заголовке Authorization: Bearer [token]
 /// Бэкенд должен проверять Firebase ID Token через Firebase Admin SDK
 class ApiClient {
-  final AuthStorage storage;
-
   late final Dio _dio;
 
   // Security: флаг для предотвращения race condition при refresh
@@ -23,7 +19,7 @@ class ApiClient {
   // Очередь запросов, ожидающих refresh
   final List<_PendingRequest> _pendingRequests = [];
 
-  ApiClient({required this.storage}) {
+  ApiClient() {
     _dio = Dio(BaseOptions(
       baseUrl: ApiConfig.baseUrl,
       connectTimeout: const Duration(seconds: 15),
@@ -104,12 +100,10 @@ class ApiClient {
               developer.log('[ApiClient] Ошибка refresh Firebase ID Token',
                   name: 'ApiClient',
                   error: refreshError);
-              // Если refresh не удался — очищаем сессию и перезагружаем страницу
-              await storage.clearSession();
-              // Перезагрузка страницы для web или редирект на login
-              if (kIsWeb) {
-                web_utils.reloadPage();
-              }
+              // Если refresh не удался — просто логируем ошибку
+              // Очистка сессии должна обрабатываться на уровне SessionManager
+              developer.log('[ApiClient] Firebase ID Token refresh failed, session cleanup handled by SessionManager',
+                  name: 'ApiClient');
             }
           }
         }
@@ -164,7 +158,7 @@ class ApiClient {
 
   /// Внутренний конструктор для использования с кастомным Dio
   /// (например, для внешних API без авторизации)
-  ApiClient.internal(Dio dio) : _dio = dio, storage = _NoOpAuthStorage();
+  ApiClient.internal(Dio dio) : _dio = dio;
 
   Dio get raw => _dio;
 
@@ -241,29 +235,6 @@ class NetworkException extends ApiException {
 
 class UnauthorizedException extends ApiException {
   const UnauthorizedException(super.message);
-}
-
-/// Заглушка AuthStorage для случаев, когда авторизация не требуется
-class _NoOpAuthStorage extends AuthStorage {
-  _NoOpAuthStorage();
-
-  @override
-  Future<void> writeTokenPair(TokenPair pair) async {}
-
-  @override
-  Future<String?> readAccessToken() async => null;
-
-  @override
-  Future<String?> readRefreshToken() async => null;
-
-  @override
-  Future<TokenPair?> readTokenPair() async => null;
-
-  @override
-  Future<DateTime?> readExpiresAt() async => null;
-
-  @override
-  Future<void> clearSession() async {}
 }
 
 /// Внутренний класс для ожидания завершения refresh

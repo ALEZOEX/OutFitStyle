@@ -9,14 +9,12 @@ import '../../data/datasources/notification_remote_data_source.dart';
 import '../../data/models/notification_dto.dart';
 import '../../data/repositories/notification_repository.dart';
 
-/// Провайдер для NotificationRepository (использует глобальный ApiClient и AuthStorage)
+/// Провайдер для NotificationRepository (использует глобальный ApiClient с Firebase ID Token)
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  final authStorage = ref.watch(authStorageProvider);
+  final apiClient = ApiClient(); // Глобальный ApiClient с Firebase ID Token
   final remoteDataSource = NotificationRemoteDataSource(apiClient);
   return NotificationRepository(
     remoteDataSource: remoteDataSource,
-    authStorage: authStorage,
   );
 });
 

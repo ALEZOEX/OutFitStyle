@@ -10,6 +10,7 @@ export 'auth_provider.dart'
         userIdProvider,
         adminAccessProvider,
         // Провайдеры совместимости (для постепенной миграции)
+        // TODO: Удалить после полной миграции на Firebase Auth
         authStorageProvider,
         apiClientProvider,
         AuthState,
