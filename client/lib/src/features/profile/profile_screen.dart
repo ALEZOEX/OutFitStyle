@@ -106,11 +106,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         CircleAvatar(
                           radius: 50,
                           backgroundColor: Colors.white.withOpacity(0.2),
-                          backgroundImage:
-                              profileState.userProfile?.avatarUrl != null
-                                  ? NetworkImage(
-                                      profileState.userProfile!.avatarUrl!)
-                                  : null,
+                          backgroundImage: () {
+                            final avatarUrl = profileState.userProfile?.avatarUrl;
+                            if (avatarUrl != null && avatarUrl.isNotEmpty) {
+                              return NetworkImage(avatarUrl);
+                            }
+                            return null;
+                          }(),
                           child: profileState.userProfile?.avatarUrl == null
                               ? const Icon(
                                   Icons.person,
