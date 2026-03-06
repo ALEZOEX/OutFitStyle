@@ -10,15 +10,13 @@ import '../../../../presentation/providers/session_provider.dart' show sessionMa
 import '../../../../storage/profile_storage.dart';
 import '../../../../storage/local_storage.dart';
 import '../../../settings/data/repositories/profile_repository.dart';
-import '../../../../presentation/providers/auth_provider.dart' show apiClientProvider, authStorageProvider;
+import '../../../../core/api/api_client.dart';
 
 /// Провайдер для ProfileRepository
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  final authStorage = ref.watch(authStorageProvider);
+  final apiClient = ApiClient();
   return ProfileRepository(
     apiClient: apiClient,
-    authStorage: authStorage,
   );
 });
 

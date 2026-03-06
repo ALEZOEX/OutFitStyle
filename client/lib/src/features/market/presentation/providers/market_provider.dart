@@ -5,21 +5,17 @@ import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/features/market/data/market_api_client.dart';
 import 'package:outfitstyle_client/src/features/market/data/market_repository.dart';
 import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
-import '../../../../presentation/providers/auth_provider.dart' show authStorageProvider;
 
 /// API client provider (core)
 final coreApiClientProvider = Provider<ApiClient>((ref) {
-  final authStorage = ref.watch(authStorageProvider);
-  return ApiClient(storage: authStorage);
+  return ApiClient();
 });
 
 /// Auth service provider
 final authServiceProvider = Provider<AuthService>((ref) {
-  final authStorage = ref.watch(authStorageProvider);
   final apiClient = ref.watch(coreApiClientProvider);
   return AuthService(
     apiBase: ApiConfig.baseUrl,
-    authStorage: authStorage,
     dio: apiClient.raw,
   );
 });
