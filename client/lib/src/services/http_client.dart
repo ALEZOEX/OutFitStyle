@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../core/api/api_config.dart';
-import 'package:outfitstyle_client/src/core/models/token_pair.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
 
 /// HTTP клиент с JWT авторизацией для Market Service API
 ///
@@ -12,13 +10,12 @@ import 'package:outfitstyle_client/src/services/auth_storage.dart';
 class AuthenticatedHttpClient extends http.BaseClient {
   final http.Client _inner;
   final ApiConfig _apiConfig;
-  final AuthStorage _authStorage;
 
-  AuthenticatedHttpClient(this._inner, this._apiConfig, this._authStorage);
+  AuthenticatedHttpClient(this._inner, this._apiConfig);
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    final token = await _authStorage.readAccessToken();
+    final token = await ApiConfig.getAccessToken();
     if (token != null && token.isNotEmpty) {
       request.headers['Authorization'] = 'Bearer $token';
     }
@@ -56,7 +53,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
     // Теперь точно будем повторять — можно drain
     await response.stream.drain();
 
-    final newToken = await _authStorage.readAccessToken();
+    final newToken = await ApiConfig.getAccessToken();
     if (newToken == null || newToken.isEmpty) {
       // Refresh прошёл, но токен не получен — возвращаем 401
       return http.StreamedResponse(
@@ -80,50 +77,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
   }
 
   Future<bool> _tryRefreshToken() async {
-    final refreshToken = await _authStorage.readRefreshToken();
-    if (refreshToken == null || refreshToken.isEmpty) return false;
-
-    // Используем /api/v1/auth/refresh
-    final uri = Uri.parse('${_apiConfig.apiBase}/api/v1/auth/refresh');
-
-    final resp = await _inner.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'refresh_token': refreshToken}),
-    );
-
-    if (resp.statusCode != 200) return false;
-
-    final data = jsonDecode(resp.body);
-    // подстрой под фактический формат ответа API:
-    // либо { "tokens": {...} }, либо { "access_token": "...", "refresh_token": "..." }
-
-    // Проверяем, является ли 'tokens' мапом
-    if (data['tokens'] != null && data['tokens'] is Map<String, dynamic>) {
-      try {
-        final tokens = TokenPair.fromJson(data['tokens']);
-        await _authStorage.writeTokenPair(tokens);
-        return true;
-      } catch (e) {
-        // Если не удалось распарсить токены, возвращаем false
-        return false;
-      }
-    } else if (data is Map<String, dynamic> &&
-        data.containsKey('access_token') &&
-        data.containsKey('refresh_token') &&
-        data.containsKey('expires_at')) {
-      // Альтернативный формат: прямой объект с токенами
-      try {
-        final tokens = TokenPair.fromJson(data);
-        await _authStorage.writeTokenPair(tokens);
-        return true;
-      } catch (e) {
-        // Если не удалось распарсить токены, возвращаем false
-        return false;
-      }
-    } else {
-      // Если формат ответа не соответствует ожидаемому, возвращаем false
-      return false;
-    }
+    // Refresh token больше не используется — Firebase ID Token
+    return false;
   }
 }

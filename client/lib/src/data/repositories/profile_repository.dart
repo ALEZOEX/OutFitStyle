@@ -1,14 +1,10 @@
 import '../../core/api/api_client.dart';
-import '../../core/api/api_config.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
 
 /// Репозиторий профиля пользователя
 class ProfileRepository {
-  final ApiConfig config;
-  final AuthStorage authStorage;
   final ApiClient apiClient;
 
-  ProfileRepository(this.config, this.authStorage, this.apiClient);
+  ProfileRepository(this.apiClient);
 
   /// Получить профиль текущего пользователя
   Future<Map<String, dynamic>> getMe() async {
