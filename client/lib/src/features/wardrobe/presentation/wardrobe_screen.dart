@@ -720,8 +720,8 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                       if (selected) {
                         setState(() {
                           _selectedCategory = cat['value'] as String;
-                          _selectedEmoji =
-                              _emojiCategories[_selectedCategory]!.first;
+                          final emojis = _emojiCategories[_selectedCategory] ?? [];
+                          _selectedEmoji = emojis.firstOrNull ?? '😊';
                         });
                       }
                     },
@@ -743,7 +743,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
             spacing: 12,
             runSpacing: 12,
             children:
-                _emojiCategories[_selectedCategory]!.map((emoji) {
+                (_emojiCategories[_selectedCategory] ?? []).map((emoji) {
                   final isSelected = _selectedEmoji == emoji;
                   return GestureDetector(
                     onTap: () => setState(() => _selectedEmoji = emoji),
