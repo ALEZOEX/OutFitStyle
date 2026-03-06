@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/di/di.dart';
 import '../onboarding/onboarding_storage.dart' as onboarding_storage;
-import '../../presentation/providers/auth_provider.dart' show authStorageProvider;
+import '../../presentation/providers/session_provider.dart' show sessionManagerProvider;
 
 /// Провайдер для отслеживания состояния проверки onboarding
 final splashInitProvider = FutureProvider<String>((ref) async {
@@ -16,10 +16,9 @@ final splashInitProvider = FutureProvider<String>((ref) async {
   final notifier = ref.read(onboardingDoneProvider.notifier);
   notifier.updateState(onboardingDone);
 
-  // Проверяем авторизацию через AuthStorage
-  final authStorage = ref.read(authStorageProvider);
-  final token = await authStorage.readAccessToken();
-  final isAuthenticated = token != null && token.isNotEmpty;
+  // Проверяем авторизацию через SessionManager (Firebase Auth)
+  final sessionManager = ref.read(sessionManagerProvider);
+  final isAuthenticated = sessionManager.isAuthenticated;
 
   // Возвращаем маршрут для редиректа
   if (!onboardingDone) {
