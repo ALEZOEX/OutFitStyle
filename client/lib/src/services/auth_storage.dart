@@ -3,6 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Абстрактный класс хранилища токенов для Market Service API
+///
+/// @Deprecated Используйте Firebase Auth для пользовательской аутентификации
+@Deprecated('Используйте Firebase Auth. JWT токены устарели.')
 abstract class AuthStorage {
   Future<void> writeTokenPair(TokenPair pair);
   Future<String?> readAccessToken();
@@ -23,6 +26,9 @@ abstract class AuthStorage {
 ///
 /// Пользовательская аутентификация: SessionManager (Firebase Auth)
 /// Market Service API: AuthStorage (JWT токены)
+///
+/// @Deprecated Используйте Firebase Auth для пользовательской аутентификации
+@Deprecated('Используйте Firebase Auth. JWT токены устарели.')
 class AuthStorageImpl implements AuthStorage {
   final SharedPreferences _prefs;
   String? _memoryAccessToken; // Для web: access token в памяти

@@ -12,6 +12,8 @@ import 'package:outfitstyle_client/src/core/models/token_pair.dart';
 /// Market Service API: AuthRepository (JWT токены)
 ///
 /// @see SessionManager для пользовательской аутентификации
+/// @Deprecated Используйте Firebase Auth через SessionManager
+@Deprecated('Используйте SessionManager для аутентификации. JWT auth устарел.')
 abstract class IAuthRepository {
   Future<TokenPair?> login(String email, String password);
   Future<TokenPair?> register(String email, String password, String name);
@@ -22,6 +24,7 @@ abstract class IAuthRepository {
 
 /// Репозиторий аутентификации (заглушка для обратной совместимости)
 /// @Deprecated Используйте Firebase Auth через SessionManager
+@Deprecated('Используйте SessionManager.signIn/signUp вместо AuthRepository. JWT auth устарел.')
 class AuthRepository implements IAuthRepository {
   final ApiConfig config;
   final AuthStorage authStorage;

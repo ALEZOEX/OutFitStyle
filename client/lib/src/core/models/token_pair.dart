@@ -5,6 +5,9 @@
 ///
 /// Пользовательская аутентификация: Firebase Auth (ID token)
 /// Market Service API: TokenPair (access + refresh JWT)
+///
+/// @Deprecated Используйте Firebase ID Token через FirebaseAuth.instance.currentUser.getIdToken()
+@Deprecated('Используйте Firebase ID Token. JWT токены устарели.')
 class TokenPair {
   final String accessToken;
   final String refreshToken;
