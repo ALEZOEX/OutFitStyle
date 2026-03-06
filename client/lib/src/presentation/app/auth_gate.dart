@@ -98,11 +98,15 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     print('[AuthGate] Запуск загрузки данных...');
 
     // Загружаем уведомления
-    final notificationsNotifier = ref.read(notificationsProvider.notifier);
-    notificationsNotifier.loadNotifications(refresh: true);
+    try {
+      final notificationsNotifier = ref.read(notificationsProvider.notifier);
+      notificationsNotifier.loadNotifications(refresh: true);
 
-    // Запускаем polling
-    notificationsNotifier.startPolling();
+      // Запускаем polling
+      notificationsNotifier.startPolling();
+    } catch (e) {
+      print('[AuthGate] Ошибка при запуске polling: $e');
+    }
   }
 
   void _stopDataLoading() {
