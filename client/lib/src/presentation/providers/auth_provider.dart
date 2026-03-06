@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/services/auth_storage.dart' as impl;
-import 'session_provider.dart';
+import 'session_provider.dart' show sessionManagerProvider, sharedPreferencesProvider, authStateProvider;
 
 // ============================================================================
 // FIREBASE AUTH ПРОВАЙДЕРЫ (основные)
@@ -13,11 +13,8 @@ final userIdProvider = Provider<String?>((ref) {
   return sessionManager.currentUserId;
 });
 
-/// Провайдер состояния авторизации (StreamProvider\<bool\>)
-final authStateProvider = StreamProvider<bool>((ref) {
-  final sessionManager = ref.watch(sessionManagerProvider);
-  return sessionManager.authStateChanges;
-});
+// Экспортируем authStateProvider из session_provider.dart
+// final authStateProvider = StreamProvider<bool>((ref) { ... });
 
 /// Провайдер для проверки прав администратора
 final adminAccessProvider = FutureProvider<bool>((ref) async {
@@ -30,6 +27,7 @@ final adminAccessProvider = FutureProvider<bool>((ref) async {
 
 /// Провайдер для AuthStorage (Market Service API)
 /// @Deprecated Используйте SessionManager для пользовательской аутентификации
+@Deprecated('Используйте SessionManager для аутентификации. JWT auth устарел.')
 final authStorageProvider = Provider<impl.AuthStorage>((ref) {
   // Используем async/await для получения SharedPreferences
   final prefsAsync = ref.watch(sharedPreferencesProvider);
@@ -42,13 +40,15 @@ final authStorageProvider = Provider<impl.AuthStorage>((ref) {
 
 /// Провайдер для ApiClient (заглушка для обратной совместимости)
 /// @Deprecated Используйте SessionManager
+@Deprecated('Используйте ApiClient напрямую. JWT auth устарел.')
 final apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(authStorageProvider);
   return ApiClient(storage: storage);
 });
 
 /// Класс состояния авторизации (для обратной совместимости)
-/// @Deprecated Используйте authStateProvider напрямую
+/// @Deprecated Используйте authStateProvider напрямую (StreamProvider<bool>)
+@Deprecated('Используйте authStateProvider напрямую. Будет удалён после миграции router.dart.')
 class AuthState {
   final bool isLoading;
   final bool isAuthenticated;
@@ -60,7 +60,8 @@ class AuthState {
 }
 
 /// Вспомогательный провайдер для router.dart (обратная совместимость)
-/// @Deprecated Будет удалён после рефакторинга router.dart
+/// @Deprecated Будет удалён после миграции router.dart на authStateProvider
+@Deprecated('Используйте authStateProvider напрямую. Будет удалён после миграции router.dart.')
 final authStateCompatProvider = Provider<AuthState>((ref) {
   final authStateAsync = ref.watch(authStateProvider);
 
