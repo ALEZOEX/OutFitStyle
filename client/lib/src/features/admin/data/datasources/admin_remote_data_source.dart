@@ -27,7 +27,7 @@ class AdminRemoteDataSource {
     int limit = 50,
     Map<String, dynamic>? filters,
   }) async {
-    final token = await storage.readAccessToken();
+    final token = await ApiConfig.getAccessToken();
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -57,7 +57,7 @@ class AdminRemoteDataSource {
 
   /// Получает детали пользователя по ID
   Future<AdminUserDto> getUserById(String userId) async {
-    final token = await storage.readAccessToken();
+    final token = await ApiConfig.getAccessToken();
     final uri = Uri.parse('${config.apiBase}/admin/users/$userId');
 
     final response = await http.get(
@@ -79,7 +79,7 @@ class AdminRemoteDataSource {
 
   /// Обновляет роль пользователя
   Future<void> updateUserRole(String userId, String role) async {
-    final token = await storage.readAccessToken();
+    final token = await ApiConfig.getAccessToken();
     final uri = Uri.parse('${config.apiBase}/admin/users/$userId/role');
 
     final response = await http.patch(
@@ -98,7 +98,7 @@ class AdminRemoteDataSource {
 
   /// Блокирует/разблокирует пользователя
   Future<void> blockUser(String userId, bool blocked) async {
-    final token = await storage.readAccessToken();
+    final token = await ApiConfig.getAccessToken();
     final uri = Uri.parse('${config.apiBase}/admin/users/$userId/block');
 
     final response = await http.patch(
@@ -117,7 +117,7 @@ class AdminRemoteDataSource {
 
   /// Сбрасывает пароль пользователя
   Future<void> resetUserPassword(String userId) async {
-    final token = await storage.readAccessToken();
+    final token = await ApiConfig.getAccessToken();
     final uri = Uri.parse('${config.apiBase}/admin/users/$userId/reset-password');
 
     final response = await http.post(
@@ -135,7 +135,7 @@ class AdminRemoteDataSource {
 
   /// Удаляет пользователя
   Future<void> deleteUser(String userId) async {
-    final token = await storage.readAccessToken();
+    final token = await ApiConfig.getAccessToken();
     final uri = Uri.parse('${config.apiBase}/admin/users/$userId');
 
     final response = await http.delete(

@@ -6,25 +6,21 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:outfitstyle_client/src/features/settings/presentation/screens/security_screen.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import 'package:outfitstyle_client/src/features/settings/data/repositories/sessions_repository.dart';
 import 'package:outfitstyle_client/src/features/settings/data/models/session_device.dart';
 
 // Mock классы
 class MockApiClient extends Mock implements ApiClient {}
-class MockAuthStorage extends Mock implements AuthStorage {}
 class MockSessionsRepository extends Mock implements SessionsRepository {}
 
 void main() {
   group('SecurityScreen Widget Tests', () {
-    late MockApiClient mockApiClient;
     late MockSessionsRepository mockSessionsRepository;
 
     setUp(() {
       SharedPreferences.setMockInitialValues({});
-      mockApiClient = MockApiClient();
       mockSessionsRepository = MockSessionsRepository();
-      
+
       // Мокаем метод getSessions чтобы возвращал пустой список
       when(() => mockSessionsRepository.getSessions())
           .thenAnswer((_) async => <SessionDevice>[]);
@@ -33,7 +29,6 @@ void main() {
     Widget createTestWidget() {
       return ProviderScope(
         overrides: [
-          apiClientProvider.overrideWith((ref) => mockApiClient),
           sessionsRepositoryProvider.overrideWith((ref) {
             return mockSessionsRepository;
           }),

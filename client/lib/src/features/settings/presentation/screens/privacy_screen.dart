@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../presentation/routing/router.dart';
+import '../../../../presentation/providers/session_provider.dart';
 
 /// Экран настроек конфиденциальности
 class PrivacySettingsScreen extends ConsumerStatefulWidget {
@@ -340,8 +341,9 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
       final response = await _apiClient.delete('/api/v1/user/delete-account');
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        // Выход из системы и очистка сессии
-        await _authStorage.clearSession();
+        // Выход из системы через SessionManager
+        final sessionManager = ref.read(sessionManagerProvider);
+        await sessionManager.signOut();
 
         if (mounted) {
           // Перенаправление на экран входа
