@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../../data/remote/api_client.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import '../../domain/entities/outfit_recommendation.dart';
 import '../../domain/repositories/i_recommendations_repository.dart';
 
@@ -13,7 +13,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<List<OutfitRecommendation>> getUserRecommendations(String userId) async {
     final response = await apiClient.get('/users/$userId/recommendations');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -26,7 +26,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<OutfitRecommendation?> getRecommendationById(String id) async {
     final response = await apiClient.get('/recommendations/$id');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       return OutfitRecommendation.fromJson(data);
     }
     return null;
@@ -36,7 +36,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<void> saveRecommendation(OutfitRecommendation recommendation) async {
     final response = await apiClient.post(
       '/recommendations',
-      body: recommendation.toJson(),
+      data: recommendation.toJson(),
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw RecommendationsException('Не удалось сохранить рекомендацию');
@@ -51,7 +51,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
     }
     final response = await apiClient.put(
       '/recommendations/$id',
-      body: recommendation.toJson(),
+      data: recommendation.toJson(),
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsException('Не удалось обновить рекомендацию');
@@ -70,7 +70,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<void> likeRecommendation(String id, bool liked) async {
     final response = await apiClient.post(
       '/recommendations/$id/like',
-      body: {'liked': liked},
+      data: {'liked': liked},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsException('Не удалось лайкнуть рекомендацию');
@@ -81,7 +81,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<void> saveRecommendationForLater(String id, bool saved) async {
     final response = await apiClient.post(
       '/recommendations/$id/save',
-      body: {'saved': saved},
+      data: {'saved': saved},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsException('Не удалось сохранить рекомендацию на потом');
@@ -99,7 +99,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
       },
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -112,7 +112,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<List<OutfitRecommendation>> getTrendingRecommendations() async {
     final response = await apiClient.get('/recommendations/trending');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -125,7 +125,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<void> submitFeedback(String recommendationId, String feedback) async {
     final response = await apiClient.post(
       '/recommendations/$recommendationId/feedback',
-      body: {'feedback': feedback},
+      data: {'feedback': feedback},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsException('Не удалось отправить отзыв');
@@ -136,7 +136,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<List<OutfitRecommendation>> getRecommendationsHistory(String userId) async {
     final response = await apiClient.get('/users/$userId/recommendations/history');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -149,7 +149,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<List<OutfitRecommendation>> getSavedRecommendations(String userId) async {
     final response = await apiClient.get('/users/$userId/recommendations/saved');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -169,7 +169,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   }) async {
     final response = await apiClient.post(
       '/recommendations/generate',
-      body: {
+      data: {
         'user_id': userId,
         'excluded_items': excludedItems,
         'latitude': latitude,
@@ -179,7 +179,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
       },
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       return OutfitRecommendation.fromJson(data);
     }
     throw RecommendationsException('Не удалось сгенерировать рекомендацию');
@@ -202,7 +202,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
       },
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       return OutfitRecommendation.fromJson(data);
     }
     throw RecommendationsException('Не удалось подобрать элементы');
@@ -218,7 +218,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
     };
     final response = await apiClient.get('/recommendations/user', params: params);
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
@@ -231,7 +231,7 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<void> rateRecommendation(String id, double rating) async {
     final response = await apiClient.post(
       '/recommendations/$id/rate',
-      body: {'rating': rating},
+      data: {'rating': rating},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsException('Не удалось оценить рекомендацию');

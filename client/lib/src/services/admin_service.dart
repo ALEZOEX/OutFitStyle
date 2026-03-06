@@ -1,26 +1,18 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-import '../core/api/api_config.dart';
-import 'http_client.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 
 class AdminService {
-  final ApiConfig _config;
-  final http.Client _httpClient;
+  final ApiClient _apiClient;
 
-  AdminService(this._config, [http.Client? httpClient])
-      : _httpClient = httpClient ?? http.Client();
+  AdminService([ApiClient? apiClient])
+      : _apiClient = apiClient ?? ApiClient();
 
   /// Проверяет, является ли текущий пользователь администратором
   /// путем попытки доступа к административному эндпоинту
   Future<bool> isAdmin() async {
     try {
-      final client = AuthenticatedHttpClient(_httpClient, _config);
-
       // Попытка получить статистику администратора
-      final response = await client.get(
-        Uri.parse('${_config.apiBase}/admin/stats'),
-      );
+      final response = await _apiClient.get('/admin/stats');
 
       // Если запрос успешен (200), значит пользователь администратор
       return response.statusCode == 200;
@@ -33,13 +25,10 @@ class AdminService {
   /// Получает административную статистику
   Future<Map<String, dynamic>> getAdminStats() async {
     try {
-      final client = AuthenticatedHttpClient(_httpClient, _config);
-      final response = await client.get(
-        Uri.parse('${_config.apiBase}/admin/stats'),
-      );
+      final response = await _apiClient.get('/admin/stats');
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return jsonDecode(response.data);
       } else {
         throw Exception('Get admin stats failed: ${response.statusCode}');
       }
@@ -51,13 +40,13 @@ class AdminService {
   /// Получает список пользователей
   Future<List<dynamic>> getUsers(int page, int limit) async {
     try {
-      final client = AuthenticatedHttpClient(_httpClient, _config);
-      final response = await client.get(
-        Uri.parse('${_config.apiBase}/admin/users?page=$page&limit=$limit'),
+      final response = await _apiClient.get(
+        '/admin/users',
+        params: {'page': page, 'limit': limit},
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(response.data);
         return data['users'] ?? [];
       } else {
         throw Exception('Get users failed: ${response.statusCode}');
@@ -70,13 +59,13 @@ class AdminService {
   /// Получает журнал аудита
   Future<List<dynamic>> getAuditLogs(int page, int limit) async {
     try {
-      final client = AuthenticatedHttpClient(_httpClient, _config);
-      final response = await client.get(
-        Uri.parse('${_config.apiBase}/admin/audit?page=$page&limit=$limit'),
+      final response = await _apiClient.get(
+        '/admin/audit',
+        params: {'page': page, 'limit': limit},
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = jsonDecode(response.data);
         return data['logs'] ?? [];
       } else {
         throw Exception('Get audit logs failed: ${response.statusCode}');

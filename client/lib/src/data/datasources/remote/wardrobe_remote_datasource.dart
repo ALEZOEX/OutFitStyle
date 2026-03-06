@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../../remote/api_client.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import '../../../domain/entities/wardrobe_item.dart';
 
 abstract class IWardrobeRemoteDataSource {
@@ -24,7 +24,7 @@ class WardrobeRemoteDataSource implements IWardrobeRemoteDataSource {
       params: {'user_id': userId},
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['items'] as List<dynamic>? ?? data as List<dynamic>;
       return items
           .map((item) => WardrobeItem.fromJson(item as Map<String, dynamic>))
@@ -37,7 +37,7 @@ class WardrobeRemoteDataSource implements IWardrobeRemoteDataSource {
   Future<WardrobeItem?> getWardrobeItemById(String id) async {
     final response = await _apiClient.get('/wardrobe/$id');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = jsonDecode(response.data) as Map<String, dynamic>;
       return WardrobeItem.fromJson(data);
     }
     return null;
@@ -47,7 +47,7 @@ class WardrobeRemoteDataSource implements IWardrobeRemoteDataSource {
   Future<void> addWardrobeItem(WardrobeItem item) async {
     final response = await _apiClient.post(
       '/wardrobe',
-      body: item.toJson(),
+      data: item.toJson(),
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw WardrobeRemoteException('Не удалось добавить элемент гардероба');
@@ -62,7 +62,7 @@ class WardrobeRemoteDataSource implements IWardrobeRemoteDataSource {
     }
     final response = await _apiClient.put(
       '/wardrobe/$id',
-      body: item.toJson(),
+      data: item.toJson(),
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw WardrobeRemoteException('Не удалось обновить элемент гардероба');
