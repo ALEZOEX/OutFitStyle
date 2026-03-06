@@ -266,7 +266,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${recommendation.temperature!.round()}°C',
+                            '${recommendation.temperature?.round() ?? 0}°C',
                             style: theme.textTheme.labelLarge?.copyWith(
                               color: theme.colorScheme.onPrimaryContainer,
                               fontWeight: FontWeight.w600,
@@ -278,11 +278,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
 
-              if (recommendation.description != null &&
-                  recommendation.description!.isNotEmpty) ...[
+              if (recommendation.description?.isNotEmpty ?? false) ...[
                 const SizedBox(height: 8),
                 Text(
-                  recommendation.description!,
+                  recommendation.description ?? '',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
