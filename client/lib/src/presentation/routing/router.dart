@@ -33,9 +33,11 @@ import '../../features/outfit_details/presentation/outfit_details_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../providers/auth_provider.dart';
+import '../providers/session_provider.dart' show authStateProvider;
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateCompatProvider);
+  // Используем прямой StreamProvider<bool> вместо обёртки AuthState
+  final authStateAsync = ref.watch(authStateProvider);
   final onboardingDone = ref.watch(onboarding_providers.isOnboardingDoneProvider);
   final isAdminAsync = ref.watch(adminAccessProvider);
   final refreshListenable = ref.watch(goRouterRefreshProvider);
@@ -52,9 +54,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Если загрузка состояния - не редиректим кроме splash
-      if (authState.isLoading) {
+      if (authStateAsync.isLoading) {
         return '/splash';
       }
+
+      // Получаем состояние авторизации
+      final isAuthenticated = authStateAsync.valueOrNull ?? false;
 
       // 1. Если onboarding не пройден - показываем onboarding (кроме splash)
       if (!onboardingDone && path != '/onboarding') {
@@ -65,14 +70,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (path.startsWith('/onboarding')) {
         if (onboardingDone) {
           // Если уже пройден, редиректим на home или auth
-          return authState.isAuthenticated ? '/home' : '/auth';
+          return isAuthenticated ? '/home' : '/auth';
         }
         return null;
       }
 
       // 2. Если не авторизован - показываем auth
       if (path.startsWith('/auth')) {
-        if (authState.isAuthenticated) {
+        if (isAuthenticated) {
           return '/home';
         }
         return null;
@@ -86,7 +91,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Проверка доступа к админ-панели
       if (path.startsWith('/admin')) {
         // Если не авторизован - редирект на auth
-        if (!authState.isAuthenticated) {
+        if (!isAuthenticated) {
           return '/auth?redirect=/admin';
         }
         // Проверяем роль администратора
@@ -102,7 +107,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // 3. Для всех остальных маршрутов проверяем авторизацию
-      if (!authState.isAuthenticated) {
+      if (!isAuthenticated) {
         return '/auth';
       }
 
@@ -324,8 +329,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 final goRouterRefreshProvider = ChangeNotifierProvider((ref) {
   final notifier = GoRouterRefreshStream();
 
-  // Слушаем изменения authState и уведомляем роутер
-  ref.listen<AuthState>(authStateCompatProvider, (prev, next) {
+  // Слушаем изменения authState напрямую из StreamProvider<bool>
+  // ref.listen требует ProviderListenable, поэтому используем .future.then()
+  ref.listen<AsyncValue<bool>>(authStateProvider, (prev, next) {
     notifier.notifyAuthChanged();
   });
 
