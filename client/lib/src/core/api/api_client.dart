@@ -10,7 +10,7 @@ import 'web_utils.dart' if (dart.library.io) 'web_utils_stub.dart' as web_utils;
 
 /// ApiClient — HTTP клиент с Firebase ID Token авторизацией
 ///
-/// Отправляет Firebase ID Token в заголовке Authorization: Bearer <token>
+/// Отправляет Firebase ID Token в заголовке Authorization: Bearer [token]
 /// Бэкенд должен проверять Firebase ID Token через Firebase Admin SDK
 class ApiClient {
   final AuthStorage storage;
