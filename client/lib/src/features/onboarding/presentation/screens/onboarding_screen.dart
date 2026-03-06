@@ -171,7 +171,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
+    
     final state = ref.watch(onboardingNotifierProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
