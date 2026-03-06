@@ -208,9 +208,7 @@ func main() {
 
 	// ---------- Firebase Admin Client (для проверки Firebase ID Token) ----------
 	ctx := context.Background()
-	var firebaseAuthClient middleware.FirebaseAuthClient
-	var firebaseErr error
-	firebaseAuthClient, firebaseErr = middleware.NewFirebaseAdminClient(ctx)
+	firebaseAuthClient, firebaseErr := middleware.NewFirebaseAdminClient(ctx)
 	if firebaseErr != nil {
 		logger.Warn("Firebase Admin SDK initialization failed, Firebase ID Token auth disabled",
 			zap.Error(firebaseErr))
