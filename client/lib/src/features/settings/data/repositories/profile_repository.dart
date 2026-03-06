@@ -6,7 +6,6 @@ import 'package:path/path.dart' as path;
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_config.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
 
 /// Репозиторий для работы с профилем пользователя
 ///
@@ -17,13 +16,10 @@ import 'package:outfitstyle_client/src/services/auth_storage.dart';
 /// - POST /api/v1/users/avatar - загрузка аватара
 class ProfileRepository {
   final ApiClient _apiClient;
-  final AuthStorage _authStorage;
 
   ProfileRepository({
     required ApiClient apiClient,
-    required AuthStorage authStorage,
-  })  : _apiClient = apiClient,
-        _authStorage = authStorage;
+  }) : _apiClient = apiClient;
 
   /// Получить профиль текущего пользователя
   ///
@@ -113,15 +109,11 @@ class ProfileRepository {
 
       final response = await _apiClient.delete(
         '/api/v1/users/account',
-        // data: body, // DELETE с body может не поддерживаться некоторыми серверами
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw ProfileException('Ошибка удаления аккаунта: ${response.statusCode}');
       }
-
-      // Очищаем сессию после успешного удаления
-      await _authStorage.clearSession();
     } on DioException catch (e) {
       _handleDioError(e);
       rethrow;
@@ -186,8 +178,8 @@ class ProfileRepository {
         headers: {'Content-Type': 'multipart/form-data'},
       ));
 
-      // Добавляем токен авторизации
-      final token = await _authStorage.readAccessToken();
+      // Добавляем токен авторизации через ApiConfig
+      final token = await ApiConfig.getAccessToken();
       if (token != null && token.isNotEmpty) {
         dio.options.headers['Authorization'] = 'Bearer $token';
       }

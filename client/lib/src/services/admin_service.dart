@@ -2,22 +2,20 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../core/api/api_config.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import 'http_client.dart';
 
 class AdminService {
   final ApiConfig _config;
-  final AuthStorage _auth;
   final http.Client _httpClient;
 
-  AdminService(this._config, this._auth, [http.Client? httpClient])
+  AdminService(this._config, [http.Client? httpClient])
       : _httpClient = httpClient ?? http.Client();
 
   /// Проверяет, является ли текущий пользователь администратором
   /// путем попытки доступа к административному эндпоинту
   Future<bool> isAdmin() async {
     try {
-      final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
+      final client = AuthenticatedHttpClient(_httpClient, _config);
 
       // Попытка получить статистику администратора
       final response = await client.get(
@@ -35,7 +33,7 @@ class AdminService {
   /// Получает административную статистику
   Future<Map<String, dynamic>> getAdminStats() async {
     try {
-      final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
+      final client = AuthenticatedHttpClient(_httpClient, _config);
       final response = await client.get(
         Uri.parse('${_config.apiBase}/admin/stats'),
       );
@@ -53,7 +51,7 @@ class AdminService {
   /// Получает список пользователей
   Future<List<dynamic>> getUsers(int page, int limit) async {
     try {
-      final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
+      final client = AuthenticatedHttpClient(_httpClient, _config);
       final response = await client.get(
         Uri.parse('${_config.apiBase}/admin/users?page=$page&limit=$limit'),
       );
@@ -72,7 +70,7 @@ class AdminService {
   /// Получает журнал аудита
   Future<List<dynamic>> getAuditLogs(int page, int limit) async {
     try {
-      final client = AuthenticatedHttpClient(_httpClient, _config, _auth);
+      final client = AuthenticatedHttpClient(_httpClient, _config);
       final response = await client.get(
         Uri.parse('${_config.apiBase}/admin/audit?page=$page&limit=$limit'),
       );
