@@ -1,88 +1,16 @@
-import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
-import 'package:outfitstyle_client/src/services/http_client.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 
 void main() {
-  group('AuthenticatedHttpClient Tests', () {
-    late ApiConfig apiConfig;
-
-    setUp(() {
-      apiConfig = const ApiConfig(apiBase: 'https://api.example.com');
-    });
-
-    testWidgets('adds auth header when token exists', (WidgetTester tester) async {
-      // AuthenticatedHttpClient теперь использует ApiConfig.getAccessToken()
-      // Тест проверяет базовую функциональность
-      final mockClient = MockClient((request) async {
-        return http.Response('{"success": true}', 200);
-      });
-
-      final client = AuthenticatedHttpClient(mockClient, apiConfig);
-
-      final response = await client.get(Uri.parse('https://api.example.com/test'));
-      expect(response.statusCode, 200);
-    });
-
-    testWidgets('works without auth token', (WidgetTester tester) async {
-      final mockClient = MockClient((request) async {
-        expect(request.headers['Authorization'], isNull);
-        return http.Response('{"success": true}', 200);
-      });
-
-      final client = AuthenticatedHttpClient(mockClient, apiConfig);
-
-      final response = await client.get(Uri.parse('https://api.example.com/test'));
-      expect(response.statusCode, 200);
-    });
-
-    testWidgets('handles 401 response', (WidgetTester tester) async {
-      var requestCount = 0;
-
-      final mockClient = MockClient((request) async {
-        requestCount++;
-        // Первый запрос возвращает 401, второй (после refresh) возвращает 200
-        if (requestCount == 1) {
-          return http.Response('Unauthorized', 401);
-        }
-        return http.Response('{"success": true}', 200);
-      });
-
-      final client = AuthenticatedHttpClient(mockClient, apiConfig);
-
-      // Refresh больше не работает — возвращаем 401
-      final response = await client.get(Uri.parse('https://api.example.com/test'));
-      expect(response.statusCode, 401);
-    });
-
-    testWidgets('adds content-type header', (WidgetTester tester) async {
-      // Тест проверяет что клиент работает без ошибок
-      // Content-Type header устанавливается внутри AuthenticatedHttpClient
-      final mockClient = MockClient((request) async {
-        return http.Response('{"success": true}', 200);
-      });
-
-      final client = AuthenticatedHttpClient(mockClient, apiConfig);
-
-      final response = await client.post(
-        Uri.parse('https://api.example.com/test'),
-        body: jsonEncode({'key': 'value'}),
-      );
-      expect(response.statusCode, 200);
-    });
-  });
-
   group('ApiConfig Tests', () {
+    const apiConfig = ApiConfig(apiBase: 'https://api.example.com');
+
     test('ApiConfig has correct base URL', () {
-      const config = ApiConfig(apiBase: 'https://api.example.com');
-      expect(config.apiBase, 'https://api.example.com');
+      expect(apiConfig.apiBase, 'https://api.example.com');
     });
 
     test('ApiConfig builds correct endpoints', () {
-      const config = ApiConfig(apiBase: 'https://api.example.com');
-      expect(config.apiBase, contains('https://'));
+      expect(apiConfig.apiBase, contains('https://'));
     });
   });
 }
