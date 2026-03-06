@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'api_config.dart';
 
 /// Сервис для загрузки изображений на сервер
@@ -10,11 +10,9 @@ import 'api_config.dart';
 /// Использует multipart/form-data для загрузки файлов
 /// Возвращает URL загруженного изображения
 class UploadService {
-  final AuthStorage _authStorage;
   late final Dio _dio;
 
-  UploadService({required AuthStorage authStorage})
-      : _authStorage = authStorage {
+  UploadService() {
     _dio = Dio(BaseOptions(
       baseUrl: ApiConfig.baseUrl,
       connectTimeout: const Duration(seconds: 30),
@@ -24,9 +22,17 @@ class UploadService {
 
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await _authStorage.readAccessToken();
-        if (token != null && token.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer $token';
+        // Получаем Firebase ID Token
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          try {
+            final idToken = await user.getIdToken();
+            if (idToken != null && idToken.isNotEmpty) {
+              options.headers['Authorization'] = 'Bearer $idToken';
+            }
+          } catch (e) {
+            // Игнорируем ошибки получения токена
+          }
         }
         return handler.next(options);
       },
