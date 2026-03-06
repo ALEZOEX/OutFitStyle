@@ -164,7 +164,7 @@ class NotificationBadge extends StatelessWidget {
               child: Text(
                 displayCount,
                 style: TextStyle(
-                  fontSize: minSize != null ? minSize! * 0.55 : 10,
+                  fontSize: (minSize ?? 20) * 0.55,
                   color: textColor ?? Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
