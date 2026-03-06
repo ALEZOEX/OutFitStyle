@@ -1,18 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/models/onboarding_data.dart';
 
 /// Репозиторий для работы с данными онбординга
 class OnboardingRepository {
   final ApiClient _apiClient;
-  final AuthStorage _authStorage;
 
   OnboardingRepository({
     required ApiClient apiClient,
-    required AuthStorage authStorage,
-  })  : _apiClient = apiClient,
-        _authStorage = authStorage;
+  }) : _apiClient = apiClient;
 
   /// Отправка предпочтений пользователя на сервер
   /// POST /api/v1/user/preferences
