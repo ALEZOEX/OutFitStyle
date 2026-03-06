@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/theme_controller.dart';
 import '../routing/router.dart';
@@ -27,14 +28,12 @@ class OutfitStyleApp extends ConsumerWidget {
       routerConfig: router,
       locale: Locale(languageCode),
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('ru'),
-        Locale('en'),
-      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
         final brightness = MediaQuery.platformBrightnessOf(context);
         final isDark = themeMode == ThemeMode.dark ||
