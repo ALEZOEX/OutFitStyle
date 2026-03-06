@@ -1,39 +1,24 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../../core/api/api_config.dart';
-import 'package:outfitstyle_client/src/services/auth_storage.dart';
+import '../../../../core/api/api_client.dart';
 import '../models/admin_user_dto.dart';
 
 /// Удалённый источник данных для админ-панели
 class AdminRemoteDataSource {
   final ApiConfig config;
-  final AuthStorage storage;
+  final ApiClient apiClient;
 
   AdminRemoteDataSource({
     required this.config,
-    required this.storage,
+    required this.apiClient,
   });
 
   /// Получает статистику админ-панели
   Future<Map<String, dynamic>> getStats() async {
-    final token = await storage.readAccessToken();
-    final uri = Uri.parse('${config.apiBase}/admin/stats');
-
-    final response = await http.get(
-      uri,
-      headers: {
-        if (token != null) 'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      // API возвращает { success: true, data: {...} }
-      return data['data'] as Map<String, dynamic>? ?? data;
-    }
-
-    throw _handleError(response);
+    final response = await apiClient.get('/admin/stats');
+    final data = jsonDecode(response.data.toString()) as Map<String, dynamic>;
+    return data['data'] as Map<String, dynamic>? ?? data;
   }
 
   /// Получает список пользователей с пагинацией
