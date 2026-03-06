@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async' show Completer;
 import 'dart:developer' as developer;
-import 'web_utils.dart' if (dart.library.io) 'web_utils_stub.dart' as web_utils;
 
 /// ApiClient — HTTP клиент с Firebase ID Token авторизацией
 ///

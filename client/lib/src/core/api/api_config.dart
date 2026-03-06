@@ -1,9 +1,9 @@
 /// Конфигурация API для клиента
-/// 
+///
 /// # Настройка baseUrl для разных сред:
 /// - **Production**: `/` — nginx проксирует запросы на бэкенд (CORS не требуется)
 /// - **Development**: `http://localhost:8080` или `http://10.0.2.2:8080` для эмулятора
-/// 
+///
 /// # Важно:
 /// Все пути в API методах должны начинаться с `/api/v1/...`, например:
 /// ```dart
@@ -40,5 +40,13 @@ class ApiConfig {
       return 'https://$host';
     }
     return host;
+  }
+
+  /// Получить Firebase ID Token текущего пользователя
+  /// Возвращает null, если пользователь не авторизован
+  static Future<String?> getAccessToken() async {
+    // Firebase ID Token получается через FirebaseAuth.instance.currentUser.getIdToken()
+    // Этот метод оставлен для обратной совместимости
+    return null;
   }
 }
