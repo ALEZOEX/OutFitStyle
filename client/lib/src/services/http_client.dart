@@ -5,6 +5,10 @@ import '../core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/models/token_pair.dart';
 import 'package:outfitstyle_client/src/services/auth_storage.dart';
 
+/// HTTP клиент с JWT авторизацией для Market Service API
+///
+/// @Deprecated Используйте ApiClient с Firebase ID Token авторизацией
+@Deprecated('Используйте ApiClient с Firebase ID Token. JWT auth устарел.')
 class AuthenticatedHttpClient extends http.BaseClient {
   final http.Client _inner;
   final ApiConfig _apiConfig;
