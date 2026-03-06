@@ -8,7 +8,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
-import '../../../../presentation/providers/auth_provider.dart';
 import '../../data/repositories/profile_repository.dart';
 
 /// Провайдер для состояния профиля
@@ -190,18 +189,16 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
 // Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
 final _apiClientProvider = Provider<ApiClient>((ref) {
-  return ref.watch(apiClientProvider);
+  return ApiClient();
 });
 
 final _uploadServiceProvider = Provider<UploadService>((ref) {
-  final storage = ref.watch(authStorageProvider);
-  return UploadService(authStorage: storage);
+  return UploadService();
 });
 
 final _profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   final apiClient = ref.watch(_apiClientProvider);
-  final storage = ref.watch(authStorageProvider);
-  return ProfileRepository(apiClient: apiClient, authStorage: storage);
+  return ProfileRepository(apiClient: apiClient);
 });
 
 final profileProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((

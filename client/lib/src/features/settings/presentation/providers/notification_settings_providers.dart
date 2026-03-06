@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../presentation/providers/auth_provider.dart';
+import '../../../../core/api/api_client.dart';
 import '../../data/repositories/notification_settings_repository.dart';
 import '../../domain/entities/notification_settings.dart';
 
@@ -332,7 +332,7 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettingsSta
 
 final _notificationSettingsRepositoryProvider =
     Provider<NotificationSettingsRepository>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ApiClient();
   return NotificationSettingsRepository(apiClient: apiClient);
 });
 
