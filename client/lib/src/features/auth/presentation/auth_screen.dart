@@ -144,12 +144,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         success = await sessionManager.signIn(email: email, password: password);
       } else {
         // Регистрация через email/password
-        success = await sessionManager.signUp(email, password);
-
-        // После успешной регистрации обновляем профиль (имя)
-        if (success && name.isNotEmpty) {
-          await sessionManager.updateUserProfile(displayName: name);
-        }
+        success = await sessionManager.signUp(email, password, displayName: name.isNotEmpty ? name : null);
       }
 
       if (!success) {
