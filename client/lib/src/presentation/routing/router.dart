@@ -53,8 +53,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // Если загрузка состояния - не редиректим кроме splash
-      if (authStateAsync.isLoading) {
+      // Если загрузка состояния - редиректим на splash
+      // Но если уже на splash и идёт загрузка - не редиректим снова
+      if (authStateAsync.isLoading && path != '/splash') {
         return '/splash';
       }
 
