@@ -173,8 +173,8 @@ class SessionManager {
         throw Exception('Не указаны учетные данные для входа');
       }
 
-      // Вызываем backend API /auth/login
-      final response = await _apiClient.post('/auth/login', data: {
+      // Вызываем backend API /api/v1/auth/login
+      final response = await _apiClient.post('/api/v1/auth/login', data: {
         'email': email,
         'password': password,
       });
@@ -306,7 +306,7 @@ class SessionManager {
     try {
       AppLogger.info('Attempting sign up for user: ${_maskEmail(email)}');
 
-      // Вызываем backend API /auth/register
+      // Вызываем backend API /api/v1/auth/register
       final Map<String, dynamic> registerData = {
         'email': email,
         'password': password,
@@ -315,7 +315,7 @@ class SessionManager {
         registerData['display_name'] = displayName;
       }
 
-      final response = await _apiClient.post('/auth/register', data: registerData);
+      final response = await _apiClient.post('/api/v1/auth/register', data: registerData);
 
       final data = response.data;
       if (data is! Map) {
@@ -375,7 +375,7 @@ class SessionManager {
     try {
       final currentSession = _currentUserSession;
       final firebaseUser = _firebaseAuth.currentUser;
-      
+
       if (currentSession == null) {
         AppLogger.warning('No session for profile update');
         return false;
@@ -445,8 +445,8 @@ class SessionManager {
     try {
       AppLogger.info('Requesting password reset code for: ${_maskEmail(email)}');
 
-      // Вызываем backend API /auth/forgot-password
-      await _apiClient.post('/auth/forgot-password', data: {
+      // Вызываем backend API /api/v1/auth/forgot-password
+      await _apiClient.post('/api/v1/auth/forgot-password', data: {
         'email': email,
       });
 
@@ -464,8 +464,8 @@ class SessionManager {
     try {
       AppLogger.info('Resetting password for: ${_maskEmail(email)}');
 
-      // Вызываем backend API /auth/reset-password
-      await _apiClient.post('/auth/reset-password', data: {
+      // Вызываем backend API /api/v1/auth/reset-password
+      await _apiClient.post('/api/v1/auth/reset-password', data: {
         'email': email,
         'code': code,
         'new_password': newPassword,
