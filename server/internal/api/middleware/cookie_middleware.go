@@ -30,6 +30,19 @@ func DefaultRefreshCookieConfig() CookieConfig {
 		SameSite: http.SameSiteStrictMode,
 	}
 }
+// DefaultAccessCookieConfig возвращает конфигурацию по умолчанию для access token cookie
+func DefaultAccessCookieConfig() CookieConfig {
+	return CookieConfig{
+		Name:     "access_token",
+		Path:     "/",                                      // Доступен для всех API endpoints
+		Domain:   "",                                       // Пустой = текущий домен
+		MaxAge:   int((24 * time.Hour).Seconds()),          // 24 часа (как access token)
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+}
+
 
 // SetRefreshTokenCookie устанавливает httpOnly cookie с refresh token
 // Cookie устанавливается через заголовок Set-Cookie
@@ -47,6 +60,23 @@ func SetRefreshTokenCookie(w http.ResponseWriter, refreshToken string, config Co
 
 	http.SetCookie(w, cookie)
 }
+// SetAccessTokenCookie устанавливает httpOnly cookie с access token
+// Cookie устанавливается через заголовок Set-Cookie
+func SetAccessTokenCookie(w http.ResponseWriter, accessToken string, config CookieConfig) {
+	cookie := &http.Cookie{
+		Name:     config.Name,
+		Value:    accessToken,
+		Path:     config.Path,
+		Domain:   config.Domain,
+		MaxAge:   config.MaxAge,
+		Secure:   config.Secure,
+		HttpOnly: config.HttpOnly,
+		SameSite: config.SameSite,
+	}
+
+	http.SetCookie(w, cookie)
+}
+
 
 // ClearRefreshTokenCookie удаляет refresh token cookie
 func ClearRefreshTokenCookie(w http.ResponseWriter, config CookieConfig) {
@@ -63,6 +93,22 @@ func ClearRefreshTokenCookie(w http.ResponseWriter, config CookieConfig) {
 
 	http.SetCookie(w, cookie)
 }
+// ClearAccessTokenCookie удаляет access token cookie
+func ClearAccessTokenCookie(w http.ResponseWriter, config CookieConfig) {
+	cookie := &http.Cookie{
+		Name:     config.Name,
+		Value:    "",
+		Path:     config.Path,
+		Domain:   config.Domain,
+		MaxAge:   -1, // Удаляем cookie
+		Secure:   config.Secure,
+		HttpOnly: config.HttpOnly,
+		SameSite: config.SameSite,
+	}
+
+	http.SetCookie(w, cookie)
+}
+
 
 // GetRefreshTokenFromCookie извлекает refresh token из cookie
 func GetRefreshTokenFromCookie(r *http.Request, config CookieConfig) (string, error) {
