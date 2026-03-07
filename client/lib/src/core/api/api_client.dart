@@ -1,21 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:async' show Completer;
 import 'dart:developer' as developer;
 
-/// ApiClient — HTTP клиент с Firebase ID Token авторизацией
+/// ApiClient — HTTP клиент для авторизованных запросов
 ///
-/// Отправляет Firebase ID Token в заголовке Authorization: Bearer [token]
-/// Бэкенд должен проверять Firebase ID Token через Firebase Admin SDK
+/// Авторизация работает через httpOnly cookie (refresh token)
+/// Backend сам управляет сессией через cookie
+///
+/// Для web: cookie отправляется автоматически (withCredentials: true)
+/// Для mobile: требуется дополнительная настройка cookie jar
 class ApiClient {
   late final Dio _dio;
-
-  // Security: флаг для предотвращения race condition при refresh
-  bool _isRefreshing = false;
-
-  // Очередь запросов, ожидающих refresh
-  final List<_PendingRequest> _pendingRequests = [];
 
   ApiClient() {
     _dio = Dio(BaseOptions(
@@ -23,146 +18,31 @@ class ApiClient {
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json'},
-      extra: {'withCredentials': true}, // Security: для отправки httpOnly cookie на вебе
+      extra: {'withCredentials': true}, // Важно: отправка cookie на вебе
     ));
 
-    // Interceptor для добавления Firebase ID Token
+    // Interceptor для логирования
     _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        // Получаем Firebase ID Token
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          try {
-            // getIdToken() автоматически refresh токен если нужно
-            final idToken = await user.getIdToken();
-            if (idToken != null && idToken.isNotEmpty) {
-              options.headers['Authorization'] = 'Bearer $idToken';
-              developer.log('[ApiClient] Firebase ID Token добавлен',
-                  name: 'ApiClient',
-                  level: 900);
-            } else {
-              developer.log('[ApiClient] Firebase ID Token пуст',
-                  name: 'ApiClient',
-                  level: 900,
-                  error: 'Empty ID token for ${options.method} ${options.path}');
-            }
-          } catch (e) {
-            developer.log('[ApiClient] Ошибка получения Firebase ID Token',
-                name: 'ApiClient',
-                level: 1000,
-                error: e);
-          }
-        } else {
-          developer.log('[ApiClient] Пользователь не авторизован',
-              name: 'ApiClient',
-              level: 900,
-              error: 'No user for ${options.method} ${options.path}');
-        }
+      onRequest: (options, handler) {
+        developer.log('[ApiClient] Request',
+            name: 'ApiClient',
+            level: 900,
+            info: '${options.method} ${options.path}');
         return handler.next(options);
       },
       onError: (DioException err, ErrorInterceptorHandler handler) async {
-        // Логируем ошибки для отладки
         developer.log('[ApiClient] Error',
             name: 'ApiClient',
             level: 1000,
             error: '${err.type} ${err.requestOptions.path} - ${err.response?.statusCode}');
-
-        // Если 401 — пробуем refresh Firebase ID Token
-        if (err.response?.statusCode == 401) {
-          final path = err.requestOptions.path;
-
-          // Не пытаемся refresh для auth endpoints
-          final isAuthEndpoint = path.contains('/auth/');
-
-          if (!isAuthEndpoint) {
-            try {
-              developer.log('[ApiClient] Попытка refresh Firebase ID Token', name: 'ApiClient');
-              final refreshed = await _refreshFirebaseToken();
-
-              if (refreshed) {
-                developer.log('[ApiClient] Firebase ID Token обновлён, повторяем запрос', name: 'ApiClient');
-
-                // Повторяем оригинальный запрос с новым токеном
-                final opts = err.requestOptions;
-                final user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  final newToken = await user.getIdToken(true); // Force refresh
-                  if (newToken != null) {
-                    opts.headers['Authorization'] = 'Bearer $newToken';
-                    final response = await _dio.fetch(opts);
-                    return handler.resolve(response);
-                  }
-                }
-              }
-            } catch (refreshError) {
-              developer.log('[ApiClient] Ошибка refresh Firebase ID Token',
-                  name: 'ApiClient',
-                  error: refreshError);
-              // Если refresh не удался — просто логируем ошибку
-              // Очистка сессии должна обрабатываться на уровне SessionManager
-              developer.log('[ApiClient] Firebase ID Token refresh failed, session cleanup handled by SessionManager',
-                  name: 'ApiClient');
-            }
-          }
-        }
-
         return handler.next(err);
       },
     ));
   }
 
-  /// Refresh Firebase ID Token
-  /// Firebase SDK автоматически управляет refresh токеном
-  Future<bool> _refreshFirebaseToken() async {
-    if (_isRefreshing) {
-      developer.log('[ApiClient] Refresh уже выполняется, ждём', name: 'ApiClient');
-      final startTime = DateTime.now();
-      while (_isRefreshing) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        if (DateTime.now().difference(startTime) > const Duration(seconds: 10)) {
-          developer.log('[ApiClient] Timeout waiting for refresh', name: 'ApiClient');
-          return false;
-        }
-      }
-      return true;
-    }
-
-    _isRefreshing = true;
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        developer.log('[ApiClient] Нет пользователя для refresh', name: 'ApiClient');
-        return false;
-      }
-
-      // Force refresh Firebase ID Token
-      final newToken = await user.getIdToken(true);
-      if (newToken != null && newToken.isNotEmpty) {
-        developer.log('[ApiClient] Firebase ID Token успешно обновлён', name: 'ApiClient');
-        return true;
-      }
-
-      developer.log('[ApiClient] Firebase ID Token пуст после refresh', name: 'ApiClient');
-      return false;
-    } catch (e) {
-      developer.log('[ApiClient] Ошибка refresh Firebase ID Token',
-          name: 'ApiClient',
-          error: e);
-      return false;
-    } finally {
-      _isRefreshing = false;
-    }
-  }
-
-  /// Внутренний конструктор для использования с кастомным Dio
-  /// (например, для внешних API без авторизации)
-  ApiClient.internal(Dio dio) : _dio = dio;
-
   Dio get raw => _dio;
 
-  /// Нормализует path — убирает leading slash для корректной работы с baseUrl
   String _normalizePath(String path) {
-    // Убираем leading slash чтобы Dio обрабатывал path как относительный
     return path.startsWith('/') ? path.substring(1) : path;
   }
 
@@ -233,16 +113,4 @@ class NetworkException extends ApiException {
 
 class UnauthorizedException extends ApiException {
   const UnauthorizedException(super.message);
-}
-
-/// Внутренний класс для ожидания завершения refresh
-class _PendingRequest {
-  final Completer<void> completer = Completer<void>();
-  final String path;
-
-  _PendingRequest(this.path);
-
-  Future<void> wait() => completer.future;
-  void resolve() => completer.complete();
-  void reject(Object error) => completer.completeError(error);
 }

@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'api_config.dart';
 
 /// Сервис для загрузки изображений на сервер
@@ -10,6 +9,8 @@ import 'api_config.dart';
 ///
 /// Использует multipart/form-data для загрузки файлов
 /// Возвращает URL загруженного изображения
+///
+/// Авторизация через httpOnly cookie (refresh token)
 class UploadService {
   late final Dio _dio;
 
@@ -19,22 +20,12 @@ class UploadService {
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 60),
       headers: {'Content-Type': 'multipart/form-data'},
+      extra: {'withCredentials': true}, // Важно: отправка cookie на вебе
     ));
 
+    // Interceptor для логирования
     _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        // Получаем Firebase ID Token
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          try {
-            final idToken = await user.getIdToken();
-            if (idToken != null && idToken.isNotEmpty) {
-              options.headers['Authorization'] = 'Bearer $idToken';
-            }
-          } catch (e) {
-            // Игнорируем ошибки получения токена
-          }
-        }
+      onRequest: (options, handler) {
         return handler.next(options);
       },
       onError: (DioException err, handler) => handler.next(err),
