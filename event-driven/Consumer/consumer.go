@@ -2,7 +2,11 @@ package event_driven
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/segmentio/kafka-go"
@@ -10,21 +14,49 @@ import (
 
 // KafkaConsumer потребляет события из Kafka
 type KafkaConsumer struct {
-	reader *kafka.Reader
+	reader     *kafka.Reader
+	signingKey string
 }
 
 // NewKafkaConsumer создает нового Kafka consumer
-func NewKafkaConsumer(brokers []string, topic, groupID string) *KafkaConsumer {
+// signingKey should be retrieved from secure secret manager before calling this function
+func NewKafkaConsumer(brokers []string, topic, groupID string, signingKey string) (*KafkaConsumer, error) {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  brokers,
-		GroupID:  groupID,
-		Topic:    topic,
+		Brokers:     brokers,
+		GroupID:     groupID,
+		Topic:       topic,
 		StartOffset: kafka.FirstOffset,
 	})
 
-	return &KafkaConsumer{
-		reader: reader,
+	if signingKey == "" {
+		return nil, fmt.Errorf("Kafka signing key cannot be empty")
 	}
+
+	return &KafkaConsumer{
+		reader:     reader,
+		signingKey: signingKey,
+	}, nil
+}
+
+// verifySignature verifies the HMAC-SHA256 signature of message data
+func (kc *KafkaConsumer) verifySignature(data []byte, signature string) bool {
+	h := hmac.New(sha256.New, []byte(kc.signingKey))
+	h.Write(data)
+	expectedSignature := h.Sum(nil)
+	expectedSignatureStr := base64.StdEncoding.EncodeToString(expectedSignature)
+
+	// Use constant-time comparison to prevent timing attacks
+	return hmac.Equal([]byte(expectedSignatureStr), []byte(signature))
+}
+
+// getSignatureFromHeaders extracts the signature from Kafka message headers
+func getSignatureFromHeaders(headers []kafka.Header) (string, bool) {
+	for _, header := range headers {
+		if header.Key == "X-Message-Signature" {
+			return string(header.Value), true
+		}
+	}
+	return "", false
 }
 
 // ConsumeRecommendationEvents начинает потребление событий рекомендаций
@@ -37,6 +69,21 @@ func (kc *KafkaConsumer) ConsumeRecommendationEvents(ctx context.Context, handle
 			msg, err := kc.reader.FetchMessage(context.Background())
 			if err != nil {
 				log.Printf("Ошибка получения сообщения: %v", err)
+				continue
+			}
+
+			// Extract signature from headers
+			signature, found := getSignatureFromHeaders(msg.Headers)
+			if !found {
+				log.Printf("SECURITY WARNING: Unsigned message rejected - missing signature header")
+				kc.reader.CommitMessages(context.Background(), msg)
+				continue
+			}
+
+			// Verify signature
+			if !kc.verifySignature(msg.Value, signature) {
+				log.Printf("SECURITY WARNING: Message with invalid signature rejected")
+				kc.reader.CommitMessages(context.Background(), msg)
 				continue
 			}
 

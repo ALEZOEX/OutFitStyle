@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
+	"outfitstyle/server/internal/secrets"
 )
 
 type ServerConfig struct {
@@ -159,6 +161,21 @@ type AppConfig struct {
 	Features        FeaturesConfig
 	APIKeys         APIKeysConfig
 	Eventing        EventingConfig
+
+	// Secret manager for secure secret storage
+	secretManager secrets.Manager
+}
+
+// SecretManagerConfig holds configuration for the secret manager
+type SecretManagerConfig struct {
+	Provider     string
+	AWSRegion    string
+	AWSSecretARN string
+	GCPProjectID string
+	VaultAddress string
+	VaultToken   string
+	VaultPath    string
+	CacheTTL     time.Duration
 }
 
 func Load() (*AppConfig, error) {
@@ -177,6 +194,47 @@ func Load() (*AppConfig, error) {
 		}
 	}
 
+	// Initialize secret manager
+	secretMgr, err := initSecretManager()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize secret manager: %w", err)
+	}
+
+	// Load secrets from secret manager
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	secretKeys := []string{
+		"JWT_SECRET",
+		"ADMIN_API_KEY",
+		"API_KEY_PEPPER",
+		"OPENWEATHER_API_KEY",
+		"REDIS_PASSWORD",
+		"SMTP_PASSWORD",
+		"S3_SECRET_KEY",
+		"YOOKASSA_SECRET_KEY",
+		"STRIPE_SECRET_KEY",
+		"STRIPE_WEBHOOK_SECRET",
+	}
+
+	loadedSecrets, err := secretMgr.GetSecrets(ctx, secretKeys)
+	if err != nil {
+		log.Printf("Warning: failed to load secrets from secret manager: %v. Falling back to environment variables.", err)
+		loadedSecrets = make(map[string]string)
+	}
+
+	// Helper function to get value from secrets or environment
+	getSecretOrEnv := func(keys []string, def string) string {
+		// First try to get from loaded secrets
+		for _, k := range keys {
+			if v, ok := loadedSecrets[k]; ok && v != "" {
+				return v
+			}
+		}
+		// Fallback to environment variables
+		return getEnvFirst(keys, def)
+	}
+
 	cfg := &AppConfig{
 		Server: ServerConfig{
 			Host:            getEnvFirst([]string{"SERVER_HOST", "HOST"}, "0.0.0.0"),
@@ -193,10 +251,10 @@ func Load() (*AppConfig, error) {
 		},
 		Redis: RedisConfig{
 			URL:      getEnvFirst([]string{"REDIS_URL"}, ""),
-			Password: getEnvFirst([]string{"REDIS_PASSWORD"}, ""),
+			Password: getSecretOrEnv([]string{"REDIS_PASSWORD"}, ""),
 		},
 		Security: SecurityConfig{
-			JWTSecret:          getEnvFirst([]string{"JWT_SECRET"}, ""),
+			JWTSecret:          getSecretOrEnv([]string{"JWT_SECRET"}, ""),
 			JWTPrivateKeyPath:  getEnvFirst([]string{"JWT_PRIVATE_KEY_PATH"}, "config/jwt/private.pem"),
 			JWTPublicKeyPath:   getEnvFirst([]string{"JWT_PUBLIC_KEY_PATH"}, "config/jwt/public.pem"),
 			UseRS256:           getEnvBool("JWT_USE_RS256", false),
@@ -222,7 +280,7 @@ func Load() (*AppConfig, error) {
 			InvalidateOnUpdate: getEnvBool("ML_INVALIDATE_ON_UPDATE", true),
 		},
 		OpenWeather: OpenWeatherConfig{
-			APIKey:   getEnvFirst([]string{"OPENWEATHER_API_KEY", "WEATHER_API_KEY"}, ""),
+			APIKey:   getSecretOrEnv([]string{"OPENWEATHER_API_KEY", "WEATHER_API_KEY"}, ""),
 			CacheTTL: getEnvDurationFirst([]string{"OPENWEATHER_CACHE_TTL"}, 10*time.Minute),
 			BaseURL:  getEnvFirst([]string{"OPENWEATHER_BASE_URL"}, "https://api.openweathermap.org/data/2.5"),
 		},
@@ -234,7 +292,7 @@ func Load() (*AppConfig, error) {
 			SMTPHost:     getEnvFirst([]string{"SMTP_HOST"}, ""),
 			SMTPPort:     getEnvInt("SMTP_PORT", 587, 1, 65535),
 			SMTPUser:     getEnvFirst([]string{"SMTP_USER", "SMTP_USERNAME"}, ""),
-			SMTPPassword: getEnvFirst([]string{"SMTP_PASSWORD"}, ""),
+			SMTPPassword: getSecretOrEnv([]string{"SMTP_PASSWORD"}, ""),
 			From:         getEnvFirst([]string{"EMAIL_FROM", "SMTP_FROM_EMAIL", "FROM_EMAIL"}, "noreply@outfitstyle.app"),
 		},
 		Sentry: SentryConfig{
@@ -244,7 +302,7 @@ func Load() (*AppConfig, error) {
 			S3Endpoint:  getEnvFirst([]string{"S3_ENDPOINT"}, ""),
 			S3Bucket:    getEnvFirst([]string{"S3_BUCKET"}, ""),
 			S3AccessKey: getEnvFirst([]string{"S3_ACCESS_KEY"}, ""),
-			S3SecretKey: getEnvFirst([]string{"S3_SECRET_KEY"}, ""),
+			S3SecretKey: getSecretOrEnv([]string{"S3_SECRET_KEY"}, ""),
 			S3Region:    getEnvFirst([]string{"S3_REGION"}, ""),
 
 			PublicBaseURL: getEnvFirst([]string{"S3_PUBLIC_BASE_URL"}, ""),
@@ -252,13 +310,13 @@ func Load() (*AppConfig, error) {
 		},
 		Payments: PaymentsConfig{
 			YooKassaShopID:    getEnvFirst([]string{"YOOKASSA_SHOP_ID"}, ""),
-			YooKassaSecretKey: getEnvFirst([]string{"YOOKASSA_SECRET_KEY"}, ""),
+			YooKassaSecretKey: getSecretOrEnv([]string{"YOOKASSA_SECRET_KEY"}, ""),
 
-			StripeSecretKey:     getEnvFirst([]string{"STRIPE_SECRET_KEY"}, ""),
-			StripeWebhookSecret: getEnvFirst([]string{"STRIPE_WEBHOOK_SECRET"}, ""),
+			StripeSecretKey:     getSecretOrEnv([]string{"STRIPE_SECRET_KEY"}, ""),
+			StripeWebhookSecret: getSecretOrEnv([]string{"STRIPE_WEBHOOK_SECRET"}, ""),
 		},
 		Admin: AdminConfig{
-			APIKey: getEnvFirst([]string{"ADMIN_API_KEY"}, ""),
+			APIKey: getSecretOrEnv([]string{"ADMIN_API_KEY"}, ""),
 		},
 		Push: PushConfig{
 			FCMCredentialsFile: getEnvFirst([]string{"FCM_CREDENTIALS_FILE"}, ""),
@@ -279,7 +337,7 @@ func Load() (*AppConfig, error) {
 			Achievements:   getEnvBool("FEATURE_ACHIEVEMENTS", true),
 		},
 		APIKeys: APIKeysConfig{
-			Pepper: getEnvFirst([]string{"API_KEY_PEPPER"}, getEnvFirst([]string{"JWT_SECRET"}, "")),
+			Pepper: getSecretOrEnv([]string{"API_KEY_PEPPER"}, getSecretOrEnv([]string{"JWT_SECRET"}, "")),
 		},
 		Eventing: EventingConfig{
 			KafkaBrokers:              splitCSV(getEnvFirst([]string{"KAFKA_BROKERS"}, "")),
@@ -288,12 +346,32 @@ func Load() (*AppConfig, error) {
 			KafkaTopicEvents:          getEnvFirst([]string{"KAFKA_TOPIC_EVENTS"}, "user_events"),
 			Enabled:                   getEnvBool("EVENTING_ENABLED", true),
 		},
+		secretManager: secretMgr,
 	}
 
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 	return cfg, nil
+}
+
+// initSecretManager initializes the secret manager based on environment configuration
+func initSecretManager() (secrets.Manager, error) {
+	provider := getEnvFirst([]string{"SECRET_MANAGER_PROVIDER"}, "env")
+
+	cfg := secrets.Config{
+		Provider:     provider,
+		AWSRegion:    getEnvFirst([]string{"AWS_REGION", "AWS_DEFAULT_REGION"}, "us-east-1"),
+		AWSSecretARN: getEnvFirst([]string{"AWS_SECRET_ARN"}, ""),
+		GCPProjectID: getEnvFirst([]string{"GCP_PROJECT_ID"}, ""),
+		VaultAddress: getEnvFirst([]string{"VAULT_ADDR"}, ""),
+		VaultToken:   getEnvFirst([]string{"VAULT_TOKEN"}, ""),
+		VaultPath:    getEnvFirst([]string{"VAULT_SECRET_PATH"}, "secret/data/outfitstyle"),
+		CacheTTL:     getEnvDurationFirst([]string{"SECRET_CACHE_TTL"}, 5*time.Minute),
+		Timeout:      getEnvDurationFirst([]string{"SECRET_MANAGER_TIMEOUT"}, 10*time.Second),
+	}
+
+	return secrets.NewManager(cfg)
 }
 
 func (c *AppConfig) Validate() error {
@@ -394,4 +472,12 @@ func getEnvBool(key string, def bool) bool {
 
 func (c *AppConfig) Addr() string {
 	return fmt.Sprintf("%s:%s", c.Server.Host, c.Server.Port)
+}
+
+// Close cleans up resources, including the secret manager
+func (c *AppConfig) Close() error {
+	if c.secretManager != nil {
+		return c.secretManager.Close()
+	}
+	return nil
 }
