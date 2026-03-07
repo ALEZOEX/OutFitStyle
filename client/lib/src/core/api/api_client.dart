@@ -35,6 +35,12 @@ class ApiClient {
             name: 'ApiClient',
             level: 1000,
             error: '${err.type} ${err.requestOptions.path} - ${err.response?.statusCode}');
+
+        // Если 401 — логируем для отладки
+        if (err.response?.statusCode == 401) {
+          developer.log('[ApiClient] 401 ошибка — требуется авторизация', name: 'ApiClient');
+        }
+
         return handler.next(err);
       },
     ));
