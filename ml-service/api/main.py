@@ -77,13 +77,13 @@ def _get_catalog_data() -> Tuple[Dict[str, float], Dict[str, str], Dict[str, str
     """
     Загружает данные о товарах из Market Service для фильтрации предпочтений.
     Возвращает кортеж: (item_prices, item_styles, item_brands)
-    
+
     Данные кэшируются на 5 минут для снижения нагрузки на Market Service.
     """
     global _catalog_cache, _catalog_cache_timestamp
-    
+
     current_time = time.time()
-    
+
     # Проверка кэша
     if current_time - _catalog_cache_timestamp < _CATALOG_CACHE_TTL and _catalog_cache:
         return (
@@ -91,7 +91,7 @@ def _get_catalog_data() -> Tuple[Dict[str, float], Dict[str, str], Dict[str, str
             _catalog_cache.get("styles", {}),
             _catalog_cache.get("brands", {}),
         )
-    
+
     try:
         # Запрос к Market Service API
         response = requests.get(
@@ -100,7 +100,7 @@ def _get_catalog_data() -> Tuple[Dict[str, float], Dict[str, str], Dict[str, str
         )
         response.raise_for_status()
         data = response.json()
-        
+
         # Кэширование данных
         _catalog_cache = {
             "prices": data.get("prices", {}),
@@ -108,15 +108,15 @@ def _get_catalog_data() -> Tuple[Dict[str, float], Dict[str, str], Dict[str, str
             "brands": data.get("brands", {}),
         }
         _catalog_cache_timestamp = current_time
-        
+
         logger.info(f"Catalog data loaded from Market Service: {len(data)} items")
-        
+
     except requests.RequestException as e:
         logger.warning(f"Failed to load catalog data from Market Service: {e}")
         # Возвращаем пустые данные при ошибке
         _catalog_cache = {"prices": {}, "styles": {}, "brands": {}}
         _catalog_cache_timestamp = current_time
-    
+
     return (
         _catalog_cache.get("prices", {}),
         _catalog_cache.get("styles", {}),
@@ -263,6 +263,23 @@ app = FastAPI(
     title="OutfitStyle ML Ranking Service", version="1.0.0", lifespan=lifespan
 )
 
+# Add request body size limit middleware (10MB max)
+@app.middleware("http")
+async def limit_request_size(request: Request, call_next):
+    """Limit request body size to prevent DoS attacks"""
+    max_size = 10 * 1024 * 1024  # 10MB
+    content_length = request.headers.get("content-length")
+
+    if content_length and int(content_length) > max_size:
+        return JSONResponse(
+            status_code=413,
+            content={
+                "detail": f"Request body too large. Maximum size is {max_size} bytes"
+            }
+        )
+
+    return await call_next(request)
+
 # ═══════════════════════════════════════════
 # LOGGING & CONFIG
 # ═══════════════════════════════════════════
@@ -377,12 +394,6 @@ async def rank_candidates(
                 ranked=[],
                 model_version=predictor.get_model_version() if predictor else "unknown",
                 processing_time_ms=0.0,
-            )
-
-        if len(request.candidates) > 250:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Too many candidates: {len(request.candidates)}, maximum allowed: 250",
             )
 
         # Проверка, что модель загружена

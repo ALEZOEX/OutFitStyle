@@ -321,8 +321,8 @@
     - Run first-time token use test
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
-- [~] 7. Fix 5: Secure Secret Management
-  - [ ] 7.1 Implement secure secret management
+- [-] 7. Fix 5: Secure Secret Management
+  - [x] 7.1 Implement secure secret management
     - Files: `internal/config/config.go` and deployment configuration
     - Integrate cloud provider secret manager (AWS Secrets Manager, GCP Secret Manager, or HashiCorp Vault)
     - Load secrets at application startup from secure storage, not environment variables
@@ -347,8 +347,8 @@
     - Run admin operations test
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
-- [~] 8. Fix 6: ML Service Input Validation
-  - [ ] 8.1 Implement ML service input validation
+- [-] 8. Fix 6: ML Service Input Validation
+  - [x] 8.1 Implement ML service input validation
     - File: `ml-service/app/api/routes.py` or `ml-service/app/services/recommendation_service.py`
     - Enforce candidate count bounds: minimum 1, maximum 100
     - Validate temperature range: -50 to 50°C
@@ -376,8 +376,8 @@
     - Run valid ML requests test
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
-- [~] 9. Fix 7: Kafka Message Signing
-  - [ ] 9.1 Implement Kafka message signing and verification
+- [-] 9. Fix 7: Kafka Message Signing
+  - [x] 9.1 Implement Kafka message signing and verification
     - Files: `internal/events/publisher.go` and `internal/events/consumer.go`
     - Generate HMAC-SHA256 signature for each message using shared secret
     - Add signature to Kafka message headers

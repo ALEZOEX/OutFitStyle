@@ -2,6 +2,9 @@ package event_driven
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,20 +14,35 @@ import (
 
 // KafkaPublisher публикует события в Kafka
 type KafkaPublisher struct {
-	writer *kafka.Writer
+	writer     *kafka.Writer
+	signingKey string
 }
 
 // NewKafkaPublisher создает нового Kafka publisher
-func NewKafkaPublisher(brokers []string, topic string) *KafkaPublisher {
+// signingKey should be retrieved from secure secret manager before calling this function
+func NewKafkaPublisher(brokers []string, topic string, signingKey string) (*KafkaPublisher, error) {
 	writer := &kafka.Writer{
 		Addr:     kafka.TCP(brokers...),
 		Topic:    topic,
 		Balancer: &kafka.LeastBytes{},
 	}
 
-	return &KafkaPublisher{
-		writer: writer,
+	if signingKey == "" {
+		return nil, fmt.Errorf("Kafka signing key cannot be empty")
 	}
+
+	return &KafkaPublisher{
+		writer:     writer,
+		signingKey: signingKey,
+	}, nil
+}
+
+// computeSignature generates HMAC-SHA256 signature for message data
+func (kp *KafkaPublisher) computeSignature(data []byte) string {
+	h := hmac.New(sha256.New, []byte(kp.signingKey))
+	h.Write(data)
+	signature := h.Sum(nil)
+	return base64.StdEncoding.EncodeToString(signature)
 }
 
 // PublishRecommendationRequestedEvent публикует событие запроса рекомендации
@@ -34,8 +52,14 @@ func (kp *KafkaPublisher) PublishRecommendationRequestedEvent(ctx context.Contex
 		return fmt.Errorf("не удалось маршализовать событие: %w", err)
 	}
 
+	// Generate signature
+	signature := kp.computeSignature(data)
+
 	err = kp.writer.WriteMessages(ctx, kafka.Message{
 		Value: data,
+		Headers: []kafka.Header{
+			{Key: "X-Message-Signature", Value: []byte(signature)},
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("не удалось опубликовать событие: %w", err)
@@ -52,8 +76,14 @@ func (kp *KafkaPublisher) PublishRecommendationProcessedEvent(ctx context.Contex
 		return fmt.Errorf("не удалось маршализовать событие: %w", err)
 	}
 
+	// Generate signature
+	signature := kp.computeSignature(data)
+
 	err = kp.writer.WriteMessages(ctx, kafka.Message{
 		Value: data,
+		Headers: []kafka.Header{
+			{Key: "X-Message-Signature", Value: []byte(signature)},
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("не удалось опубликовать событие: %w", err)
@@ -70,8 +100,14 @@ func (kp *KafkaPublisher) PublishUserFeedbackEvent(ctx context.Context, event Us
 		return fmt.Errorf("не удалось маршализовать событие: %w", err)
 	}
 
+	// Generate signature
+	signature := kp.computeSignature(data)
+
 	err = kp.writer.WriteMessages(ctx, kafka.Message{
 		Value: data,
+		Headers: []kafka.Header{
+			{Key: "X-Message-Signature", Value: []byte(signature)},
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("не удалось опубликовать событие: %w", err)

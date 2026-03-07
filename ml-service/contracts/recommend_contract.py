@@ -13,7 +13,7 @@ from typing import List, Optional, Dict, Any
 class RecommendContext(BaseModel):
     """Контекст для рекомендаций"""
 
-    temperature: float = Field(..., description="Температура (°C)", ge=-40, le=60)
+    temperature: float = Field(..., description="Температура (°C)", ge=-50, le=50)
     humidity: float = Field(..., description="Влажность (%)", ge=0, le=100)
     weather_condition: str = Field(
         ..., description="Погода (Cerah, Mendung, Hujan, Berawan)"
@@ -26,6 +26,50 @@ class RecommendContext(BaseModel):
     duration: float = Field(
         default=2.0, description="Длительность (часы)", ge=0.5, le=24.0
     )
+
+    @field_validator("weather_condition")
+    @classmethod
+    def validate_weather_condition(cls, v: str) -> str:
+        """Validate weather condition against allowed values"""
+        allowed_values = {"Cerah", "Mendung", "Hujan", "Berawan", "clear", "cloudy", "rain", "overcast"}
+        if v not in allowed_values:
+            raise ValueError(
+                f"weather_condition must be one of: {allowed_values}, got: {v}"
+            )
+        return v
+
+    @field_validator("location")
+    @classmethod
+    def validate_location(cls, v: str) -> str:
+        """Validate location against allowed values"""
+        allowed_values = {"Indoor", "Outdoor", "indoor", "outdoor"}
+        if v not in allowed_values:
+            raise ValueError(
+                f"location must be one of: {allowed_values}, got: {v}"
+            )
+        return v
+
+    @field_validator("activity")
+    @classmethod
+    def validate_activity(cls, v: str) -> str:
+        """Validate activity against allowed values"""
+        allowed_values = {"Olahraga", "Kerja", "Jalan-jalan", "Pesta", "sport", "work", "casual", "party"}
+        if v not in allowed_values:
+            raise ValueError(
+                f"activity must be one of: {allowed_values}, got: {v}"
+            )
+        return v
+
+    @field_validator("gender")
+    @classmethod
+    def validate_gender(cls, v: str) -> str:
+        """Validate gender against allowed values"""
+        allowed_values = {"Laki-laki", "Perempuan", "male", "female", "unisex"}
+        if v not in allowed_values:
+            raise ValueError(
+                f"gender must be one of: {allowed_values}, got: {v}"
+            )
+        return v
 
 
 class UserPreferences(BaseModel):
@@ -90,7 +134,7 @@ class RecommendRequest(BaseModel):
         ...,
         description="Предметы по категориям: {'upper': [...], 'lower': [...], ...}"
     )
-    top_k: int = Field(default=5, description="Количество рекомендаций", ge=1, le=50)
+    top_k: int = Field(default=5, description="Количество рекомендаций", ge=1, le=100)
 
     # Предпочтения пользователя для персонализации
     user_preferences: Optional[UserPreferences] = Field(
@@ -101,11 +145,22 @@ class RecommendRequest(BaseModel):
     @field_validator("top_k")
     @classmethod
     def validate_top_k(cls, v: int) -> int:
-        """Валидация top_k: от 1 до 50"""
+        """Валидация top_k: от 1 до 100"""
         if v < 1:
             raise ValueError("top_k должен быть не менее 1")
-        if v > 50:
-            raise ValueError("top_k должен быть не более 50")
+        if v > 100:
+            raise ValueError("top_k должен быть не более 100")
+        return v
+
+    @field_validator("items_by_category")
+    @classmethod
+    def validate_items_by_category(cls, v: Dict[str, List[Item]]) -> Dict[str, List[Item]]:
+        """Validate total items count across all categories"""
+        total_items = sum(len(items) for items in v.values())
+        if total_items > 1000:
+            raise ValueError(
+                f"Total items across all categories exceeds maximum of 1000, got: {total_items}"
+            )
         return v
 
 
