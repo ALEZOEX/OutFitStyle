@@ -54,6 +54,21 @@ func AuthMiddleware(authService *services.AuthService, apiKeyService *services.A
 				return
 			}
 
+			// 3) Cookie-based authentication: access_token cookie
+			cookie, err := r.Cookie("access_token")
+			if err == nil && cookie.Value != "" {
+				token := strings.TrimSpace(cookie.Value)
+				userID, sessionID, err := authService.ValidateAccessToken(r.Context(), token)
+				if err != nil {
+					resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
+					return
+				}
+				ctx := WithUserID(r.Context(), userID)
+				ctx = WithSessionID(ctx, sessionID)
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+
 			resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
 		})
 	}
