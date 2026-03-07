@@ -68,7 +68,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   }
 
   void _nextPage() {
-    if (_pageController.page!.toInt() < 4) {
+    final page = _pageController.page;
+    if (page != null && page.toInt() < 4) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -77,7 +78,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   }
 
   void _previousPage() {
-    if (_pageController.page!.toInt() > 0) {
+    final page = _pageController.page;
+    if (page != null && page.toInt() > 0) {
       _pageController.previousPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
