@@ -23,6 +23,10 @@ func NewSubscriptionLimiter(svc *services.SubscriptionService) *SubscriptionLimi
 func (l *SubscriptionLimiter) EnforceRecommendationsLimit() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if l == nil || l.subscriptions == nil {
+				next.ServeHTTP(w, r)
+				return
+			}
 			if r.Method != http.MethodPost {
 				next.ServeHTTP(w, r)
 				return
@@ -56,6 +60,10 @@ func (l *SubscriptionLimiter) EnforceRecommendationsLimit() mux.MiddlewareFunc {
 func (l *SubscriptionLimiter) EnforceWardrobeLimit() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if l == nil || l.subscriptions == nil {
+				next.ServeHTTP(w, r)
+				return
+			}
 			if r.Method != http.MethodPost {
 				next.ServeHTTP(w, r)
 				return

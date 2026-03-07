@@ -498,7 +498,7 @@ func main() {
 	health.RegisterChecks(checks)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, passwordHandler, weatherHandler, limiter, logger, authService, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler, redisClient)
+	router := setupRouter(cfg, authHandler, userHandler, passwordHandler, weatherHandler, limiter, logger, authService, firebaseAuthClient, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler, redisClient)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -568,6 +568,7 @@ func setupRouter(
 	limiter *middleware.RateLimiter,
 	logger *zap.Logger,
 	authService *services.AuthService,
+	firebaseAuthClient middleware.FirebaseAuthClient,
 	subLimiter *middleware.SubscriptionLimiter,
 	notifHandler *handlers.NotificationHandler,
 	wardrobeHandler *handlers.WardrobeHandler,
@@ -623,7 +624,7 @@ func setupRouter(
 
 	// protected
 	protected := api.NewRoute().Subrouter()
-	protected.Use(middleware.NewAuthMiddlewareWithFirebase(cfg.Security.JWTSecret, firebaseAuthClient, logger).Handler)
+	protected.Use(middleware.NewAuthMiddlewareWithFirebase(authService, apiKeyService, firebaseAuthClient).Handler)
 
 	// Business API-key policies
 	protected.Use(middleware.APIKeyPolicyMiddleware())
