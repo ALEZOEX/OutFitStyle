@@ -3,6 +3,7 @@ import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/models/onboarding_data.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/repositories/onboarding_repository.dart';
 import 'package:outfitstyle_client/src/features/onboarding/onboarding_storage.dart';
+import 'package:outfitstyle_client/src/utils/logger.dart';
 
 /// Провайдер хранилища онбординга
 final onboardingStorageProvider = Provider<OnboardingStorage>((ref) {
@@ -194,12 +195,10 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       await _storage.saveOnboardingData(state.data);
       await _storage.setDone();
 
-      // Отправка на сервер (не блокирующая, если ошибка - продолжаем)
       try {
         await _repository.savePreferences(state.data);
       } catch (e) {
-        // Логируем ошибку, но не прерываем процесс
-        print('[OnboardingNotifier] Ошибка отправки на сервер: $e');
+        AppLogger.error('Error sending preferences to server', e);
       }
 
       state = state.copyWith(currentPage: 4, isSubmitting: false);

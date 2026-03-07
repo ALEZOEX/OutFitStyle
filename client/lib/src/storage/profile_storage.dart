@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:outfitstyle_client/src/utils/logger.dart';
 
 /// Данные для заполнения профиля пользователя
 class CompleteProfileData {
@@ -76,7 +77,7 @@ class ProfileStorage {
       final json = jsonDecode(dataStr) as Map<String, dynamic>;
       return CompleteProfileData.fromJson(json);
     } catch (e) {
-      print('[ProfileStorage] Ошибка парсинга данных профиля: $e');
+      AppLogger.error('Error parsing profile data', e);
       return null;
     }
   }
