@@ -318,7 +318,9 @@ func (c *DatabaseConfig) DatabaseURL() string { return c.URL }
 func splitCSV(v string) []string {
 	v = strings.TrimSpace(v)
 	if v == "" {
-		return []string{"*"}
+		// Security: не используем wildcard по умолчанию для CORS
+		// Требуем явного указания allowed origins
+		return []string{}
 	}
 	if v == "*" {
 		return []string{"*"}
@@ -330,9 +332,6 @@ func splitCSV(v string) []string {
 		if p != "" {
 			out = append(out, p)
 		}
-	}
-	if len(out) == 0 {
-		return []string{"*"}
 	}
 	return out
 }
