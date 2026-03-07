@@ -1,8 +1,0 @@
-Analyzing client...
-
-  error - lib\src\core\api\api_client.dart:30:13 - The named parameter 'info' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'info'. - undefined_named_parameter
-  error - lib\src\presentation\providers\weather_provider.dart:18:31 - The method 'internal' isn't defined for the type 'ApiClient'. Try correcting the name to the name of an existing method, or defining a method named 'internal'. - undefined_method
-  error - lib\src\presentation\providers\weather_provider.dart:30:31 - The method 'internal' isn't defined for the type 'ApiClient'. Try correcting the name to the name of an existing method, or defining a method named 'internal'. - undefined_method
-warning - lib\src\auth\session_manager.dart:5:8 - Unused import: 'package:dio/dio.dart'. Try removing the import directive. - unused_import
-
-4 issues found.
