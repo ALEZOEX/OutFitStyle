@@ -213,7 +213,7 @@
 ## Phase 2: Implementation
 
 - [-] 3. Fix 1: SQL Injection Prevention
-  - [ ] 3.1 Implement SQL injection prevention in wardrobe repository
+  - [x] 3.1 Implement SQL injection prevention in wardrobe repository
     - File: `internal/wardrobe/repository/postgres/wardrobe_repository.go`
     - Function: `List(ctx context.Context, userID string, filters WardrobeFilters) ([]Wardrobe, error)`
     - Create whitelist map for allowed sort fields: ["name", "created_at", "updated_at", "category"]
@@ -240,7 +240,7 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
 - [~] 4. Fix 2: CORS Configuration Hardening
-  - [ ] 4.1 Implement CORS configuration hardening
+  - [x] 4.1 Implement CORS configuration hardening
     - File: `cmd/api/main.go` or `internal/middleware/cors.go`
     - Load allowed origins from configuration environment variable ALLOWED_ORIGINS
     - Example: `ALLOWED_ORIGINS=https://outfitstyle.com,https://app.outfitstyle.com`
@@ -266,7 +266,7 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
 - [~] 5. Fix 3: Strong Password Policy
-  - [ ] 5.1 Implement strong password policy
+  - [x] 5.1 Implement strong password policy
     - File: `internal/auth/service/auth_service.go`
     - Function: `Register(ctx context.Context, email, password string) error`
     - Enforce minimum 12 characters (increased from 8)
@@ -294,8 +294,8 @@
     - Run strong password registration test
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
-- [~] 6. Fix 4: Refresh Token Rotation
-  - [ ] 6.1 Implement refresh token rotation
+- [-] 6. Fix 4: Refresh Token Rotation
+  - [x] 6.1 Implement refresh token rotation
     - File: `internal/auth/service/token_service.go`
     - Function: `RefreshAccessToken(ctx context.Context, refreshToken string) (string, string, error)`
     - Mark old refresh token as used/invalid in database immediately after validation
@@ -428,8 +428,8 @@
     - Run within rate limits test
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
-- [~] 11. Fix 9: Resource Ownership Authorization
-  - [ ] 11.1 Implement resource ownership authorization
+- [-] 11. Fix 9: Resource Ownership Authorization
+  - [x] 11.1 Implement resource ownership authorization
     - File: `internal/wardrobe/service/wardrobe_service.go`
     - Functions: All resource access methods (Get, Update, Delete)
     - Query resource to verify user_id matches authenticated user before any operation
@@ -510,7 +510,7 @@
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
 - [~] 14. Fix 12: Security Headers Implementation
-  - [ ] 14.1 Implement security headers middleware
+  - [x] 14.1 Implement security headers middleware
     - File: `internal/middleware/security_headers.go`
     - Set X-Permitted-Cross-Domain-Policies: none
     - Set Referrer-Policy: strict-origin-when-cross-origin
@@ -591,8 +591,8 @@
     - Run normal logging test
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
-- [~] 17. Fix 15: Constant-Time Secret Comparison
-  - [ ] 17.1 Implement constant-time secret comparison
+- [-] 17. Fix 15: Constant-Time Secret Comparison
+  - [x] 17.1 Implement constant-time secret comparison
     - Files: Multiple files where secrets are compared
       - `internal/auth/service/auth_service.go`
       - `internal/middleware/api_key_auth.go`
@@ -619,8 +619,8 @@
     - Run correct authentication test
     - **EXPECTED OUTCOME**: Test PASSES (confirms no regressions)
 
-- [~] 18. Fix 16: Automated Vulnerability Scanning
-  - [ ] 18.1 Implement automated vulnerability scanning
+- [-] 18. Fix 16: Automated Vulnerability Scanning
+  - [x] 18.1 Implement automated vulnerability scanning
     - File: `.github/workflows/security-scan.yml` or CI/CD pipeline configuration
     - Integrate govulncheck for Go dependencies
     - Integrate pip-audit or safety for Python dependencies
