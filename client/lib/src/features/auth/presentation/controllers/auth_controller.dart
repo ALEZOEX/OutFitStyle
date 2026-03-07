@@ -104,11 +104,8 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> registerWithEmail(String email, String password, String name) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final success = await _sessionManager.signUp(email, password);
+      final success = await _sessionManager.signUp(email, password, displayName: name);
       if (success) {
-        // Обновляем displayName после регистрации
-        await _sessionManager.updateUserProfile(displayName: name);
-        
         final session = _sessionManager.currentUserSession;
         state = state.copyWith(
           isLoading: false,

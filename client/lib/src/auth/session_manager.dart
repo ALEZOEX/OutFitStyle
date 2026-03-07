@@ -116,7 +116,9 @@ class SessionManager {
   UserSession? get currentUserSession => _currentUserSession;
 
   /// Проверка, вошел ли пользователь
-  bool get isAuthenticated => _firebaseAuth.currentUser != null;
+  /// Для email/password - проверяем по наличию сессии в _currentUserSession
+  /// Для Google - проверяем по Firebase
+  bool get isAuthenticated => _currentUserSession != null || _firebaseAuth.currentUser != null;
 
   /// Получение UID текущего пользователя
   String? get currentUserId => _firebaseAuth.currentUser?.uid;
@@ -368,37 +370,41 @@ class SessionManager {
   }
 
   /// Обновление данных пользователя
+  /// Работает как для Firebase (Google), так и для email/password (backend)
   Future<bool> updateUserProfile({String? displayName, String? photoUrl}) async {
     try {
-      final user = _firebaseAuth.currentUser;
       final currentSession = _currentUserSession;
+      final firebaseUser = _firebaseAuth.currentUser;
       
-      if (user == null || currentSession == null) {
-        AppLogger.warning('No user or session for profile update');
+      if (currentSession == null) {
+        AppLogger.warning('No session for profile update');
         return false;
       }
 
-      AppLogger.info('Updating profile for user: ${user.uid}');
-      
-      if (displayName != null) {
-        await user.updateDisplayName(displayName);
-      }
-      if (photoUrl != null) {
-        await user.updatePhotoURL(photoUrl);
+      final String uid = firebaseUser?.uid ?? currentSession.uid;
+      AppLogger.info('Updating profile for user: $uid');
+
+      // Если есть Firebase user (Google) - обновляем в Firebase
+      if (firebaseUser != null) {
+        if (displayName != null) {
+          await firebaseUser.updateDisplayName(displayName);
+        }
+        if (photoUrl != null) {
+          await firebaseUser.updatePhotoURL(photoUrl);
+        }
       }
 
-      // Обновляем сессию с новыми данными
+      // Обновляем сессию с новыми данными (работает для обоих типов)
       _currentUserSession = UserSession(
-        uid: user.uid,
-        email: user.email,
-        displayName: displayName ?? user.displayName,
-        photoUrl: photoUrl ?? user.photoURL,
+        uid: uid,
+        email: currentSession.email,
+        displayName: displayName ?? currentSession.displayName,
+        photoUrl: photoUrl ?? currentSession.photoUrl,
         loginTime: currentSession.loginTime,
-        isEmailVerified: user.emailVerified,
+        isEmailVerified: currentSession.isEmailVerified,
       );
 
       // Сохраняем обновленную сессию
-      // Безопасно: _currentUserSession только что установлен выше
       final sessionJson = _currentUserSession?.toJson();
       if (sessionJson != null) {
         await _sharedPreferences.setString(
@@ -409,7 +415,7 @@ class SessionManager {
 
       // Уведомляем подписчиков
       _sessionStreamController.add(_currentUserSession);
-      AppLogger.info('Profile updated for user: ${user.uid}');
+      AppLogger.info('Profile updated for user: $uid');
       return true;
     } catch (e) {
       AppLogger.error('Error updating profile: $e', e);

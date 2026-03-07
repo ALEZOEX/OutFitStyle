@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../presentation/providers/session_provider.dart';
+import '../../../presentation/routing/router.dart';
 import '../../../ui/misc/app_avatar.dart';
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
@@ -35,6 +36,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         }
       });
     });
+  }
+
+  void _handleAuthSuccess() {
+    // Проверяем есть ли redirect параметр
+    final uri = GoRouterState.of(context).uri;
+    final redirect = uri.queryParameters['redirect'];
+    
+    if (redirect != null && redirect.isNotEmpty) {
+      context.go(redirect);
+    } else {
+      // По умолчанию на главную
+      context.go('/home');
+    }
   }
 
   @override
@@ -93,9 +107,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         if (mounted) {
           ref.read(authErrorProvider.notifier).state = 'Не удалось войти через Google';
         }
+      } else {
+        // При успехе перенаправляем на нужную страницу
+        if (mounted) {
+          _handleAuthSuccess();
+        }
       }
-      // При успехе GoRouter сам перенаправит через redirect
-      // НЕ вызывать context.go() вручную
     } catch (e, stackTrace) {
       print('[Google Sign-In] ❌ ОШИБКА: $e');
       print('[Google Sign-In] Stack trace: $stackTrace');
@@ -151,8 +168,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         throw Exception('Не удалось выполнить операцию');
       }
 
-      // При успехе GoRouter сам перенаправит через redirect
-      // НЕ вызывать context.go() вручную
+      // При успехе перенаправляем на нужную страницу
+      if (mounted) {
+        _handleAuthSuccess();
+      }
     } catch (e) {
       if (mounted) {
         ref.read(authErrorProvider.notifier).state =
