@@ -42,11 +42,9 @@ class ApiConfig {
     return host;
   }
 
-  /// Получить Firebase ID Token текущего пользователя
-  /// Возвращает null, если пользователь не авторизован
+  /// Авторизация работает через httpOnly cookie
+  /// Access token не требуется хранить явно — cookie отправляется автоматически
   static Future<String?> getAccessToken() async {
-    // Firebase ID Token получается через FirebaseAuth.instance.currentUser.getIdToken()
-    // Этот метод оставлен для обратной совместимости
     return null;
   }
 }
