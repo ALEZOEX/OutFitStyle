@@ -49,7 +49,7 @@ func (r *SessionRepository) CreateSession(ctx context.Context, session *domain.S
 func (r *SessionRepository) GetByID(ctx context.Context, sessionID domain.ID) (*repositories.Session, error) {
 	query := `
 		SELECT
-			id, user_id, refresh_token_hash, device_info, ip_address, user_agent,
+			id, user_id, refresh_token_hash, device_info, ip_address::text, user_agent,
 			is_active, created_at, expires_at, last_used_at
 		FROM sessions
 		WHERE id = $1
@@ -94,7 +94,7 @@ func (r *SessionRepository) GetByID(ctx context.Context, sessionID domain.ID) (*
 func (r *SessionRepository) GetSession(ctx context.Context, id domain.ID) (*domain.Session, error) {
 	query := `
 		SELECT
-			id, user_id, refresh_token_hash, device_info, ip_address, user_agent,
+			id, user_id, refresh_token_hash, device_info, ip_address::text, user_agent,
 			is_active, created_at, expires_at, last_used_at
 		FROM sessions
 		WHERE id = $1
@@ -139,7 +139,7 @@ func (r *SessionRepository) GetSession(ctx context.Context, id domain.ID) (*doma
 func (r *SessionRepository) GetSessionByToken(ctx context.Context, token string) (*domain.Session, error) {
 	query := `
 		SELECT
-			id, user_id, refresh_token_hash, device_info, ip_address, user_agent,
+			id, user_id, refresh_token_hash, device_info, ip_address::text, user_agent,
 			is_active, created_at, expires_at, last_used_at
 		FROM sessions
 		WHERE refresh_token_hash = $1 AND is_active = true
@@ -259,7 +259,7 @@ func (r *SessionRepository) Create(ctx context.Context, p repositories.CreateSes
 func (r *SessionRepository) GetByRefreshHash(ctx context.Context, refreshHash string) (*repositories.Session, error) {
 	query := `
 		SELECT
-			id, user_id, refresh_token_hash, device_info, ip_address, user_agent,
+			id, user_id, refresh_token_hash, device_info, ip_address::text, user_agent,
 			is_active, created_at, expires_at, last_used_at
 		FROM sessions
 		WHERE refresh_token_hash = $1 AND is_active = true
@@ -398,7 +398,7 @@ func (r *SessionRepository) RevokeForUser(ctx context.Context, userID, sessionID
 func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([]repositories.Session, error) {
 	query := `
 		SELECT
-			id, user_id, refresh_token_hash, device_info, ip_address, user_agent,
+			id, user_id, refresh_token_hash, device_info, ip_address::text, user_agent,
 			is_active, created_at, expires_at, last_used_at
 		FROM sessions
 		WHERE user_id = $1
