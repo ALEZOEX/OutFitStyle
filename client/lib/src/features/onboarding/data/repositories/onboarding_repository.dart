@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/models/onboarding_data.dart';
+import 'package:outfitstyle_client/src/utils/logger.dart';
 
-/// Репозиторий для работы с данными онбординга
 class OnboardingRepository {
   final ApiClient _apiClient;
 
@@ -10,8 +10,6 @@ class OnboardingRepository {
     required ApiClient apiClient,
   }) : _apiClient = apiClient;
 
-  /// Отправка предпочтений пользователя на сервер
-  /// POST /api/v1/user/preferences
   Future<bool> savePreferences(OnboardingData data) async {
     try {
       final response = await _apiClient.post(
@@ -23,20 +21,17 @@ class OnboardingRepository {
         return true;
       }
 
-      // Логируем ошибку
-      print('[OnboardingRepository] Ошибка сохранения предпочтений: ${response.statusCode}');
+      AppLogger.warning('Failed to save preferences: ${response.statusCode}');
       return false;
     } on DioException catch (e) {
-      print('[OnboardingRepository] DioException: ${e.message}');
+      AppLogger.error('DioException while saving preferences', e);
       return false;
     } catch (e) {
-      print('[OnboardingRepository] Неизвестная ошибка: $e');
+      AppLogger.error('Error saving preferences', e);
       return false;
     }
   }
 
-  /// Получение предпочтений пользователя с сервера
-  /// GET /api/v1/user/preferences
   Future<OnboardingData?> getPreferences() async {
     try {
       final response = await _apiClient.get('/api/v1/user/preferences');
@@ -48,18 +43,16 @@ class OnboardingRepository {
 
       return null;
     } on DioException catch (e) {
-      print('[OnboardingRepository] Ошибка получения предпочтений: ${e.message}');
+      AppLogger.error('Error getting preferences', e);
       return null;
     } catch (e) {
-      print('[OnboardingRepository] Неизвестная ошибка: $e');
+      AppLogger.error('Error getting preferences', e);
       return null;
     }
   }
 
-  /// Автоопределение города по IP (используем внешний API)
   Future<Map<String, dynamic>?> detectCityByIp() async {
     try {
-      // Используем ipapi.co для определения города по IP
       final response = await _apiClient.raw.get(
         'https://ipapi.co/json/',
         options: Options(
@@ -80,7 +73,7 @@ class OnboardingRepository {
 
       return null;
     } catch (e) {
-      print('[OnboardingRepository] Ошибка определения города по IP: $e');
+      AppLogger.error('Error detecting city by IP', e);
       return null;
     }
   }

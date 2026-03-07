@@ -39,23 +39,15 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   Future<void> _initializeAuth() async {
     if (!mounted || _isInitialized) return;
 
-    print('[AuthGate] Инициализация...');
-
     try {
-      // Получаем SessionManager
       final sessionManager = ref.read(sessionManagerProvider);
 
-      // СНАЧАЛА проверяем текущее состояние auth
-      // Это важно: если пользователь уже авторизован до подписки
       final currentAuth = sessionManager.isAuthenticated;
-      print('[AuthGate] Текущее состояние auth: $currentAuth');
 
-      // Подписываемся на authStateChanges
       _authSubscription = sessionManager.authStateChanges.listen(
         (isAuthenticated) {
           if (!mounted) return;
 
-          print('[AuthGate] Auth state changed: $isAuthenticated');
           setState(() => _isAuthenticated = isAuthenticated);
 
           if (isAuthenticated) {
@@ -64,27 +56,19 @@ class _AuthGateState extends ConsumerState<AuthGate> {
             _stopDataLoading();
           }
         },
-        onError: (error) {
-          print('[AuthGate] Ошибка auth stream: $error');
-        },
-        onDone: () {
-          print('[AuthGate] Auth stream closed');
-        },
+        onError: (_) {},
+        onDone: () {},
       );
 
-      // Инициализируем состояние
-      // Если уже авторизован — запускаем загрузку данных
       setState(() {
         _isAuthenticated = currentAuth;
         _isInitialized = true;
       });
 
       if (currentAuth) {
-        print('[AuthGate] Пользователь уже авторизован, запускаем загрузку данных');
         _startDataLoading();
       }
     } catch (e) {
-      print('[AuthGate] Ошибка при инициализации: $e');
       if (mounted) {
         setState(() {
           _isInitialized = true;
@@ -95,24 +79,14 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   }
 
   void _startDataLoading() {
-    print('[AuthGate] Запуск загрузки данных...');
-
-    // Загружаем уведомления
     try {
       final notificationsNotifier = ref.read(notificationsProvider.notifier);
       notificationsNotifier.loadNotifications(refresh: true);
-
-      // Запускаем polling
       notificationsNotifier.startPolling();
-    } catch (e) {
-      print('[AuthGate] Ошибка при запуске polling: $e');
-    }
+    } catch (_) {}
   }
 
   void _stopDataLoading() {
-    print('[AuthGate] Остановка загрузки данных...');
-
-    // Останавливаем polling
     final notificationsNotifier = ref.read(notificationsProvider.notifier);
     notificationsNotifier.stopPolling();
   }

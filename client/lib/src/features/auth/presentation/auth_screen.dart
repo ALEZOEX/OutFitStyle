@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../presentation/providers/session_provider.dart';
-import '../../../presentation/routing/router.dart';
 import '../../../ui/misc/app_avatar.dart';
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
@@ -61,9 +60,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   /// Вход через Google через Firebase Auth
   Future<void> _signInWithGoogle() async {
-    print('[Google Sign-In] Начало входа через Firebase Auth...');
-
-    // Показываем модальное окно ожидания
     if (!mounted) return;
 
     showDialog(
@@ -92,35 +88,23 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
 
     try {
-      // Получаем SessionManager
       final sessionManager = ref.read(sessionManagerProvider);
-
-      print('[Google Sign-In] Вызов sessionManager.signInWithGoogle()...');
       final success = await sessionManager.signInWithGoogle();
-      print('[Google Sign-In] Результат: $success');
 
-      // Закрываем модальное окно
       if (mounted) Navigator.of(context).pop(success);
 
       if (!success) {
-        // Ошибка уже обработана в SessionManager, показываем сообщение
         if (mounted) {
           ref.read(authErrorProvider.notifier).state = 'Не удалось войти через Google';
         }
       } else {
-        // При успехе перенаправляем на нужную страницу
         if (mounted) {
           _handleAuthSuccess();
         }
       }
-    } catch (e, stackTrace) {
-      print('[Google Sign-In] ❌ ОШИБКА: $e');
-      print('[Google Sign-In] Stack trace: $stackTrace');
-
-      // Закрываем модальное окно
+    } catch (e) {
       if (mounted) Navigator.of(context).pop(false);
 
-      // Показываем ошибку
       if (mounted) {
         ref.read(authErrorProvider.notifier).state = e.toString();
 

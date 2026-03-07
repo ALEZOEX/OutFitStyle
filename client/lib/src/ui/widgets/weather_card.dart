@@ -20,7 +20,8 @@ class WeatherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (weatherData == null) {
+    final data = weatherData;
+    if (data == null) {
       return _buildErrorState(context);
     }
 
@@ -41,8 +42,8 @@ class WeatherCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                _getGradientStartColor(weatherData!),
-                _getGradientEndColor(weatherData!),
+                _getGradientStartColor(data),
+                _getGradientEndColor(data),
               ],
             ),
           ),
@@ -51,19 +52,12 @@ class WeatherCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Заголовок с кнопкой обновления
                 _buildHeader(context),
                 const SizedBox(height: 16),
-
-                // Основная информация о погоде
                 _buildCurrentWeather(context),
                 const SizedBox(height: 20),
-
-                // Детали погоды
                 _buildWeatherDetails(context),
                 const SizedBox(height: 20),
-
-                // Прогноз
                 if (forecast != null && forecast!.isNotEmpty)
                   _buildForecast(context),
               ],
@@ -138,13 +132,15 @@ class WeatherCard extends StatelessWidget {
 
   Widget _buildCurrentWeather(BuildContext context) {
     final theme = Theme.of(context);
-    final temp = weatherData!.temperature?.round() ?? 0;
-    final feelsLike = weatherData!.feelsLike?.round();
-    final description = weatherData!.description ?? '';
+    final data = weatherData;
+    if (data == null) return const SizedBox.shrink();
+    
+    final temp = data.temperature?.round() ?? 0;
+    final feelsLike = data.feelsLike?.round();
+    final description = data.description ?? '';
 
     return Row(
       children: [
-        // Температура
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +184,6 @@ class WeatherCard extends StatelessWidget {
             ],
           ),
         ),
-        // Иконка погоды с описанием
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -200,14 +195,14 @@ class WeatherCard extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                _getWeatherIcon(weatherData!.description ?? ''),
+                _getWeatherIcon(data.description ?? ''),
                 color: Colors.white,
                 size: 44,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              _getWeatherDescription(weatherData!.description ?? ''),
+              _getWeatherDescription(data.description ?? ''),
               style: theme.textTheme.labelLarge?.copyWith(
                 color: Colors.white.withOpacity(0.95),
                 fontWeight: FontWeight.w500,
@@ -221,9 +216,11 @@ class WeatherCard extends StatelessWidget {
 
   Widget _buildWeatherDetails(BuildContext context) {
     final theme = Theme.of(context);
+    final data = weatherData;
+    if (data == null) return const SizedBox.shrink();
 
-    final humidity = weatherData!.humidity;
-    final windSpeed = weatherData!.windSpeed;
+    final humidity = data.humidity;
+    final windSpeed = data.windSpeed;
 
     return Container(
       padding: const EdgeInsets.all(16),

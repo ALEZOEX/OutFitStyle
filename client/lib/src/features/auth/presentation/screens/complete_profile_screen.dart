@@ -11,6 +11,7 @@ import '../../../../storage/profile_storage.dart';
 import '../../../../storage/local_storage.dart';
 import '../../../settings/data/repositories/profile_repository.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../utils/logger.dart';
 
 /// Провайдер для ProfileRepository
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
@@ -155,8 +156,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
           email: email,
         );
       } catch (e) {
-        print('[CompleteProfile] Ошибка обновления профиля: $e');
-        // Продолжаем, даже если сервер недоступен
+        AppLogger.error('Error updating profile', e);
       }
 
       // 2. Загружаем фото, если выбрано
@@ -164,8 +164,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
         try {
           await profileRepository.uploadAvatarFile(_photoFile!);
         } catch (e) {
-          print('[CompleteProfile] Ошибка загрузки фото: $e');
-          // Продолжаем, даже если загрузка фото не удалась
+          AppLogger.error('Error uploading photo', e);
         }
       }
 
