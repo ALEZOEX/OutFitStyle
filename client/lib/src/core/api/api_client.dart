@@ -24,10 +24,9 @@ class ApiClient {
     // Interceptor для логирования
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        developer.log('[ApiClient] Request',
+        developer.log('[ApiClient] Request: ${options.method} ${options.path}',
             name: 'ApiClient',
-            level: 900,
-            info: '${options.method} ${options.path}');
+            level: 900);
         return handler.next(options);
       },
       onError: (DioException err, ErrorInterceptorHandler handler) async {
@@ -47,6 +46,10 @@ class ApiClient {
   }
 
   Dio get raw => _dio;
+
+  /// Внутренний конструктор для использования с кастомным Dio
+  /// (например, для Weather API без авторизации)
+  ApiClient.internal(Dio dio) : _dio = dio;
 
   String _normalizePath(String path) {
     return path.startsWith('/') ? path.substring(1) : path;
