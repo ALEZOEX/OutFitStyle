@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:outfitstyle_client/src/services/auth_service.dart';
-import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/features/market/data/market_api_client.dart';
 import 'package:outfitstyle_client/src/features/market/data/market_repository.dart';
@@ -9,15 +7,6 @@ import 'package:outfitstyle_client/src/features/market/data/models/product.dart'
 /// API client provider (core)
 final coreApiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient();
-});
-
-/// Auth service provider
-final authServiceProvider = Provider<AuthService>((ref) {
-  final apiClient = ref.watch(coreApiClientProvider);
-  return AuthService(
-    apiBase: ApiConfig.baseUrl,
-    dio: apiClient.raw,
-  );
 });
 
 /// Market API client provider

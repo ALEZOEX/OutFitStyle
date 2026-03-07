@@ -133,7 +133,8 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
 
   /// Сохранить профиль
   Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) {
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) {
       return;
     }
 

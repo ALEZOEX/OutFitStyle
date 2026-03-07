@@ -126,7 +126,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) return;
 
     ref.read(authLoadingProvider.notifier).state = true;
     ref.read(authErrorProvider.notifier).state = null;
