@@ -157,13 +157,18 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Security: устанавливаем refresh token в httpOnly cookie для веба
-	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	cookieConfig.Secure = h.cookieSecure // из конфига
-	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
+	// Security: устанавливаем оба токена в httpOnly cookies для веба
+	// Access token cookie для аутентификации запросов
+	accessCookieConfig := middleware.DefaultAccessCookieConfig()
+	accessCookieConfig.Secure = h.cookieSecure
+	middleware.SetAccessTokenCookie(w, out.Tokens.AccessToken, accessCookieConfig)
 
-	// Возвращаем access token в ответе (refresh token в cookie)
-	// Для веба клиент не должен сохранять refresh token
+	// Refresh token cookie для обновления токенов
+	refreshCookieConfig := middleware.DefaultRefreshCookieConfig()
+	refreshCookieConfig.Secure = h.cookieSecure
+	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, refreshCookieConfig)
+
+	// Возвращаем токены в ответе (также в cookies для веба)
 	resp.Success(w, out)
 }
 
@@ -245,12 +250,18 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error("failed to reset lockout", zap.Error(err))
 	}
 
-	// Security: устанавливаем refresh token в httpOnly cookie для веба
-	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	cookieConfig.Secure = h.cookieSecure // из конфига
-	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
+	// Security: устанавливаем оба токена в httpOnly cookies для веба
+	// Access token cookie для аутентификации запросов
+	accessCookieConfig := middleware.DefaultAccessCookieConfig()
+	accessCookieConfig.Secure = h.cookieSecure
+	middleware.SetAccessTokenCookie(w, out.Tokens.AccessToken, accessCookieConfig)
 
-	// Возвращаем access token в ответе (refresh token в cookie)
+	// Refresh token cookie для обновления токенов
+	refreshCookieConfig := middleware.DefaultRefreshCookieConfig()
+	refreshCookieConfig.Secure = h.cookieSecure
+	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, refreshCookieConfig)
+
+	// Возвращаем токены в ответе (также в cookies для веба)
 	resp.Success(w, out)
 }
 
@@ -309,11 +320,17 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Security: устанавливаем новый refresh token в cookie (rotation)
-	cookieConfig.Secure = h.cookieSecure // из конфига
+	// Security: устанавливаем оба новых токена в cookies (rotation)
+	// Access token cookie для аутентификации запросов
+	accessCookieConfig := middleware.DefaultAccessCookieConfig()
+	accessCookieConfig.Secure = h.cookieSecure
+	middleware.SetAccessTokenCookie(w, pair.AccessToken, accessCookieConfig)
+
+	// Refresh token cookie для обновления токенов
+	cookieConfig.Secure = h.cookieSecure
 	middleware.SetRefreshTokenCookie(w, pair.RefreshToken, cookieConfig)
 
-	// Возвращаем access token (refresh в cookie)
+	// Возвращаем токены в ответе (также в cookies для веба)
 	resp.Success(w, map[string]any{"tokens": pair})
 }
 
@@ -353,10 +370,16 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Security: очищаем refresh token cookie
-	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	cookieConfig.Secure = h.cookieSecure // из конфига
-	middleware.ClearRefreshTokenCookie(w, cookieConfig)
+	// Security: очищаем оба токена из cookies
+	// Access token cookie
+	accessCookieConfig := middleware.DefaultAccessCookieConfig()
+	accessCookieConfig.Secure = h.cookieSecure
+	middleware.ClearAccessTokenCookie(w, accessCookieConfig)
+
+	// Refresh token cookie
+	refreshCookieConfig := middleware.DefaultRefreshCookieConfig()
+	refreshCookieConfig.Secure = h.cookieSecure
+	middleware.ClearRefreshTokenCookie(w, refreshCookieConfig)
 
 	resp.Success(w, map[string]any{"success": true})
 }
@@ -442,10 +465,16 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 		zap.Bool("is_new_user", out.User.CreatedAt.IsZero() || time.Since(out.User.CreatedAt) < time.Second),
 	)
 
-	// Security: устанавливаем refresh token в httpOnly cookie для веба
-	cookieConfig := middleware.DefaultRefreshCookieConfig()
-	cookieConfig.Secure = h.cookieSecure // из конфига
-	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, cookieConfig)
+	// Security: устанавливаем оба токена в httpOnly cookies для веба
+	// Access token cookie для аутентификации запросов
+	accessCookieConfig := middleware.DefaultAccessCookieConfig()
+	accessCookieConfig.Secure = h.cookieSecure
+	middleware.SetAccessTokenCookie(w, out.Tokens.AccessToken, accessCookieConfig)
+
+	// Refresh token cookie для обновления токенов
+	refreshCookieConfig := middleware.DefaultRefreshCookieConfig()
+	refreshCookieConfig.Secure = h.cookieSecure
+	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, refreshCookieConfig)
 
 	resp.Success(w, out)
 }
