@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import '../utils/logger.dart';
+import '../core/api/public_api_client.dart';
 
 /// Модель данных пользователя
 class UserSession {
@@ -49,12 +51,14 @@ class UserSession {
 class SessionManager {
   final FirebaseAuth _firebaseAuth;
   final SharedPreferences _sharedPreferences;
+  final PublicApiClient _apiClient;
 
   UserSession? _currentUserSession;
   late final StreamController<UserSession?> _sessionStreamController;
   StreamSubscription<User?>? _authSubscription;
 
-  SessionManager(this._firebaseAuth, this._sharedPreferences) {
+  SessionManager(this._firebaseAuth, this._sharedPreferences)
+      : _apiClient = PublicApiClient() {
     _sessionStreamController = StreamController<UserSession?>.broadcast();
     _initializeSession();
     _setupAuthStateListener();
@@ -152,46 +156,78 @@ class SessionManager {
     AppLogger.info('Session updated for user: ${_maskEmail(firebaseUser.email ?? 'unknown')}');
   }
 
-  /// Вход пользователя
+  /// Вход пользователя через backend API
+  ///
+  /// Flow:
+  /// 1. Отправляем email/password на backend /auth/login
+  /// 2. Backend возвращает access token и refresh token (в httpOnly cookie)
+  /// 3. Используем access token для получения данных пользователя
+  /// 4. Синхронизируем с Firebase (silent sign-in)
   Future<bool> signIn({String? email, String? password}) async {
     try {
       AppLogger.info('Attempting sign in for user: ${_maskEmail(email ?? 'unknown')}');
-      UserCredential credential;
 
-      if (email != null && password != null) {
-        // Вход с email/password
-        credential = await _firebaseAuth.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      } else {
-        // Вход через Google или другие провайдеры может быть реализован здесь
+      if (email == null || password == null) {
         AppLogger.warning('No credentials provided for sign in');
         throw Exception('Не указаны учетные данные для входа');
       }
 
-      final user = credential.user;
-      if (user == null) {
-        AppLogger.warning('No user in credential after sign in');
-        throw Exception('Не удалось получить данные пользователя');
+      // Вызываем backend API /auth/login
+      final response = await _apiClient.post('/auth/login', data: {
+        'email': email,
+        'password': password,
+      });
+
+      final data = response.data;
+      if (data is! Map) {
+        AppLogger.warning('Invalid response from login endpoint');
+        throw Exception('Неверный формат ответа сервера');
       }
 
-      // Явно ждём событие authStateChanges, подтверждающее вход
-      await _authStateChanges.firstWhere(
-        (firebaseUser) => firebaseUser?.uid == user.uid,
-      ).timeout(
-        const Duration(seconds: 5),
-        onTimeout: () => throw TimeoutException('Auth state change timeout'),
+      // Backend вернул tokens и user
+      final user = data['user'] as Map?;
+      final tokens = data['tokens'] as Map?;
+
+      if (user == null || tokens == null) {
+        AppLogger.warning('Invalid response structure from login');
+        throw Exception('Ошибка получения данных пользователя');
+      }
+
+      // Для email/password пользователей Firebase не используется
+      // Создаём сессию напрямую из данных backend
+      final backendUid = user['id'] as String?;
+      if (backendUid == null) {
+        AppLogger.warning('No user ID in response');
+        throw Exception('Не удалось получить ID пользователя');
+      }
+
+      // Обновляем сессию
+      _currentUserSession = UserSession(
+        uid: backendUid,
+        email: user['email'] as String?,
+        displayName: user['display_name'] as String?,
+        photoUrl: user['avatar_url'] as String?,
+        loginTime: DateTime.now(),
+        isEmailVerified: user['is_verified'] as bool? ?? false,
       );
 
-      AppLogger.info('Sign in successful for user: ${user.uid}');
+      // Сохраняем сессию в SharedPreferences
+      final sessionJson = _currentUserSession?.toJson();
+      if (sessionJson != null) {
+        await _sharedPreferences.setString(
+          'user_session',
+          jsonEncode(sessionJson),
+        );
+      }
+
+      // Уведомляем подписчиков
+      _sessionStreamController.add(_currentUserSession);
+
+      AppLogger.info('Sign in successful for user: ${_maskEmail(email)}');
       return true;
-    } on FirebaseAuthException catch (e) {
-      AppLogger.error('Sign in error: ${e.code} - ${e.message}', e);
-      return false;
     } catch (e) {
       AppLogger.error('Sign in error: $e', e);
-      return false;
+      rethrow;
     }
   }
 
@@ -256,37 +292,79 @@ class SessionManager {
     }
   }
 
-  /// Регистрация нового пользователя
-  Future<bool> signUp(String email, String password) async {
+  /// Регистрация нового пользователя через backend API
+  ///
+  /// Flow:
+  /// 1. Отправляем email/password/displayName на backend /auth/register
+  /// 2. Backend создаёт пользователя в PostgreSQL и возвращает токены
+  /// 3. Сохраняем сессию локально
+  ///
+  /// ВАЖНО: Firebase Auth НЕ используется для email/password регистрации
+  /// Firebase используется только для Google Sign-In
+  Future<bool> signUp(String email, String password, {String? displayName}) async {
     try {
       AppLogger.info('Attempting sign up for user: ${_maskEmail(email)}');
-      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
 
-      final user = credential.user;
-      if (user == null) {
-        AppLogger.warning('No user in credential after sign up');
-        throw Exception('Не удалось получить данные пользователя');
+      // Вызываем backend API /auth/register
+      final Map<String, dynamic> registerData = {
+        'email': email,
+        'password': password,
+      };
+      if (displayName != null && displayName.isNotEmpty) {
+        registerData['display_name'] = displayName;
       }
 
-      // Явно ждём событие authStateChanges, подтверждающее вход
-      await _authStateChanges.firstWhere(
-        (firebaseUser) => firebaseUser?.uid == user.uid,
-      ).timeout(
-        const Duration(seconds: 5),
-        onTimeout: () => throw TimeoutException('Auth state change timeout'),
+      final response = await _apiClient.post('/auth/register', data: registerData);
+
+      final data = response.data;
+      if (data is! Map) {
+        AppLogger.warning('Invalid response from register endpoint');
+        throw Exception('Неверный формат ответа сервера');
+      }
+
+      // Backend вернул tokens и user
+      final user = data['user'] as Map?;
+      final tokens = data['tokens'] as Map?;
+
+      if (user == null || tokens == null) {
+        AppLogger.warning('Invalid response structure from register');
+        throw Exception('Ошибка регистрации пользователя');
+      }
+
+      // Создаём сессию из данных backend
+      final backendUid = user['id'] as String?;
+      if (backendUid == null) {
+        AppLogger.warning('No user ID in response');
+        throw Exception('Не удалось получить ID пользователя');
+      }
+
+      // Обновляем сессию
+      _currentUserSession = UserSession(
+        uid: backendUid,
+        email: user['email'] as String?,
+        displayName: user['display_name'] as String?,
+        photoUrl: user['avatar_url'] as String?,
+        loginTime: DateTime.now(),
+        isEmailVerified: user['is_verified'] as bool? ?? false,
       );
 
-      AppLogger.info('Sign up successful for user: ${user.uid}');
+      // Сохраняем сессию в SharedPreferences
+      final sessionJson = _currentUserSession?.toJson();
+      if (sessionJson != null) {
+        await _sharedPreferences.setString(
+          'user_session',
+          jsonEncode(sessionJson),
+        );
+      }
+
+      // Уведомляем подписчиков
+      _sessionStreamController.add(_currentUserSession);
+
+      AppLogger.info('Sign up successful for user: ${_maskEmail(email)}');
       return true;
-    } on FirebaseAuthException catch (e) {
-      AppLogger.error('Sign up error: ${e.code} - ${e.message}', e);
-      return false;
     } catch (e) {
       AppLogger.error('Sign up error: $e', e);
-      return false;
+      rethrow;
     }
   }
 
@@ -355,12 +433,40 @@ class SessionManager {
     }
   }
 
-  /// Сброс пароля
+  /// Сброс пароля — шаг 1: запрос кода на email через backend API
+  ///
+  /// Backend отправляет 6-значный код на email пользователя
   Future<void> resetPassword(String email) async {
     try {
+      AppLogger.info('Requesting password reset code for: ${_maskEmail(email)}');
+
+      // Вызываем backend API /auth/forgot-password
+      await _apiClient.post('/auth/forgot-password', data: {
+        'email': email,
+      });
+
+      AppLogger.info('Password reset code sent to: ${_maskEmail(email)}');
+    } catch (e) {
+      AppLogger.error('Error requesting password reset: $e', e);
+      rethrow;
+    }
+  }
+
+  /// Сброс пароля — шаг 2: проверка кода и установка нового пароля
+  ///
+  /// Backend проверяет код и обновляет пароль пользователя
+  Future<void> resetPasswordWithCode(String email, String code, String newPassword) async {
+    try {
       AppLogger.info('Resetting password for: ${_maskEmail(email)}');
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
-      AppLogger.info('Password reset email sent');
+
+      // Вызываем backend API /auth/reset-password
+      await _apiClient.post('/auth/reset-password', data: {
+        'email': email,
+        'code': code,
+        'new_password': newPassword,
+      });
+
+      AppLogger.info('Password reset successfully for: ${_maskEmail(email)}');
     } catch (e) {
       AppLogger.error('Error resetting password: $e', e);
       rethrow;

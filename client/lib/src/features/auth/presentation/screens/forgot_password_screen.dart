@@ -51,7 +51,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       final sessionManager = ref.read(sessionManagerProvider);
       final email = _emailController.text.trim();
 
-      // Firebase отправляет письмо для сброса пароля
+      // Backend отправляет 6-значный код на email
       await sessionManager.resetPassword(email);
 
       if (!mounted) return;
@@ -61,10 +61,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         _currentStep = _Step.code;
         _isLoading = false;
       });
-    } on Exception catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Ошибка: ${e.toString()}';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -80,6 +80,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     try {
       // Код будет проверен на сервере при сбросе пароля
+      // Просто переходим к шагу ввода нового пароля
       setState(() {
         _currentStep = _Step.password;
         _isLoading = false;
@@ -87,7 +88,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Ошибка: ${e.toString()}';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -109,20 +110,23 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      // Firebase не поддерживает сброс пароля по коду из email напрямую
-      // Код отправляется через resetPassword, а здесь мы просто показываем инструкцию
-      // Для полноценного сброса пользователь должен перейти по ссылке из письма
-      
+      final sessionManager = ref.read(sessionManagerProvider);
+      final email = _emailController.text.trim();
+      final code = _codeController.text.trim();
+      final newPassword = _newPasswordController.text;
+
+      // Вызываем backend API для сброса пароля по коду
+      await sessionManager.resetPasswordWithCode(email, code, newPassword);
+
       if (!mounted) return;
 
-      // Показываем диалог с инструкцией
+      // Показываем диалог об успехе
       await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Проверьте email'),
+          title: const Text('Пароль сброшен'),
           content: const Text(
-            'Мы отправили инструкцию по сбросу пароля на ваш email. '
-            'Перейдите по ссылке в письме и задайте новый пароль.',
+            'Ваш пароль успешно изменён. Теперь вы можете войти с новым паролем.',
           ),
           actions: [
             TextButton(
@@ -138,7 +142,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Ошибка: ${e.toString()}';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -431,8 +435,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             if (value == null || value.isEmpty) {
               return 'Введите пароль';
             }
-            if (value.length < 6) {
-              return 'Пароль должен быть не менее 6 символов';
+            // Security: минимум 8 символов (соответствует backend)
+            if (value.length < 8) {
+              return 'Минимум 8 символов';
             }
             return null;
           },
