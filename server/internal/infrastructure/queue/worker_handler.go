@@ -267,11 +267,11 @@ func (d WorkerDeps) handleUserPreferenceLearning(ctx context.Context, p tasks.ML
 	return nil
 }
 
-// prefix возвращает префикс строки длиной до 8 символов
+// prefix возвращает маскированную строку токена
 // Используется для логирования токенов, чтобы не выводить полные токены
 func prefix(s string) string {
-	if len(s) <= 8 {
-		return s
+	if len(s) <= 4 {
+		return "****"
 	}
-	return s[:8]
+	return s[:4] + "****"
 }

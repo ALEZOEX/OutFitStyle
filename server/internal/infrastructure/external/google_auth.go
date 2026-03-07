@@ -35,12 +35,31 @@ func (c *GoogleAuthClient) Verify(ctx context.Context, tokenString string) (*Goo
 		return nil, fmt.Errorf("google token invalid: %w", err)
 	}
 
-	email, _ := payload.Claims["email"].(string)
-	verified, _ := payload.Claims["email_verified"].(bool)
-	givenName, _ := payload.Claims["given_name"].(string)
-	familyName, _ := payload.Claims["family_name"].(string)
-	picture, _ := payload.Claims["picture"].(string)
-	sub, _ := payload.Claims["sub"].(string) // Google unique ID
+	var email, givenName, familyName, picture, sub string
+	var verified bool
+
+	if v, ok := payload.Claims["email"].(string); ok {
+		email = v
+	}
+	if v, ok := payload.Claims["email_verified"].(bool); ok {
+		verified = v
+	}
+	if v, ok := payload.Claims["given_name"].(string); ok {
+		givenName = v
+	}
+	if v, ok := payload.Claims["family_name"].(string); ok {
+		familyName = v
+	}
+	if v, ok := payload.Claims["picture"].(string); ok {
+		picture = v
+	}
+	if v, ok := payload.Claims["sub"].(string); ok {
+		sub = v
+	}
+
+	if sub == "" {
+		return nil, fmt.Errorf("google token missing sub claim")
+	}
 
 	return &GoogleUser{
 		ID:            sub,

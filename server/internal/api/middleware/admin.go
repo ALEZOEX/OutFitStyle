@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"crypto/subtle"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -18,7 +19,7 @@ func AdminMiddleware(cfg *config.AppConfig) mux.MiddlewareFunc {
 				return
 			}
 			key := r.Header.Get("X-Admin-Key")
-			if key == "" || key != cfg.Admin.APIKey {
+			if key == "" || subtle.ConstantTimeCompare([]byte(key), []byte(cfg.Admin.APIKey)) != 1 {
 				resp.Error(w, http.StatusForbidden, errors.New("forbidden"))
 				return
 			}
