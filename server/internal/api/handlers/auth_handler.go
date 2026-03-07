@@ -232,15 +232,18 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	out, err := h.auth.Login(r.Context(), req, device)
 	if err != nil {
-		// Записываем неудачную попытку
-		_ = h.lockout.RecordFailedAttempt(r.Context(), email)
+		if err := h.lockout.RecordFailedAttempt(r.Context(), email); err != nil {
+			h.logger.Error("failed to record failed attempt", zap.Error(err))
+		}
 
 		resp.Error(w, http.StatusUnauthorized, services.ErrInvalidCredentials)
 		return
 	}
 
 	// Успешный вход — сбрасываем счётчик попыток
-	_ = h.lockout.Reset(r.Context(), email)
+	if err := h.lockout.Reset(r.Context(), email); err != nil {
+		h.logger.Error("failed to reset lockout", zap.Error(err))
+	}
 
 	// Security: устанавливаем refresh token в httpOnly cookie для веба
 	cookieConfig := middleware.DefaultRefreshCookieConfig()
@@ -275,8 +278,9 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	// 2. Если нет cookie — пробуем из body (для mobile)
 	if refreshToken == "" {
 		var req refreshRequest
-		// Не проверяем ошибку — body может быть пустым (web)
-		_ = json.NewDecoder(r.Body).Decode(&req)
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			h.logger.Debug("failed to decode refresh request body", zap.Error(err))
+		}
 		if req.RefreshToken != "" {
 			refreshToken = req.RefreshToken
 		}
@@ -326,7 +330,9 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var req logoutRequest
-	_ = json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.logger.Debug("failed to decode logout request", zap.Error(err))
+	}
 
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
@@ -402,16 +408,9 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Логирование для отладки
-	tokenPrefix := req.IDToken
-	if len(tokenPrefix) > 50 {
-		tokenPrefix = tokenPrefix[:50]
-	}
 	h.logger.Info("Google Sign-In запрос",
 		zap.Int("token_length", len(req.IDToken)),
-		zap.String("token_prefix", tokenPrefix+"..."),
 		zap.String("remote_addr", r.RemoteAddr),
-		zap.String("user_agent", r.UserAgent()),
 	)
 
 	device := services.DeviceInfo{
@@ -537,7 +536,9 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 			h.logger.Error("failed to check forgot password rate limit", zap.String("email", email), zap.Error(err))
 		}
 		if count == 1 {
-			_, _ = h.redis.Expire(r.Context(), rateLimitKey, 15*time.Minute).Result()
+			if _, err := h.redis.Expire(r.Context(), rateLimitKey, 15*time.Minute).Result(); err != nil {
+				h.logger.Error("failed to set rate limit expiry", zap.Error(err))
+			}
 		}
 		if count > 3 {
 			// Возвращаем success чтобы не раскрывать информацию о лимите

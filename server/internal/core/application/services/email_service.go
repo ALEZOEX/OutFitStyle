@@ -30,6 +30,20 @@ type EmailService interface {
 	SendAchievement(to, name string, data AchievementData) error
 }
 
+// maskEmail маскирует email для логирования (защита PII)
+func maskEmail(email string) string {
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return "***"
+	}
+	name := parts[0]
+	domain := parts[1]
+	if len(name) <= 2 {
+		return "*@" + domain
+	}
+	return string(name[0]) + strings.Repeat("*", len(name)-2) + string(name[len(name)-1]) + "@" + domain
+}
+
 // SMTPConfig holds SMTP configuration
 type SMTPConfig struct {
 	Host     string
@@ -254,7 +268,7 @@ func (s *SMTPEmailService) SendVerificationEmail(to, code string) error {
 func (s *SMTPEmailService) SendPasswordResetEmail(to, code string) error {
 	// DEV mode fallback
 	if s.config.Host == "" || s.config.Username == "" || s.config.Password == "" {
-		s.logger.Info("DEV MODE: Password reset code", zap.String("to", to), zap.String("code", code))
+		s.logger.Info("DEV MODE: Password reset code sent", zap.String("to", maskEmail(to)))
 		return nil
 	}
 
