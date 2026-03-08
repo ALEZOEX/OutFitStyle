@@ -491,6 +491,12 @@ func main() {
 	expRepo := pg.NewExperimentRepository(db.Pool())
 	expService := services.NewExperimentService(expRepo)
 
+	// ---------- Classification Dashboard Handler ----------
+	classificationHandler := handlers.NewClassificationHandler(db, logger)
+
+	// ---------- Manual Correction Tool Handler ----------
+	correctionHandler := handlers.NewCorrectionHandler(db, logger)
+
 	// ---------- Health checks ----------
 	checks := map[string]health.Checker{
 		"database": db,
@@ -498,7 +504,7 @@ func main() {
 	health.RegisterChecks(checks)
 
 	// ---------- Роутер ----------
-	router := setupRouter(cfg, authHandler, userHandler, passwordHandler, weatherHandler, limiter, logger, authService, firebaseAuthClient, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler, redisClient)
+	router := setupRouter(cfg, authHandler, userHandler, passwordHandler, weatherHandler, limiter, logger, authService, firebaseAuthClient, subLimiter, notifHandler, wardrobeHandler, recommendationHandler, achievementHandler, savedOutfitHandler, catalogHandler, shareHandler, supportHandler, feedbackHandler, adminHandler, apiKeyHandler, adminFFHandler, expService, apiKeyService, geoHandler, auditRepo, db, mlClient, recCache, ratingHandler, redisClient, classificationHandler, correctionHandler)
 
 	// ---------- HTTP‑сервер ----------
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
@@ -591,6 +597,8 @@ func setupRouter(
 	recCache *cache.RecommendationCache,
 	ratingHandler *handlers.RatingHandler,
 	redisClient *redis.Client,
+	classificationHandler *handlers.ClassificationHandler,
+	correctionHandler *handlers.CorrectionHandler,
 ) *mux.Router {
 	router := mux.NewRouter()
 
@@ -679,6 +687,14 @@ func setupRouter(
 	// catalog может быть public
 	catalog := api.PathPrefix("/catalog").Subrouter()
 	catalogHandler.RegisterRoutes(catalog)
+
+	// /api/v1/classification/* (protected - for dashboard and monitoring)
+	classification := protected.PathPrefix("/classification").Subrouter()
+	classificationHandler.RegisterRoutes(classification)
+
+	// /api/v1/clothing-items/* (protected - for manual correction tool)
+	clothingItems := protected.PathPrefix("/clothing-items").Subrouter()
+	correctionHandler.RegisterRoutes(clothingItems)
 
 	// public weather (можно на onboarding)
 	weather := api.PathPrefix("/weather").Subrouter()
