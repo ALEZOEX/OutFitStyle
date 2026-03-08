@@ -53,7 +53,16 @@ void main() {
                   'code': code,
                 },
               )).thenThrow(
-            Exception('Invalid or expired code'),
+            DioException(
+              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              message: 'Invalid or expired code',
+              type: DioExceptionType.badResponse,
+              response: Response(
+                requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+                statusCode: 400,
+                data: {'error': 'Invalid or expired code'},
+              ),
+            ),
           );
 
           // Act & Assert: Verify that server validation is called
@@ -115,7 +124,7 @@ void main() {
         );
 
         // Assert: Server validation was called and succeeded
-        expect(response.data['success'], isTrue);
+        expect((response.data as Map<String, dynamic>)['success'], isTrue);
         verify(() => mockApiClient.post(
               '/api/v1/auth/verify-reset-code',
               data: {
@@ -150,7 +159,18 @@ void main() {
                   'email': testEmail,
                   'code': code,
                 },
-              )).thenThrow(Exception('Invalid code'));
+              )).thenThrow(
+            DioException(
+              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              message: 'Invalid code',
+              type: DioExceptionType.badResponse,
+              response: Response(
+                requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+                statusCode: 400,
+                data: {'error': 'Invalid code'},
+              ),
+            ),
+          );
 
           // Act: Attempt to verify code
           try {
@@ -193,7 +213,16 @@ void main() {
                 'code': expiredCode,
               },
             )).thenThrow(
-          Exception('Invalid or expired code'),
+          DioException(
+            requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+            message: 'Invalid or expired code',
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              statusCode: 400,
+              data: {'error': 'Invalid or expired code'},
+            ),
+          ),
         );
 
         // Act & Assert: Verify expired code is rejected
@@ -233,7 +262,18 @@ void main() {
                   'email': testEmail,
                   'code': attemptCodes[i],
                 },
-              )).thenThrow(Exception('Invalid code'));
+              )).thenThrow(
+            DioException(
+              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              message: 'Invalid code',
+              type: DioExceptionType.badResponse,
+              response: Response(
+                requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+                statusCode: 400,
+                data: {'error': 'Invalid code'},
+              ),
+            ),
+          );
         }
 
         // 6th attempt should be rate limited
@@ -243,7 +283,18 @@ void main() {
                 'email': testEmail,
                 'code': attemptCodes[5],
               },
-            )).thenThrow(Exception('Too many attempts'));
+            )).thenThrow(
+          DioException(
+            requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+            message: 'Too many attempts',
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              statusCode: 429,
+              data: {'error': 'Too many attempts'},
+            ),
+          ),
+        );
 
         // Act: Make 6 verification attempts
         for (var i = 0; i < 6; i++) {
