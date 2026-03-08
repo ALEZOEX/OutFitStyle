@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:outfitstyle_client/src/auth/session_manager.dart';
+import 'package:dio/dio.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 
 /// **Validates: Requirements 2.1, 2.2**
@@ -99,9 +99,11 @@ void main() {
                 'email': testEmail,
                 'code': validCode,
               },
-            )).thenAnswer((_) async => {
-              'success': true,
-            });
+            )).thenAnswer((_) async => Response(
+              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              data: {'success': true},
+              statusCode: 200,
+            ));
 
         // Act: Verify code
         final response = await mockApiClient.post(
@@ -113,7 +115,7 @@ void main() {
         );
 
         // Assert: Server validation was called and succeeded
-        expect(response['success'], isTrue);
+        expect(response.data['success'], isTrue);
         verify(() => mockApiClient.post(
               '/api/v1/auth/verify-reset-code',
               data: {
