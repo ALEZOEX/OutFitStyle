@@ -123,10 +123,11 @@ spec:
             timeoutSeconds: 10
             failureThreshold: 3
           startupProbe:
-            httpGet:
-              path: /health
-              port: 8080
-              scheme: HTTP
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 10
