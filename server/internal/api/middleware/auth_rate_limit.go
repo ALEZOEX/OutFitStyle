@@ -3,6 +3,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -132,7 +133,7 @@ func AuthRateLimitMiddleware(redisClient *redis.Client, logger *zap.Logger) func
 					if requiresCaptcha {
 						errMsg = "too many failed attempts. CAPTCHA verification required"
 					}
-					resp.Error(w, http.StatusTooManyRequests, fmt.Errorf(errMsg))
+					resp.Error(w, http.StatusTooManyRequests, errors.New(errMsg))
 					return
 				}
 			}
@@ -166,7 +167,7 @@ func AuthRateLimitMiddleware(redisClient *redis.Client, logger *zap.Logger) func
 					if requiresCaptcha {
 						errMsg = "too many failed attempts. CAPTCHA verification required"
 					}
-					resp.Error(w, http.StatusTooManyRequests, fmt.Errorf(errMsg))
+					resp.Error(w, http.StatusTooManyRequests, errors.New(errMsg))
 					return
 				}
 			}

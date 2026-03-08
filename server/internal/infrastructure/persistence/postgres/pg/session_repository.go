@@ -473,17 +473,6 @@ func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([
 
 	return sessions, nil
 }
-		session.DeviceInfo = deviceInfo
-		session.IPAddress = ipAddress
-		session.UserAgent = userAgent
-		session.ExpiresAt = expiresAt
-		session.LastUsedAt = lastUsedAt
-
-		sessions = append(sessions, session)
-	}
-
-	return sessions, nil
-}
 
 func (r *SessionRepository) UpdateDeviceInfo(ctx context.Context, sessionID domain.ID, p repositories.UpdateDeviceInfoParams) error {
 	query := `
