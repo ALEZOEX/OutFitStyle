@@ -11,7 +11,7 @@ import (
 // RegisterUserRoutes регистрирует маршруты, связанные с пользователями
 // Устанавливает обработчики для эндпоинтов управления профилем пользователя
 func RegisterUserRoutes(router *mux.Router, userHandler *handlers.UserHandler, passwordHandler *handlers.PasswordHandler) {
-	users := router.PathPrefix("/api/users").Subrouter()
+	users := router.PathPrefix("/api/v1/users").Subrouter()
 	userHandler.RegisterRoutes(users)
 
 	// Маршруты управления паролем

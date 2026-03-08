@@ -11,7 +11,7 @@ import (
 // RegisterAuthRoutes регистрирует маршруты, связанные с аутентификацией
 // Устанавливает обработчики для эндпоинтов регистрации, входа и управления сессией
 func RegisterAuthRoutes(router *mux.Router, authHandler *handlers.AuthHandler) {
-	auth := router.PathPrefix("/api/auth").Subrouter()
+	auth := router.PathPrefix("/api/v1/auth").Subrouter()
 
 	auth.HandleFunc("/register", authHandler.Register).Methods("POST")
 	auth.HandleFunc("/login", authHandler.Login).Methods("POST")
