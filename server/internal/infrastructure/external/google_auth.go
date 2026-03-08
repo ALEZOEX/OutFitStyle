@@ -17,11 +17,18 @@ type GoogleUser struct {
 }
 
 type GoogleAuthClient struct {
-	clientID string
+	clientID        string
+	firebaseProject string
 }
 
 func NewGoogleAuthClient(clientID string) *GoogleAuthClient {
-	return &GoogleAuthClient{clientID: clientID}
+	// Firebase project ID для валидации Firebase ID токенов
+	// Firebase токены имеют aud = project ID, а не client ID
+	firebaseProject := "outfitstyle-ce15f"
+	return &GoogleAuthClient{
+		clientID:        clientID,
+		firebaseProject: firebaseProject,
+	}
 }
 
 // ClientID возвращает client ID для отладки
@@ -30,7 +37,9 @@ func (c *GoogleAuthClient) ClientID() string {
 }
 
 func (c *GoogleAuthClient) Verify(ctx context.Context, tokenString string) (*GoogleUser, error) {
-	payload, err := idtoken.Validate(ctx, tokenString, c.clientID)
+	// Используем Firebase project ID для валидации Firebase ID токенов
+	// Firebase Auth генерирует токены с aud = project ID
+	payload, err := idtoken.Validate(ctx, tokenString, c.firebaseProject)
 	if err != nil {
 		return nil, fmt.Errorf("google token invalid: %w", err)
 	}
