@@ -122,16 +122,6 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 3
-          startupProbe:
-            exec:
-              command:
-              - sh
-              - -c
-              - (echo -n "GET /health HTTP/1.0\r\nHost: localhost\r\n\r\n"; sleep 1) | nc localhost 8080 | grep -q "200 OK"
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 10
-            failureThreshold: 12
 ---
 apiVersion: v1
 kind: Service
