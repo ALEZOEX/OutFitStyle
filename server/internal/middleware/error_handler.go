@@ -171,6 +171,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error, logger *zap.
 		Error: genericMessage,
 	}
 
-	// Encode response, ignore encoding errors as we're already in error handling
-	_ = json.NewEncoder(w).Encode(response)
+	// Marshal to JSON without trailing newline
+	data, _ := json.Marshal(response)
+	w.Write(data)
 }
