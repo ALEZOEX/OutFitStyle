@@ -11,7 +11,7 @@ import (
 // RegisterRecommendationRoutes регистрирует маршруты, связанные с рекомендациями
 // Устанавливает обработчики для эндпоинтов получения и управления рекомендациями
 func RegisterRecommendationRoutes(router *mux.Router, recommendationHandler *handlers.RecommendationHandler) {
-	recommendations := router.PathPrefix("/api/recommendations").Subrouter()
+	recommendations := router.PathPrefix("/api/v1/recommendations").Subrouter()
 
 	recommendations.HandleFunc("", recommendationHandler.List).Methods("GET")
 	recommendations.HandleFunc("/history", recommendationHandler.List).Methods("GET")
