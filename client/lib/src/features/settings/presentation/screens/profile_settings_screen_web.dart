@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../data/repositories/profile_repository.dart';
 
 /// Провайдер для состояния профиля
@@ -189,7 +190,12 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
 // Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
 final _apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient();
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  return prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
 });
 
 final _uploadServiceProvider = Provider<UploadService>((ref) {

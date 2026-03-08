@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../data/repositories/profile_repository.dart';
 
 /// Провайдер для состояния профиля
@@ -182,7 +183,12 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
 // Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
 final _apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient();
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  return prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
 });
 
 final _uploadServiceProvider = Provider<UploadService>((ref) {
@@ -307,7 +313,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
   /// Использует NetworkImage для всех URL (сервер возвращает только URL)
   ImageProvider? _getAvatarImageProvider(String avatarUrl) {
     if (avatarUrl.isEmpty) return null;
-    
+
     // Все аватары хранятся на сервере, используем NetworkImage
     return NetworkImage(avatarUrl);
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_config.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../data/datasources/admin_remote_data_source.dart';
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../../../domain/entities/admin_user.dart';
@@ -12,7 +13,12 @@ final adminRemoteDataSourceProvider = Provider<AdminRemoteDataSource>((ref) {
   final config = const ApiConfig(
     apiBase: ApiConfig.baseUrl,
   );
-  final apiClient = ApiClient(); // Firebase ID Token
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  final apiClient = prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
   return AdminRemoteDataSource(config: config, apiClient: apiClient);
 });
 

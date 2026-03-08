@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 
-import '../../../../presentation/providers/session_provider.dart' show sessionManagerProvider;
+import '../../../../presentation/providers/session_provider.dart';
 import '../../../../storage/profile_storage.dart';
 import '../../../../storage/local_storage.dart';
 import '../../../settings/data/repositories/profile_repository.dart';
@@ -15,7 +15,12 @@ import '../../../../utils/logger.dart';
 
 /// Провайдер для ProfileRepository
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
-  final apiClient = ApiClient();
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  final apiClient = prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
   return ProfileRepository(
     apiClient: apiClient,
   );
@@ -52,7 +57,7 @@ class CompleteProfileScreen extends ConsumerStatefulWidget {
 class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  
+
   File? _photoFile;
   String? _photoPath;
   CompleteProfileState _state = CompleteProfileState.initial;
@@ -79,7 +84,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
   Future<void> _pickImage() async {
     // Сохраняем тему до всех await
     final theme = Theme.of(context);
-    
+
     try {
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: ImageSource.gallery,

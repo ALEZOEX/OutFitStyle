@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import '../../../../domain/entities/outfit_recommendation.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../presentation/providers/session_provider.dart';
 
 /// Заглушка для демонстрации UI (удалить после подключения реального API)
 final mockRecommendations = <OutfitRecommendation>[];
@@ -109,9 +110,9 @@ class RecommendationsState {
   List<PlannedOutfit> getPlannedForWeek(DateTime startDate) {
     final start = DateTime(startDate.year, startDate.month, startDate.day);
     final end = start.add(const Duration(days: 6));
-    
+
     return plannedOutfits.values
-        .where((outfit) => outfit.date.isAfter(start.subtract(const Duration(days: 1))) && 
+        .where((outfit) => outfit.date.isAfter(start.subtract(const Duration(days: 1))) &&
                            outfit.date.isBefore(end.add(const Duration(days: 1))))
         .toList()
       ..sort((a, b) => a.date.compareTo(b.date));
@@ -121,7 +122,12 @@ class RecommendationsState {
 /// Провайдер рекомендаций (использует глобальный ApiClient)
 final recommendationsProvider =
     StateNotifierProvider<RecommendationsNotifier, RecommendationsState>((ref) {
-  final apiClient = ApiClient();
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  final apiClient = prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
   return RecommendationsNotifier(apiClient: apiClient);
 });
 
@@ -144,10 +150,10 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.data.toString()) as Map<String, dynamic>;
-        final items = data['recommendations'] as List<dynamic>? ?? 
-                      data['items'] as List<dynamic>? ?? 
+        final items = data['recommendations'] as List<dynamic>? ??
+                      data['items'] as List<dynamic>? ??
                       [];
-        
+
         final recommendations = items
             .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
             .toList();
@@ -205,7 +211,7 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 
     final plannedOutfits = Map<DateTime, PlannedOutfit>.from(state.plannedOutfits);
     plannedOutfits[normalizedDate] = plannedOutfit;
-    
+
     state = state.copyWith(plannedOutfits: plannedOutfits);
   }
 

@@ -26,15 +26,16 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _initDependencies();
     _loadSettings();
   }
 
   Future<void> _initDependencies() async {
-    _apiClient = ApiClient(); // Firebase ID Token
+    final prefs = await SharedPreferences.getInstance();
+    _apiClient = ApiClient(prefs);
   }
 
   Future<void> _loadSettings() async {
+    await _initDependencies();
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _allowDataCollection = prefs.getBool('allow_data_collection') ?? false;

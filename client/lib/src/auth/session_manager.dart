@@ -85,6 +85,14 @@ class SessionManager {
         );
         _currentUserSession = session;
         AppLogger.info('Session restored for user: ${_maskEmail(session.email ?? 'unknown')}');
+
+        // Restore access_token if available
+        final accessToken = _sharedPreferences.getString('access_token');
+        if (accessToken != null && accessToken.isNotEmpty) {
+          AppLogger.info('Access token restored for user: ${_maskEmail(session.email ?? 'unknown')}');
+        } else {
+          AppLogger.warning('No access_token found in storage for user: ${_maskEmail(session.email ?? 'unknown')}');
+        }
       } catch (e) {
         AppLogger.error('Error deserializing session: $e', e);
         _clearSession();
@@ -194,6 +202,15 @@ class SessionManager {
         throw Exception('Ошибка получения данных пользователя');
       }
 
+      // Extract and store access_token for Bearer authentication
+      final accessToken = tokens['access_token'] as String?;
+      if (accessToken != null && accessToken.isNotEmpty) {
+        await _sharedPreferences.setString('access_token', accessToken);
+        AppLogger.info('Access token stored for user: ${_maskEmail(email)}');
+      } else {
+        AppLogger.warning('No access_token in login response for user: ${_maskEmail(email)}');
+      }
+
       // Для email/password пользователей Firebase не используется
       // Создаём сессию напрямую из данных backend
       final backendUid = user['id'] as String?;
@@ -237,7 +254,9 @@ class SessionManager {
   /// Flow:
   /// 1. Открываем popup для Google OAuth (Web) или нативное окно (Mobile)
   /// 2. Получаем UserCredential из Firebase
-  /// 3. SessionManager автоматически обновит сессию через _setupAuthStateListener
+  /// 3. Получаем Firebase ID token
+  /// 4. Отправляем ID token на backend для получения access_token
+  /// 5. Сохраняем access_token и обновляем сессию
   ///
   /// Возвращает true при успешном входе, false при ошибке или отмене
   Future<bool> signInWithGoogle() async {
@@ -268,6 +287,72 @@ class SessionManager {
         const Duration(seconds: 5),
         onTimeout: () => throw TimeoutException('Auth state change timeout'),
       );
+
+      // Get Firebase ID token to exchange for backend access_token
+      final idToken = await user.getIdToken();
+      if (idToken == null || idToken.isEmpty) {
+        AppLogger.error('Failed to get Firebase ID token for user: ${user.uid}');
+        throw Exception('Не удалось получить токен аутентификации');
+      }
+
+      AppLogger.info('Exchanging Firebase token for backend access_token...');
+
+      // Call backend to exchange Firebase token for access_token
+      final response = await _apiClient.post('/api/v1/auth/google', data: {
+        'id_token': idToken,
+      });
+
+      final data = response.data;
+      if (data is! Map) {
+        AppLogger.warning('Invalid response from Google auth endpoint');
+        throw Exception('Неверный формат ответа сервера');
+      }
+
+      // Extract tokens from backend response
+      final backendUser = data['user'] as Map?;
+      final tokens = data['tokens'] as Map?;
+
+      if (backendUser == null || tokens == null) {
+        AppLogger.warning('Invalid response structure from Google auth');
+        throw Exception('Ошибка получения данных пользователя');
+      }
+
+      // Extract and store access_token for Bearer authentication
+      final accessToken = tokens['access_token'] as String?;
+      if (accessToken != null && accessToken.isNotEmpty) {
+        await _sharedPreferences.setString('access_token', accessToken);
+        AppLogger.info('Access token stored for Google user: ${_maskEmail(user.email ?? 'unknown')}');
+      } else {
+        AppLogger.warning('No access_token in Google auth response for user: ${_maskEmail(user.email ?? 'unknown')}');
+      }
+
+      // Update session with backend user data
+      final backendUid = backendUser['id'] as String?;
+      if (backendUid == null) {
+        AppLogger.warning('No user ID in Google auth response');
+        throw Exception('Не удалось получить ID пользователя');
+      }
+
+      _currentUserSession = UserSession(
+        uid: backendUid,
+        email: backendUser['email'] as String?,
+        displayName: backendUser['display_name'] as String?,
+        photoUrl: backendUser['avatar_url'] as String?,
+        loginTime: DateTime.now(),
+        isEmailVerified: backendUser['is_verified'] as bool? ?? false,
+      );
+
+      // Save session to SharedPreferences
+      final sessionJson = _currentUserSession?.toJson();
+      if (sessionJson != null) {
+        await _sharedPreferences.setString(
+          'user_session',
+          jsonEncode(sessionJson),
+        );
+      }
+
+      // Notify subscribers
+      _sessionStreamController.add(_currentUserSession);
 
       AppLogger.info('Google Sign-In completed for user: ${user.uid}');
       return true;
@@ -330,6 +415,15 @@ class SessionManager {
       if (user == null || tokens == null) {
         AppLogger.warning('Invalid response structure from register');
         throw Exception('Ошибка регистрации пользователя');
+      }
+
+      // Extract and store access_token for Bearer authentication
+      final accessToken = tokens['access_token'] as String?;
+      if (accessToken != null && accessToken.isNotEmpty) {
+        await _sharedPreferences.setString('access_token', accessToken);
+        AppLogger.info('Access token stored for user: ${_maskEmail(email)}');
+      } else {
+        AppLogger.warning('No access_token in register response for user: ${_maskEmail(email)}');
       }
 
       // Создаём сессию из данных backend
@@ -483,6 +577,7 @@ class SessionManager {
     final userId = _currentUserSession?.uid;
     _currentUserSession = null;
     await _sharedPreferences.remove('user_session');
+    await _sharedPreferences.remove('access_token');
     _sessionStreamController.add(null);
     AppLogger.info('Session cleared for user: $userId');
   }

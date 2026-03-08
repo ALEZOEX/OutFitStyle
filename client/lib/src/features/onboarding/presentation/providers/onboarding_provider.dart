@@ -3,6 +3,7 @@ import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/models/onboarding_data.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/repositories/onboarding_repository.dart';
 import 'package:outfitstyle_client/src/features/onboarding/onboarding_storage.dart';
+import 'package:outfitstyle_client/src/presentation/providers/session_provider.dart';
 import 'package:outfitstyle_client/src/utils/logger.dart';
 
 /// Провайдер хранилища онбординга
@@ -12,7 +13,12 @@ final onboardingStorageProvider = Provider<OnboardingStorage>((ref) {
 
 /// Провайдер репозитория онбординга
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
-  final apiClient = ApiClient(); // Firebase ID Token
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  final apiClient = prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
   return OnboardingRepository(
     apiClient: apiClient,
   );

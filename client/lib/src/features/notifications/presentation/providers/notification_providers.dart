@@ -11,7 +11,12 @@ import '../../data/repositories/notification_repository.dart';
 
 /// Провайдер для NotificationRepository (использует глобальный ApiClient с Firebase ID Token)
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
-  final apiClient = ApiClient(); // Глобальный ApiClient с Firebase ID Token
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  final apiClient = prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
   final remoteDataSource = NotificationRemoteDataSource(apiClient);
   return NotificationRepository(
     remoteDataSource: remoteDataSource,
@@ -216,10 +221,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   Future<void> _refreshUnreadCount() async {
     try {
       final count = await _repository.getUnreadCount();
-      
+
       // Сбрасываем счетчик ошибок при успехе
       _consecutiveErrors = 0;
-      
+
       if (count != state.unreadCount) {
         state = state.copyWith(unreadCount: count);
         // Если есть новые непрочитанные, можно перезагрузить список
@@ -229,17 +234,17 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       }
     } catch (e) {
       _consecutiveErrors++;
-      
+
       // Проверяем, это ошибка авторизации (401)
-      final isAuthError = e.toString().contains('401') || 
+      final isAuthError = e.toString().contains('401') ||
                           e.toString().contains('Unauthorized') ||
                           e.toString().contains('авторизаци');
-      
+
       // Если ошибка авторизации или достигнуто макс. количество ошибок — останавливаем поллинг
       if (isAuthError || _consecutiveErrors >= _maxConsecutiveErrors) {
         debugPrint('Остановка поллинга уведомлений: ${isAuthError ? "ошибка авторизации" : "достигнуто макс. число ошибок"}');
         stopPolling();
-        
+
         // Если это ошибка авторизации — очищаем состояние и делаем logout
         if (isAuthError) {
           debugPrint('Требуется повторная авторизация — выход из системы');
@@ -247,7 +252,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
         }
         return;
       }
-      
+
       // Игнорируем временные ошибки, но логируем
       debugPrint('Ошибка обновления unread count (попытка $_consecutiveErrors/$_maxConsecutiveErrors): $e');
     }
@@ -257,7 +262,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   void _logoutAndClearState() {
     // Очищаем состояние уведомлений
     clear();
-    
+
     // Выход из аккаунта (auth_state_provider сам разберется с редиректом)
     // Используем Future.microtask чтобы избежать проблем с rebuild
     Future.microtask(() {

@@ -4,8 +4,7 @@ import 'package:outfitstyle_client/src/core/api/api_client.dart';
 class AdminService {
   final ApiClient _apiClient;
 
-  AdminService([ApiClient? apiClient])
-      : _apiClient = apiClient ?? ApiClient();
+  AdminService(ApiClient apiClient) : _apiClient = apiClient;
 
   /// Проверяет, является ли текущий пользователь администратором
   /// путем попытки доступа к административному эндпоинту

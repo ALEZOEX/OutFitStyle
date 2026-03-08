@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/services/auth_storage.dart' as impl;
-import 'session_provider.dart' show sessionManagerProvider, authStateProvider;
+import 'session_provider.dart' show sessionManagerProvider, authStateProvider, sharedPreferencesProvider;
 
 // ============================================================================
 // FIREBASE AUTH ПРОВАЙДЕРЫ (основные)
@@ -37,7 +37,12 @@ final authStorageProvider = Provider<impl.AuthStorage>((ref) {
 /// @Deprecated Используйте SessionManager
 @Deprecated('Используйте ApiClient напрямую. JWT auth устарел.')
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient();
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  return prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
 });
 
 /// Класс состояния авторизации (для обратной совместимости)

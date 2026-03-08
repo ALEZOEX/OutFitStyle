@@ -1,12 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
+import 'package:outfitstyle_client/src/presentation/providers/session_provider.dart';
 import 'package:outfitstyle_client/src/features/market/data/market_api_client.dart';
 import 'package:outfitstyle_client/src/features/market/data/market_repository.dart';
 import 'package:outfitstyle_client/src/features/market/data/models/product.dart';
 
 /// API client provider (core)
 final coreApiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient();
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  return prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
 });
 
 /// Market API client provider
