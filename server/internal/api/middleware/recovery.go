@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/infrastructure/observability"
-	resp "outfitstyle/server/internal/pkg/http"
 )
 
 func RecoveryMiddleware(logger *zap.Logger) mux.MiddlewareFunc {
@@ -22,10 +21,16 @@ func RecoveryMiddleware(logger *zap.Logger) mux.MiddlewareFunc {
 						logger.Error("panic recovered",
 							zap.Any("panic", v),
 							zap.ByteString("stack", debug.Stack()),
+							zap.String("method", r.Method),
+							zap.String("path", r.URL.Path),
+							zap.String("remote_addr", r.RemoteAddr),
 						)
 					}
 
-					resp.Error(w, http.StatusInternalServerError, http.ErrAbortHandler)
+					// Return generic error message to client (no stack trace)
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(`{"error":"Internal server error"}`))
 				}
 			}()
 

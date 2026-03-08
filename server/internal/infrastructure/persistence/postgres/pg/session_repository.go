@@ -49,14 +49,17 @@ func (r *SessionRepository) CreateSession(ctx context.Context, session *domain.S
 func (r *SessionRepository) GetByID(ctx context.Context, sessionID domain.ID) (*repositories.Session, error) {
 	query := `
 		SELECT
-			id, user_id, refresh_token_hash, device_info, ip_address::text, user_agent,
-			is_active, created_at, expires_at, last_used_at
+			id, user_id, refresh_token_hash, device_info, device_id, device_name, device_type,
+			ip_address::text, user_agent, is_active, created_at, expires_at, last_used_at
 		FROM sessions
 		WHERE id = $1
 	`
 
 	var session repositories.Session
 	var deviceInfo *string
+	var deviceID *string
+	var deviceName *string
+	var deviceType *string
 	var ipAddress *string
 	var userAgent *string
 	var expiresAt *time.Time
@@ -67,6 +70,9 @@ func (r *SessionRepository) GetByID(ctx context.Context, sessionID domain.ID) (*
 		&session.UserID,
 		&session.RefreshTokenHash,
 		&deviceInfo,
+		&deviceID,
+		&deviceName,
+		&deviceType,
 		&ipAddress,
 		&userAgent,
 		&session.IsActive,
@@ -83,6 +89,9 @@ func (r *SessionRepository) GetByID(ctx context.Context, sessionID domain.ID) (*
 
 	// Set nullable fields
 	session.DeviceInfo = deviceInfo
+	session.DeviceID = deviceID
+	session.DeviceName = deviceName
+	session.DeviceType = deviceType
 	session.IPAddress = ipAddress
 	session.UserAgent = userAgent
 	session.ExpiresAt = expiresAt
@@ -233,9 +242,9 @@ func (r *SessionRepository) Create(ctx context.Context, p repositories.CreateSes
 
 	query := `
 		INSERT INTO sessions (
-			id, user_id, refresh_token_hash, device_info, ip_address, user_agent,
-			is_active, created_at, expires_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			id, user_id, refresh_token_hash, device_info, device_id, device_name, device_type,
+			ip_address, user_agent, is_active, created_at, expires_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 	`
 
 	_, err := r.db.Exec(ctx, query,
@@ -243,6 +252,9 @@ func (r *SessionRepository) Create(ctx context.Context, p repositories.CreateSes
 		p.UserID,
 		p.RefreshTokenHash,
 		p.DeviceInfo,
+		p.DeviceID,
+		p.DeviceName,
+		p.DeviceType,
 		p.IPAddress,
 		p.UserAgent,
 		true, // is_active
@@ -398,8 +410,8 @@ func (r *SessionRepository) RevokeForUser(ctx context.Context, userID, sessionID
 func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([]repositories.Session, error) {
 	query := `
 		SELECT
-			id, user_id, refresh_token_hash, device_info, ip_address::text, user_agent,
-			is_active, created_at, expires_at, last_used_at
+			id, user_id, refresh_token_hash, device_info, device_id, device_name, device_type,
+			ip_address::text, user_agent, is_active, created_at, expires_at, last_used_at
 		FROM sessions
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -415,6 +427,9 @@ func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([
 	for rows.Next() {
 		var session repositories.Session
 		var deviceInfo *string
+		var deviceID *string
+		var deviceName *string
+		var deviceType *string
 		var ipAddress *string
 		var userAgent *string
 		var expiresAt *time.Time
@@ -425,6 +440,9 @@ func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([
 			&session.UserID,
 			&session.RefreshTokenHash,
 			&deviceInfo,
+			&deviceID,
+			&deviceName,
+			&deviceType,
 			&ipAddress,
 			&userAgent,
 			&session.IsActive,
@@ -437,6 +455,24 @@ func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([
 		}
 
 		// Set nullable fields
+		session.DeviceInfo = deviceInfo
+		session.DeviceID = deviceID
+		session.DeviceName = deviceName
+		session.DeviceType = deviceType
+		session.IPAddress = ipAddress
+		session.UserAgent = userAgent
+		session.ExpiresAt = expiresAt
+		session.LastUsedAt = lastUsedAt
+
+		sessions = append(sessions, session)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "error iterating sessions")
+	}
+
+	return sessions, nil
+}
 		session.DeviceInfo = deviceInfo
 		session.IPAddress = ipAddress
 		session.UserAgent = userAgent
@@ -452,12 +488,16 @@ func (r *SessionRepository) ListByUser(ctx context.Context, userID domain.ID) ([
 func (r *SessionRepository) UpdateDeviceInfo(ctx context.Context, sessionID domain.ID, p repositories.UpdateDeviceInfoParams) error {
 	query := `
 		UPDATE sessions
-		SET device_info = $1, ip_address = $2, user_agent = $3, updated_at = $4
-		WHERE id = $5
+		SET device_info = $1, device_id = $2, device_name = $3, device_type = $4,
+		    ip_address = $5, user_agent = $6, updated_at = $7
+		WHERE id = $8
 	`
 
 	_, err := r.db.Exec(ctx, query,
 		p.DeviceInfo,
+		p.DeviceID,
+		p.DeviceName,
+		p.DeviceType,
 		p.IPAddress,
 		p.UserAgent,
 		time.Now(),

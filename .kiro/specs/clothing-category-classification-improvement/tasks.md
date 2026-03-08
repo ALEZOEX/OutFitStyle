@@ -238,7 +238,7 @@ y
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 8.2_
 
 - [~] 11. Integrate ML Classifier with Category Mapper
-  - [ ] 11.1 Implement MapCategoryWithML method
+  - [x] 11.1 Implement MapCategoryWithML method
     - Add ML Classifier Client as dependency to Category Mapper
     - Implement MapCategoryWithML to call ML service for unknown subcategories
     - Fall back to default category if ML unavailable or low confidence
@@ -249,7 +249,7 @@ y
     - **Property 15: ML Fallback Chain Priority**
     - **Validates: Requirements 5.7**
 
-  - [ ] 11.3 Update import pipeline to use ML classification
+  - [x] 11.3 Update import pipeline to use ML classification
     - Modify import script to call MapCategoryWithML for unknown subcategories
     - Update validation system to track ML classification statistics
     - Log ML classification results (high/low confidence counts)
@@ -266,14 +266,14 @@ y
   - Ensure all tests pass, ask the user if questions arise.
 
 - [~] 13. Implement ML Classifier Service (Python)
-  - [ ] 13.1 Set up Python ML service project structure
+  - [x] 13.1 Set up Python ML service project structure
     - Create `ml-service/` directory with FastAPI application
     - Set up virtual environment and dependencies (fastapi, uvicorn, scikit-learn, pandas)
     - Create `ml-service/services/category_classifier.py`
     - Create `ml-service/api/routes.py` for HTTP endpoints
     - _Requirements: 3.1_
 
-  - [ ] 13.2 Implement CategoryClassifier class
+  - [x] 13.2 Implement CategoryClassifier class
     - Implement classify method accepting ClassifyRequest
     - Use TF-IDF vectorization for name and subcategory text
     - Use one-hot encoding for materials and style
@@ -281,7 +281,7 @@ y
     - Return category prediction with confidence score
     - _Requirements: 3.1, 3.2_
 
-  - [ ] 13.3 Implement classification API endpoint
+  - [x] 13.3 Implement classification API endpoint
     - Create POST /api/v1/classify endpoint
     - Accept JSON with name, subcategory, materials, style
     - Return JSON with category and confidence

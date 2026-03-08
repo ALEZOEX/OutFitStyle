@@ -44,6 +44,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"log"
 	stdhttp "net/http"
 	"os"
@@ -514,6 +515,24 @@ func main() {
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 		IdleTimeout:  120 * time.Second,
+		// TLS Configuration: Enforce TLS 1.2+ with strong cipher suites
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			CipherSuites: []uint16{
+				// TLS 1.3 cipher suites (preferred)
+				tls.TLS_AES_128_GCM_SHA256,
+				tls.TLS_AES_256_GCM_SHA384,
+				tls.TLS_CHACHA20_POLY1305_SHA256,
+				// TLS 1.2 cipher suites (strong)
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+			},
+			PreferServerCipherSuites: true,
+		},
 	}
 
 	// Стартуем сервер
@@ -604,6 +623,7 @@ func setupRouter(
 
 	router.Use(
 		middleware.RecoveryMiddleware(logger),
+		middleware.HTTPSRedirectMiddleware(cfg.Server.Environment),
 		middleware.SecurityHeadersMiddleware(),
 		middleware.CORSMiddleware(cfg.Security.CORSAllowedOrigins),
 		middleware.LoggerMiddleware(logger),

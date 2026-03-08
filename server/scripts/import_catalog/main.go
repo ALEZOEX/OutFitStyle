@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 
 	"outfitstyle/server/internal/catalog"
+	"outfitstyle/server/internal/ml"
 )
 
 type NDItem struct {
@@ -241,6 +242,7 @@ func main() {
 	batchSize := flag.Int("batch", 300, "Batch size")
 	configPath := flag.String("config", "server/config/category_mapping.json", "Path to category mapping config")
 	reportsDir := flag.String("reports", "server/validation_reports", "Directory for validation reports")
+	mlServiceURL := flag.String("ml-url", "", "ML service URL (optional, e.g., http://localhost:8001)")
 	flag.Parse()
 
 	if *filePath == "" || *dsn == "" {
@@ -256,8 +258,16 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize CategoryMapper
-	categoryMapper, err := catalog.NewCategoryMapper(*configPath)
+	// Initialize CategoryMapper with optional ML client
+	var mlClient catalog.MLClassifierClient
+	if *mlServiceURL != "" {
+		fmt.Printf("Initializing ML classifier client with URL: %s\n", *mlServiceURL)
+		mlClient = catalog.NewMLClassifierAdapter(ml.NewClassifierClient(*mlServiceURL))
+	} else {
+		fmt.Println("ML service URL not provided, using config-based mapping only")
+	}
+
+	categoryMapper, err := catalog.NewCategoryMapper(*configPath, mlClient)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to initialize category mapper: %v\n", err)
 		os.Exit(1)
@@ -298,6 +308,11 @@ func main() {
 	pending := 0
 	total := 0
 	skipped := 0
+
+	// Track ML classification statistics
+	mlClassified := 0
+	mlHighConfidence := 0
+	mlLowConfidence := 0
 
 	// Collect items for validation
 	var validationItems []*catalog.ClothingItem
@@ -345,21 +360,43 @@ func main() {
 			continue
 		}
 
-		// Use CategoryMapper instead of hardcoded mapCategory
-		cat, err := categoryMapper.MapCategory(it.Category, it.Subcategory)
+		// Create ClothingItem for classification
+		clothingItem := &catalog.ClothingItem{
+			Name:        it.Name,
+			Subcategory: it.Subcategory,
+			Materials:   it.Materials,
+			Style:       it.Style,
+		}
+
+		// Use MapCategoryWithML for ML-enhanced classification
+		cat, confidence, err := categoryMapper.MapCategoryWithML(ctx, clothingItem)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error mapping category for item '%s': %v\n", it.Name, err)
 			skipped++
 			continue
 		}
 
+		// Determine classification source based on confidence
+		var classificationSource string
+		var confidencePtr *float64
+		if confidence > 0.8 {
+			classificationSource = "ml_auto"
+			confidencePtr = &confidence
+			mlClassified++
+			mlHighConfidence++
+		} else if confidence >= 0.5 {
+			classificationSource = "ml_flagged"
+			confidencePtr = &confidence
+			mlClassified++
+			mlLowConfidence++
+		} else {
+			// confidence == 0 means config-based mapping
+			classificationSource = "mapping"
+			confidencePtr = nil
+		}
+
 		// Collect item for validation
-		validationItems = append(validationItems, &catalog.ClothingItem{
-			Name:        it.Name,
-			Subcategory: it.Subcategory,
-			Materials:   it.Materials,
-			Style:       it.Style,
-		})
+		validationItems = append(validationItems, clothingItem)
 
 		// subcategory_specs: upsert (чтобы FK не падал)
 		specKey := cat + "|" + sub
@@ -434,7 +471,7 @@ INSERT INTO clothing_items (
   materials, fit, pattern,
   icon_emoji,
   source, is_owned, is_active,
-  classification_source
+  classification_source, classification_confidence
 ) VALUES (
   $1,
   $2,$3,$4,
@@ -445,7 +482,7 @@ INSERT INTO clothing_items (
   $14,$15,$16,
   $17,
   $18,$19,true,
-  'mapping'
+  $20,$21
 )
 ON CONFLICT (external_id) DO UPDATE SET
   name=EXCLUDED.name,
@@ -465,7 +502,9 @@ ON CONFLICT (external_id) DO UPDATE SET
   pattern=EXCLUDED.pattern,
   icon_emoji=EXCLUDED.icon_emoji,
   source=EXCLUDED.source,
-  is_owned=EXCLUDED.is_owned
+  is_owned=EXCLUDED.is_owned,
+  classification_source=EXCLUDED.classification_source,
+  classification_confidence=EXCLUDED.classification_confidence
 `, extID,
 			name, cat, sub,
 			gender, style, usage, season,
@@ -475,6 +514,7 @@ ON CONFLICT (external_id) DO UPDATE SET
 			materials, fit, pattern,
 			it.IconEmoji,
 			source, isOwned,
+			classificationSource, confidencePtr,
 		)
 
 		pending++
@@ -497,6 +537,11 @@ ON CONFLICT (external_id) DO UPDATE SET
 	fmt.Println("Generating validation report...")
 	report := validator.ValidateBatch(ctx, validationItems)
 
+	// Add ML classification statistics to the report
+	report.MLClassified = mlClassified
+	report.MLHighConfidence = mlHighConfidence
+	report.MLLowConfidence = mlLowConfidence
+
 	reportPath := catalog.GenerateReportPath(*reportsDir, startTime)
 	if err := validator.GenerateReport(report, reportPath); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: Failed to generate validation report: %v\n", err)
@@ -512,6 +557,16 @@ ON CONFLICT (external_id) DO UPDATE SET
 	fmt.Printf("Imported/Upserted: %d items, skipped: %d\n", total, skipped)
 	fmt.Printf("Fallback usage: %.2f%% (%d items)\n", report.FallbackPercent, report.FallbackCount)
 	fmt.Printf("Unknown subcategories: %d\n", len(report.UnknownSubcats))
+
+	// Log ML classification statistics
+	if mlClassified > 0 {
+		fmt.Printf("\nML Classification Statistics:\n")
+		fmt.Printf("  Total ML classified: %d items (%.2f%%)\n", mlClassified, float64(mlClassified)/float64(total)*100)
+		fmt.Printf("  High confidence (>0.8): %d items\n", mlHighConfidence)
+		fmt.Printf("  Low confidence (0.5-0.8): %d items (flagged for review)\n", mlLowConfidence)
+	} else {
+		fmt.Printf("\nML Classification: Not used (ML service unavailable or all items mapped via config)\n")
+	}
 
 	if len(report.Errors) > 0 {
 		fmt.Printf("\nErrors encountered: %d\n", len(report.Errors))
