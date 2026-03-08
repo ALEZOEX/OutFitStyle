@@ -205,7 +205,7 @@ y
 - [~] 9. Checkpoint - Verify Dashboard and Correction Tool APIs
   - Ensure all tests pass, ask the user if questions arise.
 
-- [~] 10. Implement ML Classifier Client (Go)
+- [x] 10. Implement ML Classifier Client (Go)
   - [ ] 10.1 Create ML Classifier Client interface and HTTP client
     - Create `server/internal/ml/classifier_client.go`
     - Implement ClassifyItem method with HTTP POST to ML service

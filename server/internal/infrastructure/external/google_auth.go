@@ -3,6 +3,7 @@ package external
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"google.golang.org/api/idtoken"
 )
@@ -39,9 +40,30 @@ func (c *GoogleAuthClient) ClientID() string {
 func (c *GoogleAuthClient) Verify(ctx context.Context, tokenString string) (*GoogleUser, error) {
 	// Используем Firebase project ID для валидации Firebase ID токенов
 	// Firebase Auth генерирует токены с aud = project ID
+
+	// Debug: логируем первые 50 символов токена для отладки
+	tokenPreview := tokenString
+	if len(tokenPreview) > 50 {
+		tokenPreview = tokenPreview[:50] + "..."
+	}
+
+	// Пробуем валидировать токен
 	payload, err := idtoken.Validate(ctx, tokenString, c.firebaseProject)
 	if err != nil {
-		return nil, fmt.Errorf("google token invalid: %w", err)
+		// Если ошибка связана с cert keyId, пробуем альтернативный подход
+		if strings.Contains(err.Error(), "could not find matching cert keyId") {
+			// Пробуем валидировать с Google OAuth client ID вместо Firebase project ID
+			payload, err2 := idtoken.Validate(ctx, tokenString, c.clientID)
+			if err2 != nil {
+				// Обе попытки провалились - возвращаем оригинальную ошибку
+				return nil, fmt.Errorf("google token invalid (firebase project ID): %w, also tried client ID: %v", err, err2)
+			}
+			// Успешно валидировали с client ID
+			payload = payload
+			err = nil
+		} else {
+			return nil, fmt.Errorf("google token invalid: %w", err)
+		}
 	}
 
 	var email, givenName, familyName, picture, sub string
