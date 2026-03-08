@@ -103,16 +103,20 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 	validation.ValidateUserRegistration(v, input)
 
 	if !v.Valid() {
+		s.logger.Info("Register: validation failed", zap.Any("errors", v.Errors))
 		return nil, NewValidationError(v.Errors)
 	}
 
 	email := strings.TrimSpace(strings.ToLower(input.Email))
+	s.logger.Info("Register attempt", zap.String("email", email[:3]+"***"))
 
 	existing, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil && !errors.Is(err, repositories.ErrNotFound) {
+		s.logger.Error("Register: database error checking existing user", zap.Error(err))
 		return nil, err
 	}
 	if existing != nil {
+		s.logger.Info("Register: email already exists", zap.String("email", email[:3]+"***"))
 		return nil, repositories.ErrEmailAlreadyExists
 	}
 
@@ -120,6 +124,7 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 	// Защита от brute-force атак на GPU
 	hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), 12)
 	if err != nil {
+		s.logger.Error("Register: failed to hash password", zap.Error(err))
 		return nil, err
 	}
 
@@ -137,14 +142,19 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 	}
 
 	if err := s.userRepo.CreateUser(ctx, u); err != nil {
+		s.logger.Error("Register: failed to create user", zap.Error(err))
 		return nil, err
 	}
+
+	s.logger.Info("Register: user created", zap.String("user_id", u.ID.String()))
 
 	pair, err := s.createSessionAndTokens(ctx, u.ID, device)
 	if err != nil {
+		s.logger.Error("Register: failed to create session", zap.String("user_id", u.ID.String()), zap.Error(err))
 		return nil, err
 	}
 
+	s.logger.Info("Register successful", zap.String("user_id", u.ID.String()))
 	return &RegisterResult{User: u, Tokens: pair}, nil
 }
 
@@ -152,29 +162,42 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 func (s *AuthService) Login(ctx context.Context, input domain.UserLogin, device DeviceInfo) (*LoginResult, error) {
 	email := strings.TrimSpace(strings.ToLower(input.Email))
 	if email == "" || input.Password == "" {
+		s.logger.Debug("Login: empty email or password")
 		return nil, ErrInvalidCredentials
 	}
+
+	s.logger.Info("Login attempt", zap.String("email", email[:3]+"***"))
 
 	u, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, repositories.ErrNotFound) {
+			s.logger.Info("Login: user not found", zap.String("email", email[:3]+"***"))
 			return nil, ErrInvalidCredentials
 		}
+		s.logger.Error("Login: database error", zap.Error(err))
 		return nil, err
 	}
 	if u == nil {
+		s.logger.Info("Login: user is nil", zap.String("email", email[:3]+"***"))
 		return nil, ErrInvalidCredentials
 	}
 
+	s.logger.Info("Login: user found", zap.String("user_id", u.ID.String()), zap.Bool("is_active", u.IsActive))
+
 	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(input.Password)); err != nil {
+		s.logger.Info("Login: password mismatch", zap.String("user_id", u.ID.String()))
 		return nil, ErrInvalidCredentials
 	}
+
+	s.logger.Info("Login: password verified", zap.String("user_id", u.ID.String()))
 
 	pair, err := s.createSessionAndTokens(ctx, u.ID, device)
 	if err != nil {
+		s.logger.Error("Login: failed to create session", zap.String("user_id", u.ID.String()), zap.Error(err))
 		return nil, err
 	}
 
+	s.logger.Info("Login successful", zap.String("user_id", u.ID.String()))
 	return &LoginResult{User: u, Tokens: pair}, nil
 }
 
@@ -206,7 +229,7 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 		// Но хеш токена можно залогировать для мониторинга
 		return domain.TokenPair{}, ErrUnauthorized
 	}
-	
+
 	if !sess.IsActive || (sess.ExpiresAt != nil && time.Now().After(*sess.ExpiresAt)) {
 		s.logger.Info("Refresh token expired or inactive",
 			zap.String("session_id", sess.ID.String()),
