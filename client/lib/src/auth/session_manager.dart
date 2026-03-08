@@ -181,8 +181,8 @@ class SessionManager {
         throw Exception('Не указаны учетные данные для входа');
       }
 
-      // Вызываем backend API /api/v1/auth/login
-      final response = await _apiClient.post('/api/v1/auth/login', data: {
+      // Вызываем backend API /api/auth/login
+      final response = await _apiClient.post('/api/auth/login', data: {
         'email': email,
         'password': password,
       });
@@ -296,66 +296,78 @@ class SessionManager {
       }
 
       AppLogger.info('Exchanging Firebase token for backend access_token...');
+      AppLogger.info('Firebase ID token (first 50 chars): ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...');
 
       // Call backend to exchange Firebase token for access_token
-      final response = await _apiClient.post('/api/v1/auth/google', data: {
-        'id_token': idToken,
-      });
+      try {
+        final response = await _apiClient.post('/api/auth/google', data: {
+          'id_token': idToken,
+        });
 
-      final data = response.data;
-      if (data is! Map) {
-        AppLogger.warning('Invalid response from Google auth endpoint');
-        throw Exception('Неверный формат ответа сервера');
-      }
+        AppLogger.info('Backend response status: ${response.statusCode}');
+        AppLogger.info('Backend response data: ${response.data}');
 
-      // Extract tokens from backend response
-      final backendUser = data['user'] as Map?;
-      final tokens = data['tokens'] as Map?;
+        final data = response.data;
+        if (data is! Map) {
+          AppLogger.warning('Invalid response from Google auth endpoint');
+          throw Exception('Неверный формат ответа сервера');
+        }
 
-      if (backendUser == null || tokens == null) {
-        AppLogger.warning('Invalid response structure from Google auth');
-        throw Exception('Ошибка получения данных пользователя');
-      }
+        // Extract tokens from backend response
+        final backendUser = data['user'] as Map?;
+        final tokens = data['tokens'] as Map?;
 
-      // Extract and store access_token for Bearer authentication
-      final accessToken = tokens['access_token'] as String?;
-      if (accessToken != null && accessToken.isNotEmpty) {
-        await _sharedPreferences.setString('access_token', accessToken);
-        AppLogger.info('Access token stored for Google user: ${_maskEmail(user.email ?? 'unknown')}');
-      } else {
-        AppLogger.warning('No access_token in Google auth response for user: ${_maskEmail(user.email ?? 'unknown')}');
-      }
+        if (backendUser == null || tokens == null) {
+          AppLogger.warning('Invalid response structure from Google auth');
+          throw Exception('Ошибка получения данных пользователя');
+        }
 
-      // Update session with backend user data
-      final backendUid = backendUser['id'] as String?;
-      if (backendUid == null) {
-        AppLogger.warning('No user ID in Google auth response');
-        throw Exception('Не удалось получить ID пользователя');
-      }
+        // Extract and store access_token for Bearer authentication
+        final accessToken = tokens['access_token'] as String?;
+        if (accessToken != null && accessToken.isNotEmpty) {
+          await _sharedPreferences.setString('access_token', accessToken);
+          AppLogger.info('Access token stored for Google user: ${_maskEmail(user.email ?? 'unknown')}');
+        } else {
+          AppLogger.warning('No access_token in Google auth response for user: ${_maskEmail(user.email ?? 'unknown')}');
+        }
 
-      _currentUserSession = UserSession(
-        uid: backendUid,
-        email: backendUser['email'] as String?,
-        displayName: backendUser['display_name'] as String?,
-        photoUrl: backendUser['avatar_url'] as String?,
-        loginTime: DateTime.now(),
-        isEmailVerified: backendUser['is_verified'] as bool? ?? false,
-      );
+        // Update session with backend user data
+        final backendUid = backendUser['id'] as String?;
+        if (backendUid == null) {
+          AppLogger.warning('No user ID in Google auth response');
+          throw Exception('Не удалось получить ID пользователя');
+        }
 
-      // Save session to SharedPreferences
-      final sessionJson = _currentUserSession?.toJson();
-      if (sessionJson != null) {
-        await _sharedPreferences.setString(
-          'user_session',
-          jsonEncode(sessionJson),
+        _currentUserSession = UserSession(
+          uid: backendUid,
+          email: backendUser['email'] as String?,
+          displayName: backendUser['display_name'] as String?,
+          photoUrl: backendUser['avatar_url'] as String?,
+          loginTime: DateTime.now(),
+          isEmailVerified: backendUser['is_verified'] as bool? ?? false,
         );
+
+        // Save session to SharedPreferences
+        final sessionJson = _currentUserSession?.toJson();
+        if (sessionJson != null) {
+          await _sharedPreferences.setString(
+            'user_session',
+            jsonEncode(sessionJson),
+          );
+        }
+
+        // Notify subscribers
+        _sessionStreamController.add(_currentUserSession);
+
+        AppLogger.info('Google Sign-In completed for user: ${user.uid}');
+        return true;
+      } catch (e) {
+        AppLogger.error('Backend Google auth error: $e', e);
+        if (e.toString().contains('401')) {
+          AppLogger.error('401 Unauthorized from backend - Firebase token may be invalid or expired');
+        }
+        rethrow;
       }
-
-      // Notify subscribers
-      _sessionStreamController.add(_currentUserSession);
-
-      AppLogger.info('Google Sign-In completed for user: ${user.uid}');
-      return true;
     } on FirebaseAuthException catch (e) {
       AppLogger.error('Google Sign-In error: ${e.code} - ${e.message}', e);
       return false;
@@ -400,7 +412,7 @@ class SessionManager {
         registerData['display_name'] = displayName;
       }
 
-      final response = await _apiClient.post('/api/v1/auth/register', data: registerData);
+      final response = await _apiClient.post('/api/auth/register', data: registerData);
 
       final data = response.data;
       if (data is! Map) {
@@ -539,8 +551,8 @@ class SessionManager {
     try {
       AppLogger.info('Requesting password reset code for: ${_maskEmail(email)}');
 
-      // Вызываем backend API /api/v1/auth/forgot-password
-      await _apiClient.post('/api/v1/auth/forgot-password', data: {
+      // Вызываем backend API /api/auth/forgot-password
+      await _apiClient.post('/api/auth/forgot-password', data: {
         'email': email,
       });
 
@@ -558,8 +570,8 @@ class SessionManager {
     try {
       AppLogger.info('Resetting password for: ${_maskEmail(email)}');
 
-      // Вызываем backend API /api/v1/auth/reset-password
-      await _apiClient.post('/api/v1/auth/reset-password', data: {
+      // Вызываем backend API /api/auth/reset-password
+      await _apiClient.post('/api/auth/reset-password', data: {
         'email': email,
         'code': code,
         'new_password': newPassword,
