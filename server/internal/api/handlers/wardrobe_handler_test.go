@@ -137,7 +137,7 @@ func TestWardrobeHandler_List_Unauthorized(t *testing.T) {
 	handler.List(rr, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rr.Code)
-	assert.Contains(t, rr.Body.String(), "auth required")
+	assert.Contains(t, rr.Body.String(), "Unauthorized")
 }
 
 // TestWardrobeHandler_List_WithFilters тестирует список с фильтрами
