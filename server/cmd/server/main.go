@@ -622,11 +622,6 @@ func setupRouter(
 	auth.Use(middleware.AuthRateLimitMiddleware(redisClient, logger))
 	authHandler.RegisterRoutes(auth)
 
-	// /api/auth/* (без v1) для обратной совместимости с клиентом
-	authNoV1 := router.PathPrefix("/api/auth").Subrouter()
-	authNoV1.Use(middleware.AuthRateLimitMiddleware(redisClient, logger))
-	authHandler.RegisterRoutes(authNoV1)
-
 	// protected
 	protected := api.NewRoute().Subrouter()
 	protected.Use(middleware.NewAuthMiddlewareWithFirebase(authService, apiKeyService, firebaseAuthClient).Handler)
