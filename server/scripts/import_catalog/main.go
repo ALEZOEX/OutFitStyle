@@ -8,10 +8,15 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/google/uuid"
+
+	"outfitstyle/server/internal/catalog"
 )
 
 type NDItem struct {
@@ -145,8 +150,10 @@ func mapGender(_ string) string {
 	return "unisex"
 }
 
-// category для БД: outerwear/upper/lower/footwear/accessory
-func mapCategory(catRaw, subRaw string) string {
+// category for БД: outerwear/upper/lower/footwear/accessory
+// DEPRECATED: This function is replaced by CategoryMapper
+// Kept for reference only - DO NOT USE
+func mapCategoryOld(catRaw, subRaw string) string {
 	cat := norm(catRaw)
 	sub := norm(subRaw)
 
@@ -232,10 +239,12 @@ func main() {
 	filePath := flag.String("file", "", "Path to ndjson file")
 	dsn := flag.String("dsn", "", "Database URL")
 	batchSize := flag.Int("batch", 300, "Batch size")
+	configPath := flag.String("config", "server/config/category_mapping.json", "Path to category mapping config")
+	reportsDir := flag.String("reports", "server/validation_reports", "Directory for validation reports")
 	flag.Parse()
 
 	if *filePath == "" || *dsn == "" {
-		fmt.Println("Usage: go run main.go -file data.ndjson -dsn postgres://... [-batch 300]")
+		fmt.Println("Usage: go run main.go -file data.ndjson -dsn postgres://... [-batch 300] [-config path] [-reports dir]")
 		os.Exit(1)
 	}
 
@@ -247,9 +256,32 @@ func main() {
 	}
 	defer db.Close()
 
+	// Initialize CategoryMapper
+	categoryMapper, err := catalog.NewCategoryMapper(*configPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to initialize category mapper: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Initialize ImportValidator
+	validator := catalog.NewImportValidator(categoryMapper)
+
+	// Create import metadata record
+	importID := uuid.New()
+	startTime := time.Now()
+	_, err = db.Exec(ctx, `
+		INSERT INTO import_metadata (id, filename, started_at, status)
+		VALUES ($1, $2, $3, 'running')
+	`, importID, filepath.Base(*filePath), startTime)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to create import metadata: %v\n", err)
+		os.Exit(1)
+	}
+
 	file, err := os.Open(*filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to open file: %v\n", err)
+		updateImportStatus(ctx, db, importID, "failed", 0, 0, "")
 		os.Exit(1)
 	}
 	defer file.Close()
@@ -267,6 +299,9 @@ func main() {
 	total := 0
 	skipped := 0
 
+	// Collect items for validation
+	var validationItems []*catalog.ClothingItem
+
 	flush := func() {
 		if pending == 0 {
 			return
@@ -274,6 +309,7 @@ func main() {
 		tx, err := db.Begin(ctx)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to begin transaction: %v\n", err)
+			updateImportStatus(ctx, db, importID, "failed", total, skipped, "")
 			os.Exit(1)
 		}
 		defer func() { _ = tx.Rollback(ctx) }()
@@ -282,10 +318,12 @@ func main() {
 		if err := br.Close(); err != nil {
 			_ = tx.Rollback(ctx)
 			fmt.Fprintf(os.Stderr, "Failed to execute batch: %v\n", err)
+			updateImportStatus(ctx, db, importID, "failed", total, skipped, "")
 			os.Exit(1)
 		}
 		if err := tx.Commit(ctx); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to commit transaction: %v\n", err)
+			updateImportStatus(ctx, db, importID, "failed", total, skipped, "")
 			os.Exit(1)
 		}
 
@@ -301,12 +339,27 @@ func main() {
 		}
 
 		// нормализуем
-		cat := mapCategory(it.Category, it.Subcategory)
 		sub := norm(it.Subcategory)
 		if sub == "" {
 			skipped++
 			continue
 		}
+
+		// Use CategoryMapper instead of hardcoded mapCategory
+		cat, err := categoryMapper.MapCategory(it.Category, it.Subcategory)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error mapping category for item '%s': %v\n", it.Name, err)
+			skipped++
+			continue
+		}
+
+		// Collect item for validation
+		validationItems = append(validationItems, &catalog.ClothingItem{
+			Name:        it.Name,
+			Subcategory: it.Subcategory,
+			Materials:   it.Materials,
+			Style:       it.Style,
+		})
 
 		// subcategory_specs: upsert (чтобы FK не падал)
 		specKey := cat + "|" + sub
@@ -380,7 +433,8 @@ INSERT INTO clothing_items (
   min_temp, max_temp,
   materials, fit, pattern,
   icon_emoji,
-  source, is_owned, is_active
+  source, is_owned, is_active,
+  classification_source
 ) VALUES (
   $1,
   $2,$3,$4,
@@ -390,7 +444,8 @@ INSERT INTO clothing_items (
   $12,$13,
   $14,$15,$16,
   $17,
-  $18,$19,true
+  $18,$19,true,
+  'mapping'
 )
 ON CONFLICT (external_id) DO UPDATE SET
   name=EXCLUDED.name,
@@ -432,10 +487,61 @@ ON CONFLICT (external_id) DO UPDATE SET
 
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "Scanner error: %v\n", err)
+		updateImportStatus(ctx, db, importID, "failed", total, skipped, "")
 		os.Exit(1)
 	}
 
 	flush()
 
+	// Generate validation report
+	fmt.Println("Generating validation report...")
+	report := validator.ValidateBatch(ctx, validationItems)
+
+	reportPath := catalog.GenerateReportPath(*reportsDir, startTime)
+	if err := validator.GenerateReport(report, reportPath); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Failed to generate validation report: %v\n", err)
+		// Don't fail the import, just log the warning
+	} else {
+		fmt.Printf("Validation report saved to: %s\n", reportPath)
+	}
+
+	// Update import metadata with completion status
+	updateImportStatus(ctx, db, importID, "completed", total, skipped, reportPath)
+
+	fmt.Printf("Import completed successfully!\n")
 	fmt.Printf("Imported/Upserted: %d items, skipped: %d\n", total, skipped)
+	fmt.Printf("Fallback usage: %.2f%% (%d items)\n", report.FallbackPercent, report.FallbackCount)
+	fmt.Printf("Unknown subcategories: %d\n", len(report.UnknownSubcats))
+
+	if len(report.Errors) > 0 {
+		fmt.Printf("\nErrors encountered: %d\n", len(report.Errors))
+		for _, errMsg := range report.Errors {
+			fmt.Printf("  - %s\n", errMsg)
+		}
+	}
+
+	if len(report.Warnings) > 0 {
+		fmt.Printf("\nWarnings: %d\n", len(report.Warnings))
+		for _, warnMsg := range report.Warnings {
+			fmt.Printf("  - %s\n", warnMsg)
+		}
+	}
+}
+
+// updateImportStatus updates the import_metadata record with completion status
+func updateImportStatus(ctx context.Context, db *pgxpool.Pool, importID uuid.UUID, status string, totalItems, skippedItems int, reportPath string) {
+	_, err := db.Exec(ctx, `
+		UPDATE import_metadata
+		SET completed_at = $1,
+		    status = $2,
+		    total_items = $3,
+		    successful_items = $4,
+		    skipped_items = $5,
+		    validation_report_path = $6
+		WHERE id = $7
+	`, time.Now(), status, totalItems, totalItems-skippedItems, skippedItems, reportPath, importID)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Failed to update import metadata: %v\n", err)
+	}
 }
