@@ -32,7 +32,8 @@ class ApiClient {
         if (!path.contains('/auth/login') &&
             !path.contains('/auth/register') &&
             !path.contains('/auth/forgot-password') &&
-            !path.contains('/auth/reset-password')) {
+            !path.contains('/auth/reset-password') &&
+            !path.contains('/auth/google')) {
           // Get access_token from SharedPreferences
           final accessToken = _sharedPreferences?.getString('access_token');
           if (accessToken != null && accessToken.isNotEmpty) {
