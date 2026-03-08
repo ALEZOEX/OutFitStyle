@@ -575,9 +575,10 @@ func TestAuthHandler_ForgotPassword_Success(t *testing.T) {
 
 	handler.ForgotPassword(rr, req)
 
-	// Ожидаем ошибку Redis unavailable, так как в тесте redis = nil
+	// Ожидаем ошибку Internal server error из-за недоступности Redis
+	// (санитизация ошибок скрывает детали)
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
-	assert.Contains(t, rr.Body.String(), "Redis unavailable")
+	assert.Contains(t, rr.Body.String(), "Internal server error")
 
 	mockUserRepo.AssertExpectations(t)
 }
