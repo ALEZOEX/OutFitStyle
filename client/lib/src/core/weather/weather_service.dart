@@ -10,10 +10,10 @@ import '../../domain/entities/weather_data.dart';
 /// Кэширует данные на 30 минут для уменьшения количества запросов
 class WeatherService {
   final ApiClient _apiClient;
-  
+
   // Open-Meteo API (бесплатный)
   static const String _openMeteoBaseUrl = 'https://api.open-meteo.com/v1';
-  
+
   // Кэш погоды
   final Map<String, _WeatherCacheEntry> _cache = {};
   static const Duration _cacheDuration = Duration(minutes: 30);
@@ -22,17 +22,17 @@ class WeatherService {
       : _apiClient = apiClient;
 
   /// Получить текущую погоду по координатам
-  /// 
+  ///
   /// [latitude] - широта
   /// [longitude] - долгота
-  /// 
+  ///
   /// Возвращает [WeatherData] с текущими погодными условиями
   Future<WeatherData> getCurrentWeather(
     double latitude,
     double longitude,
   ) async {
     final cacheKey = '$latitude,$longitude';
-    
+
     // Проверяем кэш
     final cached = _cache[cacheKey];
     if (cached != null && !cached.isExpired) {
@@ -55,13 +55,13 @@ class WeatherService {
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
         final weather = _parseOpenMeteoResponse(data);
-        
+
         // Сохраняем в кэш
         _cache[cacheKey] = _WeatherCacheEntry(
           data: weather,
           expiresAt: DateTime.now().add(_cacheDuration),
         );
-        
+
         return weather;
       } else {
         throw WeatherException('Ошибка получения погоды: ${response.statusCode}');
@@ -75,11 +75,11 @@ class WeatherService {
   }
 
   /// Получить прогноз погоды на несколько дней
-  /// 
+  ///
   /// [latitude] - широта
   /// [longitude] - долгота
   /// [days] - количество дней прогноза (1-14)
-  /// 
+  ///
   /// Возвращает список [WeatherData] для каждого дня
   Future<List<WeatherData>> getWeatherForecast(
     double latitude,
@@ -151,14 +151,24 @@ class WeatherService {
 
   WeatherData _parseOpenMeteoResponse(Map<String, dynamic> data) {
     final current = data['current_weather'] as Map<String, dynamic>;
+    final hourly = data['hourly'] as Map<String, dynamic>?;
     final weatherCode = current['weathercode'] as int;
+
+    // Получаем влажность из hourly данных (первое значение - текущее)
+    int humidity = 50;
+    if (hourly != null && hourly['relative_humidity_2m'] != null) {
+      final humidityList = hourly['relative_humidity_2m'] as List;
+      if (humidityList.isNotEmpty) {
+        humidity = (humidityList.first as num).toInt();
+      }
+    }
 
     return WeatherData(
       temperature: (current['temperature'] as num).toDouble(),
       feelsLike: (current['temperature'] as num).toDouble(), // Open-Meteo не предоставляет feels_like
       condition: _getWeatherCondition(weatherCode),
       description: _getWeatherDescription(weatherCode),
-      humidity: 50, // Open-Meteo требует отдельного запроса
+      humidity: humidity,
       windSpeed: (current['windspeed'] as num).toDouble(),
       latitude: (data['latitude'] as num).toDouble(),
       longitude: (data['longitude'] as num).toDouble(),
@@ -213,9 +223,9 @@ class WeatherService {
 /// Исключение погодного сервиса
 class WeatherException implements Exception {
   final String message;
-  
+
   const WeatherException(this.message);
-  
+
   @override
   String toString() => 'WeatherException: $message';
 }
