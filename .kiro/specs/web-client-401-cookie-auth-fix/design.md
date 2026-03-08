@@ -1,86 +1,105 @@
-# Web Client Cookie Authentication Bugfix Design
+# Web Client Bearer Token Authentication Bugfix Design
 
 ## Overview
 
-The web client cannot authenticate with the API server because of an authentication method mismatch. The client sends httpOnly cookies with `withCredentials: true`, but the server's `AuthMiddleware` only validates `Authorization: Bearer <token>` headers and `X-API-Key` headers, never checking cookies. This fix adds cookie-based authentication checking to the middleware while preserving all existing header-based authentication methods.
+The web client cannot authenticate with the API server because it does not send authentication credentials after login. When users log in via email/password or Google Sign-In, the backend returns an `access_token` in the response body, but the client neither stores this token nor includes it in subsequent API requests. The backend's AuthMiddleware already supports Bearer token authentication, but the client sends no `Authorization` header, causing all authenticated requests to fail with 401 Unauthorized.
 
-The fix is minimal and surgical: add a third authentication path in `AuthMiddleware` that extracts the access to
-earer token and API key authentication that must remain unchanged by the fix
-- **AuthMiddleware**: The function in `server/internal/api/middleware/auth.go` that validates authentication credentials
-- **access_token cookie**: The httpOnly cookie containing the JWT access token sent by the web client
-- **withCredentials**: The Dio client configuration that enables automatic cookie sending from the web client
+The fix is minimal and surgical: modify the client to extract and store the `access_token` from login responses, then automatically add it to the `Authorization: Bearer <token>` header for all authenticated requests using a Dio interceptor.
+
+## Glossary
+
+- **Bug_Condition (C)**: Authenticated API requests from the web client that fail with 401 because no `Authorization` header is sent
+- **Property (P)**: Successful authentication when valid `access_token` is included in `Authorization: Bearer <token>` header
+- **Preservation**: Existing login flow, session storage, and non-authenticated requests that must remain unchanged
+- **SessionManager**: The class in `client/lib/src/auth/session_manager.dart` that handles login and stores user session data
+- **ApiClient**: The class in `client/lib/src/core/api/api_client.dart` that makes HTTP requests using Dio
+- **access_token**: The JWT access token returned by the backend in the login/register response body
+- **Bearer token**: The authentication scheme where the token is sent in the `Authorization: Bearer <token>` header
+- **Dio interceptor**: A middleware mechanism in Dio that can modify requests before they are sent
 
 ## Bug Details
 
 ### Bug Condition
 
-The bug manifests when the web client makes an authenticated API request with `withCredentials: true` and valid httpOnly cookies, but the server's `AuthMiddleware` does not check cookies for authentication tokens. The middleware only validates `Authorization: Bearer <token>` headers or `X-API-Key` headers, causing all cookie-based requests to fail with 401 Unauthorized.
+The bug manifests when the web client makes an authenticated API request after successful login. The backend returns an `access_token` in the login/register response body, but the client:
+1. **Does not extract the access_token** from the response
+2. **Does not store the access_token** in memory or SharedPreferences
+3. **Does not add the access_token** to the `Authorization` header in subsequent requests
+
+This causes all authenticated API requests to fail with 401 Unauthorized because the backend's AuthMiddleware receives no authentication credentials.
 
 **Formal Specification:**
 ```
 FUNCTION isBugCondition(request)
-  INPUT: request of type *http.Request
+  INPUT: request of type HTTP Request
   OUTPUT: boolean
 
-  RETURN request.Header.Get("Authorization") == ""
-         AND request.Header.Get("X-API-Key") == ""
-         AND cookieExists(request, "access_token")
-         AND isValidToken(getCookie(request, "access_token"))
-         AND NOT requestAuthenticated(request)
+  RETURN request.path IN ['/api/v1/notifications', '/api/v1/wardrobe',
+                          '/api/v1/recommendations', '/api/v1/achievements']
+         AND request.Header.Get("Authorization") == ""
+         AND userHasValidAccessToken(request.context)
+         AND accessTokenNotSentByClient(request)
 END FUNCTION
 ```
 
 ### Examples
 
-- **Web client wardrobe request**: Client sends `GET /api/v1/wardrobe` with `access_token` cookie → Server returns 401 Unauthorized (should return wardrobe data)
-- **Web client recommendations request**: Client sends `GET /api/v1/recommendations` with `access_token` cookie → Server returns 401 Unauthorized (should return recommendations)
-- **Web client notifications request**: Client sends `GET /api/v1/notifications` with `access_token` cookie → Server returns 401 Unauthorized (should return notifications)
-- **Edge case - expired cookie**: Client sends request with expired `access_token` cookie → Server returns 401 Unauthorized (correct behavior, should remain unchanged)
+- **Web client wardrobe request**: Client sends `GET /api/v1/wardrobe` after login, but no `Authorization` header is included → Server returns 401 Unauthorized (should include `Authorization: Bearer <token>`)
+- **Web client recommendations request**: Client sends `GET /api/v1/recommendations` after login, no `Authorization` header → Server returns 401 Unauthorized (should include Bearer token)
+- **Web client notifications request**: Client sends `GET /api/v1/notifications` after login, no `Authorization` header → Server returns 401 Unauthorized (should include Bearer token)
+- **Email/password login**: User logs in, backend returns `{"user": {...}, "tokens": {"access_token": "eyJ..."}}`, but client doesn't extract or store the token → Subsequent requests fail with 401
+- **Google Sign-In**: User signs in with Google, but client doesn't retrieve access_token from backend → Subsequent requests fail with 401
+- **Edge case - expired token**: Client sends request with expired `access_token` in Authorization header → Server returns 401 Unauthorized (correct behavior, should remain unchanged)
 
 ## Expected Behavior
 
 ### Preservation Requirements
 
 **Unchanged Behaviors:**
-- Bearer token authentication (`Authorization: Bearer <token>`) must continue to work exactly as before
-- API key authentication (`X-API-Key` header) must continue to work exactly as before
-- Requests with neither valid cookies nor valid headers must continue to return 401 Unauthorized
-- Invalid or expired credentials in any format must continue to return 401 Unauthorized
-- Non-web clients (mobile, CLI) using header-based authentication must continue to work
+- Login flow (email/password and Google Sign-In) must continue to work exactly as before
+- Session data storage in SharedPreferences must remain unchanged
+- User session state management must remain unchanged
+- Non-authenticated requests (login, register, public endpoints) must continue to work without Authorization headers
+- Error handling for invalid or expired tokens must continue to return 401 Unauthorized
 
 **Scope:**
-All inputs that do NOT involve cookie-based authentication should be completely unaffected by this fix. This includes:
-- Bearer token requests from mobile clients
-- API key requests from integration partners
-- Requests with no authentication credentials
-- Requests with invalid authentication credentials
+All inputs that do NOT involve authenticated API requests should be completely unaffected by this fix. This includes:
+- Login and registration requests (these don't need Authorization headers)
+- Public API endpoints that don't require authentication
+- Session initialization and restoration from SharedPreferences
+- Firebase authentication state management for Google Sign-In
 
 ## Hypothesized Root Cause
 
-Based on the bug description and code analysis, the root cause is clear:
+Based on code analysis of `SessionManager` and `ApiClient`, the root cause is now clear:
 
-1. **Missing Cookie Check**: The `AuthMiddleware` function in `server/internal/api/middleware/auth.go` only checks two authentication methods:
-   - Bearer token in `Authorization` header (lines 17-29)
-   - API key in `X-API-Key` header (lines 32-56)
-   - No cookie checking logic exists
+1. **Token Not Extracted from Login Response**: In `SessionManager.signIn()` (lines 189-245), the method receives the backend response containing `tokens.access_token`, but only extracts user data. The `access_token` is never read from `data['tokens']['access_token']`.
 
-2. **Web Client Configuration**: The web client is correctly configured with `withCredentials: true` in `client/lib/src/core/api/api_client.dart`, which automatically sends httpOnly cookies with every request
+2. **Token Not Stored**: The client has no mechanism to store the `access_token` in memory or SharedPreferences. Only user session data (uid, email, displayName, etc.) is stored.
 
-3. **Cookie Infrastructure Exists**: The codebase already has cookie handling infrastructure in `server/internal/api/middleware/cookie_middleware.go` with functions like `GetRefreshTokenFromCookie`, but this is only used for refresh tokens, not access tokens
+3. **No Authorization Header Added**: In `ApiClient` (lines 1-115), the Dio client has no interceptor to add the `Authorization: Bearer <token>` header to outgoing requests. The client only configures `withCredentials: true` for cookie support, but doesn't use Bearer tokens.
 
-4. **Access Token Storage**: The authentication handlers (`server/internal/api/handlers/auth_handler.go`) set refresh tokens in cookies but return access tokens in the response body, expecting clients to send them in headers. The web client appears to be storing access tokens in cookies as well, but the middleware doesn't check for them.
+4. **Backend Already Supports Bearer Tokens**: The `AuthMiddleware` in `server/internal/api/middleware/auth.go` (lines 17-27) already validates Bearer tokens correctly. The server-side implementation is complete and working.
+
+5. **Google Sign-In Has Same Issue**: In `SessionManager.signInWithGoogle()` (lines 268-307), the method uses Firebase authentication but never retrieves or stores an `access_token` from the backend for subsequent API requests.
+
+**Why This Causes 401 Errors:**
+- After login, the client makes authenticated requests to `/api/v1/wardrobe`, `/api/v1/notifications`, etc.
+- These requests have no `Authorization` header, no `X-API-Key` header, and no cookies
+- The backend's `AuthMiddleware` checks all three authentication methods and finds none
+- The middleware returns 401 Unauthorized, causing the client to log the user out
 
 ## Correctness Properties
 
-Property 1: Bug Condition - Cookie-Based Authentication
+Property 1: Bug Condition - Bearer Token Authentication for Authenticated Requests
 
-_For any_ HTTP request where the bug condition holds (no Authorization or X-API-Key header, but valid access_token cookie present), the fixed AuthMiddleware SHALL extract the access token from the cookie, validate it using the existing ValidateAccessToken method, and authenticate the request successfully by adding userID and sessionID to the request context.
+_For any_ HTTP request to an authenticated endpoint where the user has a valid access_token stored, the fixed client SHALL include the `Authorization: Bearer <token>` header, and the backend SHALL successfully authenticate the request by validating the token and adding userID and sessionID to the request context.
 
 **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6**
 
-Property 2: Preservation - Header-Based Authentication
+Property 2: Preservation - Login Flow and Non-Authenticated Requests
 
-_For any_ HTTP request that uses Bearer token or API key authentication in headers, the fixed AuthMiddleware SHALL produce exactly the same behavior as the original middleware, preserving all existing authentication flows for non-web clients.
+_For any_ login/register request OR non-authenticated public endpoint request, the fixed client SHALL produce exactly the same behavior as the original client, preserving the login flow, session storage, and public API access without requiring Authorization headers.
 
 **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
 
@@ -90,28 +109,71 @@ _For any_ HTTP request that uses Bearer token or API key authentication in heade
 
 Assuming our root cause analysis is correct:
 
-**File**: `server/internal/api/middleware/auth.go`
+**File 1**: `client/lib/src/auth/session_manager.dart`
 
-**Function**: `AuthMiddleware`
+**Function**: `signIn`
 
 **Specific Changes**:
-1. **Add Cookie Authentication Path**: After checking Bearer token and API key, add a third check for `access_token` cookie
-   - Use `r.Cookie("access_token")` to extract the cookie
-   - If cookie exists and has a non-empty value, validate it using `authService.ValidateAccessToken`
-   - On successful validation, add userID and sessionID to context (same as Bearer token path)
-   - On validation failure, return 401 Unauthorized
+1. **Extract access_token from response**: After receiving the login response (line ~210), extract the access_token:
+   ```dart
+   final accessToken = tokens['access_token'] as String?;
+   ```
 
-2. **Maintain Execution Order**: The authentication checks should remain in priority order:
-   - First: Bearer token (existing)
-   - Second: API key (existing)
-   - Third: Cookie (new)
-   - If none succeed: 401 Unauthorized (existing)
+2. **Store access_token in SharedPreferences**: Save the token for persistence:
+   ```dart
+   if (accessToken != null) {
+     await _sharedPreferences.setString('access_token', accessToken);
+   }
+   ```
 
-3. **Reuse Existing Validation**: Use the same `authService.ValidateAccessToken` method that Bearer tokens use, ensuring consistent validation logic
+3. **Handle token in session restoration**: In `_initializeSession()`, also restore the access_token from SharedPreferences
 
-4. **Preserve Error Handling**: Use the same error response pattern (`resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)`) for consistency
+**Function**: `signInWithGoogle`
 
-5. **No Changes to Cookie Setting**: The fix only adds cookie reading in the middleware; cookie setting logic in auth handlers remains unchanged
+**Specific Changes**:
+1. **Call backend to get access_token**: After successful Firebase authentication, call the backend to exchange the Firebase token for an access_token
+2. **Store the access_token**: Save it to SharedPreferences using the same mechanism as email/password login
+
+**Function**: `signOut`
+
+**Specific Changes**:
+1. **Clear access_token**: Remove the access_token from SharedPreferences when user logs out:
+   ```dart
+   await _sharedPreferences.remove('access_token');
+   ```
+
+**File 2**: `client/lib/src/core/api/api_client.dart`
+
+**Class**: `ApiClient`
+
+**Specific Changes**:
+1. **Add SharedPreferences dependency**: Inject SharedPreferences into ApiClient constructor to access the stored access_token
+
+2. **Add Authorization header interceptor**: In the constructor (after line 23), add a new interceptor:
+   ```dart
+   _dio.interceptors.add(InterceptorsWrapper(
+     onRequest: (options, handler) async {
+       // Skip Authorization header for login/register endpoints
+       if (!options.path.contains('/auth/login') &&
+           !options.path.contains('/auth/register')) {
+         final accessToken = _sharedPreferences.getString('access_token');
+         if (accessToken != null && accessToken.isNotEmpty) {
+           options.headers['Authorization'] = 'Bearer $accessToken';
+         }
+       }
+       return handler.next(options);
+     },
+   ));
+   ```
+
+3. **Handle 401 errors**: The existing error interceptor already logs 401 errors; consider adding token refresh logic in the future
+
+**File 3**: `client/lib/src/auth/session_manager.dart` (signUp method)
+
+**Function**: `signUp`
+
+**Specific Changes**:
+1. **Extract and store access_token**: Same as signIn - extract `tokens['access_token']` and store in SharedPreferences
 
 ## Testing Strategy
 
@@ -121,19 +183,20 @@ The testing strategy follows a two-phase approach: first, surface counterexample
 
 ### Exploratory Bug Condition Checking
 
-**Goal**: Surface counterexamples that demonstrate the bug BEFORE implementing the fix. Confirm that requests with valid access_token cookies are rejected with 401 Unauthorized.
+**Goal**: Surface counterexamples that demonstrate the bug BEFORE implementing the fix. Confirm that authenticated requests fail with 401 Unauthorized because no Authorization header is sent.
 
-**Test Plan**: Write integration tests that simulate authenticated requests with cookies but no headers. Run these tests on the UNFIXED code to observe 401 failures and confirm the root cause.
+**Test Plan**: Write integration tests that simulate the full login flow followed by authenticated API requests. Run these tests on the UNFIXED code to observe 401 failures and confirm the root cause.
 
 **Test Cases**:
-1. **Wardrobe Request with Cookie**: Send `GET /api/v1/wardrobe` with valid `access_token` cookie, no Authorization header (will fail with 401 on unfixed code)
-2. **Recommendations Request with Cookie**: Send `GET /api/v1/recommendations` with valid `access_token` cookie, no Authorization header (will fail with 401 on unfixed code)
-3. **Notifications Request with Cookie**: Send `GET /api/v1/notifications` with valid `access_token` cookie, no Authorization header (will fail with 401 on unfixed code)
-4. **Invalid Cookie Test**: Send request with expired or malformed `access_token` cookie (should fail with 401 on both unfixed and fixed code)
+1. **Wardrobe Request After Login**: Login with email/password, then send `GET /api/v1/wardrobe` (will fail with 401 on unfixed code - no Authorization header)
+2. **Recommendations Request After Login**: Login, then send `GET /api/v1/recommendations` (will fail with 401 on unfixed code)
+3. **Notifications Request After Login**: Login, then send `GET /api/v1/notifications` (will fail with 401 on unfixed code)
+4. **Google Sign-In Flow**: Sign in with Google, then make authenticated request (will fail with 401 on unfixed code)
 
 **Expected Counterexamples**:
-- All requests with valid cookies but no headers return 401 Unauthorized
-- Root cause confirmed: middleware does not check cookies for authentication
+- All authenticated requests return 401 Unauthorized after successful login
+- Network inspection shows no `Authorization` header in requests
+- Root cause confirmed: client does not extract or send access_token
 
 ### Fix Checking
 
@@ -142,21 +205,20 @@ The testing strategy follows a two-phase approach: first, surface counterexample
 **Pseudocode:**
 ```
 FOR ALL request WHERE isBugCondition(request) DO
-  response := AuthMiddleware_fixed(request)
+  response := ApiClient_fixed.get(request.path)
   ASSERT response.statusCode == 200
-  ASSERT request.context.userID != nil
-  ASSERT request.context.sessionID != nil
+  ASSERT request.headers['Authorization'] STARTS_WITH 'Bearer '
 END FOR
 ```
 
 **Test Plan**: After implementing the fix, run the same test cases and verify they succeed with proper authentication.
 
 **Test Cases**:
-1. **Wardrobe Request with Cookie**: Verify request succeeds and returns wardrobe data
-2. **Recommendations Request with Cookie**: Verify request succeeds and returns recommendations
-3. **Notifications Request with Cookie**: Verify request succeeds and returns notifications
-4. **Achievements Request with Cookie**: Verify request succeeds and returns achievements
-5. **Multiple Endpoints**: Test various authenticated endpoints to ensure cookie auth works universally
+1. **Wardrobe Request with Token**: Verify request includes `Authorization: Bearer <token>` header and returns 200 OK with wardrobe data
+2. **Recommendations Request with Token**: Verify request includes Bearer token and returns 200 OK with recommendations
+3. **Notifications Request with Token**: Verify request includes Bearer token and returns 200 OK with notifications
+4. **Achievements Request with Token**: Verify request includes Bearer token and returns 200 OK with achievements
+5. **Token Persistence**: Verify access_token is stored in SharedPreferences and survives app restart
 
 ### Preservation Checking
 
@@ -165,45 +227,45 @@ END FOR
 **Pseudocode:**
 ```
 FOR ALL request WHERE NOT isBugCondition(request) DO
-  ASSERT AuthMiddleware_original(request) = AuthMiddleware_fixed(request)
+  ASSERT ApiClient_original(request) = ApiClient_fixed(request)
 END FOR
 ```
 
 **Testing Approach**: Property-based testing is recommended for preservation checking because:
 - It generates many test cases automatically across the input domain
 - It catches edge cases that manual unit tests might miss
-- It provides strong guarantees that behavior is unchanged for all non-cookie inputs
+- It provides strong guarantees that behavior is unchanged for all non-authenticated inputs
 
-**Test Plan**: Run existing integration tests for Bearer token and API key authentication to verify they continue to work exactly as before.
+**Test Plan**: Run existing tests for login, registration, and session management to verify they continue to work exactly as before.
 
 **Test Cases**:
-1. **Bearer Token Preservation**: Verify all requests with `Authorization: Bearer <token>` header continue to authenticate successfully
-2. **API Key Preservation**: Verify all requests with `X-API-Key` header continue to authenticate successfully
-3. **No Credentials Preservation**: Verify requests with no authentication credentials continue to return 401 Unauthorized
-4. **Invalid Credentials Preservation**: Verify requests with invalid or expired credentials continue to return 401 Unauthorized
-5. **Mobile Client Preservation**: Verify mobile clients using header-based auth continue to work without any changes
+1. **Login Flow Preservation**: Verify email/password login continues to work and stores session data correctly
+2. **Registration Flow Preservation**: Verify user registration continues to work without changes
+3. **Google Sign-In Preservation**: Verify Google authentication flow continues to work
+4. **Session Restoration Preservation**: Verify session restoration from SharedPreferences continues to work
+5. **Public Endpoints Preservation**: Verify public API endpoints (if any) continue to work without Authorization headers
 
 ### Unit Tests
 
-- Test cookie extraction from request with valid `access_token` cookie
-- Test cookie authentication with valid token (should succeed)
-- Test cookie authentication with expired token (should fail with 401)
-- Test cookie authentication with malformed token (should fail with 401)
-- Test cookie authentication with missing cookie (should fall through to 401)
-- Test that Bearer token takes precedence over cookie if both are present
+- Test access_token extraction from login response with valid token
+- Test access_token extraction with missing token (should handle gracefully)
+- Test access_token storage in SharedPreferences
+- Test access_token restoration from SharedPreferences
+- Test Authorization header addition in Dio interceptor
+- Test that login/register endpoints do NOT get Authorization header
+- Test access_token removal on logout
 
 ### Property-Based Tests
 
-- Generate random valid access tokens in cookies and verify authentication succeeds
-- Generate random invalid tokens in cookies and verify authentication fails with 401
-- Generate random requests with Bearer tokens and verify behavior is unchanged
-- Generate random requests with API keys and verify behavior is unchanged
-- Test across many authenticated endpoints to ensure universal cookie support
+- Generate random valid access tokens and verify they are correctly added to Authorization headers
+- Generate random API endpoints and verify authenticated ones get Authorization header
+- Generate random login responses and verify token extraction works correctly
+- Test across many authenticated endpoints to ensure universal Bearer token support
 
 ### Integration Tests
 
-- Test full authentication flow: login → receive tokens → make authenticated request with cookie
-- Test web client flow: register → login → access wardrobe/recommendations/notifications with cookies
-- Test that cookie authentication works across all protected endpoints
-- Test that session management works correctly with cookie-based auth
-- Test that logout properly invalidates cookie-based sessions
+- Test full authentication flow: login → store token → make authenticated request with Bearer token
+- Test web client flow: register → login → access wardrobe/recommendations/notifications with tokens
+- Test that Bearer token authentication works across all protected endpoints
+- Test that session management works correctly with token-based auth
+- Test that logout properly clears the access_token from storage

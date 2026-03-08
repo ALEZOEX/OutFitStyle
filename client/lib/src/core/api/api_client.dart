@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'dart:developer' as developer;
 
@@ -11,14 +12,36 @@ import 'dart:developer' as developer;
 /// Для mobile: требуется дополнительная настройка cookie jar
 class ApiClient {
   late final Dio _dio;
+  final SharedPreferences? _sharedPreferences;
 
-  ApiClient() {
+  ApiClient(SharedPreferences sharedPreferences)
+      : _sharedPreferences = sharedPreferences {
     _dio = Dio(BaseOptions(
       baseUrl: ApiConfig.baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json'},
       extra: {'withCredentials': true}, // Важно: отправка cookie на вебе
+    ));
+
+    // Interceptor для добавления Authorization header
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        // Skip Authorization header for login/register endpoints
+        final path = options.path;
+        if (!path.contains('/auth/login') &&
+            !path.contains('/auth/register') &&
+            !path.contains('/auth/forgot-password') &&
+            !path.contains('/auth/reset-password')) {
+          // Get access_token from SharedPreferences
+          final accessToken = _sharedPreferences?.getString('access_token');
+          if (accessToken != null && accessToken.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
+            developer.log('[ApiClient] Added Authorization header', name: 'ApiClient');
+          }
+        }
+        return handler.next(options);
+      },
     ));
 
     // Interceptor для логирования
@@ -49,7 +72,9 @@ class ApiClient {
 
   /// Внутренний конструктор для использования с кастомным Dio
   /// (например, для Weather API без авторизации)
-  ApiClient.internal(Dio dio) : _dio = dio;
+  ApiClient.internal(Dio dio)
+      : _dio = dio,
+        _sharedPreferences = null;
 
   String _normalizePath(String path) {
     return path.startsWith('/') ? path.substring(1) : path;

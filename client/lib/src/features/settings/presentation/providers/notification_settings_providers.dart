@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/api/api_client.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../data/repositories/notification_settings_repository.dart';
 import '../../domain/entities/notification_settings.dart';
 
@@ -332,7 +333,12 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettingsSta
 
 final _notificationSettingsRepositoryProvider =
     Provider<NotificationSettingsRepository>((ref) {
-  final apiClient = ApiClient();
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  final apiClient = prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
   return NotificationSettingsRepository(apiClient: apiClient);
 });
 

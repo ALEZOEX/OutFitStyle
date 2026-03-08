@@ -4,13 +4,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import 'package:outfitstyle_client/src/services/password_api.dart';
 import '../../data/repositories/sessions_repository.dart';
 import '../../data/models/session_device.dart';
 
 /// Провайдер API клиента
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(); // Firebase ID Token
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  return prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
 });
 
 /// Провайдер PasswordApiService
@@ -157,7 +163,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
         final data = response.data as Map<String, dynamic>;
         final passwordHash = data['password_hash'] as String?;
         final oauthProvider = data['oauth_provider'] as String?;
-        
+
         setState(() {
           // Пароль есть, если password_hash не null и не пустой
           _hasPassword = passwordHash != null && passwordHash.isNotEmpty;

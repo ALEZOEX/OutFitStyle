@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../data/repositories/preferences_repository.dart';
 
 /// Модели предпочтений (UI enum)
@@ -234,7 +235,12 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
 
 // Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
 final _apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient();
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  return prefsAsync.when(
+    data: (prefs) => ApiClient(prefs),
+    loading: () => throw StateError('SharedPreferences не инициализированы'),
+    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
+  );
 });
 
 final _preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {
