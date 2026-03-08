@@ -181,8 +181,8 @@ class SessionManager {
         throw Exception('Не указаны учетные данные для входа');
       }
 
-      // Вызываем backend API /api/auth/login
-      final response = await _apiClient.post('/api/auth/login', data: {
+      // Вызываем backend API /api/v1/auth/login
+      final response = await _apiClient.post('/api/v1/auth/login', data: {
         'email': email,
         'password': password,
       });
@@ -300,7 +300,7 @@ class SessionManager {
 
       // Call backend to exchange Firebase token for access_token
       try {
-        final response = await _apiClient.post('/api/auth/google', data: {
+        final response = await _apiClient.post('/api/v1/auth/google', data: {
           'id_token': idToken,
         });
 
@@ -412,7 +412,7 @@ class SessionManager {
         registerData['display_name'] = displayName;
       }
 
-      final response = await _apiClient.post('/api/auth/register', data: registerData);
+      final response = await _apiClient.post('/api/v1/auth/register', data: registerData);
 
       final data = response.data;
       if (data is! Map) {
@@ -551,8 +551,8 @@ class SessionManager {
     try {
       AppLogger.info('Requesting password reset code for: ${_maskEmail(email)}');
 
-      // Вызываем backend API /api/auth/forgot-password
-      await _apiClient.post('/api/auth/forgot-password', data: {
+      // Вызываем backend API /api/v1/auth/forgot-password
+      await _apiClient.post('/api/v1/auth/forgot-password', data: {
         'email': email,
       });
 
@@ -570,8 +570,8 @@ class SessionManager {
     try {
       AppLogger.info('Resetting password for: ${_maskEmail(email)}');
 
-      // Вызываем backend API /api/auth/reset-password
-      await _apiClient.post('/api/auth/reset-password', data: {
+      // Вызываем backend API /api/v1/auth/reset-password
+      await _apiClient.post('/api/v1/auth/reset-password', data: {
         'email': email,
         'code': code,
         'new_password': newPassword,
