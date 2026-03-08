@@ -137,7 +137,7 @@ func TestCategoryMapper_MapCategory(t *testing.T) {
 		t.Fatalf("Failed to write config file: %v", err)
 	}
 
-	mapper, err := NewCategoryMapper(configPath)
+	mapper, err := NewCategoryMapper(configPath, nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -178,7 +178,7 @@ func TestCategoryMapper_GetUnmappedSubcategories(t *testing.T) {
 		t.Fatalf("Failed to write config file: %v", err)
 	}
 
-	mapper, err := NewCategoryMapper(configPath)
+	mapper, err := NewCategoryMapper(configPath, nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -288,7 +288,7 @@ func TestCategoryMapper_InvalidConfiguration(t *testing.T) {
 				t.Fatalf("Failed to write config file: %v", err)
 			}
 
-			mapper, err := NewCategoryMapper(configPath)
+			mapper, err := NewCategoryMapper(configPath, nil)
 			if err != nil {
 				t.Fatalf("Failed to create category mapper: %v", err)
 			}
@@ -330,7 +330,7 @@ func TestCategoryMapper_ReloadConfig(t *testing.T) {
 		t.Fatalf("Failed to write config file: %v", err)
 	}
 
-	mapper, err := NewCategoryMapper(configPath)
+	mapper, err := NewCategoryMapper(configPath, nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -406,7 +406,7 @@ func TestCategoryMapper_ReloadConfig_InvalidConfig(t *testing.T) {
 		t.Fatalf("Failed to write config file: %v", err)
 	}
 
-	mapper, err := NewCategoryMapper(configPath)
+	mapper, err := NewCategoryMapper(configPath, nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -462,7 +462,7 @@ func TestCategoryMapper_MapCategoryWithML(t *testing.T) {
 		t.Fatalf("Failed to write config file: %v", err)
 	}
 
-	mapper, err := NewCategoryMapper(configPath)
+	mapper, err := NewCategoryMapper(configPath, nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}

@@ -39,6 +39,26 @@ type ClothingItem struct {
 	Style       string
 }
 
+// MLClassifierClient defines the interface for ML classification service
+// This interface is compatible with ml.ClassifierClient from internal/ml package
+type MLClassifierClient interface {
+	ClassifyItem(ctx context.Context, req *MLClassifyRequest) (*MLClassifyResponse, error)
+}
+
+// MLClassifyRequest represents the request payload for classification
+type MLClassifyRequest struct {
+	Name        string   `json:"name"`
+	Subcategory string   `json:"subcategory"`
+	Materials   []string `json:"materials"`
+	Style       string   `json:"style"`
+}
+
+// MLClassifyResponse represents the response from the ML service
+type MLClassifyResponse struct {
+	Category   string  `json:"category"`
+	Confidence float64 `json:"confidence"`
+}
+
 // categoryMapper is the concrete implementation of CategoryMapper
 type categoryMapper struct {
 	mu               sync.RWMutex
@@ -46,13 +66,15 @@ type categoryMapper struct {
 	configPath       string
 	unmappedSubcats  map[string]bool
 	hardcodedDefault *CategoryMappingConfig
+	mlClient         MLClassifierClient // ML Classifier Client for unknown subcategories
 }
 
 // NewCategoryMapper creates a new CategoryMapper instance
-func NewCategoryMapper(configPath string) (CategoryMapper, error) {
+func NewCategoryMapper(configPath string, mlClient MLClassifierClient) (CategoryMapper, error) {
 	mapper := &categoryMapper{
 		configPath:      configPath,
 		unmappedSubcats: make(map[string]bool),
+		mlClient:        mlClient,
 		hardcodedDefault: &CategoryMappingConfig{
 			Version:  "1.0.0-hardcoded",
 			Fallback: "upper",
@@ -196,15 +218,64 @@ func (m *categoryMapper) MapCategory(category, subcategory string) (string, erro
 }
 
 // MapCategoryWithML attempts ML classification for unknown subcategories
-// This is a placeholder implementation - will be integrated with ML service later
+// Implements fallback chain: config mapping → ML classification → default fallback
 func (m *categoryMapper) MapCategoryWithML(ctx context.Context, item *ClothingItem) (category string, confidence float64, err error) {
-	// For now, just use the regular mapping
-	// This will be implemented in Task 10-11 when ML classifier is added
+	// Step 1: Try config-based mapping first
 	mappedCategory, mapErr := m.MapCategory("", item.Subcategory)
 	if mapErr != nil {
 		return "", 0, mapErr
 	}
-	return mappedCategory, 0, nil
+
+	// Check if the result is the fallback category (indicates unknown subcategory)
+	m.mu.RLock()
+	fallbackCategory := m.config.Fallback
+	m.mu.RUnlock()
+
+	// If config mapping found a specific mapping (not fallback), use it
+	normalizedSubcat := strings.ToLower(strings.TrimSpace(item.Subcategory))
+	m.mu.RLock()
+	_, foundInConfig := m.config.Mappings[normalizedSubcat]
+	m.mu.RUnlock()
+
+	if foundInConfig {
+		// Config mapping succeeded, return with confidence 0 (config-based)
+		return mappedCategory, 0, nil
+	}
+
+	// Step 2: Subcategory is unknown, try ML classification if client is available
+	if m.mlClient != nil {
+		mlReq := &MLClassifyRequest{
+			Name:        item.Name,
+			Subcategory: item.Subcategory,
+			Materials:   item.Materials,
+			Style:       item.Style,
+		}
+
+		mlResp, mlErr := m.mlClient.ClassifyItem(ctx, mlReq)
+		if mlErr != nil {
+			// ML service unavailable or error, log and fall back to default
+			fmt.Fprintf(os.Stderr, "ML classification failed for item '%s': %v. Using fallback category '%s'\n",
+				item.Name, mlErr, fallbackCategory)
+			return fallbackCategory, 0, nil
+		}
+
+		// ML classification succeeded, check confidence thresholds
+		if mlResp.Confidence > 0.8 {
+			// High confidence: use ML category with ml_auto source
+			return mlResp.Category, mlResp.Confidence, nil
+		} else if mlResp.Confidence >= 0.5 {
+			// Medium confidence: use ML category but flag for review (ml_flagged source)
+			return mlResp.Category, mlResp.Confidence, nil
+		} else {
+			// Low confidence: fall back to default category
+			fmt.Fprintf(os.Stderr, "ML confidence too low (%.3f) for item '%s'. Using fallback category '%s'\n",
+				mlResp.Confidence, item.Name, fallbackCategory)
+			return fallbackCategory, 0, nil
+		}
+	}
+
+	// Step 3: ML client not available, use default fallback
+	return fallbackCategory, 0, nil
 }
 
 // ReloadConfig hot-reloads the mapping configuration

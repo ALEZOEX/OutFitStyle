@@ -280,6 +280,10 @@ async def limit_request_size(request: Request, call_next):
 
     return await call_next(request)
 
+# Include category classification router
+from api.routes import router as classification_router
+app.include_router(classification_router)
+
 # ═══════════════════════════════════════════
 # LOGGING & CONFIG
 # ═══════════════════════════════════════════

@@ -106,6 +106,7 @@ func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/google", h.GoogleSignIn).Methods(http.MethodPost)
 	r.HandleFunc("/validate", h.ValidateToken).Methods(http.MethodPost)
 	r.HandleFunc("/forgot-password", h.ForgotPassword).Methods(http.MethodPost)
+	r.HandleFunc("/verify-reset-code", h.VerifyResetCode).Methods(http.MethodPost)
 	r.HandleFunc("/reset-password", h.ResetPassword).Methods(http.MethodPost)
 }
 
@@ -518,11 +519,86 @@ func (h *AuthHandler) ValidateToken(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// verifyResetCodeRequest запрос на проверку кода восстановления пароля
+type verifyResetCodeRequest struct {
+	Email string `json:"email"`
+	Code  string `json:"code"`
+}
+
+// VerifyResetCode обрабатывает запрос на проверку кода восстановления пароля
+// Проверяет код без его потребления (код остается валидным для финального сброса)
+func (h *AuthHandler) VerifyResetCode(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var req verifyResetCodeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
+		return
+	}
+
+	// Валидация
+	v := validation.NewValidator()
+	validation.ValidateEmail(v, req.Email)
+	validation.ValidateStringLength(v, req.Code, 6, 6, "code", "code")
+
+	if !v.Valid() {
+		resp.ValidationError(w, v.Errors)
+		return
+	}
+
+	email := strings.TrimSpace(strings.ToLower(req.Email))
+
+	// Проверяем код в Redis
+	codeKey := fmt.Sprintf("password_reset:%s", email)
+	var storedCode string
+
+	if h.redis != nil {
+		val, err := h.redis.Get(r.Context(), codeKey).Result()
+		if err == redis.Nil {
+			resp.Error(w, http.StatusBadRequest, errors.New("invalid or expired code"))
+			return
+		}
+		if err != nil {
+			resp.Error(w, http.StatusInternalServerError, errors.Wrap(err, "failed to verify code"))
+			return
+		}
+		storedCode = val
+	} else {
+		resp.Error(w, http.StatusInternalServerError, errors.New("Redis unavailable"))
+		return
+	}
+
+	// Проверяем количество попыток (rate limiting) - 10 попыток за 15 минут
+	attemptsKey := fmt.Sprintf("password_reset_verify_attempts:%s", email)
+	attempts, err := h.redis.Incr(r.Context(), attemptsKey).Result()
+	if err != nil {
+		h.logger.Error("failed to check password reset verify attempts", zap.String("email", email), zap.Error(err))
+	}
+	if attempts == 1 {
+		// Устанавливаем TTL 15 минут для счётчика попыток
+		_, _ = h.redis.Expire(r.Context(), attemptsKey, 15*time.Minute).Result()
+	}
+	if attempts > 10 {
+		resp.Error(w, http.StatusTooManyRequests, errors.New("too many verification attempts, please try again later"))
+		return
+	}
+
+	// Сравниваем коды используя constant-time comparison (защита от timing-атаки)
+	if subtle.ConstantTimeCompare([]byte(storedCode), []byte(req.Code)) != 1 {
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid code"))
+		return
+	}
+
+	// Код валиден - возвращаем успех БЕЗ потребления кода
+	// Код остается в Redis для финального сброса пароля
+	resp.Success(w, map[string]any{"success": true})
+}
+
 // VerifyCode обрабатывает запрос на проверку кода аутентификации
-// В настоящее время не используется — восстановление пароля через email с кодом
+// DEPRECATED: Используйте VerifyResetCode вместо этого
 func (h *AuthHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	resp.Error(w, http.StatusNotImplemented, errors.New("VerifyCode endpoint is deprecated. Use /auth/reset-password instead"))
+	resp.Error(w, http.StatusNotImplemented, errors.New("VerifyCode endpoint is deprecated. Use /auth/verify-reset-code instead"))
 }
 
 // RefreshToken обрабатывает запрос на обновление токена

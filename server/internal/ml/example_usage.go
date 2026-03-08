@@ -83,7 +83,7 @@ Example 3: Integration with category mapper
 		mlClient := ml.NewClassifierClient("http://localhost:8001")
 
 		// Initialize category mapper
-		mapper, err := catalog.NewCategoryMapper("config/category_mapping.json")
+		mapper, err := catalog.NewCategoryMapper("config/category_mapping.json", nil)
 		if err != nil {
 			log.Fatalf("Failed to create mapper: %v", err)
 		}

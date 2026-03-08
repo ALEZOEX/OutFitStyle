@@ -7,7 +7,7 @@ package catalog
 Example 1: Basic validation workflow
 
 	// Initialize the category mapper
-	mapper, err := NewCategoryMapper("config/category_mapping.json")
+	mapper, err := NewCategoryMapper("config/category_mapping.json", nil)
 	if err != nil {
 		log.Fatalf("Failed to create mapper: %v", err)
 	}
@@ -46,7 +46,7 @@ Example 2: Integration with import pipeline
 		}
 
 		// Initialize mapper and validator
-		mapper, _ := NewCategoryMapper("config/category_mapping.json")
+		mapper, _ := NewCategoryMapper("config/category_mapping.json", nil)
 		validator := NewImportValidator(mapper)
 
 		// Process in batches

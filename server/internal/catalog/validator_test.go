@@ -10,7 +10,7 @@ import (
 )
 
 func TestValidateBatch_EmptyBatch(t *testing.T) {
-	mapper, err := NewCategoryMapper("../../config/category_mapping.json")
+	mapper, err := NewCategoryMapper("../../config/category_mapping.json", nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestValidateBatch_EmptyBatch(t *testing.T) {
 }
 
 func TestValidateBatch_KnownSubcategories(t *testing.T) {
-	mapper, err := NewCategoryMapper("../../config/category_mapping.json")
+	mapper, err := NewCategoryMapper("../../config/category_mapping.json", nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestValidateBatch_KnownSubcategories(t *testing.T) {
 }
 
 func TestValidateBatch_UnknownSubcategories(t *testing.T) {
-	mapper, err := NewCategoryMapper("../../config/category_mapping.json")
+	mapper, err := NewCategoryMapper("../../config/category_mapping.json", nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -104,7 +104,7 @@ func TestValidateBatch_UnknownSubcategories(t *testing.T) {
 }
 
 func TestValidateBatch_FallbackThresholdExactly10Percent(t *testing.T) {
-	mapper, err := NewCategoryMapper("../../config/category_mapping.json")
+	mapper, err := NewCategoryMapper("../../config/category_mapping.json", nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestValidateBatch_FallbackThresholdExactly10Percent(t *testing.T) {
 }
 
 func TestValidateBatch_FallbackThresholdExceeded(t *testing.T) {
-	mapper, err := NewCategoryMapper("../../config/category_mapping.json")
+	mapper, err := NewCategoryMapper("../../config/category_mapping.json", nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -173,7 +173,7 @@ func TestValidateBatch_FallbackThresholdExceeded(t *testing.T) {
 }
 
 func TestValidateBatch_FallbackThresholdJustOver10Percent(t *testing.T) {
-	mapper, err := NewCategoryMapper("../../config/category_mapping.json")
+	mapper, err := NewCategoryMapper("../../config/category_mapping.json", nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestValidateBatch_FallbackThresholdJustOver10Percent(t *testing.T) {
 }
 
 func TestGenerateReport_CreatesFile(t *testing.T) {
-	mapper, err := NewCategoryMapper("../../config/category_mapping.json")
+	mapper, err := NewCategoryMapper("../../config/category_mapping.json", nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
@@ -276,7 +276,7 @@ func TestGenerateReportPath_FormatsCorrectly(t *testing.T) {
 }
 
 func TestValidateBatch_CaseInsensitiveSubcategory(t *testing.T) {
-	mapper, err := NewCategoryMapper("../../config/category_mapping.json")
+	mapper, err := NewCategoryMapper("../../config/category_mapping.json", nil)
 	if err != nil {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}

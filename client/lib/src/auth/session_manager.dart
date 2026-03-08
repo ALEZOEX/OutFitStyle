@@ -563,7 +563,27 @@ class SessionManager {
     }
   }
 
-  /// Сброс пароля — шаг 2: проверка кода и установка нового пароля
+  /// Проверка кода восстановления пароля — шаг 2: валидация кода на сервере
+  ///
+  /// Backend проверяет код БЕЗ его потребления (код остается валидным для финального сброса)
+  Future<void> verifyResetCode(String email, String code) async {
+    try {
+      AppLogger.info('Verifying reset code for: ${_maskEmail(email)}');
+
+      // Вызываем backend API /api/v1/auth/verify-reset-code
+      await _apiClient.post('/api/v1/auth/verify-reset-code', data: {
+        'email': email,
+        'code': code,
+      });
+
+      AppLogger.info('Reset code verified for: ${_maskEmail(email)}');
+    } catch (e) {
+      AppLogger.error('Error verifying reset code: $e', e);
+      rethrow;
+    }
+  }
+
+  /// Сброс пароля — шаг 3: проверка кода и установка нового пароля
   ///
   /// Backend проверяет код и обновляет пароль пользователя
   Future<void> resetPasswordWithCode(String email, String code, String newPassword) async {

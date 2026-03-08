@@ -81,8 +81,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      // Код будет проверен на сервере при сбросе пароля
-      // Просто переходим к шагу ввода нового пароля
+      final sessionManager = ref.read(sessionManagerProvider);
+      final email = _emailController.text.trim();
+      final code = _codeController.text.trim();
+
+      // Validate code on server before allowing progression
+      await sessionManager.verifyResetCode(email, code);
+
+      if (!mounted) return;
+
+      // Only proceed to password step after successful validation
       setState(() {
         _currentStep = _Step.password;
         _isLoading = false;
