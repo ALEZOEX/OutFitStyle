@@ -125,7 +125,7 @@ spec:
           startupProbe:
             exec:
               command:
-              - /bin/sh
+              - sh
               - -c
               - (echo -n "GET /health HTTP/1.0\r\nHost: localhost\r\n\r\n"; sleep 1) | nc localhost 8080 | grep -q "200 OK"
             initialDelaySeconds: 5
