@@ -9,13 +9,16 @@ import (
 	"testing"
 )
 
-// mockMLClient is a mock implementation of MLClassifierClient for testing
 type mockMLClient struct {
-	response *MLClassifyResponse
-	err      error
+	response          *MLClassifyResponse
+	shouldNotBeCalled bool
+	err               error
 }
 
 func (m *mockMLClient) ClassifyItem(ctx context.Context, req *MLClassifyRequest) (*MLClassifyResponse, error) {
+	if m.shouldNotBeCalled {
+		panic("ML client should not be called for known subcategories")
+	}
 	if m.err != nil {
 		return nil, m.err
 	}

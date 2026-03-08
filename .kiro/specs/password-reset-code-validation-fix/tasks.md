@@ -1,6 +1,6 @@
-# Implementation Plan
+6# Implementation Plan
 
-- [ ] 1. Write bug condition exploration test
+- [x] 1. Write bug condition exploration test
   - **Property 1: Bug Condition** - Invalid Code Allows UI Progression Without Server Validation
   - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
   - **DO NOT attempt to fix the test or the code when it fails**
@@ -15,7 +15,7 @@
   - Mark task complete when test is written, run, and failure is documented
   - _Requirements: 2.1, 2.2_
 
-- [ ] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Existing Password Reset Flow Behavior
   - **IMPORTANT**: Follow observation-first methodology
   - Observe behavior on UNFIXED code for non-buggy inputs (email submission, final password reset, code resend)
@@ -31,7 +31,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 3. Fix for password reset code validation vulnerability
+- [x] 3. Fix for password reset code validation vulnerability
 
   - [x] 3.1 Create backend verification endpoint
     - Add `verifyResetCodeRequest` struct in `auth_handler.go` with email and code fields
@@ -90,7 +90,7 @@
     - Confirm all tests still pass after fix: email submission, final password reset, code resend, rate limiting, UI flow
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Run all unit tests for backend verification endpoint
   - Run all integration tests for full password reset flow
   - Run property-based tests for code validation and rate limiting

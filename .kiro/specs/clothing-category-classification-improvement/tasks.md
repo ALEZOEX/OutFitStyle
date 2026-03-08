@@ -112,7 +112,7 @@ y
     - Update status field appropriately
     - _Requirements: 5.5, 5.6_
 
-- [~] 6. Checkpoint - Verify Validation System integration
+- [x] 6. Checkpoint - Verify Validation System integration
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 7. Implement Classification Dashboard API
@@ -202,11 +202,11 @@ y
     - Test transaction rollback scenarios
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8_
 
-- [~] 9. Checkpoint - Verify Dashboard and Correction Tool APIs
+- [x] 9. Checkpoint - Verify Dashboard and Correction Tool APIs
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 10. Implement ML Classifier Client (Go)
-  - [ ] 10.1 Create ML Classifier Client interface and HTTP client
+  - [x] 10.1 Create ML Classifier Client interface and HTTP client
     - Create `server/internal/ml/classifier_client.go`
     - Implement ClassifyItem method with HTTP POST to ML service
     - Implement HealthCheck method
@@ -218,7 +218,7 @@ y
     - **Property 4: ML Confidence Score Range**
     - **Validates: Requirements 3.2**
 
-  - [ ] 10.3 Implement confidence-based category assignment logic
+  - [x] 10.3 Implement confidence-based category assignment logic
     - Add logic to auto-assign category when confidence > 0.8 (classification_source = 'ml_auto')
     - Add logic to flag for review when confidence 0.5-0.8 (classification_source = 'ml_flagged')
     - Use fallback category when confidence < 0.5 or ML unavailable
@@ -262,7 +262,7 @@ y
     - Verify validation reports include ML statistics
     - _Requirements: 3.3, 3.4, 5.7_
 
-- [~] 12. Checkpoint - Verify ML Classifier integration
+- [x] 12. Checkpoint - Verify ML Classifier integration
   - Ensure all tests pass, ask the user if questions arise.
 
 - [~] 13. Implement ML Classifier Service (Python)
@@ -378,7 +378,7 @@ y
     - Test concurrent updates
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8_
 
-- [~] 17. Final checkpoint - Ensure all tests pass
+- [x] 17. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
