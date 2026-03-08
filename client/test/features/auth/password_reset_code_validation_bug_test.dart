@@ -12,8 +12,18 @@ import 'package:outfitstyle_client/src/core/api/api_client.dart';
 /// - On FIXED code: Test should PASS (bug is fixed - server validation occurs)
 ///
 /// GOAL: Verify that the bug condition no longer exists by confirming:
-/// 1. Server-side validation is cal
-(() {
+/// 1. Server-side validation is called before UI progression
+/// 2. Invalid codes are rejected by the server
+/// 3. Valid codes are accepted by the server
+/// 4. Rate limiting is enforced
+
+class MockApiClient extends Mock implements ApiClient {}
+
+void main() {
+  group('Password Reset Code Validation - Bug Condition Exploration', () {
+    late MockApiClient mockApiClient;
+
+    setUp(() {
       mockApiClient = MockApiClient();
       // Note: SessionManager would need to accept ApiClient in constructor
       // For now, this demonstrates the test structure
