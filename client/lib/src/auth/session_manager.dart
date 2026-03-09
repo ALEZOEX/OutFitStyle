@@ -207,6 +207,9 @@ class SessionManager {
       if (accessToken != null && accessToken.isNotEmpty) {
         await _sharedPreferences.setString('access_token', accessToken);
         AppLogger.info('Access token stored for user: ${_maskEmail(email)}');
+        // Verify it was saved
+        final saved = _sharedPreferences.getString('access_token');
+        AppLogger.info('Access token verification: ${saved != null ? "saved successfully (${saved.length} chars)" : "FAILED TO SAVE"}');
       } else {
         AppLogger.warning('No access_token in login response for user: ${_maskEmail(email)}');
       }
