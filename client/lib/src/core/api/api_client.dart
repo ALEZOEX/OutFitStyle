@@ -36,9 +36,13 @@ class ApiClient {
             !path.contains('/auth/google')) {
           // Get access_token from SharedPreferences
           final accessToken = _sharedPreferences?.getString('access_token');
+          developer.log('[ApiClient] Checking access_token for ${options.path}', name: 'ApiClient');
+          developer.log('[ApiClient] access_token: ${accessToken != null ? "present (${accessToken.length} chars)" : "null"}', name: 'ApiClient');
           if (accessToken != null && accessToken.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $accessToken';
             developer.log('[ApiClient] Added Authorization header', name: 'ApiClient');
+          } else {
+            developer.log('[ApiClient] No access_token found - request will be unauthorized', name: 'ApiClient');
           }
         }
         return handler.next(options);
