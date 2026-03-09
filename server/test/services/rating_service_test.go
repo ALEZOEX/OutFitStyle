@@ -214,6 +214,14 @@ func (m *MockClothingRepository) CreateUserItem(ctx context.Context, userID doma
 	return args.Get(0).(domain.ID), args.Error(1)
 }
 
+func (m *MockClothingRepository) GetItemsByCategory(ctx context.Context, userID domain.ID) (map[string][]domain.ClothingItem, error) {
+	args := m.Called(ctx, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(map[string][]domain.ClothingItem), args.Error(1)
+}
+
 // MockEventPublisher - мок-реализация EventPublisher
 type MockEventPublisher struct {
 	mock.Mock
