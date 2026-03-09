@@ -56,8 +56,8 @@ class SessionManager {
   late final StreamController<UserSession?> _sessionStreamController;
   StreamSubscription<User?>? _authSubscription;
 
-  SessionManager(this._firebaseAuth, this._sharedPreferences)
-      : _apiClient = PublicApiClient() {
+  SessionManager(this._firebaseAuth, this._sharedPreferences, [PublicApiClient? apiClient])
+      : _apiClient = apiClient ?? PublicApiClient() {
     _sessionStreamController = StreamController<UserSession?>.broadcast();
     _initializeSession();
     _setupAuthStateListener();
