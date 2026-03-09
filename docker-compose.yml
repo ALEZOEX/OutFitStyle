@@ -50,8 +50,8 @@ services:
 
   migrate:
     build:
-      context: .
-      dockerfile: ./server/Dockerfile
+      context: ./server
+      dockerfile: Dockerfile
     command: /app/migrate
     environment:
       - DB_HOST=postgres
@@ -68,8 +68,8 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: ./server/Dockerfile
+      context: ./server
+      dockerfile: Dockerfile
     command: /app/server
     environment:
       - RUN_IN_DOCKER=1
