@@ -1068,3 +1068,121 @@ func (r *ClothingRepository) ListCatalogCandidatesLite(ctx context.Context, incl
 
 	return items, nil
 }
+
+// GetItemsByCategory возвращает предметы одежды пользователя, сгруппированные по категориям
+func (r *ClothingRepository) GetItemsByCategory(ctx context.Context, userID domain.ID) (map[string][]domain.ClothingItem, error) {
+	query := `
+		SELECT
+			id, name, description, category, subcategory, min_temp, max_temp, warmth_level,
+			rain_ok, snow_ok, wind_ok, style, formality_level, base_colour, pattern,
+			usage, materials, fit, icon_emoji, source, owner_id, is_owned, is_active,
+			created_at, updated_at
+		FROM clothing_items
+		WHERE owner_id = $1 AND is_active = true
+		ORDER BY category, created_at DESC
+	`
+
+	rows, err := r.db.Query(ctx, query, userID)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query clothing items by category")
+	}
+	defer rows.Close()
+
+	// Группируем предметы по категориям
+	itemsByCategory := make(map[string][]domain.ClothingItem)
+
+	for rows.Next() {
+		var item domain.ClothingItem
+		var description *string
+		var minTemp, maxTemp, warmthLevel *int16
+		var formalityLevel *int16
+		var baseColour *string
+		var usageJSON []byte
+		var materialsJSON []byte
+		var ownerID *uuid.UUID
+		var createdAt, updatedAt time.Time
+
+		err := rows.Scan(
+			&item.ID,
+			&item.Name,
+			&description,
+			&item.Category,
+			&item.Subcategory,
+			&minTemp,
+			&maxTemp,
+			&warmthLevel,
+			&item.RainOK,
+			&item.SnowOK,
+			&item.WindOK,
+			&item.Style,
+			&formalityLevel,
+			&baseColour,
+			&item.Pattern,
+			&usageJSON,
+			&materialsJSON,
+			&item.Fit,
+			&item.IconEmoji,
+			&item.Source,
+			&ownerID,
+			&item.IsOwned,
+			&item.IsActive,
+			&createdAt,
+			&updatedAt,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to scan clothing item")
+		}
+
+		// Set nullable fields
+		if description != nil {
+			item.Description = description
+		}
+		if minTemp != nil {
+			item.MinTemp = minTemp
+		}
+		if maxTemp != nil {
+			item.MaxTemp = maxTemp
+		}
+		if warmthLevel != nil {
+			item.WarmthLevel = warmthLevel
+		}
+		if formalityLevel != nil {
+			item.FormalityLevel = formalityLevel
+		}
+		if baseColour != nil {
+			item.BaseColour = baseColour
+		}
+		if ownerID != nil {
+			oid := domain.ID(*ownerID)
+			item.OwnerID = &oid
+		}
+
+		// Parse usage and materials from JSON
+		if len(usageJSON) > 0 {
+			err = json.Unmarshal(usageJSON, &item.Usage)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal usage")
+			}
+		}
+		if len(materialsJSON) > 0 {
+			err = json.Unmarshal(materialsJSON, &item.Materials)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to unmarshal materials")
+			}
+		}
+
+		item.CreatedAt = createdAt
+		item.UpdatedAt = updatedAt
+
+		// Добавляем предмет в соответствующую категорию
+		itemsByCategory[item.Category] = append(itemsByCategory[item.Category], item)
+	}
+
+	// Проверяем ошибки после итерации
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "error iterating clothing items")
+	}
+
+	// Возвращаем пустую мапу, если нет предметов (не ошибку)
+	return itemsByCategory, nil
+}

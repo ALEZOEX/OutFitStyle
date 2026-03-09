@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"go.uber.org/zap"
+
 	"outfitstyle/server/internal/core/application/repositories"
 	"outfitstyle/server/internal/core/domain"
 )
@@ -30,6 +32,9 @@ type getRecommendationsUseCase struct {
 	recommendationRepo repositories.RecommendationRepository
 	weatherService     WeatherService
 	mlService          MLService
+	catalogRepo        repositories.CatalogRepository
+	wardrobeRepo       repositories.ClothingRepository
+	logger             *zap.Logger
 }
 
 // WeatherService defines the interface for weather service.
@@ -54,12 +59,18 @@ func NewGetRecommendationsUseCase(
 	recommendationRepo repositories.RecommendationRepository,
 	weatherService WeatherService,
 	mlService MLService,
+	catalogRepo repositories.CatalogRepository,
+	wardrobeRepo repositories.ClothingRepository,
+	logger *zap.Logger,
 ) GetRecommendationsUseCase {
 	return &getRecommendationsUseCase{
 		userRepo:           userRepo,
 		recommendationRepo: recommendationRepo,
 		weatherService:     weatherService,
 		mlService:          mlService,
+		catalogRepo:        catalogRepo,
+		wardrobeRepo:       wardrobeRepo,
+		logger:             logger,
 	}
 }
 
@@ -95,13 +106,70 @@ func (uc *getRecommendationsUseCase) Execute(
 	_ = userProfile // пока профиль не используется
 
 	// Получаем предметы гардероба пользователя по категориям
-	// В реальной реализации здесь будет вызов wardrobeRepo.GetItemsByCategory
-	itemsByCategory := make(map[string][]domain.ClothingItem)
-	// Например:
-	// itemsByCategory, err = uc.wardrobeRepo.GetItemsByCategory(ctx, userID)
-	// if err != nil {
-	//     return nil, fmt.Errorf("failed to get wardrobe items: %w", err)
-	// }
+	itemsByCategory, err := uc.wardrobeRepo.GetItemsByCategory(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get wardrobe items: %w", err)
+	}
+
+	// Двухуровневая логика поиска: проверяем наличие обязательных категорий
+	requiredCategories := []string{"upper", "lower", "footwear"}
+	missingCategories := []string{}
+
+	for _, category := range requiredCategories {
+		if items, exists := itemsByCategory[category]; !exists || len(items) == 0 {
+			missingCategories = append(missingCategories, category)
+		}
+	}
+
+	// Если есть отсутствующие категории, получаем предметы из базового каталога
+	if len(missingCategories) > 0 {
+		uc.logger.Info("Using fallback to catalog for missing categories",
+			zap.String("user_id", userID.String()),
+			zap.Strings("missing_categories", missingCategories),
+		)
+
+		catalogItemsCount := 0
+		for _, category := range missingCategories {
+			// Подготавливаем фильтры для поиска в каталоге
+			categoryFilter := category
+			searchParams := repositories.CatalogSearchParams{
+				Category: &categoryFilter,
+				Limit:    10, // Ограничиваем количество кандидатов
+			}
+
+			// Добавляем фильтр по температуре, если доступны данные о погоде
+			if weather != nil {
+				minTemp := int16(weather.Temperature - 5)
+				maxTemp := int16(weather.Temperature + 5)
+				searchParams.Filters = domain.ClothingItemFilters{
+					MinTemp: &minTemp,
+					MaxTemp: &maxTemp,
+				}
+			}
+
+			// Выполняем поиск в каталоге
+			catalogItems, _, err := uc.catalogRepo.Search(ctx, searchParams)
+			if err != nil {
+				uc.logger.Error("Failed to search catalog for missing category",
+					zap.String("user_id", userID.String()),
+					zap.String("category", category),
+					zap.Error(err),
+				)
+				continue
+			}
+
+			// Добавляем найденные предметы в itemsByCategory
+			if len(catalogItems) > 0 {
+				itemsByCategory[category] = catalogItems
+				catalogItemsCount += len(catalogItems)
+			}
+		}
+
+		uc.logger.Info("Fallback completed",
+			zap.String("user_id", userID.String()),
+			zap.Int("catalog_items_added", catalogItemsCount),
+		)
+	}
 
 	// Get ML recommendations с предметами гардероба
 	mlRecommendation, err := uc.mlService.GetRecommendations(ctx, userID, *weather, itemsByCategory)
