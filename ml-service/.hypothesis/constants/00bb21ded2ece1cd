@@ -1,0 +1,4 @@
+# file: D:\outfitstyle\ml-service\model\enhanced_predictor.py
+# hypothesis_version: 6.151.9
+
+[100, 'Model not loaded', 'cat_features', 'catboost_cbm', 'cbm_path', 'classifier', 'feature_columns', 'format', 'model.cbm', 'model_kind', 'preds', 'proba', 'ranker', 'rb', 'unknown', 'version']

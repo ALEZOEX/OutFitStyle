@@ -29,4 +29,7 @@ type ClothingRepository interface {
 
 	// CreateUserItem создает элемент одежды пользователя
 	CreateUserItem(ctx context.Context, userID domain.ID, item domain.ClothingItem) (domain.ID, error)
+
+	// GetItemsByCategory возвращает предметы одежды пользователя, сгруппированные по категориям
+	GetItemsByCategory(ctx context.Context, userID domain.ID) (map[string][]domain.ClothingItem, error)
 }

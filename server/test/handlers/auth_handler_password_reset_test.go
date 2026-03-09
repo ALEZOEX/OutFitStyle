@@ -15,7 +15,6 @@ import (
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/handlers"
-	"outfitstyle/server/internal/api/response"
 	"outfitstyle/server/internal/pkg/resp"
 )
 

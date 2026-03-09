@@ -320,6 +320,9 @@ func main() {
 		recommendationRepo,
 		weatherServiceAdapter,
 		mlService, // Using the ML service adapter instead of the raw client
+		catalogRepo,
+		clothingRepo,
+		logger,
 	)
 
 	// ---------- Recommendation cache ----------

@@ -1,0 +1,4 @@
+# file: D:\outfitstyle\ml-service\model\outfit_generator.py
+# hypothesis_version: 6.151.9
+
+[-100.0, 0.0, 0.1, 0.15, 0.3, 0.5, 0.55, 0.6, 0.8, 1.0, 3.0, 4.0, 100.0, 'accessory', 'base', 'base_colour', 'beige', 'black', 'brown', 'business', 'casual', 'category', 'classic', 'color_harmony', 'elegant', 'footwear', 'formal', 'formality_level', 'gray', 'id', 'item_style', 'lower', 'max_temp', 'min_temp', 'navy', 'outdoor', 'outerwear', 'smart', 'smart_casual', 'sport', 'street', 'style_coherence', 'upper', 'weather_fit', 'white']
