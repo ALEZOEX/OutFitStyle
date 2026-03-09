@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Mock classes
@@ -38,8 +37,6 @@ void main() {
       'Bug Condition: Authenticated requests should include Bearer token after login',
       () async {
         // Arrange
-        const email = 'test@example.com';
-        const password = 'password123';
         const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test';
 
         // Mock successful login response with access_token
@@ -59,8 +56,6 @@ void main() {
       'Bug Condition: Login should extract and store access_token from response',
       () async {
         // Arrange
-        const email = 'test@example.com';
-        const password = 'password123';
         const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test';
 
         // Track if setString was called with access_token
@@ -88,9 +83,6 @@ void main() {
       'Bug Condition: Registration should extract and store access_token from response',
       () async {
         // Arrange
-        const email = 'newuser@example.com';
-        const password = 'password123';
-        const displayName = 'New User';
         const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.register';
 
         // Track if setString was called with access_token

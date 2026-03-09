@@ -55,7 +55,6 @@ void main() {
           () async {
             // Arrange
             final email = testCase['email'] as String;
-            final password = testCase['password'] as String;
             const userId = 'user-123';
             const displayName = 'Test User';
 
@@ -117,7 +116,6 @@ void main() {
           () async {
             // Arrange
             final email = testCase['email'] as String;
-            final password = testCase['password'] as String;
             final displayName = testCase['displayName'] as String;
             const userId = 'new-user-123';
 
@@ -177,7 +175,7 @@ void main() {
             final uid = testCase['uid'] as String;
             final email = testCase['email'] as String;
             final displayName = testCase['displayName'] as String;
-            final photoUrl = testCase['photoUrl'] as String?;
+            final photoUrl = testCase['photoUrl'];
 
             final sessionData = {
               'uid': uid,
