@@ -237,7 +237,7 @@ y
     - Test confidence score edge cases
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 8.2_
 
-- [~] 11. Integrate ML Classifier with Category Mapper
+- [ ] 11. Integrate ML Classifier with Category Mapper
   - [x] 11.1 Implement MapCategoryWithML method
     - Add ML Classifier Client as dependency to Category Mapper
     - Implement MapCategoryWithML to call ML service for unknown subcategories
@@ -265,7 +265,7 @@ y
 - [x] 12. Checkpoint - Verify ML Classifier integration
   - Ensure all tests pass, ask the user if questions arise.
 
-- [~] 13. Implement ML Classifier Service (Python)
+- [ ] 13. Implement ML Classifier Service (Python)
   - [x] 13.1 Set up Python ML service project structure
     - Create `ml-service/` directory with FastAPI application
     - Set up virtual environment and dependencies (fastapi, uvicorn, scikit-learn, pandas)
@@ -300,7 +300,7 @@ y
     - Test concurrent classification requests
     - _Requirements: 3.1, 3.2_
 
-- [~] 14. Implement ML training functionality
+- [ ] 14. Implement ML training functionality
   - [ ] 14.1 Implement training data export from audit trail
     - Query category_audit table for manually corrected items
     - Join with clothing_items to get full item attributes
@@ -331,7 +331,7 @@ y
     - Test model loading on startup
     - _Requirements: 7.7_
 
-- [~] 15. Add performance optimizations and benchmarks
+- [ ] 15. Add performance optimizations and benchmarks
   - [ ] 15.1 Optimize Category Mapper for batch processing
     - Implement batch mapping method to reduce overhead
     - Add caching for configuration lookups
@@ -358,7 +358,7 @@ y
     - Benchmark validation report generation for 10000 items (target: <1s)
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [~] 16. Final integration and end-to-end testing
+- [ ] 16. Final integration and end-to-end testing
   - [ ] 16.1 Create end-to-end import flow test
     - Test complete pipeline: NDJSON → mapping → ML → validation → database
     - Test with ML service available and unavailable
