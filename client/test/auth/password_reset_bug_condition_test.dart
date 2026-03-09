@@ -16,12 +16,14 @@ class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 // Мок для Response
-class MockResponse extends Mock implements Response {
+class MockResponse extends Mock implements Response<dynamic> {
   @override
-  int get statusCode => 200;
+  final int statusCode;
 
   @override
-  dynamic get data => {'success': true};
+  final dynamic data;
+
+  MockResponse({this.statusCode = 200, this.data = const {'success': true}});
 }
 
 void main() {
@@ -36,8 +38,16 @@ void main() {
       mockFirebaseAuth = MockFirebaseAuth();
       mockSharedPreferences = MockSharedPreferences();
 
+      // Mock authStateChanges to return empty stream
+      when(() => mockFirebaseAuth.authStateChanges())
+          .thenAnswer((_) => Stream<User?>.value(null));
+
+      // Mock SharedPreferences methods
+      when(() => mockSharedPreferences.remove(any())).thenAnswer((_) async => true);
+      when(() => mockSharedPreferences.getString(any())).thenReturn(null);
+
       // Инициализируем SessionManager с мок-объектами
-      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences);
+      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences, mockApiClient);
     });
 
     /// **Property 1: Bug Condition - Invalid Code Allows UI Progression Without Server Validation**
@@ -61,9 +71,9 @@ void main() {
         const invalidCode = '000000'; // Invalid code
 
         // Mock the API to reject invalid code
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/verify-reset-code',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenThrow(
           Exception('invalid or expired code'),
         );
@@ -86,9 +96,9 @@ void main() {
         const validCode = '847291'; // Valid code
 
         // Mock the API to accept valid code
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/verify-reset-code',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenAnswer((_) async => MockResponse());
 
         // Act & Assert
@@ -109,9 +119,9 @@ void main() {
         const code = '123456';
 
         // Mock the API to return rate limit error
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/verify-reset-code',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenThrow(
           Exception('too many verification attempts, please try again later'),
         );
@@ -134,9 +144,9 @@ void main() {
         const expiredCode = '847291'; // Code that expired
 
         // Mock the API to reject expired code
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/verify-reset-code',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenThrow(
           Exception('invalid or expired code'),
         );
@@ -151,10 +161,4 @@ void main() {
       },
     );
   });
-}
-
-// Mock response class
-class MockResponse {
-  final int statusCode = 200;
-  final dynamic data = {'success': true};
 }

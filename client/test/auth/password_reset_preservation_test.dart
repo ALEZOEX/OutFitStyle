@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:outfitstyle_client/src/auth/session_manager.dart';
 import 'package:outfitstyle_client/src/core/api/public_api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dio/dio.dart';
 
 // Мок для PublicApiClient
 class MockPublicApiClient extends Mock implements PublicApiClient {}
@@ -26,8 +27,16 @@ void main() {
       mockFirebaseAuth = MockFirebaseAuth();
       mockSharedPreferences = MockSharedPreferences();
 
+      // Mock authStateChanges to return empty stream
+      when(() => mockFirebaseAuth.authStateChanges())
+          .thenAnswer((_) => Stream<User?>.value(null));
+
+      // Mock SharedPreferences methods
+      when(() => mockSharedPreferences.remove(any())).thenAnswer((_) async => true);
+      when(() => mockSharedPreferences.getString(any())).thenReturn(null);
+
       // Инициализируем SessionManager с мок-объектами
-      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences);
+      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences, mockApiClient);
     });
 
     /// **Property 2: Preservation - Existing Password Reset Flow Behavior**
@@ -51,9 +60,9 @@ void main() {
         const email = 'test@example.com';
 
         // Mock the API to send code successfully
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/forgot-password',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenAnswer((_) async => MockResponse());
 
         // Act & Assert
@@ -73,9 +82,9 @@ void main() {
         const newPassword = 'NewPassword123!';
 
         // Mock the API to reset password successfully
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/reset-password',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenAnswer((_) async => MockResponse());
 
         // Act & Assert
@@ -93,9 +102,9 @@ void main() {
         const email = 'test@example.com';
 
         // Mock the API to send code successfully (resend)
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/forgot-password',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenAnswer((_) async => MockResponse());
 
         // Act & Assert
@@ -120,9 +129,9 @@ void main() {
         const invalidEmail = 'invalid-email';
 
         // Mock the API to reject invalid email
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/forgot-password',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenThrow(
           Exception('invalid email format'),
         );
@@ -144,9 +153,9 @@ void main() {
         const newPassword = 'NewPassword123!';
 
         // Mock the API to reject invalid code
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/reset-password',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenThrow(
           Exception('invalid or expired code'),
         );
@@ -168,9 +177,9 @@ void main() {
         const weakPassword = 'weak'; // Too short
 
         // Mock the API to reject weak password
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/reset-password',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenThrow(
           Exception('password must be at least 8 characters'),
         );
@@ -191,9 +200,9 @@ void main() {
         const email2 = 'user2@example.com';
 
         // Mock the API to send code successfully for both emails
-        when(mockApiClient.post(
+        when(() => mockApiClient.post(
           '/api/v1/auth/forgot-password',
-          data: anyNamed('data'),
+          data: any(named: 'data'),
         )).thenAnswer((_) async => MockResponse());
 
         // Act & Assert
@@ -214,7 +223,12 @@ void main() {
 }
 
 // Mock response class
-class MockResponse {
-  final int statusCode = 200;
-  final dynamic data = {'success': true};
+class MockResponse extends Mock implements Response<dynamic> {
+  @override
+  final int statusCode;
+
+  @override
+  final dynamic data;
+
+  MockResponse({this.statusCode = 200, this.data = const {'success': true}});
 }
