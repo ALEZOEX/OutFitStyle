@@ -27,10 +27,10 @@ UPDATE user_achievements
 SET status = 'unlocked'
 WHERE unlocked_at IS NOT NULL;
 
--- Обновляем status для достижений в процессе
-UPDATE user_achievements
-SET status = 'in_progress'
-WHERE unlocked_at IS NULL AND progress > 0;
+-- Обновляем status для достижений в процессе (если есть колонка progress)
+-- UPDATE user_achievements
+-- SET status = 'in_progress'
+-- WHERE unlocked_at IS NULL AND progress > 0;
 
 -- Индекс для статуса
 CREATE INDEX IF NOT EXISTS idx_user_achievements_status ON user_achievements(status);
