@@ -132,6 +132,7 @@ services:
       - "80:80"
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./client/build/web:/usr/share/nginx/html:ro
     depends_on:
       - api
     restart: unless-stopped
