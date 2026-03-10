@@ -201,8 +201,6 @@ services:
         condition: service_started
       api:
         condition: service_started
-      scraper-api:
-        condition: service_started
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8001/health', timeout=5)"]
       interval: 30s
@@ -211,27 +209,6 @@ services:
       start_period: 10s
     profiles:
       - market
-    restart: unless-stopped
-
-  scraper-api:
-    build:
-      context: ./scraper-api
-      dockerfile: Dockerfile
-    ports:
-      - "8002:8000"
-    volumes:
-      - ./scraper-api/artifacts:/app/artifacts
-    networks:
-      - default
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     restart: unless-stopped
 
 volumes:
