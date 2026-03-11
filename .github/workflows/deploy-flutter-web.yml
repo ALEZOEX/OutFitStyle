@@ -1,0 +1,56 @@
+name: Deploy Flutter Web
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'client/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: |
+          cd client
+          flutter pub get
+
+      - name: Build Flutter Web
+        run: |
+          cd client
+          flutter build web --release
+
+      - name: Patch Service Worker for Auto-Update
+        run: |
+          cd client
+          node scripts/patch_service_worker.js
+
+      - name: Deploy to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "client/build/web/*"
+          target: "/root/OutFitStyle/"
+          strip_components: 0
+
+      - name: Restart Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /root/OutFitStyle
+            docker-compose restart nginx
