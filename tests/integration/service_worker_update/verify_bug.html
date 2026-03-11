@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Worker Bug Verification Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .code {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        .bug-indicator {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+        }
+        .bug-found {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .bug-fixed {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Service Worker Bug Verification Tool</h1>
+
+        <div class="status info">
+            <strong>Purpose:</strong> This tool helps verify the Flutter Service Worker cache update bug.
+            Open this page from your Flutter web app's domain to test Service Worker behavior.
+        </div>
+
+        <h2>Step 1: Check Service Worker Status</h2>
+        <button onclick="checkServiceWorker()">Check Service Worker</button>
+        <div id="sw-status"></div>
+
+        <h2>Step 2: Check Serv
+Instructions</h2>
+        <div class="status warning">
+            <strong>How to use this tool:</strong>
+            <ol>
+                <li>Copy this HTML file to your Flutter web build directory: <code>client/build/web/verify_bug.html</code></li>
+                <li>Start your local server: <code>python -m http.server 8000</code></li>
+                <li>Open: <code>http://localhost:8000/verify_bug.html</code></li>
+                <li>Click each button in order to diagnose the bug</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function checkServiceWorker() {
+            const statusDiv = document.getElementById('sw-status');
+            statusDiv.innerHTML = '<div class="status info">Checking Service Worker...</div>';
+
+            if (!('serviceWorker' in navigator)) {
+                statusDiv.innerHTML = '<div class="status error">❌ Service Worker not supported in this browser</div>';
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+
+                if (!registration) {
+                    statusDiv.innerHTML = '<div class="status warning">⚠️ No Service Worker registered</div>';
+                    return;
+                }
+
+                let html = '<div class="status success">✅ Service Worker registered</div>';
+
+                if (registration.active) {
+                    html += '<div class="result"><strong>Active:</strong> ' + registration.active.state + '<br>';
+                    html += '<strong>Script URL:</strong> ' + registration.active.scriptURL + '</div>';
+                }
+
+                if (registration.waiting) {
+                    html += '<div class="status error">❌ BUG DETECTED: Service Worker in WAITING state</div>';
+                    html += '<div class="result"><strong>Waiting:</strong> ' + registration.waiting.state + '<br>';
+                    html += '<strong>Script URL:</strong> ' + registration.waiting.scriptURL + '</div>';
+                    html += '<div class="status warning">This indicates a new Service Worker was detected but not activated automatically!</div>';
+                }
+
+                if (registration.installing) {
+                    html += '<div class="result"><strong>Installing:</strong> ' + registration.installing.state + '</div>';
+                }
+
+                statusDiv.innerHTML = html;
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function checkVersion() {
+            const statusDiv = document.getElementById('version-status');
+            statusDiv.innerHTML = '<div class="status info">Checking version...</div>';
+
+            try {
+                // Check if _flutter.buildConfig exists
+                if (window._flutter && window._flutter.buildConfig) {
+                    const version = window._flutter.buildConfig.serviceWorkerVersion || 'unknown';
+                    statusDiv.innerHTML = '<div class="status success">✅ Service Worker Version: <code>' + version + '</code></div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status warning">⚠️ Flutter build config not found. This tool must be run from the Flutter app domain.</div>';
+                }
+
+                // Try to fetch and check the Service Worker file
+                const response = await fetch('/flutter_service_worker.js');
+                const text = await response.text();
+                const firstLine = text.split('\n')[0];
+
+                statusDiv.innerHTML += '<div class="result"><strong>Service Worker file first line:</strong><br><code>' + firstLine + '</code></div>';
+
+                if (firstLine.includes('VERSION:')) {
+                    statusDiv.innerHTML += '<div class="status info">Version marker found in Service Worker file</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML += '<div class="status error">❌ Error fetching Service Worker: ' + error.message + '</div>';
+            }
+        }
+
+        async function forceUpdate() {
+            const statusDiv = document.getElementById('update-status');
+            statusDiv.innerHTML = '<div class="status info">Forcing update check...</div>';
+
+            if (!('serviceWorker' in navigator)) {
+                statusDiv.innerHTML = '<div class="status error">❌ Service Worker not supported</div>';
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+
+                if (!registration) {
+                    statusDiv.innerHTML = '<div class="status warning">⚠️ No Service Worker registered</div>';
+                    return;
+                }
+
+                await registration.update();
+
+                // Wait a bit for the update to process
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const updatedReg = await navigator.serviceWorker.getRegistration();
+
+                let html = '<div class="status success">✅ Update check completed</div>';
+
+                if (updatedReg.waiting) {
+                    html += '<div class="status error">❌ BUG CONFIRMED: New Service Worker detected but in WAITING state</div>';
+                    html += '<div class="status warning">The new Service Worker is not activating automatically. This is the bug!</div>';
+                } else if (updatedReg.active && !updatedReg.waiting) {
+                    html += '<div class="status success">✅ Service Worker is active and up to date</div>';
+                }
+
+                statusDiv.innerHTML = html;
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function checkCacheHeaders() {
+            const statusDiv = document.getElementById('cache-status');
+            statusDiv.innerHTML = '<div class="status info">Checking cache headers...</div>';
+
+            try {
+                const response = await fetch('/flutter_service_worker.js', { cache: 'reload' });
+                const headers = response.headers;
+
+                let html = '<div class="result"><strong>Cache Headers for flutter_service_worker.js:</strong><br>';
+
+                const cacheControl = headers.get('cache-control');
+                const pragma = headers.get('pragma');
+                const expires = headers.get('expires');
+
+                html += '<code>Cache-Control: ' + (cacheControl || 'not set') + '</code><br>';
+                html += '<code>Pragma: ' + (pragma || 'not set') + '</code><br>';
+                html += '<code>Expires: ' + (expires || 'not set') + '</code><br>';
+                html += '</div>';
+
+                if (cacheControl && (cacheControl.includes('no-cache') || cacheControl.includes('no-store'))) {
+                    html += '<div class="status success">✅ Proper cache headers set (no-cache/no-store)</div>';
+                } else {
+                    html += '<div class="status error">❌ BUG DETECTED: Service Worker file has aggressive caching</div>';
+                    html += '<div class="status warning">The Service Worker file should have "no-cache, no-store, must-revalidate" headers</div>';
+                }
+
+                statusDiv.innerHTML = html;
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function diagnoseBug() {
+            const diagnosisDiv = document.getElementById('bug-diagnosis');
+            diagnosisDiv.innerHTML = '<div class="status info">Running full diagnosis...</div>';
+
+            let bugFound = false;
+            let issues = [];
+
+            // Check 1: Service Worker waiting state
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration && registration.waiting) {
+                    bugFound = true;
+                    issues.push('Service Worker in WAITING state (not activating automatically)');
+                }
+            } catch (e) {}
+
+            // Check 2: Cache headers
+            try {
+                const response = await fetch('/flutter_service_worker.js', { cache: 'reload' });
+                const cacheControl = response.headers.get('cache-control');
+                if (!cacheControl || (!cacheControl.includes('no-cache') && !cacheControl.includes('no-store'))) {
+                    bugFound = true;
+                    issues.push('Service Worker file has aggressive caching (missing no-cache headers)');
+                }
+            } catch (e) {}
+
+            let html = '';
+            if (bugFound) {
+                html = '<div class="bug-indicator bug-found">';
+                html += '<strong>🐛 BUG CONFIRMED</strong><br><br>';
+                html += 'The following issues were detected:<br>';
+                issues.forEach(issue => {
+                    html += '• ' + issue + '<br>';
+                });
+                html += '</div>';
+                html += '<div class="status error">This confirms the Service Worker cache update bug exists.</div>';
+            } else {
+                html = '<div class="bug-indicator bug-fixed">';
+                html += '<strong>✅ NO BUG DETECTED</strong><br><br>';
+                html += 'Service Worker appears to be working correctly.';
+                html += '</div>';
+                html += '<div class="status success">Either the bug is fixed or no update is available to test.</div>';
+            }
+
+            diagnosisDiv.innerHTML = html;
+        }
+
+        // Auto-run diagnosis on page load
+        window.addEventListener('load', () => {
+            setTimeout(diagnoseBug, 1000);
+        });
+    </script>
+</body>
+</html>
