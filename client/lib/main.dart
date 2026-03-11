@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 import 'src/presentation/app/app.dart';
 import 'src/core/config/build_stamp.dart';
 
+// Service Worker auto-update fix deployed - v1.0.1
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
