@@ -21,8 +21,8 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (localStorage.getItem('theme') === 'dark' || 
-        (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (localStorage.getItem('theme') === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       setIsDark(true);
       document.documentElement.classList.add('dark');
     } else {
@@ -45,10 +45,10 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-[#090a0f] text-gray-900 dark:text-gray-100 font-sans transition-colors duration-500 selection:bg-primary-500/30 overflow-hidden relative">
-      
+
       {/* Background Noise Texture (Subtle) */}
-      <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.015] dark:opacity-[0.03]" 
-           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}>
+      <div className="pointer-events-none fixed inset-0 z-50 opacity-[0.015] dark:opacity-[0.03]"
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}>
       </div>
 
       {/* Floating Animated Orbs */}
@@ -59,34 +59,34 @@ export function App() {
       </div>
 
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'glass-header py-3' : 'bg-transparent py-5'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'glass-header py-2 sm:py-3' : 'bg-transparent py-3 sm:py-5'}`}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow">
                 <img src={logo} alt="OutfitStyle" className="w-full h-full object-cover" />
               </div>
-              <span className="text-xl font-bold tracking-tight">OutfitStyle</span>
+              <span className="text-lg sm:text-xl font-bold tracking-tight">OutfitStyle</span>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-8 font-medium text-sm text-gray-600 dark:text-gray-300">
               <a href="#features" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Преимущества</a>
               <a href="#how-it-works" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Как это работает</a>
               <a href="#examples" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Примеры</a>
             </div>
 
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={toggleTheme} 
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-transparent dark:border-gray-800"
+            <div className="flex items-center gap-2 sm:gap-4">
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-transparent dark:border-gray-800"
                 aria-label="Toggle theme"
               >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                {isDark ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
               <div className="hidden sm:block">
                 <Magnetic>
-                  <a href="#download" className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-semibold rounded-full hover:scale-105 transition-transform shadow-lg shadow-gray-900/20 dark:shadow-white/20 inline-block">
-                    Скачать бесплатно
+                  <a href="#download" className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs sm:text-sm font-semibold rounded-full hover:scale-105 transition-transform shadow-lg shadow-gray-900/20 dark:shadow-white/20 inline-block">
+                    Скачать
                   </a>
                 </Magnetic>
               </div>
@@ -96,7 +96,7 @@ export function App() {
       </nav>
 
       <main className="relative z-10 pt-32 pb-20">
-        
+
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-16 min-h-[80vh]">
           <div className="flex-1 text-center lg:text-left z-20">
@@ -109,10 +109,10 @@ export function App() {
             </div>
 
             <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-              Ваш идеальный <br/>
+              Ваш идеальный <br />
               <span className="gradient-text">образ за секунды</span>
             </h1>
-            
+
             <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto lg:mx-0 animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.2s' }}>
               Нейросеть проанализирует ваш гардероб, текущую погоду за окном и повод, чтобы собрать безупречный наряд. Забудьте о проблеме «Мне нечего надеть».
             </p>
@@ -143,15 +143,15 @@ export function App() {
         <Marquee />
 
         {/* Core Features / Consumer Bento */}
-        <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20">
+        <section id="features" className="py-12 sm:py-20 lg:py-24 px-3 sm:px-6 lg:px-8 relative z-20">
           <div className="max-w-7xl mx-auto">
-            <RevealText text="Магия технологий для вашего стиля" className="text-4xl md:text-5xl font-extrabold text-center mb-4 text-gray-900 dark:text-white tracking-tight" />
-            <p className="text-center text-xl text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto">
+            <RevealText text="Магия технологий для вашего стиля" className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-center mb-3 sm:mb-4 text-gray-900 dark:text-white tracking-tight px-2" />
+            <p className="text-center text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 mb-8 sm:mb-12 lg:mb-16 max-w-3xl mx-auto px-4">
               Мы объединили мощный искусственный интеллект с элегантным интерфейсом, чтобы каждое утро начиналось идеально.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+
               <GlowCard className="lg:col-span-2">
                 <div className="flex flex-col md:flex-row items-center gap-8">
                   <div className="flex-1">
@@ -164,20 +164,20 @@ export function App() {
                     </p>
                   </div>
                   <div className="flex-1 w-full relative h-48 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden">
-                     <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent"></div>
-                     <div className="relative z-10 flex gap-4 items-center flex-col sm:flex-row">
-                       <div className="px-5 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 text-center">
-                         <CloudRain className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                         <div className="font-bold text-lg">14°C</div>
-                         <div className="text-xs text-gray-500">Дождь через час</div>
-                       </div>
-                       <ChevronRight className="w-6 h-6 text-gray-400 hidden sm:block" />
-                       <div className="px-5 py-3 bg-blue-500 text-white rounded-2xl shadow-xl shadow-blue-500/30 text-center">
-                         <Umbrella className="w-8 h-8 mx-auto mb-2" />
-                         <div className="font-bold text-lg">Тренч + Зонт</div>
-                         <div className="text-xs text-blue-100">Идеальный выбор</div>
-                       </div>
-                     </div>
+                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent"></div>
+                    <div className="relative z-10 flex gap-4 items-center flex-col sm:flex-row">
+                      <div className="px-5 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 text-center">
+                        <CloudRain className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                        <div className="font-bold text-lg">14°C</div>
+                        <div className="text-xs text-gray-500">Дождь через час</div>
+                      </div>
+                      <ChevronRight className="w-6 h-6 text-gray-400 hidden sm:block" />
+                      <div className="px-5 py-3 bg-blue-500 text-white rounded-2xl shadow-xl shadow-blue-500/30 text-center">
+                        <Umbrella className="w-8 h-8 mx-auto mb-2" />
+                        <div className="font-bold text-lg">Тренч + Зонт</div>
+                        <div className="text-xs text-blue-100">Идеальный выбор</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </GlowCard>
@@ -227,14 +227,14 @@ export function App() {
         </section>
 
         {/* Examples Section */}
-        <section id="examples" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20">
+        <section id="examples" className="py-12 sm:py-20 lg:py-24 px-3 sm:px-6 lg:px-8 relative z-20">
           <div className="max-w-7xl mx-auto">
-            <RevealText text="Примеры образов" className="text-4xl md:text-5xl font-extrabold text-center mb-4 text-gray-900 dark:text-white tracking-tight" />
-            <p className="text-center text-xl text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto">
+            <RevealText text="Примеры образов" className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-center mb-3 sm:mb-4 text-gray-900 dark:text-white tracking-tight px-2" />
+            <p className="text-center text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 mb-8 sm:mb-12 lg:mb-16 max-w-3xl mx-auto px-4">
               Смотрите, как нейросеть сочетает вещи из вашего гардероба для разных ситуаций
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 
               <GlowCard>
                 <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
@@ -271,60 +271,60 @@ export function App() {
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 relative z-20">
+        <section id="faq" className="py-12 sm:py-20 lg:py-24 px-3 sm:px-6 lg:px-8 relative z-20">
           <div className="max-w-3xl mx-auto">
-            <RevealText text="Частые вопросы" className="text-4xl md:text-5xl font-extrabold text-center mb-4 text-gray-900 dark:text-white tracking-tight" />
-            <p className="text-center text-xl text-gray-600 dark:text-gray-400 mb-16 max-w-3xl mx-auto">
+            <RevealText text="Частые вопросы" className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-center mb-3 sm:mb-4 text-gray-900 dark:text-white tracking-tight px-2" />
+            <p className="text-center text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 mb-8 sm:mb-12 lg:mb-16 max-w-3xl mx-auto px-4">
               Ответы на популярные вопросы о приложении
             </p>
 
-            <div className="space-y-4">
-              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
-                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+            <div className="space-y-3 sm:space-y-4">
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-4 sm:p-6 cursor-pointer font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
                   Как работает приложение?
-                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-open:rotate-180 flex-shrink-0 ml-2" />
                 </summary>
-                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Нейросеть анализирует ваш гардероб, текущую погоду и событие, чтобы предложить идеальный образ. Просто добавьте вещи в приложение и получайте рекомендации каждое утро.
                 </div>
               </details>
 
-              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
-                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-4 sm:p-6 cursor-pointer font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
                   Это бесплатно?
-                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-open:rotate-180 flex-shrink-0 ml-2" />
                 </summary>
-                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Да, базовая версия приложения полностью бесплатна. Премиум-функции доступны по подписке и включают расширенные возможности персонализации.
                 </div>
               </details>
 
-              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
-                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-4 sm:p-6 cursor-pointer font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
                   Работает ли приложение без интернета?
-                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-open:rotate-180 flex-shrink-0 ml-2" />
                 </summary>
-                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Приложение может работать без интернета для просмотра загруженного гардероба. Однако для получения рекомендаций на основе погоды требуется подключение к сети.
                 </div>
               </details>
 
-              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
-                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-4 sm:p-6 cursor-pointer font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
                   Как добавить вещи в гардероб?
-                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-open:rotate-180 flex-shrink-0 ml-2" />
                 </summary>
-                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Откройте раздел «Гардероб» и добавьте ваши вещи вручную. Укажите категорию, цвет, бренд и другие параметры для каждой вещи.
                 </div>
               </details>
 
-              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
-                <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 dark:text-white">
+              <details className="group bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <summary className="flex items-center justify-between p-4 sm:p-6 cursor-pointer font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
                   Как связаться с поддержкой?
-                  <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-open:rotate-180 flex-shrink-0 ml-2" />
                 </summary>
-                <div className="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Напишите нам на <a href="mailto:outfitstyle.official.app@gmail.com" className="text-primary-600 dark:text-primary-400 hover:underline">outfitstyle.official.app@gmail.com</a>. Мы отвечаем в течение 24 часов.
                 </div>
               </details>
@@ -338,7 +338,7 @@ export function App() {
             <div className="relative rounded-3xl overflow-hidden shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-accent-600"></div>
               <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=2000')] opacity-20 mix-blend-overlay bg-cover bg-center"></div>
-              
+
               <div className="relative z-10 p-12 md:p-20 text-white">
                 <h2 className="text-4xl md:text-5xl font-bold mb-6">Готовы изменить свой стиль?</h2>
                 <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
@@ -347,13 +347,13 @@ export function App() {
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <a href="#" className="px-8 py-4 bg-white text-gray-900 font-bold rounded-full hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-2">
                     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M16.365 21.493c-1.353 1.054-2.827.818-4.07-.06-.91-.643-1.897-.61-2.808.06-1.282.946-2.618 1.07-4.116-.06C2.26 18.066 1.103 13.916 2.38 9.531c.642-2.193 1.947-3.765 3.963-4.322 1.547-.424 2.97.042 3.92.83.67.556 1.48.513 2.158.006 1.066-.79 2.47-1.123 4.145-.583 1.706.55 2.85 1.724 3.442 3.45-3.085 1.41-3.567 4.786-1.162 6.51-1.026 2.473-2.193 4.414-2.481 6.071zm-6.22-16.79c-.066-2.492 1.83-4.706 4.227-4.703.11 2.502-1.841 4.793-4.227 4.703z"/>
+                      <path d="M16.365 21.493c-1.353 1.054-2.827.818-4.07-.06-.91-.643-1.897-.61-2.808.06-1.282.946-2.618 1.07-4.116-.06C2.26 18.066 1.103 13.916 2.38 9.531c.642-2.193 1.947-3.765 3.963-4.322 1.547-.424 2.97.042 3.92.83.67.556 1.48.513 2.158.006 1.066-.79 2.47-1.123 4.145-.583 1.706.55 2.85 1.724 3.442 3.45-3.085 1.41-3.567 4.786-1.162 6.51-1.026 2.473-2.193 4.414-2.481 6.071zm-6.22-16.79c-.066-2.492 1.83-4.706 4.227-4.703.11 2.502-1.841 4.793-4.227 4.703z" />
                     </svg>
                     App Store
                   </a>
                   <a href="#" className="px-8 py-4 bg-gray-900 text-white font-bold rounded-full hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-2 border border-gray-700">
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3.13 2.222l12.446 12.446-2.923 2.923L3.13 2.222zm1.61-1.056L18.4 14.82l2.365-2.365L4.74 1.166zm13.684 15.688L5.95 24l-1.02-1.02 12.474-12.474 1.02 1.02zm.98-.98l2.91-2.91L5.95 0 3.04 2.91l16.365 16.365z"/>
+                      <path d="M3.13 2.222l12.446 12.446-2.923 2.923L3.13 2.222zm1.61-1.056L18.4 14.82l2.365-2.365L4.74 1.166zm13.684 15.688L5.95 24l-1.02-1.02 12.474-12.474 1.02 1.02zm.98-.98l2.91-2.91L5.95 0 3.04 2.91l16.365 16.365z" />
                     </svg>
                     Google Play
                   </a>
