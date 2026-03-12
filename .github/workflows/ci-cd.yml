@@ -70,7 +70,7 @@ jobs:
       - name: Test ML service
         working-directory: ml-service
         run: |
-          pip install -r requirements.txt
+          pip install --upgrade -r requirements.txt
           pip install pytest
           python -m pytest tests/ -v
 
