@@ -656,7 +656,7 @@ func setupRouter(
 
 	// protected
 	protected := api.NewRoute().Subrouter()
-	protected.Use(middleware.NewAuthMiddlewareWithFirebase(authService, apiKeyService, firebaseAuthClient).Handler)
+	protected.Use(middleware.NewAuthMiddlewareWithFirebase(authService, apiKeyService, firebaseAuthClient, logger).Handler)
 
 	// Business API-key policies
 	protected.Use(middleware.APIKeyPolicyMiddleware())

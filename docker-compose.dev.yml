@@ -123,7 +123,7 @@ services:
       - RUN_IN_DOCKER=1
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=8080
-      - ENVIRONMENT=production
+      - ENVIRONMENT=development
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=postgres
@@ -160,7 +160,9 @@ services:
       - FEATURE_AB_TESTING=${FEATURE_AB_TESTING}
       - FEATURE_ACHIEVEMENTS=${FEATURE_ACHIEVEMENTS}
       - API_KEY_PEPPER=dev-pepper
-      - LOG_LEVEL=${LOG_LEVEL}
+      # Debug логирование для отладки аутентификации
+      - LOG_LEVEL=debug
+      - ZAP_LOGGING_LEVEL=debug
     depends_on:
       migrate:
         condition: service_completed_successfully
