@@ -31,6 +31,66 @@
 
   <title>OutfitStyle</title>
   <link rel="manifest" href="manifest.json">
+
+  <script>
+    // Service Worker Update Detection and Notification Logic
+    // Validates: Requirements 2.1, 2.4
+
+    if ('serviceWorker' in navigator) {
+      // Listen for controller change (new Service Worker activated)
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('New Service Worker activated, reloading page...');
+        // Automatically reload the page when new Service Worker takes control
+        window.location.reload();
+      });
+
+      // Periodic update check every 60 seconds
+      setInterval(() => {
+        navigator.serviceWorker.getRegistration().then(registration => {
+          if (registration) {
+            console.log('Checking for Service Worker updates...');
+            registration.update();
+          }
+        });
+      }, 60000); // Check every 60 seconds
+
+      // Check for updates when page becomes visible
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          navigator.serviceWorker.getRegistration().then(registration => {
+            if (registration) {
+              console.log('Page visible, checking for Service Worker updates...');
+              registration.update();
+            }
+          });
+        }
+      });
+
+      // Listen for waiting Service Worker
+      navigator.serviceWorker.ready.then(registration => {
+        // Check if there's a waiting Service Worker
+        if (registration.waiting) {
+          console.log('New Service Worker waiting, activating...');
+          // Send skipWaiting message to activate immediately
+          registration.waiting.postMessage('skipWaiting');
+        }
+
+        // Listen for new Service Worker installing
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          console.log('New Service Worker found, installing...');
+
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('New Service Worker installed, activating...');
+              // Send skipWaiting message to activate immediately
+              newWorker.postMessage('skipWaiting');
+            }
+          });
+        });
+      });
+    }
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

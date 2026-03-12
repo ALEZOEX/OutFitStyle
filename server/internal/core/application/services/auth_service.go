@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net"
 	"strings"
@@ -44,6 +45,7 @@ type AuthService struct {
 	tokenSvc    TokenServiceInterface          // Сервис токенов
 	google      *external.GoogleAuthClient     // Клиент Google аутентификации
 	blacklist   TokenBlacklist                 // Blacklist токенов
+	auditRepo   repositories.AuditRepository   // Репозиторий аудита
 	logger      *zap.Logger                    // Логгер
 }
 
@@ -75,6 +77,7 @@ func NewAuthService(
 	tokenSvc TokenServiceInterface,
 	google *external.GoogleAuthClient,
 	blacklist TokenBlacklist,
+	auditRepo repositories.AuditRepository,
 	logger *zap.Logger,
 ) *AuthService {
 	return &AuthService{
@@ -83,6 +86,7 @@ func NewAuthService(
 		tokenSvc:    tokenSvc,
 		google:      google,
 		blacklist:   blacklist,
+		auditRepo:   auditRepo,
 		logger:      logger,
 	}
 }
@@ -148,6 +152,33 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 
 	s.logger.Info("Register: user created", zap.String("user_id", u.ID.String()))
 
+	// Audit logging for user registration (sensitive operation)
+	if s.auditRepo != nil {
+		userIDCopy := u.ID
+		resourceType := "user"
+		newValuesJSON, _ := json.Marshal(map[string]interface{}{
+			"user_id":      u.ID.String(),
+			"email":        email,
+			"display_name": u.DisplayName,
+			"is_active":    u.IsActive,
+			"is_verified":  u.IsVerified,
+		})
+
+		auditErr := s.auditRepo.Create(ctx, repositories.AuditCreate{
+			UserID:       &userIDCopy,
+			Action:       "user_registration",
+			ResourceType: &resourceType,
+			ResourceID:   &u.ID,
+			NewValues:    newValuesJSON,
+			IPAddress:    device.IPAddress,
+			UserAgent:    device.UserAgent,
+			Success:      true,
+		})
+		if auditErr != nil {
+			s.logger.Debug("Register: audit log failed", zap.Error(auditErr))
+		}
+	}
+
 	pair, err := s.createSessionAndTokens(ctx, u.ID, device)
 	if err != nil {
 		s.logger.Error("Register: failed to create session", zap.String("user_id", u.ID.String()), zap.Error(err))
@@ -194,7 +225,55 @@ func (s *AuthService) Login(ctx context.Context, input domain.UserLogin, device 
 	pair, err := s.createSessionAndTokens(ctx, u.ID, device)
 	if err != nil {
 		s.logger.Error("Login: failed to create session", zap.String("user_id", u.ID.String()), zap.Error(err))
+
+		// Audit logging for failed login (sensitive operation)
+		if s.auditRepo != nil {
+			userIDCopy := u.ID
+			resourceType := "user"
+			errMsg := "failed to create session"
+			newValuesJSON, _ := json.Marshal(map[string]interface{}{
+				"user_id": u.ID.String(),
+				"email":   email,
+			})
+
+			_ = s.auditRepo.Create(ctx, repositories.AuditCreate{
+				UserID:       &userIDCopy,
+				Action:       "user_login",
+				ResourceType: &resourceType,
+				ResourceID:   &u.ID,
+				NewValues:    newValuesJSON,
+				IPAddress:    device.IPAddress,
+				UserAgent:    device.UserAgent,
+				Success:      false,
+				ErrorMessage: &errMsg,
+			})
+		}
+
 		return nil, err
+	}
+
+	// Audit logging for successful login (sensitive operation)
+	if s.auditRepo != nil {
+		userIDCopy := u.ID
+		resourceType := "user"
+		newValuesJSON, _ := json.Marshal(map[string]interface{}{
+			"user_id": u.ID.String(),
+			"email":   email,
+		})
+
+		auditErr := s.auditRepo.Create(ctx, repositories.AuditCreate{
+			UserID:       &userIDCopy,
+			Action:       "user_login",
+			ResourceType: &resourceType,
+			ResourceID:   &u.ID,
+			NewValues:    newValuesJSON,
+			IPAddress:    device.IPAddress,
+			UserAgent:    device.UserAgent,
+			Success:      true,
+		})
+		if auditErr != nil {
+			s.logger.Debug("Login: audit log failed", zap.Error(auditErr))
+		}
 	}
 
 	s.logger.Info("Login successful", zap.String("user_id", u.ID.String()))
@@ -380,10 +459,45 @@ func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, a
 		}
 	}
 
+	var err error
 	if allDevices {
-		return s.sessionRepo.RevokeAllForUser(ctx, userID)
+		err = s.sessionRepo.RevokeAllForUser(ctx, userID)
+	} else {
+		err = s.sessionRepo.Revoke(ctx, sessionID)
 	}
-	return s.sessionRepo.Revoke(ctx, sessionID)
+
+	// Audit logging for logout (sensitive operation)
+	if s.auditRepo != nil {
+		userIDCopy := userID
+		resourceType := "user"
+		newValuesJSON, _ := json.Marshal(map[string]interface{}{
+			"user_id":     userID.String(),
+			"session_id":  sessionID.String(),
+			"all_devices": allDevices,
+		})
+
+		success := err == nil
+		var errMsg *string
+		if err != nil {
+			msg := err.Error()
+			errMsg = &msg
+		}
+
+		auditErr := s.auditRepo.Create(ctx, repositories.AuditCreate{
+			UserID:       &userIDCopy,
+			Action:       "user_logout",
+			ResourceType: &resourceType,
+			ResourceID:   &userID,
+			NewValues:    newValuesJSON,
+			Success:      success,
+			ErrorMessage: errMsg,
+		})
+		if auditErr != nil {
+			s.logger.Debug("Logout: audit log failed", zap.Error(auditErr))
+		}
+	}
+
+	return err
 }
 
 // ValidateAccessToken: JWT + проверка, что сессия активна (logout сразу инвалидирует access-токен)

@@ -9,6 +9,7 @@ import '../../theme/theme_controller.dart';
 import '../routing/router.dart';
 import 'auth_gate.dart';
 import '../../features/settings/providers/language_provider.dart';
+import '../../ui/widgets/service_worker_update_banner.dart';
 
 class OutfitStyleApp extends ConsumerWidget {
   const OutfitStyleApp({super.key});
@@ -47,7 +48,9 @@ class OutfitStyleApp extends ConsumerWidget {
             statusBarBrightness:
                 isDark ? Brightness.dark : Brightness.light,
           ),
-          child: AuthGate(child: child!),
+          child: ServiceWorkerUpdateBanner(
+            child: AuthGate(child: child!),
+          ),
         );
       },
     );
