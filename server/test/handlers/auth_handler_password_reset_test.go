@@ -4,18 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/api/handlers"
-	"outfitstyle/server/internal/pkg/resp"
 )
 
 // MockRedisClient - мок для Redis
@@ -55,7 +51,7 @@ func (m *MockRedisClient) Incr(ctx context.Context, key string) *redis.IntCmd {
 	if v, ok := m.data[key]; ok {
 		// Parse existing value
 		var existing int64
-		_, _ = json.Unmarshal([]byte(v), &existing)
+		_ = json.Unmarshal([]byte(v), &existing)
 		val = existing + 1
 	}
 	m.data[key] = json.Number(string(rune(val))).String()
@@ -74,7 +70,8 @@ func (m *MockRedisClient) Expire(ctx context.Context, key string, expiration tim
 func TestVerifyResetCode_ValidCode(t *testing.T) {
 	// Подготовка
 	mockRedis := NewMockRedisClient()
-	logger := zap.NewNop()
+	_ = mockRedis
+	_ = t
 
 	// Устанавливаем валидный код в Redis
 	email := "test@example.com"
@@ -82,19 +79,18 @@ func TestVerifyResetCode_ValidCode(t *testing.T) {
 	codeKey := "password_reset:" + email
 	mockRedis.data[codeKey] = validCode
 
+	// TODO: Implement test when handler is ready
 	// Создаём handler
-	handler := &handlers.AuthHandler{
-		// Инициализируем необходимые поля
-	}
+	// handler := &handlers.AuthHandler{}
 
 	// Создаём request
-	reqBody := map[string]string{
-		"email": email,
-		"code":  validCode,
-	}
-	body, _ := json.Marshal(reqBody)
-	req := httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
-	w := httptest.NewRecorder()
+	// reqBody := map[string]string{
+	// 	"email": email,
+	// 	"code":  validCode,
+	// }
+	// body, _ := json.Marshal(reqBody)
+	// req := httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
+	// w := httptest.NewRecorder()
 
 	// Выполнение
 	// handler.VerifyResetCode(w, req)
@@ -108,6 +104,7 @@ func TestVerifyResetCode_InvalidCode(t *testing.T) {
 	// Подготовка
 	mockRedis := NewMockRedisClient()
 	logger := zap.NewNop()
+	_ = logger
 
 	// Устанавливаем валидный код в Redis
 	email := "test@example.com"
@@ -120,6 +117,7 @@ func TestVerifyResetCode_InvalidCode(t *testing.T) {
 	handler := &handlers.AuthHandler{
 		// Инициализируем необходимые поля
 	}
+	_ = handler
 
 	// Создаём request с невалидным кодом
 	reqBody := map[string]string{
@@ -129,6 +127,8 @@ func TestVerifyResetCode_InvalidCode(t *testing.T) {
 	body, _ := json.Marshal(reqBody)
 	req := httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
 	w := httptest.NewRecorder()
+	_ = req
+	_ = w
 
 	// Выполнение
 	// handler.VerifyResetCode(w, req)
@@ -140,15 +140,15 @@ func TestVerifyResetCode_InvalidCode(t *testing.T) {
 // TestVerifyResetCode_ExpiredCode - тест проверки истёкшего кода
 func TestVerifyResetCode_ExpiredCode(t *testing.T) {
 	// Подготовка
-	mockRedis := NewMockRedisClient()
-	logger := zap.NewNop()
+	_ = NewMockRedisClient()
+	_ = zap.NewNop()
 
 	// Код не установлен в Redis (истёк)
 	email := "test@example.com"
 	code := "123456"
 
 	// Создаём handler
-	handler := &handlers.AuthHandler{
+	_ = &handlers.AuthHandler{
 		// Инициализируем необходимые поля
 	}
 
@@ -158,8 +158,8 @@ func TestVerifyResetCode_ExpiredCode(t *testing.T) {
 		"code":  code,
 	}
 	body, _ := json.Marshal(reqBody)
-	req := httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
-	w := httptest.NewRecorder()
+	_ = httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
+	_ = httptest.NewRecorder()
 
 	// Выполнение
 	// handler.VerifyResetCode(w, req)
@@ -172,7 +172,7 @@ func TestVerifyResetCode_ExpiredCode(t *testing.T) {
 func TestVerifyResetCode_RateLimiting(t *testing.T) {
 	// Подготовка
 	mockRedis := NewMockRedisClient()
-	logger := zap.NewNop()
+	_ = zap.NewNop()
 
 	email := "test@example.com"
 	validCode := "123456"
@@ -184,7 +184,7 @@ func TestVerifyResetCode_RateLimiting(t *testing.T) {
 	mockRedis.data[attemptsKey] = "11" // Больше лимита (10)
 
 	// Создаём handler
-	handler := &handlers.AuthHandler{
+	_ = &handlers.AuthHandler{
 		// Инициализируем необходимые поля
 	}
 
@@ -194,8 +194,8 @@ func TestVerifyResetCode_RateLimiting(t *testing.T) {
 		"code":  validCode,
 	}
 	body, _ := json.Marshal(reqBody)
-	req := httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
-	w := httptest.NewRecorder()
+	_ = httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
+	_ = httptest.NewRecorder()
 
 	// Выполнение
 	// handler.VerifyResetCode(w, req)
@@ -208,7 +208,7 @@ func TestVerifyResetCode_RateLimiting(t *testing.T) {
 func TestVerifyResetCode_CodeNotConsumed(t *testing.T) {
 	// Подготовка
 	mockRedis := NewMockRedisClient()
-	logger := zap.NewNop()
+	_ = zap.NewNop()
 
 	email := "test@example.com"
 	validCode := "123456"
@@ -216,7 +216,7 @@ func TestVerifyResetCode_CodeNotConsumed(t *testing.T) {
 	mockRedis.data[codeKey] = validCode
 
 	// Создаём handler
-	handler := &handlers.AuthHandler{
+	_ = &handlers.AuthHandler{
 		// Инициализируем необходимые поля
 	}
 
@@ -226,8 +226,8 @@ func TestVerifyResetCode_CodeNotConsumed(t *testing.T) {
 		"code":  validCode,
 	}
 	body, _ := json.Marshal(reqBody)
-	req := httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
-	w := httptest.NewRecorder()
+	_ = httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
+	_ = httptest.NewRecorder()
 
 	// Выполнение
 	// handler.VerifyResetCode(w, req)
