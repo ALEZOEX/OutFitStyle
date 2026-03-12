@@ -173,7 +173,7 @@ func main() {
 	catalogRepo := pg.NewCatalogRepository(db.Pool())
 	achievementRepo := pg.NewAchievementRepository(db.Pool(), logger)
 	achEngineRepo := pg.NewAchievementEngineRepository(db.Pool())
-	// auditRepo := pg.NewAuditRepository(db.Pool()) // объявлен позже, когда используется
+	auditRepo := pg.NewAuditRepository(db.Pool())
 
 	// ---------- Services ----------
 	// Пока не создаем ML клиент, передаем nil для него
@@ -205,7 +205,7 @@ func main() {
 	// Создаём blacklist репозиторий для отзыв токенов
 	tokenBlacklist := redisrepo.NewTokenBlacklistRepository(redisClient)
 
-	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, tokenBlacklist, logger)
+	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, tokenBlacklist, auditRepo, logger)
 
 	// ---------- Firebase Admin Client (для проверки Firebase ID Token) ----------
 	ctx := context.Background()
@@ -464,9 +464,6 @@ func main() {
 	achievementService := services.NewAchievementsService(achievementRepo)
 	achievementHandler := handlers.NewAchievementHandler(achievementService, logger)
 
-	// ---------- Repositories for audit (module 13) ----------
-	auditRepo := pg.NewAuditRepository(db.Pool())
-
 	// ---------- Модуль 10: Share, Support, Feedback, Admin ----------
 	shareRepo := pg.NewShareRepository(db.Pool())
 	supportRepo := pg.NewSupportRepository(db.Pool())
@@ -624,13 +621,17 @@ func setupRouter(
 ) *mux.Router {
 	router := mux.NewRouter()
 
+	// Configure per-user rate limiting
+	perUserRateLimitConfig := middleware.DefaultPerUserRateLimitConfig()
+
 	router.Use(
 		middleware.RecoveryMiddleware(logger),
 		middleware.HTTPSRedirectMiddleware(cfg.Server.Environment),
 		middleware.SecurityHeadersMiddleware(),
 		middleware.CORSMiddleware(cfg.Security.CORSAllowedOrigins),
 		middleware.LoggerMiddleware(logger),
-		middleware.RateLimitMiddleware(limiter, cfg.Security.RateLimitPerMinute, time.Minute),
+		middleware.InputSanitizationMiddleware, // Security: Sanitize all JSON inputs
+		middleware.PerUserRateLimitMiddleware(limiter, perUserRateLimitConfig),
 		middleware.MetricsMiddleware(),
 	)
 
