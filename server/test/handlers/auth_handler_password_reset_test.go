@@ -216,9 +216,10 @@ func TestVerifyResetCode_CodeNotConsumed(t *testing.T) {
 	mockRedis.data[codeKey] = validCode
 
 	// Создаём handler
-	_ = &handlers.AuthHandler{
+	handler := &handlers.AuthHandler{
 		// Инициализируем необходимые поля
 	}
+	_ = handler
 
 	// Создаём request
 	reqBody := map[string]string{
@@ -226,8 +227,10 @@ func TestVerifyResetCode_CodeNotConsumed(t *testing.T) {
 		"code":  validCode,
 	}
 	body, _ := json.Marshal(reqBody)
-	_ = httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
-	_ = httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/verify-reset-code", bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	_ = req
+	_ = w
 
 	// Выполнение
 	// handler.VerifyResetCode(w, req)
