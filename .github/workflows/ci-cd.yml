@@ -72,7 +72,19 @@ jobs:
         run: |
           pip install --upgrade -r requirements.txt
           pip install pytest
+
+          # Start ML service in background
+          python -m uvicorn main:app --host 0.0.0.0 --port 8001 &
+          ML_PID=$!
+
+          # Wait for service to be ready
+          sleep 5
+
+          # Run all tests including integration
           python -m pytest tests/ -v
+
+          # Stop ML service
+          kill $ML_PID || true
 
       - name: Install marketplace dependencies
         working-directory: server/marketplace-service
