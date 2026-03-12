@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'dart:developer' as developer;
+import '../../utils/logger.dart';
 
 /// ApiClient — HTTP клиент для авторизованных запросов
 ///
@@ -27,8 +28,10 @@ class ApiClient {
     // Interceptor для добавления Authorization header
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        // Skip Authorization header for login/register endpoints
+        final timestamp = DateTime.now().toIso8601String();
         final path = options.path;
+        
+        // Skip Authorization header for login/register endpoints
         if (!path.contains('/auth/login') &&
             !path.contains('/auth/register') &&
             !path.contains('/auth/forgot-password') &&
@@ -36,36 +39,67 @@ class ApiClient {
             !path.contains('/auth/google')) {
           // Get access_token from SharedPreferences
           final accessToken = _sharedPreferences?.getString('access_token');
-          developer.log('[ApiClient] Checking access_token for ${options.path}', name: 'ApiClient');
-          developer.log('[ApiClient] access_token: ${accessToken != null ? "present (${accessToken.length} chars)" : "null"}', name: 'ApiClient');
+          
+          developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path}', name: 'ApiClient');
+          developer.log('[$timestamp] [ApiClient] [Auth] access_token: ${accessToken != null ? "present (${accessToken.length} chars)" : "null"}', name: 'ApiClient');
+          
           if (accessToken != null && accessToken.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $accessToken';
-            developer.log('[ApiClient] Added Authorization header', name: 'ApiClient');
+            developer.log('[$timestamp] [ApiClient] [Auth] Authorization header добавлен (Bearer ${accessToken.length} chars)', name: 'ApiClient');
           } else {
-            developer.log('[ApiClient] No access_token found - request will be unauthorized', name: 'ApiClient');
+            developer.log('[$timestamp] [ApiClient] [Auth] WARNING: access_token не найден - запрос будет без авторизации', name: 'ApiClient');
+            AppLogger.warning('[$timestamp] [ApiClient] Запрос без токена: ${options.method} ${options.path}');
           }
+        } else {
+          developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path} (public endpoint, no auth)', name: 'ApiClient');
         }
+        
         return handler.next(options);
       },
     ));
 
-    // Interceptor для логирования
+    // Interceptor для логирования ответов
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        developer.log('[ApiClient] Request: ${options.method} ${options.path}',
-            name: 'ApiClient',
-            level: 900);
+        final timestamp = DateTime.now().toIso8601String();
+        developer.log('[$timestamp] [ApiClient] [HTTP] Отправка запроса: ${options.method} ${options.path}', name: 'ApiClient');
         return handler.next(options);
       },
+      onResponse: (Response response, ResponseInterceptorHandler handler) {
+        final timestamp = DateTime.now().toIso8601String();
+        developer.log('[$timestamp] [ApiClient] [HTTP] Ответ: ${response.statusCode} ${response.requestOptions.path}', name: 'ApiClient');
+        
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          developer.log('[$timestamp] [ApiClient] [HTTP] Успешный ответ', name: 'ApiClient');
+        }
+        
+        return handler.next(response);
+      },
       onError: (DioException err, ErrorInterceptorHandler handler) async {
-        developer.log('[ApiClient] Error',
+        final timestamp = DateTime.now().toIso8601String();
+        final statusCode = err.response?.statusCode;
+        
+        developer.log('[$timestamp] [ApiClient] [HTTP] Ошибка',
             name: 'ApiClient',
             level: 1000,
-            error: '${err.type} ${err.requestOptions.path} - ${err.response?.statusCode}');
+            error: '${err.type} ${err.requestOptions.path} - $statusCode');
 
         // Если 401 — логируем для отладки
-        if (err.response?.statusCode == 401) {
-          developer.log('[ApiClient] 401 ошибка — требуется авторизация', name: 'ApiClient');
+        if (statusCode == 401) {
+          developer.log('[$timestamp] [ApiClient] [Auth] 401 Unauthorized — требуется авторизация', name: 'ApiClient');
+          AppLogger.error('[$timestamp] [ApiClient] 401 ошибка на ${err.requestOptions.path}');
+          
+          // Проверяем, есть ли токен
+          final accessToken = _sharedPreferences?.getString('access_token');
+          if (accessToken == null || accessToken.isEmpty) {
+            developer.log('[$timestamp] [ApiClient] [Auth] 401 ошибка: access_token отсутствует в SharedPreferences', name: 'ApiClient');
+            AppLogger.error('[$timestamp] [ApiClient] 401 ошибка: access_token не найден');
+          } else {
+            developer.log('[$timestamp] [ApiClient] [Auth] 401 ошибка: access_token присутствует (${accessToken.length} chars), возможно истёк', name: 'ApiClient');
+            AppLogger.error('[$timestamp] [ApiClient] 401 ошибка: access_token есть, но не валиден (возможно истёк)');
+          }
+        } else if (statusCode != null) {
+          AppLogger.error('[$timestamp] [ApiClient] HTTP ошибка $statusCode на ${err.requestOptions.path}');
         }
 
         return handler.next(err);

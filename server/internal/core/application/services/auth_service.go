@@ -344,37 +344,59 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 
 // GoogleSignIn выполняет вход через Google
 func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device DeviceInfo) (*LoginResult, error) {
+	s.logger.Info("[AuthService] [GoogleSignIn] Начало входа через Google",
+		zap.Int("token_length", len(idToken)),
+		zap.String("client_id", s.google.ClientID()),
+		zap.String("device_ip", device.IPAddress),
+	)
+
 	// 1. Валидируем токен через Google
-	s.logger.Info("GoogleSignIn: валидация токена",
+	s.logger.Debug("[AuthService] [GoogleSignIn] Валидация токена через Google API",
 		zap.Int("token_length", len(idToken)),
 		zap.String("client_id", s.google.ClientID()),
 	)
 	gUser, err := s.google.Verify(ctx, idToken)
 	if err != nil {
-		s.logger.Error("GoogleSignIn: ошибка верификации токена",
+		s.logger.Error("[AuthService] [GoogleSignIn] Ошибка верификации токена",
 			zap.String("error", err.Error()),
+			zap.String("error_type", fmt.Sprintf("%T", err)),
+			zap.Int("token_length", len(idToken)),
 		)
 		return nil, ErrInvalidCredentials // Или более специфичная ошибка
 	}
 
-	s.logger.Info("GoogleSignIn: токен верифицирован",
+	s.logger.Info("[AuthService] [GoogleSignIn] Токен верифицирован Google",
 		zap.String("email", gUser.Email),
 		zap.Bool("email_verified", gUser.EmailVerified),
+		zap.String("google_sub", gUser.ID),
 	)
 
 	if !gUser.EmailVerified {
+		s.logger.Warn("[AuthService] [GoogleSignIn] Email не подтверждён",
+			zap.String("email", gUser.Email),
+		)
 		return nil, errors.New("email в Google не подтвержден")
 	}
 
 	// 2. Ищем пользователя в БД
+	s.logger.Debug("[AuthService] [GoogleSignIn] Поиск пользователя в БД",
+		zap.String("email", gUser.Email),
+	)
 	u, err := s.userRepo.GetUserByEmail(ctx, gUser.Email)
 	if err != nil {
+		s.logger.Error("[AuthService] [GoogleSignIn] Ошибка поиска пользователя",
+			zap.String("email", gUser.Email),
+			zap.String("error", err.Error()),
+		)
 		return nil, err
 	}
 
 	var resultUser *domain.User
 
 	if u == nil {
+		s.logger.Info("[AuthService] [GoogleSignIn] Пользователь не найден, создаём нового",
+			zap.String("email", gUser.Email),
+		)
 		// 3. Пользователя нет -> Регистрируем автоматически
 		displayName := gUser.FirstName
 		if gUser.LastName != "" {
@@ -399,17 +421,41 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 			UpdatedAt:     time.Now(), // Устанавливаем время обновления
 		}
 
+		s.logger.Debug("[AuthService] [GoogleSignIn] Создание пользователя в БД",
+			zap.String("email", gUser.Email),
+			zap.String("display_name", displayName),
+		)
 		if err := s.userRepo.CreateUser(ctx, newUser); err != nil {
+			s.logger.Error("[AuthService] [GoogleSignIn] Ошибка создания пользователя",
+				zap.String("email", gUser.Email),
+				zap.String("error", err.Error()),
+			)
 			return nil, err
 		}
 		resultUser = newUser
+		s.logger.Info("[AuthService] [GoogleSignIn] Пользователь создан",
+			zap.String("user_id", resultUser.ID.String()),
+			zap.String("email", gUser.Email),
+		)
 	} else {
+		s.logger.Info("[AuthService] [GoogleSignIn] Пользователь найден",
+			zap.String("user_id", u.ID.String()),
+			zap.String("email", u.Email),
+			zap.String("oauth_provider", *u.OAuthProvider),
+		)
 		// 4. Пользователь существует
 		// Проверяем, если у пользователя уже есть OAuth-провайдер (Google), просто логиним
 		if u.OAuthProvider != nil && *u.OAuthProvider == "google" {
 			resultUser = u
+			s.logger.Debug("[AuthService] [GoogleSignIn] Существующий Google пользователь",
+				zap.String("user_id", u.ID.String()),
+			)
 		} else {
 			// 5. Пользователь существует с email-паролем, нужно "склеить" аккаунты
+			s.logger.Info("[AuthService] [GoogleSignIn] Связывание Google с email-аккаунтом",
+				zap.String("user_id", u.ID.String()),
+				zap.String("email", u.Email),
+			)
 			// Обновляем профиль данными из Google
 			provider := "google"
 			updatedUser := &domain.User{
@@ -427,7 +473,14 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 			}
 
 			// Обновляем пользователя в базе
+			s.logger.Debug("[AuthService] [GoogleSignIn] Обновление пользователя",
+				zap.String("user_id", u.ID.String()),
+			)
 			if err := s.userRepo.UpdateUser(ctx, updatedUser); err != nil {
+				s.logger.Error("[AuthService] [GoogleSignIn] Ошибка обновления пользователя",
+					zap.String("user_id", u.ID.String()),
+					zap.String("error", err.Error()),
+				)
 				return nil, err
 			}
 			resultUser = updatedUser
@@ -435,10 +488,25 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 	}
 
 	// 6. Генерируем сессию и токены
+	s.logger.Info("[AuthService] [GoogleSignIn] Генерация сессии и токенов",
+		zap.String("user_id", resultUser.ID.String()),
+		zap.String("device_ip", device.IPAddress),
+	)
 	pair, err := s.createSessionAndTokens(ctx, resultUser.ID, device)
 	if err != nil {
+		s.logger.Error("[AuthService] [GoogleSignIn] Ошибка генерации токенов",
+			zap.String("user_id", resultUser.ID.String()),
+			zap.String("error", err.Error()),
+		)
 		return nil, err
 	}
+
+	s.logger.Info("[AuthService] [GoogleSignIn] Токены сгенерированы успешно",
+		zap.String("user_id", resultUser.ID.String()),
+		zap.String("email", resultUser.Email),
+		zap.Int("access_token_length", len(pair.AccessToken)),
+		zap.Int("refresh_token_length", len(pair.RefreshToken)),
+	)
 
 	return &LoginResult{User: resultUser, Tokens: pair}, nil
 }
@@ -503,30 +571,72 @@ func (s *AuthService) Logout(ctx context.Context, userID, sessionID domain.ID, a
 // ValidateAccessToken: JWT + проверка, что сессия активна (logout сразу инвалидирует access-токен)
 // Security: проверяет blacklist для отозванных токенов
 func (s *AuthService) ValidateAccessToken(ctx context.Context, accessToken string) (domain.ID, domain.ID, error) {
+	s.logger.Debug("[AuthService] [ValidateAccessToken] Валидация токена",
+		zap.Int("token_length", len(accessToken)),
+	)
+
 	userID, sessionID, jti, err := s.tokenSvc.ValidateAccessToken(accessToken)
 	if err != nil {
+		s.logger.Debug("[AuthService] [ValidateAccessToken] Ошибка валидации JWT",
+			zap.Int("token_length", len(accessToken)),
+			zap.String("error", err.Error()),
+			zap.String("error_type", fmt.Sprintf("%T", err)),
+		)
 		return domain.ID{}, domain.ID{}, ErrUnauthorized
 	}
 
+	s.logger.Debug("[AuthService] [ValidateAccessToken] JWT валиден",
+		zap.String("user_id", userID.String()),
+		zap.String("session_id", sessionID.String()),
+		zap.String("jti", jti),
+	)
+
 	// Security: проверяем blacklist для отозванных токенов
 	if s.blacklist != nil {
+		s.logger.Debug("[AuthService] [ValidateAccessToken] Проверка blacklist",
+			zap.String("jti", jti),
+		)
 		blacklisted, err := s.blacklist.IsBlacklisted(ctx, jti)
 		if err != nil {
-			s.logger.Warn("failed to check token blacklist", zap.Error(err))
+			s.logger.Warn("[AuthService] [ValidateAccessToken] Ошибка проверки blacklist",
+				zap.String("jti", jti),
+				zap.Error(err),
+			)
 			// Graceful degradation: не блокируем вход при ошибке Redis
 		} else if blacklisted {
-			s.logger.Info("token is blacklisted", zap.String("jti", jti))
+			s.logger.Info("[AuthService] [ValidateAccessToken] Токен в blacklist",
+				zap.String("jti", jti),
+				zap.String("user_id", userID.String()),
+			)
 			return domain.ID{}, domain.ID{}, ErrUnauthorized
 		}
 	}
 
+	s.logger.Debug("[AuthService] [ValidateAccessToken] Проверка сессии",
+		zap.String("session_id", sessionID.String()),
+	)
 	sess, err := s.sessionRepo.GetByID(ctx, sessionID)
 	if err != nil {
+		s.logger.Debug("[AuthService] [ValidateAccessToken] Ошибка получения сессии",
+			zap.String("session_id", sessionID.String()),
+			zap.String("error", err.Error()),
+		)
 		return domain.ID{}, domain.ID{}, ErrUnauthorized
 	}
 	if sess == nil || !sess.IsActive || sess.UserID != userID {
+		s.logger.Debug("[AuthService] [ValidateAccessToken] Сессия неактивна или не принадлежит пользователю",
+			zap.String("session_id", sessionID.String()),
+			zap.Bool("session_nil", sess == nil),
+			zap.Bool("is_active", sess != nil && sess.IsActive),
+			zap.Bool("user_match", sess != nil && sess.UserID == userID),
+		)
 		return domain.ID{}, domain.ID{}, ErrUnauthorized
 	}
+
+	s.logger.Debug("[AuthService] [ValidateAccessToken] Токен успешно валидирован",
+		zap.String("user_id", userID.String()),
+		zap.String("session_id", sessionID.String()),
+	)
 
 	_ = s.sessionRepo.Touch(ctx, sessionID)
 

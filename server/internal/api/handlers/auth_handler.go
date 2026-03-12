@@ -411,30 +411,47 @@ type googleSignInRequest struct {
 func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
+	requestID := time.Now().Format(time.RFC3339Nano)
+	h.logger.Debug("[Auth] [GoogleSignIn] Начало обработки запроса",
+		zap.String("request_id", requestID),
+		zap.String("remote_addr", r.RemoteAddr),
+		zap.String("user_agent", r.UserAgent()),
+	)
+
 	var req googleSignInRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.logger.Error("Google Sign-In: ошибка парсинга запроса",
+		h.logger.Error("[Auth] [GoogleSignIn] Ошибка парсинга запроса",
+			zap.String("request_id", requestID),
 			zap.Error(err),
+			zap.Int("body_size", r.ContentLength),
 		)
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
 		return
 	}
+
+	h.logger.Debug("[Auth] [GoogleSignIn] Запрос декодирован",
+		zap.String("request_id", requestID),
+		zap.Int("id_token_length", len(req.IDToken)),
+	)
 
 	// Validate input data
 	v := validation.NewValidator()
 	validation.ValidateStringLength(v, req.IDToken, 1, 2048, "id_token", "ID token")
 
 	if !v.Valid() {
-		h.logger.Error("Google Sign-In: валидация не пройдена",
+		h.logger.Error("[Auth] [GoogleSignIn] Валидация не пройдена",
+			zap.String("request_id", requestID),
 			zap.Any("errors", v.Errors),
 		)
 		resp.ValidationError(w, v.Errors)
 		return
 	}
 
-	h.logger.Info("Google Sign-In запрос",
+	h.logger.Info("[Auth] [GoogleSignIn] Запрос получен",
+		zap.String("request_id", requestID),
 		zap.Int("token_length", len(req.IDToken)),
 		zap.String("remote_addr", r.RemoteAddr),
+		zap.String("client_id", h.auth.GoogleClientID()),
 	)
 
 	device := services.DeviceInfo{
@@ -445,25 +462,35 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 		device.UserAgent = &ua
 	}
 
-	h.logger.Info("Вызов AuthService.GoogleSignIn",
+	h.logger.Debug("[Auth] [GoogleSignIn] Вызов AuthService.GoogleSignIn",
+		zap.String("request_id", requestID),
 		zap.String("client_id", h.auth.GoogleClientID()),
+		zap.String("device_ip", device.IPAddress),
 	)
+
+	startTime := time.Now()
 	out, err := h.auth.GoogleSignIn(r.Context(), req.IDToken, device)
+	latency := time.Since(startTime)
+
 	if err != nil {
-		h.logger.Error("Ошибка Google Sign-In",
+		h.logger.Error("[Auth] [GoogleSignIn] Ошибка верификации/создания сессии",
+			zap.String("request_id", requestID),
 			zap.String("error", err.Error()),
 			zap.String("error_type", fmt.Sprintf("%T", err)),
 			zap.String("remote_addr", r.RemoteAddr),
+			zap.Duration("latency_ms", latency),
 		)
 		resp.Error(w, http.StatusUnauthorized, errors.New("Google authentication failed"))
 		return
 	}
 
-	h.logger.Info("Google Sign-In успешен",
+	h.logger.Info("[Auth] [GoogleSignIn] Успешный вход",
+		zap.String("request_id", requestID),
 		zap.String("user_id", out.User.ID.String()),
 		zap.String("email", out.User.Email),
 		zap.String("display_name", out.User.GetDisplayName()),
 		zap.Bool("is_new_user", out.User.CreatedAt.IsZero() || time.Since(out.User.CreatedAt) < time.Second),
+		zap.Duration("latency_ms", latency),
 	)
 
 	// Security: устанавливаем оба токена в httpOnly cookies для веба
@@ -472,10 +499,26 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	accessCookieConfig.Secure = h.cookieSecure
 	middleware.SetAccessTokenCookie(w, out.Tokens.AccessToken, accessCookieConfig)
 
+	h.logger.Debug("[Auth] [GoogleSignIn] Access token cookie установлен",
+		zap.String("request_id", requestID),
+		zap.Int("access_token_length", len(out.Tokens.AccessToken)),
+	)
+
 	// Refresh token cookie для обновления токенов
 	refreshCookieConfig := middleware.DefaultRefreshCookieConfig()
 	refreshCookieConfig.Secure = h.cookieSecure
 	middleware.SetRefreshTokenCookie(w, out.Tokens.RefreshToken, refreshCookieConfig)
+
+	h.logger.Debug("[Auth] [GoogleSignIn] Refresh token cookie установлен",
+		zap.String("request_id", requestID),
+		zap.Int("refresh_token_length", len(out.Tokens.RefreshToken)),
+	)
+
+	h.logger.Info("[Auth] [GoogleSignIn] Ответ отправлен клиенту",
+		zap.String("request_id", requestID),
+		zap.String("user_id", out.User.ID.String()),
+		zap.Int("response_status", http.StatusOK),
+	)
 
 	resp.Success(w, out)
 }
