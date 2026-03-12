@@ -97,6 +97,18 @@ spec:
                 secretKeyRef:
                   name: outfitstyle-secrets
                   key: google-client-id
+            - name: FIREBASE_CREDENTIALS_JSON
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: firebase-credentials-json
+              optional: true
+            - name: FIREBASE_CREDENTIALS_PATH
+              value: "/etc/firebase/credentials.json"
+          volumeMounts:
+            - name: firebase-credentials
+              mountPath: /etc/firebase
+              readOnly: true
           resources:
             requests:
               cpu: 100m
@@ -113,6 +125,11 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 10
             failureThreshold: 5
+      volumes:
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-credentials-secret
+            optional: true
 ---
 apiVersion: v1
 kind: Service
