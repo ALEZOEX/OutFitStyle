@@ -68,7 +68,7 @@ spec:
             - name: SERVER_PORT
               value: "8080"
             - name: ENVIRONMENT
-              value: "production"
+              value: "staging"
             - name: ML_SERVICE_URL
               value: "http://ml-service"
             - name: REDIS_URL
