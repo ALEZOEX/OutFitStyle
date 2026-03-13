@@ -38,16 +38,20 @@ func (c *GoogleAuthClient) ClientID() string {
 
 func (c *GoogleAuthClient) Verify(ctx context.Context, tokenString string) (*GoogleUser, error) {
 	// Firebase ID токены имеют aud = Firebase Project ID
-	// Используем Firebase project ID для валидации
-	payload, err := idtoken.Validate(ctx, tokenString, c.firebaseProject)
+	// Используем последовательную валидацию с разными audience
+	var payload *idtoken.Payload
+	var err error
+
+	// Попытка 1: Firebase project ID
+	payload, err = idtoken.Validate(ctx, tokenString, c.firebaseProject)
 	if err != nil {
-		// Пробуем альтернативный подход - валидация с Google OAuth client ID
-		payload, err2 := idtoken.Validate(ctx, tokenString, c.clientID)
-		if err2 != nil {
-			// Последняя попытка - валидация без audience проверки
-			payload, err3 := idtoken.Validate(ctx, tokenString, "")
-			if err3 != nil {
-				return nil, fmt.Errorf("google token invalid: firebase_project=%s (err: %v), client_id=%s (err: %v), no_audience (err: %v)", c.firebaseProject, err, c.clientID, err2, err3)
+		// Попытка 2: Google OAuth client ID
+		payload, err = idtoken.Validate(ctx, tokenString, c.clientID)
+		if err != nil {
+			// Попытка 3: без audience проверки
+			payload, err = idtoken.Validate(ctx, tokenString, "")
+			if err != nil {
+				return nil, fmt.Errorf("google token invalid: all validation attempts failed")
 			}
 		}
 	}
