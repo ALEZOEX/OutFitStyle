@@ -23,24 +23,17 @@ type FirebaseAuthClient interface {
 	VerifyIDToken(ctx context.Context, idToken string) (*Token, error)
 }
 
-// Logger интерфейс для логгирования
-type Logger interface {
-	Debug(msg string, fields ...zap.Field)
-	Info(msg string, fields ...zap.Field)
-	Error(msg string, fields ...zap.Field)
-}
-
 // AuthMiddlewareWithFirebase проверяет JWT и Firebase ID Token
 type AuthMiddlewareWithFirebase struct {
 	authService   *services.AuthService
 	apiKeyService *services.APIKeyService
 	firebaseAuth  FirebaseAuthClient
-	logger        Logger
+	logger        *zap.Logger
 }
 
 // NewAuthMiddlewareWithFirebase создаёт middleware с поддержкой Firebase
-func NewAuthMiddlewareWithFirebase(authService *services.AuthService, apiKeyService *services.APIKeyService, firebaseAuth FirebaseAuthClient, logger ...Logger) *AuthMiddlewareWithFirebase {
-	var log Logger
+func NewAuthMiddlewareWithFirebase(authService *services.AuthService, apiKeyService *services.APIKeyService, firebaseAuth FirebaseAuthClient, logger ...*zap.Logger) *AuthMiddlewareWithFirebase {
+	var log *zap.Logger
 	if len(logger) > 0 && logger[0] != nil {
 		log = logger[0]
 	}

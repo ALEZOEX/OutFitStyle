@@ -24,8 +24,9 @@ func TestAuthService_Register_DuplicateEmail(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	input := domain.UserRegistration{
 		Email:    "existing@example.com",
