@@ -1,0 +1,52 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: outfitstyle-ingressroute
+  namespace: outfitstyle
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    # Health check - должен идти первым
+    - match: Host(`app.outfitstyle.ru`) && PathPrefix(`/health`)
+      kind: Rule
+      services:
+        - name: backend
+          port: 80
+      middlewares:
+        - name: forward-headers
+          namespace: outfitstyle
+    
+    # API
+    - match: Host(`app.outfitstyle.ru`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: backend
+          port: 80
+      middlewares:
+        - name: forward-headers
+          namespace: outfitstyle
+    
+    # Frontend (должен идти последним)
+    - match: Host(`app.outfitstyle.ru`)
+      kind: Rule
+      services:
+        - name: frontend
+          port: 80
+    
+    # Landing
+    - match: Host(`outfitstyle.ru`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: landing
+          port: 80
+    
+    # Landing API
+    - match: Host(`outfitstyle.ru`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: backend
+          port: 80
+  tls:
+    secretName: outfitstyle-tls
