@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"strings"
 	"time"
@@ -98,6 +99,14 @@ type DeviceInfo struct {
 	DeviceType *string // Тип устройства
 	IPAddress  *string // IP-адрес
 	UserAgent  *string // User-Agent
+}
+
+// IPAddressOrEmpty возвращает IP-адрес или пустую строку
+func (d DeviceInfo) IPAddressOrEmpty() string {
+	if d.IPAddress == nil {
+		return ""
+	}
+	return *d.IPAddress
 }
 
 // Register регистрирует нового пользователя
@@ -347,7 +356,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 	s.logger.Info("[AuthService] [GoogleSignIn] Начало входа через Google",
 		zap.Int("token_length", len(idToken)),
 		zap.String("client_id", s.google.ClientID()),
-		zap.String("device_ip", device.IPAddress),
+		zap.String("device_ip", device.IPAddressOrEmpty()),
 	)
 
 	// 1. Валидируем токен через Google
@@ -490,7 +499,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 	// 6. Генерируем сессию и токены
 	s.logger.Info("[AuthService] [GoogleSignIn] Генерация сессии и токенов",
 		zap.String("user_id", resultUser.ID.String()),
-		zap.String("device_ip", device.IPAddress),
+		zap.String("device_ip", device.IPAddressOrEmpty()),
 	)
 	pair, err := s.createSessionAndTokens(ctx, resultUser.ID, device)
 	if err != nil {
