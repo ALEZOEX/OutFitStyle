@@ -1,0 +1,28 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "name": "backend",
+            "volumeMounts": [
+              {
+                "name": "firebase-credentials",
+                "mountPath": "/etc/firebase",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "volumes": [
+          {
+            "name": "firebase-credentials",
+            "secret": {
+              "secretName": "firebase-credentials-secret"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
