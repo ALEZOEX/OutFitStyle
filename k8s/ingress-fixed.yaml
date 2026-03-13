@@ -1,0 +1,63 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: outfitstyle-ingress
+  namespace: outfitstyle
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: outfitstyle-forward-headers
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - outfitstyle.ru
+        - app.outfitstyle.ru
+      secretName: outfitstyle-tls
+  rules:
+    # Landing page
+    - host: outfitstyle.ru
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: landing
+                port:
+                  number: 80
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 80
+    # Flutter Web + API Proxy
+    - host: app.outfitstyle.ru
+      http:
+        paths:
+          # API прокси на backend (должен идти перед /)
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 80
+          # Health check (должен идти перед /)
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 80
+          # Фронтенд (должен идти последним)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

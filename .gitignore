@@ -124,6 +124,7 @@ Thumbs.db
 # Environment variable files
 .env
 .env.local
+firebase-credentials.json
 .env.development
 .env.test
 .env.production
