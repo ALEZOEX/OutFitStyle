@@ -423,7 +423,7 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error("[Auth] [GoogleSignIn] Ошибка парсинга запроса",
 			zap.String("request_id", requestID),
 			zap.Error(err),
-			zap.Int("body_size", r.ContentLength),
+			zap.Int64("body_size", r.ContentLength),
 		)
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid request body"))
 		return
@@ -465,7 +465,7 @@ func (h *AuthHandler) GoogleSignIn(w http.ResponseWriter, r *http.Request) {
 	h.logger.Debug("[Auth] [GoogleSignIn] Вызов AuthService.GoogleSignIn",
 		zap.String("request_id", requestID),
 		zap.String("client_id", h.auth.GoogleClientID()),
-		zap.String("device_ip", device.IPAddress),
+		zap.String("device_ip", device.IPAddressOrEmpty()),
 	)
 
 	startTime := time.Now()
