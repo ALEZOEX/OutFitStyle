@@ -47,7 +47,7 @@ func (c *GoogleAuthClient) Verify(ctx context.Context, tokenString string) (*Goo
 			// Последняя попытка - валидация без audience проверки
 			payload, err3 := idtoken.Validate(ctx, tokenString, "")
 			if err3 != nil {
-				return nil, fmt.Errorf("google token invalid: tried firebase project (%v), client ID (%v), no audience (%v)", err, err2, err3)
+				return nil, fmt.Errorf("google token invalid: firebase_project=%s (err: %v), client_id=%s (err: %v), no_audience (err: %v)", c.firebaseProject, err, c.clientID, err2, err3)
 			}
 		}
 	}
