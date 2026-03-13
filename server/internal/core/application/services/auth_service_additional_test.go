@@ -57,7 +57,7 @@ func TestAuthService_Register_ValidationError(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	input := domain.UserRegistration{
 		Email:    "", // Неверный email
@@ -78,7 +78,7 @@ func TestAuthService_Login_UserNotFound(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	loginInput := domain.UserLogin{
 		Email:    "nonexistent@example.com",
@@ -103,7 +103,7 @@ func TestAuthService_Login_WrongPassword(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	password := "SecureP@ssw0rd123"  // 12+ символов для новой политики паролей
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
@@ -140,7 +140,7 @@ func TestAuthService_Login_EmptyCredentials(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	loginInput := domain.UserLogin{
 		Email:    "",
@@ -161,7 +161,7 @@ func TestAuthService_Refresh_EmptyToken(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	result, err := authService.Refresh(context.Background(), "")
 
@@ -178,7 +178,7 @@ func TestAuthService_Refresh_InvalidToken(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	mockTokenSvc.On("HashRefreshToken", "invalid_token").Return("hashed_invalid_token")
 	mockSessionRepo.On("GetByRefreshHash", mock.Anything, "hashed_invalid_token").Return(nil, repositories.ErrNotFound)
@@ -200,7 +200,7 @@ func TestAuthService_Refresh_ExpiredSession(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	expiredTime := time.Now().Add(-time.Hour)
 	session := &repositories.Session{
@@ -231,7 +231,7 @@ func TestAuthService_Refresh_InactiveSession(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	futureTime := time.Now().Add(time.Hour)
 	session := &repositories.Session{
@@ -262,7 +262,7 @@ func TestAuthService_Logout_AllDevices(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	userID := domain.NewID()
 	sessionID := domain.NewID()
@@ -282,7 +282,7 @@ func TestAuthService_Logout_SingleDevice(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	userID := domain.NewID()
 	sessionID := domain.NewID()
@@ -302,7 +302,7 @@ func TestAuthService_ValidateAccessToken_InvalidToken(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	mockTokenSvc.On("ValidateAccessToken", "invalid_token").Return(domain.ID{}, domain.ID{}, "", assert.AnError)
 
@@ -323,7 +323,7 @@ func TestAuthService_ValidateAccessToken_SessionNotFound(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	userID := domain.NewID()
 	sessionID := domain.NewID()
@@ -351,7 +351,7 @@ func TestAuthService_ValidateAccessToken_Success(t *testing.T) {
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, testLogger)
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
 	userID := domain.NewID()
 	sessionID := domain.NewID()
