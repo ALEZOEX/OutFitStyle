@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 import '../utils/logger.dart';
+import '../core/api/api_client.dart';
 import '../core/api/public_api_client.dart';
 
 /// Модель данных пользователя
@@ -50,14 +51,14 @@ class UserSession {
 class SessionManager {
   final FirebaseAuth _firebaseAuth;
   final SharedPreferences _sharedPreferences;
-  final PublicApiClient _apiClient;
+  final ApiClient _apiClient;
 
   UserSession? _currentUserSession;
   late final StreamController<UserSession?> _sessionStreamController;
   StreamSubscription<User?>? _authSubscription;
 
-  SessionManager(this._firebaseAuth, this._sharedPreferences, [PublicApiClient? apiClient])
-      : _apiClient = apiClient ?? PublicApiClient() {
+  SessionManager(this._firebaseAuth, this._sharedPreferences, {ApiClient? apiClient})
+      : _apiClient = apiClient ?? ApiClient() {
     _sessionStreamController = StreamController<UserSession?>.broadcast();
     _initializeSession();
     _setupAuthStateListener();
