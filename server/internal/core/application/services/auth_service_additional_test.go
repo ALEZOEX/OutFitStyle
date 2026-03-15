@@ -15,6 +15,16 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
+// MockAuditRepository моки репозиторий аудита
+type MockAuditRepository struct {
+	mock.Mock
+}
+
+func (m *MockAuditRepository) Create(ctx context.Context, input repositories.AuditCreate) error {
+	args := m.Called(ctx, input)
+	return args.Error(0)
+}
+
 // Тестовый logger
 var testLogger = zap.NewNop()
 
@@ -56,6 +66,7 @@ func TestAuthService_Register_ValidationError(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -77,6 +88,7 @@ func TestAuthService_Login_UserNotFound(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -102,6 +114,7 @@ func TestAuthService_Login_WrongPassword(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -139,6 +152,7 @@ func TestAuthService_Login_EmptyCredentials(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -160,6 +174,7 @@ func TestAuthService_Refresh_EmptyToken(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -177,6 +192,7 @@ func TestAuthService_Refresh_InvalidToken(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -199,6 +215,7 @@ func TestAuthService_Refresh_ExpiredSession(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -230,6 +247,7 @@ func TestAuthService_Refresh_InactiveSession(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -261,6 +279,7 @@ func TestAuthService_Logout_AllDevices(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -268,6 +287,7 @@ func TestAuthService_Logout_AllDevices(t *testing.T) {
 	sessionID := domain.NewID()
 
 	mockSessionRepo.On("RevokeAllForUser", mock.Anything, userID).Return(nil)
+	mockAuditRepo.On("Create", mock.Anything, mock.Anything).Return(nil)
 
 	err := authService.Logout(context.Background(), userID, sessionID, true, "")
 
@@ -281,6 +301,7 @@ func TestAuthService_Logout_SingleDevice(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -288,6 +309,7 @@ func TestAuthService_Logout_SingleDevice(t *testing.T) {
 	sessionID := domain.NewID()
 
 	mockSessionRepo.On("Revoke", mock.Anything, sessionID).Return(nil)
+	mockAuditRepo.On("Create", mock.Anything, mock.Anything).Return(nil)
 
 	err := authService.Logout(context.Background(), userID, sessionID, false, "")
 
@@ -301,6 +323,7 @@ func TestAuthService_ValidateAccessToken_InvalidToken(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -322,6 +345,7 @@ func TestAuthService_ValidateAccessToken_SessionNotFound(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 
@@ -350,6 +374,7 @@ func TestAuthService_ValidateAccessToken_Success(t *testing.T) {
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
 	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
 	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, testLogger)
 

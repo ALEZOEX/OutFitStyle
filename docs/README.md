@@ -120,7 +120,7 @@
 ### Технологический стек:
 
 **Backend:**
-- Go 1.21+ (Chi Router, SQLC, Wire DI)
+- Go 1.25.0 (Chi Router, SQLC, Wire DI)
 - Python 3.11+ (FastAPI, CatBoost, Scikit-learn)
 - PostgreSQL 16 (Drift ORM)
 - Redis 7

@@ -243,14 +243,36 @@ func (m *MockTokenService) RefreshTTL() time.Duration {
 	return args.Get(0).(time.Duration)
 }
 
+// MockAuditRepository - мок-реализация AuditRepository для тестов
+type MockAuditRepository struct {
+	mock.Mock
+}
+
+func (m *MockAuditRepository) Create(ctx context.Context, a repositories.AuditCreate) error {
+	args := m.Called(ctx, a)
+	return args.Error(0)
+}
+
+// MockAuditRepositoryError - мок-реализация AuditRepository для тестов с ошибками
+type MockAuditRepositoryError struct {
+	mock.Mock
+}
+
+func (m *MockAuditRepositoryError) Create(ctx context.Context, a repositories.AuditCreate) error {
+	args := m.Called(ctx, a)
+	return args.Error(0)
+}
+
 // Тест для AuthService
 func TestAuthService_Register(t *testing.T) {
 	// Подготовка
 	mockUserRepo := new(MockUserRepository)
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
+	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, new(MockTokenBlacklist), zap.NewNop())
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, zap.NewNop())
 
 	// Тестовые данные
 	input := domain.UserRegistration{
@@ -268,6 +290,7 @@ func TestAuthService_Register(t *testing.T) {
 	mockTokenSvc.On("GenerateAccessToken", mock.Anything, mock.Anything).Return("access_token_mock", time.Now().Add(time.Hour), nil)
 	mockTokenSvc.On("RefreshTTL").Return(time.Hour)
 	mockSessionRepo.On("Create", mock.Anything, mock.Anything).Return(domain.NewID(), nil)
+	mockAuditRepo.On("Create", mock.Anything, mock.Anything).Return(nil)
 
 	// Выполнение
 	result, err := authService.Register(context.Background(), input, DeviceInfo{})
@@ -289,8 +312,10 @@ func TestAuthService_Login_Success(t *testing.T) {
 	mockUserRepo := new(MockUserRepository)
 	mockSessionRepo := new(MockSessionRepository)
 	mockTokenSvc := new(MockTokenService)
+	mockBlacklist := new(MockTokenBlacklist)
+	mockAuditRepo := new(MockAuditRepository)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, new(MockTokenBlacklist), zap.NewNop())
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, zap.NewNop())
 
 	// Тестовые данные
 	password := "SecureP@ssw0rd123"  // 12+ символов: uppercase, lowercase, digit, special
@@ -319,6 +344,7 @@ func TestAuthService_Login_Success(t *testing.T) {
 	mockTokenSvc.On("GenerateAccessToken", mock.Anything, mock.Anything).Return("access_token_mock", time.Now().Add(time.Hour), nil)
 	mockTokenSvc.On("RefreshTTL").Return(time.Hour)
 	mockSessionRepo.On("Create", mock.Anything, mock.Anything).Return(domain.NewID(), nil)
+	mockAuditRepo.On("Create", mock.Anything, mock.Anything).Return(nil)
 
 	// Выполнение
 	result, err := authService.Login(context.Background(), loginInput, DeviceInfo{})
