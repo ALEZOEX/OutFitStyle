@@ -5,7 +5,7 @@ import '../../../../domain/entities/catalog_entity.dart';
 import '../../data/repositories/wardrobe_repository.dart';
 import '../../../../domain/entities/wardrobe_item.dart';
 import '../../../../domain/entities/wardrobe_request_entities.dart';
-import '../../../../presentation/providers/auth_provider.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../../../presentation/routing/router.dart';
 
 /// Состояние гардероба
