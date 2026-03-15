@@ -43,46 +43,58 @@ class ApiClient {
             !path.contains('/auth/verify-reset-code')) {
 
           String? firebaseIdToken;
+          
+          // 🔑 DEBUG LOGS
+          developer.log('🔑 [AUTH DEBUG] ============== REQUEST START ==============', name: 'AuthDebug');
+          developer.log('🔑 [AUTH DEBUG] Path: ${options.method} ${options.path}', name: 'AuthDebug');
 
           try {
             // Получаем текущего пользователя Firebase
             final user = _firebaseAuth.currentUser;
+            
+            developer.log('🔑 [AUTH DEBUG] currentUser: ${user != null ? "UID=${user.uid}, Email=${user.email}" : "NULL"}', name: 'AuthDebug');
 
             if (user != null) {
               // ВАЖНО: Получаем свежий Firebase ID Token с force refresh=true
               // Это гарантирует что токен актуален и не истёк
               firebaseIdToken = await user.getIdToken(true);
 
+              developer.log('🔑 [AUTH DEBUG] getIdToken() returned: ${firebaseIdToken != null ? "length=${firebaseIdToken.length}" : "NULL"}', name: 'AuthDebug');
+
               if (firebaseIdToken != null) {
-                developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path}', name: 'ApiClient');
-                developer.log('[$timestamp] [ApiClient] [Auth] Firebase ID Token получен (длина: ${firebaseIdToken.length} символов)', name: 'ApiClient');
+                developer.log('🔑 [AUTH DEBUG] Token first 50 chars: ${firebaseIdToken.substring(0, firebaseIdToken.length > 50 ? 50 : firebaseIdToken.length)}...', name: 'AuthDebug');
 
                 if (firebaseIdToken.isNotEmpty) {
                   options.headers['Authorization'] = 'Bearer $firebaseIdToken';
-                  developer.log('[$timestamp] [ApiClient] [Auth] Authorization header добавлен с Firebase ID Token', name: 'ApiClient');
+                  developer.log('🔑 [AUTH DEBUG] ✅ Authorization header SET (Bearer ${firebaseIdToken.length} chars)', name: 'AuthDebug');
                 } else {
-                  developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase ID Token пустой', name: 'ApiClient');
+                  developer.log('🔑 [AUTH DEBUG] ❌ WARNING: Firebase ID Token пустой', name: 'AuthDebug');
                   AppLogger.warning('[$timestamp] [ApiClient] Запрос с пустым Firebase ID Token: ${options.method} ${options.path}');
                 }
               } else {
-                developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase ID Token = null', name: 'ApiClient');
+                developer.log('🔑 [AUTH DEBUG] ❌ WARNING: Firebase ID Token = null', name: 'AuthDebug');
                 AppLogger.warning('[$timestamp] [ApiClient] Запрос с null Firebase ID Token: ${options.method} ${options.path}');
               }
             } else {
-              developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase currentUser = null', name: 'ApiClient');
+              developer.log('🔑 [AUTH DEBUG] ❌ WARNING: Firebase currentUser = null', name: 'AuthDebug');
               AppLogger.warning('[$timestamp] [ApiClient] Запрос без авторизации (Firebase user = null): ${options.method} ${options.path}');
             }
           } catch (e) {
-            developer.log('[$timestamp] [ApiClient] [Auth] ERROR получения Firebase ID Token: $e', name: 'ApiClient');
+            developer.log('🔑 [AUTH DEBUG] ❌ ERROR получения Firebase ID Token: $e', name: 'AuthDebug');
             AppLogger.error('[$timestamp] [ApiClient] Ошибка получения Firebase ID Token: $e');
 
             // Пробуем fallback на access_token из SharedPreferences
             final accessToken = _sharedPreferences?.getString('access_token');
             if (accessToken != null && accessToken.isNotEmpty) {
               options.headers['Authorization'] = 'Bearer $accessToken';
-              developer.log('[$timestamp] [ApiClient] [Auth] Fallback: используем access_token из SharedPreferences', name: 'ApiClient');
+              developer.log('🔑 [AUTH DEBUG] ⚠️ Fallback: используем access_token из SharedPreferences (${accessToken.length} chars)', name: 'AuthDebug');
+            } else {
+              developer.log('🔑 [AUTH DEBUG] ❌ Fallback: access_token тоже не найден', name: 'AuthDebug');
             }
           }
+          
+          developer.log('🔑 [AUTH DEBUG] Final headers: ${options.headers}', name: 'AuthDebug');
+          developer.log('🔑 [AUTH DEBUG] ============== REQUEST END ==============', name: 'AuthDebug');
         } else {
           developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path} (public endpoint, no auth)', name: 'ApiClient');
         }
