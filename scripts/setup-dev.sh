@@ -2,16 +2,15 @@
 # Setup development environment
 echo "Setting up development environment..."
 
-# Check if Go is installed
 if ! command -v go &> /dev/null; then
-    echo "Go is not installed. Please install Go 1.21+ first."
+    echo "Go is not installed. Please install Go 1.25.0 first."
     exit 1
 fi
 
 # Check Go version
 GO_VERSION=$(go version | cut -d ' ' -f 3 | cut -c 3-)
-if [[ $(printf '%s\n' "1.21" "$GO_VERSION" | sort -V | head -n1) != "1.21" ]]; then
-    echo "Go version $GO_VERSION is too old. Please upgrade to Go 1.21+."
+if [[ $(printf '%s\n' "1.25.0" "$GO_VERSION" | sort -V | head -n1) != "1.25.0" ]]; then
+    echo "Go version $GO_VERSION is too old. Please upgrade to Go 1.25.0."
     exit 1
 fi
 
