@@ -263,8 +263,8 @@ class SessionManager {
   ///
   /// Возвращает true при успешном входе, false при ошибке или отмене
   Future<bool> signInWithGoogle() async {
+    final timestamp = DateTime.now().toIso8601String();
     try {
-      final timestamp = DateTime.now().toIso8601String();
       AppLogger.info('[$timestamp] [Auth] [GoogleSignIn] Начало Google Sign-In через Firebase Auth...');
 
       // Создаём Google Auth Provider с нужными скоупами
@@ -308,12 +308,12 @@ class SessionManager {
       AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Firebase ID token (первые 50 символов): ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...');
 
       AppLogger.info('[$timestamp] [Auth] [GoogleSignIn] Обмен Firebase token на backend access_token...');
-      
+
       // Call backend to exchange Firebase token for access_token
       try {
         final backendTimestamp = DateTime.now().toIso8601String();
         AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Отправка запроса на POST /api/v1/auth/google');
-        
+
         final response = await _apiClient.post('/api/v1/auth/google', data: {
           'id_token': idToken,
         });
@@ -342,7 +342,7 @@ class SessionManager {
           AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Сохранение access_token (длина: ${accessToken.length} символов)');
           await _sharedPreferences.setString('access_token', accessToken);
           AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Access token сохранён для Google пользователя: ${_maskEmail(user.email ?? 'unknown')}');
-          
+
           // Verify it was saved
           final saved = _sharedPreferences.getString('access_token');
           if (saved != null && saved.isNotEmpty) {

@@ -17,7 +17,7 @@ class ApiClient {
   final SharedPreferences? _sharedPreferences;
   final FirebaseAuth _firebaseAuth;
 
-  ApiClient(SharedPreferences sharedPreferences, {FirebaseAuth? firebaseAuth})
+  ApiClient({SharedPreferences? sharedPreferences, FirebaseAuth? firebaseAuth})
       : _sharedPreferences = sharedPreferences,
         _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
     _dio = Dio(BaseOptions(
@@ -41,21 +41,21 @@ class ApiClient {
             !path.contains('/auth/reset-password') &&
             !path.contains('/auth/google') &&
             !path.contains('/auth/verify-reset-code')) {
-          
+
           String? firebaseIdToken;
-          
+
           try {
             // Получаем текущего пользователя Firebase
             final user = _firebaseAuth.currentUser;
-            
+
             if (user != null) {
               // ВАЖНО: Получаем свежий Firebase ID Token с force refresh=true
               // Это гарантирует что токен актуален и не истёк
               firebaseIdToken = await user.getIdToken(true);
-              
+
               developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path}', name: 'ApiClient');
               developer.log('[$timestamp] [ApiClient] [Auth] Firebase ID Token получен (длина: ${firebaseIdToken.length} символов)', name: 'ApiClient');
-              
+
               if (firebaseIdToken.isNotEmpty) {
                 options.headers['Authorization'] = 'Bearer $firebaseIdToken';
                 developer.log('[$timestamp] [ApiClient] [Auth] Authorization header добавлен с Firebase ID Token', name: 'ApiClient');
@@ -70,7 +70,7 @@ class ApiClient {
           } catch (e) {
             developer.log('[$timestamp] [ApiClient] [Auth] ERROR получения Firebase ID Token: $e', name: 'ApiClient');
             AppLogger.error('[$timestamp] [ApiClient] Ошибка получения Firebase ID Token: $e');
-            
+
             // Пробуем fallback на access_token из SharedPreferences
             final accessToken = _sharedPreferences?.getString('access_token');
             if (accessToken != null && accessToken.isNotEmpty) {
@@ -96,17 +96,17 @@ class ApiClient {
       onResponse: (Response response, ResponseInterceptorHandler handler) {
         final timestamp = DateTime.now().toIso8601String();
         developer.log('[$timestamp] [ApiClient] [HTTP] Ответ: ${response.statusCode} ${response.requestOptions.path}', name: 'ApiClient');
-        
+
         if (response.statusCode == 200 || response.statusCode == 201) {
           developer.log('[$timestamp] [ApiClient] [HTTP] Успешный ответ', name: 'ApiClient');
         }
-        
+
         return handler.next(response);
       },
       onError: (DioException err, ErrorInterceptorHandler handler) async {
         final timestamp = DateTime.now().toIso8601String();
         final statusCode = err.response?.statusCode;
-        
+
         developer.log('[$timestamp] [ApiClient] [HTTP] Ошибка',
             name: 'ApiClient',
             level: 1000,
@@ -116,7 +116,7 @@ class ApiClient {
         if (statusCode == 401) {
           developer.log('[$timestamp] [ApiClient] [Auth] 401 Unauthorized — требуется авторизация', name: 'ApiClient');
           AppLogger.error('[$timestamp] [ApiClient] 401 ошибка на ${err.requestOptions.path}');
-          
+
           // Проверяем, есть ли токен
           final accessToken = _sharedPreferences?.getString('access_token');
           if (accessToken == null || accessToken.isEmpty) {
@@ -141,7 +141,8 @@ class ApiClient {
   /// (например, для Weather API без авторизации)
   ApiClient.internal(Dio dio)
       : _dio = dio,
-        _sharedPreferences = null;
+        _sharedPreferences = null,
+        _firebaseAuth = FirebaseAuth.instance;
 
   String _normalizePath(String path) {
     return path.startsWith('/') ? path.substring(1) : path;
