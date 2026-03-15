@@ -18,6 +18,7 @@ Godeps/
 # IDE
 .vscode/
 .idea/
+.kiro/
 
 # Flutter/Dart/Pub
 .build/
