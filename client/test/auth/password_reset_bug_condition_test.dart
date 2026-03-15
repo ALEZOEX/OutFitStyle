@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:outfitstyle_client/src/auth/session_manager.dart';
-import 'package:outfitstyle_client/src/core/api/public_api_client.dart';
+import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 
-// Мок для PublicApiClient
-class MockPublicApiClient extends Mock implements PublicApiClient {}
+// Мок для ApiClient
+class MockApiClient extends Mock implements ApiClient {}
 
 // Мок для FirebaseAuth
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
@@ -28,13 +28,13 @@ class MockResponse extends Mock implements Response<dynamic> {
 
 void main() {
   group('Password Reset Code Validation - Bug Condition Exploration', () {
-    late MockPublicApiClient mockApiClient;
+    late MockApiClient mockApiClient;
     late MockFirebaseAuth mockFirebaseAuth;
     late MockSharedPreferences mockSharedPreferences;
     late SessionManager sessionManager;
 
     setUp(() {
-      mockApiClient = MockPublicApiClient();
+      mockApiClient = MockApiClient();
       mockFirebaseAuth = MockFirebaseAuth();
       mockSharedPreferences = MockSharedPreferences();
 
