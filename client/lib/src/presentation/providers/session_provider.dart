@@ -26,10 +26,11 @@ final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
 final sessionManagerProvider = Provider<SessionManager>((ref) {
   // Получаем SharedPreferences асинхронно через FutureProvider
   final prefsAsync = ref.watch(sharedPreferencesProvider);
+  final apiClient = ref.watch(apiClientProvider);
 
   return prefsAsync.when(
     data: (prefs) {
-      final manager = SessionManager(FirebaseAuth.instance, prefs);
+      final manager = SessionManager(FirebaseAuth.instance, prefs, apiClient: apiClient);
       // ✅ Правильная очистка при уничтожении провайдера
       ref.onDispose(() => manager.dispose());
       return manager;
