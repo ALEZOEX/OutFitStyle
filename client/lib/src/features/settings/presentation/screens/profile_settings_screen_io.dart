@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/upload_service.dart';
-import '../../../../presentation/providers/session_provider.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 import '../../data/repositories/profile_repository.dart';
 
 /// Провайдер для состояния профиля
@@ -183,12 +183,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
 // Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
 final _apiClientProvider = Provider<ApiClient>((ref) {
-  final prefsAsync = ref.watch(sharedPreferencesProvider);
-  return prefsAsync.when(
-    data: (prefs) => ApiClient(prefs),
-    loading: () => throw StateError('SharedPreferences не инициализированы'),
-    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
-  );
+  return ref.watch(apiClientProvider);
 });
 
 final _uploadServiceProvider = Provider<UploadService>((ref) {

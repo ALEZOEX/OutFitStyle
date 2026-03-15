@@ -1,22 +1,25 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'dart:developer' as developer;
 import '../../utils/logger.dart';
 
 /// ApiClient — HTTP клиент для авторизованных запросов
 ///
-/// Авторизация работает через httpOnly cookie (refresh token)
-/// Backend сам управляет сессией через cookie
+/// Авторизация работает через Firebase ID Token
+/// Токен получается динамически перед каждым запросом через getIdToken()
 ///
 /// Для web: cookie отправляется автоматически (withCredentials: true)
-/// Для mobile: требуется дополнительная настройка cookie jar
+/// Для mobile: cookie jar не требуется (используется Bearer token)
 class ApiClient {
   late final Dio _dio;
   final SharedPreferences? _sharedPreferences;
+  final FirebaseAuth _firebaseAuth;
 
-  ApiClient(SharedPreferences sharedPreferences)
-      : _sharedPreferences = sharedPreferences {
+  ApiClient(SharedPreferences sharedPreferences, {FirebaseAuth? firebaseAuth})
+      : _sharedPreferences = sharedPreferences,
+        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
     _dio = Dio(BaseOptions(
       baseUrl: ApiConfig.baseUrl,
       connectTimeout: const Duration(seconds: 15),
@@ -25,35 +28,60 @@ class ApiClient {
       extra: {'withCredentials': true}, // Важно: отправка cookie на вебе
     ));
 
-    // Interceptor для добавления Authorization header
+    // Interceptor для добавления Authorization header с Firebase ID Token
     _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
+      onRequest: (options, handler) async {
         final timestamp = DateTime.now().toIso8601String();
         final path = options.path;
-        
-        // Skip Authorization header for login/register endpoints
+
+        // Skip Authorization header for public endpoints
         if (!path.contains('/auth/login') &&
             !path.contains('/auth/register') &&
             !path.contains('/auth/forgot-password') &&
             !path.contains('/auth/reset-password') &&
-            !path.contains('/auth/google')) {
-          // Get access_token from SharedPreferences
-          final accessToken = _sharedPreferences?.getString('access_token');
+            !path.contains('/auth/google') &&
+            !path.contains('/auth/verify-reset-code')) {
           
-          developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path}', name: 'ApiClient');
-          developer.log('[$timestamp] [ApiClient] [Auth] access_token: ${accessToken != null ? "present (${accessToken.length} chars)" : "null"}', name: 'ApiClient');
+          String? firebaseIdToken;
           
-          if (accessToken != null && accessToken.isNotEmpty) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-            developer.log('[$timestamp] [ApiClient] [Auth] Authorization header добавлен (Bearer ${accessToken.length} chars)', name: 'ApiClient');
-          } else {
-            developer.log('[$timestamp] [ApiClient] [Auth] WARNING: access_token не найден - запрос будет без авторизации', name: 'ApiClient');
-            AppLogger.warning('[$timestamp] [ApiClient] Запрос без токена: ${options.method} ${options.path}');
+          try {
+            // Получаем текущего пользователя Firebase
+            final user = _firebaseAuth.currentUser;
+            
+            if (user != null) {
+              // ВАЖНО: Получаем свежий Firebase ID Token с force refresh=true
+              // Это гарантирует что токен актуален и не истёк
+              firebaseIdToken = await user.getIdToken(true);
+              
+              developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path}', name: 'ApiClient');
+              developer.log('[$timestamp] [ApiClient] [Auth] Firebase ID Token получен (длина: ${firebaseIdToken.length} символов)', name: 'ApiClient');
+              
+              if (firebaseIdToken.isNotEmpty) {
+                options.headers['Authorization'] = 'Bearer $firebaseIdToken';
+                developer.log('[$timestamp] [ApiClient] [Auth] Authorization header добавлен с Firebase ID Token', name: 'ApiClient');
+              } else {
+                developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase ID Token пустой', name: 'ApiClient');
+                AppLogger.warning('[$timestamp] [ApiClient] Запрос с пустым Firebase ID Token: ${options.method} ${options.path}');
+              }
+            } else {
+              developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase currentUser = null', name: 'ApiClient');
+              AppLogger.warning('[$timestamp] [ApiClient] Запрос без авторизации (Firebase user = null): ${options.method} ${options.path}');
+            }
+          } catch (e) {
+            developer.log('[$timestamp] [ApiClient] [Auth] ERROR получения Firebase ID Token: $e', name: 'ApiClient');
+            AppLogger.error('[$timestamp] [ApiClient] Ошибка получения Firebase ID Token: $e');
+            
+            // Пробуем fallback на access_token из SharedPreferences
+            final accessToken = _sharedPreferences?.getString('access_token');
+            if (accessToken != null && accessToken.isNotEmpty) {
+              options.headers['Authorization'] = 'Bearer $accessToken';
+              developer.log('[$timestamp] [ApiClient] [Auth] Fallback: используем access_token из SharedPreferences', name: 'ApiClient');
+            }
           }
         } else {
           developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path} (public endpoint, no auth)', name: 'ApiClient');
         }
-        
+
         return handler.next(options);
       },
     ));
