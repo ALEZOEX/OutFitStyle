@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 
-import '../../../../presentation/providers/auth_provider.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../../../storage/profile_storage.dart';
 import '../../../../storage/local_storage.dart';
 import '../../../settings/data/repositories/profile_repository.dart';

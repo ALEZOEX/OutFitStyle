@@ -53,7 +53,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   final firebaseAuth = ref.watch(firebaseAuthProvider);
 
   return prefsAsync.when(
-    data: (prefs) => ApiClient(prefs, firebaseAuth: firebaseAuth),
+    data: (prefs) => ApiClient(sharedPreferences: prefs, firebaseAuth: firebaseAuth),
     loading: () => throw StateError('SharedPreferences не инициализированы'),
     error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
   );

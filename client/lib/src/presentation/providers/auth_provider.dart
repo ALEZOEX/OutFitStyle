@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:outfitstyle_client/src/services/auth_storage.dart' as impl;
-import 'session_provider.dart' show sessionManagerProvider, authStateProvider, apiClientProvider;
+import 'session_provider.dart' show sessionManagerProvider, authStateProvider;
 
 // ============================================================================
 // FIREBASE AUTH ПРОВАЙДЕРЫ (основные)
