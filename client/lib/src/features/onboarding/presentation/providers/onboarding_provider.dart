@@ -3,7 +3,7 @@ import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/models/onboarding_data.dart';
 import 'package:outfitstyle_client/src/features/onboarding/data/repositories/onboarding_repository.dart';
 import 'package:outfitstyle_client/src/features/onboarding/onboarding_storage.dart';
-import 'package:outfitstyle_client/src/presentation/providers/auth_provider.dart';
+import 'package:outfitstyle_client/src/presentation/providers/session_provider.dart';
 import 'package:outfitstyle_client/src/utils/logger.dart';
 
 /// Провайдер хранилища онбординга
