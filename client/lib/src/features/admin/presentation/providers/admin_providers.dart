@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_config.dart';
-import '../../../../core/api/api_client.dart';
 import '../../../../presentation/providers/session_provider.dart';
 import '../../data/datasources/admin_remote_data_source.dart';
 import '../../data/repositories/admin_repository_impl.dart';

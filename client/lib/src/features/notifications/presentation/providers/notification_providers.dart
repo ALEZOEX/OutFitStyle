@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/api/api_client.dart';
 import '../../../../presentation/providers/session_provider.dart';
 import '../../data/datasources/notification_remote_data_source.dart';
 import '../../data/models/notification_dto.dart';
