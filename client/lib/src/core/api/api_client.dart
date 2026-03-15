@@ -53,15 +53,20 @@ class ApiClient {
               // Это гарантирует что токен актуален и не истёк
               firebaseIdToken = await user.getIdToken(true);
 
-              developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path}', name: 'ApiClient');
-              developer.log('[$timestamp] [ApiClient] [Auth] Firebase ID Token получен (длина: ${firebaseIdToken.length} символов)', name: 'ApiClient');
+              if (firebaseIdToken != null) {
+                developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path}', name: 'ApiClient');
+                developer.log('[$timestamp] [ApiClient] [Auth] Firebase ID Token получен (длина: ${firebaseIdToken.length} символов)', name: 'ApiClient');
 
-              if (firebaseIdToken.isNotEmpty) {
-                options.headers['Authorization'] = 'Bearer $firebaseIdToken';
-                developer.log('[$timestamp] [ApiClient] [Auth] Authorization header добавлен с Firebase ID Token', name: 'ApiClient');
+                if (firebaseIdToken.isNotEmpty) {
+                  options.headers['Authorization'] = 'Bearer $firebaseIdToken';
+                  developer.log('[$timestamp] [ApiClient] [Auth] Authorization header добавлен с Firebase ID Token', name: 'ApiClient');
+                } else {
+                  developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase ID Token пустой', name: 'ApiClient');
+                  AppLogger.warning('[$timestamp] [ApiClient] Запрос с пустым Firebase ID Token: ${options.method} ${options.path}');
+                }
               } else {
-                developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase ID Token пустой', name: 'ApiClient');
-                AppLogger.warning('[$timestamp] [ApiClient] Запрос с пустым Firebase ID Token: ${options.method} ${options.path}');
+                developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase ID Token = null', name: 'ApiClient');
+                AppLogger.warning('[$timestamp] [ApiClient] Запрос с null Firebase ID Token: ${options.method} ${options.path}');
               }
             } else {
               developer.log('[$timestamp] [ApiClient] [Auth] WARNING: Firebase currentUser = null', name: 'ApiClient');

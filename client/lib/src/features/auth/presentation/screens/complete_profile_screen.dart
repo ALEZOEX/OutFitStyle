@@ -10,7 +10,6 @@ import '../../../../presentation/providers/session_provider.dart';
 import '../../../../storage/profile_storage.dart';
 import '../../../../storage/local_storage.dart';
 import '../../../settings/data/repositories/profile_repository.dart';
-import '../../../../core/api/api_client.dart';
 import '../../../../utils/logger.dart';
 
 /// Провайдер для ProfileRepository
