@@ -15,16 +15,6 @@ import (
 	"outfitstyle/server/internal/core/domain"
 )
 
-// MockAuditRepository моки репозиторий аудита
-type MockAuditRepository struct {
-	mock.Mock
-}
-
-func (m *MockAuditRepository) Create(ctx context.Context, input repositories.AuditCreate) error {
-	args := m.Called(ctx, input)
-	return args.Error(0)
-}
-
 // Тестовый logger
 var testLogger = zap.NewNop()
 
