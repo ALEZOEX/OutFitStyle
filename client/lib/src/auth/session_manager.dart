@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:convert';
 import '../utils/logger.dart';
 import '../core/api/api_client.dart';
-import '../core/api/public_api_client.dart';
 
 /// Модель данных пользователя
 class UserSession {
