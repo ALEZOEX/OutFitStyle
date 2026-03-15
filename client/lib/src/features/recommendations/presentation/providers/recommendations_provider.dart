@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import '../../../../domain/entities/outfit_recommendation.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../presentation/providers/session_provider.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 
 /// Заглушка для демонстрации UI (удалить после подключения реального API)
 final mockRecommendations = <OutfitRecommendation>[];
@@ -122,12 +122,7 @@ class RecommendationsState {
 /// Провайдер рекомендаций (использует глобальный ApiClient)
 final recommendationsProvider =
     StateNotifierProvider<RecommendationsNotifier, RecommendationsState>((ref) {
-  final prefsAsync = ref.watch(sharedPreferencesProvider);
-  final apiClient = prefsAsync.when(
-    data: (prefs) => ApiClient(prefs),
-    loading: () => throw StateError('SharedPreferences не инициализированы'),
-    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
-  );
+  final apiClient = ref.watch(apiClientProvider);
   return RecommendationsNotifier(apiClient: apiClient);
 });
 

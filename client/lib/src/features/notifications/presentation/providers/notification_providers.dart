@@ -4,19 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/api/api_client.dart';
-import '../../../../presentation/providers/session_provider.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 import '../../data/datasources/notification_remote_data_source.dart';
 import '../../data/models/notification_dto.dart';
 import '../../data/repositories/notification_repository.dart';
 
 /// Провайдер для NotificationRepository (использует глобальный ApiClient с Firebase ID Token)
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
-  final prefsAsync = ref.watch(sharedPreferencesProvider);
-  final apiClient = prefsAsync.when(
-    data: (prefs) => ApiClient(prefs),
-    loading: () => throw StateError('SharedPreferences не инициализированы'),
-    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
-  );
+  final apiClient = ref.watch(apiClientProvider);
   final remoteDataSource = NotificationRemoteDataSource(apiClient);
   return NotificationRepository(
     remoteDataSource: remoteDataSource,

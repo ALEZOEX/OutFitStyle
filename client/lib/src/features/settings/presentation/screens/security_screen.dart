@@ -4,20 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../presentation/providers/session_provider.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 import 'package:outfitstyle_client/src/services/password_api.dart';
 import '../../data/repositories/sessions_repository.dart';
 import '../../data/models/session_device.dart';
-
-/// Провайдер API клиента
-final apiClientProvider = Provider<ApiClient>((ref) {
-  final prefsAsync = ref.watch(sharedPreferencesProvider);
-  return prefsAsync.when(
-    data: (prefs) => ApiClient(prefs),
-    loading: () => throw StateError('SharedPreferences не инициализированы'),
-    error: (e, st) => throw StateError('Ошибка инициализации SharedPreferences: $e'),
-  );
-});
 
 /// Провайдер PasswordApiService
 final passwordApiProvider = Provider<PasswordApiService>((ref) {

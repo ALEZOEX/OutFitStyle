@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../ui/widgets/max_width_container.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../presentation/routing/router.dart';
-import '../../../../presentation/providers/session_provider.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 
 /// Экран настроек конфиденциальности
 class PrivacySettingsScreen extends ConsumerStatefulWidget {
@@ -20,22 +20,13 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   // Настройки приватности
   bool _allowDataCollection = false;
 
-  // API клиент
-  late final ApiClient _apiClient;
-
   @override
   void initState() {
     super.initState();
     _loadSettings();
   }
 
-  Future<void> _initDependencies() async {
-    final prefs = await SharedPreferences.getInstance();
-    _apiClient = ApiClient(prefs);
-  }
-
   Future<void> _loadSettings() async {
-    await _initDependencies();
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _allowDataCollection = prefs.getBool('allow_data_collection') ?? false;
@@ -272,7 +263,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   Future<void> _exportData() async {
     try {
       // Экспорт данных через API
-      final response = await _apiClient.post('/api/v1/user/export-data');
+      final apiClient = ref.read(apiClientProvider);
+      final response = await apiClient.post('/api/v1/user/export-data');
 
       if (response.statusCode == 200 || response.statusCode == 202) {
         if (mounted) {
@@ -339,7 +331,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   Future<void> _deleteAccount() async {
     try {
       // Удаление аккаунта через API
-      final response = await _apiClient.delete('/api/v1/user/delete-account');
+      final apiClient = ref.read(apiClientProvider);
+      final response = await apiClient.delete('/api/v1/user/delete-account');
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         // Выход из системы через SessionManager
