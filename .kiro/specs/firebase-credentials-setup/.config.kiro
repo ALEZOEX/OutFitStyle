@@ -1,5 +1,0 @@
-{
-  "specType": "bugfix",
-  "workflowType": "requirements-first",
-  "featureName": "firebase-credentials-setup"
-}
