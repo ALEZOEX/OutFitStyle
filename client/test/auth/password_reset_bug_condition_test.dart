@@ -47,7 +47,7 @@ void main() {
       when(() => mockSharedPreferences.getString(any())).thenReturn(null);
 
       // Инициализируем SessionManager с мок-объектами
-      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences, mockApiClient);
+      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences, apiClient: mockApiClient);
     });
 
     /// **Property 1: Bug Condition - Invalid Code Allows UI Progression Without Server Validation**

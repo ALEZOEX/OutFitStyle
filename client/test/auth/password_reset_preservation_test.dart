@@ -36,7 +36,7 @@ void main() {
       when(() => mockSharedPreferences.getString(any())).thenReturn(null);
 
       // Инициализируем SessionManager с мок-объектами
-      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences, mockApiClient);
+      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences, apiClient: mockApiClient);
     });
 
     /// **Property 2: Preservation - Existing Password Reset Flow Behavior**
