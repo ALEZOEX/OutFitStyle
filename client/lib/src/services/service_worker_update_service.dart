@@ -68,8 +68,7 @@ class ServiceWorkerUpdateService {
         await registration.update();
 
         // Check if there's a waiting Service Worker
-        // ignore: unnecessary_null_comparison
-        if (registration.waiting != null) {
+        if (registration.waiting != null) { // ignore: unnecessary_null_comparison
           debugPrint('ServiceWorkerUpdateService: Update available (waiting Service Worker)');
           _isUpdateAvailable = true;
           _updateAvailableController.add(true);
