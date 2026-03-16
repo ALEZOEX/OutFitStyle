@@ -35,7 +35,7 @@ class ServiceWorkerUpdateService {
     });
 
     // Check for updates when page becomes visible
-    web.document.addEventListener('visibilitychange', ((_) {
+    web.document.addEventListener('visibilitychange', (() {
       if (!web.document.hidden) {
         debugPrint('ServiceWorkerUpdateService: Page visible, checking for updates');
         _checkForUpdates();
