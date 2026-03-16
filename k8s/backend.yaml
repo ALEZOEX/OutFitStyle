@@ -104,7 +104,7 @@ spec:
                   key: firebase-credentials-json
               optional: true
             - name: FIREBASE_CREDENTIALS_PATH
-              value: "/etc/firebase/credentials.json"
+              value: "/etc/firebase/serviceAccountKey.json"
           volumeMounts:
             - name: firebase-credentials
               mountPath: /etc/firebase
