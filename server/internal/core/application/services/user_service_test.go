@@ -121,6 +121,14 @@ func (m *MockUserRepositoryForUser) UpdatePassword(ctx context.Context, userID d
 	return args.Error(0)
 }
 
+func (m *MockUserRepositoryForUser) GetUserByOAuthID(ctx context.Context, provider string, oauthID string) (*domain.User, error) {
+	args := m.Called(ctx, provider, oauthID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.User), args.Error(1)
+}
+
 // Тесты для UserService
 
 func TestUserService_GetUserProfile(t *testing.T) {

@@ -213,6 +213,14 @@ func (m *MockUserRepositoryForHandler) UpdatePassword(ctx context.Context, userI
 	return args.Error(0)
 }
 
+func (m *MockUserRepositoryForHandler) GetUserByOAuthID(ctx context.Context, provider string, oauthID string) (*domain.User, error) {
+	args := m.Called(ctx, provider, oauthID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.User), args.Error(1)
+}
+
 // createTestHandler создает тестовый обработчик с моками
 func createTestHandler() (*AuthHandler, *MockAuthService, *MockAccountLockout, *MockUserRepositoryForHandler) {
 	mockAuth := new(MockAuthService)

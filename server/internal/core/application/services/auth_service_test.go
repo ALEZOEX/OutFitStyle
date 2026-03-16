@@ -124,6 +124,14 @@ func (m *MockUserRepository) UpdatePassword(ctx context.Context, userID domain.I
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) GetUserByOAuthID(ctx context.Context, provider string, oauthID string) (*domain.User, error) {
+	args := m.Called(ctx, provider, oauthID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.User), args.Error(1)
+}
+
 // MockSessionRepository - мок-реализация SessionRepository для тестов
 type MockSessionRepository struct {
 	mock.Mock
