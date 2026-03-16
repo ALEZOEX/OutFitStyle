@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:js_interop';
 // ignore: avoid_web_libraries_in_flutter, deprecated_member_use
 import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
@@ -18,12 +17,12 @@ class ServiceWorkerUpdateService {
   void initialize() {
     debugPrint('ServiceWorkerUpdateService: Initializing update detection');
     _timer = Timer.periodic(const Duration(minutes: 30), (_) => _checkForUpdates());
-    html.document.addEventListener('visibilitychange', (() {
-      if (!html.document.hidden!) {
+    html.document.onVisibilityChange.listen((_) {
+      if (html.document.visibilityState == 'visible') {
         debugPrint('ServiceWorkerUpdateService: Page visible, checking for updates');
         _checkForUpdates();
       }
-    }).toJS);
+    });
     _checkForUpdates();
   }
 
