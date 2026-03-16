@@ -222,6 +222,104 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 	return &user, nil
 }
 
+// GetUserByOAuthID возвращает пользователя по OAuth провайдеру и OAuth ID
+func (r *UserRepository) GetUserByOAuthID(ctx context.Context, provider string, oauthID string) (*domain.User, error) {
+	query := `
+		SELECT
+			id, email, password_hash, display_name, avatar_url, gender, birth_date,
+			default_location, default_latitude, default_longitude, timezone, locale,
+			body_measurements, preferences, is_active, is_verified, verified_at,
+			oauth_provider, oauth_id, last_login_at, login_count, created_at, updated_at
+		FROM users
+		WHERE oauth_provider = $1 AND oauth_id = $2
+	`
+
+	var user domain.User
+	var displayName *string
+	var avatarURL *string
+	var gender *string
+	var birthDate *time.Time
+	var defaultLocation *string
+	var defaultLatitude *float64
+	var defaultLongitude *float64
+	var timezone *string
+	var locale *string
+	var bodyMeasurementsJSON []byte
+	var preferencesJSON []byte
+	var verifiedAt *time.Time
+	var oauthProvider *string
+	var oauthIDVal *string
+	var lastLoginAt *time.Time
+	var createdAt time.Time
+	var updatedAt time.Time
+
+	err := r.db.QueryRow(ctx, query, provider, oauthID).Scan(
+		&user.ID,
+		&user.Email,
+		&user.PasswordHash,
+		&displayName,
+		&avatarURL,
+		&gender,
+		&birthDate,
+		&defaultLocation,
+		&defaultLatitude,
+		&defaultLongitude,
+		&timezone,
+		&locale,
+		&bodyMeasurementsJSON,
+		&preferencesJSON,
+		&user.IsActive,
+		&user.IsVerified,
+		&verifiedAt,
+		&oauthProvider,
+		&oauthIDVal,
+		&lastLoginAt,
+		&user.LoginCount,
+		&createdAt,
+		&updatedAt,
+	)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "failed to get user by oauth id")
+	}
+
+	// Set nullable fields
+	user.DisplayName = displayName
+	user.AvatarURL = avatarURL
+	user.Gender = gender
+	user.BirthDate = birthDate
+	user.DefaultLocation = defaultLocation
+	user.DefaultLatitude = defaultLatitude
+	user.DefaultLongitude = defaultLongitude
+	user.Timezone = timezone
+	user.Locale = locale
+	user.VerifiedAt = verifiedAt
+	user.OAuthProvider = oauthProvider
+	user.OAuthID = oauthIDVal
+	user.LastLoginAt = lastLoginAt
+	user.CreatedAt = createdAt
+	user.UpdatedAt = updatedAt
+
+	// Parse JSON fields
+	if len(bodyMeasurementsJSON) > 0 {
+		err = json.Unmarshal(bodyMeasurementsJSON, &user.BodyMeasurements)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal body measurements")
+		}
+	}
+
+	if len(preferencesJSON) > 0 {
+		err = json.Unmarshal(preferencesJSON, &user.Preferences)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal preferences")
+		}
+	}
+
+	return &user, nil
+}
+
 // CreateUser создает нового пользователя в базе данных
 func (r *UserRepository) CreateUser(ctx context.Context, user *domain.User) error {
 	query := `
