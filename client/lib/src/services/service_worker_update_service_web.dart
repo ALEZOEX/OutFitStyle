@@ -1,2 +1,57 @@
-// Web-specific implementation
-export 'service_worker_update_service_impl.dart';
+import 'dart:async';
+import 'dart:js_interop';
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart';
+
+class ServiceWorkerUpdateService {
+  static final ServiceWorkerUpdateService _instance = ServiceWorkerUpdateService._internal();
+  factory ServiceWorkerUpdateService() => _instance;
+  ServiceWorkerUpdateService._internal();
+
+  final _updateAvailableController = StreamController<bool>.broadcast();
+  Stream<bool> get updateAvailable => _updateAvailableController.stream;
+  bool _isUpdateAvailable = false;
+  bool get isUpdateAvailable => _isUpdateAvailable;
+  Timer? _timer;
+
+  void initialize() {
+    debugPrint('ServiceWorkerUpdateService: Initializing update detection');
+    _timer = Timer.periodic(const Duration(minutes: 30), (_) => _checkForUpdates());
+    html.document.addEventListener('visibilitychange', (() {
+      if (!html.document.hidden!) {
+        debugPrint('ServiceWorkerUpdateService: Page visible, checking for updates');
+        _checkForUpdates();
+      }
+    }).toJS);
+    _checkForUpdates();
+  }
+
+  Future<void> _checkForUpdates() async {
+    try {
+      final sw = html.window.navigator.serviceWorker;
+      if (sw == null) return;
+      final reg = await sw.getRegistration();
+      if (reg != null) {
+        await reg.update();
+        if (reg.waiting != null) {
+          _isUpdateAvailable = true;
+          _updateAvailableController.add(true);
+          debugPrint('ServiceWorkerUpdateService: Update available!');
+        }
+      }
+    } catch (e) {
+      debugPrint('ServiceWorkerUpdateService: Error checking updates: $e');
+    }
+  }
+
+  void applyUpdate() {
+    debugPrint('ServiceWorkerUpdateService: Applying update');
+    html.window.location.reload();
+  }
+
+  void dispose() {
+    _timer?.cancel();
+    _updateAvailableController.close();
+  }
+}
