@@ -1,82 +1,11 @@
-import 'dart:async';
-// ignore: deprecated_member_use, avoid_web_libraries_in_flutter
-import 'dart:html' as html;
-import 'package:flutter/foundation.dart';
-
 /// Service Worker Update Detection Service
 ///
-/// Validates: Requirements 2.4
-///
-/// This service monitors Service Worker updates and provides
-/// notifications when a new version is available.
-class ServiceWorkerUpdateService {
-  static final ServiceWorkerUpdateService _instance = ServiceWorkerUpdateService._internal();
-  factory ServiceWorkerUpdateService() => _instance;
-  ServiceWorkerUpdateService._internal();
+/// Conditional export:
+/// - Web: real implementation with dart:html
+/// - Mobile/Desktop: stub implementation (no-op)
+library;
 
-  final _updateAvailableController = StreamController<bool>.broadcast();
-  Stream<bool> get updateAvailable => _updateAvailableController.stream;
-
-  bool _isUpdateAvailable = false;
-  bool get isUpdateAvailable => _isUpdateAvailable;
-
-  /// Initialize Service Worker update detection
-  void initialize() {
-    if (!kIsWeb) {
-      debugPrint('ServiceWorkerUpdateService: Not running on web, skipping initialization');
-      return;
-    }
-
-    debugPrint('ServiceWorkerUpdateService: Initializing update detection');
-
-    // Check for updates periodically
-    Timer.periodic(const Duration(seconds: 60), (_) {
-      _checkForUpdates();
-    });
-
-    // Check for updates when page becomes visible
-    html.document.onVisibilityChange.listen((_) {
-      if (!html.document.hidden!) {
-        debugPrint('ServiceWorkerUpdateService: Page visible, checking for updates');
-        _checkForUpdates();
-      }
-    });
-
-    // Initial check
-    _checkForUpdates();
-  }
-
-  /// Check for Service Worker updates
-  Future<void> _checkForUpdates() async {
-    try {
-      final serviceWorker = html.window.navigator.serviceWorker;
-      if (serviceWorker == null) return;
-
-      final registration = await serviceWorker.getRegistration();
-      if (registration != null) {
-        debugPrint('ServiceWorkerUpdateService: Checking for updates...');
-        await registration.update();
-
-        // Check if there's a waiting Service Worker
-        if (registration.waiting != null) {
-          debugPrint('ServiceWorkerUpdateService: Update available (waiting Service Worker)');
-          _isUpdateAvailable = true;
-          _updateAvailableController.add(true);
-        }
-      }
-    } catch (e) {
-      debugPrint('ServiceWorkerUpdateService: Error checking for updates: $e');
-    }
-  }
-
-  /// Apply the update by reloading the page
-  void applyUpdate() {
-    debugPrint('ServiceWorkerUpdateService: Applying update, reloading page...');
-    html.window.location.reload();
-  }
-
-  /// Dispose resources
-  void dispose() {
-    _updateAvailableController.close();
-  }
-}
+// Conditional import based on platform
+// ignore: avoid_web_libraries_in_flutter
+export 'service_worker_update_service_stub.dart'
+    if (dart.library.html) 'service_worker_update_service_impl.dart';

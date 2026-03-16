@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/service_worker_update_service.dart';
+import 'package:outfitstyle_client/src/services/service_worker_update_service.dart';
 
 /// Service Worker Update Banner Widget
 ///
