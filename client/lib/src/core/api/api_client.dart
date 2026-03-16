@@ -156,10 +156,10 @@ class ApiClient {
 
   /// Внутренний конструктор для использования с кастомным Dio
   /// (например, для Weather API без авторизации)
-  ApiClient.internal(Dio dio)
+  ApiClient.internal(Dio dio, {FirebaseAuth? firebaseAuth})
       : _dio = dio,
         _sharedPreferences = null,
-        _firebaseAuth = FirebaseAuth.instance;
+        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   String _normalizePath(String path) {
     return path.startsWith('/') ? path.substring(1) : path;

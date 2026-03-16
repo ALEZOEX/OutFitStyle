@@ -18,6 +18,9 @@ void main() {
     setUp(() async {
       capturedHeaders = {};
 
+      // Initialize Firebase for tests
+      TestWidgetsFlutterBinding.ensureInitialized();
+
       // Set up SharedPreferences with a test access token
       SharedPreferences.setMockInitialValues({
         'access_token': 'test_token_12345',
