@@ -782,3 +782,30 @@ func ExtractIP(remoteAddr string) *string {
 	}
 	return &host
 }
+
+// GetUserByOAuthID находит пользователя по OAuth провайдеру и OAuth ID
+func (s *AuthService) GetUserByOAuthID(ctx context.Context, provider string, oauthID string) (*domain.User, error) {
+	s.logger.Debug("[AuthService] [GetUserByOAuthID] Поиск пользователя по OAuth",
+		zap.String("provider", provider),
+		zap.String("oauth_id", oauthID),
+	)
+
+	user, err := s.userRepo.GetUserByOAuthID(ctx, provider, oauthID)
+	if err != nil {
+		s.logger.Error("[AuthService] [GetUserByOAuthID] Ошибка поиска пользователя",
+			zap.String("provider", provider),
+			zap.String("oauth_id", oauthID),
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	if user != nil {
+		s.logger.Debug("[AuthService] [GetUserByOAuthID] Пользователь найден",
+			zap.String("user_id", user.ID.String()),
+			zap.String("email", user.Email),
+		)
+	}
+
+	return user, nil
+}

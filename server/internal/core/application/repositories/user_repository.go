@@ -13,6 +13,9 @@ type UserRepository interface {
 	// GetUserByEmail возвращает пользователя по email
 	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
 
+	// GetUserByOAuthID возвращает пользователя по OAuth провайдеру и OAuth ID
+	GetUserByOAuthID(ctx context.Context, provider string, oauthID string) (*domain.User, error)
+
 	// CreateUser создает нового пользователя
 	CreateUser(ctx context.Context, user *domain.User) error
 

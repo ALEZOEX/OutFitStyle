@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"outfitstyle/server/internal/core/application/services"
@@ -89,12 +88,25 @@ func (m *AuthMiddlewareWithFirebase) Handler(next http.Handler) http.Handler {
 
 				token, err := m.firebaseAuth.VerifyIDToken(r.Context(), tokenString)
 				if err == nil {
-					userID, err := uuid.Parse(token.UID)
-					if err != nil {
+					// Firebase UID это строка (не UUID), ищем пользователя по oauth_id
+					firebaseUID := token.UID
+
+					if m.logger != nil {
+						m.logger.Debug("[AuthMiddlewareWithFirebase] Firebase токен валиден, поиск пользователя",
+							zap.String("path", r.URL.Path),
+							zap.String("firebase_uid", firebaseUID),
+							zap.Duration("latency_ms", time.Since(startTime)),
+						)
+					}
+
+					// Ищем пользователя по oauth_id = Firebase UID
+					user, err := m.authService.GetUserByOAuthID(r.Context(), "google", firebaseUID)
+					if err != nil || user == nil {
 						if m.logger != nil {
-							m.logger.Error("[AuthMiddlewareWithFirebase] Ошибка парсинга Firebase UID",
+							m.logger.Debug("[AuthMiddlewareWithFirebase] Пользователь не найден по Firebase UID",
 								zap.String("path", r.URL.Path),
-								zap.String("error", err.Error()),
+								zap.String("firebase_uid", firebaseUID),
+								zap.Error(err),
 							)
 						}
 						resp.Error(w, http.StatusUnauthorized, services.ErrUnauthorized)
@@ -102,14 +114,15 @@ func (m *AuthMiddlewareWithFirebase) Handler(next http.Handler) http.Handler {
 					}
 
 					if m.logger != nil {
-						m.logger.Debug("[AuthMiddlewareWithFirebase] Firebase токен валиден",
+						m.logger.Debug("[AuthMiddlewareWithFirebase] Пользователь найден по Firebase UID",
 							zap.String("path", r.URL.Path),
-							zap.String("user_id", userID.String()),
+							zap.String("user_id", user.ID.String()),
+							zap.String("email", user.Email),
 							zap.Duration("latency_ms", time.Since(startTime)),
 						)
 					}
 
-					ctx := context.WithValue(r.Context(), ctxUserID, userID)
+					ctx := context.WithValue(r.Context(), ctxUserID, user.ID)
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				}
