@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:js_interop';
-import 'package:web/web.dart' as web;
+// ignore: deprecated_member_use, avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 
 /// Service Worker Update Detection Service
@@ -35,12 +35,12 @@ class ServiceWorkerUpdateService {
     });
 
     // Check for updates when page becomes visible
-    web.document.addEventListener('visibilitychange', (() {
-      if (!web.document.hidden) {
+    html.document.onVisibilityChange.listen((_) {
+      if (!html.document.hidden!) {
         debugPrint('ServiceWorkerUpdateService: Page visible, checking for updates');
         _checkForUpdates();
       }
-    }).toJS);
+    });
 
     // Initial check
     _checkForUpdates();
@@ -49,10 +49,13 @@ class ServiceWorkerUpdateService {
   /// Check for Service Worker updates
   Future<void> _checkForUpdates() async {
     try {
-      final registration = await web.window.navigator.serviceWorker.getRegistration().toDart;
+      final serviceWorker = html.window.navigator.serviceWorker;
+      if (serviceWorker == null) return;
+
+      final registration = await serviceWorker.getRegistration();
       if (registration != null) {
         debugPrint('ServiceWorkerUpdateService: Checking for updates...');
-        await registration.update().toDart;
+        await registration.update();
 
         // Check if there's a waiting Service Worker
         if (registration.waiting != null) {
@@ -69,7 +72,7 @@ class ServiceWorkerUpdateService {
   /// Apply the update by reloading the page
   void applyUpdate() {
     debugPrint('ServiceWorkerUpdateService: Applying update, reloading page...');
-    web.window.location.reload();
+    html.window.location.reload();
   }
 
   /// Dispose resources
