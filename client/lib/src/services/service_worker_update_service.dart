@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:html' as html;
+import 'dart:js_interop';
+import 'package:web/web.dart' as web;
 import 'package:flutter/foundation.dart';
 
 /// Service Worker Update Detection Service
@@ -26,49 +27,35 @@ class ServiceWorkerUpdateService {
       return;
     }
 
-    try {
-      final serviceWorker = html.window.navigator.serviceWorker;
-      if (serviceWorker == null) {
-        debugPrint('ServiceWorkerUpdateService: Service Worker not supported');
-        return;
-      }
+    debugPrint('ServiceWorkerUpdateService: Initializing update detection');
 
-      debugPrint('ServiceWorkerUpdateService: Initializing update detection');
-
-      // Check for updates periodically
-      Timer.periodic(const Duration(seconds: 60), (_) {
-        _checkForUpdates();
-      });
-
-      // Check for updates when page becomes visible
-      html.document.onVisibilityChange.listen((_) {
-        if (!html.document.hidden!) {
-          debugPrint('ServiceWorkerUpdateService: Page visible, checking for updates');
-          _checkForUpdates();
-        }
-      });
-
-      // Initial check
+    // Check for updates periodically
+    Timer.periodic(const Duration(seconds: 60), (_) {
       _checkForUpdates();
+    });
 
-    } catch (e) {
-      debugPrint('ServiceWorkerUpdateService: Error initializing: $e');
-    }
+    // Check for updates when page becomes visible
+    web.document.addEventListener('visibilitychange', ((web.Event _) {
+      if (!web.document.hidden) {
+        debugPrint('ServiceWorkerUpdateService: Page visible, checking for updates');
+        _checkForUpdates();
+      }
+    }) as web.EventListener);
+
+    // Initial check
+    _checkForUpdates();
   }
 
   /// Check for Service Worker updates
   Future<void> _checkForUpdates() async {
     try {
-      final serviceWorker = html.window.navigator.serviceWorker;
-      if (serviceWorker == null) return;
-
-      final registration = await serviceWorker.getRegistration();
+      final registration = await web.window.navigator.serviceWorker.getRegistration().toDart;
       if (registration != null) {
         debugPrint('ServiceWorkerUpdateService: Checking for updates...');
-        await registration.update();
+        await registration.update().toDart;
 
         // Check if there's a waiting Service Worker
-        if (registration.waiting != null) { // ignore: unnecessary_null_comparison
+        if (registration.waiting != null) {
           debugPrint('ServiceWorkerUpdateService: Update available (waiting Service Worker)');
           _isUpdateAvailable = true;
           _updateAvailableController.add(true);
@@ -82,7 +69,7 @@ class ServiceWorkerUpdateService {
   /// Apply the update by reloading the page
   void applyUpdate() {
     debugPrint('ServiceWorkerUpdateService: Applying update, reloading page...');
-    html.window.location.reload();
+    web.window.location.reload();
   }
 
   /// Dispose resources
