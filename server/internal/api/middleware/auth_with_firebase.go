@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -138,7 +139,7 @@ func (m *AuthMiddlewareWithFirebase) Handler(next http.Handler) http.Handler {
 			// Пробуем JWT токен
 			if m.authService != nil {
 				if m.logger != nil {
-					m.logger.Debug("[AuthMiddlewareWithFirebase] Верификация JWT токена",
+					m.logger.Info("[AuthMiddlewareWithFirebase] Верификация JWT токена",
 						zap.String("path", r.URL.Path),
 						zap.Int("token_length", len(tokenString)),
 					)
@@ -147,7 +148,7 @@ func (m *AuthMiddlewareWithFirebase) Handler(next http.Handler) http.Handler {
 				userID, sessionID, err := m.authService.ValidateAccessToken(r.Context(), tokenString)
 				if err == nil {
 					if m.logger != nil {
-						m.logger.Debug("[AuthMiddlewareWithFirebase] JWT токен валиден",
+						m.logger.Info("[AuthMiddlewareWithFirebase] JWT токен валиден",
 							zap.String("path", r.URL.Path),
 							zap.String("user_id", userID.String()),
 							zap.String("session_id", sessionID.String()),
@@ -162,9 +163,10 @@ func (m *AuthMiddlewareWithFirebase) Handler(next http.Handler) http.Handler {
 				}
 
 				if m.logger != nil {
-					m.logger.Error("[AuthMiddlewareWithFirebase] Ошибка валидации JWT токена",
+					m.logger.Info("[AuthMiddlewareWithFirebase] Ошибка валидации JWT токена",
 						zap.String("path", r.URL.Path),
 						zap.String("error", err.Error()),
+						zap.String("error_type", fmt.Sprintf("%T", err)),
 						zap.Duration("latency_ms", time.Since(startTime)),
 					)
 				}

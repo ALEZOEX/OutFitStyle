@@ -50,9 +50,12 @@ class ApiClient {
 
           // Приоритет 1: Backend Access Token из SharedPreferences
           accessToken = _sharedPreferences?.getString('access_token');
-          
+
           if (accessToken != null && accessToken.isNotEmpty) {
-            developer.log('🔑 [AUTH DEBUG] ✅ Используем Backend Access Token из SharedPreferences (${accessToken.length} chars)', name: 'AuthDebug');
+            // Определяем тип токена по структуре JWT (xxx.xxx.xxx)
+            final tokenParts = accessToken.split('.');
+            final isJwt = tokenParts.length == 3;
+            developer.log('🔑 [AUTH DEBUG] ✅ Используем Backend Access Token из SharedPreferences (${accessToken.length} chars, JWT: $isJwt)', name: 'AuthDebug');
           } else {
             // Приоритет 2: Firebase ID Token (fallback для совместимости)
             developer.log('🔑 [AUTH DEBUG] Backend Access Token не найден, пробуем Firebase ID Token', name: 'AuthDebug');
