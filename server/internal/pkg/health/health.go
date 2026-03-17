@@ -137,7 +137,7 @@ func ReadyHandler(db *pgxpool.Pool, mlClient MLHealthClient) http.HandlerFunc {
 // RegisterChecks регистрирует проверки для использования в других частях приложения
 // Позволяет расширить функциональность проверки работоспособности
 func RegisterChecks(checks map[string]Checker) {
-	// Временная реализация для тестирования
+	// Пустая реализация (игнорирует входные данные)
 	for _, checker := range checks {
 		_ = checker
 	}

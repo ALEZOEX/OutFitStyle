@@ -137,8 +137,8 @@ func NewPaymentHandler(svc *BillingService, log interface{}) *PaymentHandler {
 }
 
 // RegisterWebhook регистрирует webhook маршруты
+// Deprecated: метод устарел, используется автоматическая регистрация
 func (h *PaymentHandler) RegisterWebhook(r interface{}) {
-	// Сохранено для совместимости со старой версией API
 }
 
 // Webhook обрабатывает webhook
