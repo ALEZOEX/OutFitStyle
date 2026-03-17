@@ -79,6 +79,13 @@ func (rl *RateLimiter) cleanupVisitors() {
 // Если лимит превышен, возвращает статус 429 Too Many Requests
 func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Пропускаем rate limiting для health check endpoints
+		// Это необходимо для корректной работы Kubernetes liveness/readiness проб
+		if r.URL.Path == "/health" || r.URL.Path == "/metrics" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		ip := getIP(r)
 		limiter := rl.getVisitor(ip)
 
