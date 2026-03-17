@@ -29,8 +29,7 @@ class ServiceWorkerUpdateService {
   Future<void> _checkForUpdates() async {
     try {
       final sw = html.window.navigator.serviceWorker;
-      if (sw == null) return;
-      final reg = await sw.getRegistration();
+      final reg = await sw?.getRegistration();
       if (reg != null && reg.waiting != null) {
         await reg.update();
         _isUpdateAvailable = true;
