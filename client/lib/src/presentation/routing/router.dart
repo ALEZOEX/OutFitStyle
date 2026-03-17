@@ -62,16 +62,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Получаем состояние авторизации
       final isAuthenticated = authStateAsync.valueOrNull ?? false;
 
-      // 1. Если onboarding не пройден - показываем onboarding (кроме splash)
-      if (!onboardingDone && path != '/onboarding') {
-        return '/onboarding';
-      }
-
-      // Онбординг - разрешаем доступ только если не пройден
+      // Онбординг - разрешаем доступ только если не пройден И авторизован
       if (path.startsWith('/onboarding')) {
         if (onboardingDone) {
           // Если уже пройден, редиректим на home или auth
           return isAuthenticated ? '/home' : '/auth';
+        }
+        // Показываем онбординг только если авторизован
+        if (!isAuthenticated) {
+          return '/auth';
         }
         return null;
       }
