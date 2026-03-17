@@ -34,6 +34,8 @@ class ApiClient {
         final timestamp = DateTime.now().toIso8601String();
         final path = options.path;
 
+        developer.log('[$timestamp] [ApiClient] [Interceptor 1] START processing: ${options.method} ${options.path}', name: 'ApiClient');
+
         // Skip Authorization header for public endpoints
         if (!path.contains('/auth/login') &&
             !path.contains('/auth/register') &&
@@ -59,7 +61,7 @@ class ApiClient {
           } else {
             // Приоритет 2: Firebase ID Token (fallback для совместимости)
             developer.log('🔑 [AUTH DEBUG] Backend Access Token не найден, пробуем Firebase ID Token', name: 'AuthDebug');
-            
+
             try {
               final user = _firebaseAuth.currentUser;
               developer.log('🔑 [AUTH DEBUG] currentUser: ${user != null ? "UID=${user.uid}, Email=${user.email}" : "NULL"}', name: 'AuthDebug');
@@ -90,26 +92,39 @@ class ApiClient {
           developer.log('🔑 [AUTH DEBUG] Final headers: ${options.headers}', name: 'AuthDebug');
           developer.log('🔑 [AUTH DEBUG] ============== REQUEST END ==============', name: 'AuthDebug');
         } else {
-          developer.log('[$timestamp] [ApiClient] [Request] ${options.method} ${options.path} (public endpoint, no auth)', name: 'ApiClient');
+          developer.log('[$timestamp] [ApiClient] [Interceptor 1] Public endpoint detected: ${options.path}, skipping Authorization header', name: 'ApiClient');
         }
 
+        developer.log('[$timestamp] [ApiClient] [Interceptor 1] END processing, calling handler.next()', name: 'ApiClient');
         return handler.next(options);
+      },
+      onError: (DioException err, ErrorInterceptorHandler handler) async {
+        final timestamp = DateTime.now().toIso8601String();
+        final statusCode = err.response?.statusCode;
+        
+        developer.log('[$timestamp] [ApiClient] [Interceptor 1 onError] DioException caught: ${err.type} ${err.requestOptions.path} - $statusCode', name: 'ApiClient', level: 1000, error: err);
+        developer.log('[$timestamp] [ApiClient] [Interceptor 1 onError] Error message: ${err.message}', name: 'ApiClient');
+        developer.log('[$timestamp] [ApiClient] [Interceptor 1 onError] Response data: ${err.response?.data}', name: 'ApiClient');
+        
+        return handler.next(err);
       },
     ));
 
-    // Interceptor для логирования ответов
+    // Interceptor для логирования ответов (Interceptor 2)
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         final timestamp = DateTime.now().toIso8601String();
-        developer.log('[$timestamp] [ApiClient] [HTTP] Отправка запроса: ${options.method} ${options.path}', name: 'ApiClient');
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2] HTTP Request: ${options.method} ${options.path}', name: 'ApiClient');
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2] Headers: ${options.headers}', name: 'ApiClient');
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2] Data: ${options.data}', name: 'ApiClient');
         return handler.next(options);
       },
       onResponse: (Response response, ResponseInterceptorHandler handler) {
         final timestamp = DateTime.now().toIso8601String();
-        developer.log('[$timestamp] [ApiClient] [HTTP] Ответ: ${response.statusCode} ${response.requestOptions.path}', name: 'ApiClient');
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2] HTTP Response: ${response.statusCode} ${response.requestOptions.path}', name: 'ApiClient');
 
         if (response.statusCode == 200 || response.statusCode == 201) {
-          developer.log('[$timestamp] [ApiClient] [HTTP] Успешный ответ', name: 'ApiClient');
+          developer.log('[$timestamp] [ApiClient] [Interceptor 2] Успешный ответ', name: 'ApiClient');
         }
 
         return handler.next(response);
@@ -118,10 +133,14 @@ class ApiClient {
         final timestamp = DateTime.now().toIso8601String();
         final statusCode = err.response?.statusCode;
 
-        developer.log('[$timestamp] [ApiClient] [HTTP] Ошибка',
-            name: 'ApiClient',
-            level: 1000,
-            error: '${err.type} ${err.requestOptions.path} - $statusCode');
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ╔═══════════════════════════════════════════', name: 'ApiClient', level: 1000);
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ DioException DETECTED', name: 'ApiClient', level: 1000);
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Type: ${err.type}', name: 'ApiClient', level: 1000);
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Path: ${err.requestOptions.method} ${err.requestOptions.path}', name: 'ApiClient', level: 1000);
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Status Code: $statusCode', name: 'ApiClient', level: 1000);
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Message: ${err.message}', name: 'ApiClient', level: 1000);
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Response Data: ${err.response?.data}', name: 'ApiClient', level: 1000);
+        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ╚═══════════════════════════════════════════', name: 'ApiClient', level: 1000);
 
         // Если 401 — логируем для отладки
         if (statusCode == 401) {

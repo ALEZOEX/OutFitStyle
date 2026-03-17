@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import '../utils/logger.dart';
 import '../core/api/api_client.dart';
+import '../core/api/api_config.dart';
 
 /// Модель данных пользователя
 class UserSession {
@@ -312,12 +313,27 @@ class SessionManager {
       // Call backend to exchange Firebase token for access_token
       try {
         final backendTimestamp = DateTime.now().toIso8601String();
+        
+        // 🔍 DEBUG: Логирование перед вызовом API
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ PRE-API CALL DEBUG', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ Endpoint: POST /api/v1/auth/google', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ Base URL: ${ApiConfig.baseUrl}', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ Full URL: ${ApiConfig.baseUrl}/api/v1/auth/google', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token length: ${idToken.length}', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token preview: ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient instance: $_apiClient', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient type: ${_apiClient.runtimeType}', name: 'GoogleSignIn');
+        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════', name: 'GoogleSignIn');
+        
         AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Отправка запроса на POST /api/v1/auth/google');
+        AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Вызов _apiClient.post()...');
 
         final response = await _apiClient.post('/api/v1/auth/google', data: {
           'id_token': idToken,
         });
 
+        AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] ✅ _apiClient.post() ЗАВЕРШЁН УСПЕШНО');
         AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Backend response status: ${response.statusCode}');
         AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Backend response data: ${response.data}');
 
@@ -388,9 +404,21 @@ class SessionManager {
         AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Сессия обновлена, токены сохранены');
         return true;
       } catch (e) {
-        AppLogger.error('[$timestamp] [Auth] [GoogleSignIn] Ошибка backend Google auth: $e', e);
+        // 🔍 DEBUG: Детальное логирование ошибок backend вызова
+        final errorTimestamp = DateTime.now().toIso8601String();
+        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════', name: 'GoogleSignIn', level: 1000);
+        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ║ BACKEND API CALL ERROR', name: 'GoogleSignIn', level: 1000);
+        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error type: ${e.runtimeType}', name: 'GoogleSignIn', level: 1000);
+        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error message: $e', name: 'GoogleSignIn', level: 1000);
+        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ║ Stack trace: ${StackTrace.current}', name: 'GoogleSignIn', level: 1000);
+        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════', name: 'GoogleSignIn', level: 1000);
+        
+        AppLogger.error('[$errorTimestamp] [Auth] [GoogleSignIn] Ошибка backend Google auth: $e', e);
         if (e.toString().contains('401')) {
-          AppLogger.error('[$timestamp] [Auth] [GoogleSignIn] 401 Unauthorized от backend - Firebase token может быть невалиден или истёк');
+          AppLogger.error('[$errorTimestamp] [Auth] [GoogleSignIn] 401 Unauthorized от backend - Firebase token может быть невалиден или истёк');
+        }
+        if (e.toString().contains('SocketException') || e.toString().contains('Failed host lookup')) {
+          AppLogger.error('[$errorTimestamp] [Auth] [GoogleSignIn] Network error - проверьте подключение к серверу и CORS настройки');
         }
         rethrow;
       }
