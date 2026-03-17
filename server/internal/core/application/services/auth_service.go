@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,6 +24,17 @@ var (
 	ErrUnauthorized       = errors.New("не авторизован")
 )
 
+// FirebaseAuthClient интерфейс для Firebase Admin SDK клиента
+// Определён здесь для избежания циклического импорта с middleware
+type FirebaseAuthClient interface {
+	VerifyIDToken(ctx context.Context, idToken string) (*FirebaseToken, error)
+}
+
+// FirebaseToken представляет результат верификации Firebase ID токена
+type FirebaseToken struct {
+	UID string
+}
+
 // TokenServiceInterface интерфейс для сервиса токенов
 type TokenServiceInterface interface {
 	GenerateRefreshToken() (string, error)
@@ -41,13 +53,14 @@ type TokenBlacklist interface {
 
 // AuthService сервис аутентификации и авторизации пользователей
 type AuthService struct {
-	userRepo    repositories.UserRepository    // Репозиторий пользователей
-	sessionRepo repositories.SessionRepository // Репозиторий сессий
-	tokenSvc    TokenServiceInterface          // Сервис токенов
-	google      *external.GoogleAuthClient     // Клиент Google аутентификации
-	blacklist   TokenBlacklist                 // Blacklist токенов
-	auditRepo   repositories.AuditRepository   // Репозиторий аудита
-	logger      *zap.Logger                    // Логгер
+	userRepo     repositories.UserRepository   // Репозиторий пользователей
+	sessionRepo  repositories.SessionRepository // Репозиторий сессий
+	tokenSvc     TokenServiceInterface          // Сервис токенов
+	google       *external.GoogleAuthClient     // Клиент Google аутентификации
+	firebaseAuth FirebaseAuthClient             // Клиент Firebase Admin SDK
+	blacklist    TokenBlacklist                 // Blacklist токенов
+	auditRepo    repositories.AuditRepository   // Репозиторий аудита
+	logger       *zap.Logger                    // Логгер
 }
 
 // RegisterResult результат регистрации пользователя
@@ -77,18 +90,20 @@ func NewAuthService(
 	sessionRepo repositories.SessionRepository,
 	tokenSvc TokenServiceInterface,
 	google *external.GoogleAuthClient,
+	firebaseAuth FirebaseAuthClient,
 	blacklist TokenBlacklist,
 	auditRepo repositories.AuditRepository,
 	logger *zap.Logger,
 ) *AuthService {
 	return &AuthService{
-		userRepo:    userRepo,
-		sessionRepo: sessionRepo,
-		tokenSvc:    tokenSvc,
-		google:      google,
-		blacklist:   blacklist,
-		auditRepo:   auditRepo,
-		logger:      logger,
+		userRepo:     userRepo,
+		sessionRepo:  sessionRepo,
+		tokenSvc:     tokenSvc,
+		google:       google,
+		firebaseAuth: firebaseAuth,
+		blacklist:    blacklist,
+		auditRepo:    auditRepo,
+		logger:       logger,
 	}
 }
 
@@ -351,34 +366,138 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 	}, nil
 }
 
+// firebaseTokenClaims представляет claims из Firebase ID токена
+type firebaseTokenClaims struct {
+	UID           string `json:"user_id"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	Name          string `json:"name"`
+	Picture       string `json:"picture"`
+}
+
+// decodeFirebaseToken декодирует Firebase ID токен и извлекает claims
+// Security: эта функция только декодирует JWT, но НЕ проверяет подпись
+// Подпись проверяется через Firebase Admin SDK или google.Verify()
+func decodeFirebaseToken(tokenString string) (*firebaseTokenClaims, error) {
+	parts := strings.Split(tokenString, ".")
+	if len(parts) != 3 {
+		return nil, errors.New("invalid token format")
+	}
+
+	// Добавляем padding для base64 decoding
+	claimsBase64 := parts[1]
+	switch len(claimsBase64) % 4 {
+	case 2:
+		claimsBase64 += "=="
+	case 3:
+		claimsBase64 += "="
+	}
+
+	claimsBytes, err := base64.URLEncoding.DecodeString(claimsBase64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode claims: %w", err)
+	}
+
+	var claims firebaseTokenClaims
+	if err := json.Unmarshal(claimsBytes, &claims); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal claims: %w", err)
+	}
+
+	return &claims, nil
+}
+
 // GoogleSignIn выполняет вход через Google
+// Логика валидации:
+// 1. Если Firebase Admin SDK инициализирован — пробуем валидировать через него
+// 2. Если Firebase Admin SDK не инициализирован или вернул ошибку — fallback на google.Verify()
+// 3. Email извлекаем из claims токена (декодирование JWT) или из google.Verify()
 func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device DeviceInfo) (*LoginResult, error) {
 	s.logger.Info("[AuthService] [GoogleSignIn] Начало входа через Google",
 		zap.Int("token_length", len(idToken)),
 		zap.String("client_id", s.google.ClientID()),
 		zap.String("device_ip", device.IPAddressOrEmpty()),
+		zap.Bool("firebase_auth_available", s.firebaseAuth != nil),
 	)
 
-	// 1. Валидируем токен через Google
-	s.logger.Debug("[AuthService] [GoogleSignIn] Валидация токена через Google API",
-		zap.Int("token_length", len(idToken)),
-		zap.String("client_id", s.google.ClientID()),
-	)
-	gUser, err := s.google.Verify(ctx, idToken)
-	if err != nil {
-		s.logger.Error("[AuthService] [GoogleSignIn] Ошибка верификации токена",
-			zap.String("error", err.Error()),
-			zap.String("error_type", fmt.Sprintf("%T", err)),
+	var gUser *external.GoogleUser
+	var err error
+
+	// 1. Пробуем валидировать через Firebase Admin SDK (если доступен)
+	if s.firebaseAuth != nil {
+		s.logger.Debug("[AuthService] [GoogleSignIn] Попытка валидации через Firebase Admin SDK",
 			zap.Int("token_length", len(idToken)),
 		)
-		return nil, ErrInvalidCredentials // Или более специфичная ошибка
+
+		firebaseToken, firebaseErr := s.firebaseAuth.VerifyIDToken(ctx, idToken)
+		if firebaseErr == nil {
+			s.logger.Info("[AuthService] [GoogleSignIn] Firebase Admin SDK валидация успешна",
+				zap.String("firebase_uid", firebaseToken.UID),
+			)
+
+			// Декодируем токен для получения email и других claims
+			claims, decodeErr := decodeFirebaseToken(idToken)
+			if decodeErr != nil {
+				s.logger.Error("[AuthService] [GoogleSignIn] Ошибка декодирования claims из Firebase токена",
+					zap.String("error", decodeErr.Error()),
+				)
+				// Не прерываем, пробуем fallback
+			} else {
+				// Успешно декодировали claims
+				gUser = &external.GoogleUser{
+					ID:            claims.UID,          // Firebase UID
+					Email:         claims.Email,
+					EmailVerified: claims.EmailVerified,
+					FirstName:     claims.Name,
+					LastName:      "",
+					Picture:       claims.Picture,
+				}
+				s.logger.Info("[AuthService] [GoogleSignIn] Claims извлечены из Firebase токена",
+					zap.String("email", claims.Email),
+					zap.Bool("email_verified", claims.EmailVerified),
+				)
+			}
+		} else {
+			s.logger.Debug("[AuthService] [GoogleSignIn] Firebase Admin SDK валидация не удалась, fallback на google.Verify",
+				zap.String("error", firebaseErr.Error()),
+			)
+		}
+	} else {
+		s.logger.Debug("[AuthService] [GoogleSignIn] Firebase Admin SDK не доступен, используем google.Verify",
+			zap.Int("token_length", len(idToken)),
+		)
 	}
 
-	s.logger.Info("[AuthService] [GoogleSignIn] Токен верифицирован Google",
-		zap.String("email", gUser.Email),
-		zap.Bool("email_verified", gUser.EmailVerified),
-		zap.String("google_sub", gUser.ID),
-	)
+	// 2. Fallback: если Firebase Admin SDK не доступен или вернул ошибку, используем google.Verify()
+	if gUser == nil {
+		s.logger.Debug("[AuthService] [GoogleSignIn] Валидация токена через Google API (fallback)",
+			zap.Int("token_length", len(idToken)),
+			zap.String("client_id", s.google.ClientID()),
+		)
+
+		gUser, err = s.google.Verify(ctx, idToken)
+		if err != nil {
+			s.logger.Error("[AuthService] [GoogleSignIn] Ошибка верификации токена (google.Verify)",
+				zap.String("error", err.Error()),
+				zap.String("error_type", fmt.Sprintf("%T", err)),
+				zap.Int("token_length", len(idToken)),
+			)
+			return nil, ErrInvalidCredentials
+		}
+
+		s.logger.Info("[AuthService] [GoogleSignIn] Токен верифицирован через Google API",
+			zap.String("email", gUser.Email),
+			zap.Bool("email_verified", gUser.EmailVerified),
+			zap.String("google_sub", gUser.ID),
+		)
+	}
+
+	// 3. Проверка email
+	if gUser.Email == "" {
+		s.logger.Error("[AuthService] [GoogleSignIn] Email не получен из токена",
+			zap.String("firebase_uid", gUser.ID),
+		)
+		return nil, errors.New("email не получен из токена")
+	}
 
 	if !gUser.EmailVerified {
 		s.logger.Warn("[AuthService] [GoogleSignIn] Email не подтверждён",

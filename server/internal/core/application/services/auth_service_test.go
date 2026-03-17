@@ -280,7 +280,7 @@ func TestAuthService_Register(t *testing.T) {
 	mockBlacklist := new(MockTokenBlacklist)
 	mockAuditRepo := new(MockAuditRepository)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, zap.NewNop())
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, nil, mockBlacklist, mockAuditRepo, zap.NewNop())
 
 	// Тестовые данные
 	input := domain.UserRegistration{
@@ -323,7 +323,7 @@ func TestAuthService_Login_Success(t *testing.T) {
 	mockBlacklist := new(MockTokenBlacklist)
 	mockAuditRepo := new(MockAuditRepository)
 
-	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, mockBlacklist, mockAuditRepo, zap.NewNop())
+	authService := NewAuthService(mockUserRepo, mockSessionRepo, mockTokenSvc, nil, nil, mockBlacklist, mockAuditRepo, zap.NewNop())
 
 	// Тестовые данные
 	password := "SecureP@ssw0rd123"  // 12+ символов: uppercase, lowercase, digit, special

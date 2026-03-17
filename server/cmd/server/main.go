@@ -205,8 +205,6 @@ func main() {
 	// Создаём blacklist репозиторий для отзыв токенов
 	tokenBlacklist := redisrepo.NewTokenBlacklistRepository(redisClient)
 
-	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, tokenBlacklist, auditRepo, logger)
-
 	// ---------- Firebase Admin Client (для проверки Firebase ID Token) ----------
 	ctx := context.Background()
 	firebaseAuthClient, firebaseErr := middleware.NewFirebaseAdminClient(ctx, logger)
@@ -219,6 +217,15 @@ func main() {
 	} else {
 		logger.Info("Firebase Admin SDK not configured, Firebase ID Token auth disabled")
 	}
+
+	// Адаптер: middleware.FirebaseAdminClient -> services.FirebaseAuthClient
+	// Необходим из-за разных типов Token (*middleware.Token vs *services.FirebaseToken)
+	var firebaseAuthAdapter services.FirebaseAuthClient
+	if firebaseAuthClient != nil {
+		firebaseAuthAdapter = &firebaseAuthClientAdapter{client: firebaseAuthClient}
+	}
+
+	authService := services.NewAuthService(userRepo, sessionRepo, tokenSvc, googleClient, firebaseAuthAdapter, tokenBlacklist, auditRepo, logger)
 
 	// ---------- Rate limit violation repository ----------
 	rateLimitRepo := pg.NewRateLimitViolationRepository(db.Pool())
@@ -765,4 +772,18 @@ func setupRouter(
 	admin.HandleFunc("/feature-flags", adminFFHandler.SetEnabled).Methods(stdhttp.MethodPut)
 
 	return router
+}
+
+// firebaseAuthClientAdapter адаптирует middleware.FirebaseAdminClient к services.FirebaseAuthClient
+type firebaseAuthClientAdapter struct {
+	client *middleware.FirebaseAdminClient
+}
+
+// VerifyIDToken проверяет Firebase ID Token и возвращает services.FirebaseToken
+func (a *firebaseAuthClientAdapter) VerifyIDToken(ctx context.Context, idToken string) (*services.FirebaseToken, error) {
+	token, err := a.client.VerifyIDToken(ctx, idToken)
+	if err != nil {
+		return nil, err
+	}
+	return &services.FirebaseToken{UID: token.UID}, nil
 }
