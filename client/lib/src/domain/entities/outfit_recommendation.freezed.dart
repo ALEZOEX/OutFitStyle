@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OutfitRecommendation {
 
- String? get id; String? get title; String? get description; String? get imageUrl; List<String>? get recommendedItems; double? get temperature; String? get weatherCondition; DateTime? get createdAt;
+ String? get id; String? get title; String? get description; List<String>? get recommendedItems; double? get temperature; String? get weatherCondition; DateTime? get createdAt;
 /// Create a copy of OutfitRecommendation
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $OutfitRecommendationCopyWith<OutfitRecommendation> get copyWith => _$OutfitReco
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OutfitRecommendation&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other.recommendedItems, recommendedItems)&&(identical(other.temperature, temperature) || other.temperature == temperature)&&(identical(other.weatherCondition, weatherCondition) || other.weatherCondition == weatherCondition)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OutfitRecommendation&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.recommendedItems, recommendedItems)&&(identical(other.temperature, temperature) || other.temperature == temperature)&&(identical(other.weatherCondition, weatherCondition) || other.weatherCondition == weatherCondition)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,imageUrl,const DeepCollectionEquality().hash(recommendedItems),temperature,weatherCondition,createdAt);
+int get hashCode => Object.hash(runtimeType,id,title,description,const DeepCollectionEquality().hash(recommendedItems),temperature,weatherCondition,createdAt);
 
 @override
 String toString() {
-  return 'OutfitRecommendation(id: $id, title: $title, description: $description, imageUrl: $imageUrl, recommendedItems: $recommendedItems, temperature: $temperature, weatherCondition: $weatherCondition, createdAt: $createdAt)';
+  return 'OutfitRecommendation(id: $id, title: $title, description: $description, recommendedItems: $recommendedItems, temperature: $temperature, weatherCondition: $weatherCondition, createdAt: $createdAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $OutfitRecommendationCopyWith<$Res>  {
   factory $OutfitRecommendationCopyWith(OutfitRecommendation value, $Res Function(OutfitRecommendation) _then) = _$OutfitRecommendationCopyWithImpl;
 @useResult
 $Res call({
- String? id, String? title, String? description, String? imageUrl, List<String>? recommendedItems, double? temperature, String? weatherCondition, DateTime? createdAt
+ String? id, String? title, String? description, List<String>? recommendedItems, double? temperature, String? weatherCondition, DateTime? createdAt
 });
 
 
@@ -65,12 +65,11 @@ class _$OutfitRecommendationCopyWithImpl<$Res>
 
 /// Create a copy of OutfitRecommendation
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? title = freezed,Object? description = freezed,Object? imageUrl = freezed,Object? recommendedItems = freezed,Object? temperature = freezed,Object? weatherCondition = freezed,Object? createdAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? title = freezed,Object? description = freezed,Object? recommendedItems = freezed,Object? temperature = freezed,Object? weatherCondition = freezed,Object? createdAt = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String?,recommendedItems: freezed == recommendedItems ? _self.recommendedItems : recommendedItems // ignore: cast_nullable_to_non_nullable
 as List<String>?,temperature: freezed == temperature ? _self.temperature : temperature // ignore: cast_nullable_to_non_nullable
 as double?,weatherCondition: freezed == weatherCondition ? _self.weatherCondition : weatherCondition // ignore: cast_nullable_to_non_nullable
@@ -160,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String? title,  String? description,  String? imageUrl,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String? title,  String? description,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OutfitRecommendation() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
   return orElse();
 
 }
@@ -181,10 +180,10 @@ return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.reco
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String? title,  String? description,  String? imageUrl,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String? title,  String? description,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _OutfitRecommendation():
-return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +200,10 @@ return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.reco
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String? title,  String? description,  String? imageUrl,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String? title,  String? description,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _OutfitRecommendation() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
+return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
   return null;
 
 }
@@ -216,13 +215,12 @@ return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.reco
 @JsonSerializable()
 
 class _OutfitRecommendation implements OutfitRecommendation {
-  const _OutfitRecommendation({this.id, this.title, this.description, this.imageUrl, final  List<String>? recommendedItems, this.temperature, this.weatherCondition, this.createdAt}): _recommendedItems = recommendedItems;
+  const _OutfitRecommendation({this.id, this.title, this.description, final  List<String>? recommendedItems, this.temperature, this.weatherCondition, this.createdAt}): _recommendedItems = recommendedItems;
   factory _OutfitRecommendation.fromJson(Map<String, dynamic> json) => _$OutfitRecommendationFromJson(json);
 
 @override final  String? id;
 @override final  String? title;
 @override final  String? description;
-@override final  String? imageUrl;
  final  List<String>? _recommendedItems;
 @override List<String>? get recommendedItems {
   final value = _recommendedItems;
@@ -249,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OutfitRecommendation&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other._recommendedItems, _recommendedItems)&&(identical(other.temperature, temperature) || other.temperature == temperature)&&(identical(other.weatherCondition, weatherCondition) || other.weatherCondition == weatherCondition)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OutfitRecommendation&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other._recommendedItems, _recommendedItems)&&(identical(other.temperature, temperature) || other.temperature == temperature)&&(identical(other.weatherCondition, weatherCondition) || other.weatherCondition == weatherCondition)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,imageUrl,const DeepCollectionEquality().hash(_recommendedItems),temperature,weatherCondition,createdAt);
+int get hashCode => Object.hash(runtimeType,id,title,description,const DeepCollectionEquality().hash(_recommendedItems),temperature,weatherCondition,createdAt);
 
 @override
 String toString() {
-  return 'OutfitRecommendation(id: $id, title: $title, description: $description, imageUrl: $imageUrl, recommendedItems: $recommendedItems, temperature: $temperature, weatherCondition: $weatherCondition, createdAt: $createdAt)';
+  return 'OutfitRecommendation(id: $id, title: $title, description: $description, recommendedItems: $recommendedItems, temperature: $temperature, weatherCondition: $weatherCondition, createdAt: $createdAt)';
 }
 
 
@@ -269,7 +267,7 @@ abstract mixin class _$OutfitRecommendationCopyWith<$Res> implements $OutfitReco
   factory _$OutfitRecommendationCopyWith(_OutfitRecommendation value, $Res Function(_OutfitRecommendation) _then) = __$OutfitRecommendationCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String? title, String? description, String? imageUrl, List<String>? recommendedItems, double? temperature, String? weatherCondition, DateTime? createdAt
+ String? id, String? title, String? description, List<String>? recommendedItems, double? temperature, String? weatherCondition, DateTime? createdAt
 });
 
 
@@ -286,12 +284,11 @@ class __$OutfitRecommendationCopyWithImpl<$Res>
 
 /// Create a copy of OutfitRecommendation
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? title = freezed,Object? description = freezed,Object? imageUrl = freezed,Object? recommendedItems = freezed,Object? temperature = freezed,Object? weatherCondition = freezed,Object? createdAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? title = freezed,Object? description = freezed,Object? recommendedItems = freezed,Object? temperature = freezed,Object? weatherCondition = freezed,Object? createdAt = freezed,}) {
   return _then(_OutfitRecommendation(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String?,recommendedItems: freezed == recommendedItems ? _self._recommendedItems : recommendedItems // ignore: cast_nullable_to_non_nullable
 as List<String>?,temperature: freezed == temperature ? _self.temperature : temperature // ignore: cast_nullable_to_non_nullable
 as double?,weatherCondition: freezed == weatherCondition ? _self.weatherCondition : weatherCondition // ignore: cast_nullable_to_non_nullable

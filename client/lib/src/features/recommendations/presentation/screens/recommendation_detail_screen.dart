@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../domain/entities/outfit_recommendation.dart';
@@ -116,24 +115,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (recommendation.imageUrl != null &&
-                      recommendation.imageUrl!.isNotEmpty)
-                    CachedNetworkImage(
-                      imageUrl: recommendation.imageUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) =>
-                          _buildImagePlaceholder(context),
-                    )
-                  else
-                    _buildImagePlaceholder(context),
+                  _buildImagePlaceholder(context),
                   // Градиент overlay
                   Positioned.fill(
                     child: DecoratedBox(
@@ -806,7 +788,6 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
       id: widget.recommendationId,
       title: 'Рекомендация',
       description: '',
-      imageUrl: null,
       recommendedItems: [],
       temperature: null,
       weatherCondition: null,

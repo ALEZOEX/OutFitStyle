@@ -25,7 +25,6 @@ abstract class Recommendation with _$Recommendation {
     int? id,
     String? title,
     String? description,
-    @JsonKey(name: 'image_url') String? imageUrl,
     RecommendationType? type,
     RecommendationSource? source,
     @JsonKey(name: 'confidence_score') double? confidenceScore,

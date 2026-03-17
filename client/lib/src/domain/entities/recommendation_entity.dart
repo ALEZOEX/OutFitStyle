@@ -15,7 +15,6 @@ class Recommendations extends Table {
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get lastSyncedAt => dateTime().nullable()();
   BoolColumn get dirty => boolean()();
-  TextColumn get imageUrl => text().nullable()();
   TextColumn get localImagePath => text().nullable()();
 }
 
@@ -32,7 +31,6 @@ class RecommendationRow {
   final DateTime updatedAt;
   final DateTime? lastSyncedAt;
   final bool dirty;
-  final String? imageUrl;
   final String? localImagePath;
 
   RecommendationRow({
@@ -46,7 +44,6 @@ class RecommendationRow {
     required this.updatedAt,
     this.lastSyncedAt,
     required this.dirty,
-    this.imageUrl,
     this.localImagePath,
   });
 
@@ -81,7 +78,6 @@ class RecommendationRow {
           ? DateTime.parse(json['last_synced_at'] as String)
           : null,
       dirty: json['dirty'] as bool? ?? true,
-      imageUrl: json['image_url'] as String?,
       localImagePath: json['local_image_path'] as String?,
     );
   }
@@ -98,7 +94,6 @@ class RecommendationRow {
       'updated_at': updatedAt.toIso8601String(),
       'last_synced_at': lastSyncedAt?.toIso8601String(),
       'dirty': dirty,
-      'image_url': imageUrl,
       'local_image_path': localImagePath,
     };
   }
@@ -114,7 +109,6 @@ class RecommendationRow {
     DateTime? updatedAt,
     DateTime? lastSyncedAt,
     bool? dirty,
-    String? imageUrl,
     String? localImagePath,
   }) {
     return RecommendationRow(
@@ -128,7 +122,6 @@ class RecommendationRow {
       updatedAt: updatedAt ?? this.updatedAt,
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
       dirty: dirty ?? this.dirty,
-      imageUrl: imageUrl ?? this.imageUrl,
       localImagePath: localImagePath ?? this.localImagePath,
     );
   }
@@ -147,7 +140,6 @@ class RecommendationRow {
           external['updated_at'] ?? DateTime.now().toIso8601String()),
       lastSyncedAt: DateTime.now(),
       dirty: false, // Сразу синхронизировано
-      imageUrl: external['image_url'],
       localImagePath: external['local_image_path'],
     );
   }
@@ -164,7 +156,6 @@ class RecommendationRow {
       updatedAt: dbEntity.updatedAt,
       lastSyncedAt: dbEntity.lastSyncedAt,
       dirty: dbEntity.dirty,
-      imageUrl: dbEntity.imageUrl,
       localImagePath: dbEntity.localImagePath,
     );
   }

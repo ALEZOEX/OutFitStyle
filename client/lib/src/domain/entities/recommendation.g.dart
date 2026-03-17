@@ -11,7 +11,6 @@ _Recommendation _$RecommendationFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num?)?.toInt(),
       title: json['title'] as String?,
       description: json['description'] as String?,
-      imageUrl: json['image_url'] as String?,
       type: $enumDecodeNullable(_$RecommendationTypeEnumMap, json['type']),
       source: $enumDecodeNullable(
         _$RecommendationSourceEnumMap,
@@ -54,7 +53,6 @@ Map<String, dynamic> _$RecommendationToJson(_Recommendation instance) =>
       'id': instance.id,
       'title': instance.title,
       'description': instance.description,
-      'image_url': instance.imageUrl,
       'type': _$RecommendationTypeEnumMap[instance.type],
       'source': _$RecommendationSourceEnumMap[instance.source],
       'confidence_score': instance.confidenceScore,

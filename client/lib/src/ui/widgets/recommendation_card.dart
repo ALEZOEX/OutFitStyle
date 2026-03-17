@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../features/domain/entities/outfit_recommendation.dart';
 
@@ -40,85 +39,9 @@ class RecommendationCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Изображение
-            Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 4 / 3,
-                  child: _buildImage(context),
-                ),
-                // Градиент overlay
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.6),
-                        ],
-                        stops: const [0.5, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
-                // Бейдж погоды
-                if (recommendation.weatherCondition != null)
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _getWeatherIcon(recommendation.weatherCondition!),
-                            size: 14,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${recommendation.temperature?.round()}°C',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                // Кнопки действий
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Row(
-                    children: [
-                      _buildActionButton(
-                        context,
-                        icon: isLiked ? Icons.favorite : Icons.favorite_border,
-                        color: isLiked ? Colors.red : null,
-                        onTap: onLike,
-                      ),
-                      const SizedBox(width: 8),
-                      _buildActionButton(
-                        context,
-                        icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
-                        color: isSaved ? theme.colorScheme.primary : null,
-                        onTap: onSave,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            AspectRatio(
+              aspectRatio: 4 / 3,
+              child: _buildPlaceholder(context),
             ),
             // Информация
             Padding(
@@ -166,27 +89,6 @@ class RecommendationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(BuildContext context) {
-    if (recommendation.imageUrl != null &&
-        recommendation.imageUrl!.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: recommendation.imageUrl!,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ),
-        errorWidget: (context, url, error) => _buildPlaceholder(context),
-      );
-    }
-    return _buildPlaceholder(context);
-  }
-
   Widget _buildPlaceholder(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -209,36 +111,6 @@ class RecommendationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton(
-    BuildContext context, {
-    required IconData icon,
-    Color? color,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: (color ?? Colors.white).withOpacity(0.9),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 4,
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: color ?? Colors.black87,
-        ),
-      ),
-    );
-  }
-
   Widget _buildTag(String tag, BuildContext context) {
     final theme = Theme.of(context);
 
@@ -256,17 +128,6 @@ class RecommendationCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  IconData _getWeatherIcon(String condition) {
-    return switch (condition.toLowerCase()) {
-      'sunny' || 'ясно' => Icons.wb_sunny,
-      'cloudy' || 'облачно' => Icons.cloud,
-      'rainy' || 'дождь' => Icons.grain,
-      'snowy' || 'снег' => Icons.ac_unit,
-      'partly_cloudy' || 'переменная облачность' => Icons.cloud,
-      _ => Icons.wb_sunny,
-    };
   }
 }
 

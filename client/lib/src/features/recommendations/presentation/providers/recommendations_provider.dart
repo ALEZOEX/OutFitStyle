@@ -234,7 +234,6 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: _generateTitle(occasion, weatherCondition),
         description: _generateDescription(occasion, weatherCondition),
-        imageUrl: 'https://images.unsplash.com/photo-1550614000-4b9519e02d48?w=600',
         recommendedItems: _getRandomItems(),
         temperature: temperature ?? 15.0,
         weatherCondition: weatherCondition ?? 'sunny',

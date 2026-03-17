@@ -12,7 +12,6 @@ _OutfitRecommendation _$OutfitRecommendationFromJson(
   id: json['id'] as String?,
   title: json['title'] as String?,
   description: json['description'] as String?,
-  imageUrl: json['imageUrl'] as String?,
   recommendedItems:
       (json['recommendedItems'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -31,7 +30,6 @@ Map<String, dynamic> _$OutfitRecommendationToJson(
   'id': instance.id,
   'title': instance.title,
   'description': instance.description,
-  'imageUrl': instance.imageUrl,
   'recommendedItems': instance.recommendedItems,
   'temperature': instance.temperature,
   'weatherCondition': instance.weatherCondition,

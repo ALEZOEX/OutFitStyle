@@ -28,14 +28,10 @@ class RecommendationService {
     final title = _generateTitle(weather, preferences, occasion);
     final description = _generateDescription(weather, preferences, outfitItems);
 
-    // Временный URL до интеграции ML-сервиса
-    final imageUrl = _generateImageUrl(outfitItems);
-    
     return OutfitRecommendation(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       description: description,
-      imageUrl: imageUrl,
       recommendedItems: outfitItems.map((item) => item.name ?? '').where((name) => name.isNotEmpty).toList(),
       temperature: weather.temperature,
       weatherCondition: weather.condition,
@@ -388,14 +384,5 @@ class RecommendationService {
     }
 
     return '${parts.join('. ')}. ';
-  }
-
-  /// Временная реализация до подключения ML-сервиса генерации изображений
-  String _generateImageUrl(List<WardrobeItem> outfitItems) {
-    // В будущем здесь будет вызов ML-сервиса для генерации изображения
-    // Пока используем случайное изображение из Unsplash по тематике одежды
-    final fashionKeywords = ['fashion', 'outfit', 'style', 'clothing', 'wardrobe'];
-    final keyword = fashionKeywords[DateTime.now().millisecond % fashionKeywords.length];
-    return 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&auto=format&fit=crop&q=$keyword';
   }
 }

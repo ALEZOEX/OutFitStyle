@@ -9,7 +9,6 @@ abstract class OutfitRecommendation with _$OutfitRecommendation {
     String? id,
     String? title,
     String? description,
-    String? imageUrl,
     List<String>? recommendedItems,
     double? temperature,
     String? weatherCondition,
