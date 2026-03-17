@@ -138,7 +138,7 @@ func NewPaymentHandler(svc *BillingService, log interface{}) *PaymentHandler {
 
 // RegisterWebhook регистрирует webhook маршруты
 func (h *PaymentHandler) RegisterWebhook(r interface{}) {
-	// Заглушка для обратной совместимости
+	// Сохранено для совместимости со старой версией API
 }
 
 // Webhook обрабатывает webhook

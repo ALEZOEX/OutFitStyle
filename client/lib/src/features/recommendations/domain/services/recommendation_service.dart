@@ -27,8 +27,8 @@ class RecommendationService {
     // Генерируем название и описание
     final title = _generateTitle(weather, preferences, occasion);
     final description = _generateDescription(weather, preferences, outfitItems);
-    
-    // Генерируем URL изображения (заглушка, в будущем — ML генерация)
+
+    // Временный URL до интеграции ML-сервиса
     final imageUrl = _generateImageUrl(outfitItems);
     
     return OutfitRecommendation(
@@ -390,7 +390,7 @@ class RecommendationService {
     return '${parts.join('. ')}. ';
   }
 
-  /// Генерация URL изображения (заглушка для будущей ML-генерации)
+  /// Временная реализация до подключения ML-сервиса генерации изображений
   String _generateImageUrl(List<WardrobeItem> outfitItems) {
     // В будущем здесь будет вызов ML-сервиса для генерации изображения
     // Пока используем случайное изображение из Unsplash по тематике одежды

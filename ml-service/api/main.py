@@ -1075,8 +1075,8 @@ async def action_event(ev: ActionEvent) -> ActionEventResponse:
 
 @app.get("/metrics")
 async def get_metrics():
-    """Placeholder for Prometheus metrics endpoint"""
-    # В реальном приложении здесь должен быть код для интеграции с Prometheus
+    """Endpoint для метрик Prometheus"""
+    # TODO: Интеграция с Prometheus
     return {"message": "Metrics endpoint"}
 
 

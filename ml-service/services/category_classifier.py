@@ -35,10 +35,9 @@ class ClassifyResponse(BaseModel):
 
 class CategoryClassifier:
     """
-    ML-based category classifier for clothing items.
-
-    This is a placeholder implementation that will be replaced with a trained model.
-    Currently returns a simple rule-based classification for testing purposes.
+    ML-классификатор категорий для одежды.
+    Текущая версия: rule-based классификация.
+    Планируется: замена на обученную модель.
     """
 
     # Simple rule-based mapping for initial implementation

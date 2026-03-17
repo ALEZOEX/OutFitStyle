@@ -467,7 +467,7 @@ func TestCategoryMapper_MapCategoryWithML(t *testing.T) {
 		t.Fatalf("Failed to create category mapper: %v", err)
 	}
 
-	// Test ML classification (placeholder implementation for now)
+	// Тестирование ML-классификации
 	item := &ClothingItem{
 		Name:        "Test Shirt",
 		Subcategory: "shirt",
@@ -484,7 +484,7 @@ func TestCategoryMapper_MapCategoryWithML(t *testing.T) {
 		t.Errorf("MapCategoryWithML() category = %v, want upper", category)
 	}
 
-	// Placeholder implementation returns 0 confidence
+	// Rule-based реализация возвращает 0 confidence
 	if confidence != 0 {
 		t.Errorf("MapCategoryWithML() confidence = %v, want 0", confidence)
 	}

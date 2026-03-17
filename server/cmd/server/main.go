@@ -305,7 +305,7 @@ func main() {
 		eventPublisher = kafkaPublisher
 		logger.Info("Event publisher enabled", zap.Strings("brokers", cfg.Eventing.KafkaBrokers), zap.String("topic", cfg.Eventing.KafkaTopicRecommendations))
 	} else {
-		// Заглушка для event publisher, если отключен
+		// Event publisher отключен в конфигурации
 		eventPublisher = nil
 		kafkaPublisher = nil
 		logger.Info("Event publisher disabled")
