@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 import '../utils/logger.dart';
 import '../core/api/api_client.dart';
 import '../core/api/api_config.dart';
