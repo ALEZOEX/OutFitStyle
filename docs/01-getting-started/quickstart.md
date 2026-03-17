@@ -1,97 +1,75 @@
-# Профессиональная архитектура OutfitStyle
+# Быстрый старт
 
-## Обзор
+## Что нужно для запуска
 
-OutfitStyle реализует продвинутую архитектуру с единой моделью вещей и системой Retrieval + Ranking для подбора рекомендаций. 
+**Минимальные требования:**
+- Docker (для запуска базы данных и Redis)
+- Go 1.21+ (для backend)
+- Python 3.11+ (для ML сервиса)
+- Flutter 3.x (для клиента, опционально)
 
-## Продовый подход: единая модель вещей → Retrieval → Ranking
+## Запуск за 5 минут
 
-### Цели архитектуры
-- Единый каталог вещей в Postgres с различными источниками:
-  - Реальные вещи гардероба пользователя
-  - Вещи из интернет-каталога/парсинга
-  - "Образцовые" Kaggle-вещи
-- Приоритеты источников:
-  - Личный гардероб (если по погоде подходит)
-  - Реальные новые вещи (catalog/marketplace)
-  - Kaggle seed как "учебный магазин"
-- Retrieval (подбор кандидатов): быстрый SQL/правила по погоде, полу, стилю, сезону и источнику
-- Ranking (ML-модель): ранжирует и комбинирует уже малое число кандидатов (до 500–1000, а не 44k)
-- Никаких таймаутов/404 от ML, никакого "ручного затыкания дыр"
+### 1. Клонировать репозиторий
 
-## Структура БД
-
-### clothing_items
-Расширенная таблица с атрибутами:
-- `gender`, `master_category`, `subcategory`, `season`, `base_colour`, `usage`
-- `source` ('wardrobe', 'catalog', 'kaggle_seed', ...)
-- `is_owned`, `owner_user_id`
-- `min_temp`, `max_temp`, `warmth_level`, `formality_level`
-
-### wardrobe_items
-Связь между пользователями и их личными вещами:
-- `user_id`, `clothing_item_id`
-
-## ML-ранжирование: приоритеты источников
-
-### При подготовке фичей
-- One-hot/label-encoding для `source` (wardrobe, catalog, kaggle_seed)
-- Бинарный признак `is_owned`
-
-### При финальном скоринге
-- +α к score, если `is_owned = True` и вещь подходит по погоде
-- Чуть меньший приоритет для catalog по сравнению с wardrobe
-- Kaggle_seed — базовая линия (0)
-
-## Go-бэкенд: улучшенный сервис рекомендаций
-
-- ML-сервис теперь всегда работает через `clothing_items`, никаких CSV/404/таймаутов на 40 секунд
-- Устаревший `RecommendationService` удален, заменен на новый архитектурно правильный сервис в `internal/core/application/services`
-- Теперь все рекомендации сохраняются в БД, так как все вещи из базы данных
-- Новый сервис поддерживает расширенные функции: рейтинги, избранные, регенерация и т.д.
-
-## Flutter: нормальная обработка источников
-
-### Модель ClothingItem
-Обновлена для парсинга всех новых полей:
-```dart
-class ClothingItem {
-  final int id;
-  final String name;
-  final String category;
-  final String? subcategory;
-  final String source;   // 'wardrobe', 'catalog', 'kaggle_seed'
-  final bool isOwned;
-  final double? minTemp;
-  final double? maxTemp;
-  final int warmthLevel;
-  final int formalityLevel;
-  final String iconEmoji;
-  // ...
-}
+```bash
+git clone https://github.com/ALEZOEX/OutFitStyle.git
+cd OutFitStyle
 ```
 
-### Визуальное разделение в UI
-- "Что из твоего гардероба" (isOwned == true)
-- "Что стоит докупить" (isOwned == false и source != 'kaggle_seed')
-- "Образцовые варианты" (source == 'kaggle_seed')
+### 2. Запустить базу данных и Redis
 
-### Пустой список
-Если items.isEmpty → показываем "нет вещей, добавь одежду в гардероб"
+```bash
+docker-compose -f docker-compose.dev-minimal.yml up -d
+```
 
-## Преимущества подхода
+Проверить:
+```bash
+docker-compose ps
+# Должны быть запущены: postgres и redis
+```
 
-1. **Профессиональный**: 
-   - Единая схема
-   - Чёткое разделение Retrieval/Ranking
-   - Предсказуемые таймауты
-   - Приоритеты источников
+### 3. Запустить Backend (Go)
 
-2. **Гибкий**:
-   - Можно добавлять реальные вещи, парсеры
-   - Менять веса без ломки архитектуры
+```bash
+cd server
+go run cmd/server/main.go
+```
 
-3. **Учитывает сценарии**:
-   - Бедный/непосезонный гардероб
-   - Комбинирование Wardrobe + Catalog + Kaggle
-   - Сохранение разнообразия и "крутости" рекомендаций за счёт десятков тысяч seed-вещей
+Backend запустится на http://localhost:8080
+
+Проверить:
+```bash
+curl http://localhost:8080/api/health
+# Должен вернуть: {"status":"ok"}
+```
+
+### 4. Запустить ML сервис (Python, опционально)
+
+```bash
+cd ml-service
+pip install -r requirements.txt
+python main.py
+```
+
+ML сервис запустится на http://localhost:5000
+
+### 5. Запустить Flutter клиент (опционально)
+
+```bash
+cd client
+flutter pub get
+flutter run
+```
+
+## Проверка работы
+
+1. **API доступно**: http://localhost:8080/api/health
+2. **Swagger документация**: http://localhost:8080/swagger
+3. **ML сервис**: http://localhost:5000/health
+
+## Что дальше?
+
+- [Обзор проекта](overview.md) — узнайте что делает OutfitStyle
+- [Руководство разработчика](../04-development/guide.md) — настройка окружения
+- [API документация](../03-api/reference.md) — как работать с API

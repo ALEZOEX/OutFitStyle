@@ -122,6 +122,11 @@ Thumbs.db
 *.swp
 *.swo
 
+# Workspace files (IDE specific)
+*.code-workspace
+*.swp
+*.swo
+
 # Environment variable files
 .env
 .env.local
@@ -129,6 +134,7 @@ firebase-credentials.json
 .env.development
 .env.test
 .env.production
+register.json
 
 # Firebase configuration (contains sensitive API keys)
 **/google-services.json

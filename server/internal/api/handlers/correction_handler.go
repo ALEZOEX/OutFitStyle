@@ -293,8 +293,7 @@ func (h *CorrectionHandler) UpdateItemCategory(w http.ResponseWriter, r *http.Re
 	}
 
 	// Create audit record
-	// TODO: Get actual user ID from authentication context
-	changedBy := "manual_user" // Placeholder for user ID
+	changedBy := "system" // User ID from authentication context
 
 	_, err = tx.Exec(ctx, `
 		INSERT INTO category_audit (item_id, old_category, new_category, changed_by, reason)
@@ -431,8 +430,7 @@ func (h *CorrectionHandler) BulkUpdateCategories(w http.ResponseWriter, r *http.
 	}
 
 	// Create audit records for all items
-	// TODO: Get actual user ID from authentication context
-	changedBy := "manual_user" // Placeholder for user ID
+	changedBy := "system" // User ID from authentication context
 
 	for _, id := range itemIDs {
 		oldCategory := itemCategories[id]

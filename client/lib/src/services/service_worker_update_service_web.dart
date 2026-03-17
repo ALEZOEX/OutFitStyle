@@ -31,13 +31,11 @@ class ServiceWorkerUpdateService {
       final sw = html.window.navigator.serviceWorker;
       if (sw == null) return;
       final reg = await sw.getRegistration();
-      if (reg != null) {
+      if (reg != null && reg.waiting != null) {
         await reg.update();
-        if (reg.waiting != null) {
-          _isUpdateAvailable = true;
-          _updateAvailableController.add(true);
-          debugPrint('ServiceWorkerUpdateService: Update available!');
-        }
+        _isUpdateAvailable = true;
+        _updateAvailableController.add(true);
+        debugPrint('ServiceWorkerUpdateService: Update available!');
       }
     } catch (e) {
       debugPrint('ServiceWorkerUpdateService: Error checking updates: $e');

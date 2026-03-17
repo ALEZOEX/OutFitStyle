@@ -1,6 +1,15 @@
 #!/bin/bash
-
 # Test authentication flow on production server
+# Usage: ./scripts/test_auth_flow.sh <server_url>
+# Example: ./scripts/test_auth_flow.sh https://app.outfitstyle.ru
+
+if [ -z "$1" ]; then
+  echo "Usage: ./test_auth_flow.sh <server_url>"
+  echo "Example: ./test_auth_flow.sh https://app.outfitstyle.ru"
+  exit 1
+fi
+
+SERVER_URL="$1"
 
 echo "=== Testing Authentication Flow ==="
 echo ""
@@ -11,7 +20,7 @@ TIMESTAMP=$(date +%s)
 TEST_EMAIL="test_${TIMESTAMP}@example.com"
 TEST_PASSWORD="TestPass123!"
 
-REGISTER_RESPONSE=$(curl -s -X POST https://app.outfitstyle.ru/api/v1/auth/register \
+REGISTER_RESPONSE=$(curl -s -X POST "${SERVER_URL}/api/v1/auth/register" \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"${TEST_EMAIL}\",\"password\":\"${TEST_PASSWORD}\",\"display_name\":\"Test User\"}")
 
@@ -31,7 +40,7 @@ echo ""
 
 # Step 2: Test authenticated request with Bearer token
 echo "Step 2: Testing authenticated request to /api/v1/wardrobe..."
-WARDROBE_RESPONSE=$(curl -s -X GET https://app.outfitstyle.ru/api/v1/wardrobe \
+WARDROBE_RESPONSE=$(curl -s -X GET "${SERVER_URL}/api/v1/wardrobe" \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -w "\nHTTP_CODE:%{http_code}")
 

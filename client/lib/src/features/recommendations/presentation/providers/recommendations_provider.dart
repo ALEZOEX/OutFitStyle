@@ -4,7 +4,7 @@ import '../../../../domain/entities/outfit_recommendation.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../presentation/providers/session_provider.dart';
 
-/// Заглушка для демонстрации UI (удалить после подключения реального API)
+/// Временные рекомендации для демонстрации UI
 final mockRecommendations = <OutfitRecommendation>[];
 
 /// Запись запланированного образа

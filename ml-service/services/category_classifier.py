@@ -113,8 +113,8 @@ class CategoryClassifier:
         Returns:
             Classification response with predicted category and confidence
         """
-        # TODO: Replace with actual ML model prediction
-        # For now, use simple rule-based classification
+        # Rule-based classification using subcategory mapping
+        # ML model training will be implemented in future versions
 
         subcategory_lower = request.subcategory.lower().strip()
 
@@ -166,8 +166,7 @@ class CategoryClassifier:
         Args:
             training_data: List of training examples with features and labels
         """
-        # TODO: Implement training logic
-        # This will be implemented in a later task
+        # Training logic to be implemented using audit trail data
         logger.info(f"Training not yet implemented. Received {len(training_data)} examples.")
         pass
 

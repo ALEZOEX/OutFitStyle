@@ -1,4 +1,6 @@
 #!/bin/sh
+# Test API from nginx container
+# Usage: ./scripts/test_api_from_nginx.sh
 
 echo "Installing curl and jq..."
 apk add --no-cache curl jq 2>/dev/null
