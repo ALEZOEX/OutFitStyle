@@ -13,20 +13,22 @@ import '../../domain/entities/notification_settings.dart';
 class NotificationSettingsRepository {
   final ApiClient _apiClient;
 
-  NotificationSettingsRepository({
-    required ApiClient apiClient,
-  }) : _apiClient = apiClient;
+  NotificationSettingsRepository({required ApiClient apiClient})
+    : _apiClient = apiClient;
 
   /// Получить настройки уведомлений с сервера
   ///
   /// Endpoint: GET /api/v1/users/notifications/settings
   Future<NotificationSettings> getSettings() async {
     try {
-      final response = await _apiClient.get('/api/v1/users/notifications/settings');
+      final response = await _apiClient.get(
+        '/api/v1/users/notifications/settings',
+      );
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final settingsData = data['notification_settings'] as Map<String, dynamic>? ?? data;
+        final settingsData =
+            data['notification_settings'] as Map<String, dynamic>? ?? data;
         return NotificationSettings.fromMap(settingsData);
       } else if (response.statusCode == 404) {
         // Настройки ещё не созданы, возвращаем дефолтные
@@ -50,7 +52,9 @@ class NotificationSettingsRepository {
   /// [settings] - новые настройки уведомлений
   ///
   /// Endpoint: PUT /api/v1/users/notifications/settings
-  Future<NotificationSettings> updateSettings(NotificationSettings settings) async {
+  Future<NotificationSettings> updateSettings(
+    NotificationSettings settings,
+  ) async {
     try {
       final response = await _apiClient.put(
         '/api/v1/users/notifications/settings',
@@ -59,7 +63,8 @@ class NotificationSettingsRepository {
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final settingsData = data['notification_settings'] as Map<String, dynamic>? ?? data;
+        final settingsData =
+            data['notification_settings'] as Map<String, dynamic>? ?? data;
         return NotificationSettings.fromMap(settingsData);
       } else {
         throw NotificationSettingsException(
@@ -79,7 +84,9 @@ class NotificationSettingsRepository {
   ///
   /// [localSettings] - локальные настройки
   /// Возвращает актуальные настройки (с сервера или локальные при ошибке)
-  Future<NotificationSettings> syncWithServer(NotificationSettings localSettings) async {
+  Future<NotificationSettings> syncWithServer(
+    NotificationSettings localSettings,
+  ) async {
     try {
       return await updateSettings(localSettings);
     } catch (e) {

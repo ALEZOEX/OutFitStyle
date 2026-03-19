@@ -30,7 +30,8 @@ class StringListConverter extends TypeConverter<List<String>, String> {
 }
 
 /// Конвертер для ClothingCategory
-class ClothingCategoryConverter extends TypeConverter<ClothingCategory, String> {
+class ClothingCategoryConverter
+    extends TypeConverter<ClothingCategory, String> {
   const ClothingCategoryConverter();
 
   @override
@@ -126,9 +127,7 @@ class OutfitSeasonListConverter
     if (fromDb.isEmpty) return [];
     try {
       final decoded = jsonDecode(fromDb) as List<dynamic>;
-      return decoded
-          .map((e) => OutfitSeason.fromValue(e.toString()))
-          .toList();
+      return decoded.map((e) => OutfitSeason.fromValue(e.toString())).toList();
     } catch (_) {
       return fromDb.split(',').map(OutfitSeason.fromValue).toList();
     }
@@ -150,9 +149,7 @@ class OutfitWeatherListConverter
     if (fromDb.isEmpty) return [];
     try {
       final decoded = jsonDecode(fromDb) as List<dynamic>;
-      return decoded
-          .map((e) => OutfitWeather.fromValue(e.toString()))
-          .toList();
+      return decoded.map((e) => OutfitWeather.fromValue(e.toString())).toList();
     } catch (_) {
       return fromDb.split(',').map(OutfitWeather.fromValue).toList();
     }
@@ -225,8 +222,7 @@ class DateTimeConverter extends TypeConverter<DateTime, int> {
 }
 
 /// Конвертер для DateTime? (nullable)
-class NullableDateTimeConverter
-    extends TypeConverter<DateTime?, int?> {
+class NullableDateTimeConverter extends TypeConverter<DateTime?, int?> {
   const NullableDateTimeConverter();
 
   @override

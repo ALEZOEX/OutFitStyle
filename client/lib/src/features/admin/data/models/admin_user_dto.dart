@@ -21,9 +21,10 @@ class AdminUserDto {
       isActive: json['is_active'] as bool,
       isVerified: json['is_verified'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
-      lastLoginAt: json['last_login_at'] != null
-          ? DateTime.parse(json['last_login_at'] as String)
-          : null,
+      lastLoginAt:
+          json['last_login_at'] != null
+              ? DateTime.parse(json['last_login_at'] as String)
+              : null,
     );
   }
 
@@ -60,7 +61,9 @@ extension AdminUserDtoExtension on AdminUserDto {
       isVerified: isVerified,
       createdAt: createdAt,
       lastLoginAt: lastLoginAt,
-      role: UserRole.user, // По умолчанию user, роль можно определить по is_active
+      role:
+          UserRole
+              .user, // По умолчанию user, роль можно определить по is_active
     );
   }
 }
@@ -70,17 +73,13 @@ class UpdateUserRoleRequest {
   const UpdateUserRoleRequest({required this.role});
 
   factory UpdateUserRoleRequest.fromJson(Map<String, dynamic> json) {
-    return UpdateUserRoleRequest(
-      role: json['role'] as String,
-    );
+    return UpdateUserRoleRequest(role: json['role'] as String);
   }
 
   final String role;
 
   Map<String, dynamic> toJson() {
-    return {
-      'role': role,
-    };
+    return {'role': role};
   }
 }
 
@@ -89,17 +88,13 @@ class BlockUserRequest {
   const BlockUserRequest({required this.isActive});
 
   factory BlockUserRequest.fromJson(Map<String, dynamic> json) {
-    return BlockUserRequest(
-      isActive: json['is_active'] as bool,
-    );
+    return BlockUserRequest(isActive: json['is_active'] as bool);
   }
 
   final bool isActive;
 
   Map<String, dynamic> toJson() {
-    return {
-      'is_active': isActive,
-    };
+    return {'is_active': isActive};
   }
 }
 
@@ -108,16 +103,12 @@ class ResetPasswordRequest {
   const ResetPasswordRequest({required this.userId});
 
   factory ResetPasswordRequest.fromJson(Map<String, dynamic> json) {
-    return ResetPasswordRequest(
-      userId: json['user_id'] as String,
-    );
+    return ResetPasswordRequest(userId: json['user_id'] as String);
   }
 
   final String userId;
 
   Map<String, dynamic> toJson() {
-    return {
-      'user_id': userId,
-    };
+    return {'user_id': userId};
   }
 }

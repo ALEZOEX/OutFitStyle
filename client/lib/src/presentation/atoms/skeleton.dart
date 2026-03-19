@@ -24,10 +24,7 @@ class SkeletonBox extends StatelessWidget {
       child: Container(
         width: width,
         height: height,
-        decoration: BoxDecoration(
-          color: base,
-          borderRadius: borderRadius,
-        ),
+        decoration: BoxDecoration(color: base, borderRadius: borderRadius),
       ),
     );
   }

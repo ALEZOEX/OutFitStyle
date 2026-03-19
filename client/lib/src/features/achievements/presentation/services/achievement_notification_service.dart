@@ -44,10 +44,7 @@ class AchievementNotificationService {
                 ),
               ],
             ),
-            child: Text(
-              achievement.icon,
-              style: const TextStyle(fontSize: 24),
-            ),
+            child: Text(achievement.icon, style: const TextStyle(fontSize: 24)),
           ),
           const SizedBox(width: 16),
           // Текст уведомления
@@ -96,9 +93,7 @@ class AchievementNotificationService {
       ),
       behavior: SnackBarBehavior.floating,
       duration: const Duration(seconds: 5),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       elevation: 8,
@@ -159,10 +154,7 @@ class AchievementNotificationService {
                   duration: const Duration(milliseconds: 600),
                   curve: Curves.elasticOut,
                   builder: (context, value, child) {
-                    return Transform.scale(
-                      scale: value,
-                      child: child,
-                    );
+                    return Transform.scale(scale: value, child: child);
                   },
                   child: Container(
                     padding: const EdgeInsets.all(20),
@@ -221,7 +213,10 @@ class AchievementNotificationService {
                 const SizedBox(height: 16),
                 // Награда
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.tertiaryContainer.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(20),
@@ -282,7 +277,9 @@ class AchievementNotificationService {
 }
 
 /// Провайдер для управления уведомлениями о достижениях
-final achievementNotificationControllerProvider = Provider<ConfettiController>((ref) {
+final achievementNotificationControllerProvider = Provider<ConfettiController>((
+  ref,
+) {
   final controller = ConfettiController(duration: const Duration(seconds: 3));
   ref.onDispose(() => controller.dispose());
   return controller;
@@ -301,17 +298,19 @@ class AchievementConfettiOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final confettiController = ref.watch(achievementNotificationControllerProvider);
+    final confettiController = ref.watch(
+      achievementNotificationControllerProvider,
+    );
 
     // Слушаем новые разблокированные достижения
-    ref.listen<List<Achievement>>(
-      newlyUnlockedAchievementsProvider,
-      (previous, next) {
-        if (next.isNotEmpty) {
-          AchievementNotificationService.playConfetti(confettiController);
-        }
-      },
-    );
+    ref.listen<List<Achievement>>(newlyUnlockedAchievementsProvider, (
+      previous,
+      next,
+    ) {
+      if (next.isNotEmpty) {
+        AchievementNotificationService.playConfetti(confettiController);
+      }
+    });
 
     return Stack(
       children: [
@@ -339,4 +338,6 @@ class AchievementConfettiOverlay extends ConsumerWidget {
 }
 
 /// Провайдер для отслеживания только что разблокированных достижений
-final newlyUnlockedAchievementsProvider = StateProvider<List<Achievement>>((ref) => []);
+final newlyUnlockedAchievementsProvider = StateProvider<List<Achievement>>(
+  (ref) => [],
+);

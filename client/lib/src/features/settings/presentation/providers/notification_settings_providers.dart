@@ -59,7 +59,9 @@ class NotificationSettingsState {
   }
 
   /// Создать из настроек
-  factory NotificationSettingsState.fromSettings(NotificationSettings settings) {
+  factory NotificationSettingsState.fromSettings(
+    NotificationSettings settings,
+  ) {
     return NotificationSettingsState(
       settings: settings,
       originalSettings: settings,
@@ -68,13 +70,16 @@ class NotificationSettingsState {
 }
 
 /// StateNotifier для управления настройками уведомлений
-class NotificationSettingsNotifier extends StateNotifier<NotificationSettingsState> {
+class NotificationSettingsNotifier
+    extends StateNotifier<NotificationSettingsState> {
   final NotificationSettingsRepository _repository;
 
   NotificationSettingsNotifier({
     required NotificationSettingsRepository repository,
-  })  : _repository = repository,
-        super(const NotificationSettingsState(settings: NotificationSettings())) {
+  }) : _repository = repository,
+       super(
+         const NotificationSettingsState(settings: NotificationSettings()),
+       ) {
     _loadSettings();
   }
 
@@ -132,7 +137,10 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettingsSta
   Future<void> _saveLocalSettings(NotificationSettings settings) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_kNotificationSettingsKey, jsonEncode(settings.toMap()));
+      await prefs.setString(
+        _kNotificationSettingsKey,
+        jsonEncode(settings.toMap()),
+      );
     } catch (e) {
       debugPrint('Failed to save local settings: $e');
     }
@@ -293,8 +301,9 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettingsSta
 
     try {
       final updatedSettings = await _repository.updateSettings(state.settings);
-      state = NotificationSettingsState.fromSettings(updatedSettings)
-          .copyWith(isSaving: false);
+      state = NotificationSettingsState.fromSettings(
+        updatedSettings,
+      ).copyWith(isSaving: false);
 
       // Сохраняем локально
       await _saveLocalSettings(updatedSettings);
@@ -332,13 +341,15 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettingsSta
 
 final _notificationSettingsRepositoryProvider =
     Provider<NotificationSettingsRepository>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  return NotificationSettingsRepository(apiClient: apiClient);
-});
+      final apiClient = ref.watch(apiClientProvider);
+      return NotificationSettingsRepository(apiClient: apiClient);
+    });
 
 /// Провайдер для управления настройками уведомлений
-final notificationSettingsProvider =
-    StateNotifierProvider<NotificationSettingsNotifier, NotificationSettingsState>((ref) {
+final notificationSettingsProvider = StateNotifierProvider<
+  NotificationSettingsNotifier,
+  NotificationSettingsState
+>((ref) {
   final repository = ref.watch(_notificationSettingsRepositoryProvider);
   return NotificationSettingsNotifier(repository: repository);
 });

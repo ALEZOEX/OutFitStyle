@@ -65,13 +65,13 @@ class SyncManager {
 
     await _updateConnectivityStatus();
 
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) {
-        if (result.isNotEmpty) {
-          _updateConnectivityStatus(result.first);
-        }
-      },
-    );
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
+      List<ConnectivityResult> result,
+    ) {
+      if (result.isNotEmpty) {
+        _updateConnectivityStatus(result.first);
+      }
+    });
 
     // Start periodic sync when online
     _startPeriodicSync();
@@ -165,7 +165,9 @@ class SyncManager {
       final localChanges = await _getLocalPreferenceChanges();
 
       if (localChanges.isNotEmpty) {
-        _logFine('Found ${localChanges.length} local preference changes to sync');
+        _logFine(
+          'Found ${localChanges.length} local preference changes to sync',
+        );
 
         // Send changes to server
         for (final change in localChanges) {
@@ -175,7 +177,11 @@ class SyncManager {
             // Mark as synced (implementation depends on how preferences are stored locally)
             await _markPreferenceAsSynced(change);
           } catch (e, stackTrace) {
-            _logWarning('Failed to sync preference change: $e', null, stackTrace);
+            _logWarning(
+              'Failed to sync preference change: $e',
+              null,
+              stackTrace,
+            );
             // Continue with other changes
           }
         }
@@ -193,7 +199,7 @@ class SyncManager {
 
   /// Получает локальные изменения настроек, которые необходимо синхронизировать
   Future<List<Map<String, dynamic>>> _getLocalPreferenceChanges() async {
-    // In a real implementation, this would query the local database for 
+    // In a real implementation, this would query the local database for
     // preferences marked as dirty or unsynced
     // For now, returning empty list as preferences sync is handled differently
     return [];
@@ -212,7 +218,11 @@ class SyncManager {
       // Implementation would depend on how preferences are stored locally
       _logFine('Pulled ${serverPrefs.length} user preferences from server');
     } catch (e, stackTrace) {
-      _logWarning('Failed to pull user preferences from server', null, stackTrace);
+      _logWarning(
+        'Failed to pull user preferences from server',
+        null,
+        stackTrace,
+      );
     }
   }
 
@@ -263,7 +273,10 @@ class SyncManager {
       if (item.serverId == null) {
         // New item - create on server
         final createdItem = await _createWardrobeItem(item);
-        await _wardrobeRepository.markAsSynced(itemId, createdItem.serverId ?? itemId);
+        await _wardrobeRepository.markAsSynced(
+          itemId,
+          createdItem.serverId ?? itemId,
+        );
       } else {
         // Existing item - update on server
         await _updateWardrobeItem(item);
@@ -276,7 +289,9 @@ class SyncManager {
   }
 
   /// Создает элемент гардероба на сервере
-  Future<domain.WardrobeItem> _createWardrobeItem(domain.WardrobeItem item) async {
+  Future<domain.WardrobeItem> _createWardrobeItem(
+    domain.WardrobeItem item,
+  ) async {
     // Получаем userId из AuthRepository
     final userId = await _getUserId();
 
@@ -312,7 +327,11 @@ class SyncManager {
     // For now, we'll simulate the creation by returning an updated item
     // Using the request object to avoid the unused variable warning
     _logFine('Creating wardrobe item: ${request.name}');
-    return item.copyWith(serverId: item.id, dirty: false, lastSyncedAt: DateTime.now());
+    return item.copyWith(
+      serverId: item.id,
+      dirty: false,
+      lastSyncedAt: DateTime.now(),
+    );
   }
 
   /// Обновляет элемент гардероба на сервере
@@ -351,7 +370,9 @@ class SyncManager {
         return;
       }
 
-      _logFine('Found ${unsyncedRecommendations.length} unsynced recommendations');
+      _logFine(
+        'Found ${unsyncedRecommendations.length} unsynced recommendations',
+      );
 
       for (final rec in unsyncedRecommendations) {
         await _syncRecommendation(rec);
@@ -398,7 +419,10 @@ class SyncManager {
             await _sendFeedbackToServer(feedback);
             await _removeLocalFeedback(feedback.id);
           } catch (e, stackTrace) {
-            _logWarning('Failed to sync feedback ${feedback.id}: $e', stackTrace);
+            _logWarning(
+              'Failed to sync feedback ${feedback.id}: $e',
+              stackTrace,
+            );
             // Continue with other feedback items
           }
         }
@@ -492,12 +516,24 @@ class SyncManager {
 
   /// Вспомогательный метод для записи предупреждающих сообщений
   void _logWarning(String message, [Object? error, StackTrace? stackTrace]) {
-    developer.log(message, name: 'SyncManager', level: 900, error: error, stackTrace: stackTrace); // WARNING level
+    developer.log(
+      message,
+      name: 'SyncManager',
+      level: 900,
+      error: error,
+      stackTrace: stackTrace,
+    ); // WARNING level
   }
 
   /// Вспомогательный метод для записи критических/ошибочных сообщений
   void _logSevere(String message, [Object? error, StackTrace? stackTrace]) {
-    developer.log(message, name: 'SyncManager', level: 1000, error: error, stackTrace: stackTrace); // SEVERE/ERROR level
+    developer.log(
+      message,
+      name: 'SyncManager',
+      level: 1000,
+      error: error,
+      stackTrace: stackTrace,
+    ); // SEVERE/ERROR level
   }
 }
 

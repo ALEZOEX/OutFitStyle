@@ -33,15 +33,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final cartAsync = ref.watch(cartProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Оформление заказа'),
-      ),
+      appBar: AppBar(title: const Text('Оформление заказа')),
       body: cartAsync.when(
         data: (cart) {
           if (cart.isEmpty) {
-            return const Center(
-              child: Text('Корзина пуста'),
-            );
+            return const Center(child: Text('Корзина пуста'));
           }
 
           return Form(
@@ -153,24 +149,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 _buildSectionTitle('Заказ'),
                 const SizedBox(height: 16),
 
-                ...cart.items.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${item.productName ?? 'Товар'} x${item.quantity}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Text(
-                        '${item.total.toStringAsFixed(0)} ₽',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                ...cart.items.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${item.productName ?? 'Товар'} x${item.quantity}',
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                      ),
-                    ],
+                        Text(
+                          '${item.total.toStringAsFixed(0)} ₽',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
-                )),
+                ),
 
                 const Divider(height: 32),
 
@@ -211,7 +208,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
                     child: const Text(
                       'Разместить заказ',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -221,9 +221,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Ошибка: $error'),
-        ),
+        error: (error, stack) => Center(child: Text('Ошибка: $error')),
       ),
     );
   }
@@ -231,9 +229,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 
@@ -252,7 +250,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         paymentMethod: _paymentMethod,
       );
 
-      final order = await ref.read(marketRepositoryProvider).createOrder(request);
+      final order = await ref
+          .read(marketRepositoryProvider)
+          .createOrder(request);
 
       // Clear cart
       await ref.read(cartProvider.notifier).clear();
@@ -271,7 +271,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Ошибка создания заказа: $e'),

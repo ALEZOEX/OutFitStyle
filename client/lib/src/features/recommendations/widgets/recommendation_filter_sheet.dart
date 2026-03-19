@@ -54,21 +54,22 @@ class _RecommendationFilterSheetState
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            children: RecommendationType.values.map((type) {
-              return ChoiceChip(
-                label: Text(type.displayName),
-                selected: _options.selectedTypes.contains(type),
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _options.selectedTypes.add(type);
-                    } else {
-                      _options.selectedTypes.remove(type);
-                    }
-                  });
-                },
-              );
-            }).toList(),
+            children:
+                RecommendationType.values.map((type) {
+                  return ChoiceChip(
+                    label: Text(type.displayName),
+                    selected: _options.selectedTypes.contains(type),
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _options.selectedTypes.add(type);
+                        } else {
+                          _options.selectedTypes.remove(type);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
           ),
           const SizedBox(height: 16),
 
@@ -77,22 +78,24 @@ class _RecommendationFilterSheetState
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            children: RecommendationWeatherCondition.values.map((condition) {
-              return ChoiceChip(
-                label: Text(condition.displayName),
-                selected:
-                    _options.selectedWeatherConditions.contains(condition),
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _options.selectedWeatherConditions.add(condition);
-                    } else {
-                      _options.selectedWeatherConditions.remove(condition);
-                    }
-                  });
-                },
-              );
-            }).toList(),
+            children:
+                RecommendationWeatherCondition.values.map((condition) {
+                  return ChoiceChip(
+                    label: Text(condition.displayName),
+                    selected: _options.selectedWeatherConditions.contains(
+                      condition,
+                    ),
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _options.selectedWeatherConditions.add(condition);
+                        } else {
+                          _options.selectedWeatherConditions.remove(condition);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
           ),
           const SizedBox(height: 24),
 
@@ -145,10 +148,11 @@ class RecommendationFilterOptions {
     // Check weather conditions
     if (selectedWeatherConditions.isNotEmpty &&
         !(recommendation.outfit?.weatherConditions ?? []).any(
-            (outfitCondition) => selectedWeatherConditions.any(
-                (selectedCondition) =>
-                    _convertToOutfitWeather(selectedCondition) ==
-                    outfitCondition))) {
+          (outfitCondition) => selectedWeatherConditions.any(
+            (selectedCondition) =>
+                _convertToOutfitWeather(selectedCondition) == outfitCondition,
+          ),
+        )) {
       return false;
     }
 
@@ -156,7 +160,8 @@ class RecommendationFilterOptions {
   }
 
   OutfitWeather _convertToOutfitWeather(
-      RecommendationWeatherCondition condition) {
+    RecommendationWeatherCondition condition,
+  ) {
     switch (condition) {
       case RecommendationWeatherCondition.sunny:
         return OutfitWeather.sunny;

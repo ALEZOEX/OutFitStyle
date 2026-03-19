@@ -18,5 +18,6 @@ abstract class WeatherData with _$WeatherData {
     String? iconUrl,
   }) = _WeatherData;
 
-  factory WeatherData.fromJson(Map<String, dynamic> json) => _$WeatherDataFromJson(json);
+  factory WeatherData.fromJson(Map<String, dynamic> json) =>
+      _$WeatherDataFromJson(json);
 }

@@ -3,7 +3,8 @@ import 'package:drift/drift.dart';
 import 'package:logger/logger.dart';
 
 // Conditional import for connection creation
-import 'local_database_io.dart' if (dart.library.html) 'local_database_web.dart';
+import 'local_database_io.dart'
+    if (dart.library.html) 'local_database_web.dart';
 
 part 'local_database.g.dart';
 
@@ -118,9 +119,10 @@ class LocalDatabase extends _$LocalDatabase {
   Future<Map<String, dynamic>> getDatabaseStats() async {
     try {
       final stats = <String, dynamic>{};
-      final tableCountResult = await customSelect(
-        'SELECT COUNT(*) as count FROM sqlite_master WHERE type="table"',
-      ).getSingle();
+      final tableCountResult =
+          await customSelect(
+            'SELECT COUNT(*) as count FROM sqlite_master WHERE type="table"',
+          ).getSingle();
       stats['table_count'] = tableCountResult.read<int>('count');
       return stats;
     } catch (e) {

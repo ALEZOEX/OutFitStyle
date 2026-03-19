@@ -34,15 +34,9 @@ class AppCard extends StatelessWidget {
     Widget content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (header != null) ...[
-          header!,
-          const SizedBox(height: 8.0),
-        ],
+        if (header != null) ...[header!, const SizedBox(height: 8.0)],
         Expanded(child: child),
-        if (footer != null) ...[
-          const SizedBox(height: 8.0),
-          footer!,
-        ],
+        if (footer != null) ...[const SizedBox(height: 8.0), footer!],
       ],
     );
 
@@ -57,13 +51,11 @@ class AppCard extends StatelessWidget {
     return Card(
       color: color,
       elevation: showShadow ? elevation ?? 2.0 : 0.0,
-      shape: shape ??
+      shape:
+          shape ??
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
-            side: BorderSide(
-              color: theme.dividerColor,
-              width: 0.5,
-            ),
+            side: BorderSide(color: theme.dividerColor, width: 0.5),
           ),
       margin: margin ?? const EdgeInsets.all(8.0),
       child: Container(
@@ -99,23 +91,17 @@ class OutfitRecommendationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (image != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: image,
-            ),
+            ClipRRect(borderRadius: BorderRadius.circular(8.0), child: image),
             const SizedBox(height: 12.0),
           ],
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4.0),
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
           if (tags != null && tags!.isNotEmpty) ...[
             const SizedBox(height: 8.0),
             Wrap(
@@ -140,9 +126,9 @@ class OutfitRecommendationCard extends StatelessWidget {
       child: Text(
         tag,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).primaryColor,
-              fontSize: 12.0,
-            ),
+          color: Theme.of(context).primaryColor,
+          fontSize: 12.0,
+        ),
       ),
     );
   }

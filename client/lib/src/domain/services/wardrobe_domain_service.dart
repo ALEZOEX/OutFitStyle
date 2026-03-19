@@ -7,8 +7,12 @@ class WardrobeDomainService {
 
   WardrobeDomainService(this._repository);
 
-  Future<List<WardrobeItem>> getAllWardrobeItems({bool includeArchived = false}) async {
-    return await _repository.getAllWardrobeItems(includeArchived: includeArchived);
+  Future<List<WardrobeItem>> getAllWardrobeItems({
+    bool includeArchived = false,
+  }) async {
+    return await _repository.getAllWardrobeItems(
+      includeArchived: includeArchived,
+    );
   }
 
   Stream<List<WardrobeItem>> watchWardrobe({bool includeArchived = false}) {

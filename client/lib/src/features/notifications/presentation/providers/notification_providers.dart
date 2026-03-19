@@ -12,18 +12,11 @@ import '../../data/repositories/notification_repository.dart';
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   final remoteDataSource = NotificationRemoteDataSource(apiClient);
-  return NotificationRepository(
-    remoteDataSource: remoteDataSource,
-  );
+  return NotificationRepository(remoteDataSource: remoteDataSource);
 });
 
 /// Состояние списка уведомлений
-enum NotificationsLoadStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum NotificationsLoadStatus { initial, loading, success, error }
 
 /// Состояние для уведомлений
 class NotificationsState {
@@ -78,13 +71,17 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   final Ref _ref;
   Timer? _pollingTimer;
 
-  static const Duration _pollingInterval = Duration(minutes: 2); // Увеличено с 30 сек до 2 мин
+  static const Duration _pollingInterval = Duration(
+    minutes: 2,
+  ); // Увеличено с 30 сек до 2 мин
   static const int _pageSize = 20;
-  static const int _maxConsecutiveErrors = 3; // Максимум ошибок перед остановкой
+  static const int _maxConsecutiveErrors =
+      3; // Максимум ошибок перед остановкой
 
   int _consecutiveErrors = 0; // Счетчик последовательных ошибок
 
-  NotificationsNotifier(this._repository, this._ref) : super(const NotificationsState());
+  NotificationsNotifier(this._repository, this._ref)
+    : super(const NotificationsState());
 
   /// Загрузить уведомления
   Future<void> loadNotifications({bool refresh = false}) async {
@@ -104,9 +101,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
         limit: _pageSize,
       );
 
-      final updatedNotifications = refresh
-          ? result.notifications
-          : [...state.notifications, ...result.notifications];
+      final updatedNotifications =
+          refresh
+              ? result.notifications
+              : [...state.notifications, ...result.notifications];
 
       state = state.copyWith(
         notifications: updatedNotifications,
@@ -131,12 +129,13 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       await _repository.markAsRead(notificationId);
 
       // Обновляем локальное состояние
-      final updatedNotifications = state.notifications.map((n) {
-        if (n.id == notificationId) {
-          return n.copyWith(isRead: true);
-        }
-        return n;
-      }).toList();
+      final updatedNotifications =
+          state.notifications.map((n) {
+            if (n.id == notificationId) {
+              return n.copyWith(isRead: true);
+            }
+            return n;
+          }).toList();
 
       state = state.copyWith(
         notifications: updatedNotifications,
@@ -154,9 +153,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       await _repository.markAllAsRead();
 
       // Обновляем локальное состояние
-      final updatedNotifications = state.notifications.map((n) {
-        return n.copyWith(isRead: true);
-      }).toList();
+      final updatedNotifications =
+          state.notifications.map((n) {
+            return n.copyWith(isRead: true);
+          }).toList();
 
       state = state.copyWith(
         notifications: updatedNotifications,
@@ -190,7 +190,9 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     // Проверяем, авторизован ли пользователь через SessionManager (Firebase Auth)
     final sessionManager = _ref.read(sessionManagerProvider);
     if (!sessionManager.isAuthenticated) {
-      debugPrint('startPolling: пользователь не авторизован — поллинг не запускается');
+      debugPrint(
+        'startPolling: пользователь не авторизован — поллинг не запускается',
+      );
       return;
     }
 
@@ -230,13 +232,16 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       _consecutiveErrors++;
 
       // Проверяем, это ошибка авторизации (401)
-      final isAuthError = e.toString().contains('401') ||
-                          e.toString().contains('Unauthorized') ||
-                          e.toString().contains('авторизаци');
+      final isAuthError =
+          e.toString().contains('401') ||
+          e.toString().contains('Unauthorized') ||
+          e.toString().contains('авторизаци');
 
       // Если ошибка авторизации или достигнуто макс. количество ошибок — останавливаем поллинг
       if (isAuthError || _consecutiveErrors >= _maxConsecutiveErrors) {
-        debugPrint('Остановка поллинга уведомлений: ${isAuthError ? "ошибка авторизации" : "достигнуто макс. число ошибок"}');
+        debugPrint(
+          'Остановка поллинга уведомлений: ${isAuthError ? "ошибка авторизации" : "достигнуто макс. число ошибок"}',
+        );
         stopPolling();
 
         // Если это ошибка авторизации — очищаем состояние и делаем logout
@@ -248,7 +253,9 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       }
 
       // Игнорируем временные ошибки, но логируем
-      debugPrint('Ошибка обновления unread count (попытка $_consecutiveErrors/$_maxConsecutiveErrors): $e');
+      debugPrint(
+        'Ошибка обновления unread count (попытка $_consecutiveErrors/$_maxConsecutiveErrors): $e',
+      );
     }
   }
 
@@ -288,10 +295,11 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 }
 
 /// Провайдер для управления состоянием уведомлений
-final notificationsProvider = StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
-  final repository = ref.watch(notificationRepositoryProvider);
-  return NotificationsNotifier(repository, ref);
-});
+final notificationsProvider =
+    StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
+      final repository = ref.watch(notificationRepositoryProvider);
+      return NotificationsNotifier(repository, ref);
+    });
 
 /// Провайдер только для количества непрочитанных уведомлений
 final unreadCountProvider = Provider<int>((ref) {

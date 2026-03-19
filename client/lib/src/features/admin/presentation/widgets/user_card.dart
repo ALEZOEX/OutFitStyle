@@ -21,14 +21,13 @@ class UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final firstLetter = user.email.isNotEmpty ? user.email[0].toUpperCase() : '?';
+    final firstLetter =
+        user.email.isNotEmpty ? user.email[0].toUpperCase() : '?';
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onViewDetails ?? () => context.push('/admin/users/${user.id}'),
         borderRadius: BorderRadius.circular(12),
@@ -83,7 +82,9 @@ class UserCard extends StatelessWidget {
                         Text(
                           user.email,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -112,7 +113,9 @@ class UserCard extends StatelessWidget {
                         user.isActive ? Icons.block : Icons.lock_open,
                         size: 18,
                       ),
-                      label: Text(user.isActive ? 'Заблокировать' : 'Разблокировать'),
+                      label: Text(
+                        user.isActive ? 'Заблокировать' : 'Разблокировать',
+                      ),
                     ),
                   if (onRoleChange != null)
                     TextButton.icon(
@@ -121,7 +124,9 @@ class UserCard extends StatelessWidget {
                       label: const Text('Роль'),
                     ),
                   IconButton(
-                    onPressed: onViewDetails ?? () => context.push('/admin/users/${user.id}'),
+                    onPressed:
+                        onViewDetails ??
+                        () => context.push('/admin/users/${user.id}'),
                     icon: const Icon(Icons.arrow_forward_ios, size: 16),
                     tooltip: 'Подробнее',
                   ),

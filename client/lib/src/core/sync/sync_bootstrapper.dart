@@ -4,7 +4,9 @@ import '../../data/sync/sync_worker.dart';
 
 /// Провайдер SyncWorker
 final syncWorkerProvider = Provider<SyncWorker>((ref) {
-  throw UnimplementedError('Используйте syncWorkerProvider.override для инициализации');
+  throw UnimplementedError(
+    'Используйте syncWorkerProvider.override для инициализации',
+  );
 });
 
 /// Bootstrapper для инициализации синхронизации

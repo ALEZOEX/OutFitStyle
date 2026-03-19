@@ -73,11 +73,7 @@ class AppEmptyState extends StatelessWidget {
               customImage!,
               const SizedBox(height: 24.0),
             ] else ...[
-              Icon(
-                displayIcon,
-                size: 64.0,
-                color: theme.disabledColor,
-              ),
+              Icon(displayIcon, size: 64.0, color: theme.disabledColor),
               const SizedBox(height: 24.0),
             ],
             Text(
@@ -118,10 +114,8 @@ class AppEmptyState extends StatelessWidget {
 class OutfitRecommendationsEmptyState extends StatelessWidget {
   final VoidCallback? onRefresh;
 
-  const OutfitRecommendationsEmptyState({
-    Key? key,
-    this.onRefresh,
-  }) : super(key: key);
+  const OutfitRecommendationsEmptyState({Key? key, this.onRefresh})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {

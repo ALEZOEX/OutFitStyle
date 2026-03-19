@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../wardrobe/presentation/providers/wardrobe_provider.dart';
 import '../recommendations/presentation/providers/recommendations_provider.dart';
-import '../recommendations/presentation/providers/rating_provider.dart' show ratingApiServiceProvider;
+import '../recommendations/presentation/providers/rating_provider.dart'
+    show ratingApiServiceProvider;
 import 'package:outfitstyle_client/src/presentation/providers/weather_provider.dart';
 import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
 import 'package:outfitstyle_client/src/ui/widgets/weather_card.dart';
@@ -56,7 +57,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                
+
                 // Погода и город
                 _buildWeatherSection(context, weatherAsync, userLocation),
 
@@ -73,7 +74,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 20),
 
                 // Статистика
-                _buildStatsSection(context, wardrobeState, recommendationsState),
+                _buildStatsSection(
+                  context,
+                  wardrobeState,
+                  recommendationsState,
+                ),
 
                 const SizedBox(height: 16),
 
@@ -984,7 +989,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       rating: liked ? 5 : 1,
       outfitItems: null,
     );
-    
+
     // Визуальная обратная связь
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

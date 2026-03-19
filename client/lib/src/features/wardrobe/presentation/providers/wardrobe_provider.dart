@@ -9,12 +9,7 @@ import '../../../../presentation/providers/session_provider.dart';
 import '../../../../presentation/routing/router.dart';
 
 /// Состояние гардероба
-enum WardrobeLoadStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum WardrobeLoadStatus { initial, loading, success, error }
 
 /// Провайдер состояния гардероба
 class WardrobeState {
@@ -70,7 +65,8 @@ class WardrobeState {
   int get totalCount => items.length;
 
   /// Получить количество избранных элементов
-  int get favoritesCount => items.where((item) => item.isFavorite == true).length;
+  int get favoritesCount =>
+      items.where((item) => item.isFavorite == true).length;
 }
 
 /// Провайдер WardrobeApiService
@@ -86,17 +82,19 @@ final wardrobeRepositoryProvider = Provider<WardrobeRepository>((ref) {
 });
 
 /// Провайдер гардероба
-final wardrobeProvider = StateNotifierProvider<WardrobeNotifier, WardrobeState>((ref) {
-  final repository = ref.watch(wardrobeRepositoryProvider);
-  return WardrobeNotifier(repository: repository);
-});
+final wardrobeProvider = StateNotifierProvider<WardrobeNotifier, WardrobeState>(
+  (ref) {
+    final repository = ref.watch(wardrobeRepositoryProvider);
+    return WardrobeNotifier(repository: repository);
+  },
+);
 
 class WardrobeNotifier extends StateNotifier<WardrobeState> {
   final WardrobeRepository _repository;
 
   WardrobeNotifier({required WardrobeRepository repository})
-      : _repository = repository,
-        super(const WardrobeState()) {
+    : _repository = repository,
+      super(const WardrobeState()) {
     _loadWardrobe();
   }
 
@@ -161,17 +159,11 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
 
       // Добавляем в список
       final items = List<WardrobeItem>.from(state.items)..add(newItem);
-      state = state.copyWith(
-        items: items,
-        isAddingItem: false,
-      );
+      state = state.copyWith(items: items, isAddingItem: false);
 
       return newItem;
     } catch (e) {
-      state = state.copyWith(
-        isAddingItem: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isAddingItem: false, error: e.toString());
       rethrow;
     }
   }
@@ -192,7 +184,10 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
   }
 
   /// Обновить элемент
-  Future<void> updateItem(String itemId, WardrobeItemUpdateRequest request) async {
+  Future<void> updateItem(
+    String itemId,
+    WardrobeItemUpdateRequest request,
+  ) async {
     try {
       final updatedItem = await _repository.updateWardrobeItem(itemId, request);
 
@@ -243,7 +238,10 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
         gender: catalogItem.gender,
         fit: catalogItem.fit,
         pattern: catalogItem.pattern,
-        materials: catalogItem.materials.isNotEmpty ? catalogItem.materials.join(',') : null,
+        materials:
+            catalogItem.materials.isNotEmpty
+                ? catalogItem.materials.join(',')
+                : null,
         usage: catalogItem.usage.isNotEmpty ? catalogItem.usage.first : null,
         userId: '', // Сервер определит по токену
         clothingItemId: catalogItem.id,
@@ -253,17 +251,11 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
 
       // Добавляем в список
       final items = List<WardrobeItem>.from(state.items)..add(newItem);
-      state = state.copyWith(
-        items: items,
-        isAddingItem: false,
-      );
+      state = state.copyWith(items: items, isAddingItem: false);
 
       return newItem;
     } catch (e) {
-      state = state.copyWith(
-        isAddingItem: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isAddingItem: false, error: e.toString());
       rethrow;
     }
   }
@@ -278,8 +270,5 @@ final filteredWardrobeItemsProvider = Provider<List<WardrobeItem>>((ref) {
 /// Провайдер для получения категорий с количеством
 final wardrobeCategoriesProvider = Provider<Map<String, int>>((ref) {
   final state = ref.watch(wardrobeProvider);
-  return {
-    'all': state.totalCount,
-    ...state.categoryCounts,
-  };
+  return {'all': state.totalCount, ...state.categoryCounts};
 });

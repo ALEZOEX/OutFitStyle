@@ -8,10 +8,7 @@ void main() {
     testWidgets('shows initial rating of 0', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 0,
-            onRatingChanged: (_) {},
-          ),
+          home: RatingSlider(initialRating: 0, onRatingChanged: (_) {}),
         ),
       );
 
@@ -23,10 +20,7 @@ void main() {
     testWidgets('shows rating labels -10, 0, +10', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 0,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 0, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -39,10 +33,7 @@ void main() {
     testWidgets('shows correct icon for negative rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: -7,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: -7, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -53,10 +44,7 @@ void main() {
     testWidgets('shows correct icon for positive rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 7,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 7, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -67,10 +55,7 @@ void main() {
     testWidgets('shows correct icon for neutral rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 0,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 0, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -78,13 +63,12 @@ void main() {
       expect(find.byIcon(Icons.remove), findsWidgets);
     });
 
-    testWidgets('shows rating with plus sign for positive values', (tester) async {
+    testWidgets('shows rating with plus sign for positive values', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 5,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 5, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -92,13 +76,12 @@ void main() {
       expect(find.text('+5'), findsWidgets);
     });
 
-    testWidgets('shows rating without plus sign for negative values', (tester) async {
+    testWidgets('shows rating without plus sign for negative values', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: -5,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: -5, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -109,10 +92,7 @@ void main() {
     testWidgets('shows correct label for very bad rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: -8,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: -8, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -122,10 +102,7 @@ void main() {
     testWidgets('shows correct label for bad rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: -5,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: -5, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -135,10 +112,7 @@ void main() {
     testWidgets('shows correct label for good rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 5,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 5, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -148,10 +122,7 @@ void main() {
     testWidgets('shows correct label for excellent rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 9,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 9, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -161,10 +132,7 @@ void main() {
     testWidgets('shows correct label for perfect rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 10,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 10, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -174,10 +142,7 @@ void main() {
     testWidgets('allows selection from -10 to 10', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 0,
-            onRatingChanged: (_) {},
-          ),
+          home: RatingSlider(initialRating: 0, onRatingChanged: (_) {}),
         ),
       );
 
@@ -219,10 +184,7 @@ void main() {
     testWidgets('shows gradient slider bar', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 0,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 0, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -233,10 +195,7 @@ void main() {
     testWidgets('shows rating indicator circle', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 0,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 0, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -262,10 +221,7 @@ void main() {
     testWidgets('shows rating card with border', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 0,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 0, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -277,11 +233,7 @@ void main() {
   group('CompactRatingSlider Widget Tests', () {
     testWidgets('shows compact slider', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: CompactRatingSlider(
-            rating: 0,
-          ),
-        ),
+        MaterialApp(home: CompactRatingSlider(rating: 0)),
       );
 
       // Проверяем наличие компактного слайдера (используем findsWidgets т.к. Container может быть в нескольких местах)
@@ -290,11 +242,7 @@ void main() {
 
     testWidgets('shows gradient bar in compact mode', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: CompactRatingSlider(
-            rating: 5,
-          ),
-        ),
+        MaterialApp(home: CompactRatingSlider(rating: 5)),
       );
 
       // Проверяем наличие градиента (используем findsWidgets т.к. Container может быть в нескольких местах)
@@ -303,11 +251,7 @@ void main() {
 
     testWidgets('shows indicator at correct position', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: CompactRatingSlider(
-            rating: 5,
-          ),
-        ),
+        MaterialApp(home: CompactRatingSlider(rating: 5)),
       );
 
       // Проверяем наличие индикатора (используем findsWidgets т.к. Stack может быть в нескольких местах)
@@ -316,12 +260,7 @@ void main() {
 
     testWidgets('accepts custom height', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: CompactRatingSlider(
-            rating: 0,
-            height: 60,
-          ),
-        ),
+        MaterialApp(home: CompactRatingSlider(rating: 0, height: 60)),
       );
 
       // Проверяем наличие контейнера (используем findsWidgets т.к. Container может быть в нескольких местах)
@@ -331,10 +270,7 @@ void main() {
     testWidgets('allows rating change with callback', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: CompactRatingSlider(
-            rating: 0,
-            onRatingChanged: (_) {},
-          ),
+          home: CompactRatingSlider(rating: 0, onRatingChanged: (_) {}),
         ),
       );
 
@@ -347,10 +283,7 @@ void main() {
     testWidgets('shows red color for negative ratings', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: -10,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: -10, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -361,10 +294,7 @@ void main() {
     testWidgets('shows green color for positive ratings', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 10,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 10, onRatingChanged: (rating) {}),
         ),
       );
 
@@ -375,10 +305,7 @@ void main() {
     testWidgets('shows grey color for neutral rating', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RatingSlider(
-            initialRating: 0,
-            onRatingChanged: (rating) {},
-          ),
+          home: RatingSlider(initialRating: 0, onRatingChanged: (rating) {}),
         ),
       );
 

@@ -8,8 +8,8 @@ class AdminController extends StateNotifier<AdminState> {
   final ApiClient _apiClient;
 
   AdminController({required ApiClient apiClient})
-      : _apiClient = apiClient,
-        super(const AdminState());
+    : _apiClient = apiClient,
+      super(const AdminState());
 
   /// Получить статистику
   Future<Map<String, dynamic>> getStats() async {
@@ -18,10 +18,7 @@ class AdminController extends StateNotifier<AdminState> {
       final response = await _apiClient.get('/admin/stats');
       if (response.statusCode == 200) {
         final stats = jsonDecode(response.data) as Map<String, dynamic>;
-        state = state.copyWith(
-          isLoading: false,
-          stats: stats,
-        );
+        state = state.copyWith(isLoading: false, stats: stats);
         return stats;
       }
       throw AdminException('Не удалось загрузить статистику');
@@ -38,11 +35,10 @@ class AdminController extends StateNotifier<AdminState> {
       final response = await _apiClient.get('/admin/users');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.data) as Map<String, dynamic>;
-        final users = (data['users'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
-        state = state.copyWith(
-          isLoading: false,
-          users: users,
-        );
+        final users =
+            (data['users'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
+            [];
+        state = state.copyWith(isLoading: false, users: users);
         return users;
       }
       throw AdminException('Не удалось загрузить пользователей');

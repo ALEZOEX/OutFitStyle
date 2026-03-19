@@ -1,9 +1,6 @@
 // Базовые провайдеры
 export 'session_provider.dart'
-    show
-        sharedPreferencesProvider,
-        sessionManagerProvider,
-        authStateProvider;
+    show sharedPreferencesProvider, sessionManagerProvider, authStateProvider;
 export 'auth_provider.dart'
     show
         // Firebase провайдеры

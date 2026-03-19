@@ -8,19 +8,16 @@ class WeatherRepository implements IWeatherRepository {
   final ApiClient apiClient;
   final Future<SharedPreferences> sharedPreferences;
 
-  WeatherRepository({
-    required this.apiClient,
-    required this.sharedPreferences,
-  });
+  WeatherRepository({required this.apiClient, required this.sharedPreferences});
 
   @override
-  Future<Map<String, dynamic>> getCurrentWeather(double latitude, double longitude) async {
+  Future<Map<String, dynamic>> getCurrentWeather(
+    double latitude,
+    double longitude,
+  ) async {
     final response = await apiClient.get(
       '/weather/current',
-      params: {
-        'lat': latitude.toString(),
-        'lon': longitude.toString(),
-      },
+      params: {'lat': latitude.toString(), 'lon': longitude.toString()},
     );
     if (response.statusCode == 200) {
       return jsonDecode(response.data) as Map<String, dynamic>;
@@ -29,13 +26,13 @@ class WeatherRepository implements IWeatherRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> getWeatherForecast(double latitude, double longitude) async {
+  Future<Map<String, dynamic>> getWeatherForecast(
+    double latitude,
+    double longitude,
+  ) async {
     final response = await apiClient.get(
       '/weather/forecast',
-      params: {
-        'lat': latitude.toString(),
-        'lon': longitude.toString(),
-      },
+      params: {'lat': latitude.toString(), 'lon': longitude.toString()},
     );
     if (response.statusCode == 200) {
       return jsonDecode(response.data) as Map<String, dynamic>;

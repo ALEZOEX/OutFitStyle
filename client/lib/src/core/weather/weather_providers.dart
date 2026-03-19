@@ -16,16 +16,18 @@ final weatherServiceProvider = Provider<WeatherService>((ref) {
 });
 
 /// Провайдер для загрузки текущей погоды
-final currentWeatherProvider = FutureProvider.autoDispose.family<WeatherData, Location>((ref, location) async {
-  final service = ref.watch(weatherServiceProvider);
-  return service.getCurrentWeather(location.latitude, location.longitude);
-});
+final currentWeatherProvider = FutureProvider.autoDispose
+    .family<WeatherData, Location>((ref, location) async {
+      final service = ref.watch(weatherServiceProvider);
+      return service.getCurrentWeather(location.latitude, location.longitude);
+    });
 
 /// Провайдер для загрузки прогноза погоды
-final weatherForecastProvider = FutureProvider.autoDispose.family<List<WeatherData>, Location>((ref, location) async {
-  final service = ref.watch(weatherServiceProvider);
-  return service.getWeatherForecast(location.latitude, location.longitude);
-});
+final weatherForecastProvider = FutureProvider.autoDispose
+    .family<List<WeatherData>, Location>((ref, location) async {
+      final service = ref.watch(weatherServiceProvider);
+      return service.getWeatherForecast(location.latitude, location.longitude);
+    });
 
 /// Модель локации
 class Location {
@@ -33,9 +35,5 @@ class Location {
   final double longitude;
   final String? name;
 
-  const Location({
-    required this.latitude,
-    required this.longitude,
-    this.name,
-  });
+  const Location({required this.latitude, required this.longitude, this.name});
 }

@@ -10,9 +10,12 @@ class AchievementsResponse {
   factory AchievementsResponse.fromJson(Map<String, dynamic> json) {
     final list = json['achievements'] as List? ?? [];
     return AchievementsResponse(
-      achievements: list
-          .map((item) => AchievementDto.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      achievements:
+          list
+              .map(
+                (item) => AchievementDto.fromJson(item as Map<String, dynamic>),
+              )
+              .toList(),
     );
   }
 
@@ -41,12 +44,18 @@ class UserAchievementsResponse {
     final inProgressList = json['in_progress'] as List? ?? [];
 
     return UserAchievementsResponse(
-      unlocked: unlockedList
-          .map((item) => AchievementDto.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      inProgress: inProgressList
-          .map((item) => AchievementDto.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      unlocked:
+          unlockedList
+              .map(
+                (item) => AchievementDto.fromJson(item as Map<String, dynamic>),
+              )
+              .toList(),
+      inProgress:
+          inProgressList
+              .map(
+                (item) => AchievementDto.fromJson(item as Map<String, dynamic>),
+              )
+              .toList(),
       totalPoints: json['total_points'] as int? ?? 0,
       rank: json['rank'] as String? ?? 'bronze',
     );
@@ -120,9 +129,10 @@ class AchievementDto {
       description: json['description'] as String,
       iconEmoji: json['icon_emoji'] as String,
       points: json['points'] as int,
-      unlockedAt: json['unlocked_at'] != null
-          ? DateTime.parse(json['unlocked_at'] as String)
-          : null,
+      unlockedAt:
+          json['unlocked_at'] != null
+              ? DateTime.parse(json['unlocked_at'] as String)
+              : null,
       progress: json['progress'] as int?,
       status: json['status'] as String?,
     );
@@ -132,7 +142,7 @@ class AchievementDto {
   Achievement toDomain() {
     // Определяем категорию по коду (префикс до первого _)
     final category = _parseCategoryFromCode(code);
-    
+
     // Определяем целевое значение из прогресса или по умолчанию 1
     final targetValue = progress != null && progress! > 1 ? progress! : 1;
     final currentProgress = progress ?? 0;
@@ -163,8 +173,8 @@ class AchievementDto {
     }
 
     // Гардероб
-    if (code.startsWith('wardrobe_') || 
-        code == 'all_categories' || 
+    if (code.startsWith('wardrobe_') ||
+        code == 'all_categories' ||
         code == 'favorite_hunter' ||
         code.startsWith('family_')) {
       return AchievementCategory.wardrobe;

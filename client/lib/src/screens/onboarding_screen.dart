@@ -6,13 +6,8 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Добро пожаловать'),
-        centerTitle: true,
-      ),
-      body: const Center(
-        child: Text('Экран приветствия'),
-      ),
+      appBar: AppBar(title: const Text('Добро пожаловать'), centerTitle: true),
+      body: const Center(child: Text('Экран приветствия')),
     );
   }
 }

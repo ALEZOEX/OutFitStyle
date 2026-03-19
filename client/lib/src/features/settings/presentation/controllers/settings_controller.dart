@@ -7,8 +7,8 @@ class SettingsController extends StateNotifier<SettingsState> {
   final Future<SharedPreferences> _sharedPreferences;
 
   SettingsController({required Future<SharedPreferences> sharedPreferences})
-      : _sharedPreferences = sharedPreferences,
-        super(const SettingsState());
+    : _sharedPreferences = sharedPreferences,
+      super(const SettingsState());
 
   static const String _keyTheme = 'theme';
   static const String _keyLanguage = 'language';
@@ -26,15 +26,9 @@ class SettingsController extends StateNotifier<SettingsState> {
         'notifications_enabled': prefs.getBool(_keyNotifications) ?? true,
         'location_enabled': prefs.getBool(_keyLocation) ?? true,
       };
-      state = state.copyWith(
-        isLoading: false,
-        settings: settings,
-      );
+      state = state.copyWith(isLoading: false, settings: settings);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -51,7 +45,8 @@ class SettingsController extends StateNotifier<SettingsState> {
       } else if (value is double) {
         await prefs.setDouble(key, value);
       }
-      final newSettings = Map<String, dynamic>.from(state.settings)..[key] = value;
+      final newSettings = Map<String, dynamic>.from(state.settings)
+        ..[key] = value;
       state = state.copyWith(settings: newSettings);
     } catch (e) {
       state = state.copyWith(error: e.toString());

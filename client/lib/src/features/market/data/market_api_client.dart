@@ -8,24 +8,21 @@ class MarketApiClient {
   final Dio _dio;
   final String baseUrl;
 
-  MarketApiClient({
-    required this.baseUrl,
-    Dio? dio,
-  })  : _dio = dio ??
-            Dio(BaseOptions(
+  MarketApiClient({required this.baseUrl, Dio? dio})
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
               baseUrl: baseUrl,
               connectTimeout: const Duration(seconds: 30),
               receiveTimeout: const Duration(seconds: 30),
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            )) {
+              headers: {'Content-Type': 'application/json'},
+            ),
+          ) {
     // Add interceptors
-    _dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      error: true,
-    ));
+    _dio.interceptors.add(
+      LogInterceptor(requestBody: true, responseBody: true, error: true),
+    );
   }
 
   /// Set user ID header
@@ -54,10 +51,7 @@ class MarketApiClient {
     int pageSize = 20,
     String? search,
   }) async {
-    final queryParams = <String, dynamic>{
-      'page': page,
-      'page_size': pageSize,
-    };
+    final queryParams = <String, dynamic>{'page': page, 'page_size': pageSize};
 
     if (category != null) queryParams['category'] = category;
     if (brand != null) queryParams['brand'] = brand;
@@ -75,7 +69,9 @@ class MarketApiClient {
     final data = response.data as Map<String, dynamic>;
     final items = data['items'] as List<dynamic>;
 
-    return items.map((item) => Product.fromJson(item as Map<String, dynamic>)).toList();
+    return items
+        .map((item) => Product.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   /// Get product by ID
@@ -88,9 +84,7 @@ class MarketApiClient {
   Future<List<Map<String, String>>> getCategories() async {
     final response = await _dio.get('/api/v1/market/products/categories');
     final data = response.data as List<dynamic>;
-    return data
-        .map((item) => Map<String, String>.from(item as Map))
-        .toList();
+    return data.map((item) => Map<String, String>.from(item as Map)).toList();
   }
 
   // ═══════════════════════════════════════════
@@ -180,7 +174,9 @@ class MarketApiClient {
     final data = response.data as Map<String, dynamic>;
     final items = data['items'] as List<dynamic>;
 
-    return items.map((item) => Order.fromJson(item as Map<String, dynamic>)).toList();
+    return items
+        .map((item) => Order.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   /// Get order by ID
@@ -224,7 +220,11 @@ class MarketApiClient {
     final recommendations = data['recommendations'] as List<dynamic>;
 
     return recommendations
-        .map((rec) => Product.fromJson((rec as Map<String, dynamic>)['product'] as Map<String, dynamic>))
+        .map(
+          (rec) => Product.fromJson(
+            (rec as Map<String, dynamic>)['product'] as Map<String, dynamic>,
+          ),
+        )
         .toList();
   }
 
@@ -239,6 +239,8 @@ class MarketApiClient {
     );
 
     final data = response.data as List<dynamic>;
-    return data.map((item) => Product.fromJson(item as Map<String, dynamic>)).toList();
+    return data
+        .map((item) => Product.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

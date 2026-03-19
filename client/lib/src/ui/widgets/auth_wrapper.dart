@@ -13,28 +13,22 @@ class AuthWrapper extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authStateAsync = ref.watch(authStateProvider);
-    
+
     return authStateAsync.when(
       data: (isAuthenticated) {
         if (!isAuthenticated) {
           return const Scaffold(
-            body: Center(
-              child: Text('Требуется авторизация'),
-            ),
+            body: Center(child: Text('Требуется авторизация')),
           );
         }
         return child;
       },
-      loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      error: (error, stack) => Scaffold(
-        body: Center(
-          child: Text('Ошибка авторизации: $error'),
-        ),
-      ),
+      loading:
+          () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error:
+          (error, stack) =>
+              Scaffold(body: Center(child: Text('Ошибка авторизации: $error'))),
     );
   }
 }

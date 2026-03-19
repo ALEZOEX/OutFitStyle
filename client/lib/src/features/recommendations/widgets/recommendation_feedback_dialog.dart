@@ -66,12 +66,15 @@ class _RecommendationFeedbackDialogState
                   });
                 }
               },
-              items: FeedbackCategory.values
-                  .map((category) => DropdownMenuItem(
-                        value: category,
-                        child: Text(category.displayName),
-                      ))
-                  .toList(),
+              items:
+                  FeedbackCategory.values
+                      .map(
+                        (category) => DropdownMenuItem(
+                          value: category,
+                          child: Text(category.displayName),
+                        ),
+                      )
+                      .toList(),
             ),
             const SizedBox(height: 16),
 

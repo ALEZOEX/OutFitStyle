@@ -61,11 +61,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(
-          Icons.style,
-          color: Colors.white,
-          size: 36,
-        ),
+        child: const Icon(Icons.style, color: Colors.white, size: 36),
       ),
     );
   }
@@ -78,39 +74,27 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
       body: CustomScrollView(
         slivers: [
           // Заголовок
-          SliverToBoxAdapter(
-            child: _buildHeader(context),
-          ),
+          SliverToBoxAdapter(child: _buildHeader(context)),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          
+
           // Логотип и версия
-          SliverToBoxAdapter(
-            child: _buildLogoSection(context, theme),
-          ),
+          SliverToBoxAdapter(child: _buildLogoSection(context, theme)),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          
+
           // Описание
-          SliverToBoxAdapter(
-            child: _buildDescriptionSection(context, theme),
-          ),
+          SliverToBoxAdapter(child: _buildDescriptionSection(context, theme)),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          
+
           // Соцсети
-          SliverToBoxAdapter(
-            child: _buildSocialSection(context, theme),
-          ),
+          SliverToBoxAdapter(child: _buildSocialSection(context, theme)),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          
+
           // Документы
-          SliverToBoxAdapter(
-            child: _buildDocumentsSection(context, theme),
-          ),
+          SliverToBoxAdapter(child: _buildDocumentsSection(context, theme)),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
           // Лицензии
-          SliverToBoxAdapter(
-            child: _buildLicensesSection(context, theme),
-          ),
+          SliverToBoxAdapter(child: _buildLicensesSection(context, theme)),
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
@@ -125,10 +109,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
         children: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(
-              Icons.arrow_back,
-              color: theme.colorScheme.onSurface,
-            ),
+            icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
             tooltip: 'Назад',
           ),
           const SizedBox(width: 8),
@@ -183,11 +164,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.checkroom,
-              color: Colors.white,
-              size: 56,
-            ),
+            child: const Icon(Icons.checkroom, color: Colors.white, size: 56),
           ),
           const SizedBox(height: 24),
           Text(
@@ -253,9 +230,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
             '• Современных трендов стиля\n'
             '• Искусственного интеллекта\n\n'
             'С OutfitStyle вы всегда будете выглядеть стильно и уместно!',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              height: 1.5,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
           ),
         ],
       ),
@@ -276,11 +251,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Icon(
-                  Icons.share,
-                  color: theme.colorScheme.primary,
-                  size: 24,
-                ),
+                Icon(Icons.share, color: theme.colorScheme.primary, size: 24),
                 const SizedBox(width: 8),
                 Text(
                   'Мы в соцсетях',
@@ -340,16 +311,9 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           color: theme.colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(
-          icon,
-          color: theme.colorScheme.primary,
-          size: 22,
-        ),
+        child: Icon(icon, color: theme.colorScheme.primary, size: 22),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(
         subtitle,
         style: theme.textTheme.bodySmall?.copyWith(
@@ -432,16 +396,9 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           color: theme.colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(
-          icon,
-          color: theme.colorScheme.primary,
-          size: 22,
-        ),
+        child: Icon(icon, color: theme.colorScheme.primary, size: 22),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       trailing: Icon(
         Icons.open_in_new,
         color: theme.colorScheme.onSurfaceVariant,

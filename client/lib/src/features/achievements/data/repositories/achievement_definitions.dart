@@ -559,9 +559,7 @@ class AchievementDefinitions {
 
   /// Получить достижения по категории
   static List<Achievement> getByCategory(AchievementCategory category) {
-    return getAllAchievements()
-        .where((a) => a.category == category)
-        .toList();
+    return getAllAchievements().where((a) => a.category == category).toList();
   }
 
   /// Получить достижение по ID

@@ -37,7 +37,9 @@ class AuthStorageImpl implements AuthStorage {
 
   @override
   Future<void> writeTokenPair(TokenPair pair) async {
-    debugPrint('[AuthStorage Legacy] writeTokenPair вызван (для обратной совместимости)');
+    debugPrint(
+      '[AuthStorage Legacy] writeTokenPair вызван (для обратной совместимости)',
+    );
     if (kIsWeb) {
       // Для web: access token в памяти, refresh в cookie (обрабатывается браузером)
       _memoryAccessToken = pair.accessToken;
@@ -46,7 +48,10 @@ class AuthStorageImpl implements AuthStorage {
       await _prefs.setString('legacy_access_token', pair.accessToken);
       await _prefs.setString('legacy_refresh_token', pair.refreshToken);
       if (pair.expiresAt != null) {
-        await _prefs.setString('legacy_expires_at', pair.expiresAt!.toIso8601String());
+        await _prefs.setString(
+          'legacy_expires_at',
+          pair.expiresAt!.toIso8601String(),
+        );
       }
     }
   }
@@ -98,7 +103,9 @@ class AuthStorageImpl implements AuthStorage {
 
   @override
   Future<void> clearSession() async {
-    debugPrint('[AuthStorage Legacy] clearSession вызван (для обратной совместимости)');
+    debugPrint(
+      '[AuthStorage Legacy] clearSession вызван (для обратной совместимости)',
+    );
     if (kIsWeb) {
       _memoryAccessToken = null;
     } else {

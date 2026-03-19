@@ -16,9 +16,9 @@ class LocalAnalyticsService implements IAnalyticsService {
     LocalAnalyticsStorage? storage,
     required Dio dio,
     Connectivity? connectivity,
-  })  : _storage = storage ?? LocalAnalyticsStorage(),
-        _dio = dio,
-        _connectivity = connectivity ?? Connectivity();
+  }) : _storage = storage ?? LocalAnalyticsStorage(),
+       _dio = dio,
+       _connectivity = connectivity ?? Connectivity();
 
   @override
   Future<void> logEvent(AnalyticsEvent event) async {
@@ -37,8 +37,10 @@ class LocalAnalyticsService implements IAnalyticsService {
   }
 
   @override
-  Future<void> logEventSimple(String eventName,
-      {Map<String, dynamic>? parameters}) async {
+  Future<void> logEventSimple(
+    String eventName, {
+    Map<String, dynamic>? parameters,
+  }) async {
     final event = AnalyticsEvent(
       type: AnalyticsEventType.values.firstWhere(
         (element) => element.value == eventName,
@@ -66,10 +68,7 @@ class LocalAnalyticsService implements IAnalyticsService {
   Future<void> logError(String error, {String? stackTrace}) async {
     final event = AnalyticsEvent(
       type: AnalyticsEventType.settingsUpdate,
-      properties: {
-        'error': error,
-        'stack_trace': stackTrace,
-      },
+      properties: {'error': error, 'stack_trace': stackTrace},
       userId: _userId,
       timestamp: DateTime.now(),
     );
@@ -166,9 +165,10 @@ class LocalAnalyticsService implements IAnalyticsService {
 
       // Отправляем события на сервер
       try {
-        await _dio.post('/api/v1/analytics/batch', data: {
-          'events': eventsToSync,
-        });
+        await _dio.post(
+          '/api/v1/analytics/batch',
+          data: {'events': eventsToSync},
+        );
 
         // Удаляем успешно отправленные события
         await _storage.removeEventsByIds(eventIds);

@@ -2,8 +2,9 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 
 class LikeBurstController {
-  final ConfettiController controller =
-      ConfettiController(duration: const Duration(milliseconds: 260));
+  final ConfettiController controller = ConfettiController(
+    duration: const Duration(milliseconds: 260),
+  );
 
   void play() => controller.play();
   void dispose() => controller.dispose();

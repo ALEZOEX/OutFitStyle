@@ -199,7 +199,8 @@ class WardrobeItemUpdateRequest {
     if (customName != null) json['custom_name'] = customName;
     if (notes != null) json['notes'] = notes;
     if (tags != null) json['tags'] = tags;
-    if (purchaseDate != null) json['purchase_date'] = purchaseDate!.toIso8601String();
+    if (purchaseDate != null)
+      json['purchase_date'] = purchaseDate!.toIso8601String();
     if (purchasePrice != null) json['purchase_price'] = purchasePrice;
     if (purchaseCurrency != null) json['purchase_currency'] = purchaseCurrency;
     if (condition != null) json['condition'] = condition;

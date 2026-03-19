@@ -13,11 +13,7 @@ void main() {
 
     testWidgets('shows language screen title', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем заголовок
@@ -26,11 +22,7 @@ void main() {
 
     testWidgets('shows auto-detection section', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем секцию авто-определения
@@ -40,11 +32,7 @@ void main() {
 
     testWidgets('shows language list', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем заголовок списка языков
@@ -53,11 +41,7 @@ void main() {
 
     testWidgets('shows Russian language option', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем наличие русского языка
@@ -67,11 +51,7 @@ void main() {
 
     testWidgets('shows English language option', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем наличие английского языка
@@ -81,11 +61,7 @@ void main() {
 
     testWidgets('shows other language options', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем наличие других языков
@@ -101,11 +77,7 @@ void main() {
 
     testWidgets('shows language flags', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем наличие флагов
@@ -123,11 +95,7 @@ void main() {
 
     testWidgets('shows selected language checkmark', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем наличие галочки у выбранного языка (по умолчанию русский)
@@ -136,28 +104,22 @@ void main() {
 
     testWidgets('auto-detection switch can be toggled', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Находим переключатель авто-определения
       final switchFinder = find.byType(Switch).first;
-      
+
       // Проверяем начальное состояние (включено по умолчанию)
       final switchWidget = tester.widget<Switch>(switchFinder);
       expect(switchWidget.value, true);
     });
 
-    testWidgets('language selection is disabled when auto-detection is on', (tester) async {
+    testWidgets('language selection is disabled when auto-detection is on', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // При включенном авто-определении выбор языка должен быть недоступен
@@ -167,11 +129,7 @@ void main() {
 
     testWidgets('shows native language names', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем отображение названий на родных языках
@@ -189,11 +147,7 @@ void main() {
 
     testWidgets('shows language icons', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем наличие иконок
@@ -203,11 +157,7 @@ void main() {
 
     testWidgets('shows snackbar on language change', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Выключаем авто-определение
@@ -226,11 +176,7 @@ void main() {
 
     testWidgets('shows selected state for chosen language', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Выключаем авто-определение
@@ -248,11 +194,7 @@ void main() {
 
     testWidgets('list has dividers between languages', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем наличие разделителей
@@ -261,11 +203,7 @@ void main() {
 
     testWidgets('shows proper card styling', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LanguageScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: LanguageScreen())),
       );
 
       // Проверяем наличие контейнеров с оформлением

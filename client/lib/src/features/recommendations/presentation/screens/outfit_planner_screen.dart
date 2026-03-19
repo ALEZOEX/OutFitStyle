@@ -10,13 +10,11 @@ import '../providers/recommendations_provider.dart';
 class OutfitPlannerScreen extends ConsumerStatefulWidget {
   final String? initialRecommendationId;
 
-  const OutfitPlannerScreen({
-    super.key,
-    this.initialRecommendationId,
-  });
+  const OutfitPlannerScreen({super.key, this.initialRecommendationId});
 
   @override
-  ConsumerState<OutfitPlannerScreen> createState() => _OutfitPlannerScreenState();
+  ConsumerState<OutfitPlannerScreen> createState() =>
+      _OutfitPlannerScreenState();
 }
 
 class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
@@ -98,7 +96,9 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                   icon: const Icon(Icons.chevron_left),
                   onPressed: () {
                     setState(() {
-                      _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+                      _selectedDate = _selectedDate.subtract(
+                        const Duration(days: 1),
+                      );
                     });
                   },
                 ),
@@ -108,7 +108,9 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                       final picked = await showDatePicker(
                         context: context,
                         initialDate: _selectedDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                        firstDate: DateTime.now().subtract(
+                          const Duration(days: 30),
+                        ),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                         locale: const Locale('ru', 'RU'),
                       );
@@ -127,7 +129,10 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.calendar_today, color: theme.colorScheme.primary),
+                          Icon(
+                            Icons.calendar_today,
+                            color: theme.colorScheme.primary,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             _dateFormat.format(_selectedDate),
@@ -142,7 +147,9 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                   icon: const Icon(Icons.chevron_right),
                   onPressed: () {
                     setState(() {
-                      _selectedDate = _selectedDate.add(const Duration(days: 1));
+                      _selectedDate = _selectedDate.add(
+                        const Duration(days: 1),
+                      );
                     });
                   },
                 ),
@@ -163,14 +170,24 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                 _QuickDateChip(
                   label: 'Завтра',
                   date: DateTime.now().add(const Duration(days: 1)),
-                  isSelected: _isSameDay(_selectedDate, DateTime.now().add(const Duration(days: 1))),
-                  onTap: () => setState(() => _selectedDate = DateTime.now().add(const Duration(days: 1))),
+                  isSelected: _isSameDay(
+                    _selectedDate,
+                    DateTime.now().add(const Duration(days: 1)),
+                  ),
+                  onTap:
+                      () => setState(
+                        () =>
+                            _selectedDate = DateTime.now().add(
+                              const Duration(days: 1),
+                            ),
+                      ),
                 ),
                 _QuickDateChip(
                   label: 'Выходные',
                   date: _getNextWeekend(),
                   isSelected: _isSameDay(_selectedDate, _getNextWeekend()),
-                  onTap: () => setState(() => _selectedDate = _getNextWeekend()),
+                  onTap:
+                      () => setState(() => _selectedDate = _getNextWeekend()),
                 ),
               ],
             ),
@@ -189,10 +206,15 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
     return Row(
       children: [
         Icon(
-          isToday ? Icons.today : isPast ? Icons.history : Icons.event,
-          color: isToday
-              ? theme.colorScheme.primary
+          isToday
+              ? Icons.today
               : isPast
+              ? Icons.history
+              : Icons.event,
+          color:
+              isToday
+                  ? theme.colorScheme.primary
+                  : isPast
                   ? theme.colorScheme.onSurfaceVariant
                   : theme.colorScheme.tertiary,
           size: 24,
@@ -206,21 +228,23 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                 _dayFormat.format(_selectedDate),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isToday
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface,
+                  color:
+                      isToday
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
                 ),
               ),
               Text(
                 isToday
                     ? 'Сегодня'
                     : isPast
-                        ? 'Прошедшая дата'
-                        : 'Планирование на будущее',
+                    ? 'Прошедшая дата'
+                    : 'Планирование на будущее',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isToday
-                      ? theme.colorScheme.primary
-                      : isPast
+                  color:
+                      isToday
+                          ? theme.colorScheme.primary
+                          : isPast
                           ? theme.colorScheme.onSurfaceVariant
                           : theme.colorScheme.tertiary,
                 ),
@@ -265,7 +289,9 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: theme.colorScheme.primary.withValues(alpha: 0.3),
@@ -280,7 +306,8 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (plannedOutfit.description != null && plannedOutfit.description!.isNotEmpty) ...[
+                    if (plannedOutfit.description != null &&
+                        plannedOutfit.description!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
                         plannedOutfit.description!,
@@ -289,19 +316,26 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                    if (plannedOutfit.items != null && plannedOutfit.items!.isNotEmpty) ...[
+                    if (plannedOutfit.items != null &&
+                        plannedOutfit.items!.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 4,
                         runSpacing: 4,
-                        children: plannedOutfit.items!
-                            .take(3)
-                            .map((item) => Chip(
-                                  label: Text(item, style: const TextStyle(fontSize: 11)),
-                                  padding: EdgeInsets.zero,
-                                  visualDensity: VisualDensity.compact,
-                                ))
-                            .toList(),
+                        children:
+                            plannedOutfit.items!
+                                .take(3)
+                                .map(
+                                  (item) => Chip(
+                                    label: Text(
+                                      item,
+                                      style: const TextStyle(fontSize: 11),
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                )
+                                .toList(),
                       ),
                     ],
                   ],
@@ -314,7 +348,9 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                     Icon(
                       Icons.calendar_today,
                       size: 48,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -327,7 +363,9 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                     Text(
                       'Выберите рекомендацию ниже',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
@@ -341,7 +379,10 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
   }
 
   /// Выбор рекомендации для планирования
-  Widget _buildRecommendationSelector(BuildContext context, RecommendationsState state) {
+  Widget _buildRecommendationSelector(
+    BuildContext context,
+    RecommendationsState state,
+  ) {
     final theme = Theme.of(context);
     final recommendations = state.recommendations;
 
@@ -378,7 +419,8 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                 separatorBuilder: (context, index) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final recommendation = recommendations[index];
-                  final isSelected = _selectedRecommendationId == recommendation.id;
+                  final isSelected =
+                      _selectedRecommendationId == recommendation.id;
 
                   return InkWell(
                     onTap: () {
@@ -390,23 +432,33 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
-                            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                        color:
+                            isSelected
+                                ? theme.colorScheme.primaryContainer.withValues(
+                                  alpha: 0.3,
+                                )
+                                : theme.colorScheme.surfaceContainerHighest
+                                    .withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.outline.withValues(alpha: 0.3),
+                          color:
+                              isSelected
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.outline.withValues(
+                                    alpha: 0.3,
+                                  ),
                         ),
                       ),
                       child: Row(
                         children: [
                           Icon(
-                            isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant,
+                            isSelected
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color:
+                                isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -422,10 +474,14 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 if (recommendation.recommendedItems != null &&
-                                    recommendation.recommendedItems!.isNotEmpty) ...[
+                                    recommendation
+                                        .recommendedItems!
+                                        .isNotEmpty) ...[
                                   const SizedBox(height: 4),
                                   Text(
-                                    recommendation.recommendedItems!.take(2).join(', '),
+                                    recommendation.recommendedItems!
+                                        .take(2)
+                                        .join(', '),
                                     style: theme.textTheme.bodySmall,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -444,9 +500,10 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _selectedRecommendationId != null
-                    ? () => _planOutfit(context, state)
-                    : null,
+                onPressed:
+                    _selectedRecommendationId != null
+                        ? () => _planOutfit(context, state)
+                        : null,
                 icon: const Icon(Icons.add_task),
                 label: const Text('Запланировать образ'),
                 style: ElevatedButton.styleFrom(
@@ -511,7 +568,8 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                 itemBuilder: (context, index) {
                   final outfit = weekPlan[index];
                   final isToday = _isSameDay(outfit.date, DateTime.now());
-                  final isPast = outfit.date.isBefore(DateTime.now()) && !isToday;
+                  final isPast =
+                      outfit.date.isBefore(DateTime.now()) && !isToday;
 
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
@@ -519,9 +577,10 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: isToday
-                            ? theme.colorScheme.primaryContainer
-                            : isPast
+                        color:
+                            isToday
+                                ? theme.colorScheme.primaryContainer
+                                : isPast
                                 ? theme.colorScheme.surfaceContainerHighest
                                 : theme.colorScheme.tertiaryContainer,
                         borderRadius: BorderRadius.circular(8),
@@ -531,9 +590,10 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                           outfit.date.day.toString(),
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: isToday
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface,
+                            color:
+                                isToday
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -549,9 +609,13 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
                       _dayFormat.format(outfit.date),
                       style: theme.textTheme.bodySmall,
                     ),
-                    trailing: isPast
-                        ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
-                        : null,
+                    trailing:
+                        isPast
+                            ? Icon(
+                              Icons.check_circle,
+                              color: theme.colorScheme.primary,
+                            )
+                            : null,
                   );
                 },
               ),
@@ -609,36 +673,44 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
   }
 
   /// Подтверждение отмены планирования
-  void _confirmCancelPlanning(BuildContext context, RecommendationsState state) {
+  void _confirmCancelPlanning(
+    BuildContext context,
+    RecommendationsState state,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Отменить планирование'),
-        content: const Text('Вы уверены, что хотите отменить запланированный образ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Отменить планирование'),
+            content: const Text(
+              'Вы уверены, что хотите отменить запланированный образ?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  final notifier = ref.read(recommendationsProvider.notifier);
+                  notifier.cancelPlannedOutfit(_selectedDate);
+
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Планирование отменено'),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Отменить'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              final notifier = ref.read(recommendationsProvider.notifier);
-              notifier.cancelPlannedOutfit(_selectedDate);
-              
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Планирование отменено'),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                ),
-              );
-            },
-            child: const Text('Отменить'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -652,7 +724,8 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
     final now = DateTime.now();
     int daysUntilSaturday = 6 - now.weekday;
     if (daysUntilSaturday < 0) daysUntilSaturday += 7;
-    if (daysUntilSaturday == 0) daysUntilSaturday = 1; // Если сегодня суббота, показать воскресенье
+    if (daysUntilSaturday == 0)
+      daysUntilSaturday = 1; // Если сегодня суббота, показать воскресенье
     return DateTime(now.year, now.month, now.day + daysUntilSaturday);
   }
 }
@@ -684,9 +757,10 @@ class _QuickDateChip extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outline.withValues(alpha: 0.3),
+          color:
+              isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
     );

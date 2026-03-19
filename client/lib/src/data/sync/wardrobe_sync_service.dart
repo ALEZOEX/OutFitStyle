@@ -10,7 +10,7 @@ class WardrobeSyncService {
   final IWardrobeRepository wardrobeRepository;
   final Logger _logger;
   final Connectivity _connectivity;
-  
+
   Timer? _syncTimer;
   final _syncLock = Lock();
   bool _isSyncing = false;
@@ -19,13 +19,15 @@ class WardrobeSyncService {
     required this.wardrobeRepository,
     Logger? logger,
     Connectivity? connectivity,
-  })  : _logger = logger ?? Logger(),
-        _connectivity = connectivity ?? Connectivity();
+  }) : _logger = logger ?? Logger(),
+       _connectivity = connectivity ?? Connectivity();
 
   /// Запустить периодическую синхронизацию
   void startPeriodicSync({Duration interval = const Duration(minutes: 5)}) {
-    _logger.i('Запуск периодической синхронизации (интервал: ${interval.inMinutes} мин)');
-    
+    _logger.i(
+      'Запуск периодической синхронизации (интервал: ${interval.inMinutes} мин)',
+    );
+
     _syncTimer?.cancel();
     _syncTimer = Timer.periodic(interval, (_) => sync());
   }
@@ -89,13 +91,15 @@ class WardrobeSyncService {
   /// Синхронизировать локальные изменения на сервер
   Future<void> _syncLocalChangesToServer() async {
     final unsyncedItems = await wardrobeRepository.getUnsynced();
-    
+
     if (unsyncedItems.isEmpty) {
       _logger.d('Нет несинхронизированных элементов');
       return;
     }
 
-    _logger.d('Синхронизация ${unsyncedItems.length} несинхронизированных элементов...');
+    _logger.d(
+      'Синхронизация ${unsyncedItems.length} несинхронизированных элементов...',
+    );
 
     for (final item in unsyncedItems) {
       try {

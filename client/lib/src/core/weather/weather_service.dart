@@ -18,8 +18,7 @@ class WeatherService {
   final Map<String, _WeatherCacheEntry> _cache = {};
   static const Duration _cacheDuration = Duration(minutes: 30);
 
-  WeatherService({required ApiClient apiClient})
-      : _apiClient = apiClient;
+  WeatherService({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Получить текущую погоду по координатам
   ///
@@ -64,7 +63,9 @@ class WeatherService {
 
         return weather;
       } else {
-        throw WeatherException('Ошибка получения погоды: ${response.statusCode}');
+        throw WeatherException(
+          'Ошибка получения погоды: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -92,7 +93,8 @@ class WeatherService {
         queryParameters: {
           'latitude': latitude,
           'longitude': longitude,
-          'daily': 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+          'daily':
+              'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
           'timezone': 'auto',
           'forecast_days': days.clamp(1, 14),
         },
@@ -102,7 +104,9 @@ class WeatherService {
         final data = response.data as Map<String, dynamic>;
         return _parseOpenMeteoForecast(data);
       } else {
-        throw WeatherException('Ошибка получения прогноза: ${response.statusCode}');
+        throw WeatherException(
+          'Ошибка получения прогноза: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -165,7 +169,9 @@ class WeatherService {
 
     return WeatherData(
       temperature: (current['temperature'] as num).toDouble(),
-      feelsLike: (current['temperature'] as num).toDouble(), // Open-Meteo не предоставляет feels_like
+      feelsLike:
+          (current['temperature'] as num)
+              .toDouble(), // Open-Meteo не предоставляет feels_like
       condition: _getWeatherCondition(weatherCode),
       description: _getWeatherDescription(weatherCode),
       humidity: humidity,
@@ -184,7 +190,11 @@ class WeatherService {
 
     final forecast = <WeatherData>[];
 
-    for (var i = 0; i < times.length && i < maxTemps.length && i < minTemps.length; i++) {
+    for (
+      var i = 0;
+      i < times.length && i < maxTemps.length && i < minTemps.length;
+      i++
+    ) {
       forecast.add(
         WeatherData(
           temperature: ((maxTemps[i] as num) + (minTemps[i] as num)) / 2,
@@ -235,10 +245,7 @@ class _WeatherCacheEntry {
   final WeatherData data;
   final DateTime expiresAt;
 
-  _WeatherCacheEntry({
-    required this.data,
-    required this.expiresAt,
-  });
+  _WeatherCacheEntry({required this.data, required this.expiresAt});
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
 }

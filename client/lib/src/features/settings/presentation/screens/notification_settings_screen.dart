@@ -46,242 +46,248 @@ class _NotificationSettingsScreenState
             ),
         ],
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Push уведомления
-                _buildSection(
-                  context,
-                  title: 'Push-уведомления',
-                  icon: Icons.notifications_active,
-                  child: Column(
-                    children: [
-                      _buildGlobalToggle(
-                        context,
-                        title: 'Включить Push-уведомления',
-                        subtitle: 'Разрешить push-уведомления от приложения',
-                        value: state.settings.pushEnabled,
-                        onChanged: (value) {
-                          notifier.updatePushEnabled(value);
-                        },
-                      ),
-                      if (state.settings.pushEnabled) ...[
-                        const Divider(height: 24),
-                        _buildToggle(
+      body:
+          state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Push уведомления
+                  _buildSection(
+                    context,
+                    title: 'Push-уведомления',
+                    icon: Icons.notifications_active,
+                    child: Column(
+                      children: [
+                        _buildGlobalToggle(
                           context,
-                          icon: Icons.cloud,
-                          title: 'Погодные предупреждения',
-                          subtitle: 'Уведомления о неблагоприятной погоде',
-                          value: state.settings.weatherAlerts,
-                          onChanged: notifier.updateWeatherAlerts,
+                          title: 'Включить Push-уведомления',
+                          subtitle: 'Разрешить push-уведомления от приложения',
+                          value: state.settings.pushEnabled,
+                          onChanged: (value) {
+                            notifier.updatePushEnabled(value);
+                          },
                         ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.auto_awesome,
-                          title: 'Готовые рекомендации',
-                          subtitle: 'Когда ИИ подготовил подборку образов',
-                          value: state.settings.recommendationReady,
-                          onChanged: notifier.updateRecommendationReady,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.new_releases,
-                          title: 'Новые поступления',
-                          subtitle: 'Обновления в вашем гардеробе',
-                          value: state.settings.newArrivals,
-                          onChanged: notifier.updateNewArrivals,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.emoji_events,
-                          title: 'Достижения',
-                          subtitle: 'Уведомления о полученных наградах',
-                          value: state.settings.achievementUnlocked,
-                          onChanged: notifier.updateAchievementUnlocked,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.calendar_today,
-                          title: 'Напоминания',
-                          subtitle: 'Напоминания о планировании образов',
-                          value: state.settings.outfitReminders,
-                          onChanged: notifier.updateOutfitReminders,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.card_membership,
-                          title: 'Статус подписки',
-                          subtitle: 'Информация о подписке и платежах',
-                          value: state.settings.subscriptionStatus,
-                          onChanged: notifier.updateSubscriptionStatus,
-                        ),
-                        const Divider(height: 24),
-                        _buildToggle(
-                          context,
-                          icon: Icons.campaign,
-                          title: 'Промо-уведомления',
-                          subtitle: 'Акции, скидки и специальные предложения',
-                          value: state.settings.promotional,
-                          onChanged: notifier.updatePromotional,
-                        ),
+                        if (state.settings.pushEnabled) ...[
+                          const Divider(height: 24),
+                          _buildToggle(
+                            context,
+                            icon: Icons.cloud,
+                            title: 'Погодные предупреждения',
+                            subtitle: 'Уведомления о неблагоприятной погоде',
+                            value: state.settings.weatherAlerts,
+                            onChanged: notifier.updateWeatherAlerts,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.auto_awesome,
+                            title: 'Готовые рекомендации',
+                            subtitle: 'Когда ИИ подготовил подборку образов',
+                            value: state.settings.recommendationReady,
+                            onChanged: notifier.updateRecommendationReady,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.new_releases,
+                            title: 'Новые поступления',
+                            subtitle: 'Обновления в вашем гардеробе',
+                            value: state.settings.newArrivals,
+                            onChanged: notifier.updateNewArrivals,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.emoji_events,
+                            title: 'Достижения',
+                            subtitle: 'Уведомления о полученных наградах',
+                            value: state.settings.achievementUnlocked,
+                            onChanged: notifier.updateAchievementUnlocked,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.calendar_today,
+                            title: 'Напоминания',
+                            subtitle: 'Напоминания о планировании образов',
+                            value: state.settings.outfitReminders,
+                            onChanged: notifier.updateOutfitReminders,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.card_membership,
+                            title: 'Статус подписки',
+                            subtitle: 'Информация о подписке и платежах',
+                            value: state.settings.subscriptionStatus,
+                            onChanged: notifier.updateSubscriptionStatus,
+                          ),
+                          const Divider(height: 24),
+                          _buildToggle(
+                            context,
+                            icon: Icons.campaign,
+                            title: 'Промо-уведомления',
+                            subtitle: 'Акции, скидки и специальные предложения',
+                            value: state.settings.promotional,
+                            onChanged: notifier.updatePromotional,
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Email уведомления
-                _buildSection(
-                  context,
-                  title: 'Email-уведомления',
-                  icon: Icons.email_outlined,
-                  child: Column(
-                    children: [
-                      _buildGlobalToggle(
-                        context,
-                        title: 'Включить Email-уведомления',
-                        subtitle: 'Получать уведомления на электронную почту',
-                        value: state.settings.emailEnabled,
-                        onChanged: (value) {
-                          notifier.updateEmailEnabled(value);
-                        },
-                      ),
-                      if (state.settings.emailEnabled) ...[
-                        const Divider(height: 24),
-                        _buildToggle(
-                          context,
-                          icon: Icons.cloud,
-                          title: 'Погодные предупреждения',
-                          subtitle: 'Email о неблагоприятной погоде',
-                          value: state.settings.emailWeatherAlerts,
-                          onChanged: notifier.updateEmailWeatherAlerts,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.auto_awesome,
-                          title: 'Дайджест рекомендаций',
-                          subtitle: 'Еженедельная подборка образов',
-                          value: state.settings.emailRecommendationDigest,
-                          onChanged: notifier.updateEmailRecommendationDigest,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.emoji_events,
-                          title: 'Достижения',
-                          subtitle: 'Email о полученных наградах',
-                          value: state.settings.emailAchievements,
-                          onChanged: notifier.updateEmailAchievements,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.card_membership,
-                          title: 'Статус подписки',
-                          subtitle: 'Информация о подписке и платежах',
-                          value: state.settings.emailSubscriptionStatus,
-                          onChanged: notifier.updateEmailSubscriptionStatus,
-                        ),
-                        const Divider(height: 24),
-                        _buildToggle(
-                          context,
-                          icon: Icons.campaign,
-                          title: 'Промо-Email',
-                          subtitle: 'Акции, скидки и специальные предложения',
-                          value: state.settings.emailPromotional,
-                          onChanged: notifier.updateEmailPromotional,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.mail,
-                          title: 'Newsletter',
-                          subtitle: 'Новости и советы по стилю',
-                          value: state.settings.emailNewsletter,
-                          onChanged: notifier.updateEmailNewsletter,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // SMS уведомления
-                _buildSection(
-                  context,
-                  title: 'SMS-уведомления',
-                  icon: Icons.sms_outlined,
-                  child: Column(
-                    children: [
-                      _buildGlobalToggle(
-                        context,
-                        title: 'Включить SMS-уведомления',
-                        subtitle: 'Получать уведомления в виде SMS',
-                        value: state.settings.smsEnabled,
-                        onChanged: (value) {
-                          notifier.updateSmsEnabled(value);
-                        },
-                      ),
-                      if (state.settings.smsEnabled) ...[
-                        const Divider(height: 24),
-                        _buildToggle(
-                          context,
-                          icon: Icons.cloud,
-                          title: 'Погодные предупреждения',
-                          subtitle: 'SMS о критических погодных условиях',
-                          value: state.settings.smsWeatherAlerts,
-                          onChanged: notifier.updateSmsWeatherAlerts,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.calendar_today,
-                          title: 'Срочные напоминания',
-                          subtitle: 'Важные напоминания по SMS',
-                          value: state.settings.smsReminders,
-                          onChanged: notifier.updateSmsReminders,
-                        ),
-                        _buildToggle(
-                          context,
-                          icon: Icons.card_membership,
-                          title: 'Статус подписки',
-                          subtitle: 'Важная информация о подписке',
-                          value: state.settings.smsSubscriptionStatus,
-                          onChanged: notifier.updateSmsSubscriptionStatus,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Кнопка сохранения
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: state.hasUnsavedChanges ? _saveSettings : null,
-                    icon: state.isSaving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
-                        : const Icon(Icons.save),
-                    label: Text(
-                      state.hasUnsavedChanges ? 'Сохранить изменения' : 'Изменений нет',
-                    ),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
-                ),
-                if (state.error != null) ...[
                   const SizedBox(height: 16),
-                  _buildErrorBanner(context, state.error!),
+
+                  // Email уведомления
+                  _buildSection(
+                    context,
+                    title: 'Email-уведомления',
+                    icon: Icons.email_outlined,
+                    child: Column(
+                      children: [
+                        _buildGlobalToggle(
+                          context,
+                          title: 'Включить Email-уведомления',
+                          subtitle: 'Получать уведомления на электронную почту',
+                          value: state.settings.emailEnabled,
+                          onChanged: (value) {
+                            notifier.updateEmailEnabled(value);
+                          },
+                        ),
+                        if (state.settings.emailEnabled) ...[
+                          const Divider(height: 24),
+                          _buildToggle(
+                            context,
+                            icon: Icons.cloud,
+                            title: 'Погодные предупреждения',
+                            subtitle: 'Email о неблагоприятной погоде',
+                            value: state.settings.emailWeatherAlerts,
+                            onChanged: notifier.updateEmailWeatherAlerts,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.auto_awesome,
+                            title: 'Дайджест рекомендаций',
+                            subtitle: 'Еженедельная подборка образов',
+                            value: state.settings.emailRecommendationDigest,
+                            onChanged: notifier.updateEmailRecommendationDigest,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.emoji_events,
+                            title: 'Достижения',
+                            subtitle: 'Email о полученных наградах',
+                            value: state.settings.emailAchievements,
+                            onChanged: notifier.updateEmailAchievements,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.card_membership,
+                            title: 'Статус подписки',
+                            subtitle: 'Информация о подписке и платежах',
+                            value: state.settings.emailSubscriptionStatus,
+                            onChanged: notifier.updateEmailSubscriptionStatus,
+                          ),
+                          const Divider(height: 24),
+                          _buildToggle(
+                            context,
+                            icon: Icons.campaign,
+                            title: 'Промо-Email',
+                            subtitle: 'Акции, скидки и специальные предложения',
+                            value: state.settings.emailPromotional,
+                            onChanged: notifier.updateEmailPromotional,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.mail,
+                            title: 'Newsletter',
+                            subtitle: 'Новости и советы по стилю',
+                            value: state.settings.emailNewsletter,
+                            onChanged: notifier.updateEmailNewsletter,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // SMS уведомления
+                  _buildSection(
+                    context,
+                    title: 'SMS-уведомления',
+                    icon: Icons.sms_outlined,
+                    child: Column(
+                      children: [
+                        _buildGlobalToggle(
+                          context,
+                          title: 'Включить SMS-уведомления',
+                          subtitle: 'Получать уведомления в виде SMS',
+                          value: state.settings.smsEnabled,
+                          onChanged: (value) {
+                            notifier.updateSmsEnabled(value);
+                          },
+                        ),
+                        if (state.settings.smsEnabled) ...[
+                          const Divider(height: 24),
+                          _buildToggle(
+                            context,
+                            icon: Icons.cloud,
+                            title: 'Погодные предупреждения',
+                            subtitle: 'SMS о критических погодных условиях',
+                            value: state.settings.smsWeatherAlerts,
+                            onChanged: notifier.updateSmsWeatherAlerts,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.calendar_today,
+                            title: 'Срочные напоминания',
+                            subtitle: 'Важные напоминания по SMS',
+                            value: state.settings.smsReminders,
+                            onChanged: notifier.updateSmsReminders,
+                          ),
+                          _buildToggle(
+                            context,
+                            icon: Icons.card_membership,
+                            title: 'Статус подписки',
+                            subtitle: 'Важная информация о подписке',
+                            value: state.settings.smsSubscriptionStatus,
+                            onChanged: notifier.updateSmsSubscriptionStatus,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Кнопка сохранения
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: state.hasUnsavedChanges ? _saveSettings : null,
+                      icon:
+                          state.isSaving
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                              : const Icon(Icons.save),
+                      label: Text(
+                        state.hasUnsavedChanges
+                            ? 'Сохранить изменения'
+                            : 'Изменений нет',
+                      ),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                  if (state.error != null) ...[
+                    const SizedBox(height: 16),
+                    _buildErrorBanner(context, state.error!),
+                  ],
                 ],
-              ],
-            ),
+              ),
     );
   }
 
@@ -344,10 +350,7 @@ class _NotificationSettingsScreenState
       dense: true,
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-      title: Text(
-        title,
-        style: theme.textTheme.bodyMedium,
-      ),
+      title: Text(title, style: theme.textTheme.bodyMedium),
       subtitle: Text(
         subtitle,
         style: theme.textTheme.bodySmall?.copyWith(
@@ -384,24 +387,24 @@ class _NotificationSettingsScreenState
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: value
-              ? theme.colorScheme.primary.withValues(alpha: 0.2)
-              : theme.colorScheme.surface,
+          color:
+              value
+                  ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                  : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           value ? Icons.check_circle : Icons.cancel,
           size: 20,
-          color: value
-              ? theme.colorScheme.primary
-              : theme.colorScheme.onSurfaceVariant,
+          color:
+              value
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
         ),
       ),
       title: Text(
         title,
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
         subtitle,
@@ -438,11 +441,7 @@ class _NotificationSettingsScreenState
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: theme.colorScheme.error,
-            size: 20,
-          ),
+          Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -500,7 +499,10 @@ class _NotificationSettingsScreenState
               const Icon(Icons.error_outline, color: Colors.white),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(ref.read(notificationSettingsProvider).error ?? 'Ошибка сохранения'),
+                child: Text(
+                  ref.read(notificationSettingsProvider).error ??
+                      'Ошибка сохранения',
+                ),
               ),
             ],
           ),

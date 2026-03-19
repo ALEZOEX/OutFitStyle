@@ -720,7 +720,8 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                       if (selected) {
                         setState(() {
                           _selectedCategory = cat['value'] as String;
-                          final emojis = _emojiCategories[_selectedCategory] ?? [];
+                          final emojis =
+                              _emojiCategories[_selectedCategory] ?? [];
                           _selectedEmoji = emojis.firstOrNull ?? '😊';
                         });
                       }

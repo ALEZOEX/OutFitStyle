@@ -21,42 +21,41 @@ class RecommendationHistoryScreen extends ConsumerWidget {
     final historyState = ref.watch(recommendationStateNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('История рекомендаций'),
-      ),
-      body: historyState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : historyState.errorMessage != null
-              ? Center(
-                  child: Text('Ошибка: ${historyState.errorMessage}'),
-                )
+      appBar: AppBar(title: const Text('История рекомендаций')),
+      body:
+          historyState.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : historyState.errorMessage != null
+              ? Center(child: Text('Ошибка: ${historyState.errorMessage}'))
               : historyState.historyRecommendations.isEmpty
-                  ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.history, size: 64, color: Colors.grey),
-                          SizedBox(height: 16),
-                          Text(
-                            'История рекомендаций пуста',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: historyState.historyRecommendations.length,
-                      itemBuilder: (context, index) {
-                        final recommendation =
-                            historyState.historyRecommendations[index];
-                        return _buildHistoryItem(context, recommendation);
-                      },
+              ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.history, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      'История рекомендаций пуста',
+                      style: TextStyle(fontSize: 16),
                     ),
+                  ],
+                ),
+              )
+              : ListView.builder(
+                itemCount: historyState.historyRecommendations.length,
+                itemBuilder: (context, index) {
+                  final recommendation =
+                      historyState.historyRecommendations[index];
+                  return _buildHistoryItem(context, recommendation);
+                },
+              ),
     );
   }
 
   Widget _buildHistoryItem(
-      BuildContext context, Recommendation recommendation) {
+    BuildContext context,
+    Recommendation recommendation,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
@@ -71,8 +70,8 @@ class RecommendationHistoryScreen extends ConsumerWidget {
                   child: Text(
                     'Рекомендация от ${recommendation.createdAt?.day}.${recommendation.createdAt?.month}.${recommendation.createdAt?.year}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 if ((recommendation.rating ?? 0) > 0)
@@ -97,33 +96,39 @@ class RecommendationHistoryScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               'Повод: ${(recommendation.occasion?.isNotEmpty ?? false) ? recommendation.occasion : 'Общий'}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
               'Активность: ${(recommendation.activity?.isNotEmpty ?? false) ? recommendation.activity : 'Общая'}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: (recommendation.outfit?.clothingItemIds ?? [])
-                  .take(4) // Show only first 4 items
-                  .map((itemId) => _buildOutfitItem(itemId.toString(), context))
-                  .toList(),
+              children:
+                  (recommendation.outfit?.clothingItemIds ?? [])
+                      .take(4) // Show only first 4 items
+                      .map(
+                        (itemId) =>
+                            _buildOutfitItem(itemId.toString(), context),
+                      )
+                      .toList(),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
                 if (recommendation.isUsed)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green[100],
                       borderRadius: BorderRadius.circular(12),
@@ -136,8 +141,10 @@ class RecommendationHistoryScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
                 if (recommendation.isFavorite)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.orange[100],
                       borderRadius: BorderRadius.circular(12),
@@ -168,10 +175,7 @@ class RecommendationHistoryScreen extends ConsumerWidget {
         children: [
           Icon(Icons.checkroom, size: 16, color: Colors.grey[600]),
           const SizedBox(width: 4),
-          Text(
-            'Элемент $itemId',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text('Элемент $itemId', style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );

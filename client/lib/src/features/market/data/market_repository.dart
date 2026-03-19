@@ -9,7 +9,7 @@ class MarketRepository {
   final MarketApiClient _apiClient;
 
   MarketRepository({required MarketApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   // ═══════════════════════════════════════════
   // PRODUCTS
@@ -207,10 +207,7 @@ class MarketRepository {
     int limit = 5,
   }) async {
     try {
-      return await _apiClient.getSimilarProducts(
-        productId,
-        limit: limit,
-      );
+      return await _apiClient.getSimilarProducts(productId, limit: limit);
     } catch (e) {
       debugPrint('Error getting similar products: $e');
       rethrow;

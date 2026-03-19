@@ -198,10 +198,7 @@ void main() {
     });
 
     test('WeatherForecast empty list', () {
-      final forecast = WeatherForecast(
-        location: 'Unknown',
-        forecasts: [],
-      );
+      final forecast = WeatherForecast(location: 'Unknown', forecasts: []);
 
       expect(forecast.location, 'Unknown');
       expect(forecast.forecasts.isEmpty, true);

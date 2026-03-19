@@ -6,14 +6,13 @@ class AuthService {
   final String apiBase;
   final Dio dio;
 
-  AuthService({
-    required this.apiBase,
-    required this.dio,
-  });
+  AuthService({required this.apiBase, required this.dio});
 
   /// Вход через Google для Web
   Future<void> loginWithGoogle() async {
-    throw UnimplementedError('Используйте SessionManager.signInWithGoogle() вместо AuthService.loginWithGoogle()');
+    throw UnimplementedError(
+      'Используйте SessionManager.signInWithGoogle() вместо AuthService.loginWithGoogle()',
+    );
   }
 
   /// Тихий вход

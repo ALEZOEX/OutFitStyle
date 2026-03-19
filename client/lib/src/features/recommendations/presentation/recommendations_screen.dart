@@ -13,7 +13,8 @@ class RecommendationsScreen extends ConsumerStatefulWidget {
   const RecommendationsScreen({super.key});
 
   @override
-  ConsumerState<RecommendationsScreen> createState() => _RecommendationsScreenState();
+  ConsumerState<RecommendationsScreen> createState() =>
+      _RecommendationsScreenState();
 }
 
 class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
@@ -73,7 +74,10 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           else
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Card(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   child: Padding(
@@ -93,7 +97,8 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                         IconButton(
                           icon: const Icon(Icons.edit),
                           onPressed: () {
-                            ref.read(selectedCityProvider.notifier).state = null;
+                            ref.read(selectedCityProvider.notifier).state =
+                                null;
                             ref.invalidate(recommendationsProvider);
                           },
                           tooltip: 'Изменить город',
@@ -168,7 +173,9 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                   ],
                 ),
                 IconButton(
-                  onPressed: () => ref.read(recommendationsProvider.notifier).refresh(),
+                  onPressed:
+                      () =>
+                          ref.read(recommendationsProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh),
                   tooltip: 'Обновить',
                   style: IconButton.styleFrom(
@@ -239,25 +246,28 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: isDarkMode 
-            ? color.withValues(alpha: 0.2) 
-            : color.withValues(alpha: 0.1),
+        color:
+            isDarkMode
+                ? color.withValues(alpha: 0.2)
+                : color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDarkMode
-              ? color.withValues(alpha: 0.3)
-              : color.withValues(alpha: 0.2),
+          color:
+              isDarkMode
+                  ? color.withValues(alpha: 0.3)
+                  : color.withValues(alpha: 0.2),
           width: 1,
         ),
-        boxShadow: isDarkMode
-            ? [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.15),
-                  blurRadius: 8,
-                  spreadRadius: 0,
-                ),
-              ]
-            : null,
+        boxShadow:
+            isDarkMode
+                ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                  ),
+                ]
+                : null,
       ),
       child: Column(
         children: [
@@ -273,9 +283,10 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: isDarkMode
-                  ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
-                  : theme.colorScheme.onSurfaceVariant,
+              color:
+                  isDarkMode
+                      ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
+                      : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -328,26 +339,32 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
         child: Card(
           clipBehavior: Clip.antiAlias,
           elevation: isDarkMode ? 6 : 3,
-          shadowColor: theme.colorScheme.primary.withValues(alpha: isDarkMode ? 0.4 : 0.2),
+          shadowColor: theme.colorScheme.primary.withValues(
+            alpha: isDarkMode ? 0.4 : 0.2,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           child: InkWell(
-            onTap: state.isGenerating ? null : () => _generateRecommendation(context),
+            onTap:
+                state.isGenerating
+                    ? null
+                    : () => _generateRecommendation(context),
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: isDarkMode
-                      ? [
-                          theme.colorScheme.primary.withValues(alpha: 0.95),
-                          theme.colorScheme.secondary.withValues(alpha: 1.0),
-                        ]
-                      : [
-                          theme.colorScheme.primary.withValues(alpha: 0.8),
-                          theme.colorScheme.secondary.withValues(alpha: 0.9),
-                        ],
+                  colors:
+                      isDarkMode
+                          ? [
+                            theme.colorScheme.primary.withValues(alpha: 0.95),
+                            theme.colorScheme.secondary.withValues(alpha: 1.0),
+                          ]
+                          : [
+                            theme.colorScheme.primary.withValues(alpha: 0.8),
+                            theme.colorScheme.secondary.withValues(alpha: 0.9),
+                          ],
                 ),
               ),
               padding: const EdgeInsets.all(20),
@@ -372,7 +389,9 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                               ? 'Подбираем идеальный outfit...'
                               : 'На основе погоды и предпочтений',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimary.withValues(alpha: 0.95),
+                            color: theme.colorScheme.onPrimary.withValues(
+                              alpha: 0.95,
+                            ),
                           ),
                         ),
                       ],
@@ -383,31 +402,35 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.25),
+                      color: theme.colorScheme.onPrimary.withValues(
+                        alpha: 0.25,
+                      ),
                       shape: BoxShape.circle,
-                      boxShadow: isDarkMode
-                          ? [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                              ),
-                            ]
-                          : null,
+                      boxShadow:
+                          isDarkMode
+                              ? [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  spreadRadius: 2,
+                                ),
+                              ]
+                              : null,
                     ),
-                    child: state.isGenerating
-                        ? Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
+                    child:
+                        state.isGenerating
+                            ? Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            )
+                            : Icon(
+                              Icons.auto_awesome,
                               color: theme.colorScheme.onPrimary,
+                              size: 28,
                             ),
-                          )
-                        : Icon(
-                            Icons.auto_awesome,
-                            color: theme.colorScheme.onPrimary,
-                            size: 28,
-                          ),
                   ),
                 ],
               ),
@@ -428,9 +451,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
 
     if (state.status == RecommendationsLoadStatus.loading) {
       return const SliverFillRemaining(
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -465,35 +486,34 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     }
 
     if (state.recommendations.isEmpty) {
-      return SliverFillRemaining(
-        child: _buildEmptyState(context),
-      );
+      return SliverFillRemaining(child: _buildEmptyState(context));
     }
 
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final recommendation = state.recommendations[index];
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: ResponsiveMaxWidthContainer(
-                maxWidth: 800,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: RecommendationCard(
-                    recommendation: recommendation,
-                    onDetailsPressed: () => context.push('/recommendations/${recommendation.id}'),
-                    onPlanPressed: () => _planRecommendation(context, recommendation.id),
-                    onUsePressed: () => _useRecommendation(context, recommendation.id),
-                  ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final recommendation = state.recommendations[index];
+          return FadeTransition(
+            opacity: _fadeAnimation,
+            child: ResponsiveMaxWidthContainer(
+              maxWidth: 800,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: RecommendationCard(
+                  recommendation: recommendation,
+                  onDetailsPressed:
+                      () =>
+                          context.push('/recommendations/${recommendation.id}'),
+                  onPlanPressed:
+                      () => _planRecommendation(context, recommendation.id),
+                  onUsePressed:
+                      () => _useRecommendation(context, recommendation.id),
                 ),
               ),
-            );
-          },
-          childCount: state.recommendations.length,
-        ),
+            ),
+          );
+        }, childCount: state.recommendations.length),
       ),
     );
   }
@@ -551,7 +571,9 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
       const SnackBar(
         content: Text('Рекомендация отмечена как использованная'),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
       ),
     );
   }
@@ -593,7 +615,10 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
               icon: const Icon(Icons.auto_awesome),
               label: const Text('Сгенерировать'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -627,9 +652,7 @@ class _QuickActionChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
@@ -638,9 +661,9 @@ class _QuickActionChip extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

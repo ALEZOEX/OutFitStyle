@@ -19,11 +19,7 @@ void main() {
 
     testWidgets('shows about screen title', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -34,11 +30,7 @@ void main() {
 
     testWidgets('shows app name', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -49,11 +41,7 @@ void main() {
 
     testWidgets('shows app version', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -64,11 +52,7 @@ void main() {
 
     testWidgets('shows app icon', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -79,11 +63,7 @@ void main() {
 
     testWidgets('shows description section', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -94,11 +74,7 @@ void main() {
 
     testWidgets('shows social media section', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -109,11 +85,7 @@ void main() {
 
     testWidgets('shows documents section', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -124,11 +96,7 @@ void main() {
 
     testWidgets('shows team section', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -139,11 +107,7 @@ void main() {
 
     testWidgets('shows licenses section', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -154,11 +118,7 @@ void main() {
 
     testWidgets('team dialog shows team members', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -169,11 +129,7 @@ void main() {
 
     testWidgets('team dialog shows roles', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -184,11 +140,7 @@ void main() {
 
     testWidgets('team dialog can be closed', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -199,11 +151,7 @@ void main() {
 
     testWidgets('licenses button opens license page', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -214,11 +162,7 @@ void main() {
 
     testWidgets('shows gradient logo container', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -229,11 +173,7 @@ void main() {
 
     testWidgets('shows info icon in description', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -244,11 +184,7 @@ void main() {
 
     testWidgets('shows share icon in social section', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -259,11 +195,7 @@ void main() {
 
     testWidgets('shows description icon', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -274,11 +206,7 @@ void main() {
 
     testWidgets('shows groups icon in team section', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -289,11 +217,7 @@ void main() {
 
     testWidgets('shows account balance icon in licenses', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -304,11 +228,7 @@ void main() {
 
     testWidgets('shows open in new icons for links', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -319,11 +239,7 @@ void main() {
 
     testWidgets('shows feature descriptions', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: AboutScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: AboutScreen())),
       );
 
       await tester.pumpAndSettle();

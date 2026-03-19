@@ -35,7 +35,8 @@ final List<RouteBase> $appRoutes = [
               if (recommendation == null) {
                 return const Scaffold(
                   body: Center(
-                      child: Text('Ошибка: Данные рекомендации отсутствуют')),
+                    child: Text('Ошибка: Данные рекомендации отсутствуют'),
+                  ),
                 );
               }
               return RecommendationDetailScreen(recommendation: recommendation);

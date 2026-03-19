@@ -33,17 +33,13 @@ class StatisticsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: 28,
-            color: color ?? Theme.of(context).primaryColor,
-          ),
+          Icon(icon, size: 28, color: color ?? Theme.of(context).primaryColor),
           const SizedBox(height: 8),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(

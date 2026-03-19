@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:outfitstyle_client/src/presentation/providers/auth_provider.dart';
-import 'package:outfitstyle_client/src/presentation/providers/session_provider.dart' show authStateProvider;
+import 'package:outfitstyle_client/src/presentation/providers/session_provider.dart'
+    show authStateProvider;
 
 void main() {
   group('Auth Provider Tests', () {

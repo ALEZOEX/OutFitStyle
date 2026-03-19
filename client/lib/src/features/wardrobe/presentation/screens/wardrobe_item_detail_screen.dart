@@ -9,12 +9,8 @@ class WardrobeItemDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Wardrobe Item Detail'),
-      ),
-      body: Center(
-        child: Text('Wardrobe Item Detail Screen for ID: $itemId'),
-      ),
+      appBar: AppBar(title: const Text('Wardrobe Item Detail')),
+      body: Center(child: Text('Wardrobe Item Detail Screen for ID: $itemId')),
     );
   }
 }

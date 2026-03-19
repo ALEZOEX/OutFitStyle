@@ -32,40 +32,43 @@ class AppImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    Widget imageWidget = useCache
-        ? CachedNetworkImage(
-            imageUrl: imageUrl,
-            placeholder: (context, url) => _buildPlaceholder(theme),
-            errorWidget: (context, url, error) => _buildError(theme),
-            fit: fit,
-            width: width,
-            height: height,
-          )
-        : Image.network(
-            imageUrl,
-            fit: fit,
-            width: width,
-            height: height,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return _buildPlaceholder(theme);
-            },
-            errorBuilder: (context, error, stackTrace) => _buildError(theme),
-          );
+    Widget imageWidget =
+        useCache
+            ? CachedNetworkImage(
+              imageUrl: imageUrl,
+              placeholder: (context, url) => _buildPlaceholder(theme),
+              errorWidget: (context, url, error) => _buildError(theme),
+              fit: fit,
+              width: width,
+              height: height,
+            )
+            : Image.network(
+              imageUrl,
+              fit: fit,
+              width: width,
+              height: height,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return _buildPlaceholder(theme);
+              },
+              errorBuilder: (context, error, stackTrace) => _buildError(theme),
+            );
 
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: variant == ImageVariant.circle
-            ? BorderRadius.circular((width ?? height ?? 100.0) / 2)
-            : BorderRadius.circular(borderRadius),
+        borderRadius:
+            variant == ImageVariant.circle
+                ? BorderRadius.circular((width ?? height ?? 100.0) / 2)
+                : BorderRadius.circular(borderRadius),
       ),
       child: ClipRRect(
-        borderRadius: variant == ImageVariant.circle
-            ? BorderRadius.circular((width ?? height ?? 100.0) / 2)
-            : BorderRadius.circular(borderRadius),
+        borderRadius:
+            variant == ImageVariant.circle
+                ? BorderRadius.circular((width ?? height ?? 100.0) / 2)
+                : BorderRadius.circular(borderRadius),
         child: imageWidget,
       ),
     );
@@ -77,9 +80,10 @@ class AppImage extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: variant == ImageVariant.circle
-            ? BorderRadius.circular((width ?? height ?? 100.0) / 2)
-            : BorderRadius.circular(borderRadius),
+        borderRadius:
+            variant == ImageVariant.circle
+                ? BorderRadius.circular((width ?? height ?? 100.0) / 2)
+                : BorderRadius.circular(borderRadius),
       ),
       child: Center(
         child: CircularProgressIndicator(
@@ -95,17 +99,19 @@ class AppImage extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: variant == ImageVariant.circle
-            ? BorderRadius.circular((width ?? height ?? 100.0) / 2)
-            : BorderRadius.circular(borderRadius),
+        borderRadius:
+            variant == ImageVariant.circle
+                ? BorderRadius.circular((width ?? height ?? 100.0) / 2)
+                : BorderRadius.circular(borderRadius),
       ),
       child: Center(
         child: Icon(
           Icons.broken_image_outlined,
           color: theme.disabledColor,
-          size: width != null
-              ? width! * 0.3
-              : height != null
+          size:
+              width != null
+                  ? width! * 0.3
+                  : height != null
                   ? height! * 0.3
                   : 40.0,
         ),

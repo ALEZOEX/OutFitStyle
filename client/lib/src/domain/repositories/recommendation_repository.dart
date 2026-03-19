@@ -34,10 +34,13 @@ abstract class RecommendationRepository {
   Future<Either<String, Recommendation>> getRecommendationById(int id);
 
   Future<Either<String, Recommendation>> saveRecommendation(
-      Recommendation recommendation);
+    Recommendation recommendation,
+  );
 
   Future<Either<String, void>> likeRecommendation(
-      int recommendationId, bool isLiked);
+    int recommendationId,
+    bool isLiked,
+  );
 
   Future<Either<String, void>> saveRecommendationFeedback({
     required int recommendationId,
@@ -46,13 +49,16 @@ abstract class RecommendationRepository {
   });
 
   Future<Either<String, List<Recommendation>>> getRecommendationHistory(
-      int userId);
+    int userId,
+  );
 
   Future<Either<String, List<Recommendation>>> getSavedRecommendations(
-      int userId);
+    int userId,
+  );
 
   Future<Either<String, void>> updateRecommendation(
-      Recommendation recommendation);
+    Recommendation recommendation,
+  );
 
   Future<Either<String, void>> deleteRecommendation(int id);
 }

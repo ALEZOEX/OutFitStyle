@@ -12,9 +12,7 @@ Widget createTestWidget({
   return ProviderScope(
     overrides: overrides,
     observers: observers,
-    child: MaterialApp(
-      home: child,
-    ),
+    child: MaterialApp(home: child),
   );
 }
 
@@ -57,7 +55,11 @@ Future<void> pumpUntilSettled(WidgetTester tester) async {
 }
 
 /// Дождаться появления виджета
-Future<bool> waitForWidget(WidgetTester tester, Finder finder, {Duration timeout = const Duration(seconds: 5)}) async {
+Future<bool> waitForWidget(
+  WidgetTester tester,
+  Finder finder, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
   final endTime = DateTime.now().add(timeout);
   while (DateTime.now().isBefore(endTime)) {
     if (tester.any(finder)) {
@@ -69,7 +71,11 @@ Future<bool> waitForWidget(WidgetTester tester, Finder finder, {Duration timeout
 }
 
 /// Дождаться исчезновения виджета
-Future<bool> waitForWidgetToDisappear(WidgetTester tester, Finder finder, {Duration timeout = const Duration(seconds: 5)}) async {
+Future<bool> waitForWidgetToDisappear(
+  WidgetTester tester,
+  Finder finder, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
   final endTime = DateTime.now().add(timeout);
   while (DateTime.now().isBefore(endTime)) {
     if (!tester.any(finder)) {
@@ -133,19 +139,24 @@ bool hasIcon(WidgetTester tester, IconData icon) {
 /// Проверить наличие кнопки на экране
 bool hasButton(WidgetTester tester, String text) {
   return tester.any(find.widgetWithText(ElevatedButton, text)) ||
-         tester.any(find.widgetWithText(TextButton, text)) ||
-         tester.any(find.widgetWithText(OutlinedButton, text));
+      tester.any(find.widgetWithText(TextButton, text)) ||
+      tester.any(find.widgetWithText(OutlinedButton, text));
 }
 
 /// Нажать на кнопку по тексту
 Future<void> tapButton(WidgetTester tester, String text) async {
-  final buttonFinder = find.widgetWithText(ElevatedButton, text).hitTestable()
-      .evaluate()
-      .isNotEmpty
-      ? find.widgetWithText(ElevatedButton, text).hitTestable()
-      : find.widgetWithText(TextButton, text).hitTestable()
-          .evaluate()
-          .isNotEmpty
+  final buttonFinder =
+      find
+              .widgetWithText(ElevatedButton, text)
+              .hitTestable()
+              .evaluate()
+              .isNotEmpty
+          ? find.widgetWithText(ElevatedButton, text).hitTestable()
+          : find
+              .widgetWithText(TextButton, text)
+              .hitTestable()
+              .evaluate()
+              .isNotEmpty
           ? find.widgetWithText(TextButton, text).hitTestable()
           : find.widgetWithText(OutlinedButton, text).hitTestable();
 
@@ -166,22 +177,29 @@ Future<void> enterText(WidgetTester tester, Finder finder, String text) async {
 }
 
 /// Ввести текст в поле по hint
-Future<void> enterTextByHint(WidgetTester tester, String hint, String text) async {
-  await tester.enterText(find.byWidgetPredicate((widget) {
-    if (widget is TextField) {
-      final decorator = (widget as dynamic).decorator;
-      if (decorator != null && decorator.hintText == hint) {
-        return true;
+Future<void> enterTextByHint(
+  WidgetTester tester,
+  String hint,
+  String text,
+) async {
+  await tester.enterText(
+    find.byWidgetPredicate((widget) {
+      if (widget is TextField) {
+        final decorator = (widget as dynamic).decorator;
+        if (decorator != null && decorator.hintText == hint) {
+          return true;
+        }
       }
-    }
-    if (widget is TextFormField) {
-      final decorator = (widget as dynamic).decorator;
-      if (decorator != null && decorator.hintText == hint) {
-        return true;
+      if (widget is TextFormField) {
+        final decorator = (widget as dynamic).decorator;
+        if (decorator != null && decorator.hintText == hint) {
+          return true;
+        }
       }
-    }
-    return false;
-  }), text);
+      return false;
+    }),
+    text,
+  );
   await tester.pump();
 }
 

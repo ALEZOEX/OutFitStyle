@@ -18,151 +18,369 @@ class ApiClient {
   final FirebaseAuth _firebaseAuth;
 
   ApiClient({SharedPreferences? sharedPreferences, FirebaseAuth? firebaseAuth})
-      : _sharedPreferences = sharedPreferences,
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
-    _dio = Dio(BaseOptions(
-      baseUrl: ApiConfig.baseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {'Content-Type': 'application/json'},
-      extra: {'withCredentials': true}, // Важно: отправка cookie на вебе
-    ));
+    : _sharedPreferences = sharedPreferences,
+      _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {'Content-Type': 'application/json'},
+        extra: {'withCredentials': true}, // Важно: отправка cookie на вебе
+      ),
+    );
 
     // Interceptor для добавления Authorization header
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final timestamp = DateTime.now().toIso8601String();
-        final path = options.path;
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final timestamp = DateTime.now().toIso8601String();
+          final path = options.path;
 
-        developer.log('[$timestamp] [ApiClient] [Interceptor 1] START processing: ${options.method} ${options.path}', name: 'ApiClient');
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 1] START processing: ${options.method} ${options.path}',
+            name: 'ApiClient',
+          );
 
-        // Skip Authorization header for public endpoints
-        if (!path.contains('/auth/login') &&
-            !path.contains('/auth/register') &&
-            !path.contains('/auth/forgot-password') &&
-            !path.contains('/auth/reset-password') &&
-            !path.contains('/auth/google') &&
-            !path.contains('/auth/verify-reset-code')) {
+          // Skip Authorization header for public endpoints
+          if (!path.contains('/auth/login') &&
+              !path.contains('/auth/register') &&
+              !path.contains('/auth/forgot-password') &&
+              !path.contains('/auth/reset-password') &&
+              !path.contains('/auth/google') &&
+              !path.contains('/auth/verify-reset-code')) {
+            String? accessToken;
 
-          String? accessToken;
+            // 🔑 DEBUG LOGS
+            developer.log(
+              '🔑 [AUTH DEBUG] ============== REQUEST START ==============',
+              name: 'AuthDebug',
+            );
+            developer.log(
+              '🔑 [AUTH DEBUG] Path: ${options.method} ${options.path}',
+              name: 'AuthDebug',
+            );
 
-          // 🔑 DEBUG LOGS
-          developer.log('🔑 [AUTH DEBUG] ============== REQUEST START ==============', name: 'AuthDebug');
-          developer.log('🔑 [AUTH DEBUG] Path: ${options.method} ${options.path}', name: 'AuthDebug');
+            // Приоритет 1: Backend Access Token из SharedPreferences
+            accessToken = _sharedPreferences?.getString('access_token');
 
-          // Приоритет 1: Backend Access Token из SharedPreferences
-          accessToken = _sharedPreferences?.getString('access_token');
+            if (accessToken != null && accessToken.isNotEmpty) {
+              // Определяем тип токена по структуре JWT (xxx.xxx.xxx)
+              final tokenParts = accessToken.split('.');
+              final isJwt = tokenParts.length == 3;
 
-          if (accessToken != null && accessToken.isNotEmpty) {
-            // Определяем тип токена по структуре JWT (xxx.xxx.xxx)
-            final tokenParts = accessToken.split('.');
-            final isJwt = tokenParts.length == 3;
-            developer.log('🔑 [AUTH DEBUG] ✅ Используем Backend Access Token из SharedPreferences (${accessToken.length} chars, JWT: $isJwt)', name: 'AuthDebug');
+              // 🔑 DEBUG: Детальная информация о токене
+              developer.log(
+                '🔑 [AUTH DEBUG] ✅ Backend Access Token найден',
+                name: 'AuthDebug',
+              );
+              developer.log(
+                '🔑 [AUTH DEBUG] Длина: ${accessToken.length} символов',
+                name: 'AuthDebug',
+              );
+              developer.log(
+                '🔑 [AUTH DEBUG] JWT формат: $isJwt',
+                name: 'AuthDebug',
+              );
+              developer.log(
+                '🔑 [AUTH DEBUG] Preview: ${accessToken.substring(0, accessToken.length > 50 ? 50 : accessToken.length)}...',
+                name: 'AuthDebug',
+              );
+
+              // Backend Access Token всегда приоритетнее Firebase ID Token
+              developer.log(
+                '🔑 [AUTH DEBUG] ✅ ИСПОЛЬЗУЕМ Backend JWT Access Token (приоритет)',
+                name: 'AuthDebug',
+              );
+            } else {
+              // Приоритет 2: Firebase ID Token (fallback для совместимости)
+              developer.log(
+                '🔑 [AUTH DEBUG] ⚠️ Backend Access Token НЕ найден в SharedPreferences',
+                name: 'AuthDebug',
+              );
+              developer.log(
+                '🔑 [AUTH DEBUG] Пытаемся получить Firebase ID Token...',
+                name: 'AuthDebug',
+              );
+
+              try {
+                final user = _firebaseAuth.currentUser;
+                developer.log(
+                  '🔑 [AUTH DEBUG] Firebase currentUser: ${user != null ? "UID=${user.uid}" : "NULL"}',
+                  name: 'AuthDebug',
+                );
+
+                if (user != null) {
+                  accessToken = await user.getIdToken(true);
+                  developer.log(
+                    '🔑 [AUTH DEBUG] Firebase ID Token получен: ${accessToken != null ? "${accessToken.length} символов" : "NULL"}',
+                    name: 'AuthDebug',
+                  );
+
+                  if (accessToken != null && accessToken.isNotEmpty) {
+                    // Проверяем, что это Firebase ID Token (не JWT backend)
+                    final tokenParts = accessToken.split('.');
+                    final isFirebaseToken = tokenParts.length == 3;
+
+                    developer.log(
+                      '🔑 [AUTH DEBUG] ⚠️ ИСПОЛЬЗУЕМ Firebase ID Token (fallback)',
+                      name: 'AuthDebug',
+                    );
+                    developer.log(
+                      '🔑 [AUTH DEBUG] Firebase Token preview: ${accessToken.substring(0, accessToken.length > 50 ? 50 : accessToken.length)}...',
+                      name: 'AuthDebug',
+                    );
+                    developer.log(
+                      '🔑 [AUTH DEBUG] Token structure: parts=${tokenParts.length}, isFirebase=$isFirebaseToken',
+                      name: 'AuthDebug',
+                    );
+
+                    // 🔴 WARNING: Если это Firebase ID Token, backend может вернуть 401
+                    if (accessToken.length > 1000) {
+                      developer.log(
+                        '🔑 [AUTH DEBUG] 🔴 WARNING: Токен >1000 символов - это Firebase ID Token, а не backend JWT!',
+                        name: 'AuthDebug',
+                      );
+                      developer.log(
+                        '🔑 [AUTH DEBUG] 🔴 Рекомендуется проверить, что /api/v1/auth/google вернул JWT токен',
+                        name: 'AuthDebug',
+                      );
+                    }
+                  }
+                }
+              } catch (e) {
+                developer.log(
+                  '🔑 [AUTH DEBUG] ❌ ERROR получения Firebase ID Token: $e',
+                  name: 'AuthDebug',
+                );
+                AppLogger.error(
+                  '[$timestamp] [ApiClient] Ошибка получения Firebase ID Token: $e',
+                );
+              }
+            }
+
+            // Устанавливаем Authorization header
+            if (accessToken != null && accessToken.isNotEmpty) {
+              options.headers['Authorization'] = 'Bearer $accessToken';
+              developer.log(
+                '🔑 [AUTH DEBUG] ✅ Authorization header SET (Bearer ${accessToken.length} chars)',
+                name: 'AuthDebug',
+              );
+            } else {
+              developer.log(
+                '🔑 [AUTH DEBUG] ❌ WARNING: Токен не найден',
+                name: 'AuthDebug',
+              );
+              AppLogger.warning(
+                '[$timestamp] [ApiClient] Запрос без токена: ${options.method} ${options.path}',
+              );
+            }
+
+            developer.log(
+              '🔑 [AUTH DEBUG] Final headers: ${options.headers}',
+              name: 'AuthDebug',
+            );
+            developer.log(
+              '🔑 [AUTH DEBUG] ============== REQUEST END ==============',
+              name: 'AuthDebug',
+            );
           } else {
-            // Приоритет 2: Firebase ID Token (fallback для совместимости)
-            developer.log('🔑 [AUTH DEBUG] Backend Access Token не найден, пробуем Firebase ID Token', name: 'AuthDebug');
+            developer.log(
+              '[$timestamp] [ApiClient] [Interceptor 1] Public endpoint detected: ${options.path}, skipping Authorization header',
+              name: 'ApiClient',
+            );
+          }
 
-            try {
-              final user = _firebaseAuth.currentUser;
-              developer.log('🔑 [AUTH DEBUG] currentUser: ${user != null ? "UID=${user.uid}, Email=${user.email}" : "NULL"}', name: 'AuthDebug');
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 1] END processing, calling handler.next()',
+            name: 'ApiClient',
+          );
+          return handler.next(options);
+        },
+        onError: (DioException err, ErrorInterceptorHandler handler) async {
+          final timestamp = DateTime.now().toIso8601String();
+          final statusCode = err.response?.statusCode;
 
-              if (user != null) {
-                accessToken = await user.getIdToken(true);
-                developer.log('🔑 [AUTH DEBUG] getIdToken() returned: ${accessToken != null ? "length=${accessToken.length}" : "NULL"}', name: 'AuthDebug');
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 1 onError] DioException caught: ${err.type} ${err.requestOptions.path} - $statusCode',
+            name: 'ApiClient',
+            level: 1000,
+            error: err,
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 1 onError] Error message: ${err.message}',
+            name: 'ApiClient',
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 1 onError] Response data: ${err.response?.data}',
+            name: 'ApiClient',
+          );
+
+          return handler.next(err);
+        },
+      ),
+    );
+
+    // Interceptor 2: Сохранение токенов из response (auth endpoints)
+    // Критично: должен выполняться ДО interceptor'а авторизации
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onResponse: (Response response, ResponseInterceptorHandler handler) {
+          final timestamp = DateTime.now().toIso8601String();
+          final path = response.requestOptions.path;
+
+          // Извлекаем токены только из auth endpoints
+          if (path.contains('/auth/login') ||
+              path.contains('/auth/register') ||
+              path.contains('/auth/google') ||
+              path.contains('/auth/refresh')) {
+            final data = response.data;
+            if (data is Map) {
+              final tokens = data['tokens'] as Map?;
+              if (tokens != null) {
+                final accessToken = tokens['access_token'] as String?;
+                final refreshToken = tokens['refresh_token'] as String?;
 
                 if (accessToken != null && accessToken.isNotEmpty) {
-                  developer.log('🔑 [AUTH DEBUG] ✅ Используем Firebase ID Token', name: 'AuthDebug');
+                  _sharedPreferences?.setString('access_token', accessToken);
+                  developer.log(
+                    '[$timestamp] [ApiClient] [Interceptor 2] ✅ ACCESS TOKEN сохранён из response (${accessToken.length} chars)',
+                    name: 'ApiClient',
+                  );
+
+                  // 🔑 DEBUG: Верификация типа токена
+                  final tokenParts = accessToken.split('.');
+                  final isJwt = tokenParts.length == 3;
+                  developer.log(
+                    '[$timestamp] [ApiClient] [Interceptor 2] 🔑 Token type: JWT=$isJwt, parts=${tokenParts.length}',
+                    name: 'ApiClient',
+                  );
+                }
+
+                if (refreshToken != null && refreshToken.isNotEmpty) {
+                  _sharedPreferences?.setString('refresh_token', refreshToken);
+                  developer.log(
+                    '[$timestamp] [ApiClient] [Interceptor 2] ✅ REFRESH TOKEN сохранён из response (${refreshToken.length} chars)',
+                    name: 'ApiClient',
+                  );
                 }
               }
-            } catch (e) {
-              developer.log('🔑 [AUTH DEBUG] ❌ ERROR получения Firebase ID Token: $e', name: 'AuthDebug');
-              AppLogger.error('[$timestamp] [ApiClient] Ошибка получения Firebase ID Token: $e');
             }
           }
 
-          // Устанавливаем Authorization header
-          if (accessToken != null && accessToken.isNotEmpty) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-            developer.log('🔑 [AUTH DEBUG] ✅ Authorization header SET (Bearer ${accessToken.length} chars)', name: 'AuthDebug');
-          } else {
-            developer.log('🔑 [AUTH DEBUG] ❌ WARNING: Токен не найден', name: 'AuthDebug');
-            AppLogger.warning('[$timestamp] [ApiClient] Запрос без токена: ${options.method} ${options.path}');
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2] HTTP Response: ${response.statusCode} ${response.requestOptions.path}',
+            name: 'ApiClient',
+          );
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            developer.log(
+              '[$timestamp] [ApiClient] [Interceptor 2] Успешный ответ',
+              name: 'ApiClient',
+            );
           }
 
-          developer.log('🔑 [AUTH DEBUG] Final headers: ${options.headers}', name: 'AuthDebug');
-          developer.log('🔑 [AUTH DEBUG] ============== REQUEST END ==============', name: 'AuthDebug');
-        } else {
-          developer.log('[$timestamp] [ApiClient] [Interceptor 1] Public endpoint detected: ${options.path}, skipping Authorization header', name: 'ApiClient');
-        }
+          return handler.next(response);
+        },
+        onRequest: (options, handler) {
+          final timestamp = DateTime.now().toIso8601String();
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2] HTTP Request: ${options.method} ${options.path}',
+            name: 'ApiClient',
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2] Headers: ${options.headers}',
+            name: 'ApiClient',
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2] Data: ${options.data}',
+            name: 'ApiClient',
+          );
+          return handler.next(options);
+        },
+        onError: (DioException err, ErrorInterceptorHandler handler) async {
+          final timestamp = DateTime.now().toIso8601String();
+          final statusCode = err.response?.statusCode;
 
-        developer.log('[$timestamp] [ApiClient] [Interceptor 1] END processing, calling handler.next()', name: 'ApiClient');
-        return handler.next(options);
-      },
-      onError: (DioException err, ErrorInterceptorHandler handler) async {
-        final timestamp = DateTime.now().toIso8601String();
-        final statusCode = err.response?.statusCode;
-        
-        developer.log('[$timestamp] [ApiClient] [Interceptor 1 onError] DioException caught: ${err.type} ${err.requestOptions.path} - $statusCode', name: 'ApiClient', level: 1000, error: err);
-        developer.log('[$timestamp] [ApiClient] [Interceptor 1 onError] Error message: ${err.message}', name: 'ApiClient');
-        developer.log('[$timestamp] [ApiClient] [Interceptor 1 onError] Response data: ${err.response?.data}', name: 'ApiClient');
-        
-        return handler.next(err);
-      },
-    ));
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ╔═══════════════════════════════════════════',
+            name: 'ApiClient',
+            level: 1000,
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ DioException DETECTED',
+            name: 'ApiClient',
+            level: 1000,
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Type: ${err.type}',
+            name: 'ApiClient',
+            level: 1000,
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Path: ${err.requestOptions.method} ${err.requestOptions.path}',
+            name: 'ApiClient',
+            level: 1000,
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Status Code: $statusCode',
+            name: 'ApiClient',
+            level: 1000,
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Message: ${err.message}',
+            name: 'ApiClient',
+            level: 1000,
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Response Data: ${err.response?.data}',
+            name: 'ApiClient',
+            level: 1000,
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ╚═══════════════════════════════════════════',
+            name: 'ApiClient',
+            level: 1000,
+          );
 
-    // Interceptor для логирования ответов (Interceptor 2)
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        final timestamp = DateTime.now().toIso8601String();
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2] HTTP Request: ${options.method} ${options.path}', name: 'ApiClient');
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2] Headers: ${options.headers}', name: 'ApiClient');
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2] Data: ${options.data}', name: 'ApiClient');
-        return handler.next(options);
-      },
-      onResponse: (Response response, ResponseInterceptorHandler handler) {
-        final timestamp = DateTime.now().toIso8601String();
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2] HTTP Response: ${response.statusCode} ${response.requestOptions.path}', name: 'ApiClient');
+          // Если 401 — логируем для отладки
+          if (statusCode == 401) {
+            developer.log(
+              '[$timestamp] [ApiClient] [Auth] 401 Unauthorized — требуется авторизация',
+              name: 'ApiClient',
+            );
+            AppLogger.error(
+              '[$timestamp] [ApiClient] 401 ошибка на ${err.requestOptions.path}',
+            );
 
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          developer.log('[$timestamp] [ApiClient] [Interceptor 2] Успешный ответ', name: 'ApiClient');
-        }
-
-        return handler.next(response);
-      },
-      onError: (DioException err, ErrorInterceptorHandler handler) async {
-        final timestamp = DateTime.now().toIso8601String();
-        final statusCode = err.response?.statusCode;
-
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ╔═══════════════════════════════════════════', name: 'ApiClient', level: 1000);
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ DioException DETECTED', name: 'ApiClient', level: 1000);
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Type: ${err.type}', name: 'ApiClient', level: 1000);
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Path: ${err.requestOptions.method} ${err.requestOptions.path}', name: 'ApiClient', level: 1000);
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Status Code: $statusCode', name: 'ApiClient', level: 1000);
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Message: ${err.message}', name: 'ApiClient', level: 1000);
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Response Data: ${err.response?.data}', name: 'ApiClient', level: 1000);
-        developer.log('[$timestamp] [ApiClient] [Interceptor 2 onError] ╚═══════════════════════════════════════════', name: 'ApiClient', level: 1000);
-
-        // Если 401 — логируем для отладки
-        if (statusCode == 401) {
-          developer.log('[$timestamp] [ApiClient] [Auth] 401 Unauthorized — требуется авторизация', name: 'ApiClient');
-          AppLogger.error('[$timestamp] [ApiClient] 401 ошибка на ${err.requestOptions.path}');
-
-          // Проверяем, есть ли токен
-          final accessToken = _sharedPreferences?.getString('access_token');
-          if (accessToken == null || accessToken.isEmpty) {
-            developer.log('[$timestamp] [ApiClient] [Auth] 401 ошибка: access_token отсутствует в SharedPreferences', name: 'ApiClient');
-            AppLogger.error('[$timestamp] [ApiClient] 401 ошибка: access_token не найден');
-          } else {
-            developer.log('[$timestamp] [ApiClient] [Auth] 401 ошибка: access_token присутствует (${accessToken.length} chars), возможно истёк', name: 'ApiClient');
-            AppLogger.error('[$timestamp] [ApiClient] 401 ошибка: access_token есть, но не валиден (возможно истёк)');
+            // Проверяем, есть ли токен
+            final accessToken = _sharedPreferences?.getString('access_token');
+            if (accessToken == null || accessToken.isEmpty) {
+              developer.log(
+                '[$timestamp] [ApiClient] [Auth] 401 ошибка: access_token отсутствует в SharedPreferences',
+                name: 'ApiClient',
+              );
+              AppLogger.error(
+                '[$timestamp] [ApiClient] 401 ошибка: access_token не найден',
+              );
+            } else {
+              developer.log(
+                '[$timestamp] [ApiClient] [Auth] 401 ошибка: access_token присутствует (${accessToken.length} chars), возможно истёк',
+                name: 'ApiClient',
+              );
+              AppLogger.error(
+                '[$timestamp] [ApiClient] 401 ошибка: access_token есть, но не валиден (возможно истёк)',
+              );
+            }
+          } else if (statusCode != null) {
+            AppLogger.error(
+              '[$timestamp] [ApiClient] HTTP ошибка $statusCode на ${err.requestOptions.path}',
+            );
           }
-        } else if (statusCode != null) {
-          AppLogger.error('[$timestamp] [ApiClient] HTTP ошибка $statusCode на ${err.requestOptions.path}');
-        }
 
-        return handler.next(err);
-      },
-    ));
+          return handler.next(err);
+        },
+      ),
+    );
   }
 
   Dio get raw => _dio;
@@ -170,9 +388,9 @@ class ApiClient {
   /// Внутренний конструктор для использования с кастомным Dio
   /// (например, для Weather API без авторизации)
   ApiClient.internal(Dio dio, {FirebaseAuth? firebaseAuth})
-      : _dio = dio,
-        _sharedPreferences = null,
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
+    : _dio = dio,
+      _sharedPreferences = null,
+      _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   String _normalizePath(String path) {
     return path.startsWith('/') ? path.substring(1) : path;
@@ -181,7 +399,10 @@ class ApiClient {
   // GET-запрос
   Future<Response> get(String path, {Map<String, dynamic>? params}) async {
     try {
-      final response = await _dio.get(_normalizePath(path), queryParameters: params);
+      final response = await _dio.get(
+        _normalizePath(path),
+        queryParameters: params,
+      );
       return response;
     } on DioException catch (e) {
       throw mapError(e);

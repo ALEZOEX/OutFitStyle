@@ -33,10 +33,7 @@ class AchievementsApiService {
     try {
       final response = await _apiClient.post(
         '/api/v1/achievements/track',
-        data: {
-          'event_type': eventType,
-          'value': value,
-        },
+        data: {'event_type': eventType, 'value': value},
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -55,7 +52,9 @@ class AchievementsApiService {
   }
 
   /// Получить прогресс конкретного достижения пользователя
-  Future<AchievementProgressDto> getAchievementProgress(String achievementId) async {
+  Future<AchievementProgressDto> getAchievementProgress(
+    String achievementId,
+  ) async {
     final response = await _apiClient.get(
       '/api/v1/achievements/$achievementId/progress',
     );
@@ -65,13 +64,13 @@ class AchievementsApiService {
 
   /// Сбросить прогресс достижения (для тестирования)
   Future<void> resetAchievementProgress(String achievementId) async {
-    await _apiClient.delete(
-      '/api/v1/achievements/$achievementId/progress',
-    );
+    await _apiClient.delete('/api/v1/achievements/$achievementId/progress');
   }
 
   /// Разблокировать достижение по ID
-  Future<Either<String, AchievementProgressDto>> unlockAchievementById(int achievementId) async {
+  Future<Either<String, AchievementProgressDto>> unlockAchievementById(
+    int achievementId,
+  ) async {
     try {
       final response = await _apiClient.post(
         '/api/v1/achievements/$achievementId/unlock',
@@ -81,7 +80,10 @@ class AchievementsApiService {
 
       return right(progress);
     } on DioException catch (e) {
-      return left(e.response?.data?['message'] as String? ?? 'Failed to unlock achievement');
+      return left(
+        e.response?.data?['message'] as String? ??
+            'Failed to unlock achievement',
+      );
     }
   }
 }
@@ -108,9 +110,10 @@ class AchievementProgressDto {
       current: json['current'] as int,
       target: json['target'] as int,
       isCompleted: json['is_completed'] as bool? ?? false,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
+      updatedAt:
+          json['updated_at'] != null
+              ? DateTime.parse(json['updated_at'] as String)
+              : null,
     );
   }
 }

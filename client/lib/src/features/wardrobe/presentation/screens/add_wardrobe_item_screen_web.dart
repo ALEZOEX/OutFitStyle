@@ -67,7 +67,8 @@ class AddItemState {
     );
   }
 
-  bool get isValid => name.trim().isNotEmpty && (imageUrl != null || imageBytes != null);
+  bool get isValid =>
+      name.trim().isNotEmpty && (imageUrl != null || imageBytes != null);
 }
 
 /// Нотификер для управления состоянием
@@ -96,7 +97,11 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
   }
 
   void setImage(String path, Uint8List? bytes) {
-    state = state.copyWith(localImagePath: path, imageUrl: path, imageBytes: bytes);
+    state = state.copyWith(
+      localImagePath: path,
+      imageUrl: path,
+      imageBytes: bytes,
+    );
   }
 
   void setLoading(bool loading) {
@@ -174,7 +179,9 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
   }
 }
 
-final addItemProvider = StateNotifierProvider<AddItemNotifier, AddItemState>((ref) {
+final addItemProvider = StateNotifierProvider<AddItemNotifier, AddItemState>((
+  ref,
+) {
   return AddItemNotifier();
 });
 
@@ -184,7 +191,8 @@ class AddWardrobeItemScreen extends ConsumerStatefulWidget {
   const AddWardrobeItemScreen({super.key});
 
   @override
-  ConsumerState<AddWardrobeItemScreen> createState() => _AddWardrobeItemScreenState();
+  ConsumerState<AddWardrobeItemScreen> createState() =>
+      _AddWardrobeItemScreenState();
 }
 
 class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
@@ -203,9 +211,18 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   ];
 
   final _colors = [
-    'Черный', 'Белый', 'Серый', 'Синий', 'Красный',
-    'Зеленый', 'Желтый', 'Оранжевый', 'Фиолетовый',
-    'Розовый', 'Коричневый', 'Бежевый',
+    'Черный',
+    'Белый',
+    'Серый',
+    'Синий',
+    'Красный',
+    'Зеленый',
+    'Желтый',
+    'Оранжевый',
+    'Фиолетовый',
+    'Розовый',
+    'Коричневый',
+    'Бежевый',
   ];
 
   final _sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -243,10 +260,7 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -255,28 +269,29 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   void _showImageSourceDialog() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt, color: Colors.blue),
-              title: const Text('Сделать фото'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.camera);
-              },
+      builder:
+          (context) => SafeArea(
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.camera_alt, color: Colors.blue),
+                  title: const Text('Сделать фото'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library, color: Colors.green),
+                  title: const Text('Выбрать из галереи'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.gallery);
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.photo_library, color: Colors.green),
-              title: const Text('Выбрать из галереи'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -340,29 +355,30 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
           ),
         ],
       ),
-      body: state.isLoading && state.uploadProgress == null
-          ? const Center(child: CircularProgressIndicator())
-          : Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _buildImageUpload(context, state),
-                  const SizedBox(height: 24),
-                  _buildNameField(context, state),
-                  const SizedBox(height: 16),
-                  _buildCategorySelector(context, state),
-                  const SizedBox(height: 16),
-                  _buildBrandField(context, state),
-                  const SizedBox(height: 16),
-                  _buildColorSelector(context, state),
-                  const SizedBox(height: 16),
-                  _buildSizeSelector(context, state),
-                  const SizedBox(height: 32),
-                  _buildSaveButton(context, state),
-                ],
+      body:
+          state.isLoading && state.uploadProgress == null
+              ? const Center(child: CircularProgressIndicator())
+              : Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _buildImageUpload(context, state),
+                    const SizedBox(height: 24),
+                    _buildNameField(context, state),
+                    const SizedBox(height: 16),
+                    _buildCategorySelector(context, state),
+                    const SizedBox(height: 16),
+                    _buildBrandField(context, state),
+                    const SizedBox(height: 16),
+                    _buildColorSelector(context, state),
+                    const SizedBox(height: 16),
+                    _buildSizeSelector(context, state),
+                    const SizedBox(height: 32),
+                    _buildSaveButton(context, state),
+                  ],
+                ),
               ),
-            ),
     );
   }
 
@@ -372,12 +388,11 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
       decoration: InputDecoration(
         labelText: 'Название *',
         hintText: 'Например: Белая футболка',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         prefixIcon: const Icon(Icons.title),
       ),
-      onChanged: (value) => ref.read(addItemProvider.notifier).updateName(value),
+      onChanged:
+          (value) => ref.read(addItemProvider.notifier).updateName(value),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Введите название';
@@ -393,12 +408,11 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
       decoration: InputDecoration(
         labelText: 'Бренд',
         hintText: 'Например: Nike, Zara',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         prefixIcon: const Icon(Icons.shopping_bag),
       ),
-      onChanged: (value) => ref.read(addItemProvider.notifier).updateBrand(value),
+      onChanged:
+          (value) => ref.read(addItemProvider.notifier).updateBrand(value),
     );
   }
 
@@ -413,118 +427,124 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
           color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: state.imageUrl != null
-                ? theme.colorScheme.primary.withOpacity(0.5)
-                : theme.colorScheme.outline.withOpacity(0.3),
+            color:
+                state.imageUrl != null
+                    ? theme.colorScheme.primary.withOpacity(0.5)
+                    : theme.colorScheme.outline.withOpacity(0.3),
             width: 2,
-            style: state.imageUrl != null ? BorderStyle.solid : BorderStyle.none,
+            style:
+                state.imageUrl != null ? BorderStyle.solid : BorderStyle.none,
           ),
         ),
-        child: state.imageUrl != null
-            ? Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: state.imageBytes != null
-                        ? Image.memory(
-                            state.imageBytes!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          )
-                        : Image.network(
-                            state.imageUrl!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Center(
-                                child: Icon(
-                                  Icons.broken_image,
-                                  color: theme.colorScheme.error,
-                                  size: 48,
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                  if (state.uploadProgress != null)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircularProgressIndicator(
-                              value: state.uploadProgress,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '${(state.uploadProgress! * 100).toInt()}%',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+        child:
+            state.imageUrl != null
+                ? Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child:
+                          state.imageBytes != null
+                              ? Image.memory(
+                                state.imageBytes!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              )
+                              : Image.network(
+                                state.imageUrl!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      color: theme.colorScheme.error,
+                                      size: 48,
+                                    ),
+                                  );
+                                },
                               ),
-                            ),
-                          ],
+                    ),
+                    if (state.uploadProgress != null)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
-                    )
-                  else
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: IconButton(
-                        icon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(
+                                value: state.uploadProgress,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                '${(state.uploadProgress! * 100).toInt()}%',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          child: const Icon(Icons.close, color: Colors.white),
                         ),
-                        onPressed: () {
-                          ref.read(addItemProvider.notifier).setImage('', null);
-                        },
+                      )
+                    else
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: IconButton(
+                          icon: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close, color: Colors.white),
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(addItemProvider.notifier)
+                                .setImage('', null);
+                          },
+                        ),
+                      ),
+                  ],
+                )
+                : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.add_a_photo,
+                        size: 48,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
+                    const SizedBox(height: 16),
+                    Text(
+                      'Добавить фото',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.add_a_photo,
-                      size: 48,
-                      color: theme.colorScheme.primary,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Камера или галерея',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Добавить фото',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Камера или галерея',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
       ),
     );
   }
@@ -545,27 +565,30 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: _categories.map((cat) {
-            final isSelected = state.category == cat['value'];
-            return ChoiceChip(
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(cat['icon'] as IconData, size: 18),
-                  const SizedBox(width: 4),
-                  Text(cat['label'] as String),
-                ],
-              ),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  ref.read(addItemProvider.notifier).updateCategory(cat['value'] as String);
-                }
-              },
-              selectedColor: theme.colorScheme.primaryContainer,
-              checkmarkColor: theme.colorScheme.onPrimaryContainer,
-            );
-          }).toList(),
+          children:
+              _categories.map((cat) {
+                final isSelected = state.category == cat['value'];
+                return ChoiceChip(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(cat['icon'] as IconData, size: 18),
+                      const SizedBox(width: 4),
+                      Text(cat['label'] as String),
+                    ],
+                  ),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) {
+                      ref
+                          .read(addItemProvider.notifier)
+                          .updateCategory(cat['value'] as String);
+                    }
+                  },
+                  selectedColor: theme.colorScheme.primaryContainer,
+                  checkmarkColor: theme.colorScheme.onPrimaryContainer,
+                );
+              }).toList(),
         ),
       ],
     );
@@ -587,19 +610,20 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: _colors.map((color) {
-            final isSelected = state.color == color;
-            return FilterChip(
-              label: Text(color),
-              selected: isSelected,
-              onSelected: (selected) {
-                ref.read(addItemProvider.notifier).updateColor(
-                  selected ? color : null,
+          children:
+              _colors.map((color) {
+                final isSelected = state.color == color;
+                return FilterChip(
+                  label: Text(color),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    ref
+                        .read(addItemProvider.notifier)
+                        .updateColor(selected ? color : null);
+                  },
+                  selectedColor: theme.colorScheme.primaryContainer,
                 );
-              },
-              selectedColor: theme.colorScheme.primaryContainer,
-            );
-          }).toList(),
+              }).toList(),
         ),
       ],
     );
@@ -621,19 +645,20 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: _sizes.map((size) {
-            final isSelected = state.size == size;
-            return FilterChip(
-              label: Text(size),
-              selected: isSelected,
-              onSelected: (selected) {
-                ref.read(addItemProvider.notifier).updateSize(
-                  selected ? size : null,
+          children:
+              _sizes.map((size) {
+                final isSelected = state.size == size;
+                return FilterChip(
+                  label: Text(size),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    ref
+                        .read(addItemProvider.notifier)
+                        .updateSize(selected ? size : null);
+                  },
+                  selectedColor: theme.colorScheme.primaryContainer,
                 );
-              },
-              selectedColor: theme.colorScheme.primaryContainer,
-            );
-          }).toList(),
+              }).toList(),
         ),
       ],
     );
@@ -647,13 +672,14 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
       height: 56,
       child: FilledButton.icon(
         onPressed: state.isLoading ? null : _saveItem,
-        icon: state.isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.save),
+        icon:
+            state.isLoading
+                ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                : const Icon(Icons.save),
         label: Text(state.isLoading ? 'Сохранение...' : 'Сохранить'),
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(

@@ -21,11 +21,14 @@ class TokenPair {
 
   factory TokenPair.fromJson(Map<String, dynamic> json) {
     return TokenPair(
-      accessToken: json['access_token'] as String? ?? json['accessToken'] as String,
-      refreshToken: json['refresh_token'] as String? ?? json['refreshToken'] as String,
-      expiresAt: json['expires_at'] != null
-          ? DateTime.parse(json['expires_at'] as String)
-          : json['expiresAt'] != null
+      accessToken:
+          json['access_token'] as String? ?? json['accessToken'] as String,
+      refreshToken:
+          json['refresh_token'] as String? ?? json['refreshToken'] as String,
+      expiresAt:
+          json['expires_at'] != null
+              ? DateTime.parse(json['expires_at'] as String)
+              : json['expiresAt'] != null
               ? DateTime.parse(json['expiresAt'] as String)
               : null,
     );
@@ -63,5 +66,6 @@ class TokenPair {
           expiresAt == other.expiresAt;
 
   @override
-  int get hashCode => accessToken.hashCode ^ refreshToken.hashCode ^ expiresAt.hashCode;
+  int get hashCode =>
+      accessToken.hashCode ^ refreshToken.hashCode ^ expiresAt.hashCode;
 }

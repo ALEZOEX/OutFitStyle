@@ -22,8 +22,10 @@ class FirebaseAnalyticsService implements IAnalyticsService {
   }
 
   @override
-  Future<void> logEventSimple(String eventName,
-      {Map<String, dynamic>? parameters}) async {
+  Future<void> logEventSimple(
+    String eventName, {
+    Map<String, dynamic>? parameters,
+  }) async {
     try {
       await _analytics.logEvent(
         name: eventName,
@@ -48,10 +50,7 @@ class FirebaseAnalyticsService implements IAnalyticsService {
     try {
       await _analytics.logEvent(
         name: 'error',
-        parameters: {
-          'error_message': error,
-          'stack_trace': stackTrace ?? '',
-        },
+        parameters: {'error_message': error, 'stack_trace': stackTrace ?? ''},
       );
     } catch (e) {
       debugPrint('Firebase Analytics Error: ${e.toString()}');

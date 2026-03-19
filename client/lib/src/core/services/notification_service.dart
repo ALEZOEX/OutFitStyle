@@ -45,8 +45,8 @@ class NotificationData {
     DateTime? timestamp,
     this.payload,
     this.read = false,
-  })  : id = id ?? const Uuid().v4(),
-        timestamp = timestamp ?? DateTime.now();
+  }) : id = id ?? const Uuid().v4(),
+       timestamp = timestamp ?? DateTime.now();
 
   factory NotificationData.fromJson(Map<String, dynamic> json) {
     return NotificationData(
@@ -58,9 +58,10 @@ class NotificationData {
         orElse: () => NotificationType.system,
       ),
       timestamp: DateTime.parse(json['timestamp']),
-      payload: json['payload'] != null
-          ? Map<String, dynamic>.from(json['payload'])
-          : null,
+      payload:
+          json['payload'] != null
+              ? Map<String, dynamic>.from(json['payload'])
+              : null,
       read: json['read'] ?? false,
     );
   }
@@ -122,18 +123,20 @@ class NotificationSettings {
       enablePushNotifications: json['enablePushNotifications'] ?? true,
       enableWeatherAlerts: json['enableWeatherAlerts'] ?? true,
       enableOutfitRecommendations: json['enableOutfitRecommendations'] ?? true,
-      dailyRecommendationTime: json['dailyRecommendationTime'] != null
-          ? _parseTimeOfDay(json['dailyRecommendationTime'])
-          : null,
+      dailyRecommendationTime:
+          json['dailyRecommendationTime'] != null
+              ? _parseTimeOfDay(json['dailyRecommendationTime'])
+              : null,
       temperatureThreshold:
           (json['temperatureThreshold'] as num?)?.toDouble() ?? 5.0,
     );
   }
 
   Map<String, dynamic> toJson() {
-    final timeString = dailyRecommendationTime != null
-        ? '${dailyRecommendationTime!.hour}:${dailyRecommendationTime!.minute.toString().padLeft(2, '0')}'
-        : null;
+    final timeString =
+        dailyRecommendationTime != null
+            ? '${dailyRecommendationTime!.hour}:${dailyRecommendationTime!.minute.toString().padLeft(2, '0')}'
+            : null;
 
     return {
       'enableLocalNotifications': enableLocalNotifications,
@@ -270,8 +273,9 @@ class FirebaseNotificationService extends NotificationService {
 
   /// Initialize local notifications
   Future<void> _initializeLocalNotifications() async {
-    const androidInitializationSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInitializationSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
 
     const iosInitializationSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -317,7 +321,8 @@ class FirebaseNotificationService extends NotificationService {
     // Handle background messages
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint(
-          'Background message opened app: ${message.notification?.title}');
+        'Background message opened app: ${message.notification?.title}',
+      );
       _navigateToNotification(message);
     });
   }
@@ -411,7 +416,8 @@ class FirebaseNotificationService extends NotificationService {
     // This would typically navigate to the appropriate screen
     // For now, we'll just log the action
     debugPrint(
-        'Navigating to screen for notification type: ${notification.type}');
+      'Navigating to screen for notification type: ${notification.type}',
+    );
   }
 
   /// Navigate to notification from push message
@@ -442,7 +448,9 @@ class FirebaseNotificationService extends NotificationService {
     final prefs = await SharedPreferences.getInstance();
     final notificationsJson = _notifications.map((n) => n.toJson()).toList();
     await prefs.setStringList(
-        'notifications', notificationsJson.map((e) => jsonEncode(e)).toList());
+      'notifications',
+      notificationsJson.map((e) => jsonEncode(e)).toList(),
+    );
   }
 
   /// Load notifications from shared preferences
@@ -450,10 +458,11 @@ class FirebaseNotificationService extends NotificationService {
     final prefs = await SharedPreferences.getInstance();
     final notificationsJson = prefs.getStringList('notifications') ?? [];
 
-    _notifications = notificationsJson
-        .map((str) => jsonDecode(str))
-        .map((json) => NotificationData.fromJson(json))
-        .toList();
+    _notifications =
+        notificationsJson
+            .map((str) => jsonDecode(str))
+            .map((json) => NotificationData.fromJson(json))
+            .toList();
 
     notifyListeners();
   }
@@ -462,7 +471,9 @@ class FirebaseNotificationService extends NotificationService {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-        'notification_settings', jsonEncode(_settings.toJson()));
+      'notification_settings',
+      jsonEncode(_settings.toJson()),
+    );
   }
 
   /// Load settings from shared preferences
@@ -606,9 +617,11 @@ class FirebaseNotificationService extends NotificationService {
 
   @override
   Future<bool> areNotificationsEnabled() async {
-    final localEnabled = await _localNotificationsPlugin
+    final localEnabled =
+        await _localNotificationsPlugin
             .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin
+            >()
             ?.areNotificationsEnabled() ??
         true;
 

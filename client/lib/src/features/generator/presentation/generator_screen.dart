@@ -25,11 +25,36 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
   bool _useCurrentWeather = true;
 
   final _occasions = [
-    {'id': 'casual', 'label': 'Повседневный', 'icon': Icons.checkroom, 'color': Colors.blue},
-    {'id': 'business', 'label': 'Деловой', 'icon': Icons.business_center, 'color': Colors.purple},
-    {'id': 'sport', 'label': 'Спорт', 'icon': Icons.sports, 'color': Colors.orange},
-    {'id': 'evening', 'label': 'Вечерний', 'icon': Icons.nightlight, 'color': Colors.indigo},
-    {'id': 'romantic', 'label': 'Романтический', 'icon': Icons.favorite, 'color': Colors.pink},
+    {
+      'id': 'casual',
+      'label': 'Повседневный',
+      'icon': Icons.checkroom,
+      'color': Colors.blue,
+    },
+    {
+      'id': 'business',
+      'label': 'Деловой',
+      'icon': Icons.business_center,
+      'color': Colors.purple,
+    },
+    {
+      'id': 'sport',
+      'label': 'Спорт',
+      'icon': Icons.sports,
+      'color': Colors.orange,
+    },
+    {
+      'id': 'evening',
+      'label': 'Вечерний',
+      'icon': Icons.nightlight,
+      'color': Colors.indigo,
+    },
+    {
+      'id': 'romantic',
+      'label': 'Романтический',
+      'icon': Icons.favorite,
+      'color': Colors.pink,
+    },
   ];
 
   final _activities = [
@@ -69,9 +94,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
       body: CustomScrollView(
         slivers: [
           // Заголовок
-          SliverToBoxAdapter(
-            child: _buildHeader(context),
-          ),
+          SliverToBoxAdapter(child: _buildHeader(context)),
           // Параметры генерации
           SliverToBoxAdapter(
             child: FadeTransition(
@@ -229,54 +252,72 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     return Wrap(
       spacing: 12,
       runSpacing: 12,
-      children: _occasions.map((occasion) {
-        final isSelected = _selectedOccasion == occasion['id'];
-        final color = occasion['color'] as Color;
+      children:
+          _occasions.map((occasion) {
+            final isSelected = _selectedOccasion == occasion['id'];
+            final color = occasion['color'] as Color;
 
-        return GestureDetector(
-          onTap: () => setState(() => _selectedOccasion = occasion['id'] as String),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? color.withValues(alpha: 0.15)
-                  : theme.colorScheme.surface.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected ? color : theme.colorScheme.outline.withValues(alpha: 0.2),
-                width: isSelected ? 2 : 1,
+            return GestureDetector(
+              onTap:
+                  () => setState(
+                    () => _selectedOccasion = occasion['id'] as String,
+                  ),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color:
+                      isSelected
+                          ? color.withValues(alpha: 0.15)
+                          : theme.colorScheme.surface.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color:
+                        isSelected
+                            ? color
+                            : theme.colorScheme.outline.withValues(alpha: 0.2),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color:
+                            isSelected
+                                ? color.withValues(alpha: 0.3)
+                                : theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        occasion['icon'] as IconData,
+                        color:
+                            isSelected
+                                ? color
+                                : theme.colorScheme.onSurfaceVariant,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      occasion['label'] as String,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isSelected
+                                ? color
+                                : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? color.withValues(alpha: 0.3)
-                        : theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    occasion['icon'] as IconData,
-                    color: isSelected ? color : theme.colorScheme.onSurfaceVariant,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  occasion['label'] as String,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isSelected ? color : theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 
@@ -286,44 +327,48 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: _activities.map((activity) {
-        final isSelected = _selectedActivity == activity['id'];
+      children:
+          _activities.map((activity) {
+            final isSelected = _selectedActivity == activity['id'];
 
-        return ChoiceChip(
-          avatar: Icon(
-            activity['icon'] as IconData,
-            size: 18,
-            color: isSelected
-                ? theme.colorScheme.onPrimaryContainer
-                : theme.colorScheme.onSurfaceVariant,
-          ),
-          label: Text(
-            activity['label'] as String,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isSelected
-                  ? theme.colorScheme.onPrimaryContainer
-                  : theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          selected: isSelected,
-          onSelected: (selected) {
-            if (selected) {
-              setState(() => _selectedActivity = activity['id'] as String);
-            }
-          },
-          selectedColor: theme.colorScheme.primaryContainer,
-          checkmarkColor: theme.colorScheme.onPrimaryContainer,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withValues(alpha: 0.3),
-            ),
-          ),
-        );
-      }).toList(),
+            return ChoiceChip(
+              avatar: Icon(
+                activity['icon'] as IconData,
+                size: 18,
+                color:
+                    isSelected
+                        ? theme.colorScheme.onPrimaryContainer
+                        : theme.colorScheme.onSurfaceVariant,
+              ),
+              label: Text(
+                activity['label'] as String,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color:
+                      isSelected
+                          ? theme.colorScheme.onPrimaryContainer
+                          : theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() => _selectedActivity = activity['id'] as String);
+                }
+              },
+              selectedColor: theme.colorScheme.primaryContainer,
+              checkmarkColor: theme.colorScheme.onPrimaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color:
+                      isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline.withValues(alpha: 0.3),
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 
@@ -357,7 +402,9 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           SliderTheme(
             data: SliderThemeData(
               activeTrackColor: theme.colorScheme.primary,
-              inactiveTrackColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+              inactiveTrackColor: theme.colorScheme.primary.withValues(
+                alpha: 0.3,
+              ),
               thumbColor: theme.colorScheme.primary,
               overlayColor: theme.colorScheme.primary.withValues(alpha: 0.2),
               trackHeight: 6,
@@ -399,7 +446,10 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     );
   }
 
-  Widget _buildGenerateButton(BuildContext context, RecommendationsState state) {
+  Widget _buildGenerateButton(
+    BuildContext context,
+    RecommendationsState state,
+  ) {
     final theme = Theme.of(context);
     final isGenerating = state.isGenerating;
 
@@ -410,10 +460,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.secondary,
-          ],
+          colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -430,46 +477,45 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           onTap: isGenerating ? null : () => _generateRecommendation(context),
           borderRadius: BorderRadius.circular(20),
           child: Center(
-            child: isGenerating
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            child:
+                isGenerating
+                    ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Генерация...',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                        const SizedBox(width: 12),
+                        Text(
+                          'Генерация...',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Сгенерировать образ',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      ],
+                    )
+                    : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Сгенерировать образ',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
           ),
         ),
       ),

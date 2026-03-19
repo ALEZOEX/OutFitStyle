@@ -6,9 +6,7 @@ import 'package:outfitstyle_client/src/utils/logger.dart';
 class OnboardingRepository {
   final ApiClient _apiClient;
 
-  OnboardingRepository({
-    required ApiClient apiClient,
-  }) : _apiClient = apiClient;
+  OnboardingRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   Future<bool> savePreferences(OnboardingData data) async {
     try {

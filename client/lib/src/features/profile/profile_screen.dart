@@ -25,9 +25,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final authState = ref.read(authStateNotifierProvider);
       final userId = authState.currentUser?.uid;
       if (userId != null) {
-        ref
-            .read(profileStateNotifierProvider.notifier)
-            .loadUserProfile(userId);
+        ref.read(profileStateNotifierProvider.notifier).loadUserProfile(userId);
       }
     });
   }
@@ -53,22 +51,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // Navigate to settings
               }
             },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'settings',
-                child: ListTile(
-                  leading: Icon(Icons.settings),
-                  title: Text('Настройки'),
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'help',
-                child: ListTile(
-                  leading: Icon(Icons.help),
-                  title: Text('Помощь'),
-                ),
-              ),
-            ],
+            itemBuilder:
+                (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'settings',
+                    child: ListTile(
+                      leading: Icon(Icons.settings),
+                      title: Text('Настройки'),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'help',
+                    child: ListTile(
+                      leading: Icon(Icons.help),
+                      title: Text('Помощь'),
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
@@ -107,19 +106,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           radius: 50,
                           backgroundColor: Colors.white.withOpacity(0.2),
                           backgroundImage: () {
-                            final avatarUrl = profileState.userProfile?.avatarUrl;
+                            final avatarUrl =
+                                profileState.userProfile?.avatarUrl;
                             if (avatarUrl != null && avatarUrl.isNotEmpty) {
                               return NetworkImage(avatarUrl);
                             }
                             return null;
                           }(),
-                          child: profileState.userProfile?.avatarUrl == null
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: Colors.white,
-                                )
-                              : null,
+                          child:
+                              profileState.userProfile?.avatarUrl == null
+                                  ? const Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.white,
+                                  )
+                                  : null,
                         ),
                         Positioned(
                           bottom: 0,
@@ -130,10 +131,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             decoration: BoxDecoration(
                               color: Theme.of(context).primaryColor,
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
+                              border: Border.all(color: Colors.white, width: 2),
                             ),
                             child: const Icon(
                               Icons.camera_alt,
@@ -147,17 +145,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 16),
                     Text(
                       profileState.userProfile?.name ?? 'Пользователь',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       profileState.userProfile?.email ?? 'email@example.com',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white70,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -170,10 +169,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         Text(
                           profileState.userProfile?.location ?? 'Не указано',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.white70,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.white70),
                         ),
                       ],
                     ),
@@ -189,20 +186,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   children: [
                     StatisticsCard(
                       title: 'Создано образов',
-                      value: (profileState.userProfile?.outfitsCreated ?? 0)
-                          .toString(),
+                      value:
+                          (profileState.userProfile?.outfitsCreated ?? 0)
+                              .toString(),
                       icon: Icons.auto_awesome,
                     ),
                     StatisticsCard(
                       title: 'Лайков',
-                      value: (profileState.userProfile?.outfitsLiked ?? 0)
-                          .toString(),
+                      value:
+                          (profileState.userProfile?.outfitsLiked ?? 0)
+                              .toString(),
                       icon: Icons.favorite,
                     ),
                     StatisticsCard(
                       title: 'Стильные очки',
-                      value: (profileState.userProfile?.stylePoints ?? 0)
-                          .toString(),
+                      value:
+                          (profileState.userProfile?.stylePoints ?? 0)
+                              .toString(),
                       icon: Icons.star,
                     ),
                   ],
@@ -215,12 +215,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildSocialStat('Подписчики',
-                        (profileState.userProfile?.followers ?? 0).toString()),
-                    _buildSocialStat('Подписан',
-                        (profileState.userProfile?.following ?? 0).toString()),
-                    _buildSocialStat('Стильность',
-                        '${((profileState.userProfile?.stylePoints ?? 0) ~/ 10)}%'),
+                    _buildSocialStat(
+                      'Подписчики',
+                      (profileState.userProfile?.followers ?? 0).toString(),
+                    ),
+                    _buildSocialStat(
+                      'Подписан',
+                      (profileState.userProfile?.following ?? 0).toString(),
+                    ),
+                    _buildSocialStat(
+                      'Стильность',
+                      '${((profileState.userProfile?.stylePoints ?? 0) ~/ 10)}%',
+                    ),
                   ],
                 ),
               ),
@@ -240,12 +246,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onSelected: (String value) {
                         // Handle theme selection
                       },
-                      itemBuilder: (BuildContext context) => const [
-                        PopupMenuItem(value: 'light', child: Text('Светлая')),
-                        PopupMenuItem(value: 'dark', child: Text('Темная')),
-                        PopupMenuItem(
-                            value: 'system', child: Text('Системная')),
-                      ],
+                      itemBuilder:
+                          (BuildContext context) => const [
+                            PopupMenuItem(
+                              value: 'light',
+                              child: Text('Светлая'),
+                            ),
+                            PopupMenuItem(value: 'dark', child: Text('Темная')),
+                            PopupMenuItem(
+                              value: 'system',
+                              child: Text('Системная'),
+                            ),
+                          ],
                     ),
                   ),
                   SettingsItem(
@@ -257,10 +269,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onSelected: (String value) {
                         // Handle language selection
                       },
-                      itemBuilder: (BuildContext context) => const [
-                        PopupMenuItem(value: 'ru', child: Text('Русский')),
-                        PopupMenuItem(value: 'en', child: Text('English')),
-                      ],
+                      itemBuilder:
+                          (BuildContext context) => const [
+                            PopupMenuItem(value: 'ru', child: Text('Русский')),
+                            PopupMenuItem(value: 'en', child: Text('English')),
+                          ],
                     ),
                   ),
                   SettingsItem(
@@ -322,8 +335,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               // Recommendation History Section
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -331,15 +346,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'История рекомендаций',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor,
-                                ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
                     ),
                     ...List<RecommendationHistoryItem>.from(
-                      profileState.recommendationHistory.take(5).map(
+                      profileState.recommendationHistory
+                          .take(5)
+                          .map(
                             (recommendation) => RecommendationHistoryItem(
                               recommendation: recommendation,
                               onTap: () {
@@ -351,9 +369,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     if (profileState.recommendationHistory.isEmpty)
                       const Padding(
                         padding: EdgeInsets.all(16),
-                        child: Center(
-                          child: Text('Рекомендации отсутствуют'),
-                        ),
+                        child: Center(child: Text('Рекомендации отсутствуют')),
                       ),
                   ],
                 ),
@@ -374,7 +390,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(
-                          color: Theme.of(context).colorScheme.error),
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -401,14 +418,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       children: [
         Text(
           value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(title, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }

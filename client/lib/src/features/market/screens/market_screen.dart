@@ -24,10 +24,9 @@ class _MarketScreenState extends ConsumerState<MarketScreen> {
   }
 
   void _loadProducts() {
-    ref.read(productsProvider.notifier).loadProducts(
-      category: _selectedCategory,
-      search: _searchQuery,
-    );
+    ref
+        .read(productsProvider.notifier)
+        .loadProducts(category: _selectedCategory, search: _searchQuery);
   }
 
   @override
@@ -67,18 +66,19 @@ class _MarketScreenState extends ConsumerState<MarketScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                suffixIcon: _searchQuery != null
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = null;
-                          });
-                          _loadProducts();
-                        },
-                      )
-                    : null,
+                suffixIcon:
+                    _searchQuery != null
+                        ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = null;
+                            });
+                            _loadProducts();
+                          },
+                        )
+                        : null,
               ),
               onSubmitted: (value) {
                 setState(() {
@@ -91,44 +91,49 @@ class _MarketScreenState extends ConsumerState<MarketScreen> {
 
           // Categories
           categoriesAsync.when(
-            data: (categories) => SizedBox(
-              height: 50,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  // All category
-                  FilterChip(
-                    label: const Text('Все'),
-                    selected: _selectedCategory == null,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedCategory = null;
-                      });
-                      _loadProducts();
-                    },
+            data:
+                (categories) => SizedBox(
+                  height: 50,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      // All category
+                      FilterChip(
+                        label: const Text('Все'),
+                        selected: _selectedCategory == null,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedCategory = null;
+                          });
+                          _loadProducts();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      ...categories.map(
+                        (category) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(category['label'] ?? ''),
+                            selected: _selectedCategory == category['value'],
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedCategory =
+                                    selected ? category['value'] : null;
+                              });
+                              _loadProducts();
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  ...categories.map((category) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(category['label'] ?? ''),
-                      selected: _selectedCategory == category['value'],
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedCategory = selected ? category['value'] : null;
-                        });
-                        _loadProducts();
-                      },
-                    ),
-                  )),
-                ],
-              ),
-            ),
-            loading: () => const SizedBox(
-              height: 50,
-              child: Center(child: CircularProgressIndicator()),
-            ),
+                ),
+            loading:
+                () => const SizedBox(
+                  height: 50,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
             error: (_, __) => const SizedBox(),
           ),
 
@@ -139,9 +144,7 @@ class _MarketScreenState extends ConsumerState<MarketScreen> {
             child: productsAsync.when(
               data: (products) {
                 if (products.isEmpty) {
-                  return const Center(
-                    child: Text('Товары не найдены'),
-                  );
+                  return const Center(child: Text('Товары не найдены'));
                 }
 
                 return GridView.builder(
@@ -159,21 +162,26 @@ class _MarketScreenState extends ConsumerState<MarketScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 48, color: AppColors.error),
-                    const SizedBox(height: 16),
-                    Text('Ошибка загрузки: $error'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadProducts,
-                      child: const Text('Повторить'),
+              error:
+                  (error, stack) => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(height: 16),
+                        Text('Ошибка загрузки: $error'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadProducts,
+                          child: const Text('Повторить'),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
             ),
           ),
         ],

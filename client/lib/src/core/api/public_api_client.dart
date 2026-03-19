@@ -13,13 +13,15 @@ class PublicApiClient {
   late final Dio _dio;
 
   PublicApiClient() {
-    _dio = Dio(BaseOptions(
-      baseUrl: ApiConfig.baseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {'Content-Type': 'application/json'},
-      extra: {'withCredentials': true}, // Для httpOnly cookie на вебе
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {'Content-Type': 'application/json'},
+        extra: {'withCredentials': true}, // Для httpOnly cookie на вебе
+      ),
+    );
   }
 
   Dio get raw => _dio;
@@ -37,7 +39,10 @@ class PublicApiClient {
   /// GET-запрос
   Future<Response> get(String path, {Map<String, dynamic>? params}) async {
     try {
-      final response = await _dio.get(_normalizePath(path), queryParameters: params);
+      final response = await _dio.get(
+        _normalizePath(path),
+        queryParameters: params,
+      );
       return response;
     } on DioException catch (e) {
       throw _mapError(e);

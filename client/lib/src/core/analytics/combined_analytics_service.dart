@@ -13,8 +13,8 @@ class CombinedAnalyticsService implements IAnalyticsService {
   CombinedAnalyticsService({
     required FirebaseAnalyticsService firebaseService,
     required LocalAnalyticsService localService,
-  })  : _firebaseService = firebaseService,
-        _localService = localService;
+  }) : _firebaseService = firebaseService,
+       _localService = localService;
 
   @override
   Future<void> logEvent(AnalyticsEvent event) async {
@@ -32,8 +32,10 @@ class CombinedAnalyticsService implements IAnalyticsService {
   }
 
   @override
-  Future<void> logEventSimple(String eventName,
-      {Map<String, dynamic>? parameters}) async {
+  Future<void> logEventSimple(
+    String eventName, {
+    Map<String, dynamic>? parameters,
+  }) async {
     final event = AnalyticsEvent(
       type: AnalyticsEventType.values.firstWhere(
         (element) => element.value == eventName,
@@ -69,12 +71,10 @@ class CombinedAnalyticsService implements IAnalyticsService {
       await _firebaseService.logError(error, stackTrace: stackTrace);
     } catch (e) {
       final event = AnalyticsEvent(
-        type: AnalyticsEventType
-            .settingsUpdate, // используем подходящий тип для ошибки
-        properties: {
-          'error': error,
-          'stack_trace': stackTrace,
-        },
+        type:
+            AnalyticsEventType
+                .settingsUpdate, // используем подходящий тип для ошибки
+        properties: {'error': error, 'stack_trace': stackTrace},
         userId: _currentUserId,
         timestamp: DateTime.now(),
       );
@@ -88,8 +88,9 @@ class CombinedAnalyticsService implements IAnalyticsService {
       await _firebaseService.logException(exception, stackTrace: stackTrace);
     } catch (e) {
       final event = AnalyticsEvent(
-        type: AnalyticsEventType
-            .settingsUpdate, // используем подходящий тип для исключения
+        type:
+            AnalyticsEventType
+                .settingsUpdate, // используем подходящий тип для исключения
         properties: {
           'exception_type': exception.runtimeType.toString(),
           'exception_message': exception.toString(),
@@ -118,8 +119,9 @@ class CombinedAnalyticsService implements IAnalyticsService {
       );
     } catch (e) {
       final event = AnalyticsEvent(
-        type: AnalyticsEventType
-            .settingsUpdate, // используем подходящий тип для покупки
+        type:
+            AnalyticsEventType
+                .settingsUpdate, // используем подходящий тип для покупки
         properties: {
           'amount': amount,
           'currency': currency,

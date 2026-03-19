@@ -12,18 +12,23 @@ class AppColors {
   static const Color backgroundLight = Color(0xFFF8F9FA); // Светлый фон
   static const Color backgroundDark = Color(0xFF121212); // Темный фон
   static const Color surfaceLight = Colors.white; // Поверхность в светлой теме
-  static const Color surfaceDark =
-      Color(0xFF1E1E1E); // Поверхность в темной теме
+  static const Color surfaceDark = Color(
+    0xFF1E1E1E,
+  ); // Поверхность в темной теме
 
   // Цвета текста
-  static const Color textPrimaryLight =
-      Color(0xFF212121); // Основной текст в светлой теме
-  static const Color textSecondaryLight =
-      Color(0xFF757575); // Вторичный текст в светлой теме
-  static const Color textPrimaryDark =
-      Color(0xFFE0E0E0); // Основной текст в темной теме
-  static const Color textSecondaryDark =
-      Color(0xFFB0B0B0); // Вторичный текст в темной теме
+  static const Color textPrimaryLight = Color(
+    0xFF212121,
+  ); // Основной текст в светлой теме
+  static const Color textSecondaryLight = Color(
+    0xFF757575,
+  ); // Вторичный текст в светлой теме
+  static const Color textPrimaryDark = Color(
+    0xFFE0E0E0,
+  ); // Основной текст в темной теме
+  static const Color textSecondaryDark = Color(
+    0xFFB0B0B0,
+  ); // Вторичный текст в темной теме
 
   // Цвета состояний
   static const Color success = Color(0xFF4CAF50); // Успех
@@ -65,60 +70,60 @@ class AppSpacing {
 class AppTypography {
   // Заголовки
   static TextStyle headlineLarge(BuildContext context) => GoogleFonts.inter(
-        fontSize: 32.0,
-        fontWeight: FontWeight.w700,
-        color: Theme.of(context).colorScheme.onSurface,
-      );
+    fontSize: 32.0,
+    fontWeight: FontWeight.w700,
+    color: Theme.of(context).colorScheme.onSurface,
+  );
 
   static TextStyle headlineMedium(BuildContext context) => GoogleFonts.inter(
-        fontSize: 24.0,
-        fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.onSurface,
-      );
+    fontSize: 24.0,
+    fontWeight: FontWeight.w600,
+    color: Theme.of(context).colorScheme.onSurface,
+  );
 
   static TextStyle headlineSmall(BuildContext context) => GoogleFonts.inter(
-        fontSize: 20.0,
-        fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.onSurface,
-      );
+    fontSize: 20.0,
+    fontWeight: FontWeight.w600,
+    color: Theme.of(context).colorScheme.onSurface,
+  );
 
   // Тело текста
   static TextStyle bodyLarge(BuildContext context) => GoogleFonts.inter(
-        fontSize: 16.0,
-        fontWeight: FontWeight.w400,
-        color: Theme.of(context).colorScheme.onSurface,
-      );
+    fontSize: 16.0,
+    fontWeight: FontWeight.w400,
+    color: Theme.of(context).colorScheme.onSurface,
+  );
 
   static TextStyle bodyMedium(BuildContext context) => GoogleFonts.inter(
-        fontSize: 14.0,
-        fontWeight: FontWeight.w400,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      );
+    fontSize: 14.0,
+    fontWeight: FontWeight.w400,
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
+  );
 
   static TextStyle bodySmall(BuildContext context) => GoogleFonts.inter(
-        fontSize: 12.0,
-        fontWeight: FontWeight.w400,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      );
+    fontSize: 12.0,
+    fontWeight: FontWeight.w400,
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
+  );
 
   // Подписи и кнопки
   static TextStyle labelLarge(BuildContext context) => GoogleFonts.inter(
-        fontSize: 14.0,
-        fontWeight: FontWeight.w500,
-        color: Theme.of(context).colorScheme.onSurface,
-      );
+    fontSize: 14.0,
+    fontWeight: FontWeight.w500,
+    color: Theme.of(context).colorScheme.onSurface,
+  );
 
   static TextStyle labelMedium(BuildContext context) => GoogleFonts.inter(
-        fontSize: 12.0,
-        fontWeight: FontWeight.w500,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      );
+    fontSize: 12.0,
+    fontWeight: FontWeight.w500,
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
+  );
 
   static TextStyle labelSmall(BuildContext context) => GoogleFonts.inter(
-        fontSize: 11.0,
-        fontWeight: FontWeight.w500,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      );
+    fontSize: 11.0,
+    fontWeight: FontWeight.w500,
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
+  );
 }
 
 // Темы приложения
@@ -153,7 +158,9 @@ class AppThemes {
           foregroundColor: WidgetStateProperty.all(Colors.white),
           padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
           ),
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
@@ -200,7 +207,9 @@ class AppThemes {
         onSurface: AppColors.textPrimaryDark,
         onSurfaceVariant: AppColors.textSecondaryDark,
         onError: Colors.white,
-        surfaceContainerHighest: Color(0xFF2D2D2D), // Более светлая поверхность для карточек
+        surfaceContainerHighest: Color(
+          0xFF2D2D2D,
+        ), // Более светлая поверхность для карточек
       ),
       scaffoldBackgroundColor: AppColors.backgroundDark,
       appBarTheme: const AppBarTheme(
@@ -215,7 +224,9 @@ class AppThemes {
           foregroundColor: WidgetStateProperty.all(Colors.white),
           padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
           ),
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(

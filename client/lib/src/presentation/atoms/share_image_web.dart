@@ -16,8 +16,9 @@ class ShareImage {
     required String fileName,
     String? text,
   }) async {
-    final boundary = boundaryKey.currentContext?.findRenderObject()
-        as RenderRepaintBoundary?;
+    final boundary =
+        boundaryKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
     if (boundary == null) {
       debugPrint('ShareImage: boundary не найден');
       return;
@@ -35,26 +36,25 @@ class ShareImage {
 
       // Создаем blob из байтов
       final blob = html.Blob([bytes], 'image/png');
-      
+
       // Создаем URL для blob
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Для Web пробуем использовать Web Share API
       try {
         await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(url, name: fileName)],
-            text: text,
-          ),
+          ShareParams(files: [XFile(url, name: fileName)], text: text),
         );
       } catch (e) {
         // Fallback: скачиваем файл
-        debugPrint('ShareImage: Web Share API не поддерживается, скачиваем файл');
+        debugPrint(
+          'ShareImage: Web Share API не поддерживается, скачиваем файл',
+        );
         html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
       }
-      
+
       // Очищаем URL
       html.Url.revokeObjectUrl(url);
     } catch (e) {

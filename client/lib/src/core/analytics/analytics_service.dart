@@ -6,8 +6,10 @@ abstract class IAnalyticsService {
   Future<void> logEvent(AnalyticsEvent event);
 
   /// Логирование простого события по имени
-  Future<void> logEventSimple(String eventName,
-      {Map<String, dynamic>? parameters});
+  Future<void> logEventSimple(
+    String eventName, {
+    Map<String, dynamic>? parameters,
+  });
 
   /// Логирование просмотра экрана
   Future<void> logScreenView(String screenName);
@@ -51,8 +53,10 @@ class AnalyticsService {
   /// Получить экземпляр сервиса аналитики
   static IAnalyticsService get instance {
     if (_instance == null) {
-      throw StateError('AnalyticsService instance not initialized. '
-          'Call AnalyticsService.setInstance() first.');
+      throw StateError(
+        'AnalyticsService instance not initialized. '
+        'Call AnalyticsService.setInstance() first.',
+      );
     }
     return _instance!;
   }

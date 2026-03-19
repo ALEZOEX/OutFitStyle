@@ -134,21 +134,22 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       // Показываем диалог об успехе
       await showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Пароль сброшен'),
-          content: const Text(
-            'Ваш пароль успешно изменён. Теперь вы можете войти с новым паролем.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.go('/auth');
-              },
-              child: const Text('Войти'),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Пароль сброшен'),
+              content: const Text(
+                'Ваш пароль успешно изменён. Теперь вы можете войти с новым паролем.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    context.go('/auth');
+                  },
+                  child: const Text('Войти'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -280,10 +281,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       child: FractionallySizedBox(
         alignment: Alignment.centerLeft,
         widthFactor: stepIndex > 0 ? 1.0 : 0.0,
-        child: Container(
-          color: Theme.of(context).primaryColor,
-          height: 2,
-        ),
+        child: Container(color: Theme.of(context).primaryColor, height: 2),
       ),
     );
   }
@@ -294,16 +292,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       children: [
         Text(
           'Введите ваш email',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           'Мы отправим код восстановления на ваш email',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
         ),
         const SizedBox(height: 24),
         TextFormField(
@@ -332,13 +330,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: _isLoading ? null : _sendCode,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Отправить код'),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Text('Отправить код'),
           ),
         ),
       ],
@@ -351,16 +350,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       children: [
         Text(
           'Введите код',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           'Код отправлен на ${_emailController.text.trim()}',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
         ),
         const SizedBox(height: 24),
         TextFormField(
@@ -401,13 +400,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: _isLoading ? null : _verifyCode,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Подтвердить'),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Text('Подтвердить'),
           ),
         ),
       ],
@@ -420,16 +420,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       children: [
         Text(
           'Новый пароль',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           'Придумайте новый пароль для вашего аккаунта',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
         ),
         const SizedBox(height: 24),
         TextFormField(
@@ -480,13 +480,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: _isLoading ? null : _resetPassword,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Сбросить пароль'),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Text('Сбросить пароль'),
           ),
         ),
       ],

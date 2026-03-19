@@ -9,9 +9,7 @@ class AchievementDemoPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Демонстрация ачивок'),
-      ),
+      appBar: AppBar(title: const Text('Демонстрация ачивок')),
       body: Column(
         children: [
           ElevatedButton(
@@ -52,20 +50,25 @@ class AchievementDemoPage extends ConsumerWidget {
                 final state = ref.watch(achievementNotifierProvider);
 
                 return switch (state.status) {
-                  AchievementStatus.initial ||
-                  AchievementStatus.loading =>
+                  AchievementStatus.initial || AchievementStatus.loading =>
                     const Center(child: CircularProgressIndicator()),
-                  AchievementStatus.loaded => state.achievements != null
-                      ? AchievementListWidget(achievements: state.achievements!)
-                      : const Center(child: Text('Нет данных')),
-                  AchievementStatus.userLoaded => state.userProgress != null
-                      ? AchievementListWidget(
-                          achievements: [], // Здесь нужно правильно отобразить ачивки пользователя
+                  AchievementStatus.loaded =>
+                    state.achievements != null
+                        ? AchievementListWidget(
+                          achievements: state.achievements!,
+                        )
+                        : const Center(child: Text('Нет данных')),
+                  AchievementStatus.userLoaded =>
+                    state.userProgress != null
+                        ? AchievementListWidget(
+                          achievements:
+                              [], // Здесь нужно правильно отобразить ачивки пользователя
                           userId: state.userProgress!.userId,
                         )
-                      : const Center(child: Text('Нет данных')),
-                  AchievementStatus.error =>
-                    Center(child: Text('Ошибка: ${state.errorMessage}')),
+                        : const Center(child: Text('Нет данных')),
+                  AchievementStatus.error => Center(
+                    child: Text('Ошибка: ${state.errorMessage}'),
+                  ),
                 };
               },
             ),

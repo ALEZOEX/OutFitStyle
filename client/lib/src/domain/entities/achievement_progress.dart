@@ -16,5 +16,6 @@ abstract class AchievementProgress with _$AchievementProgress {
     required DateTime updatedAt,
   }) = _AchievementProgress;
 
-  factory AchievementProgress.fromJson(Map<String, dynamic> json) => _$AchievementProgressFromJson(json);
+  factory AchievementProgress.fromJson(Map<String, dynamic> json) =>
+      _$AchievementProgressFromJson(json);
 }

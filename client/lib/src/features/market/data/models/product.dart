@@ -54,12 +54,14 @@ class Product extends Equatable {
       styleTags: (json['style_tags'] as List<dynamic>?)?.cast<String>() ?? [],
       inStock: json['in_stock'] as bool? ?? true,
       stockCount: json['stock_count'] as int? ?? 0,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
+      createdAt:
+          json['created_at'] != null
+              ? DateTime.parse(json['created_at'] as String)
+              : null,
+      updatedAt:
+          json['updated_at'] != null
+              ? DateTime.parse(json['updated_at'] as String)
+              : null,
     );
   }
 
@@ -86,21 +88,21 @@ class Product extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        brand,
-        category,
-        subcategory,
-        price,
-        currency,
-        imageUrls,
-        sizes,
-        colors,
-        styleTags,
-        inStock,
-        stockCount,
-      ];
+    id,
+    name,
+    description,
+    brand,
+    category,
+    subcategory,
+    price,
+    currency,
+    imageUrls,
+    sizes,
+    colors,
+    styleTags,
+    inStock,
+    stockCount,
+  ];
 
   Product copyWith({
     String? id,

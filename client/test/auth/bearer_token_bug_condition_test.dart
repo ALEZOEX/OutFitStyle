@@ -14,10 +14,12 @@ void main() {
 
       // Setup default mock behaviors
       when(() => mockSharedPreferences.getString(any())).thenReturn(null);
-      when(() => mockSharedPreferences.setString(any(), any()))
-          .thenAnswer((_) async => true);
-      when(() => mockSharedPreferences.remove(any()))
-          .thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.setString(any(), any()),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.remove(any()),
+      ).thenAnswer((_) async => true);
     });
 
     /// **Property 1: Bug Condition - Bearer Token Authentication for Authenticated Requests**
@@ -40,8 +42,9 @@ void main() {
         const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test';
 
         // Mock successful login response with access_token
-        when(() => mockSharedPreferences.getString('access_token'))
-            .thenReturn(accessToken);
+        when(
+          () => mockSharedPreferences.getString('access_token'),
+        ).thenReturn(accessToken);
 
         // Act & Assert
         // Verify that access_token is retrieved from SharedPreferences
@@ -60,8 +63,9 @@ void main() {
 
         // Track if setString was called with access_token
         var tokenStored = false;
-        when(() => mockSharedPreferences.setString('access_token', any()))
-            .thenAnswer((invocation) async {
+        when(
+          () => mockSharedPreferences.setString('access_token', any()),
+        ).thenAnswer((invocation) async {
           tokenStored = true;
           return true;
         });
@@ -74,8 +78,9 @@ void main() {
         // On UNFIXED code: This will FAIL because signIn doesn't store the token
         // On FIXED code: This will PASS because signIn extracts and stores the token
         expect(tokenStored, isTrue);
-        verify(() => mockSharedPreferences.setString('access_token', accessToken))
-            .called(1);
+        verify(
+          () => mockSharedPreferences.setString('access_token', accessToken),
+        ).called(1);
       },
     );
 
@@ -87,8 +92,9 @@ void main() {
 
         // Track if setString was called with access_token
         var tokenStored = false;
-        when(() => mockSharedPreferences.setString('access_token', any()))
-            .thenAnswer((invocation) async {
+        when(
+          () => mockSharedPreferences.setString('access_token', any()),
+        ).thenAnswer((invocation) async {
           tokenStored = true;
           return true;
         });
@@ -101,8 +107,9 @@ void main() {
         // On UNFIXED code: This will FAIL because signUp doesn't store the token
         // On FIXED code: This will PASS because signUp extracts and stores the token
         expect(tokenStored, isTrue);
-        verify(() => mockSharedPreferences.setString('access_token', accessToken))
-            .called(1);
+        verify(
+          () => mockSharedPreferences.setString('access_token', accessToken),
+        ).called(1);
       },
     );
 
@@ -114,8 +121,9 @@ void main() {
 
         // Track if setString was called with access_token
         var tokenStored = false;
-        when(() => mockSharedPreferences.setString('access_token', any()))
-            .thenAnswer((invocation) async {
+        when(
+          () => mockSharedPreferences.setString('access_token', any()),
+        ).thenAnswer((invocation) async {
           tokenStored = true;
           return true;
         });
@@ -128,40 +136,40 @@ void main() {
         // On UNFIXED code: This will FAIL because signInWithGoogle doesn't get token from backend
         // On FIXED code: This will PASS because signInWithGoogle exchanges Firebase token for access_token
         expect(tokenStored, isTrue);
-        verify(() => mockSharedPreferences.setString('access_token', accessToken))
-            .called(1);
+        verify(
+          () => mockSharedPreferences.setString('access_token', accessToken),
+        ).called(1);
       },
     );
 
-    test(
-      'Bug Condition: Logout should clear access_token from storage',
-      () async {
-        // Arrange
-        const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test';
+    test('Bug Condition: Logout should clear access_token from storage', () async {
+      // Arrange
+      const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test';
 
-        // First store a token
-        when(() => mockSharedPreferences.getString('access_token'))
-            .thenReturn(accessToken);
+      // First store a token
+      when(
+        () => mockSharedPreferences.getString('access_token'),
+      ).thenReturn(accessToken);
 
-        // Track if remove was called
-        var tokenRemoved = false;
-        when(() => mockSharedPreferences.remove('access_token'))
-            .thenAnswer((invocation) async {
-          tokenRemoved = true;
-          return true;
-        });
+      // Track if remove was called
+      var tokenRemoved = false;
+      when(() => mockSharedPreferences.remove('access_token')).thenAnswer((
+        invocation,
+      ) async {
+        tokenRemoved = true;
+        return true;
+      });
 
-        // Act
-        // Simulate removing the token (this is what SessionManager.signOut should do)
-        await mockSharedPreferences.remove('access_token');
+      // Act
+      // Simulate removing the token (this is what SessionManager.signOut should do)
+      await mockSharedPreferences.remove('access_token');
 
-        // Assert
-        // On UNFIXED code: This will FAIL because signOut doesn't clear the token
-        // On FIXED code: This will PASS because signOut removes the token
-        expect(tokenRemoved, isTrue);
-        verify(() => mockSharedPreferences.remove('access_token')).called(1);
-      },
-    );
+      // Assert
+      // On UNFIXED code: This will FAIL because signOut doesn't clear the token
+      // On FIXED code: This will PASS because signOut removes the token
+      expect(tokenRemoved, isTrue);
+      verify(() => mockSharedPreferences.remove('access_token')).called(1);
+    });
 
     test(
       'Bug Condition: Session restoration should restore access_token from storage',
@@ -170,8 +178,9 @@ void main() {
         const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.restored';
 
         // Mock SharedPreferences to return stored token
-        when(() => mockSharedPreferences.getString('access_token'))
-            .thenReturn(accessToken);
+        when(
+          () => mockSharedPreferences.getString('access_token'),
+        ).thenReturn(accessToken);
 
         // Act
         // Simulate restoring the token (this is what _initializeSession should do)
@@ -191,8 +200,9 @@ void main() {
       () async {
         // Arrange
         // Mock SharedPreferences to return null (no token stored)
-        when(() => mockSharedPreferences.getString('access_token'))
-            .thenReturn(null);
+        when(
+          () => mockSharedPreferences.getString('access_token'),
+        ).thenReturn(null);
 
         // Act
         final storedToken = mockSharedPreferences.getString('access_token');

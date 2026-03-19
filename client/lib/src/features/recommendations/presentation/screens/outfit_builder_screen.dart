@@ -12,13 +12,14 @@ class OutfitBuilderScreen extends ConsumerStatefulWidget {
   const OutfitBuilderScreen({super.key});
 
   @override
-  ConsumerState<OutfitBuilderScreen> createState() => _OutfitBuilderScreenState();
+  ConsumerState<OutfitBuilderScreen> createState() =>
+      _OutfitBuilderScreenState();
 }
 
 class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
   // Выбранные вещи по категориям
   final Map<String, WardrobeItem> _selectedItems = {};
-  
+
   // Название и описание образа
   String _outfitName = '';
   String _outfitDescription = '';
@@ -45,21 +46,17 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
           IconButton(
             icon: const Icon(Icons.save),
             tooltip: 'Сохранить образ',
-            onPressed: _selectedItems.isNotEmpty ? () => _saveOutfit(context) : null,
+            onPressed:
+                _selectedItems.isNotEmpty ? () => _saveOutfit(context) : null,
           ),
         ],
       ),
       body: Row(
         children: [
           // Левая панель - выбор вещей по категориям
-          Expanded(
-            flex: 2,
-            child: _buildCategoriesPanel(context, items),
-          ),
+          Expanded(flex: 2, child: _buildCategoriesPanel(context, items)),
           // Правая панель - предпросмотр образа
-          Expanded(
-            child: _buildPreviewPanel(context),
-          ),
+          Expanded(child: _buildPreviewPanel(context)),
         ],
       ),
     );
@@ -83,7 +80,9 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
             ),
             child: Row(
               children: [
@@ -115,7 +114,8 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
                 final categoryName = category.$2;
                 final categoryIcon = category.$3;
 
-                final categoryItems = items.where((item) => item.category == categoryId).toList();
+                final categoryItems =
+                    items.where((item) => item.category == categoryId).toList();
                 final selectedItem = _selectedItems[categoryId];
 
                 return _buildCategorySection(
@@ -159,10 +159,15 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: selectedItem != null
-                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
-                    : null,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                color:
+                    selectedItem != null
+                        ? theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.3,
+                        )
+                        : null,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
               ),
               child: Row(
                 children: [
@@ -200,7 +205,10 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
                   ),
                   if (selectedItem != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary,
                         borderRadius: BorderRadius.circular(12),
@@ -224,59 +232,69 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: items.map((item) {
-                  final isSelected = selectedItem?.id == item.id;
+                children:
+                    items.map((item) {
+                      final isSelected = selectedItem?.id == item.id;
 
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        if (isSelected) {
-                          _selectedItems.remove(categoryId);
-                        } else {
-                          _selectedItems[categoryId] = item;
-                        }
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? theme.colorScheme.primaryContainer
-                            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            if (isSelected) {
+                              _selectedItems.remove(categoryId);
+                            } else {
+                              _selectedItems[categoryId] = item;
+                            }
+                          });
+                        },
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.outline.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (isSelected) ...[
-                            Icon(
-                              Icons.check_circle,
-                              color: theme.colorScheme.primary,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          Flexible(
-                            child: Text(
-                              item.name ?? 'Без названия',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: isSelected ? FontWeight.bold : null,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? theme.colorScheme.primaryContainer
+                                    : theme.colorScheme.surfaceContainerHighest
+                                        .withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color:
+                                  isSelected
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.outline.withValues(
+                                        alpha: 0.3,
+                                      ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isSelected) ...[
+                                Icon(
+                                  Icons.check_circle,
+                                  color: theme.colorScheme.primary,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                              ],
+                              Flexible(
+                                child: Text(
+                                  item.name ?? 'Без названия',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight:
+                                        isSelected ? FontWeight.bold : null,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
               ),
             ),
         ],
@@ -336,9 +354,7 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
           const SizedBox(height: 24),
 
           // Визуализация образа
-          Expanded(
-            child: _buildOutfitVisualization(context),
-          ),
+          Expanded(child: _buildOutfitVisualization(context)),
           const SizedBox(height: 24),
 
           // Кнопки действий
@@ -373,7 +389,9 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
             Text(
               'Выберите вещи из категорий\nдля создания образа',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.7,
+                ),
               ),
               textAlign: TextAlign.center,
             ),
@@ -457,9 +475,10 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: _selectedItems.isNotEmpty
-                ? () => setState(() => _selectedItems.clear())
-                : null,
+            onPressed:
+                _selectedItems.isNotEmpty
+                    ? () => setState(() => _selectedItems.clear())
+                    : null,
             icon: const Icon(Icons.clear),
             label: const Text('Очистить'),
             style: OutlinedButton.styleFrom(
@@ -471,7 +490,8 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
         Expanded(
           flex: 2,
           child: ElevatedButton.icon(
-            onPressed: _selectedItems.isNotEmpty ? () => _saveOutfit(context) : null,
+            onPressed:
+                _selectedItems.isNotEmpty ? () => _saveOutfit(context) : null,
             icon: const Icon(Icons.save),
             label: const Text('Сохранить образ'),
             style: ElevatedButton.styleFrom(
@@ -491,31 +511,35 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
     final notifier = ref.read(recommendationsProvider.notifier);
 
     // Генерируем рекомендацию на основе выбранных вещей
-    notifier.generateRecommendation(
-      temperature: 20,
-      weatherCondition: 'clear',
-      occasion: 'custom',
-    ).then((recommendation) {
-      if (!context.mounted) return;
+    notifier
+        .generateRecommendation(
+          temperature: 20,
+          weatherCondition: 'clear',
+          occasion: 'custom',
+        )
+        .then((recommendation) {
+          if (!context.mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green[700]),
-              const SizedBox(width: 12),
-              const Text('Образ сохранён!'),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green[700]),
+                  const SizedBox(width: 12),
+                  const Text('Образ сохранён!'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
 
-      // Возвращаемся на экран рекомендаций
-      context.go('/recommendations');
-    });
+          // Возвращаемся на экран рекомендаций
+          context.go('/recommendations');
+        });
   }
 
   /// Получить иконку категории

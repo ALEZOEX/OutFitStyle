@@ -4,11 +4,8 @@ class SettingsSection extends StatelessWidget {
   final String title;
   final List<SettingsItem> items;
 
-  const SettingsSection({
-    Key? key,
-    required this.title,
-    required this.items,
-  }) : super(key: key);
+  const SettingsSection({Key? key, required this.title, required this.items})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +19,9 @@ class SettingsSection extends StatelessWidget {
             child: Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
           ),
           ...items.map((item) => item.build(context)).toList(),

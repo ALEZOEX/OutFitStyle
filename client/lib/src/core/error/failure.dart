@@ -25,7 +25,7 @@ class Failure {
 
 class ServerFailure extends Failure {
   const ServerFailure([String message = 'Server error', int? statusCode])
-      : super(message, statusCode: statusCode);
+    : super(message, statusCode: statusCode);
 }
 
 class NetworkFailure extends Failure {

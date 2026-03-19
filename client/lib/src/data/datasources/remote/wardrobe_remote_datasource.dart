@@ -45,10 +45,7 @@ class WardrobeRemoteDataSource implements IWardrobeRemoteDataSource {
 
   @override
   Future<void> addWardrobeItem(WardrobeItem item) async {
-    final response = await _apiClient.post(
-      '/wardrobe',
-      data: item.toJson(),
-    );
+    final response = await _apiClient.post('/wardrobe', data: item.toJson());
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw WardrobeRemoteException('Не удалось добавить элемент гардероба');
     }
@@ -60,10 +57,7 @@ class WardrobeRemoteDataSource implements IWardrobeRemoteDataSource {
     if (id == null) {
       throw WardrobeRemoteException('ID элемента не указан');
     }
-    final response = await _apiClient.put(
-      '/wardrobe/$id',
-      data: item.toJson(),
-    );
+    final response = await _apiClient.put('/wardrobe/$id', data: item.toJson());
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw WardrobeRemoteException('Не удалось обновить элемент гардероба');
     }
@@ -89,7 +83,9 @@ class WardrobeRemoteDataSource implements IWardrobeRemoteDataSource {
   Future<void> restoreWardrobeItem(String id) async {
     final response = await _apiClient.post('/wardrobe/$id/restore');
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw WardrobeRemoteException('Не удалось восстановить элемент из архива');
+      throw WardrobeRemoteException(
+        'Не удалось восстановить элемент из архива',
+      );
     }
   }
 }

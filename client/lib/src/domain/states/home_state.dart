@@ -12,12 +12,9 @@ abstract class HomeState with _$HomeState {
   const factory HomeState({
     @Default(AsyncValue.loading())
     AsyncValue<List<RecommendationRow>> todayRecommendations,
-    @Default(AsyncValue.loading())
-    AsyncValue<List<WardrobeItem>> wardrobeStats,
-    @Default(AsyncValue.data(null))
-    AsyncValue<WeatherEntity?> currentWeather,
-    @Default(AsyncValue.data(null))
-    AsyncValue<OutfitEntity?> currentOutfit,
+    @Default(AsyncValue.loading()) AsyncValue<List<WardrobeItem>> wardrobeStats,
+    @Default(AsyncValue.data(null)) AsyncValue<WeatherEntity?> currentWeather,
+    @Default(AsyncValue.data(null)) AsyncValue<OutfitEntity?> currentOutfit,
     @Default(false) bool isLoading,
     String? error,
   }) = _HomeState;

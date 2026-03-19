@@ -8,7 +8,8 @@ abstract class AchievementRepository {
   Future<Either<String, List<Achievement>>> getAllAchievements();
 
   Future<Either<String, List<AchievementProgress>>> getUserAchievements(
-      int userId);
+    int userId,
+  );
 
   Future<Either<String, AchievementProgress>> updateUserAchievement({
     required int userId,
@@ -22,7 +23,8 @@ abstract class AchievementRepository {
   });
 
   Future<Either<String, List<UserAchievementStatus>>> getUserAchievementStatus(
-      int userId);
+    int userId,
+  );
 
   Future<Either<String, UserAchievementStatus>> setUserAchievementStatus({
     required int userId,
@@ -38,13 +40,16 @@ abstract class AchievementRepository {
   });
 
   Future<Either<String, List<Achievement>>> getUserUnlockedAchievements(
-      int userId);
+    int userId,
+  );
 
   Future<Either<String, List<Achievement>>> getUserLockedAchievements(
-      int userId);
+    int userId,
+  );
 
   Future<Either<String, List<Achievement>>> getUserInProgressAchievements(
-      int userId);
+    int userId,
+  );
 
   Future<Either<String, AchievementProgress>> getAchievementProgress({
     required int userId,

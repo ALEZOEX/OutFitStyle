@@ -19,7 +19,10 @@ class WeatherDataRepository implements WeatherRepository {
   WeatherDataRepository(this._remoteDataSource);
 
   @override
-  Future<WeatherData> getWeatherByLocation(double latitude, double longitude) async {
+  Future<WeatherData> getWeatherByLocation(
+    double latitude,
+    double longitude,
+  ) async {
     final data = await _remoteDataSource.getCurrentWeather(latitude, longitude);
     return WeatherData.fromJson(data);
   }

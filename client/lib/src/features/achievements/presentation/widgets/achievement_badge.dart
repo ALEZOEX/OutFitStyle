@@ -24,22 +24,24 @@ class AchievementBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        gradient: isUnlocked
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.colorScheme.primaryContainer,
-                  theme.colorScheme.primaryContainer.withOpacity(0.5),
-                ],
-              )
-            : null,
+        gradient:
+            isUnlocked
+                ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primaryContainer,
+                    theme.colorScheme.primaryContainer.withOpacity(0.5),
+                  ],
+                )
+                : null,
         color: isUnlocked ? null : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isUnlocked
-              ? theme.colorScheme.primary.withOpacity(0.3)
-              : theme.colorScheme.outline.withOpacity(0.2),
+          color:
+              isUnlocked
+                  ? theme.colorScheme.primary.withOpacity(0.3)
+                  : theme.colorScheme.outline.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -49,9 +51,7 @@ class AchievementBadge extends StatelessWidget {
           // Иконка
           Text(
             achievement.icon,
-            style: TextStyle(
-              fontSize: _iconSizeForSize(size),
-            ),
+            style: TextStyle(fontSize: _iconSizeForSize(size)),
           ),
           const SizedBox(width: 8),
           // Название
@@ -59,9 +59,10 @@ class AchievementBadge extends StatelessWidget {
             achievement.title,
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: isUnlocked
-                  ? theme.colorScheme.onPrimaryContainer
-                  : theme.colorScheme.onSurfaceVariant,
+              color:
+                  isUnlocked
+                      ? theme.colorScheme.onPrimaryContainer
+                      : theme.colorScheme.onSurfaceVariant,
             ),
           ),
           // Очки
@@ -76,11 +77,7 @@ class AchievementBadge extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.star,
-                    size: 10,
-                    color: theme.colorScheme.tertiary,
-                  ),
+                  Icon(Icons.star, size: 10, color: theme.colorScheme.tertiary),
                   const SizedBox(width: 2),
                   Text(
                     '+${achievement.points}',
@@ -146,10 +143,7 @@ class CategoryBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            icon,
-            style: const TextStyle(fontSize: 16),
-          ),
+          Text(icon, style: const TextStyle(fontSize: 16)),
           const SizedBox(width: 8),
           Text(
             categoryName,
@@ -187,11 +181,7 @@ class RankBadge extends StatelessWidget {
   final String rank;
   final int totalPoints;
 
-  const RankBadge({
-    super.key,
-    required this.rank,
-    required this.totalPoints,
-  });
+  const RankBadge({super.key, required this.rank, required this.totalPoints});
 
   @override
   Widget build(BuildContext context) {
@@ -204,10 +194,7 @@ class RankBadge extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            rankData.color,
-            rankData.color.withOpacity(0.6),
-          ],
+          colors: [rankData.color, rankData.color.withOpacity(0.6)],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -221,11 +208,7 @@ class RankBadge extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            rankData.icon,
-            color: Colors.white,
-            size: 32,
-          ),
+          Icon(rankData.icon, color: Colors.white, size: 32),
           const SizedBox(height: 4),
           Text(
             rankData.displayName,

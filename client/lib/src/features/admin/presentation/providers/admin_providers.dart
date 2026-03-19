@@ -9,9 +9,7 @@ import '../../../../domain/repositories/admin_repository.dart';
 
 /// Провайдер AdminRemoteDataSource
 final adminRemoteDataSourceProvider = Provider<AdminRemoteDataSource>((ref) {
-  final config = const ApiConfig(
-    apiBase: ApiConfig.baseUrl,
-  );
+  final config = const ApiConfig(apiBase: ApiConfig.baseUrl);
   final apiClient = ref.watch(apiClientProvider);
   return AdminRemoteDataSource(config: config, apiClient: apiClient);
 });
@@ -64,9 +62,10 @@ class AdminUsersState {
 }
 
 /// Провайдер состояния списка пользователей
-final adminUsersStateProvider = StateNotifierProvider<AdminUsersNotifier, AdminUsersState>((ref) {
-  return AdminUsersNotifier(ref.watch(adminRepositoryProvider));
-});
+final adminUsersStateProvider =
+    StateNotifierProvider<AdminUsersNotifier, AdminUsersState>((ref) {
+      return AdminUsersNotifier(ref.watch(adminRepositoryProvider));
+    });
 
 /// Нотификер для управления состоянием пользователей
 class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
@@ -98,10 +97,7 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
         filter: filter ?? state.filter,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -133,23 +129,25 @@ class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
 
   /// Обновляет роль пользователя в локальном состоянии
   void updateUserRoleLocally(String userId, UserRole role) {
-    final updatedUsers = state.users.map((user) {
-      if (user.id == userId) {
-        return user.copyWith(role: role);
-      }
-      return user;
-    }).toList();
+    final updatedUsers =
+        state.users.map((user) {
+          if (user.id == userId) {
+            return user.copyWith(role: role);
+          }
+          return user;
+        }).toList();
     state = state.copyWith(users: updatedUsers);
   }
 
   /// Обновляет статус блокировки в локальном состоянии
   void updateUserBlockStatusLocally(String userId, bool isActive) {
-    final updatedUsers = state.users.map((user) {
-      if (user.id == userId) {
-        return user.copyWith(isActive: isActive);
-      }
-      return user;
-    }).toList();
+    final updatedUsers =
+        state.users.map((user) {
+          if (user.id == userId) {
+            return user.copyWith(isActive: isActive);
+          }
+          return user;
+        }).toList();
     state = state.copyWith(users: updatedUsers);
   }
 }

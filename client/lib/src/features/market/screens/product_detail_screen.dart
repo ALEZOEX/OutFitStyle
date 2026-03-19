@@ -11,13 +11,11 @@ import 'package:outfitstyle_client/src/theme/app_theme.dart';
 class ProductDetailScreen extends ConsumerStatefulWidget {
   final Product product;
 
-  const ProductDetailScreen({
-    super.key,
-    required this.product,
-  });
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
-  ConsumerState<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  ConsumerState<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
@@ -43,7 +41,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    isFavorite ? 'Удалено из избранного' : 'Добавлено в избранное',
+                    isFavorite
+                        ? 'Удалено из избранного'
+                        : 'Добавлено в избранное',
                   ),
                   duration: const Duration(seconds: 1),
                 ),
@@ -71,10 +71,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     imageUrl: product.imageUrls[index],
                     fit: BoxFit.cover,
                     width: double.infinity,
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                    placeholder:
+                        (context, url) =>
+                            const Center(child: CircularProgressIndicator()),
+                    errorWidget:
+                        (context, url, error) => const Icon(Icons.error),
                   );
                 },
               ),
@@ -94,9 +95,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _currentImageIndex == index
-                            ? AppColors.primary
-                            : Colors.grey,
+                        color:
+                            _currentImageIndex == index
+                                ? AppColors.primary
+                                : Colors.grey,
                       ),
                     ),
                   ),
@@ -112,9 +114,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   // Brand and name
                   Text(
                     product.brand,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -160,18 +162,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: product.sizes.map((size) {
-                        final isSelected = _selectedSize == size;
-                        return ChoiceChip(
-                          label: Text(size),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedSize = selected ? size : null;
-                            });
-                          },
-                        );
-                      }).toList(),
+                      children:
+                          product.sizes.map((size) {
+                            final isSelected = _selectedSize == size;
+                            return ChoiceChip(
+                              label: Text(size),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  _selectedSize = selected ? size : null;
+                                });
+                              },
+                            );
+                          }).toList(),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -188,18 +191,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: product.colors.map((color) {
-                        final isSelected = _selectedColor == color;
-                        return ChoiceChip(
-                          label: Text(_capitalize(color)),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedColor = selected ? color : null;
-                            });
-                          },
-                        );
-                      }).toList(),
+                      children:
+                          product.colors.map((color) {
+                            final isSelected = _selectedColor == color;
+                            return ChoiceChip(
+                              label: Text(_capitalize(color)),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  _selectedColor = selected ? color : null;
+                                });
+                              },
+                            );
+                          }).toList(),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -261,7 +265,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ),
                       child: const Text(
                         'Добавить в корзину',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -276,9 +283,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Future<void> _addToCart() async {
     if (!widget.product.inStock) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Товар недоступен')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Товар недоступен')));
       return;
     }
 

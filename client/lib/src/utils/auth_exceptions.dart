@@ -4,11 +4,7 @@ class AuthException implements Exception {
   final String message;
   final String? details;
 
-  AuthException({
-    required this.code,
-    required this.message,
-    this.details,
-  });
+  AuthException({required this.code, required this.message, this.details});
 
   @override
   String toString() =>

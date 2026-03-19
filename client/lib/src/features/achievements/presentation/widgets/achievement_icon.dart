@@ -26,38 +26,45 @@ class AchievementIcon extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: isUnlocked
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  _getGradientColor(theme, achievement.category),
-                  _getGradientColor(theme, achievement.category).withOpacity(0.6),
-                ],
-              )
-            : null,
-        color: isUnlocked
-            ? null
-            : theme.colorScheme.surfaceContainerHighest,
+        gradient:
+            isUnlocked
+                ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    _getGradientColor(theme, achievement.category),
+                    _getGradientColor(
+                      theme,
+                      achievement.category,
+                    ).withOpacity(0.6),
+                  ],
+                )
+                : null,
+        color: isUnlocked ? null : theme.colorScheme.surfaceContainerHighest,
         shape: BoxShape.circle,
-        border: showUnlockedBorder
-            ? Border.all(
-                color: isUnlocked
-                    ? _getGradientColor(theme, achievement.category)
-                    : theme.colorScheme.outline.withOpacity(0.3),
-                width: isUnlocked ? 3 : 1,
-              )
-            : null,
-        boxShadow: isUnlocked
-            ? [
-                BoxShadow(
-                  color: _getGradientColor(theme, achievement.category)
-                      .withOpacity(0.3),
-                  blurRadius: 8,
-                  spreadRadius: 2,
-                ),
-              ]
-            : null,
+        border:
+            showUnlockedBorder
+                ? Border.all(
+                  color:
+                      isUnlocked
+                          ? _getGradientColor(theme, achievement.category)
+                          : theme.colorScheme.outline.withOpacity(0.3),
+                  width: isUnlocked ? 3 : 1,
+                )
+                : null,
+        boxShadow:
+            isUnlocked
+                ? [
+                  BoxShadow(
+                    color: _getGradientColor(
+                      theme,
+                      achievement.category,
+                    ).withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                  ),
+                ]
+                : null,
       ),
       child: Center(
         child: Text(
@@ -100,11 +107,7 @@ class CategoryIcon extends StatelessWidget {
   final AchievementCategory category;
   final double size;
 
-  const CategoryIcon({
-    super.key,
-    required this.category,
-    this.size = 40,
-  });
+  const CategoryIcon({super.key, required this.category, this.size = 40});
 
   @override
   Widget build(BuildContext context) {
@@ -125,10 +128,7 @@ class CategoryIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
-        child: Text(
-          category.icon,
-          style: const TextStyle(fontSize: 20),
-        ),
+        child: Text(category.icon, style: const TextStyle(fontSize: 20)),
       ),
     );
   }

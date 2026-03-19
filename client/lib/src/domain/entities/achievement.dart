@@ -57,7 +57,8 @@ abstract class Achievement with _$Achievement {
     String? type,
   }) = _Achievement;
 
-  factory Achievement.fromJson(Map<String, dynamic> json) => _$AchievementFromJson(json);
+  factory Achievement.fromJson(Map<String, dynamic> json) =>
+      _$AchievementFromJson(json);
 }
 
 /// Расширение для получения процента прогресса достижения

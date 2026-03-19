@@ -18,7 +18,9 @@ final achievementsApiServiceProvider = Provider<AchievementsApiService>((ref) {
 });
 
 /// Провайдер репозитория достижений (с API интеграцией)
-final achievementsRepositoryProvider = Provider<AchievementsRepositoryImpl>((ref) {
+final achievementsRepositoryProvider = Provider<AchievementsRepositoryImpl>((
+  ref,
+) {
   final apiService = ref.watch(achievementsApiServiceProvider);
   final repo = AchievementsRepositoryImpl(apiService);
   ref.onDispose(() => repo.dispose());
@@ -38,34 +40,38 @@ final achievementsStatsProvider = Provider<AchievementStats>((ref) {
 });
 
 /// Провайдер достижений с фильтром
-final filteredAchievementsProvider = Provider.family<List<Achievement>, AchievementFilter>((ref, filter) {
-  final repository = ref.watch(achievementsRepositoryProvider);
-  return repository.getWithFilter(filter);
-});
+final filteredAchievementsProvider =
+    Provider.family<List<Achievement>, AchievementFilter>((ref, filter) {
+      final repository = ref.watch(achievementsRepositoryProvider);
+      return repository.getWithFilter(filter);
+    });
 
 /// Провайдер достижений по категории
-final achievementsByCategoryProvider = Provider.family<List<Achievement>, AchievementCategory>((ref, category) {
-  final repository = ref.watch(achievementsRepositoryProvider);
-  return repository.getByCategory(category);
-});
+final achievementsByCategoryProvider =
+    Provider.family<List<Achievement>, AchievementCategory>((ref, category) {
+      final repository = ref.watch(achievementsRepositoryProvider);
+      return repository.getByCategory(category);
+    });
 
 /// Провайдер прогресса по категории
-final categoryProgressProvider = Provider.family<CategoryProgress, AchievementCategory>((ref, category) {
-  final repository = ref.watch(achievementsRepositoryProvider);
-  return repository.getCategoryProgress(category);
-});
+final categoryProgressProvider =
+    Provider.family<CategoryProgress, AchievementCategory>((ref, category) {
+      final repository = ref.watch(achievementsRepositoryProvider);
+      return repository.getCategoryProgress(category);
+    });
 
 /// Провайдер для отслеживания только что разблокированных достижений
-final newlyUnlockedAchievementsProvider = StateProvider<List<Achievement>>((ref) => []);
+final newlyUnlockedAchievementsProvider = StateProvider<List<Achievement>>(
+  (ref) => [],
+);
 
 /// Провайдер данных достижений пользователя из API
-final userAchievementsDataProvider = FutureProvider<UserAchievementsData>((ref) async {
+final userAchievementsDataProvider = FutureProvider<UserAchievementsData>((
+  ref,
+) async {
   final repository = ref.watch(achievementsRepositoryProvider);
   final result = await repository.getUserAchievementsData();
-  return result.fold(
-    (error) => throw Exception(error),
-    (data) => data,
-  );
+  return result.fold((error) => throw Exception(error), (data) => data);
 });
 
 /// State notifier для управления достижениями
@@ -100,13 +106,10 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
   Future<UserAchievementsData?> loadUserAchievements() async {
     try {
       final result = await _repository.getUserAchievementsData();
-      return result.fold(
-        (error) {
-          debugPrint('Ошибка загрузки достижений пользователя: $error');
-          return null;
-        },
-        (data) => data,
-      );
+      return result.fold((error) {
+        debugPrint('Ошибка загрузки достижений пользователя: $error');
+        return null;
+      }, (data) => data);
     } catch (e) {
       debugPrint('Ошибка загрузки достижений пользователя: $e');
       return null;
@@ -114,18 +117,27 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
   }
 
   /// Обновить прогресс достижения
-  Future<Achievement?> updateAchievementProgress(String achievementId, int progress) async {
+  Future<Achievement?> updateAchievementProgress(
+    String achievementId,
+    int progress,
+  ) async {
     return await _repository.updateProgress(achievementId, progress);
   }
 
   /// Увеличить прогресс достижения
-  Future<Achievement?> incrementAchievementProgress(String achievementId, {int by = 1}) async {
+  Future<Achievement?> incrementAchievementProgress(
+    String achievementId, {
+    int by = 1,
+  }) async {
     return await _repository.incrementProgress(achievementId, by: by);
   }
 
   /// Разблокировать достижение
   Future<void> unlockAchievement(String achievementId) async {
-    await _repository.unlockAchievement(userId: 0, achievementId: int.tryParse(achievementId) ?? 0);
+    await _repository.unlockAchievement(
+      userId: 0,
+      achievementId: int.tryParse(achievementId) ?? 0,
+    );
   }
 
   /// Сбросить прогресс достижения
@@ -149,26 +161,32 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
     required String eventType,
     int value = 1,
   }) async {
-    final result = await _repository.trackEvent(eventType: eventType, value: value);
-    return result.fold(
-      (error) {
-        debugPrint('Ошибка трекинга события: $error');
-        return [];
-      },
-      (achievements) => achievements,
+    final result = await _repository.trackEvent(
+      eventType: eventType,
+      value: value,
     );
+    return result.fold((error) {
+      debugPrint('Ошибка трекинга события: $error');
+      return [];
+    }, (achievements) => achievements);
   }
 
   /// Обработать событие для трекинга достижений (локальная версия)
   /// Возвращает список только что разблокированных достижений
-  Future<List<Achievement>> handleEvent(AchievementEventType type, {int value = 1}) async {
+  Future<List<Achievement>> handleEvent(
+    AchievementEventType type, {
+    int value = 1,
+  }) async {
     final newlyUnlocked = <Achievement>[];
 
     // Маппинг событий на достижения
     final eventAchievementMap = _getAchievementsForEvent(type);
 
     for (final achievementId in eventAchievementMap) {
-      final result = await _repository.incrementProgress(achievementId, by: value);
+      final result = await _repository.incrementProgress(
+        achievementId,
+        by: value,
+      );
       if (result != null) {
         newlyUnlocked.add(result);
       }
@@ -181,9 +199,22 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
   List<String> _getAchievementsForEvent(AchievementEventType type) {
     switch (type) {
       case AchievementEventType.addItem:
-        return ['first_item', 'wardrobe_10', 'wardrobe_50', 'wardrobe_100', 'wardrobe_500', 'wardrobe_1000'];
+        return [
+          'first_item',
+          'wardrobe_10',
+          'wardrobe_50',
+          'wardrobe_100',
+          'wardrobe_500',
+          'wardrobe_1000',
+        ];
       case AchievementEventType.useRecommendation:
-        return ['first_recommendation', 'recommendation_10', 'recommendation_50', 'recommendation_100', 'recommendation_500'];
+        return [
+          'first_recommendation',
+          'recommendation_10',
+          'recommendation_50',
+          'recommendation_100',
+          'recommendation_500',
+        ];
       case AchievementEventType.rateRecommendation:
         return ['first_rating', 'critic', 'rating_100'];
       case AchievementEventType.planOutfit:
@@ -209,7 +240,15 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
       case AchievementEventType.createOutfit:
         return ['trendsetter'];
       case AchievementEventType.dailyLogin:
-        return ['first_day', 'first_week', 'first_month', 'first_year', 'daily_user', 'perfect_week', 'perfect_month'];
+        return [
+          'first_day',
+          'first_week',
+          'first_month',
+          'first_year',
+          'daily_user',
+          'perfect_week',
+          'perfect_month',
+        ];
     }
   }
 }
@@ -263,10 +302,11 @@ enum AchievementEventType {
 }
 
 /// Провайдер notifier
-final achievementsNotifierProvider = StateNotifierProvider<AchievementsNotifier, AchievementsState>((ref) {
-  final repository = ref.watch(achievementsRepositoryProvider);
-  return AchievementsNotifier(repository);
-});
+final achievementsNotifierProvider =
+    StateNotifierProvider<AchievementsNotifier, AchievementsState>((ref) {
+      final repository = ref.watch(achievementsRepositoryProvider);
+      return AchievementsNotifier(repository);
+    });
 
 /// Состояние достижений
 class AchievementsState {
@@ -302,7 +342,9 @@ class AchievementsState {
 
   /// Получить достижения в процессе
   List<Achievement> get inProgressAchievements =>
-      achievements.where((a) => !a.isUnlocked && a.currentProgress > 0).toList();
+      achievements
+          .where((a) => !a.isUnlocked && a.currentProgress > 0)
+          .toList();
 
   /// Общий прогресс
   double get overallProgress {

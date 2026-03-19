@@ -6,8 +6,7 @@ part 'ui_states.freezed.dart';
 @freezed
 abstract class AdminState with _$AdminState {
   const factory AdminState({
-    @Default(AsyncValue.loading())
-    AsyncValue<Map<String, dynamic>> adminData,
+    @Default(AsyncValue.loading()) AsyncValue<Map<String, dynamic>> adminData,
     @Default(false) bool isLoading,
     String? error,
   }) = _AdminState;

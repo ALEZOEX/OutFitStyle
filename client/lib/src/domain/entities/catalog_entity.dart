@@ -5,7 +5,7 @@ part 'catalog_entity.freezed.dart';
 part 'catalog_entity.g.dart';
 
 /// Сущность элемента каталога одежды
-/// 
+///
 /// Соответствует доменной модели ClothingItem на сервере (Go)
 /// Используется для отображения базового каталога вещей
 @freezed

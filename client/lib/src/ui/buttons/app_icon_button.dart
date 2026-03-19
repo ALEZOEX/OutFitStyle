@@ -36,32 +36,31 @@ class AppIconButton extends StatelessWidget {
     Color buttonColor = backgroundColor ?? theme.cardColor;
     Color iconColor = color ?? theme.primaryColor;
 
-    Widget buttonContent = isLoading
-        ? SizedBox(
-            width: iconSize,
-            height: iconSize,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.0,
-              valueColor: AlwaysStoppedAnimation<Color>(iconColor),
-            ),
-          )
-        : Icon(
-            icon,
-            size: iconSize,
-            color: iconColor,
-          );
+    Widget buttonContent =
+        isLoading
+            ? SizedBox(
+              width: iconSize,
+              height: iconSize,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.0,
+                valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+              ),
+            )
+            : Icon(icon, size: iconSize, color: iconColor);
 
     Widget button = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: variant == IconButtonVariant.filled
-            ? buttonColor
-            : Colors.transparent,
+        color:
+            variant == IconButtonVariant.filled
+                ? buttonColor
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: variant == IconButtonVariant.outlined
-            ? Border.all(color: buttonColor, width: 2.0)
-            : null,
+        border:
+            variant == IconButtonVariant.outlined
+                ? Border.all(color: buttonColor, width: 2.0)
+                : null,
       ),
       child: Material(
         color: Colors.transparent,
@@ -77,10 +76,7 @@ class AppIconButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      return Tooltip(
-        message: tooltip,
-        child: button,
-      );
+      return Tooltip(message: tooltip, child: button);
     }
 
     return button;

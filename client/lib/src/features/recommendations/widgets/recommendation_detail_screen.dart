@@ -6,17 +6,12 @@ import '../../../domain/entities/recommendation.dart';
 class RecommendationDetailScreen extends ConsumerWidget {
   final Recommendation recommendation;
 
-  const RecommendationDetailScreen({
-    super.key,
-    required this.recommendation,
-  });
+  const RecommendationDetailScreen({super.key, required this.recommendation});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Детали рекомендации'),
-      ),
+      appBar: AppBar(title: const Text('Детали рекомендации')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -36,7 +31,9 @@ class RecommendationDetailScreen extends ConsumerWidget {
                     const SizedBox(height: 16),
                     if (recommendation.weather != null)
                       _buildWeatherInfoFromObject(
-                          'Погода', recommendation.weather),
+                        'Погода',
+                        recommendation.weather,
+                      ),
                   ],
                 ),
               ),
@@ -78,12 +75,15 @@ class RecommendationDetailScreen extends ConsumerWidget {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: (recommendation.outfit?.clothingItemIds ?? [])
-                          .map((itemId) => Chip(
-                                label: Text('Элемент $itemId'),
-                                avatar: const Icon(Icons.checkroom, size: 16),
-                              ))
-                          .toList(),
+                      children:
+                          (recommendation.outfit?.clothingItemIds ?? [])
+                              .map(
+                                (itemId) => Chip(
+                                  label: Text('Элемент $itemId'),
+                                  avatar: const Icon(Icons.checkroom, size: 16),
+                                ),
+                              )
+                              .toList(),
                     ),
                   ],
                 ),
@@ -104,31 +104,50 @@ class RecommendationDetailScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 16),
-                    _buildDetailRow('Тип рекомендации',
-                        (recommendation.type?.displayName ?? '')),
                     _buildDetailRow(
-                        'Источник', (recommendation.source?.displayName ?? '')),
+                      'Тип рекомендации',
+                      (recommendation.type?.displayName ?? ''),
+                    ),
                     _buildDetailRow(
-                        'Доверие модели', '${recommendation.confidenceScore}%'),
-                    _buildDetailRow('Дата создания',
-                        recommendation.createdAt != null ? recommendation.createdAt.toString() : 'N/A'),
+                      'Источник',
+                      (recommendation.source?.displayName ?? ''),
+                    ),
                     _buildDetailRow(
-                        'Теги', (recommendation.tags ?? []).join(', ')),
+                      'Доверие модели',
+                      '${recommendation.confidenceScore}%',
+                    ),
                     _buildDetailRow(
-                        'Случаи',
-                        (recommendation.outfit != null ? (recommendation.outfit!.occasions ?? []) : [])
-                            .map((o) => o.displayName)
-                            .join(', ')),
+                      'Дата создания',
+                      recommendation.createdAt != null
+                          ? recommendation.createdAt.toString()
+                          : 'N/A',
+                    ),
                     _buildDetailRow(
-                        'Погодные условия',
-                        (recommendation.outfit != null ? (recommendation.outfit!.weatherConditions ?? []) : [])
-                            .map((w) => w.displayName)
-                            .join(', ')),
+                      'Теги',
+                      (recommendation.tags ?? []).join(', '),
+                    ),
                     _buildDetailRow(
-                        'Сезоны',
-                        (recommendation.outfit?.seasons ?? [])
-                            .map((s) => s.displayName)
-                            .join(', ')),
+                      'Случаи',
+                      (recommendation.outfit != null
+                              ? (recommendation.outfit!.occasions ?? [])
+                              : [])
+                          .map((o) => o.displayName)
+                          .join(', '),
+                    ),
+                    _buildDetailRow(
+                      'Погодные условия',
+                      (recommendation.outfit != null
+                              ? (recommendation.outfit!.weatherConditions ?? [])
+                              : [])
+                          .map((w) => w.displayName)
+                          .join(', '),
+                    ),
+                    _buildDetailRow(
+                      'Сезоны',
+                      (recommendation.outfit?.seasons ?? [])
+                          .map((s) => s.displayName)
+                          .join(', '),
+                    ),
                   ],
                 ),
               ),
@@ -162,14 +181,13 @@ class RecommendationDetailScreen extends ConsumerWidget {
         children: [
           Expanded(
             flex: 1,
-            child: Text(label,
-                style: const TextStyle(fontWeight: FontWeight.w500)),
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            flex: 2,
-            child: Text(value, textAlign: TextAlign.right),
-          ),
+          Expanded(flex: 2, child: Text(value, textAlign: TextAlign.right)),
         ],
       ),
     );

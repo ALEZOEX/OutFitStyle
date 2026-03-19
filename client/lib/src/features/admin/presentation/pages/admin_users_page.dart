@@ -48,7 +48,8 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(adminUsersStateProvider.notifier).loadUsers(),
+            onPressed:
+                () => ref.read(adminUsersStateProvider.notifier).loadUsers(),
             tooltip: 'Обновить',
           ),
         ],
@@ -59,9 +60,10 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
           _buildSearchAndFilters(theme),
           // Список пользователей
           Expanded(
-            child: state.isLoading && state.users.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : state.error != null && state.users.isEmpty
+            child:
+                state.isLoading && state.users.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : state.error != null && state.users.isEmpty
                     ? _buildError(state.error!, theme)
                     : _buildUserList(state, theme),
           ),
@@ -90,26 +92,30 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
             decoration: InputDecoration(
               hintText: 'Поиск по email или имени',
               prefixIcon: const Icon(Icons.search),
-              suffixIcon: _isSearching
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(strokeWidth: 2),
+              suffixIcon:
+                  _isSearching
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                      : IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          _applyFilters();
+                        },
                       ),
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        _applyFilters();
-                      },
-                    ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
             onChanged: (value) {
               setState(() => _isSearching = value.isNotEmpty);
@@ -158,9 +164,10 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
 
   /// Чип фильтра по статусу
   Widget _buildStatusFilterChip() {
-    final label = _isActive == null
-        ? 'Все статусы'
-        : _isActive!
+    final label =
+        _isActive == null
+            ? 'Все статусы'
+            : _isActive!
             ? 'Активные'
             : 'Неактивные';
     return PopupMenuButton<bool?>(
@@ -169,17 +176,19 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
         setState(() => _isActive = value);
         _applyFilters();
       },
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: null, child: Text('Все статусы')),
-        const PopupMenuItem(value: true, child: Text('Активные')),
-        const PopupMenuItem(value: false, child: Text('Неактивные')),
-      ],
+      itemBuilder:
+          (context) => [
+            const PopupMenuItem(value: null, child: Text('Все статусы')),
+            const PopupMenuItem(value: true, child: Text('Активные')),
+            const PopupMenuItem(value: false, child: Text('Неактивные')),
+          ],
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: _isActive == null
-              ? Colors.grey.shade200
-              : _isActive!
+          color:
+              _isActive == null
+                  ? Colors.grey.shade200
+                  : _isActive!
                   ? Colors.green.shade100
                   : Colors.red.shade100,
           borderRadius: BorderRadius.circular(20),
@@ -192,9 +201,10 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: _isActive == null
-                    ? Colors.black87
-                    : _isActive!
+                color:
+                    _isActive == null
+                        ? Colors.black87
+                        : _isActive!
                         ? Colors.green.shade800
                         : Colors.red.shade800,
               ),
@@ -276,9 +286,13 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
-            onPressed: state.currentPage > 1
-                ? () => ref.read(adminUsersStateProvider.notifier).previousPage()
-                : null,
+            onPressed:
+                state.currentPage > 1
+                    ? () =>
+                        ref
+                            .read(adminUsersStateProvider.notifier)
+                            .previousPage()
+                    : null,
             icon: const Icon(Icons.chevron_left),
           ),
           Text(
@@ -286,9 +300,11 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
             style: theme.textTheme.bodyMedium,
           ),
           IconButton(
-            onPressed: state.currentPage < state.totalPages
-                ? () => ref.read(adminUsersStateProvider.notifier).nextPage()
-                : null,
+            onPressed:
+                state.currentPage < state.totalPages
+                    ? () =>
+                        ref.read(adminUsersStateProvider.notifier).nextPage()
+                    : null,
             icon: const Icon(Icons.chevron_right),
           ),
         ],
@@ -304,16 +320,9 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
             const SizedBox(height: 16),
-            Text(
-              'Ошибка загрузки',
-              style: theme.textTheme.titleLarge,
-            ),
+            Text('Ошибка загрузки', style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
               error,
@@ -324,7 +333,8 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () => ref.read(adminUsersStateProvider.notifier).loadUsers(),
+              onPressed:
+                  () => ref.read(adminUsersStateProvider.notifier).loadUsers(),
               icon: const Icon(Icons.refresh),
               label: const Text('Повторить'),
             ),
@@ -359,36 +369,43 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
     final willBlock = user.isActive;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(willBlock ? 'Заблокировать пользователя?' : 'Разблокировать пользователя?'),
-        content: Text(
-          willBlock
-              ? 'Пользователь ${user.email} потеряет доступ к приложению.'
-              : 'Пользователь ${user.email} сможет снова войти в приложение.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              willBlock
+                  ? 'Заблокировать пользователя?'
+                  : 'Разблокировать пользователя?',
+            ),
+            content: Text(
+              willBlock
+                  ? 'Пользователь ${user.email} потеряет доступ к приложению.'
+                  : 'Пользователь ${user.email} сможет снова войти в приложение.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ref
+                      .read(adminUserActionsProvider)
+                      .blockUser(user.id, willBlock);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        willBlock
+                            ? 'Пользователь заблокирован'
+                            : 'Пользователь разблокирован',
+                      ),
+                    ),
+                  );
+                },
+                child: Text(willBlock ? 'Заблокировать' : 'Разблокировать'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(adminUserActionsProvider)
-                  .blockUser(user.id, willBlock);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    willBlock ? 'Пользователь заблокирован' : 'Пользователь разблокирован',
-                  ),
-                ),
-              );
-            },
-            child: Text(willBlock ? 'Заблокировать' : 'Разблокировать'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -396,46 +413,55 @@ class _AdminUsersPageState extends ConsumerState<AdminUsersPage> {
   void _showRoleDialog(AdminUser user) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Изменить роль'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Пользователь'),
-              subtitle: const Text('Обычный пользователь'),
-              selected: user.role == UserRole.user,
-              onTap: () {
-                Navigator.pop(context);
-                ref.read(adminUserActionsProvider).updateUserRole(user.id, UserRole.user);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Роль изменена на "Пользователь"')),
-                );
-              },
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Изменить роль'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.person),
+                  title: const Text('Пользователь'),
+                  subtitle: const Text('Обычный пользователь'),
+                  selected: user.role == UserRole.user,
+                  onTap: () {
+                    Navigator.pop(context);
+                    ref
+                        .read(adminUserActionsProvider)
+                        .updateUserRole(user.id, UserRole.user);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Роль изменена на "Пользователь"'),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.admin_panel_settings),
+                  title: const Text('Администратор'),
+                  subtitle: const Text('Полный доступ к админ-панели'),
+                  selected: user.role == UserRole.admin,
+                  onTap: () {
+                    Navigator.pop(context);
+                    ref
+                        .read(adminUserActionsProvider)
+                        .updateUserRole(user.id, UserRole.admin);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Роль изменена на "Администратор"'),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.admin_panel_settings),
-              title: const Text('Администратор'),
-              subtitle: const Text('Полный доступ к админ-панели'),
-              selected: user.role == UserRole.admin,
-              onTap: () {
-                Navigator.pop(context);
-                ref.read(adminUserActionsProvider).updateUserRole(user.id, UserRole.admin);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Роль изменена на "Администратор"')),
-                );
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

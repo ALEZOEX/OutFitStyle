@@ -12,11 +12,7 @@ class ProductCard extends ConsumerWidget {
   final Product product;
   final VoidCallback? onTap;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-    this.onTap,
-  });
+  const ProductCard({super.key, required this.product, this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,9 +21,7 @@ class ProductCard extends ConsumerWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap ?? () => _navigateToDetail(context),
         child: Column(
@@ -41,14 +35,18 @@ class ProductCard extends ConsumerWidget {
                   CachedNetworkImage(
                     imageUrl: product.imageUrls.firstOrNull ?? '',
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[200],
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.image_not_supported),
-                    ),
+                    placeholder:
+                        (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                    errorWidget:
+                        (context, url, error) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.image_not_supported),
+                        ),
                   ),
 
                   // Out of stock overlay
@@ -71,17 +69,23 @@ class ProductCard extends ConsumerWidget {
                     top: 8,
                     right: 8,
                     child: IconButton(
-                      icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                      ),
                       color: isFavorite ? Colors.red : Colors.white,
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.black54,
                       ),
                       onPressed: () {
-                        ref.read(favoriteProvider.notifier).toggleFavorite(product.id);
+                        ref
+                            .read(favoriteProvider.notifier)
+                            .toggleFavorite(product.id);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              isFavorite ? 'Удалено из избранного' : 'Добавлено в избранное',
+                              isFavorite
+                                  ? 'Удалено из избранного'
+                                  : 'Добавлено в избранное',
                             ),
                             duration: const Duration(seconds: 1),
                           ),
@@ -102,9 +106,9 @@ class ProductCard extends ConsumerWidget {
                   // Brand
                   Text(
                     product.brand,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -126,7 +130,9 @@ class ProductCard extends ConsumerWidget {
                     children: [
                       Text(
                         '${product.price.toStringAsFixed(0)} ₽',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
@@ -172,7 +178,7 @@ class ProductCard extends ConsumerWidget {
         size: product.sizes.first,
         color: product.colors.firstOrNull,
       );
-      
+
       try {
         await ref.read(cartProvider.notifier).addToCart(request);
         if (context.mounted) {
@@ -187,10 +193,7 @@ class ProductCard extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Ошибка: $e'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
           );
         }
       }
@@ -198,18 +201,20 @@ class ProductCard extends ConsumerWidget {
       // Показываем диалог выбора размера
       final selectedSize = await showDialog<String>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Выберите размер'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: product.sizes.map((size) {
-              return ListTile(
-                title: Text(size),
-                onTap: () => Navigator.pop(context, size),
-              );
-            }).toList(),
-          ),
-        ),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Выберите размер'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children:
+                    product.sizes.map((size) {
+                      return ListTile(
+                        title: Text(size),
+                        onTap: () => Navigator.pop(context, size),
+                      );
+                    }).toList(),
+              ),
+            ),
       );
 
       if (selectedSize != null) {

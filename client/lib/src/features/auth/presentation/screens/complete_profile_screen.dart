@@ -15,9 +15,7 @@ import '../../../../utils/logger.dart';
 /// Провайдер для ProfileRepository
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
-  return ProfileRepository(
-    apiClient: apiClient,
-  );
+  return ProfileRepository(apiClient: apiClient);
 });
 
 /// Провайдер для ProfileStorage
@@ -26,12 +24,7 @@ final profileStorageProvider = Provider<ProfileStorage>((ref) {
 });
 
 /// Состояние экрана заполнения профиля
-enum CompleteProfileState {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum CompleteProfileState { initial, loading, success, error }
 
 /// Экран заполнения профиля после регистрации через Google
 class CompleteProfileScreen extends ConsumerStatefulWidget {
@@ -45,7 +38,8 @@ class CompleteProfileScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CompleteProfileScreen> createState() => _CompleteProfileScreenState();
+  ConsumerState<CompleteProfileScreen> createState() =>
+      _CompleteProfileScreenState();
 }
 
 class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
@@ -151,10 +145,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
 
       // 1. Обновляем профиль на сервере
       try {
-        await profileRepository.updateProfile(
-          name: displayName,
-          email: email,
-        );
+        await profileRepository.updateProfile(name: displayName, email: email);
       } catch (e) {
         AppLogger.error('Error updating profile', e);
       }
@@ -219,10 +210,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
     final isLoading = _state == CompleteProfileState.loading;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Заполните профиль'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Заполните профиль'), centerTitle: true),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -260,64 +248,67 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                         color: theme.colorScheme.surfaceContainerHighest,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                          color: theme.colorScheme.outline.withValues(
+                            alpha: 0.3,
+                          ),
                           width: 2,
                         ),
                       ),
-                      child: _photoFile != null
-                          ? Stack(
-                              children: [
-                                ClipOval(
-                                  child: Image.file(
-                                    _photoFile!,
-                                    fit: BoxFit.cover,
-                                    width: 120,
-                                    height: 120,
+                      child:
+                          _photoFile != null
+                              ? Stack(
+                                children: [
+                                  ClipOval(
+                                    child: Image.file(
+                                      _photoFile!,
+                                      fit: BoxFit.cover,
+                                      width: 120,
+                                      height: 120,
+                                    ),
                                   ),
-                                ),
-                                // Кнопка удаления
-                                Positioned(
-                                  right: 0,
-                                  bottom: 0,
-                                  child: GestureDetector(
-                                    onTap: isLoading ? null : _clearPhoto,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.error,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: theme.colorScheme.surface,
-                                          width: 2,
+                                  // Кнопка удаления
+                                  Positioned(
+                                    right: 0,
+                                    bottom: 0,
+                                    child: GestureDetector(
+                                      onTap: isLoading ? null : _clearPhoto,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.error,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: theme.colorScheme.surface,
+                                            width: 2,
+                                          ),
                                         ),
-                                      ),
-                                      child: Icon(
-                                        Icons.close,
-                                        size: 16,
-                                        color: theme.colorScheme.onError,
+                                        child: Icon(
+                                          Icons.close,
+                                          size: 16,
+                                          color: theme.colorScheme.onError,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.add_a_photo_outlined,
-                                  size: 40,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Добавить фото',
-                                  style: theme.textTheme.labelLarge?.copyWith(
-                                    color: theme.colorScheme.primary,
+                                ],
+                              )
+                              : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_a_photo_outlined,
+                                    size: 40,
+                                    color: theme.colorScheme.onSurfaceVariant,
                                   ),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Добавить фото',
+                                    style: theme.textTheme.labelLarge?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
                     ),
                   ),
                 ),
@@ -350,7 +341,8 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                 TextFormField(
                   controller: _nameController,
                   textInputAction: TextInputAction.done,
-                  autofocus: widget.googleName == null || widget.googleName!.isEmpty,
+                  autofocus:
+                      widget.googleName == null || widget.googleName!.isEmpty,
                   decoration: InputDecoration(
                     labelText: 'Имя *',
                     prefixIcon: const Icon(Icons.person_outlined),
@@ -406,18 +398,19 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                   height: 54,
                   child: FilledButton.icon(
                     onPressed: isLoading ? null : _saveProfile,
-                    icon: isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                    icon:
+                        isLoading
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
-                            ),
-                          )
-                        : const Icon(Icons.check_circle_outline),
+                            )
+                            : const Icon(Icons.check_circle_outline),
                     label: Text(
                       isLoading ? 'Сохранение...' : 'Сохранить и продолжить',
                       style: const TextStyle(fontSize: 16),

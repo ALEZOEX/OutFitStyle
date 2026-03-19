@@ -7,8 +7,8 @@ import '../../core/di/di.dart';
 
 final achievementNotifierProvider =
     StateNotifierProvider<AchievementNotifier, AchievementNotifierState>(
-  (ref) => AchievementNotifier(ref.watch(achievementRepositoryProvider)),
-);
+      (ref) => AchievementNotifier(ref.watch(achievementRepositoryProvider)),
+    );
 
 class AchievementNotifierState {
   final List<dynamic> achievements;

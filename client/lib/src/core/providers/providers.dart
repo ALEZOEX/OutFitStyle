@@ -27,6 +27,9 @@ final wardrobeItemsProvider = FutureProvider((ref) async {
 });
 
 // Provider for DI container (will be implemented in di.dart)
-final diContainerProvider = Provider((ref) => throw UnimplementedError(
-  'DI Container provider must be implemented in main or app widget'
-));
+final diContainerProvider = Provider(
+  (ref) =>
+      throw UnimplementedError(
+        'DI Container provider must be implemented in main or app widget',
+      ),
+);

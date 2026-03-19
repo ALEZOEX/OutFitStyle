@@ -11,6 +11,7 @@ import 'package:outfitstyle_client/src/features/settings/data/models/session_dev
 
 // Mock классы
 class MockApiClient extends Mock implements ApiClient {}
+
 class MockSessionsRepository extends Mock implements SessionsRepository {}
 
 void main() {
@@ -22,8 +23,9 @@ void main() {
       mockSessionsRepository = MockSessionsRepository();
 
       // Мокаем метод getSessions чтобы возвращал пустой список
-      when(() => mockSessionsRepository.getSessions())
-          .thenAnswer((_) async => <SessionDevice>[]);
+      when(
+        () => mockSessionsRepository.getSessions(),
+      ).thenAnswer((_) async => <SessionDevice>[]);
     });
 
     Widget createTestWidget() {
@@ -33,9 +35,7 @@ void main() {
             return mockSessionsRepository;
           }),
         ],
-        child: const MaterialApp(
-          home: SecurityScreen(),
-        ),
+        child: const MaterialApp(home: SecurityScreen()),
       );
     }
 
@@ -159,7 +159,9 @@ void main() {
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('password validation shows error for empty fields', (tester) async {
+    testWidgets('password validation shows error for empty fields', (
+      tester,
+    ) async {
       await tester.pumpWidget(createTestWidget());
 
       await tester.pumpAndSettle();
@@ -167,7 +169,9 @@ void main() {
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('password validation shows error for short password', (tester) async {
+    testWidgets('password validation shows error for short password', (
+      tester,
+    ) async {
       await tester.pumpWidget(createTestWidget());
 
       await tester.pumpAndSettle();

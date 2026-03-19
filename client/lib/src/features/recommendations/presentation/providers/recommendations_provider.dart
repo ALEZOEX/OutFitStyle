@@ -45,12 +45,7 @@ class PlannedOutfit {
 }
 
 /// Состояние загрузки и рекомендаций
-enum RecommendationsLoadStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum RecommendationsLoadStatus { initial, loading, success, error }
 
 /// Состояние рекомендаций
 class RecommendationsState {
@@ -112,8 +107,11 @@ class RecommendationsState {
     final end = start.add(const Duration(days: 6));
 
     return plannedOutfits.values
-        .where((outfit) => outfit.date.isAfter(start.subtract(const Duration(days: 1))) &&
-                           outfit.date.isBefore(end.add(const Duration(days: 1))))
+        .where(
+          (outfit) =>
+              outfit.date.isAfter(start.subtract(const Duration(days: 1))) &&
+              outfit.date.isBefore(end.add(const Duration(days: 1))),
+        )
         .toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }
@@ -122,16 +120,16 @@ class RecommendationsState {
 /// Провайдер рекомендаций (использует глобальный ApiClient)
 final recommendationsProvider =
     StateNotifierProvider<RecommendationsNotifier, RecommendationsState>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  return RecommendationsNotifier(apiClient: apiClient);
-});
+      final apiClient = ref.watch(apiClientProvider);
+      return RecommendationsNotifier(apiClient: apiClient);
+    });
 
 class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
   final ApiClient _apiClient;
 
   RecommendationsNotifier({required ApiClient apiClient})
-      : _apiClient = apiClient,
-        super(const RecommendationsState()) {
+    : _apiClient = apiClient,
+      super(const RecommendationsState()) {
     _loadRecommendations();
   }
 
@@ -144,17 +142,27 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
       final response = await _apiClient.get('/api/v1/recommendations');
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.data.toString()) as Map<String, dynamic>;
-        final items = data['recommendations'] as List<dynamic>? ??
-                      data['items'] as List<dynamic>? ??
-                      [];
+        final data =
+            jsonDecode(response.data.toString()) as Map<String, dynamic>;
+        final items =
+            data['recommendations'] as List<dynamic>? ??
+            data['items'] as List<dynamic>? ??
+            [];
 
-        final recommendations = items
-            .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
-            .toList();
+        final recommendations =
+            items
+                .map(
+                  (item) => OutfitRecommendation.fromJson(
+                    item as Map<String, dynamic>,
+                  ),
+                )
+                .toList();
 
         state = state.copyWith(
-          recommendations: recommendations.isNotEmpty ? recommendations : mockRecommendations,
+          recommendations:
+              recommendations.isNotEmpty
+                  ? recommendations
+                  : mockRecommendations,
           status: RecommendationsLoadStatus.success,
         );
       } else {
@@ -204,7 +212,9 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
       items: recommendation.recommendedItems,
     );
 
-    final plannedOutfits = Map<DateTime, PlannedOutfit>.from(state.plannedOutfits);
+    final plannedOutfits = Map<DateTime, PlannedOutfit>.from(
+      state.plannedOutfits,
+    );
     plannedOutfits[normalizedDate] = plannedOutfit;
 
     state = state.copyWith(plannedOutfits: plannedOutfits);
@@ -213,7 +223,9 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
   /// Отменить запланированный образ
   void cancelPlannedOutfit(DateTime date) {
     final normalizedDate = DateTime(date.year, date.month, date.day);
-    final plannedOutfits = Map<DateTime, PlannedOutfit>.from(state.plannedOutfits);
+    final plannedOutfits = Map<DateTime, PlannedOutfit>.from(
+      state.plannedOutfits,
+    );
     plannedOutfits.remove(normalizedDate);
     state = state.copyWith(plannedOutfits: plannedOutfits);
   }
@@ -260,7 +272,8 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 
   /// Удалить рекомендацию
   void removeRecommendation(String id) {
-    final recommendations = state.recommendations.where((r) => r.id != id).toList();
+    final recommendations =
+        state.recommendations.where((r) => r.id != id).toList();
     state = state.copyWith(recommendations: recommendations);
   }
 
@@ -272,13 +285,17 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
   /// Получить рекомендации по погоде
   List<OutfitRecommendation> getByWeather(String condition) {
     return state.recommendations
-        .where((r) => r.weatherCondition?.toLowerCase() == condition.toLowerCase())
+        .where(
+          (r) => r.weatherCondition?.toLowerCase() == condition.toLowerCase(),
+        )
         .toList();
   }
 
   /// Получить использованные рекомендации
   List<OutfitRecommendation> getUsed() {
-    return state.recommendations.where((r) => state.usedIds.contains(r.id)).toList();
+    return state.recommendations
+        .where((r) => state.usedIds.contains(r.id))
+        .toList();
   }
 
   // ==================== Private Methods ====================
@@ -313,8 +330,9 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 }
 
 /// Провайдер для получения отфильтрованных рекомендаций
-final filteredRecommendationsProvider =
-    Provider<List<OutfitRecommendation>>((ref) {
+final filteredRecommendationsProvider = Provider<List<OutfitRecommendation>>((
+  ref,
+) {
   final state = ref.watch(recommendationsProvider);
   return state.recommendations;
 });

@@ -64,10 +64,11 @@ class AuthenticatedHttpClient extends http.BaseClient {
       );
     }
 
-    final retry = http.Request(request.method, request.url)
-      ..headers.addAll(request.headers)
-      ..headers['Authorization'] = 'Bearer $newToken'
-      ..bodyBytes = originalBodyBytes ?? const <int>[];
+    final retry =
+        http.Request(request.method, request.url)
+          ..headers.addAll(request.headers)
+          ..headers['Authorization'] = 'Bearer $newToken'
+          ..bodyBytes = originalBodyBytes ?? const <int>[];
 
     if (originalEncoding != null) {
       retry.encoding = originalEncoding;

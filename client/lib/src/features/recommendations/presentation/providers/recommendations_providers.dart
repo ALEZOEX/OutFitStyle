@@ -11,10 +11,11 @@ final _apiClientProvider = Provider<ApiClient>((ref) {
 });
 
 /// Провайдер репозитория рекомендаций
-final dailyRecommendationsRepositoryProvider = Provider<DailyRecommendationsRepository>((ref) {
-  final apiClient = ref.watch(_apiClientProvider);
-  return DailyRecommendationsRepository(apiClient: apiClient);
-});
+final dailyRecommendationsRepositoryProvider =
+    Provider<DailyRecommendationsRepository>((ref) {
+      final apiClient = ref.watch(_apiClientProvider);
+      return DailyRecommendationsRepository(apiClient: apiClient);
+    });
 
 /// Провайдер для загрузки ежедневной рекомендации
 final dailyRecommendationProvider = FutureProvider.autoDispose((ref) async {
@@ -23,13 +24,17 @@ final dailyRecommendationProvider = FutureProvider.autoDispose((ref) async {
 });
 
 /// Провайдер для загрузки альтернативных рекомендаций
-final alternativeRecommendationsProvider = FutureProvider.autoDispose.family<List<OutfitRecommendation>, int>((ref, limit) async {
-  final repository = ref.watch(dailyRecommendationsRepositoryProvider);
-  return repository.getAlternativeRecommendations(limit: limit);
-});
+final alternativeRecommendationsProvider = FutureProvider.autoDispose
+    .family<List<OutfitRecommendation>, int>((ref, limit) async {
+      final repository = ref.watch(dailyRecommendationsRepositoryProvider);
+      return repository.getAlternativeRecommendations(limit: limit);
+    });
 
 /// Провайдер для загрузки советов дня
-final dailyTipsProvider = FutureProvider.autoDispose.family<List<Tip>, int>((ref, limit) async {
+final dailyTipsProvider = FutureProvider.autoDispose.family<List<Tip>, int>((
+  ref,
+  limit,
+) async {
   final repository = ref.watch(dailyRecommendationsRepositoryProvider);
   return repository.getDailyTips(limit: limit);
 });
@@ -40,18 +45,22 @@ final dailyTipsProvider = FutureProvider.autoDispose.family<List<Tip>, int>((ref
 /// - style_preferences: предпочитаемые стили
 /// - budget_range: диапазон бюджета (economy, medium, premium)
 /// - favorite_brands: любимые бренды
-final generateRecommendationsProvider = FutureProvider.autoDispose.family<OutfitRecommendation, GenerateRecommendationsParams>((ref, params) async {
-  final repository = ref.watch(dailyRecommendationsRepositoryProvider);
-  final userPreferences = ref.watch(userPreferencesProvider);
-  
-  return repository.createRecommendation(
-    latitude: params.latitude,
-    longitude: params.longitude,
-    occasion: params.occasion,
-    location: params.location,
-    userPreferences: userPreferences,
-  );
-});
+final generateRecommendationsProvider = FutureProvider.autoDispose
+    .family<OutfitRecommendation, GenerateRecommendationsParams>((
+      ref,
+      params,
+    ) async {
+      final repository = ref.watch(dailyRecommendationsRepositoryProvider);
+      final userPreferences = ref.watch(userPreferencesProvider);
+
+      return repository.createRecommendation(
+        latitude: params.latitude,
+        longitude: params.longitude,
+        occasion: params.occasion,
+        location: params.location,
+        userPreferences: userPreferences,
+      );
+    });
 
 /// Параметры для генерации рекомендаций
 class GenerateRecommendationsParams {

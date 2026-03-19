@@ -46,19 +46,22 @@ void main() {
 
         for (final code in invalidCodes) {
           // Setup: Mock server to reject invalid code
-          when(() => mockApiClient.post(
-                '/api/v1/auth/verify-reset-code',
-                data: {
-                  'email': testEmail,
-                  'code': code,
-                },
-              )).thenThrow(
+          when(
+            () => mockApiClient.post(
+              '/api/v1/auth/verify-reset-code',
+              data: {'email': testEmail, 'code': code},
+            ),
+          ).thenThrow(
             DioException(
-              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              requestOptions: RequestOptions(
+                path: '/api/v1/auth/verify-reset-code',
+              ),
               message: 'Invalid or expired code',
               type: DioExceptionType.badResponse,
               response: Response(
-                requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+                requestOptions: RequestOptions(
+                  path: '/api/v1/auth/verify-reset-code',
+                ),
                 statusCode: 400,
                 data: {'error': 'Invalid or expired code'},
               ),
@@ -72,10 +75,7 @@ void main() {
             // For now, verify the mock was set up correctly
             await mockApiClient.post(
               '/api/v1/auth/verify-reset-code',
-              data: {
-                'email': testEmail,
-                'code': code,
-              },
+              data: {'email': testEmail, 'code': code},
             );
             fail('Expected exception for invalid code: $code');
           } catch (e) {
@@ -84,13 +84,12 @@ void main() {
           }
 
           // Verify: Server-side validation was called (not just UI state change)
-          verify(() => mockApiClient.post(
-                '/api/v1/auth/verify-reset-code',
-                data: {
-                  'email': testEmail,
-                  'code': code,
-                },
-              )).called(1);
+          verify(
+            () => mockApiClient.post(
+              '/api/v1/auth/verify-reset-code',
+              data: {'email': testEmail, 'code': code},
+            ),
+          ).called(1);
         }
       },
     );
@@ -102,36 +101,35 @@ void main() {
         const validCode = '847291'; // Example valid code
 
         // Setup: Mock server to accept valid code
-        when(() => mockApiClient.post(
-              '/api/v1/auth/verify-reset-code',
-              data: {
-                'email': testEmail,
-                'code': validCode,
-              },
-            )).thenAnswer((_) async => Response(
-              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
-              data: {'success': true},
-              statusCode: 200,
-            ));
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/verify-reset-code',
+            data: {'email': testEmail, 'code': validCode},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            requestOptions: RequestOptions(
+              path: '/api/v1/auth/verify-reset-code',
+            ),
+            data: {'success': true},
+            statusCode: 200,
+          ),
+        );
 
         // Act: Verify code
         final response = await mockApiClient.post(
           '/api/v1/auth/verify-reset-code',
-          data: {
-            'email': testEmail,
-            'code': validCode,
-          },
+          data: {'email': testEmail, 'code': validCode},
         );
 
         // Assert: Server validation was called and succeeded
         expect((response.data as Map<String, dynamic>)['success'], isTrue);
-        verify(() => mockApiClient.post(
-              '/api/v1/auth/verify-reset-code',
-              data: {
-                'email': testEmail,
-                'code': validCode,
-              },
-            )).called(1);
+        verify(
+          () => mockApiClient.post(
+            '/api/v1/auth/verify-reset-code',
+            data: {'email': testEmail, 'code': validCode},
+          ),
+        ).called(1);
       },
     );
 
@@ -153,19 +151,22 @@ void main() {
 
         for (final code in testCodes) {
           // Setup: Mock server response (reject all for this test)
-          when(() => mockApiClient.post(
-                '/api/v1/auth/verify-reset-code',
-                data: {
-                  'email': testEmail,
-                  'code': code,
-                },
-              )).thenThrow(
+          when(
+            () => mockApiClient.post(
+              '/api/v1/auth/verify-reset-code',
+              data: {'email': testEmail, 'code': code},
+            ),
+          ).thenThrow(
             DioException(
-              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              requestOptions: RequestOptions(
+                path: '/api/v1/auth/verify-reset-code',
+              ),
               message: 'Invalid code',
               type: DioExceptionType.badResponse,
               response: Response(
-                requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+                requestOptions: RequestOptions(
+                  path: '/api/v1/auth/verify-reset-code',
+                ),
                 statusCode: 400,
                 data: {'error': 'Invalid code'},
               ),
@@ -176,10 +177,7 @@ void main() {
           try {
             await mockApiClient.post(
               '/api/v1/auth/verify-reset-code',
-              data: {
-                'email': testEmail,
-                'code': code,
-              },
+              data: {'email': testEmail, 'code': code},
             );
           } catch (_) {
             // Expected to fail
@@ -188,13 +186,12 @@ void main() {
           // Assert: CRITICAL - Server API call was made
           // On UNFIXED code: This verification would FAIL (no API call made)
           // On FIXED code: This verification should PASS (API call is made)
-          verify(() => mockApiClient.post(
-                '/api/v1/auth/verify-reset-code',
-                data: {
-                  'email': testEmail,
-                  'code': code,
-                },
-              )).called(1);
+          verify(
+            () => mockApiClient.post(
+              '/api/v1/auth/verify-reset-code',
+              data: {'email': testEmail, 'code': code},
+            ),
+          ).called(1);
         }
       },
     );
@@ -206,19 +203,22 @@ void main() {
         const expiredCode = '123456';
 
         // Setup: Mock server to reject expired code
-        when(() => mockApiClient.post(
-              '/api/v1/auth/verify-reset-code',
-              data: {
-                'email': testEmail,
-                'code': expiredCode,
-              },
-            )).thenThrow(
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/verify-reset-code',
+            data: {'email': testEmail, 'code': expiredCode},
+          ),
+        ).thenThrow(
           DioException(
-            requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+            requestOptions: RequestOptions(
+              path: '/api/v1/auth/verify-reset-code',
+            ),
             message: 'Invalid or expired code',
             type: DioExceptionType.badResponse,
             response: Response(
-              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              requestOptions: RequestOptions(
+                path: '/api/v1/auth/verify-reset-code',
+              ),
               statusCode: 400,
               data: {'error': 'Invalid or expired code'},
             ),
@@ -229,22 +229,18 @@ void main() {
         expect(
           () async => await mockApiClient.post(
             '/api/v1/auth/verify-reset-code',
-            data: {
-              'email': testEmail,
-              'code': expiredCode,
-            },
+            data: {'email': testEmail, 'code': expiredCode},
           ),
           throwsException,
         );
 
         // Verify: Server validation was called
-        verify(() => mockApiClient.post(
-              '/api/v1/auth/verify-reset-code',
-              data: {
-                'email': testEmail,
-                'code': expiredCode,
-              },
-            )).called(1);
+        verify(
+          () => mockApiClient.post(
+            '/api/v1/auth/verify-reset-code',
+            data: {'email': testEmail, 'code': expiredCode},
+          ),
+        ).called(1);
       },
     );
 
@@ -256,19 +252,22 @@ void main() {
 
         // Setup: Mock first 5 attempts to fail, 6th to be rate limited
         for (var i = 0; i < 5; i++) {
-          when(() => mockApiClient.post(
-                '/api/v1/auth/verify-reset-code',
-                data: {
-                  'email': testEmail,
-                  'code': attemptCodes[i],
-                },
-              )).thenThrow(
+          when(
+            () => mockApiClient.post(
+              '/api/v1/auth/verify-reset-code',
+              data: {'email': testEmail, 'code': attemptCodes[i]},
+            ),
+          ).thenThrow(
             DioException(
-              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              requestOptions: RequestOptions(
+                path: '/api/v1/auth/verify-reset-code',
+              ),
               message: 'Invalid code',
               type: DioExceptionType.badResponse,
               response: Response(
-                requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+                requestOptions: RequestOptions(
+                  path: '/api/v1/auth/verify-reset-code',
+                ),
                 statusCode: 400,
                 data: {'error': 'Invalid code'},
               ),
@@ -277,19 +276,22 @@ void main() {
         }
 
         // 6th attempt should be rate limited
-        when(() => mockApiClient.post(
-              '/api/v1/auth/verify-reset-code',
-              data: {
-                'email': testEmail,
-                'code': attemptCodes[5],
-              },
-            )).thenThrow(
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/verify-reset-code',
+            data: {'email': testEmail, 'code': attemptCodes[5]},
+          ),
+        ).thenThrow(
           DioException(
-            requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+            requestOptions: RequestOptions(
+              path: '/api/v1/auth/verify-reset-code',
+            ),
             message: 'Too many attempts',
             type: DioExceptionType.badResponse,
             response: Response(
-              requestOptions: RequestOptions(path: '/api/v1/auth/verify-reset-code'),
+              requestOptions: RequestOptions(
+                path: '/api/v1/auth/verify-reset-code',
+              ),
               statusCode: 429,
               data: {'error': 'Too many attempts'},
             ),
@@ -301,10 +303,7 @@ void main() {
           try {
             await mockApiClient.post(
               '/api/v1/auth/verify-reset-code',
-              data: {
-                'email': testEmail,
-                'code': attemptCodes[i],
-              },
+              data: {'email': testEmail, 'code': attemptCodes[i]},
             );
           } catch (e) {
             if (i == 5) {
@@ -316,13 +315,12 @@ void main() {
 
         // Verify: All attempts called server validation
         for (var i = 0; i < 6; i++) {
-          verify(() => mockApiClient.post(
-                '/api/v1/auth/verify-reset-code',
-                data: {
-                  'email': testEmail,
-                  'code': attemptCodes[i],
-                },
-              )).called(1);
+          verify(
+            () => mockApiClient.post(
+              '/api/v1/auth/verify-reset-code',
+              data: {'email': testEmail, 'code': attemptCodes[i]},
+            ),
+          ).called(1);
         }
       },
     );

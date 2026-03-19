@@ -20,15 +20,11 @@ class ImageStore {
   }
 
   Future<void> saveImage(String id, Uint8List imageData) async {
-    await _database!.insert(
-      _tableName,
-      {
-        'id': id,
-        'data': imageData,
-        'created_at': DateTime.now().millisecondsSinceEpoch,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _database!.insert(_tableName, {
+      'id': id,
+      'data': imageData,
+      'created_at': DateTime.now().millisecondsSinceEpoch,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<Uint8List?> getImage(String id) async {
@@ -45,11 +41,7 @@ class ImageStore {
   }
 
   Future<void> deleteImage(String id) async {
-    await _database!.delete(
-      _tableName,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _database!.delete(_tableName, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> clearCache() async {

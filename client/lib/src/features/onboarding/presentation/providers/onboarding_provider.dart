@@ -14,9 +14,7 @@ final onboardingStorageProvider = Provider<OnboardingStorage>((ref) {
 /// Провайдер репозитория онбординга
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
-  return OnboardingRepository(
-    apiClient: apiClient,
-  );
+  return OnboardingRepository(apiClient: apiClient);
 });
 
 /// Провайдер состояния онбординга (завершён или нет)
@@ -75,12 +73,13 @@ class OnboardingState {
 }
 
 /// Нотификер для управления состоянием онбординга
-final onboardingNotifierProvider = StateNotifierProvider<OnboardingNotifier, OnboardingState>((ref) {
-  return OnboardingNotifier(
-    storage: ref.read(onboardingStorageProvider),
-    repository: ref.read(onboardingRepositoryProvider),
-  );
-});
+final onboardingNotifierProvider =
+    StateNotifierProvider<OnboardingNotifier, OnboardingState>((ref) {
+      return OnboardingNotifier(
+        storage: ref.read(onboardingStorageProvider),
+        repository: ref.read(onboardingRepositoryProvider),
+      );
+    });
 
 class OnboardingNotifier extends StateNotifier<OnboardingState> {
   final OnboardingStorage _storage;
@@ -89,9 +88,9 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   OnboardingNotifier({
     required OnboardingStorage storage,
     required OnboardingRepository repository,
-  })  : _storage = storage,
-        _repository = repository,
-        super(const OnboardingState());
+  }) : _storage = storage,
+       _repository = repository,
+       super(const OnboardingState());
 
   /// Переход на следующую страницу
   void nextPage() {
@@ -146,16 +145,12 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
   /// Установка диапазона бюджета
   void setBudgetRange(String? budgetRange) {
-    state = state.copyWith(
-      data: state.data.copyWith(budgetRange: budgetRange),
-    );
+    state = state.copyWith(data: state.data.copyWith(budgetRange: budgetRange));
   }
 
   /// Установка любимых брендов
   void setFavoriteBrands(String brands) {
-    state = state.copyWith(
-      data: state.data.copyWith(favoriteBrands: brands),
-    );
+    state = state.copyWith(data: state.data.copyWith(favoriteBrands: brands));
   }
 
   /// Проверка валидности текущей страницы

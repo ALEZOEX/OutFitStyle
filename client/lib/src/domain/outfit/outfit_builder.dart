@@ -34,12 +34,12 @@ class OutfitBuilder {
   static Map<String, dynamic> buildOutfitData({
     required List<Map<String, dynamic>> lines,
   }) {
-    return <String, dynamic>{
-      'outfit': lines,
-    };
+    return <String, dynamic>{'outfit': lines};
   }
 
-  static Map<String, dynamic> _mapWardrobeItemToOutfitLine(domain.WardrobeItem w) {
+  static Map<String, dynamic> _mapWardrobeItemToOutfitLine(
+    domain.WardrobeItem w,
+  ) {
     return <String, dynamic>{
       'id': w.id,
       'name': w.name,

@@ -30,19 +30,14 @@ class RecommendationCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       elevation: 3,
       shadowColor: theme.colorScheme.primary.withOpacity(0.15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Изображение
-            AspectRatio(
-              aspectRatio: 4 / 3,
-              child: _buildPlaceholder(context),
-            ),
+            AspectRatio(aspectRatio: 4 / 3, child: _buildPlaceholder(context)),
             // Информация
             Padding(
               padding: const EdgeInsets.all(16),
@@ -75,10 +70,11 @@ class RecommendationCard extends StatelessWidget {
                     Wrap(
                       spacing: 6,
                       runSpacing: 6,
-                      children: recommendation.recommendedItems!
-                          .take(3)
-                          .map((item) => _buildTag(item, context))
-                          .toList(),
+                      children:
+                          recommendation.recommendedItems!
+                              .take(3)
+                              .map((item) => _buildTag(item, context))
+                              .toList(),
                     ),
                 ],
               ),
@@ -105,7 +101,9 @@ class RecommendationCard extends StatelessWidget {
         child: Icon(
           Icons.auto_awesome,
           size: 64,
-          color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.5),
+          color: Theme.of(
+            context,
+          ).colorScheme.onPrimaryContainer.withOpacity(0.5),
         ),
       ),
     );

@@ -20,9 +20,7 @@ class PasswordApiService {
     String? currentPassword,
     required String newPassword,
   }) async {
-    final requestData = <String, dynamic>{
-      'new_password': newPassword,
-    };
+    final requestData = <String, dynamic>{'new_password': newPassword};
 
     // current_password опционален (требуется только если у пользователя уже есть пароль)
     if (currentPassword != null && currentPassword.isNotEmpty) {
@@ -52,10 +50,7 @@ class PasswordApiService {
   }) async {
     final response = await _apiClient.post(
       '/api/v1/user/change-password',
-      data: {
-        'current_password': currentPassword,
-        'new_password': newPassword,
-      },
+      data: {'current_password': currentPassword, 'new_password': newPassword},
     );
 
     if (response.statusCode == 200) {
@@ -75,11 +70,9 @@ class SetPasswordResponse {
   final bool success;
   final String message;
 
-  SetPasswordResponse({
-    required this.success,
-    required this.message,
-  });
+  SetPasswordResponse({required this.success, required this.message});
 
   @override
-  String toString() => 'SetPasswordResponse(success: $success, message: $message)';
+  String toString() =>
+      'SetPasswordResponse(success: $success, message: $message)';
 }

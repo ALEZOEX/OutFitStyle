@@ -18,24 +18,84 @@ class AppLanguage {
   });
 
   static const List<AppLanguage> availableLanguages = [
-    AppLanguage(code: 'ru', name: 'Русский', flag: '🇷🇺', nativeName: 'Русский'),
-    AppLanguage(code: 'en', name: 'English', flag: '🇬🇧', nativeName: 'English'),
-    AppLanguage(code: 'es', name: 'Español', flag: '🇪🇸', nativeName: 'Español'),
-    AppLanguage(code: 'fr', name: 'Français', flag: '🇫🇷', nativeName: 'Français'),
-    AppLanguage(code: 'de', name: 'Deutsch', flag: '🇩🇪', nativeName: 'Deutsch'),
-    AppLanguage(code: 'it', name: 'Italiano', flag: '🇮🇹', nativeName: 'Italiano'),
-    AppLanguage(code: 'pt', name: 'Português', flag: '🇵🇹', nativeName: 'Português'),
+    AppLanguage(
+      code: 'ru',
+      name: 'Русский',
+      flag: '🇷🇺',
+      nativeName: 'Русский',
+    ),
+    AppLanguage(
+      code: 'en',
+      name: 'English',
+      flag: '🇬🇧',
+      nativeName: 'English',
+    ),
+    AppLanguage(
+      code: 'es',
+      name: 'Español',
+      flag: '🇪🇸',
+      nativeName: 'Español',
+    ),
+    AppLanguage(
+      code: 'fr',
+      name: 'Français',
+      flag: '🇫🇷',
+      nativeName: 'Français',
+    ),
+    AppLanguage(
+      code: 'de',
+      name: 'Deutsch',
+      flag: '🇩🇪',
+      nativeName: 'Deutsch',
+    ),
+    AppLanguage(
+      code: 'it',
+      name: 'Italiano',
+      flag: '🇮🇹',
+      nativeName: 'Italiano',
+    ),
+    AppLanguage(
+      code: 'pt',
+      name: 'Português',
+      flag: '🇵🇹',
+      nativeName: 'Português',
+    ),
     AppLanguage(code: 'zh', name: '中文', flag: '🇨🇳', nativeName: '中文'),
     AppLanguage(code: 'ja', name: '日本語', flag: '🇯🇵', nativeName: '日本語'),
     AppLanguage(code: 'ko', name: '한국어', flag: '🇰🇷', nativeName: '한국어'),
-    AppLanguage(code: 'ar', name: 'العربية', flag: '🇸🇦', nativeName: 'العربية'),
+    AppLanguage(
+      code: 'ar',
+      name: 'العربية',
+      flag: '🇸🇦',
+      nativeName: 'العربية',
+    ),
     AppLanguage(code: 'hi', name: 'हिन्दी', flag: '🇮🇳', nativeName: 'हिन्दी'),
     AppLanguage(code: 'tr', name: 'Türkçe', flag: '🇹🇷', nativeName: 'Türkçe'),
     AppLanguage(code: 'pl', name: 'Polski', flag: '🇵🇱', nativeName: 'Polski'),
-    AppLanguage(code: 'uk', name: 'Українская', flag: '🇺🇦', nativeName: 'Українська'),
-    AppLanguage(code: 'be', name: 'Беларуская', flag: '🇧🇾', nativeName: 'Беларуская'),
-    AppLanguage(code: 'kk', name: 'Қазақша', flag: '🇰🇿', nativeName: 'Қазақша'),
-    AppLanguage(code: 'az', name: 'Azərbaycan', flag: '🇦🇿', nativeName: 'Azərbaycan'),
+    AppLanguage(
+      code: 'uk',
+      name: 'Українская',
+      flag: '🇺🇦',
+      nativeName: 'Українська',
+    ),
+    AppLanguage(
+      code: 'be',
+      name: 'Беларуская',
+      flag: '🇧🇾',
+      nativeName: 'Беларуская',
+    ),
+    AppLanguage(
+      code: 'kk',
+      name: 'Қазақша',
+      flag: '🇰🇿',
+      nativeName: 'Қазақша',
+    ),
+    AppLanguage(
+      code: 'az',
+      name: 'Azərbaycan',
+      flag: '🇦🇿',
+      nativeName: 'Azərbaycan',
+    ),
   ];
 }
 
@@ -53,9 +113,7 @@ class LanguageScreen extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           // Заголовок
-          SliverToBoxAdapter(
-            child: _buildHeader(context),
-          ),
+          SliverToBoxAdapter(child: _buildHeader(context)),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
           // Авто-определение
@@ -66,7 +124,13 @@ class LanguageScreen extends ConsumerWidget {
 
           // Список языков
           SliverToBoxAdapter(
-            child: _buildLanguagesSection(context, theme, ref, currentLanguage, autoLanguage),
+            child: _buildLanguagesSection(
+              context,
+              theme,
+              ref,
+              currentLanguage,
+              autoLanguage,
+            ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
@@ -82,10 +146,7 @@ class LanguageScreen extends ConsumerWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(
-              Icons.arrow_back,
-              color: theme.colorScheme.onSurface,
-            ),
+            icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
             tooltip: 'Назад',
           ),
           const SizedBox(width: 8),
@@ -114,21 +175,23 @@ class LanguageScreen extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: autoLanguage
-              ? [
-                  theme.colorScheme.primary.withValues(alpha: 0.15),
-                  theme.colorScheme.secondary.withValues(alpha: 0.08),
-                ]
-              : [
-                  theme.colorScheme.surface,
-                  theme.colorScheme.surfaceContainerHighest,
-                ],
+          colors:
+              autoLanguage
+                  ? [
+                    theme.colorScheme.primary.withValues(alpha: 0.15),
+                    theme.colorScheme.secondary.withValues(alpha: 0.08),
+                  ]
+                  : [
+                    theme.colorScheme.surface,
+                    theme.colorScheme.surfaceContainerHighest,
+                  ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: autoLanguage
-              ? theme.colorScheme.primary.withValues(alpha: 0.4)
-              : theme.colorScheme.outline.withValues(alpha: 0.2),
+          color:
+              autoLanguage
+                  ? theme.colorScheme.primary.withValues(alpha: 0.4)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2),
           width: 2,
         ),
       ),
@@ -138,25 +201,30 @@ class LanguageScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: autoLanguage
-                    ? [theme.colorScheme.primary, theme.colorScheme.secondary]
-                    : [Colors.grey.shade400, Colors.grey.shade600],
+                colors:
+                    autoLanguage
+                        ? [
+                          theme.colorScheme.primary,
+                          theme.colorScheme.secondary,
+                        ]
+                        : [Colors.grey.shade400, Colors.grey.shade600],
               ),
               borderRadius: BorderRadius.circular(12),
-              boxShadow: autoLanguage
-                  ? [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
+              boxShadow:
+                  autoLanguage
+                      ? [
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                      : null,
             ),
             child: Icon(
-              autoLanguage
-                  ? Icons.language
-                  : Icons.language_outlined,
+              autoLanguage ? Icons.language : Icons.language_outlined,
               color: Colors.white,
               size: 24,
             ),
@@ -170,9 +238,10 @@ class LanguageScreen extends ConsumerWidget {
                   'Авто-определение',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: autoLanguage
-                        ? theme.colorScheme.onPrimaryContainer
-                        : null,
+                    color:
+                        autoLanguage
+                            ? theme.colorScheme.onPrimaryContainer
+                            : null,
                   ),
                 ),
                 Text(
@@ -180,9 +249,12 @@ class LanguageScreen extends ConsumerWidget {
                       ? 'Использовать язык системы'
                       : 'Выберите язык вручную',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: autoLanguage
-                        ? theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
-                        : theme.colorScheme.onSurfaceVariant,
+                    color:
+                        autoLanguage
+                            ? theme.colorScheme.onPrimaryContainer.withValues(
+                              alpha: 0.8,
+                            )
+                            : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -266,10 +338,12 @@ class LanguageScreen extends ConsumerWidget {
                   title: Text(
                     language.name,
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: isDisabled
-                          ? theme.colorScheme.onSurfaceVariant
-                          : null,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color:
+                          isDisabled
+                              ? theme.colorScheme.onSurfaceVariant
+                              : null,
                     ),
                   ),
                   subtitle: Text(
@@ -278,26 +352,30 @@ class LanguageScreen extends ConsumerWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  trailing: isSelected
-                      ? Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.check,
-                            color: theme.colorScheme.onPrimary,
-                            size: 18,
-                          ),
-                        )
-                      : null,
-                  onTap: isDisabled
-                      ? null
-                      : () {
-                          ref.read(currentLanguageProvider.notifier).setLanguage(language.code);
-                          _showLanguageChangedSnackbar(context);
-                        },
+                  trailing:
+                      isSelected
+                          ? Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              color: theme.colorScheme.onPrimary,
+                              size: 18,
+                            ),
+                          )
+                          : null,
+                  onTap:
+                      isDisabled
+                          ? null
+                          : () {
+                            ref
+                                .read(currentLanguageProvider.notifier)
+                                .setLanguage(language.code);
+                            _showLanguageChangedSnackbar(context);
+                          },
                 ),
               ],
             );
@@ -312,12 +390,12 @@ class LanguageScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Язык изменен. Перезапустите приложение для применения.'),
+        content: const Text(
+          'Язык изменен. Перезапустите приложение для применения.',
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

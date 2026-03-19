@@ -3,7 +3,9 @@ import '../entities/wardrobe_item.dart';
 /// Интерфейс репозитория гардероба
 abstract class IWardrobeRepository {
   /// Получить все элементы гардероба
-  Future<List<WardrobeItem>> getAllWardrobeItems({bool includeArchived = false});
+  Future<List<WardrobeItem>> getAllWardrobeItems({
+    bool includeArchived = false,
+  });
 
   /// Получить поток изменений гардероба
   Stream<List<WardrobeItem>> watchWardrobe({bool includeArchived = false});

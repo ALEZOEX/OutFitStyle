@@ -7,7 +7,9 @@ class RecommendationsDomainService {
 
   RecommendationsDomainService(this._repository);
 
-  Future<List<OutfitRecommendation>> getUserRecommendations(String userId) async {
+  Future<List<OutfitRecommendation>> getUserRecommendations(
+    String userId,
+  ) async {
     return await _repository.getUserRecommendations(userId);
   }
 
@@ -36,8 +38,13 @@ class RecommendationsDomainService {
   }
 
   Future<List<OutfitRecommendation>> getRecommendationsByWeather(
-      String weatherCondition, double temperature) async {
-    return await _repository.getRecommendationsByWeather(weatherCondition, temperature);
+    String weatherCondition,
+    double temperature,
+  ) async {
+    return await _repository.getRecommendationsByWeather(
+      weatherCondition,
+      temperature,
+    );
   }
 
   Future<List<OutfitRecommendation>> getTrendingRecommendations() async {
@@ -48,11 +55,15 @@ class RecommendationsDomainService {
     return await _repository.submitFeedback(recommendationId, feedback);
   }
 
-  Future<List<OutfitRecommendation>> getRecommendationsHistory(String userId) async {
+  Future<List<OutfitRecommendation>> getRecommendationsHistory(
+    String userId,
+  ) async {
     return await _repository.getRecommendationsHistory(userId);
   }
 
-  Future<List<OutfitRecommendation>> getSavedRecommendations(String userId) async {
+  Future<List<OutfitRecommendation>> getSavedRecommendations(
+    String userId,
+  ) async {
     return await _repository.getSavedRecommendations(userId);
   }
 }

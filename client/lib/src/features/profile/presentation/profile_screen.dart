@@ -39,9 +39,7 @@ class ProfileScreen extends ConsumerWidget {
             // Дополнительные опции
             SliverToBoxAdapter(child: _buildAdditionalOptions(context)),
             // Кнопка выхода
-            SliverToBoxAdapter(
-              child: _buildLogoutButtonFromRef(context, ref),
-            ),
+            SliverToBoxAdapter(child: _buildLogoutButtonFromRef(context, ref)),
             const SliverToBoxAdapter(child: SizedBox(height: 32)),
           ],
         ),
@@ -766,10 +764,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   /// Кнопка выхода (обёртка для получения SessionManager из ref)
-  Widget _buildLogoutButtonFromRef(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
+  Widget _buildLogoutButtonFromRef(BuildContext context, WidgetRef ref) {
     // Получаем SessionManager
     final sessionManager = ref.watch(sessionManagerProvider);
     return _buildLogoutButton(context, sessionManager);

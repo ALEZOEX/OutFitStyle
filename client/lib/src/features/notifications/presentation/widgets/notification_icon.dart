@@ -60,11 +60,7 @@ class NotificationIcon extends StatelessWidget {
     final color = _getColorForType(notificationType);
 
     if (!withBackground) {
-      return Icon(
-        iconData,
-        color: color,
-        size: size,
-      );
+      return Icon(iconData, color: color, size: size);
     }
 
     final iconSize = size * 0.85;
@@ -76,11 +72,7 @@ class NotificationIcon extends StatelessWidget {
         shape: BoxShape.circle,
         color: color.withValues(alpha: 0.12),
       ),
-      child: Icon(
-        iconData,
-        color: color,
-        size: iconSize,
-      ),
+      child: Icon(iconData, color: color, size: iconSize),
     );
   }
 
@@ -155,10 +147,7 @@ class NotificationBadge extends StatelessWidget {
             decoration: BoxDecoration(
               color: backgroundColor ?? theme.colorScheme.error,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.canvasColor,
-                width: 2,
-              ),
+              border: Border.all(color: theme.canvasColor, width: 2),
             ),
             child: Center(
               child: Text(

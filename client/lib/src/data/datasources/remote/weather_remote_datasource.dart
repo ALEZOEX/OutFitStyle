@@ -2,8 +2,14 @@ import 'dart:convert';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 
 abstract class IWeatherRemoteDataSource {
-  Future<Map<String, dynamic>> getCurrentWeather(double latitude, double longitude);
-  Future<Map<String, dynamic>> getWeatherForecast(double latitude, double longitude);
+  Future<Map<String, dynamic>> getCurrentWeather(
+    double latitude,
+    double longitude,
+  );
+  Future<Map<String, dynamic>> getWeatherForecast(
+    double latitude,
+    double longitude,
+  );
 }
 
 class WeatherRemoteDataSource implements IWeatherRemoteDataSource {
@@ -12,13 +18,13 @@ class WeatherRemoteDataSource implements IWeatherRemoteDataSource {
   WeatherRemoteDataSource(this._apiClient);
 
   @override
-  Future<Map<String, dynamic>> getCurrentWeather(double latitude, double longitude) async {
+  Future<Map<String, dynamic>> getCurrentWeather(
+    double latitude,
+    double longitude,
+  ) async {
     final response = await _apiClient.get(
       '/weather/current',
-      params: {
-        'lat': latitude.toString(),
-        'lon': longitude.toString(),
-      },
+      params: {'lat': latitude.toString(), 'lon': longitude.toString()},
     );
     if (response.statusCode == 200) {
       return jsonDecode(response.data) as Map<String, dynamic>;
@@ -27,13 +33,13 @@ class WeatherRemoteDataSource implements IWeatherRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> getWeatherForecast(double latitude, double longitude) async {
+  Future<Map<String, dynamic>> getWeatherForecast(
+    double latitude,
+    double longitude,
+  ) async {
     final response = await _apiClient.get(
       '/weather/forecast',
-      params: {
-        'lat': latitude.toString(),
-        'lon': longitude.toString(),
-      },
+      params: {'lat': latitude.toString(), 'lon': longitude.toString()},
     );
     if (response.statusCode == 200) {
       return jsonDecode(response.data) as Map<String, dynamic>;

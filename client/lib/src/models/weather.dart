@@ -1,5 +1,5 @@
 /// Модель данных погоды для тестов
-/// 
+///
 /// Используется в weather_service_test.dart для тестирования WeatherService
 class Weather {
   final double temperature;
@@ -32,13 +32,13 @@ class Weather {
 
   @override
   int get hashCode => Object.hash(
-        temperature,
-        feelsLike,
-        humidity,
-        windSpeed,
-        description,
-        icon,
-      );
+    temperature,
+    feelsLike,
+    humidity,
+    windSpeed,
+    description,
+    icon,
+  );
 
   @override
   String toString() {
@@ -53,8 +53,5 @@ class WeatherForecast {
   final String location;
   final List<Weather> forecasts;
 
-  const WeatherForecast({
-    required this.location,
-    required this.forecasts,
-  });
+  const WeatherForecast({required this.location, required this.forecasts});
 }

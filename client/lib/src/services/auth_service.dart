@@ -13,19 +13,20 @@ class AuthService {
   final String apiBase;
   final Dio dio;
 
-  AuthService({
-    required this.apiBase,
-    required this.dio,
-  });
+  AuthService({required this.apiBase, required this.dio});
 
   /// Вход пользователя по email и паролю
   Future<void> login(String email, String password) async {
-    throw UnimplementedError('Используйте SessionManager.signIn() вместо AuthService.login()');
+    throw UnimplementedError(
+      'Используйте SessionManager.signIn() вместо AuthService.login()',
+    );
   }
 
   /// Регистрация нового пользователя
   Future<void> register(String email, String password, String name) async {
-    throw UnimplementedError('Используйте SessionManager.signUp() вместо AuthService.register()');
+    throw UnimplementedError(
+      'Используйте SessionManager.signUp() вместо AuthService.register()',
+    );
   }
 
   Future<void> logout() async {

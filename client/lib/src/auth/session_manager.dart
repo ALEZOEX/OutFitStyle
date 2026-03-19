@@ -58,8 +58,16 @@ class SessionManager {
   late final StreamController<UserSession?> _sessionStreamController;
   StreamSubscription<User?>? _authSubscription;
 
-  SessionManager(this._firebaseAuth, this._sharedPreferences, {ApiClient? apiClient})
-      : _apiClient = apiClient ?? ApiClient(sharedPreferences: _sharedPreferences, firebaseAuth: _firebaseAuth) {
+  SessionManager(
+    this._firebaseAuth,
+    this._sharedPreferences, {
+    ApiClient? apiClient,
+  }) : _apiClient =
+           apiClient ??
+           ApiClient(
+             sharedPreferences: _sharedPreferences,
+             firebaseAuth: _firebaseAuth,
+           ) {
     _sessionStreamController = StreamController<UserSession?>.broadcast();
     _initializeSession();
     _setupAuthStateListener();
@@ -81,19 +89,23 @@ class SessionManager {
     if (sessionJson != null) {
       try {
         final session = UserSession.fromJson(
-          Map<String, dynamic>.from(
-            jsonDecode(sessionJson) as Map,
-          ),
+          Map<String, dynamic>.from(jsonDecode(sessionJson) as Map),
         );
         _currentUserSession = session;
-        AppLogger.info('Session restored for user: ${_maskEmail(session.email ?? 'unknown')}');
+        AppLogger.info(
+          'Session restored for user: ${_maskEmail(session.email ?? 'unknown')}',
+        );
 
         // Restore access_token if available
         final accessToken = _sharedPreferences.getString('access_token');
         if (accessToken != null && accessToken.isNotEmpty) {
-          AppLogger.info('Access token restored for user: ${_maskEmail(session.email ?? 'unknown')}');
+          AppLogger.info(
+            'Access token restored for user: ${_maskEmail(session.email ?? 'unknown')}',
+          );
         } else {
-          AppLogger.warning('No access_token found in storage for user: ${_maskEmail(session.email ?? 'unknown')}');
+          AppLogger.warning(
+            'No access_token found in storage for user: ${_maskEmail(session.email ?? 'unknown')}',
+          );
         }
       } catch (e) {
         AppLogger.error('Error deserializing session: $e', e);
@@ -115,7 +127,9 @@ class SessionManager {
       } else {
         // Обновляем сессию только если UID изменился
         if (_currentUserSession?.uid != firebaseUser.uid) {
-          AppLogger.info('User authenticated: ${_maskEmail(firebaseUser.email ?? 'unknown')}');
+          AppLogger.info(
+            'User authenticated: ${_maskEmail(firebaseUser.email ?? 'unknown')}',
+          );
           _updateSessionFromFirebase(firebaseUser);
         }
       }
@@ -128,7 +142,8 @@ class SessionManager {
   /// Проверка, вошел ли пользователь
   /// Для email/password - проверяем по наличию сессии в _currentUserSession
   /// Для Google - проверяем по Firebase
-  bool get isAuthenticated => _currentUserSession != null || _firebaseAuth.currentUser != null;
+  bool get isAuthenticated =>
+      _currentUserSession != null || _firebaseAuth.currentUser != null;
 
   /// Получение UID текущего пользователя
   String? get currentUserId => _firebaseAuth.currentUser?.uid;
@@ -136,7 +151,8 @@ class SessionManager {
   /// Поток изменений состояния аутентификации (Stream [bool])
   ///
   /// Возвращает true, если пользователь авторизован, и false в противном случае
-  Stream<bool> get authStateChanges => _firebaseAuth.authStateChanges().map((user) => user != null);
+  Stream<bool> get authStateChanges =>
+      _firebaseAuth.authStateChanges().map((user) => user != null);
 
   /// Поток обновлений сессии
   Stream<UserSession?> get sessionStream => _sessionStreamController.stream;
@@ -164,7 +180,9 @@ class SessionManager {
 
     // Уведомляем подписчиков о новой сессии
     _sessionStreamController.add(_currentUserSession);
-    AppLogger.info('Session updated for user: ${_maskEmail(firebaseUser.email ?? 'unknown')}');
+    AppLogger.info(
+      'Session updated for user: ${_maskEmail(firebaseUser.email ?? 'unknown')}',
+    );
   }
 
   /// Вход пользователя через backend API
@@ -176,7 +194,9 @@ class SessionManager {
   /// 4. Синхронизируем с Firebase (silent sign-in)
   Future<bool> signIn({String? email, String? password}) async {
     try {
-      AppLogger.info('Attempting sign in for user: ${_maskEmail(email ?? 'unknown')}');
+      AppLogger.info(
+        'Attempting sign in for user: ${_maskEmail(email ?? 'unknown')}',
+      );
 
       if (email == null || password == null) {
         AppLogger.warning('No credentials provided for sign in');
@@ -184,10 +204,10 @@ class SessionManager {
       }
 
       // Вызываем backend API /api/v1/auth/login
-      final response = await _apiClient.post('/api/v1/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
+      final response = await _apiClient.post(
+        '/api/v1/auth/login',
+        data: {'email': email, 'password': password},
+      );
 
       final data = response.data;
       if (data is! Map) {
@@ -211,9 +231,13 @@ class SessionManager {
         AppLogger.info('Access token stored for user: ${_maskEmail(email)}');
         // Verify it was saved
         final saved = _sharedPreferences.getString('access_token');
-        AppLogger.info('Access token verification: ${saved != null ? "saved successfully (${saved.length} chars)" : "FAILED TO SAVE"}');
+        AppLogger.info(
+          'Access token verification: ${saved != null ? "saved successfully (${saved.length} chars)" : "FAILED TO SAVE"}',
+        );
       } else {
-        AppLogger.warning('No access_token in login response for user: ${_maskEmail(email)}');
+        AppLogger.warning(
+          'No access_token in login response for user: ${_maskEmail(email)}',
+        );
       }
 
       // Для email/password пользователей Firebase не используется
@@ -267,80 +291,148 @@ class SessionManager {
   Future<bool> signInWithGoogle() async {
     final timestamp = DateTime.now().toIso8601String();
     try {
-      AppLogger.info('[$timestamp] [Auth] [GoogleSignIn] Начало Google Sign-In через Firebase Auth...');
+      AppLogger.info(
+        '[$timestamp] [Auth] [GoogleSignIn] Начало Google Sign-In через Firebase Auth...',
+      );
 
       // Создаём Google Auth Provider с нужными скоупами
       final provider = GoogleAuthProvider();
       provider.addScope('email');
       provider.addScope('profile');
 
-      AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Открытие popup для Google OAuth');
+      AppLogger.debug(
+        '[$timestamp] [Auth] [GoogleSignIn] Открытие popup для Google OAuth',
+      );
 
       // Открываем popup для входа через Google
       // На Web: signInWithPopup, на Mobile: нативное окно
-      final UserCredential credential = await _firebaseAuth.signInWithPopup(provider);
+      final UserCredential credential = await _firebaseAuth.signInWithPopup(
+        provider,
+      );
 
       final User? user = credential.user;
       if (user == null) {
-        AppLogger.warning('[$timestamp] [Auth] [GoogleSignIn] Google Sign-In отменён пользователем');
+        AppLogger.warning(
+          '[$timestamp] [Auth] [GoogleSignIn] Google Sign-In отменён пользователем',
+        );
         return false;
       }
 
-      AppLogger.info('[$timestamp] [Auth] [GoogleSignIn] Google Sign-In успешен: ${_maskEmail(user.email ?? 'unknown')}');
-      AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Firebase user UID: ${user.uid}');
-
-      // Явно ждём событие authStateChanges, подтверждающее вход
-      AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Ожидание authStateChanges...');
-      await _authStateChanges.firstWhere(
-        (firebaseUser) => firebaseUser?.uid == user.uid,
-      ).timeout(
-        const Duration(seconds: 5),
-        onTimeout: () => throw TimeoutException('Auth state change timeout'),
+      AppLogger.info(
+        '[$timestamp] [Auth] [GoogleSignIn] Google Sign-In успешен: ${_maskEmail(user.email ?? 'unknown')}',
+      );
+      AppLogger.debug(
+        '[$timestamp] [Auth] [GoogleSignIn] Firebase user UID: ${user.uid}',
       );
 
+      // Явно ждём событие authStateChanges, подтверждающее вход
+      AppLogger.debug(
+        '[$timestamp] [Auth] [GoogleSignIn] Ожидание authStateChanges...',
+      );
+      await _authStateChanges
+          .firstWhere((firebaseUser) => firebaseUser?.uid == user.uid)
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout:
+                () => throw TimeoutException('Auth state change timeout'),
+          );
+
       // Get Firebase ID token to exchange for backend access_token
-      AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Получение Firebase ID token...');
+      AppLogger.debug(
+        '[$timestamp] [Auth] [GoogleSignIn] Получение Firebase ID token...',
+      );
       final idToken = await user.getIdToken();
       if (idToken == null || idToken.isEmpty) {
-        AppLogger.error('[$timestamp] [Auth] [GoogleSignIn] Не удалось получить Firebase ID token для пользователя: ${user.uid}');
+        AppLogger.error(
+          '[$timestamp] [Auth] [GoogleSignIn] Не удалось получить Firebase ID token для пользователя: ${user.uid}',
+        );
         throw Exception('Не удалось получить токен аутентификации');
       }
 
-      AppLogger.info('[$timestamp] [Auth] [GoogleSignIn] Firebase ID token получен (длина: ${idToken.length} символов)');
-      AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Firebase ID token (первые 50 символов): ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...');
+      AppLogger.info(
+        '[$timestamp] [Auth] [GoogleSignIn] Firebase ID token получен (длина: ${idToken.length} символов)',
+      );
+      AppLogger.debug(
+        '[$timestamp] [Auth] [GoogleSignIn] Firebase ID token (первые 50 символов): ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...',
+      );
 
-      AppLogger.info('[$timestamp] [Auth] [GoogleSignIn] Обмен Firebase token на backend access_token...');
+      AppLogger.info(
+        '[$timestamp] [Auth] [GoogleSignIn] Обмен Firebase token на backend access_token...',
+      );
 
       // Call backend to exchange Firebase token for access_token
       try {
         final backendTimestamp = DateTime.now().toIso8601String();
-        
+
         // 🔍 DEBUG: Логирование перед вызовом API
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ PRE-API CALL DEBUG', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ Endpoint: POST /api/v1/auth/google', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ Base URL: ${ApiConfig.baseUrl}', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ Full URL: ${ApiConfig.baseUrl}/api/v1/auth/google', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token length: ${idToken.length}', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token preview: ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient instance: $_apiClient', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient type: ${_apiClient.runtimeType}', name: 'GoogleSignIn');
-        developer.log('[$backendTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════', name: 'GoogleSignIn');
-        
-        AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Отправка запроса на POST /api/v1/auth/google');
-        AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Вызов _apiClient.post()...');
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ PRE-API CALL DEBUG',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Endpoint: POST /api/v1/auth/google',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Base URL: ${ApiConfig.baseUrl}',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Full URL: ${ApiConfig.baseUrl}/api/v1/auth/google',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token length: ${idToken.length}',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token preview: ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient instance: $_apiClient',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient type: ${_apiClient.runtimeType}',
+          name: 'GoogleSignIn',
+        );
+        developer.log(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════',
+          name: 'GoogleSignIn',
+        );
 
-        final response = await _apiClient.post('/api/v1/auth/google', data: {
-          'id_token': idToken,
-        });
+        AppLogger.debug(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Отправка запроса на POST /api/v1/auth/google',
+        );
+        AppLogger.info(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Вызов _apiClient.post()...',
+        );
 
-        AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] ✅ _apiClient.post() ЗАВЕРШЁН УСПЕШНО');
-        AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Backend response status: ${response.statusCode}');
-        AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Backend response data: ${response.data}');
+        final response = await _apiClient.post(
+          '/api/v1/auth/google',
+          data: {'id_token': idToken},
+        );
+
+        AppLogger.info(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ _apiClient.post() ЗАВЕРШЁН УСПЕШНО',
+        );
+        AppLogger.info(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Backend response status: ${response.statusCode}',
+        );
+        AppLogger.debug(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Backend response data: ${response.data}',
+        );
 
         final data = response.data;
         if (data is! Map) {
-          AppLogger.warning('[$backendTimestamp] [Auth] [GoogleSignIn] Неверный формат ответа от Google auth endpoint');
+          AppLogger.warning(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Неверный формат ответа от Google auth endpoint',
+          );
           throw Exception('Неверный формат ответа сервера');
         }
 
@@ -349,36 +441,75 @@ class SessionManager {
         final tokens = data['tokens'] as Map?;
 
         if (backendUser == null || tokens == null) {
-          AppLogger.warning('[$backendTimestamp] [Auth] [GoogleSignIn] Неверная структура ответа от Google auth');
+          AppLogger.warning(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Неверная структура ответа от Google auth',
+          );
           throw Exception('Ошибка получения данных пользователя');
         }
 
         // Extract and store access_token for Bearer authentication
         final accessToken = tokens['access_token'] as String?;
+        final refreshToken = tokens['refresh_token'] as String?;
+
         if (accessToken != null && accessToken.isNotEmpty) {
-          AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Сохранение access_token (длина: ${accessToken.length} символов)');
+          AppLogger.debug(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Сохранение access_token (длина: ${accessToken.length} символов)',
+          );
           await _sharedPreferences.setString('access_token', accessToken);
-          AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Access token сохранён для Google пользователя: ${_maskEmail(user.email ?? 'unknown')}');
+          AppLogger.info(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Access token сохранён для Google пользователя: ${_maskEmail(user.email ?? 'unknown')}',
+          );
 
           // Verify it was saved
           final saved = _sharedPreferences.getString('access_token');
           if (saved != null && saved.isNotEmpty) {
-            AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Access token успешно сохранён и верифицирован');
+            AppLogger.debug(
+              '[$backendTimestamp] [Auth] [GoogleSignIn] Access token успешно сохранён и верифицирован',
+            );
+
+            // 🔑 КРИТИЧНО: Дополнительная верификация типа токена
+            final tokenParts = saved.split('.');
+            final isJwt = tokenParts.length == 3;
+            if (isJwt && saved.length < 500) {
+              AppLogger.info(
+                '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ JWT Access Token подтверждён (JWT=$isJwt, length=${saved.length})',
+              );
+            } else if (saved.length > 1000) {
+              AppLogger.error(
+                '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 WARNING: Сохранён Firebase ID Token вместо backend JWT!',
+              );
+            }
           } else {
-            AppLogger.error('[$backendTimestamp] [Auth] [GoogleSignIn] НЕ УДАЛОСЬ сохранить access_token в SharedPreferences');
+            AppLogger.error(
+              '[$backendTimestamp] [Auth] [GoogleSignIn] НЕ УДАЛОСЬ сохранить access_token в SharedPreferences',
+            );
           }
         } else {
-          AppLogger.warning('[$backendTimestamp] [Auth] [GoogleSignIn] Нет access_token в ответе Google auth для пользователя: ${_maskEmail(user.email ?? 'unknown')}');
+          AppLogger.warning(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Нет access_token в ответе Google auth для пользователя: ${_maskEmail(user.email ?? 'unknown')}',
+          );
+        }
+
+        // Сохраняем refresh token (для будущего refresh flow)
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          await _sharedPreferences.setString('refresh_token', refreshToken);
+          AppLogger.debug(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Refresh token сохранён (${refreshToken.length} символов)',
+          );
         }
 
         // Update session with backend user data
         final backendUid = backendUser['id'] as String?;
         if (backendUid == null) {
-          AppLogger.warning('[$backendTimestamp] [Auth] [GoogleSignIn] Нет user ID в ответе Google auth');
+          AppLogger.warning(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Нет user ID в ответе Google auth',
+          );
           throw Exception('Не удалось получить ID пользователя');
         }
 
-        AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Обновление сессии с backend данными');
+        AppLogger.debug(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Обновление сессии с backend данными',
+        );
         _currentUserSession = UserSession(
           uid: backendUid,
           email: backendUser['email'] as String?,
@@ -395,39 +526,83 @@ class SessionManager {
             'user_session',
             jsonEncode(sessionJson),
           );
-          AppLogger.debug('[$backendTimestamp] [Auth] [GoogleSignIn] Сессия сохранена в SharedPreferences');
+          AppLogger.debug(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Сессия сохранена в SharedPreferences',
+          );
         }
 
         // Notify subscribers
         _sessionStreamController.add(_currentUserSession);
 
-        AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Google Sign-In завершён для пользователя: ${user.uid}');
-        AppLogger.info('[$backendTimestamp] [Auth] [GoogleSignIn] Сессия обновлена, токены сохранены');
+        AppLogger.info(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Google Sign-In завершён для пользователя: ${user.uid}',
+        );
+        AppLogger.info(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Сессия обновлена, токены сохранены',
+        );
         return true;
       } catch (e) {
         // 🔍 DEBUG: Детальное логирование ошибок backend вызова
         final errorTimestamp = DateTime.now().toIso8601String();
-        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════', name: 'GoogleSignIn', level: 1000);
-        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ║ BACKEND API CALL ERROR', name: 'GoogleSignIn', level: 1000);
-        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error type: ${e.runtimeType}', name: 'GoogleSignIn', level: 1000);
-        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error message: $e', name: 'GoogleSignIn', level: 1000);
-        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ║ Stack trace: ${StackTrace.current}', name: 'GoogleSignIn', level: 1000);
-        developer.log('[$errorTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════', name: 'GoogleSignIn', level: 1000);
-        
-        AppLogger.error('[$errorTimestamp] [Auth] [GoogleSignIn] Ошибка backend Google auth: $e', e);
+        developer.log(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════',
+          name: 'GoogleSignIn',
+          level: 1000,
+        );
+        developer.log(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] ║ BACKEND API CALL ERROR',
+          name: 'GoogleSignIn',
+          level: 1000,
+        );
+        developer.log(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error type: ${e.runtimeType}',
+          name: 'GoogleSignIn',
+          level: 1000,
+        );
+        developer.log(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error message: $e',
+          name: 'GoogleSignIn',
+          level: 1000,
+        );
+        developer.log(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Stack trace: ${StackTrace.current}',
+          name: 'GoogleSignIn',
+          level: 1000,
+        );
+        developer.log(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════',
+          name: 'GoogleSignIn',
+          level: 1000,
+        );
+
+        AppLogger.error(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] Ошибка backend Google auth: $e',
+          e,
+        );
         if (e.toString().contains('401')) {
-          AppLogger.error('[$errorTimestamp] [Auth] [GoogleSignIn] 401 Unauthorized от backend - Firebase token может быть невалиден или истёк');
+          AppLogger.error(
+            '[$errorTimestamp] [Auth] [GoogleSignIn] 401 Unauthorized от backend - Firebase token может быть невалиден или истёк',
+          );
         }
-        if (e.toString().contains('SocketException') || e.toString().contains('Failed host lookup')) {
-          AppLogger.error('[$errorTimestamp] [Auth] [GoogleSignIn] Network error - проверьте подключение к серверу и CORS настройки');
+        if (e.toString().contains('SocketException') ||
+            e.toString().contains('Failed host lookup')) {
+          AppLogger.error(
+            '[$errorTimestamp] [Auth] [GoogleSignIn] Network error - проверьте подключение к серверу и CORS настройки',
+          );
         }
         rethrow;
       }
     } on FirebaseAuthException catch (e) {
-      AppLogger.error('[$timestamp] [Auth] [GoogleSignIn] Ошибка Google Sign-In: ${e.code} - ${e.message}', e);
+      AppLogger.error(
+        '[$timestamp] [Auth] [GoogleSignIn] Ошибка Google Sign-In: ${e.code} - ${e.message}',
+        e,
+      );
       return false;
     } catch (e) {
-      AppLogger.error('[$timestamp] [Auth] [GoogleSignIn] Ошибка Google Sign-In: $e', e);
+      AppLogger.error(
+        '[$timestamp] [Auth] [GoogleSignIn] Ошибка Google Sign-In: $e',
+        e,
+      );
       return false;
     }
   }
@@ -454,7 +629,11 @@ class SessionManager {
   ///
   /// ВАЖНО: Firebase Auth НЕ используется для email/password регистрации
   /// Firebase используется только для Google Sign-In
-  Future<bool> signUp(String email, String password, {String? displayName}) async {
+  Future<bool> signUp(
+    String email,
+    String password, {
+    String? displayName,
+  }) async {
     try {
       AppLogger.info('Attempting sign up for user: ${_maskEmail(email)}');
 
@@ -467,7 +646,10 @@ class SessionManager {
         registerData['display_name'] = displayName;
       }
 
-      final response = await _apiClient.post('/api/v1/auth/register', data: registerData);
+      final response = await _apiClient.post(
+        '/api/v1/auth/register',
+        data: registerData,
+      );
 
       final data = response.data;
       if (data is! Map) {
@@ -490,7 +672,9 @@ class SessionManager {
         await _sharedPreferences.setString('access_token', accessToken);
         AppLogger.info('Access token stored for user: ${_maskEmail(email)}');
       } else {
-        AppLogger.warning('No access_token in register response for user: ${_maskEmail(email)}');
+        AppLogger.warning(
+          'No access_token in register response for user: ${_maskEmail(email)}',
+        );
       }
 
       // Создаём сессию из данных backend
@@ -532,7 +716,10 @@ class SessionManager {
 
   /// Обновление данных пользователя
   /// Работает как для Firebase (Google), так и для email/password (backend)
-  Future<bool> updateUserProfile({String? displayName, String? photoUrl}) async {
+  Future<bool> updateUserProfile({
+    String? displayName,
+    String? photoUrl,
+  }) async {
     try {
       final currentSession = _currentUserSession;
       final firebaseUser = _firebaseAuth.currentUser;
@@ -589,7 +776,9 @@ class SessionManager {
     try {
       final user = _firebaseAuth.currentUser;
       if (user != null) {
-        AppLogger.info('Sending email verification to: ${_maskEmail(user.email ?? 'unknown')}');
+        AppLogger.info(
+          'Sending email verification to: ${_maskEmail(user.email ?? 'unknown')}',
+        );
         await user.sendEmailVerification();
         AppLogger.info('Email verification sent');
       }
@@ -604,12 +793,15 @@ class SessionManager {
   /// Backend отправляет 6-значный код на email пользователя
   Future<void> resetPassword(String email) async {
     try {
-      AppLogger.info('Requesting password reset code for: ${_maskEmail(email)}');
+      AppLogger.info(
+        'Requesting password reset code for: ${_maskEmail(email)}',
+      );
 
       // Вызываем backend API /api/v1/auth/forgot-password
-      await _apiClient.post('/api/v1/auth/forgot-password', data: {
-        'email': email,
-      });
+      await _apiClient.post(
+        '/api/v1/auth/forgot-password',
+        data: {'email': email},
+      );
 
       AppLogger.info('Password reset code sent to: ${_maskEmail(email)}');
     } catch (e) {
@@ -626,10 +818,10 @@ class SessionManager {
       AppLogger.info('Verifying reset code for: ${_maskEmail(email)}');
 
       // Вызываем backend API /api/v1/auth/verify-reset-code
-      await _apiClient.post('/api/v1/auth/verify-reset-code', data: {
-        'email': email,
-        'code': code,
-      });
+      await _apiClient.post(
+        '/api/v1/auth/verify-reset-code',
+        data: {'email': email, 'code': code},
+      );
 
       AppLogger.info('Reset code verified for: ${_maskEmail(email)}');
     } catch (e) {
@@ -641,16 +833,19 @@ class SessionManager {
   /// Сброс пароля — шаг 3: проверка кода и установка нового пароля
   ///
   /// Backend проверяет код и обновляет пароль пользователя
-  Future<void> resetPasswordWithCode(String email, String code, String newPassword) async {
+  Future<void> resetPasswordWithCode(
+    String email,
+    String code,
+    String newPassword,
+  ) async {
     try {
       AppLogger.info('Resetting password for: ${_maskEmail(email)}');
 
       // Вызываем backend API /api/v1/auth/reset-password
-      await _apiClient.post('/api/v1/auth/reset-password', data: {
-        'email': email,
-        'code': code,
-        'new_password': newPassword,
-      });
+      await _apiClient.post(
+        '/api/v1/auth/reset-password',
+        data: {'email': email, 'code': code, 'new_password': newPassword},
+      );
 
       AppLogger.info('Password reset successfully for: ${_maskEmail(email)}');
     } catch (e) {
@@ -665,6 +860,7 @@ class SessionManager {
     _currentUserSession = null;
     await _sharedPreferences.remove('user_session');
     await _sharedPreferences.remove('access_token');
+    await _sharedPreferences.remove('refresh_token');
     _sessionStreamController.add(null);
     AppLogger.info('Session cleared for user: $userId');
   }

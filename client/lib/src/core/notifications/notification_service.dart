@@ -38,8 +38,9 @@ class NotificationService {
     );
 
     // Configure local notifications for Android
-    const androidInitializationSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInitializationSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const initializationSettings = InitializationSettings(
       android: androidInitializationSettings,
     );

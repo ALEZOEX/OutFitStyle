@@ -34,10 +34,7 @@ class CatalogApiService {
     int page = 1,
     int limit = 20,
   }) async {
-    final params = <String, dynamic>{
-      'page': page,
-      'limit': limit,
-    };
+    final params = <String, dynamic>{'page': page, 'limit': limit};
 
     if (query != null && query.isNotEmpty) {
       params['q'] = query;
@@ -55,16 +52,22 @@ class CatalogApiService {
       params['color'] = color;
     }
 
-    final response = await _apiClient.get('/api/catalog/search', params: params);
+    final response = await _apiClient.get(
+      '/api/catalog/search',
+      params: params,
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
       final itemsData = data['items'] as List<dynamic>? ?? [];
       final pagination = data['pagination'] as Map<String, dynamic>?;
 
-      final items = itemsData
-          .map((item) => CatalogEntity.fromJson(item as Map<String, dynamic>))
-          .toList();
+      final items =
+          itemsData
+              .map(
+                (item) => CatalogEntity.fromJson(item as Map<String, dynamic>),
+              )
+              .toList();
 
       return CatalogListResponse(
         items: items,
@@ -112,7 +115,10 @@ class CatalogApiService {
   }
 
   /// Получить похожие вещи
-  Future<List<CatalogEntity>> getSimilarItems(String itemId, {int limit = 20}) async {
+  Future<List<CatalogEntity>> getSimilarItems(
+    String itemId, {
+    int limit = 20,
+  }) async {
     final response = await _apiClient.get(
       '/api/catalog/items/$itemId/similar',
       params: {'limit': limit},
@@ -157,9 +163,12 @@ class CatalogCategoriesResponse {
   factory CatalogCategoriesResponse.fromJson(Map<String, dynamic> json) {
     final categoriesData = json['categories'] as List<dynamic>? ?? [];
     return CatalogCategoriesResponse(
-      categories: categoriesData
-          .map((cat) => CatalogCategory.fromJson(cat as Map<String, dynamic>))
-          .toList(),
+      categories:
+          categoriesData
+              .map(
+                (cat) => CatalogCategory.fromJson(cat as Map<String, dynamic>),
+              )
+              .toList(),
     );
   }
 }
@@ -184,7 +193,8 @@ class CatalogCategory {
     final subcatsData = json['subcategories'] as List<dynamic>? ?? [];
     return CatalogCategory(
       name: json['name'] as String? ?? '',
-      displayName: json['display_name'] as String? ?? json['name'] as String? ?? '',
+      displayName:
+          json['display_name'] as String? ?? json['name'] as String? ?? '',
       emoji: json['emoji'] as String? ?? '📦',
       itemCount: json['item_count'] as int? ?? 0,
       subcategories: subcatsData.map((e) => e as String).toList(),
@@ -198,11 +208,7 @@ class CatalogApiException implements Exception {
   final int? statusCode;
   final Map<String, dynamic>? details;
 
-  const CatalogApiException(
-    this.message, {
-    this.statusCode,
-    this.details,
-  });
+  const CatalogApiException(this.message, {this.statusCode, this.details});
 
   @override
   String toString() {

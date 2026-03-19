@@ -12,11 +12,7 @@ class CityData {
   final double lat;
   final double lon;
 
-  const CityData({
-    required this.name,
-    required this.lat,
-    required this.lon,
-  });
+  const CityData({required this.name, required this.lat, required this.lon});
 
   @override
   String toString() => name;
@@ -27,10 +23,7 @@ class CityData {
 class CitySelectorWidget extends ConsumerStatefulWidget {
   final Function(CityData city)? onCitySelected;
 
-  const CitySelectorWidget({
-    super.key,
-    this.onCitySelected,
-  });
+  const CitySelectorWidget({super.key, this.onCitySelected});
 
   @override
   ConsumerState<CitySelectorWidget> createState() => _CitySelectorWidgetState();
@@ -66,7 +59,7 @@ class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
   void _selectCity(CityData city) {
     ref.read(selectedCityProvider.notifier).state = city;
     widget.onCitySelected?.call(city);
-    
+
     if (mounted) {
       Navigator.of(context).pop(city);
     }
@@ -93,24 +86,30 @@ class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
         'format=json&'
         'limit=5&'
         'countrycodes=ru&'
-        'accept-language=ru'
+        'accept-language=ru',
       );
 
-      final response = await http.get(url, headers: {
-        'User-Agent': 'OutFitStyle/1.0',
-      });
+      final response = await http.get(
+        url,
+        headers: {'User-Agent': 'OutFitStyle/1.0'},
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as List<dynamic>;
-        final results = data
-            .where((item) => item['type'] == 'city' || item['type'] == 'town')
-            .take(5)
-            .map((item) => CityData(
-                  name: item['display_name'].split(',')[0],
-                  lat: double.parse(item['lat']),
-                  lon: double.parse(item['lon']),
-                ))
-            .toList();
+        final results =
+            data
+                .where(
+                  (item) => item['type'] == 'city' || item['type'] == 'town',
+                )
+                .take(5)
+                .map(
+                  (item) => CityData(
+                    name: item['display_name'].split(',')[0],
+                    lat: double.parse(item['lat']),
+                    lon: double.parse(item['lon']),
+                  ),
+                )
+                .toList();
 
         setState(() {
           _searchResults = results;
@@ -128,9 +127,9 @@ class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
         _isSearching = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка поиска: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ошибка поиска: $e')));
       }
     }
   }
@@ -142,135 +141,142 @@ class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Заголовок
-              Text(
-                'Выберите город',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              
-              // Поиск
-              TextField(
-                controller: _cityController,
-                decoration: InputDecoration(
-                  hintText: 'Введите название города...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+      builder:
+          (context) => StatefulBuilder(
+            builder:
+                (context, setModalState) => Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                    left: 16,
+                    right: 16,
+                    top: 16,
                   ),
-                  suffixIcon: _isSearching
-                      ? const Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Заголовок
+                      Text(
+                        'Выберите город',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Поиск
+                      TextField(
+                        controller: _cityController,
+                        decoration: InputDecoration(
+                          hintText: 'Введите название города...',
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          suffixIcon:
+                              _isSearching
+                                  ? const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                  : _cityController.text.isNotEmpty
+                                  ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _cityController.clear();
+                                      setModalState(() {
+                                        _searchResults = [];
+                                      });
+                                    },
+                                  )
+                                  : null,
+                        ),
+                        onChanged: (value) {
+                          setModalState(() {});
+                          _searchCity(value);
+                        },
+                        onSubmitted: (value) {
+                          if (_searchResults.isNotEmpty) {
+                            _selectCity(_searchResults.first);
+                          }
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Результаты поиска или популярные города
+                      if (_isSearching)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32.0),
+                            child: CircularProgressIndicator(),
                           ),
                         )
-                      : _cityController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _cityController.clear();
-                                setModalState(() {
-                                  _searchResults = [];
-                                });
-                              },
-                            )
-                          : null,
-                ),
-                onChanged: (value) {
-                  setModalState(() {});
-                  _searchCity(value);
-                },
-                onSubmitted: (value) {
-                  if (_searchResults.isNotEmpty) {
-                    _selectCity(_searchResults.first);
-                  }
-                },
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Результаты поиска или популярные города
-              if (_isSearching)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else if (_searchResults.isNotEmpty) ...[
-                Text(
-                  'Результаты поиска',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: _searchResults.length,
-                    separatorBuilder: (context, index) => const Divider(),
-                    itemBuilder: (context, index) {
-                      final city = _searchResults[index];
-                      return ListTile(
-                        leading: const Icon(Icons.location_city),
-                        title: Text(city.name),
-                        subtitle: Text('Шир: ${city.lat.toStringAsFixed(2)}, Долг: ${city.lon.toStringAsFixed(2)}'),
-                        onTap: () => _selectCity(city),
-                      );
-                    },
-                  ),
-                ),
-              ] else if (_cityController.text.isEmpty) ...[
-                Text(
-                  'Популярные города',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                      else if (_searchResults.isNotEmpty) ...[
+                        Text(
+                          'Результаты поиска',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 8),
+                        Flexible(
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: _searchResults.length,
+                            separatorBuilder:
+                                (context, index) => const Divider(),
+                            itemBuilder: (context, index) {
+                              final city = _searchResults[index];
+                              return ListTile(
+                                leading: const Icon(Icons.location_city),
+                                title: Text(city.name),
+                                subtitle: Text(
+                                  'Шир: ${city.lat.toStringAsFixed(2)}, Долг: ${city.lon.toStringAsFixed(2)}',
+                                ),
+                                onTap: () => _selectCity(city),
+                              );
+                            },
+                          ),
+                        ),
+                      ] else if (_cityController.text.isEmpty) ...[
+                        Text(
+                          'Популярные города',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children:
+                              _popularCities.map((city) {
+                                return ActionChip(
+                                  label: Text(city.name),
+                                  onPressed: () => _selectCity(city),
+                                );
+                              }).toList(),
+                        ),
+                      ] else ...[
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32.0),
+                            child: Text('Городы не найдены'),
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _popularCities.map((city) {
-                    return ActionChip(
-                      label: Text(city.name),
-                      onPressed: () => _selectCity(city),
-                    );
-                  }).toList(),
-                ),
-              ] else ...[
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: Text('Городы не найдены'),
-                  ),
-                ),
-              ],
-              
-              const SizedBox(height: 16),
-            ],
           ),
-        ),
-      ),
     );
   }
 
@@ -280,9 +286,7 @@ class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -309,9 +313,10 @@ class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
                   ? 'Ваш город: ${selectedCity.name}'
                   : 'Геолокация недоступна в браузере',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: selectedCity != null
-                    ? Theme.of(context).colorScheme.onSurface
-                    : Theme.of(context).colorScheme.error,
+                color:
+                    selectedCity != null
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context).colorScheme.error,
               ),
             ),
             const SizedBox(height: 12),
@@ -320,7 +325,9 @@ class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
               child: OutlinedButton.icon(
                 onPressed: _showCitySearch,
                 icon: const Icon(Icons.edit_location),
-                label: Text(selectedCity != null ? 'Изменить' : 'Выбрать город'),
+                label: Text(
+                  selectedCity != null ? 'Изменить' : 'Выбрать город',
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(

@@ -74,24 +74,27 @@ class _AppSearchBarState extends State<AppSearchBar> {
         decoration: InputDecoration(
           hintText: widget.hintText,
           prefixIcon: const Icon(Icons.search),
-          suffixIcon: _controller.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _controller.clear();
-                    widget.onClear?.call();
-                    widget.onChanged?.call('');
-                  },
-                )
-              : null,
+          suffixIcon:
+              _controller.text.isNotEmpty
+                  ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _controller.clear();
+                      widget.onClear?.call();
+                      widget.onChanged?.call('');
+                    },
+                  )
+                  : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(24.0),
             borderSide: BorderSide.none,
           ),
           filled: true,
           fillColor: theme.cardColor,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 12.0,
+          ),
         ),
       ),
     );
@@ -109,16 +112,17 @@ class _AppSearchBarState extends State<AppSearchBar> {
         decoration: InputDecoration(
           hintText: widget.hintText,
           prefixIcon: const Icon(Icons.search),
-          suffixIcon: _controller.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _controller.clear();
-                    widget.onClear?.call();
-                    widget.onChanged?.call('');
-                  },
-                )
-              : null,
+          suffixIcon:
+              _controller.text.isNotEmpty
+                  ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _controller.clear();
+                      widget.onClear?.call();
+                      widget.onChanged?.call('');
+                    },
+                  )
+                  : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
             borderSide: BorderSide(color: theme.dividerColor),
@@ -133,8 +137,10 @@ class _AppSearchBarState extends State<AppSearchBar> {
           ),
           filled: true,
           fillColor: theme.cardColor,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 12.0,
+          ),
         ),
       ),
     );
@@ -164,30 +170,27 @@ class _AppSearchBarState extends State<AppSearchBar> {
           hintText: widget.hintText,
           prefixIcon: Padding(
             padding: const EdgeInsets.all(14.0),
-            child: Icon(
-              Icons.search,
-              color: theme.hintColor,
-            ),
+            child: Icon(Icons.search, color: theme.hintColor),
           ),
-          suffixIcon: _controller.text.isNotEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.clear,
-                      color: theme.hintColor,
+          suffixIcon:
+              _controller.text.isNotEmpty
+                  ? Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: IconButton(
+                      icon: Icon(Icons.clear, color: theme.hintColor),
+                      onPressed: () {
+                        _controller.clear();
+                        widget.onClear?.call();
+                        widget.onChanged?.call('');
+                      },
                     ),
-                    onPressed: () {
-                      _controller.clear();
-                      widget.onClear?.call();
-                      widget.onChanged?.call('');
-                    },
-                  ),
-                )
-              : null,
+                  )
+                  : null,
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 14.0,
+          ),
         ),
       ),
     );
@@ -224,9 +227,12 @@ class OutfitSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    final filteredSuggestions = suggestions
-        .where((element) => element.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final filteredSuggestions =
+        suggestions
+            .where(
+              (element) => element.toLowerCase().contains(query.toLowerCase()),
+            )
+            .toList();
 
     return ListView.builder(
       itemCount: filteredSuggestions.length,
@@ -243,9 +249,12 @@ class OutfitSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final filteredSuggestions = suggestions
-        .where((element) => element.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final filteredSuggestions =
+        suggestions
+            .where(
+              (element) => element.toLowerCase().contains(query.toLowerCase()),
+            )
+            .toList();
 
     return ListView.builder(
       itemCount: filteredSuggestions.length,

@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class UserStatisticsWidget extends StatelessWidget {
   final Map<String, dynamic>? statistics;
 
-  const UserStatisticsWidget({
-    Key? key,
-    this.statistics,
-  }) : super(key: key);
+  const UserStatisticsWidget({Key? key, this.statistics}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +41,9 @@ class UserStatisticsWidget extends StatelessWidget {
         children: [
           Text(
             'Статистика использования',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           GridView.builder(
@@ -86,10 +83,8 @@ class UserStatisticsWidget extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       stat['value'].toString(),
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Text(

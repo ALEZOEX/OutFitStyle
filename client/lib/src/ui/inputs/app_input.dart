@@ -75,13 +75,17 @@ class _AppInputState extends State<AppInput> {
       focusedBorder: _getFocusedBorder(theme),
       errorBorder: _getErrorBorder(theme),
       focusedErrorBorder: _getErrorBorder(theme),
-      filled: widget.variant == InputVariant.filled ||
+      filled:
+          widget.variant == InputVariant.filled ||
           widget.variant == InputVariant.outlined,
-      fillColor: widget.variant == InputVariant.filled
-          ? theme.inputDecorationTheme.fillColor
-          : null,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+      fillColor:
+          widget.variant == InputVariant.filled
+              ? theme.inputDecorationTheme.fillColor
+              : null,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 14.0,
+      ),
     );
 
     return TextFormField(
@@ -122,9 +126,7 @@ class _AppInputState extends State<AppInput> {
       case InputVariant.outlined:
         return OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
-          borderSide: BorderSide(
-            color: theme.dividerColor,
-          ),
+          borderSide: BorderSide(color: theme.dividerColor),
         );
       case InputVariant.filled:
         return OutlineInputBorder(
@@ -141,25 +143,16 @@ class _AppInputState extends State<AppInput> {
       case InputVariant.outlined:
         return OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
-          borderSide: BorderSide(
-            color: theme.primaryColor,
-            width: 2.0,
-          ),
+          borderSide: BorderSide(color: theme.primaryColor, width: 2.0),
         );
       case InputVariant.filled:
         return OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
-          borderSide: BorderSide(
-            color: theme.primaryColor,
-            width: 2.0,
-          ),
+          borderSide: BorderSide(color: theme.primaryColor, width: 2.0),
         );
       case InputVariant.underline:
         return UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: theme.primaryColor,
-            width: 2.0,
-          ),
+          borderSide: BorderSide(color: theme.primaryColor, width: 2.0),
         );
     }
   }

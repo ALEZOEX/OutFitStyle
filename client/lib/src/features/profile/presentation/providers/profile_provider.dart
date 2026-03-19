@@ -3,12 +3,7 @@ import '../../../../presentation/providers/session_provider.dart';
 import '../../../wardrobe/presentation/providers/wardrobe_provider.dart';
 
 /// Состояние профиля пользователя
-enum ProfileLoadStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum ProfileLoadStatus { initial, loading, success, error }
 
 /// Данные профиля пользователя из Firebase Auth
 class ProfileData {
@@ -81,9 +76,10 @@ class ProfileStats {
 }
 
 /// Провайдер данных профиля
-final profileDataProvider = StateNotifierProvider<ProfileDataNotifier, AsyncValue<ProfileData>>((ref) {
-  return ProfileDataNotifier(ref: ref);
-});
+final profileDataProvider =
+    StateNotifierProvider<ProfileDataNotifier, AsyncValue<ProfileData>>((ref) {
+      return ProfileDataNotifier(ref: ref);
+    });
 
 /// Провайдер статистики профиля
 final profileStatsProvider = Provider<ProfileStats>((ref) {
@@ -95,8 +91,8 @@ class ProfileDataNotifier extends StateNotifier<AsyncValue<ProfileData>> {
   final Ref _ref;
 
   ProfileDataNotifier({required Ref ref})
-      : _ref = ref,
-        super(const AsyncValue.loading()) {
+    : _ref = ref,
+      super(const AsyncValue.loading()) {
     _loadProfile();
   }
 
@@ -110,7 +106,10 @@ class ProfileDataNotifier extends StateNotifier<AsyncValue<ProfileData>> {
       if (userSession != null) {
         final profileData = ProfileData.fromFirebase(
           uid: userSession.uid,
-          displayName: userSession.displayName ?? userSession.email?.split('@').first ?? 'Пользователь',
+          displayName:
+              userSession.displayName ??
+              userSession.email?.split('@').first ??
+              'Пользователь',
           email: userSession.email ?? '',
           photoUrl: userSession.photoUrl,
           createdAt: null, // Firebase не предоставляет created_at напрямую

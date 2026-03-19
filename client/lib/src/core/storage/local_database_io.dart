@@ -63,7 +63,9 @@ String _generateDbHash() {
 Future<void> _ensureSecureDirectory(Directory dir) async {
   try {
     if (!dir.path.contains('documents') && !dir.path.contains('app_flutter')) {
-      throw SecurityException('Database directory appears to be outside app storage');
+      throw SecurityException(
+        'Database directory appears to be outside app storage',
+      );
     }
     final testFile = File(path.join(dir.path, '.permission_test'));
     await testFile.writeAsString('test');
@@ -85,7 +87,9 @@ Future<void> _validateDatabaseFile(File file) async {
     if (bytes.length >= 16) {
       final header = String.fromCharCodes(bytes.take(16));
       if (!header.startsWith('SQLite format 3')) {
-        throw DatabaseException('File does not appear to be a valid SQLite database');
+        throw DatabaseException(
+          'File does not appear to be a valid SQLite database',
+        );
       }
     }
   } catch (e) {
@@ -96,6 +100,9 @@ Future<void> _validateDatabaseFile(File file) async {
 
 /// Determine if SQL statements should be logged
 bool _shouldLogSql() {
-  const shouldLog = bool.fromEnvironment('LOG_SQL_QUERIES', defaultValue: false);
+  const shouldLog = bool.fromEnvironment(
+    'LOG_SQL_QUERIES',
+    defaultValue: false,
+  );
   return shouldLog;
 }

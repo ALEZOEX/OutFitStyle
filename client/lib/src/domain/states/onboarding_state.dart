@@ -10,7 +10,5 @@ abstract class OnboardingState with _$OnboardingState {
     required int totalSteps,
   }) = _InProgress;
   const factory OnboardingState.completed() = _Completed;
-  const factory OnboardingState.error({
-    required String message,
-  }) = _Error;
+  const factory OnboardingState.error({required String message}) = _Error;
 }

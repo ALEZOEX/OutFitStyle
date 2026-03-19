@@ -33,18 +33,20 @@ class CartItemCard extends StatelessWidget {
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  width: 80,
-                  height: 80,
-                  color: Colors.grey[200],
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  width: 80,
-                  height: 80,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.image_not_supported),
-                ),
+                placeholder:
+                    (context, url) => Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[200],
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                errorWidget:
+                    (context, url, error) => Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.image_not_supported),
+                    ),
               ),
             ),
 
@@ -71,11 +73,12 @@ class CartItemCard extends StatelessWidget {
                     Text(
                       [
                         if (item.size != null) 'Размер: ${item.size}',
-                        if (item.color != null) 'Цвет: ${_capitalize(item.color!)}',
+                        if (item.color != null)
+                          'Цвет: ${_capitalize(item.color!)}',
                       ].join(', '),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                     ),
 
                   const SizedBox(height: 8),
@@ -93,7 +96,8 @@ class CartItemCard extends StatelessWidget {
                           children: [
                             IconButton(
                               onPressed: () {
-                                if (item.quantity > 1 && onQuantityChanged != null) {
+                                if (item.quantity > 1 &&
+                                    onQuantityChanged != null) {
                                   onQuantityChanged!(item.quantity - 1);
                                 }
                               },
@@ -114,7 +118,8 @@ class CartItemCard extends StatelessWidget {
                             ),
                             IconButton(
                               onPressed: () {
-                                if (item.quantity < 10 && onQuantityChanged != null) {
+                                if (item.quantity < 10 &&
+                                    onQuantityChanged != null) {
                                   onQuantityChanged!(item.quantity + 1);
                                 }
                               },
@@ -137,16 +142,18 @@ class CartItemCard extends StatelessWidget {
                         children: [
                           Text(
                             '${item.total.toStringAsFixed(0)} ₽',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             '${item.price.toStringAsFixed(0)} ₽/шт',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
-                            ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                           ),
                         ],
                       ),

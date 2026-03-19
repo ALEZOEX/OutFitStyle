@@ -14,21 +14,25 @@ class UploadService {
   late final Dio _dio;
 
   UploadService() {
-    _dio = Dio(BaseOptions(
-      baseUrl: ApiConfig.baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 60),
-      headers: {'Content-Type': 'multipart/form-data'},
-      extra: {'withCredentials': true}, // Важно: отправка cookie
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 60),
+        headers: {'Content-Type': 'multipart/form-data'},
+        extra: {'withCredentials': true}, // Важно: отправка cookie
+      ),
+    );
 
     // Interceptor для логирования
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        return handler.next(options);
-      },
-      onError: (DioException err, handler) => handler.next(err),
-    ));
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          return handler.next(options);
+        },
+        onError: (DioException err, handler) => handler.next(err),
+      ),
+    );
   }
 
   /// Загружает изображение на сервер
@@ -73,9 +77,7 @@ class UploadService {
         }
         return url;
       } else {
-        throw UploadException(
-          'Ошибка загрузки: ${response.statusCode}',
-        );
+        throw UploadException('Ошибка загрузки: ${response.statusCode}');
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -159,8 +161,7 @@ class UploadService {
 
   String? _extractErrorMessage(dynamic data) {
     if (data is Map<String, dynamic>) {
-      return data['message'] as String? ?? 
-             data['error'] as String?;
+      return data['message'] as String? ?? data['error'] as String?;
     }
     return null;
   }
@@ -169,9 +170,9 @@ class UploadService {
 /// Исключение при загрузке файла
 class UploadException implements Exception {
   final String message;
-  
+
   const UploadException(this.message);
-  
+
   @override
   String toString() => 'UploadException: $message';
 }

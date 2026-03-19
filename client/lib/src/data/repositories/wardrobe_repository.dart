@@ -29,7 +29,7 @@ class WardrobeRepository implements IWardrobeRepository {
       final localItems = await database.getAllClothingItems(
         includeArchived: includeArchived,
       );
-      
+
       if (localItems.isNotEmpty) {
         return localItems.map(WardrobeItemMapper.toEntity).toList();
       }
@@ -41,7 +41,11 @@ class WardrobeRepository implements IWardrobeRepository {
       );
       return refreshedItems.map(WardrobeItemMapper.toEntity).toList();
     } catch (e, st) {
-      _logger.e('Ошибка получения элементов гардероба', error: e, stackTrace: st);
+      _logger.e(
+        'Ошибка получения элементов гардероба',
+        error: e,
+        stackTrace: st,
+      );
       // Возвращаем пустой список при ошибке
       return [];
     }
@@ -122,7 +126,7 @@ class WardrobeRepository implements IWardrobeRepository {
       if (internalId != null) {
         localItem = await database.getClothingItemById(internalId);
       }
-      
+
       if (localItem == null && item.serverId != null) {
         localItem = await database.getClothingItemByServerId(item.serverId!);
       }
@@ -213,32 +217,40 @@ class WardrobeRepository implements IWardrobeRepository {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.data) as Map<String, dynamic>;
         final items = data['items'] as List<dynamic>? ?? data as List<dynamic>;
-        
+
         await database.batch((batch) async {
           for (final itemJson in items) {
-            final item = WardrobeItem.fromJson(itemJson as Map<String, dynamic>);
+            final item = WardrobeItem.fromJson(
+              itemJson as Map<String, dynamic>,
+            );
             final companion = WardrobeItemMapper.toCompanionForInsert(
               item.copyWith(dirty: false, lastSyncedAt: DateTime.now()),
             );
-            
+
             // Проверяем, существует ли уже элемент
-            final existing = item.serverId != null
-                ? await database.getClothingItemByServerId(item.serverId!)
-                : null;
-            
+            final existing =
+                item.serverId != null
+                    ? await database.getClothingItemByServerId(item.serverId!)
+                    : null;
+
             if (existing != null) {
               final updateCompanion = companion.copyWith(
                 updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
               );
               // Обновляем существующий элемент
-              await database.updateClothingItemById(existing.id, updateCompanion);
+              await database.updateClothingItemById(
+                existing.id,
+                updateCompanion,
+              );
             } else {
               batch.insert(database.clothingItems, companion);
             }
           }
         });
 
-        _logger.i('Синхронизация с сервером завершена: ${items.length} элементов');
+        _logger.i(
+          'Синхронизация с сервером завершена: ${items.length} элементов',
+        );
       }
     } catch (e, st) {
       _logger.e('Ошибка синхронизации с сервером', error: e, stackTrace: st);
@@ -259,7 +271,11 @@ class WardrobeRepository implements IWardrobeRepository {
       final unsynced = await database.getUnsyncedClothingItems();
       return unsynced.map(WardrobeItemMapper.toEntity).toList();
     } catch (e, st) {
-      _logger.e('Ошибка получения несинхронизированных элементов', error: e, stackTrace: st);
+      _logger.e(
+        'Ошибка получения несинхронизированных элементов',
+        error: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -277,7 +293,11 @@ class WardrobeRepository implements IWardrobeRepository {
         }
       }
     } catch (e, st) {
-      _logger.e('Ошибка отметки элемента как синхронизированного', error: e, stackTrace: st);
+      _logger.e(
+        'Ошибка отметки элемента как синхронизированного',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 
@@ -285,10 +305,11 @@ class WardrobeRepository implements IWardrobeRepository {
 
   /// Сохранить элемент локально
   Future<void> _saveLocal(WardrobeItem item) async {
-    final existing = item.serverId != null
-        ? await database.getClothingItemByServerId(item.serverId!)
-        : null;
-    
+    final existing =
+        item.serverId != null
+            ? await database.getClothingItemByServerId(item.serverId!)
+            : null;
+
     if (existing != null) {
       final companion = WardrobeItemMapper.toCompanionForUpdate(
         item.copyWith(dirty: false, lastSyncedAt: DateTime.now()),
@@ -307,21 +328,16 @@ class WardrobeRepository implements IWardrobeRepository {
     try {
       if (item.serverId != null) {
         // Обновление существующего
-        await apiClient.put(
-          '/wardrobe/${item.serverId}',
-          data: item.toJson(),
-        );
+        await apiClient.put('/wardrobe/${item.serverId}', data: item.toJson());
         await markAsSynced(item.id ?? item.serverId!, item.serverId!);
       } else {
         // Создание нового
-        final response = await apiClient.post(
-          '/wardrobe',
-          data: item.toJson(),
-        );
+        final response = await apiClient.post('/wardrobe', data: item.toJson());
 
         if (response.statusCode == 201 || response.statusCode == 200) {
           final data = jsonDecode(response.data) as Map<String, dynamic>;
-          final serverId = data['id'] as String? ?? data['server_id'] as String?;
+          final serverId =
+              data['id'] as String? ?? data['server_id'] as String?;
           if (serverId != null) {
             await markAsSynced(item.id ?? '', serverId);
           }

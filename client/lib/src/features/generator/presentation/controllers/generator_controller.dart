@@ -6,9 +6,10 @@ import '../../../../data/repositories/recommendations_repository.dart';
 class GeneratorController extends StateNotifier<GeneratorState> {
   final RecommendationsRepository _recommendationsRepository;
 
-  GeneratorController({required RecommendationsRepository recommendationsRepository})
-      : _recommendationsRepository = recommendationsRepository,
-        super(const GeneratorState());
+  GeneratorController({
+    required RecommendationsRepository recommendationsRepository,
+  }) : _recommendationsRepository = recommendationsRepository,
+       super(const GeneratorState());
 
   /// Генерация наряда на основе параметров
   Future<void> generateOutfit({
@@ -20,24 +21,22 @@ class GeneratorController extends StateNotifier<GeneratorState> {
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final recommendation = await _recommendationsRepository.generateRecommendation(
-        excludedItems: [],
-        latitude: latitude,
-        longitude: longitude,
-        occasion: occasion,
-        preferredStyles: preferredStyles,
-        userId: userId,
-      );
+      final recommendation = await _recommendationsRepository
+          .generateRecommendation(
+            excludedItems: [],
+            latitude: latitude,
+            longitude: longitude,
+            occasion: occasion,
+            preferredStyles: preferredStyles,
+            userId: userId,
+          );
 
       state = state.copyWith(
         isLoading: false,
         generatedOutfit: recommendation.toJson(),
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
   }

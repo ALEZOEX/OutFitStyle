@@ -60,11 +60,7 @@ class AppErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              displayIcon,
-              size: 64.0,
-              color: theme.colorScheme.error,
-            ),
+            Icon(displayIcon, size: 64.0, color: theme.colorScheme.error),
             const SizedBox(height: 24.0),
             Text(
               message,
@@ -110,11 +106,8 @@ class WeatherDataErrorWidget extends StatelessWidget {
   final String? customMessage;
   final VoidCallback? onRetry;
 
-  const WeatherDataErrorWidget({
-    Key? key,
-    this.customMessage,
-    this.onRetry,
-  }) : super(key: key);
+  const WeatherDataErrorWidget({Key? key, this.customMessage, this.onRetry})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -136,5 +129,5 @@ enum ErrorVariant {
   permission,
   notFound,
   authentication,
-  generic
+  generic,
 }

@@ -186,10 +186,7 @@ void main() {
         isUnlocked: false,
       );
 
-      final modified = original.copyWith(
-        currentProgress: 1,
-        isUnlocked: true,
-      );
+      final modified = original.copyWith(currentProgress: 1, isUnlocked: true);
 
       expect(modified.currentProgress, 1);
       expect(modified.isUnlocked, true);
@@ -235,13 +232,25 @@ void main() {
     });
 
     test('AchievementCategory fromId returns correct category', () {
-      expect(AchievementCategory.fromId('wardrobe'), AchievementCategory.wardrobe);
-      expect(AchievementCategory.fromId('ratings'), AchievementCategory.ratings);
-      expect(AchievementCategory.fromId('unknown'), AchievementCategory.special);
+      expect(
+        AchievementCategory.fromId('wardrobe'),
+        AchievementCategory.wardrobe,
+      );
+      expect(
+        AchievementCategory.fromId('ratings'),
+        AchievementCategory.ratings,
+      );
+      expect(
+        AchievementCategory.fromId('unknown'),
+        AchievementCategory.special,
+      );
     });
 
     test('AchievementCategory allCategories returns all values', () {
-      expect(AchievementCategory.allCategories.length, AchievementCategory.values.length);
+      expect(
+        AchievementCategory.allCategories.length,
+        AchievementCategory.values.length,
+      );
     });
   });
 

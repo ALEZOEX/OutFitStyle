@@ -7,11 +7,8 @@ class AchievementCardWidget extends ConsumerWidget {
   final Achievement achievement;
   final VoidCallback? onTap;
 
-  const AchievementCardWidget({
-    Key? key,
-    required this.achievement,
-    this.onTap,
-  }) : super(key: key);
+  const AchievementCardWidget({Key? key, required this.achievement, this.onTap})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -72,16 +69,19 @@ class AchievementCardWidget extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isUnlocked
-                                  ? Colors.black87
-                                  : Colors.grey.shade600,
+                              color:
+                                  isUnlocked
+                                      ? Colors.black87
+                                      : Colors.grey.shade600,
                             ),
                           ),
                         ),
                         if (isUnlocked)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.green.shade100,
                               borderRadius: BorderRadius.circular(12),
@@ -120,7 +120,8 @@ class AchievementCardWidget extends ConsumerWidget {
                             value: progress / target,
                             backgroundColor: Colors.grey.shade200,
                             valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.blue),
+                              Colors.blue,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Row(

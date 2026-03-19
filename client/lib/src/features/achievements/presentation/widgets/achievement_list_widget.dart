@@ -23,15 +23,16 @@ class AchievementListWidget extends ConsumerWidget {
 
         return AchievementCardWidget(
           achievement: achievement,
-          onTap: userId != null
-              ? () {
-                  // При нажатии можно увеличить прогресс ачивки (для демонстрации)
-                  // В реальном приложении это будет зависеть от типа ачивки
-                  ref
-                      .read(achievementNotifierProvider.notifier)
-                      .updateUserAchievement(userId!, achievement.id);
-                }
-              : null,
+          onTap:
+              userId != null
+                  ? () {
+                    // При нажатии можно увеличить прогресс ачивки (для демонстрации)
+                    // В реальном приложении это будет зависеть от типа ачивки
+                    ref
+                        .read(achievementNotifierProvider.notifier)
+                        .updateUserAchievement(userId!, achievement.id);
+                  }
+                  : null,
         );
       },
     );

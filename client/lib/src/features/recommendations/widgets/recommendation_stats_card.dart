@@ -27,11 +27,20 @@ class RecommendationStatsCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatItem(
-                    'Всего', totalRecommendations.toString(), Icons.list),
+                  'Всего',
+                  totalRecommendations.toString(),
+                  Icons.list,
+                ),
                 _buildStatItem(
-                    'Нравится', likedCount.toString(), Icons.favorite),
+                  'Нравится',
+                  likedCount.toString(),
+                  Icons.favorite,
+                ),
                 _buildStatItem(
-                    'Сохранено', savedCount.toString(), Icons.bookmark),
+                  'Сохранено',
+                  savedCount.toString(),
+                  Icons.bookmark,
+                ),
                 _buildStatItem('Доверие', '$avgConfidence%', Icons.trending_up),
               ],
             ),
@@ -50,10 +59,7 @@ class RecommendationStatsCard extends StatelessWidget {
           value,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }

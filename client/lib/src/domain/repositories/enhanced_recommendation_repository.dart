@@ -90,9 +90,7 @@ abstract class EnhancedRecommendationRepository {
   });
 
   /// Get user preferences
-  Future<UserPreference> getUserPreferences({
-    required String userId,
-  });
+  Future<UserPreference> getUserPreferences({required String userId});
 
   /// Update user preferences
   Future<void> updateUserPreferences({
@@ -102,7 +100,7 @@ abstract class EnhancedRecommendationRepository {
 
   /// Get recommendation algorithms
   Future<List<PersonalizedRecommendationAlgorithm>>
-      getRecommendationAlgorithms();
+  getRecommendationAlgorithms();
 
   /// Get active recommendation algorithm
   Future<PersonalizedRecommendationAlgorithm> getActiveAlgorithm();

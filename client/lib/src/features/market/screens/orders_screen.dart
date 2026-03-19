@@ -50,10 +50,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       appBar: AppBar(
         title: const Text('Мои заказы'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadOrders,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadOrders),
         ],
       ),
       body: Column(
@@ -74,19 +71,21 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     _loadOrders();
                   },
                 ),
-                ...OrderStatus.values.map((status) => Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: FilterChip(
-                    label: Text(status.displayName),
-                    selected: _selectedStatus == status.name,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedStatus = selected ? status.name : null;
-                      });
-                      _loadOrders();
-                    },
+                ...OrderStatus.values.map(
+                  (status) => Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: FilterChip(
+                      label: Text(status.displayName),
+                      selected: _selectedStatus == status.name,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedStatus = selected ? status.name : null;
+                        });
+                        _loadOrders();
+                      },
+                    ),
                   ),
-                )),
+                ),
               ],
             ),
           ),
@@ -106,29 +105,35 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     return OrderCard(
                       order: orders[index],
                       onTap: () => _navigateToOrderDetails(orders[index]),
-                      onCancel: orders[index].status == OrderStatus.pending
-                          ? () => _cancelOrder(orders[index])
-                          : null,
+                      onCancel:
+                          orders[index].status == OrderStatus.pending
+                              ? () => _cancelOrder(orders[index])
+                              : null,
                     );
                   },
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 48, color: AppColors.error),
-                    const SizedBox(height: 16),
-                    Text('Ошибка загрузки: $error'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadOrders,
-                      child: const Text('Повторить'),
+              error:
+                  (error, stack) => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(height: 16),
+                        Text('Ошибка загрузки: $error'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadOrders,
+                          child: const Text('Повторить'),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
             ),
           ),
         ],
@@ -143,16 +148,13 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         children: [
           Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 24),
-          Text(
-            'Нет заказов',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text('Нет заказов', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           Text(
             'Ваши заказы появятся здесь',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -176,21 +178,22 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   Future<void> _cancelOrder(Order order) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Отменить заказ?'),
-        content: const Text('Это действие нельзя отменить'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Отмена'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Отменить заказ?'),
+            content: const Text('Это действие нельзя отменить'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                child: const Text('Отменить'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Отменить'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed != true) return;

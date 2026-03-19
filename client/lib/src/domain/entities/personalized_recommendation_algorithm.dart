@@ -52,8 +52,8 @@ abstract class PersonalizedRecommendationAlgorithm
       );
 
   factory PersonalizedRecommendationAlgorithm.fromJson(
-          Map<String, dynamic> json) =>
-      _$PersonalizedRecommendationAlgorithmFromJson(json);
+    Map<String, dynamic> json,
+  ) => _$PersonalizedRecommendationAlgorithmFromJson(json);
 }
 
 enum RecommendationAlgorithmType {

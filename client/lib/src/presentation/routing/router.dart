@@ -25,7 +25,8 @@ import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/complete_profile_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
-import '../../features/onboarding/onboarding_providers.dart' as onboarding_providers;
+import '../../features/onboarding/onboarding_providers.dart'
+    as onboarding_providers;
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/admin/presentation/pages/admin_users_page.dart';
 import '../../features/admin/presentation/pages/admin_user_detail_page.dart';
@@ -38,7 +39,9 @@ import '../providers/session_provider.dart' show authStateProvider;
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Используем прямой StreamProvider<bool> вместо обёртки AuthState
   final authStateAsync = ref.watch(authStateProvider);
-  final onboardingDone = ref.watch(onboarding_providers.isOnboardingDoneProvider);
+  final onboardingDone = ref.watch(
+    onboarding_providers.isOnboardingDoneProvider,
+  );
   final isAdminAsync = ref.watch(adminAccessProvider);
   final refreshListenable = ref.watch(goRouterRefreshProvider);
 
@@ -121,10 +124,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       // Корневой маршрут - редирект на splash
-      GoRoute(
-        path: '/',
-        redirect: (context, state) => '/splash',
-      ),
+      GoRoute(path: '/', redirect: (context, state) => '/splash'),
       // Онбординг
       GoRoute(
         path: '/onboarding',
@@ -159,10 +159,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>?;
           final email = extra?['email'] as String? ?? '';
           final name = extra?['name'] as String?;
-          return CompleteProfileScreen(
-            email: email,
-            googleName: name,
-          );
+          return CompleteProfileScreen(email: email, googleName: name);
         },
       ),
       // Главный экран с shell навигацией
@@ -185,9 +182,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/wardrobe/item/:id',
         name: 'wardrobe_item_detail',
-        builder: (context, state) => WardrobeItemDetailScreen(
-          itemId: state.pathParameters['id']!,
-        ),
+        builder:
+            (context, state) =>
+                WardrobeItemDetailScreen(itemId: state.pathParameters['id']!),
       ),
       // Рекомендации
       GoRoute(
@@ -198,9 +195,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/recommendations/:id',
         name: 'recommendation_detail',
-        builder: (context, state) => RecommendationDetailScreen(
-          recommendationId: state.pathParameters['id']!,
-        ),
+        builder:
+            (context, state) => RecommendationDetailScreen(
+              recommendationId: state.pathParameters['id']!,
+            ),
       ),
       // Планировщик образов
       GoRoute(
@@ -208,9 +206,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'outfit_planner',
         builder: (context, state) {
           final recommendationId = state.extra as String?;
-          return OutfitPlannerScreen(
-            initialRecommendationId: recommendationId,
-          );
+          return OutfitPlannerScreen(initialRecommendationId: recommendationId);
         },
       ),
       // Конструктор образов
@@ -276,9 +272,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/achievements/:id',
         name: 'achievement_detail',
-        builder: (context, state) => AchievementDetailPage(
-          achievementId: state.pathParameters['id']!,
-        ),
+        builder:
+            (context, state) => AchievementDetailPage(
+              achievementId: state.pathParameters['id']!,
+            ),
       ),
       // Generator
       GoRoute(
@@ -290,9 +287,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/outfit/:id',
         name: 'outfit_detail',
-        builder: (context, state) => OutfitDetailsScreen(
-          outfitId: state.pathParameters['id']!,
-        ),
+        builder:
+            (context, state) =>
+                OutfitDetailsScreen(outfitId: state.pathParameters['id']!),
       ),
       // Admin - Dashboard
       GoRoute(
@@ -310,9 +307,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/users/:id',
         name: 'admin_user_detail',
-        builder: (context, state) => AdminUserDetailPage(
-          userId: state.pathParameters['id']!,
-        ),
+        builder:
+            (context, state) =>
+                AdminUserDetailPage(userId: state.pathParameters['id']!),
       ),
       // Уведомления
       GoRoute(

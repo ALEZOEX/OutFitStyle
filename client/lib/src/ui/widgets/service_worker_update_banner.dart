@@ -10,13 +10,11 @@ import 'package:outfitstyle_client/src/services/service_worker_update_service.da
 class ServiceWorkerUpdateBanner extends StatefulWidget {
   final Widget child;
 
-  const ServiceWorkerUpdateBanner({
-    super.key,
-    required this.child,
-  });
+  const ServiceWorkerUpdateBanner({super.key, required this.child});
 
   @override
-  State<ServiceWorkerUpdateBanner> createState() => _ServiceWorkerUpdateBannerState();
+  State<ServiceWorkerUpdateBanner> createState() =>
+      _ServiceWorkerUpdateBannerState();
 }
 
 class _ServiceWorkerUpdateBannerState extends State<ServiceWorkerUpdateBanner> {
@@ -79,7 +77,10 @@ class _ServiceWorkerUpdateBannerState extends State<ServiceWorkerUpdateBanner> {
                         child: Text(
                           'Доступна новая версия приложения',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            color:
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                             fontWeight: FontWeight.w500,
                           ),
                         ),

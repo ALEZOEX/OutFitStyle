@@ -24,7 +24,9 @@ abstract class IAuthRepository {
 
 /// Репозиторий аутентификации (заглушка для обратной совместимости)
 /// @Deprecated Используйте Firebase Auth через SessionManager
-@Deprecated('Используйте SessionManager.signIn/signUp вместо AuthRepository. JWT auth устарел.')
+@Deprecated(
+  'Используйте SessionManager.signIn/signUp вместо AuthRepository. JWT auth устарел.',
+)
 class AuthRepository implements IAuthRepository {
   final ApiConfig config;
   final AuthStorage authStorage;
@@ -34,12 +36,20 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<TokenPair?> login(String email, String password) async {
-    throw UnimplementedError('Используйте SessionManager.signIn() вместо AuthRepository.login()');
+    throw UnimplementedError(
+      'Используйте SessionManager.signIn() вместо AuthRepository.login()',
+    );
   }
 
   @override
-  Future<TokenPair?> register(String email, String password, String name) async {
-    throw UnimplementedError('Используйте SessionManager.signUp() вместо AuthRepository.register()');
+  Future<TokenPair?> register(
+    String email,
+    String password,
+    String name,
+  ) async {
+    throw UnimplementedError(
+      'Используйте SessionManager.signUp() вместо AuthRepository.register()',
+    );
   }
 
   @override
@@ -62,7 +72,9 @@ class AuthRepository implements IAuthRepository {
 
   /// Refresh токена
   Future<TokenPair?> refreshToken() async {
-    throw UnimplementedError('Используйте SessionManager вместо AuthRepository.refreshToken()');
+    throw UnimplementedError(
+      'Используйте SessionManager вместо AuthRepository.refreshToken()',
+    );
   }
 
   /// Валидация токена

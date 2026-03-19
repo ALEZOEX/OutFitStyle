@@ -39,15 +39,22 @@ void main() {
       mockSharedPreferences = MockSharedPreferences();
 
       // Mock authStateChanges to return empty stream
-      when(() => mockFirebaseAuth.authStateChanges())
-          .thenAnswer((_) => Stream<User?>.value(null));
+      when(
+        () => mockFirebaseAuth.authStateChanges(),
+      ).thenAnswer((_) => Stream<User?>.value(null));
 
       // Mock SharedPreferences methods
-      when(() => mockSharedPreferences.remove(any())).thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.remove(any()),
+      ).thenAnswer((_) async => true);
       when(() => mockSharedPreferences.getString(any())).thenReturn(null);
 
       // Инициализируем SessionManager с мок-объектами
-      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences, apiClient: mockApiClient);
+      sessionManager = SessionManager(
+        mockFirebaseAuth,
+        mockSharedPreferences,
+        apiClient: mockApiClient,
+      );
     });
 
     /// **Property 1: Bug Condition - Invalid Code Allows UI Progression Without Server Validation**
@@ -71,12 +78,12 @@ void main() {
         const invalidCode = '000000'; // Invalid code
 
         // Mock the API to reject invalid code
-        when(() => mockApiClient.post(
-          '/api/v1/auth/verify-reset-code',
-          data: any(named: 'data'),
-        )).thenThrow(
-          Exception('invalid or expired code'),
-        );
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/verify-reset-code',
+            data: any(named: 'data'),
+          ),
+        ).thenThrow(Exception('invalid or expired code'));
 
         // Act & Assert
         // On UNFIXED code: This will FAIL because verifyResetCode doesn't call the API
@@ -88,77 +95,72 @@ void main() {
       },
     );
 
-    test(
-      'Bug Condition: Valid code should be accepted by server',
-      () async {
-        // Arrange
-        const email = 'test@example.com';
-        const validCode = '847291'; // Valid code
+    test('Bug Condition: Valid code should be accepted by server', () async {
+      // Arrange
+      const email = 'test@example.com';
+      const validCode = '847291'; // Valid code
 
-        // Mock the API to accept valid code
-        when(() => mockApiClient.post(
+      // Mock the API to accept valid code
+      when(
+        () => mockApiClient.post(
           '/api/v1/auth/verify-reset-code',
           data: any(named: 'data'),
-        )).thenAnswer((_) async => MockResponse());
+        ),
+      ).thenAnswer((_) async => MockResponse());
 
-        // Act & Assert
-        // On UNFIXED code: This will FAIL because verifyResetCode doesn't call the API
-        // On FIXED code: This will PASS because verifyResetCode calls the API successfully
-        expect(
-          () => sessionManager.verifyResetCode(email, validCode),
-          returnsNormally,
-        );
-      },
-    );
+      // Act & Assert
+      // On UNFIXED code: This will FAIL because verifyResetCode doesn't call the API
+      // On FIXED code: This will PASS because verifyResetCode calls the API successfully
+      expect(
+        () => sessionManager.verifyResetCode(email, validCode),
+        returnsNormally,
+      );
+    });
 
-    test(
-      'Bug Condition: Rate limiting should be enforced by server',
-      () async {
-        // Arrange
-        const email = 'test@example.com';
-        const code = '123456';
+    test('Bug Condition: Rate limiting should be enforced by server', () async {
+      // Arrange
+      const email = 'test@example.com';
+      const code = '123456';
 
-        // Mock the API to return rate limit error
-        when(() => mockApiClient.post(
+      // Mock the API to return rate limit error
+      when(
+        () => mockApiClient.post(
           '/api/v1/auth/verify-reset-code',
           data: any(named: 'data'),
-        )).thenThrow(
-          Exception('too many verification attempts, please try again later'),
-        );
+        ),
+      ).thenThrow(
+        Exception('too many verification attempts, please try again later'),
+      );
 
-        // Act & Assert
-        // On UNFIXED code: This will FAIL because verifyResetCode doesn't call the API
-        // On FIXED code: This will PASS because verifyResetCode calls the API and throws
-        expect(
-          () => sessionManager.verifyResetCode(email, code),
-          throwsException,
-        );
-      },
-    );
+      // Act & Assert
+      // On UNFIXED code: This will FAIL because verifyResetCode doesn't call the API
+      // On FIXED code: This will PASS because verifyResetCode calls the API and throws
+      expect(
+        () => sessionManager.verifyResetCode(email, code),
+        throwsException,
+      );
+    });
 
-    test(
-      'Bug Condition: Expired code should be rejected by server',
-      () async {
-        // Arrange
-        const email = 'test@example.com';
-        const expiredCode = '847291'; // Code that expired
+    test('Bug Condition: Expired code should be rejected by server', () async {
+      // Arrange
+      const email = 'test@example.com';
+      const expiredCode = '847291'; // Code that expired
 
-        // Mock the API to reject expired code
-        when(() => mockApiClient.post(
+      // Mock the API to reject expired code
+      when(
+        () => mockApiClient.post(
           '/api/v1/auth/verify-reset-code',
           data: any(named: 'data'),
-        )).thenThrow(
-          Exception('invalid or expired code'),
-        );
+        ),
+      ).thenThrow(Exception('invalid or expired code'));
 
-        // Act & Assert
-        // On UNFIXED code: This will FAIL because verifyResetCode doesn't call the API
-        // On FIXED code: This will PASS because verifyResetCode calls the API and throws
-        expect(
-          () => sessionManager.verifyResetCode(email, expiredCode),
-          throwsException,
-        );
-      },
-    );
+      // Act & Assert
+      // On UNFIXED code: This will FAIL because verifyResetCode doesn't call the API
+      // On FIXED code: This will PASS because verifyResetCode calls the API and throws
+      expect(
+        () => sessionManager.verifyResetCode(email, expiredCode),
+        throwsException,
+      );
+    });
   });
 }

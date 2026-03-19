@@ -11,17 +11,15 @@ class ApiClient {
   ApiClient({required this.config});
 
   /// GET-запрос с опциональными query параметрами
-  Future<http.Response> get(String endpoint, {Map<String, dynamic>? params}) async {
+  Future<http.Response> get(
+    String endpoint, {
+    Map<String, dynamic>? params,
+  }) async {
     final uri = Uri.parse('${config.apiBase}$endpoint').replace(
       queryParameters: params?.map((k, v) => MapEntry(k, v.toString())),
     );
 
-    return await http.get(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    );
+    return await http.get(uri, headers: {'Content-Type': 'application/json'});
   }
 
   /// POST-запрос с опциональным body
@@ -30,9 +28,7 @@ class ApiClient {
 
     return await http.post(
       uri,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: body != null ? jsonEncode(body) : null,
     );
   }
@@ -43,9 +39,7 @@ class ApiClient {
 
     return await http.put(
       uri,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: body != null ? jsonEncode(body) : null,
     );
   }
@@ -56,9 +50,7 @@ class ApiClient {
 
     return await http.delete(
       uri,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
     );
   }
 }

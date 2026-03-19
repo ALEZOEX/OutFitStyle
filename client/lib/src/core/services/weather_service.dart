@@ -12,9 +12,9 @@ class WeatherService {
     required Dio dio,
     required String apiKey,
     String baseUrl = 'https://api.openweathermap.org/data/2.5',
-  })  : _dio = dio,
-        _apiKey = apiKey,
-        _baseUrl = baseUrl;
+  }) : _dio = dio,
+       _apiKey = apiKey,
+       _baseUrl = baseUrl;
 
   /// Fetch current weather data for a location (used internally by repository)
   @Deprecated('Use WeatherRepository instead')
@@ -42,7 +42,8 @@ class WeatherService {
         latitude: lat,
         longitude: lon,
         locationName: data['name'],
-        iconUrl: 'https://openweathermap.org/img/w/${data['weather'][0]['icon']}.png',
+        iconUrl:
+            'https://openweathermap.org/img/w/${data['weather'][0]['icon']}.png',
       );
     } catch (e) {
       throw Exception('Failed to fetch weather data: $e');
@@ -55,11 +56,7 @@ class WeatherService {
     try {
       final response = await _dio.get(
         '$_baseUrl/weather',
-        queryParameters: {
-          'q': cityName,
-          'appid': _apiKey,
-          'units': 'metric',
-        },
+        queryParameters: {'q': cityName, 'appid': _apiKey, 'units': 'metric'},
       );
 
       final data = response.data;

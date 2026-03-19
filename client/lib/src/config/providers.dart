@@ -3,16 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/logger.dart';
 import 'app_config.dart';
 
-final dioProvider = Provider((ref) => Dio(BaseOptions(
-      baseUrl: AppConfig.apiBaseUrl, // относительные запросы на /api/v1/* (nginx проксирует)
+final dioProvider = Provider(
+  (ref) => Dio(
+    BaseOptions(
+      baseUrl:
+          AppConfig
+              .apiBaseUrl, // относительные запросы на /api/v1/* (nginx проксирует)
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       sendTimeout: const Duration(seconds: 30),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    ))
-      ..interceptors.add(LoggingInterceptor()));
+      headers: {'Content-Type': 'application/json'},
+    ),
+  )..interceptors.add(LoggingInterceptor()),
+);
 
 class LoggingInterceptor extends Interceptor {
   @override
@@ -26,15 +29,19 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     AppLogger.info(
-        'API Response: ${response.statusCode} ${response.requestOptions.path}');
+      'API Response: ${response.statusCode} ${response.requestOptions.path}',
+    );
     AppLogger.debug('Response Data: ${response.data}');
     super.onResponse(response, handler);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    AppLogger.error('API Error: ${err.type} ${err.requestOptions.path}',
-        err.message, err.stackTrace);
+    AppLogger.error(
+      'API Error: ${err.type} ${err.requestOptions.path}',
+      err.message,
+      err.stackTrace,
+    );
     super.onError(err, handler);
   }
 }

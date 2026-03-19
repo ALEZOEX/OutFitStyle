@@ -34,7 +34,9 @@ class FavoriteNotifier extends StateNotifier<Set<String>> {
 }
 
 /// Favorite products provider
-final favoriteProvider = StateNotifierProvider<FavoriteNotifier, Set<String>>((ref) {
+final favoriteProvider = StateNotifierProvider<FavoriteNotifier, Set<String>>((
+  ref,
+) {
   return FavoriteNotifier();
 });
 

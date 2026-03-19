@@ -48,18 +48,13 @@ class AppLoading extends StatelessWidget {
         loader,
         if (message != null) ...[
           const SizedBox(height: 16.0),
-          Text(
-            message!,
-            style: theme.textTheme.bodyMedium,
-          ),
+          Text(message!, style: theme.textTheme.bodyMedium),
         ],
       ],
     );
 
     if (variant == LoadingVariant.fullscreen) {
-      return Scaffold(
-        body: Center(child: content),
-      );
+      return Scaffold(body: Center(child: content));
     }
 
     return Center(child: content);
@@ -84,19 +79,20 @@ class AppLoading extends StatelessWidget {
         color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(4.0),
       ),
-      child: showProgress
-          ? AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: 200.0 * progress,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(4.0),
+      child:
+          showProgress
+              ? AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 200.0 * progress,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+              )
+              : LinearProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+                backgroundColor: color.withOpacity(0.2),
               ),
-            )
-          : LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-              backgroundColor: color.withOpacity(0.2),
-            ),
     );
   }
 
@@ -112,9 +108,10 @@ class AppLoading extends StatelessWidget {
             width: 12.0,
             height: 12.0,
             decoration: BoxDecoration(
-              color: index <= DateTime.now().millisecond ~/ 600 % 3
-                  ? color
-                  : color.withOpacity(0.3),
+              color:
+                  index <= DateTime.now().millisecond ~/ 600 % 3
+                      ? color
+                      : color.withOpacity(0.3),
               shape: BoxShape.circle,
             ),
           ),
@@ -127,10 +124,7 @@ class AppLoading extends StatelessWidget {
     return Container(
       width: 60.0,
       height: 60.0,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: const Center(
         child: SizedBox(
           width: 30.0,
@@ -168,9 +162,7 @@ class AppLoadingOverlay extends StatelessWidget {
         if (isLoading)
           Container(
             color: Colors.black.withOpacity(0.3),
-            child: Center(
-              child: AppLoading(message: message),
-            ),
+            child: Center(child: AppLoading(message: message)),
           ),
       ],
     );

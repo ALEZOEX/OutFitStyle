@@ -1,7 +1,8 @@
 import 'dart:async';
 
 class ServiceWorkerUpdateService {
-  static final ServiceWorkerUpdateService _instance = ServiceWorkerUpdateService._internal();
+  static final ServiceWorkerUpdateService _instance =
+      ServiceWorkerUpdateService._internal();
   factory ServiceWorkerUpdateService() => _instance;
   ServiceWorkerUpdateService._internal();
 
@@ -12,5 +13,7 @@ class ServiceWorkerUpdateService {
 
   void initialize() {}
   void applyUpdate() {}
-  void dispose() { _updateAvailableController.close(); }
+  void dispose() {
+    _updateAvailableController.close();
+  }
 }

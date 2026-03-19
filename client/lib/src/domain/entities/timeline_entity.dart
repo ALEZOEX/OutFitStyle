@@ -24,9 +24,12 @@ class TimelineDay {
     return TimelineDay(
       date: DateTime.parse(json['date'] as String),
       outfitCount: json['outfit_count'] as int,
-      recommendation: json['recommendation'] != null
-          ? RecommendationRow.fromJson(json['recommendation'] as Map<String, dynamic>)
-          : null,
+      recommendation:
+          json['recommendation'] != null
+              ? RecommendationRow.fromJson(
+                json['recommendation'] as Map<String, dynamic>,
+              )
+              : null,
     );
   }
 
@@ -52,11 +55,16 @@ class TimelineDay {
 
   static TimelineDay fromExternal(Map<String, dynamic> external) {
     return TimelineDay(
-      date: DateTime.parse(external['date'] ?? DateTime.now().toIso8601String()),
+      date: DateTime.parse(
+        external['date'] ?? DateTime.now().toIso8601String(),
+      ),
       outfitCount: external['outfit_count'] ?? 0,
-      recommendation: external['recommendation'] != null
-          ? RecommendationRow.fromExternal(external['recommendation'] as Map<String, dynamic>)
-          : null,
+      recommendation:
+          external['recommendation'] != null
+              ? RecommendationRow.fromExternal(
+                external['recommendation'] as Map<String, dynamic>,
+              )
+              : null,
     );
   }
 
@@ -64,9 +72,10 @@ class TimelineDay {
     return TimelineDay(
       date: dbEntity.date,
       outfitCount: dbEntity.outfitCount,
-      recommendation: dbEntity.recommendation != null
-          ? RecommendationRow.fromDbEntity(dbEntity.recommendation)
-          : null,
+      recommendation:
+          dbEntity.recommendation != null
+              ? RecommendationRow.fromDbEntity(dbEntity.recommendation)
+              : null,
     );
   }
 
@@ -78,7 +87,7 @@ class TimelineDay {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is TimelineDay &&
         other.date == date &&
         other.outfitCount == outfitCount &&

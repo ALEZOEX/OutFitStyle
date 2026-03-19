@@ -5,11 +5,7 @@ class NotificationPermissionDialog extends StatelessWidget {
   final VoidCallback? onEnable;
   final VoidCallback? onLater;
 
-  const NotificationPermissionDialog({
-    super.key,
-    this.onEnable,
-    this.onLater,
-  });
+  const NotificationPermissionDialog({super.key, this.onEnable, this.onLater});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +13,7 @@ class NotificationPermissionDialog extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -79,9 +73,7 @@ class NotificationPermissionDialog extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      side: BorderSide(
-                        color: theme.colorScheme.outline,
-                      ),
+                      side: BorderSide(color: theme.colorScheme.outline),
                     ),
                     child: Text(
                       'Позже',
@@ -107,9 +99,7 @@ class NotificationPermissionDialog extends StatelessWidget {
                     ),
                     child: const Text(
                       'Включить',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -182,21 +172,21 @@ class NotificationSnackbar {
             ),
           ],
         ),
-        action: onAction != null && actionLabel != null
-            ? SnackBarAction(
-                label: actionLabel,
-                textColor: theme.colorScheme.primary,
-                onPressed: onAction,
-              )
-            : null,
-        backgroundColor: isDark
-            ? theme.colorScheme.surfaceContainerHighest
-            : theme.colorScheme.surface,
+        action:
+            onAction != null && actionLabel != null
+                ? SnackBarAction(
+                  label: actionLabel,
+                  textColor: theme.colorScheme.primary,
+                  onPressed: onAction,
+                )
+                : null,
+        backgroundColor:
+            isDark
+                ? theme.colorScheme.surfaceContainerHighest
+                : theme.colorScheme.surface,
         elevation: 4,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         duration: duration,
       ),

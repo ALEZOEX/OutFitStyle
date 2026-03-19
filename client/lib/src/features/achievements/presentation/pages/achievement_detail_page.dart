@@ -12,21 +12,18 @@ import '../widgets/achievement_badge.dart';
 class AchievementDetailPage extends ConsumerWidget {
   final String achievementId;
 
-  const AchievementDetailPage({
-    super.key,
-    required this.achievementId,
-  });
+  const AchievementDetailPage({super.key, required this.achievementId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final achievement = ref.read(achievementsNotifierProvider.notifier).getAchievementById(achievementId);
+    final achievement = ref
+        .read(achievementsNotifierProvider.notifier)
+        .getAchievementById(achievementId);
 
     if (achievement == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Достижение не найдено'),
-        ),
+        appBar: AppBar(title: const Text('Достижение не найдено')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -125,10 +122,7 @@ class AchievementDetailPage extends ConsumerWidget {
         ),
       ),
       child: Center(
-        child: AchievementIcon(
-          achievement: achievement,
-          size: 100,
-        ),
+        child: AchievementIcon(achievement: achievement, size: 100),
       ),
     );
   }
@@ -151,7 +145,10 @@ class AchievementDetailPage extends ConsumerWidget {
             ),
             if (achievement.isUnlocked)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(20),
@@ -194,11 +191,7 @@ class AchievementDetailPage extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.star,
-                    size: 14,
-                    color: theme.colorScheme.tertiary,
-                  ),
+                  Icon(Icons.star, size: 14, color: theme.colorScheme.tertiary),
                   const SizedBox(width: 4),
                   Text(
                     '+${achievement.points}',
@@ -216,7 +209,10 @@ class AchievementDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDescriptionSection(BuildContext context, Achievement achievement) {
+  Widget _buildDescriptionSection(
+    BuildContext context,
+    Achievement achievement,
+  ) {
     final theme = Theme.of(context);
 
     return Container(
@@ -377,11 +373,7 @@ class AchievementDetailPage extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.event,
-              color: theme.colorScheme.primary,
-              size: 24,
-            ),
+            Icon(Icons.event, color: theme.colorScheme.primary, size: 24),
             const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,7 +388,9 @@ class AchievementDetailPage extends ConsumerWidget {
                 Text(
                   _formatDateTime(achievement.unlockedAt!),
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                    color: theme.colorScheme.onPrimaryContainer.withOpacity(
+                      0.8,
+                    ),
                   ),
                 ),
               ],
@@ -431,7 +425,11 @@ class AchievementDetailPage extends ConsumerWidget {
     }
   }
 
-  Widget _buildActionButtons(BuildContext context, WidgetRef ref, Achievement achievement) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    WidgetRef ref,
+    Achievement achievement,
+  ) {
     final theme = Theme.of(context);
 
     return Column(
@@ -442,10 +440,14 @@ class AchievementDetailPage extends ConsumerWidget {
             child: FilledButton.icon(
               onPressed: () {
                 // Для демонстрации - увеличить прогресс
-                ref.read(achievementsNotifierProvider.notifier).incrementAchievementProgress(achievementId);
+                ref
+                    .read(achievementsNotifierProvider.notifier)
+                    .incrementAchievementProgress(achievementId);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Прогресс увеличен: ${achievement.progressText}'),
+                    content: Text(
+                      'Прогресс увеличен: ${achievement.progressText}',
+                    ),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -467,7 +469,10 @@ class AchievementDetailPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _shareAchievement(BuildContext context, Achievement achievement) async {
+  Future<void> _shareAchievement(
+    BuildContext context,
+    Achievement achievement,
+  ) async {
     // Формируем текст для шеринга
     final shareText = '''
 🏆 Достижение разблокировано!

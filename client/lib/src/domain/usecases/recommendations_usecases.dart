@@ -5,7 +5,8 @@ abstract class GetRecommendationsByUserUsecase {
   Future<List<OutfitRecommendation>> call(String userId);
 }
 
-class GetRecommendationsByUserUsecaseImpl implements GetRecommendationsByUserUsecase {
+class GetRecommendationsByUserUsecaseImpl
+    implements GetRecommendationsByUserUsecase {
   final IRecommendationsRepository _repository;
 
   GetRecommendationsByUserUsecaseImpl(this._repository);
@@ -95,7 +96,8 @@ abstract class GetRecommendationsHistoryUsecase {
   Future<List<OutfitRecommendation>> call(String userId);
 }
 
-class GetRecommendationsHistoryUsecaseImpl implements GetRecommendationsHistoryUsecase {
+class GetRecommendationsHistoryUsecaseImpl
+    implements GetRecommendationsHistoryUsecase {
   final IRecommendationsRepository _repository;
 
   GetRecommendationsHistoryUsecaseImpl(this._repository);

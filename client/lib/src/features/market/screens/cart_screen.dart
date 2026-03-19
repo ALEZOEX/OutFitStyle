@@ -40,15 +40,17 @@ class CartScreen extends ConsumerWidget {
                     return CartItemCard(
                       item: item,
                       onQuantityChanged: (quantity) {
-                        ref.read(cartProvider.notifier).updateItemQuantity(
-                          item.productId,
-                          quantity: quantity,
-                        );
+                        ref
+                            .read(cartProvider.notifier)
+                            .updateItemQuantity(
+                              item.productId,
+                              quantity: quantity,
+                            );
                       },
                       onRemoved: () {
-                        ref.read(cartProvider.notifier).removeItem(
-                          item.productId,
-                        );
+                        ref
+                            .read(cartProvider.notifier)
+                            .removeItem(item.productId);
                       },
                     );
                   },
@@ -110,7 +112,10 @@ class CartScreen extends ConsumerWidget {
                           ),
                           child: const Text(
                             'Оформить заказ',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -122,23 +127,24 @@ class CartScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 48, color: AppColors.error),
-              const SizedBox(height: 16),
-              Text('Ошибка загрузки корзины: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ref.read(cartProvider.notifier).loadCart();
-                },
-                child: const Text('Повторить'),
+        error:
+            (error, stack) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                  const SizedBox(height: 16),
+                  Text('Ошибка загрузки корзины: $error'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.read(cartProvider.notifier).loadCart();
+                    },
+                    child: const Text('Повторить'),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
       ),
     );
   }
@@ -157,9 +163,9 @@ class CartScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             'Добавьте товары, которые вам понравились',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -178,24 +184,25 @@ class CartScreen extends ConsumerWidget {
   void _showClearConfirmation(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Очистить корзину?'),
-        content: const Text('Это действие нельзя отменить'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Очистить корзину?'),
+            content: const Text('Это действие нельзя отменить'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () {
+                  ref.read(cartProvider.notifier).clear();
+                  Navigator.pop(context);
+                },
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                child: const Text('Очистить'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              ref.read(cartProvider.notifier).clear();
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Очистить'),
-          ),
-        ],
-      ),
     );
   }
 }

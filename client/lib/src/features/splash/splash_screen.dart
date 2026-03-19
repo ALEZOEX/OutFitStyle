@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/di/di.dart';
 import '../onboarding/onboarding_storage.dart' as onboarding_storage;
-import '../../presentation/providers/session_provider.dart' show sessionManagerProvider;
+import '../../presentation/providers/session_provider.dart'
+    show sessionManagerProvider;
 
 /// Провайдер для отслеживания состояния проверки onboarding
 final splashInitProvider = FutureProvider<String>((ref) async {
@@ -44,7 +45,7 @@ class SplashScreen extends ConsumerWidget {
         }
       });
     });
-    
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -70,9 +71,9 @@ class SplashScreen extends ConsumerWidget {
               Text(
                 'OutfitStyle',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
               const SizedBox(height: 48),
               // Индикатор загрузки
@@ -80,9 +81,9 @@ class SplashScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 'Загрузка...',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               ),
             ],
           ),

@@ -102,7 +102,10 @@ class AchievementsRepositoryImpl implements AchievementRepository {
     int value = 1,
   }) async {
     try {
-      final dtos = await _apiService.trackEvent(eventType: eventType, value: value);
+      final dtos = await _apiService.trackEvent(
+        eventType: eventType,
+        value: value,
+      );
 
       // Обновляем локальный кэш с новыми данными
       for (final dto in dtos) {
@@ -127,7 +130,10 @@ class AchievementsRepositoryImpl implements AchievementRepository {
   }
 
   /// Обновить прогресс достижения (локально)
-  Future<Achievement?> updateProgress(String achievementId, int progress) async {
+  Future<Achievement?> updateProgress(
+    String achievementId,
+    int progress,
+  ) async {
     final index = _localCache.indexWhere((a) => a.id == achievementId);
     if (index == -1) return null;
 
@@ -139,7 +145,10 @@ class AchievementsRepositoryImpl implements AchievementRepository {
     final updated = achievement.copyWith(
       currentProgress: newProgress,
       isUnlocked: isNowUnlocked,
-      unlockedAt: isNowUnlocked && !wasUnlocked ? DateTime.now() : achievement.unlockedAt,
+      unlockedAt:
+          isNowUnlocked && !wasUnlocked
+              ? DateTime.now()
+              : achievement.unlockedAt,
       updatedAt: DateTime.now(),
     );
 
@@ -150,7 +159,10 @@ class AchievementsRepositoryImpl implements AchievementRepository {
   }
 
   /// Увеличить прогресс достижения
-  Future<Achievement?> incrementProgress(String achievementId, {int by = 1}) async {
+  Future<Achievement?> incrementProgress(
+    String achievementId, {
+    int by = 1,
+  }) async {
     final achievement = getById(achievementId);
     if (achievement == null) return null;
 
@@ -166,14 +178,15 @@ class AchievementsRepositoryImpl implements AchievementRepository {
     // Ищем достижение по ID
     final achievement = _localCache.firstWhere(
       (a) => a.id == achievementId.toString(),
-      orElse: () => const Achievement(
-        id: '0',
-        title: 'Unknown',
-        description: '',
-        icon: '🏆',
-        category: AchievementCategory.special,
-        points: 0,
-      ),
+      orElse:
+          () => const Achievement(
+            id: '0',
+            title: 'Unknown',
+            description: '',
+            icon: '🏆',
+            category: AchievementCategory.special,
+            points: 0,
+          ),
     );
 
     final updated = achievement.copyWith(
@@ -183,7 +196,9 @@ class AchievementsRepositoryImpl implements AchievementRepository {
       updatedAt: DateTime.now(),
     );
 
-    final index = _localCache.indexWhere((a) => a.id == achievementId.toString());
+    final index = _localCache.indexWhere(
+      (a) => a.id == achievementId.toString(),
+    );
     if (index != -1) {
       _localCache[index] = updated;
       _notifyListeners();
@@ -192,28 +207,32 @@ class AchievementsRepositoryImpl implements AchievementRepository {
     // Пытаемся разблокировать на сервере
     try {
       final result = await _apiService.unlockAchievementById(achievementId);
-      return result.map((dto) => AchievementProgress(
-        achievementId: achievementId.toString(),
-        userId: userId.toString(),
-        currentProgress: dto.current,
-        targetProgress: dto.target,
-        isCompleted: dto.isCompleted,
-        completedAt: dto.isCompleted ? dto.updatedAt : null,
-        createdAt: DateTime.now(),
-        updatedAt: dto.updatedAt ?? DateTime.now(),
-      ));
+      return result.map(
+        (dto) => AchievementProgress(
+          achievementId: achievementId.toString(),
+          userId: userId.toString(),
+          currentProgress: dto.current,
+          targetProgress: dto.target,
+          isCompleted: dto.isCompleted,
+          completedAt: dto.isCompleted ? dto.updatedAt : null,
+          createdAt: DateTime.now(),
+          updatedAt: dto.updatedAt ?? DateTime.now(),
+        ),
+      );
     } catch (e) {
       // Возвращаем локальный прогресс (заглушка)
-      return right(AchievementProgress(
-        achievementId: achievementId.toString(),
-        userId: userId.toString(),
-        currentProgress: 1,
-        targetProgress: 1,
-        isCompleted: true,
-        completedAt: DateTime.now(),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ));
+      return right(
+        AchievementProgress(
+          achievementId: achievementId.toString(),
+          userId: userId.toString(),
+          currentProgress: 1,
+          targetProgress: 1,
+          isCompleted: true,
+          completedAt: DateTime.now(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
     }
   }
 
@@ -295,9 +314,10 @@ class AchievementsRepositoryImpl implements AchievementRepository {
       category: category,
       total: categoryAchievements.length,
       unlocked: unlocked,
-      progressPercent: categoryAchievements.isNotEmpty
-          ? (unlocked / categoryAchievements.length * 100)
-          : 0,
+      progressPercent:
+          categoryAchievements.isNotEmpty
+              ? (unlocked / categoryAchievements.length * 100)
+              : 0,
     );
   }
 
@@ -323,7 +343,9 @@ class AchievementsRepositoryImpl implements AchievementRepository {
   }
 
   @override
-  Future<Either<String, List<AchievementProgress>>> getUserAchievements(int userId) {
+  Future<Either<String, List<AchievementProgress>>> getUserAchievements(
+    int userId,
+  ) {
     // Не используется в новой реализации
     return Future.value(const Left('Not implemented'));
   }
@@ -339,7 +361,9 @@ class AchievementsRepositoryImpl implements AchievementRepository {
   }
 
   @override
-  Future<Either<String, List<UserAchievementStatus>>> getUserAchievementStatus(int userId) {
+  Future<Either<String, List<UserAchievementStatus>>> getUserAchievementStatus(
+    int userId,
+  ) {
     // Не используется в новой реализации
     return Future.value(const Left('Not implemented'));
   }
@@ -366,20 +390,27 @@ class AchievementsRepositoryImpl implements AchievementRepository {
   }
 
   @override
-  Future<Either<String, List<Achievement>>> getUserUnlockedAchievements(int userId) {
+  Future<Either<String, List<Achievement>>> getUserUnlockedAchievements(
+    int userId,
+  ) {
     return Future.value(right(getWithFilter(AchievementFilter.unlocked)));
   }
 
   @override
-  Future<Either<String, List<Achievement>>> getUserLockedAchievements(int userId) {
+  Future<Either<String, List<Achievement>>> getUserLockedAchievements(
+    int userId,
+  ) {
     return Future.value(right(getWithFilter(AchievementFilter.available)));
   }
 
   @override
-  Future<Either<String, List<Achievement>>> getUserInProgressAchievements(int userId) {
-    final inProgress = _localCache
-        .where((a) => !a.isUnlocked && a.currentProgress > 0)
-        .toList();
+  Future<Either<String, List<Achievement>>> getUserInProgressAchievements(
+    int userId,
+  ) {
+    final inProgress =
+        _localCache
+            .where((a) => !a.isUnlocked && a.currentProgress > 0)
+            .toList();
     return Future.value(right(inProgress));
   }
 
@@ -445,16 +476,18 @@ extension AchievementStatsExtension on AchievementsRepositoryImpl {
 
   /// Получить прогресс по категории
   CategoryProgress getCategoryProgress(AchievementCategory category) {
-    final categoryAchievements = achievements.where((a) => a.category == category).toList();
+    final categoryAchievements =
+        achievements.where((a) => a.category == category).toList();
     final unlocked = categoryAchievements.where((a) => a.isUnlocked).length;
 
     return CategoryProgress(
       category: category,
       total: categoryAchievements.length,
       unlocked: unlocked,
-      progressPercent: categoryAchievements.isNotEmpty
-          ? (unlocked / categoryAchievements.length * 100)
-          : 0,
+      progressPercent:
+          categoryAchievements.isNotEmpty
+              ? (unlocked / categoryAchievements.length * 100)
+              : 0,
     );
   }
 }

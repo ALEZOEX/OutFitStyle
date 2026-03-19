@@ -16,11 +16,13 @@ final localAnalyticsStorageProvider = Provider<LocalAnalyticsStorage>((ref) {
 
 /// Провайдер для Dio клиента аналитики
 final analyticsDioProvider = Provider<Dio>((ref) {
-  return Dio(BaseOptions(
-    baseUrl: ApiConfig.baseUrl,
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
-  ));
+  return Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
+  );
 });
 
 /// Провайдер для сервиса локальной аналитики
@@ -33,8 +35,9 @@ final localAnalyticsServiceProvider = Provider<LocalAnalyticsService>((ref) {
 });
 
 /// Провайдер для Firebase сервиса аналитики
-final firebaseAnalyticsServiceProvider =
-    Provider<FirebaseAnalyticsService>((ref) {
+final firebaseAnalyticsServiceProvider = Provider<FirebaseAnalyticsService>((
+  ref,
+) {
   return FirebaseAnalyticsService();
 });
 

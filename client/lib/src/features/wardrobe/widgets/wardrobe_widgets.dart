@@ -33,21 +33,23 @@ class ClothingItemCard extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(4)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(4),
+                      ),
                     ),
-                    child: (item.imageUrl?.isNotEmpty ?? false)
-                        ? Image.network(
-                            item.imageUrl ?? '',
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          )
-                        : const Icon(
-                            Icons.image_not_supported,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
+                    child:
+                        (item.imageUrl?.isNotEmpty ?? false)
+                            ? Image.network(
+                              item.imageUrl ?? '',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            )
+                            : const Icon(
+                              Icons.image_not_supported,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
                   ),
                 ),
                 Padding(
@@ -66,8 +68,8 @@ class ClothingItemCard extends StatelessWidget {
                             ? item.brand ?? ''
                             : getCategoryDisplayName(item.category),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                          color: Colors.grey[600],
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -146,29 +148,32 @@ class OutfitCard extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(4)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(4),
+                  ),
                 ),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
                     (outfit.imageUrl?.isNotEmpty ?? false)
                         ? Image.network(
-                            outfit.imageUrl ?? '',
-                            fit: BoxFit.cover,
-                          )
+                          outfit.imageUrl ?? '',
+                          fit: BoxFit.cover,
+                        )
                         : const Icon(
-                            Icons.checkroom,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
+                          Icons.checkroom,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
                     Positioned(
                       bottom: 8,
                       left: 8,
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.6),
                           borderRadius: BorderRadius.circular(4),
@@ -211,10 +216,8 @@ class OutfitCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           '${outfit.timesWorn} раз(а)',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[600]),
                         ),
                       ],
                     ),
@@ -289,18 +292,21 @@ class FilterButton extends StatelessWidget {
       onSelected: (String result) {
         onFilterChanged(result);
       },
-      itemBuilder: (BuildContext context) => filterOptions.map((String option) {
-        return PopupMenuItem<String>(
-          value: option,
-          child: Row(
-            children: [
-              if (currentFilter == option) const Icon(Icons.check, size: 18),
-              const SizedBox(width: 8),
-              Text(option),
-            ],
-          ),
-        );
-      }).toList(),
+      itemBuilder:
+          (BuildContext context) =>
+              filterOptions.map((String option) {
+                return PopupMenuItem<String>(
+                  value: option,
+                  child: Row(
+                    children: [
+                      if (currentFilter == option)
+                        const Icon(Icons.check, size: 18),
+                      const SizedBox(width: 8),
+                      Text(option),
+                    ],
+                  ),
+                );
+              }).toList(),
     );
   }
 }

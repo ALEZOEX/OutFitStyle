@@ -27,7 +27,11 @@ class SecurityConfig {
 
   /// Применить настройки безопасности к HttpClient
   void applyToHttpClient(HttpClient client) {
-    client.badCertificateCallback = (X509Certificate cert, String host, int port) {
+    client.badCertificateCallback = (
+      X509Certificate cert,
+      String host,
+      int port,
+    ) {
       return validateCertificate(cert, host);
     };
   }

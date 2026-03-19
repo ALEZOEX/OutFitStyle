@@ -17,9 +17,7 @@ import '../../../../core/api/api_config.dart';
 class ProfileRepository {
   final ApiClient _apiClient;
 
-  ProfileRepository({
-    required ApiClient apiClient,
-  }) : _apiClient = apiClient;
+  ProfileRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Получить профиль текущего пользователя
   ///
@@ -33,7 +31,9 @@ class ProfileRepository {
         final userData = data['user'] as Map<String, dynamic>? ?? data;
         return userData;
       } else {
-        throw ProfileException('Ошибка получения профиля: ${response.statusCode}');
+        throw ProfileException(
+          'Ошибка получения профиля: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -76,7 +76,9 @@ class ProfileRepository {
         final userData = data['user'] as Map<String, dynamic>? ?? data;
         return userData;
       } else {
-        throw ProfileException('Ошибка обновления профиля: ${response.statusCode}');
+        throw ProfileException(
+          'Ошибка обновления профиля: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -100,19 +102,17 @@ class ProfileRepository {
     String? feedback,
   }) async {
     try {
-      final body = <String, dynamic>{
-        'password': password,
-      };
+      final body = <String, dynamic>{'password': password};
 
       if (reason != null) body['reason'] = reason;
       if (feedback != null) body['feedback'] = feedback;
 
-      final response = await _apiClient.delete(
-        '/api/v1/users/account',
-      );
+      final response = await _apiClient.delete('/api/v1/users/account');
 
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw ProfileException('Ошибка удаления аккаунта: ${response.statusCode}');
+        throw ProfileException(
+          'Ошибка удаления аккаунта: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -140,7 +140,9 @@ class ProfileRepository {
         final userData = data['user'] as Map<String, dynamic>? ?? data;
         return userData;
       } else {
-        throw ProfileException('Ошибка загрузки аватара: ${response.statusCode}');
+        throw ProfileException(
+          'Ошибка загрузки аватара: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -171,12 +173,14 @@ class ProfileRepository {
       });
 
       // Создаем отдельный Dio для multipart запроса с авторизацией
-      final dio = Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 60),
-        headers: {'Content-Type': 'multipart/form-data'},
-      ));
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: ApiConfig.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 60),
+          headers: {'Content-Type': 'multipart/form-data'},
+        ),
+      );
 
       // Добавляем токен авторизации через ApiConfig
       final token = await ApiConfig.getAccessToken();
@@ -191,7 +195,9 @@ class ProfileRepository {
         final userData = data['user'] as Map<String, dynamic>? ?? data;
         return userData;
       } else {
-        throw ProfileException('Ошибка загрузки аватара: ${response.statusCode}');
+        throw ProfileException(
+          'Ошибка загрузки аватара: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -232,7 +238,9 @@ class ProfileRepository {
         final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
         return prefData;
       } else {
-        throw ProfileException('Ошибка получения предпочтений: ${response.statusCode}');
+        throw ProfileException(
+          'Ошибка получения предпочтений: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -248,7 +256,9 @@ class ProfileRepository {
   /// [preferences] - новые предпочтения
   ///
   /// Endpoint: PUT /api/v1/users/preferences
-  Future<Map<String, dynamic>> updatePreferences(Map<String, dynamic> preferences) async {
+  Future<Map<String, dynamic>> updatePreferences(
+    Map<String, dynamic> preferences,
+  ) async {
     try {
       final response = await _apiClient.put(
         '/api/v1/users/preferences',
@@ -260,7 +270,9 @@ class ProfileRepository {
         final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
         return prefData;
       } else {
-        throw ProfileException('Ошибка обновления предпочтений: ${response.statusCode}');
+        throw ProfileException(
+          'Ошибка обновления предпочтений: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -276,14 +288,14 @@ class ProfileRepository {
         e.type == DioExceptionType.receiveTimeout) {
       throw ProfileException('Превышено время ожидания. Проверьте соединение.');
     }
-    
+
     if (e.type == DioExceptionType.connectionError) {
       throw ProfileException('Нет соединения с интернетом.');
     }
-    
+
     final statusCode = e.response?.statusCode;
     final errorMessage = _extractErrorMessage(e.response?.data);
-    
+
     switch (statusCode) {
       case 401:
         throw ProfileException('Требуется авторизация');
@@ -304,8 +316,7 @@ class ProfileRepository {
 
   String? _extractErrorMessage(dynamic data) {
     if (data is Map<String, dynamic>) {
-      return data['message'] as String? ?? 
-             data['error'] as String?;
+      return data['message'] as String? ?? data['error'] as String?;
     }
     return null;
   }
@@ -314,9 +325,9 @@ class ProfileRepository {
 /// Исключение репозитория профиля
 class ProfileException implements Exception {
   final String message;
-  
+
   const ProfileException(this.message);
-  
+
   @override
   String toString() => 'ProfileException: $message';
 }

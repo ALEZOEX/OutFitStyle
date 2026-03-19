@@ -47,7 +47,8 @@ class OnboardingData {
       cityName: json['city_name'] as String?,
       cityLat: (json['city_lat'] as num?)?.toDouble(),
       cityLon: (json['city_lon'] as num?)?.toDouble(),
-      stylePreferences: (json['style_preferences'] as List<dynamic>?)
+      stylePreferences:
+          (json['style_preferences'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],

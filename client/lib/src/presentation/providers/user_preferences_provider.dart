@@ -5,8 +5,8 @@ import '../../domain/entities/user_preference.dart';
 
 final userPreferencesProvider =
     StateNotifierProvider<UserPreferencesNotifier, UserPreference>(
-  (ref) => UserPreferencesNotifier(),
-);
+      (ref) => UserPreferencesNotifier(),
+    );
 
 class UserPreferencesNotifier extends StateNotifier<UserPreference> {
   UserPreferencesNotifier() : super(const UserPreference());
@@ -26,10 +26,7 @@ class UserPreferencesNotifier extends StateNotifier<UserPreference> {
 
   Future<void> _save() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      'user_preferences',
-      jsonEncode(state.toJson()),
-    );
+    await prefs.setString('user_preferences', jsonEncode(state.toJson()));
   }
 
   Future<void> updateAndSave(UserPreference preferences) async {

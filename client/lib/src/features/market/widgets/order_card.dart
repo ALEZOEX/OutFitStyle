@@ -9,12 +9,7 @@ class OrderCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onCancel;
 
-  const OrderCard({
-    super.key,
-    required this.order,
-    this.onTap,
-    this.onCancel,
-  });
+  const OrderCard({super.key, required this.order, this.onTap, this.onCancel});
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +43,9 @@ class OrderCard extends StatelessWidget {
               // Date
               Text(
                 dateFormat.format(order.createdAt),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
               const Divider(height: 24),
 
@@ -65,10 +60,7 @@ class OrderCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Сумма:',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  Text('Сумма:', style: Theme.of(context).textTheme.bodyMedium),
                   Text(
                     '${order.totalAmount.toStringAsFixed(0)} ₽',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -152,7 +144,9 @@ class OrderCard extends StatelessWidget {
   String _pluralize(int count, String one, String two, String many) {
     if (count % 10 == 1 && count % 100 != 11) {
       return one;
-    } else if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
+    } else if (count % 10 >= 2 &&
+        count % 10 <= 4 &&
+        (count % 100 < 10 || count % 100 >= 20)) {
       return two;
     } else {
       return many;

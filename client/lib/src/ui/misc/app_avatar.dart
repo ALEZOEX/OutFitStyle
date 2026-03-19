@@ -43,16 +43,15 @@ class AppAvatar extends StatelessWidget {
     if (borderWidth > 0) {
       avatarContent = Container(
         decoration: BoxDecoration(
-          shape: variant == AvatarVariant.circle
-              ? BoxShape.circle
-              : BoxShape.rectangle,
-          border: Border.all(
-            color: borderColor,
-            width: borderWidth,
-          ),
-          borderRadius: variant == AvatarVariant.circle
-              ? null
-              : BorderRadius.circular(radius),
+          shape:
+              variant == AvatarVariant.circle
+                  ? BoxShape.circle
+                  : BoxShape.rectangle,
+          border: Border.all(color: borderColor, width: borderWidth),
+          borderRadius:
+              variant == AvatarVariant.circle
+                  ? null
+                  : BorderRadius.circular(radius),
         ),
         child: Padding(
           padding: EdgeInsets.all(borderWidth),
@@ -68,10 +67,7 @@ class AppAvatar extends StatelessWidget {
         child: Container(
           width: radius * 2,
           height: radius * 2,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: bgColor,
-          ),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: bgColor),
           child: avatarContent,
         ),
       ),
@@ -178,11 +174,7 @@ class UserProfileAvatar extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        AppAvatar(
-          imageUrl: imageUrl,
-          name: name,
-          radius: radius,
-        ),
+        AppAvatar(imageUrl: imageUrl, name: name, radius: radius),
         if (isOnline)
           Positioned(
             bottom: 0,
@@ -193,10 +185,7 @@ class UserProfileAvatar extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.green,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 2.0,
-                ),
+                border: Border.all(color: Colors.white, width: 2.0),
               ),
             ),
           ),

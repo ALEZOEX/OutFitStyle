@@ -5,16 +5,16 @@ import 'package:outfitstyle_client/src/features/auth/presentation/screens/forgot
 
 void main() {
   group('ForgotPasswordScreen Widget Tests', () {
-    testWidgets('ForgotPasswordScreen displays email field', (WidgetTester tester) async {
+    testWidgets('ForgotPasswordScreen displays email field', (
+      WidgetTester tester,
+    ) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
+          child: const MaterialApp(home: ForgotPasswordScreen()),
         ),
       );
 
@@ -24,16 +24,16 @@ void main() {
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('ForgotPasswordScreen validates email format', (WidgetTester tester) async {
+    testWidgets('ForgotPasswordScreen validates email format', (
+      WidgetTester tester,
+    ) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
+          child: const MaterialApp(home: ForgotPasswordScreen()),
         ),
       );
 

@@ -21,93 +21,89 @@ class UserPreferencesScreen extends ConsumerWidget {
     final state = ref.watch(recommendationStateNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Мои предпочтения'),
-      ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.errorMessage != null
-              ? Center(
-                  child: Text('Ошибка: ${state.errorMessage}'),
-                )
+      appBar: AppBar(title: const Text('Мои предпочтения')),
+      body:
+          state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : state.errorMessage != null
+              ? Center(child: Text('Ошибка: ${state.errorMessage}'))
               : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionTitle('Цвета'),
-                      _buildColorChips(state.preferences.preferredColors),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Стили'),
-                      _buildStyleChips(state.preferences.preferredStyles),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Поводы'),
-                      _buildOccasionChips(
-                          state.preferences.occasionsOfInterest),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Предпочтения по материалам'),
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          _buildPreferenceChip(
-                            'Натуральные материалы',
-                            state.preferences.prefersNaturalMaterials,
-                          ),
-                          _buildPreferenceChip(
-                            'Синтетические материалы',
-                            state.preferences.prefersSyntheticMaterials,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Бюджет'),
-                      Text(
-                        'Максимальный бюджет: ${(state.preferences.maxBudget ?? 0) > 0 ? '${state.preferences.maxBudget} руб.' : 'Не указан'}',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Материалы'),
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          _buildPreferenceChip(
-                            'Натуральные материалы',
-                            state.preferences.prefersNaturalMaterials,
-                          ),
-                          _buildPreferenceChip(
-                            'Синтетические материалы',
-                            state.preferences.prefersSyntheticMaterials,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Размер'),
-                      Text(
-                        'Предпочтение по фасону: ${(state.preferences.fitPreference?.isNotEmpty ?? false) ? state.preferences.fitPreference : 'Не указано'}',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Navigate to edit preferences
-                          _showEditPreferencesDialog(
-                              context, ref, state.preferences);
-                        },
-                        child: const Text('Редактировать предпочтения'),
-                      ),
-                    ],
-                  ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle('Цвета'),
+                    _buildColorChips(state.preferences.preferredColors),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Стили'),
+                    _buildStyleChips(state.preferences.preferredStyles),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Поводы'),
+                    _buildOccasionChips(state.preferences.occasionsOfInterest),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Предпочтения по материалам'),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        _buildPreferenceChip(
+                          'Натуральные материалы',
+                          state.preferences.prefersNaturalMaterials,
+                        ),
+                        _buildPreferenceChip(
+                          'Синтетические материалы',
+                          state.preferences.prefersSyntheticMaterials,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Бюджет'),
+                    Text(
+                      'Максимальный бюджет: ${(state.preferences.maxBudget ?? 0) > 0 ? '${state.preferences.maxBudget} руб.' : 'Не указан'}',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Материалы'),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        _buildPreferenceChip(
+                          'Натуральные материалы',
+                          state.preferences.prefersNaturalMaterials,
+                        ),
+                        _buildPreferenceChip(
+                          'Синтетические материалы',
+                          state.preferences.prefersSyntheticMaterials,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Размер'),
+                    Text(
+                      'Предпочтение по фасону: ${(state.preferences.fitPreference?.isNotEmpty ?? false) ? state.preferences.fitPreference : 'Не указано'}',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Navigate to edit preferences
+                        _showEditPreferencesDialog(
+                          context,
+                          ref,
+                          state.preferences,
+                        );
+                      },
+                      child: const Text('Редактировать предпочтения'),
+                    ),
+                  ],
                 ),
+              ),
     );
   }
 
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
   }
 
@@ -142,13 +138,13 @@ class UserPreferencesScreen extends ConsumerWidget {
 
     return Wrap(
       spacing: 8,
-      children: occasions
-          .take(6)
-          .map((occasion) => Chip(label: Text(occasion)))
-          .toList(),
+      children:
+          occasions
+              .take(6)
+              .map((occasion) => Chip(label: Text(occasion)))
+              .toList(),
     );
   }
-
 
   Widget _buildPreferenceChip(String label, bool isSelected) {
     return FilterChip(
@@ -159,7 +155,10 @@ class UserPreferencesScreen extends ConsumerWidget {
   }
 
   void _showEditPreferencesDialog(
-      BuildContext context, WidgetRef ref, UserPreference currentPreferences) {
+    BuildContext context,
+    WidgetRef ref,
+    UserPreference currentPreferences,
+  ) {
     final TextEditingController budgetController = TextEditingController(
       text: currentPreferences.maxBudget.toString(),
     );
@@ -193,13 +192,21 @@ class UserPreferencesScreen extends ConsumerWidget {
                   },
                   items: const [
                     DropdownMenuItem<String>(
-                        value: '', child: Text('Не указано')),
+                      value: '',
+                      child: Text('Не указано'),
+                    ),
                     DropdownMenuItem<String>(
-                        value: 'tight', child: Text('Плотный')),
+                      value: 'tight',
+                      child: Text('Плотный'),
+                    ),
                     DropdownMenuItem<String>(
-                        value: 'regular', child: Text('Обычный')),
+                      value: 'regular',
+                      child: Text('Обычный'),
+                    ),
                     DropdownMenuItem<String>(
-                        value: 'loose', child: Text('Свободный')),
+                      value: 'loose',
+                      child: Text('Свободный'),
+                    ),
                   ],
                 ),
               ],

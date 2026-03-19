@@ -64,19 +64,25 @@ class ProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
 }
 
 /// Products provider
-final productsProvider = StateNotifierProvider<ProductsNotifier, AsyncValue<List<Product>>>((ref) {
-  final repository = ref.watch(marketRepositoryProvider);
-  return ProductsNotifier(repository);
-});
+final productsProvider =
+    StateNotifierProvider<ProductsNotifier, AsyncValue<List<Product>>>((ref) {
+      final repository = ref.watch(marketRepositoryProvider);
+      return ProductsNotifier(repository);
+    });
 
 /// Categories provider
-final categoriesProvider = FutureProvider<List<Map<String, String>>>((ref) async {
+final categoriesProvider = FutureProvider<List<Map<String, String>>>((
+  ref,
+) async {
   final repository = ref.watch(marketRepositoryProvider);
   return repository.getCategories();
 });
 
 /// Product detail provider family
-final productDetailProvider = FutureProvider.family<Product, String>((ref, productId) async {
+final productDetailProvider = FutureProvider.family<Product, String>((
+  ref,
+  productId,
+) async {
   final repository = ref.watch(marketRepositoryProvider);
   return repository.getProduct(productId);
 });

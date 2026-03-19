@@ -30,9 +30,15 @@ class AdminRepositoryImpl implements AdminRepository {
 
     // Парсим пользователей из ответа
     final usersJson = result['users'] as List<dynamic>? ?? [];
-    final users = usersJson
-        .map((json) => AdminUserDto.fromJson(json as Map<String, dynamic>).toEntity())
-        .toList();
+    final users =
+        usersJson
+            .map(
+              (json) =>
+                  AdminUserDto.fromJson(
+                    json as Map<String, dynamic>,
+                  ).toEntity(),
+            )
+            .toList();
 
     // Парсим пагинацию
     final pagination = result['pagination'] as Map<String, dynamic>?;

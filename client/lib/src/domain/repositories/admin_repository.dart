@@ -32,12 +32,7 @@ class UserFilter {
   final bool? isActive;
   final bool? isVerified;
 
-  const UserFilter({
-    this.query,
-    this.role,
-    this.isActive,
-    this.isVerified,
-  });
+  const UserFilter({this.query, this.role, this.isActive, this.isVerified});
 
   /// Преобразует фильтр в map для query параметров
   Map<String, dynamic> toQueryParams() {

@@ -23,8 +23,12 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final qualityAsync = ref.watch(recommendationQualityProvider(widget.recommendationId));
-    final userRatingAsync = ref.watch(userRatingProvider(widget.recommendationId));
+    final qualityAsync = ref.watch(
+      recommendationQualityProvider(widget.recommendationId),
+    );
+    final userRatingAsync = ref.watch(
+      userRatingProvider(widget.recommendationId),
+    );
     final notifier = ref.read(ratingNotifierProvider.notifier);
 
     return Card(
@@ -37,9 +41,9 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
             // Заголовок
             Text(
               'Оцените этот образ',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
 
@@ -84,10 +88,11 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
             qualityAsync.when(
               data: (quality) => _buildQualityStats(quality),
               loading: () => const CircularProgressIndicator.adaptive(),
-              error: (error, stack) => Text(
-                'Ошибка загрузки статистики',
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
+              error:
+                  (error, stack) => Text(
+                    'Ошибка загрузки статистики',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
             ),
           ],
         ),
@@ -121,10 +126,7 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
     if (quality.ratingCount == 0) {
       return Text(
         'Пока нет оценок',
-        style: TextStyle(
-          color: Colors.grey.shade600,
-          fontSize: 12,
-        ),
+        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
       );
     }
 
@@ -145,7 +147,9 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                avgScore > 0 ? Icons.trending_up : (avgScore < 0 ? Icons.trending_down : Icons.remove),
+                avgScore > 0
+                    ? Icons.trending_up
+                    : (avgScore < 0 ? Icons.trending_down : Icons.remove),
                 color: scoreColor,
                 size: 16,
               ),
@@ -167,10 +171,7 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
         // Количество оценок
         Text(
           '${quality.ratingCount} ${_pluralize(quality.ratingCount, 'оценка', 'оценки', 'оценок')}',
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
         ),
 
         const Spacer(),
@@ -269,14 +270,13 @@ class _OutfitRatingWidgetState extends ConsumerState<OutfitRatingWidget> {
 class QualityScoreWidget extends ConsumerWidget {
   final String recommendationId;
 
-  const QualityScoreWidget({
-    super.key,
-    required this.recommendationId,
-  });
+  const QualityScoreWidget({super.key, required this.recommendationId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final qualityAsync = ref.watch(recommendationQualityProvider(recommendationId));
+    final qualityAsync = ref.watch(
+      recommendationQualityProvider(recommendationId),
+    );
 
     return qualityAsync.when(
       data: (quality) {
@@ -298,7 +298,9 @@ class QualityScoreWidget extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                avgScore > 0 ? Icons.trending_up : (avgScore < 0 ? Icons.trending_down : Icons.remove),
+                avgScore > 0
+                    ? Icons.trending_up
+                    : (avgScore < 0 ? Icons.trending_down : Icons.remove),
                 color: scoreColor,
                 size: 14,
               ),
@@ -315,7 +317,12 @@ class QualityScoreWidget extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const SizedBox(width: 16, height: 16, child: CircularProgressIndicator.adaptive(strokeWidth: 2)),
+      loading:
+          () => const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+          ),
       error: (_, _) => const SizedBox.shrink(),
     );
   }
@@ -330,7 +337,8 @@ class QualityScoreWidget extends ConsumerWidget {
 /// Bottom sheet для оценки рекомендации с дополнительной обратной связью
 class RateOutfitBottomSheet extends StatefulWidget {
   final String recommendationId;
-  final Function(int rating, String? feedback, ThermalFeedback? thermal)? onRated;
+  final Function(int rating, String? feedback, ThermalFeedback? thermal)?
+  onRated;
 
   const RateOutfitBottomSheet({
     super.key,
@@ -412,18 +420,19 @@ class _RateOutfitBottomSheetState extends State<RateOutfitBottomSheet> {
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            children: ThermalFeedback.values.map((thermal) {
-              final isSelected = _thermalFeedback == thermal;
-              return ChoiceChip(
-                label: Text(thermal.displayName),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    _thermalFeedback = selected ? thermal : null;
-                  });
-                },
-              );
-            }).toList(),
+            children:
+                ThermalFeedback.values.map((thermal) {
+                  final isSelected = _thermalFeedback == thermal;
+                  return ChoiceChip(
+                    label: Text(thermal.displayName),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        _thermalFeedback = selected ? thermal : null;
+                      });
+                    },
+                  );
+                }).toList(),
           ),
 
           const SizedBox(height: 16),
@@ -455,12 +464,17 @@ class _RateOutfitBottomSheetState extends State<RateOutfitBottomSheet> {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
-                  onPressed: _rating > 0
-                      ? () {
-                          widget.onRated?.call(_rating, _feedback, _thermalFeedback);
-                          Navigator.pop(context);
-                        }
-                      : null,
+                  onPressed:
+                      _rating > 0
+                          ? () {
+                            widget.onRated?.call(
+                              _rating,
+                              _feedback,
+                              _thermalFeedback,
+                            );
+                            Navigator.pop(context);
+                          }
+                          : null,
                   child: const Text('Отправить'),
                 ),
               ),
@@ -506,9 +520,10 @@ void showRateOutfitBottomSheet({
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => RateOutfitBottomSheet(
-      recommendationId: recommendationId,
-      onRated: onRated,
-    ),
+    builder:
+        (context) => RateOutfitBottomSheet(
+          recommendationId: recommendationId,
+          onRated: onRated,
+        ),
   );
 }

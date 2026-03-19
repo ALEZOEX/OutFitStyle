@@ -2,7 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:drift/drift.dart' as drift;
 
 // Conditional import for connection creation
-import 'wardrobe_database_io.dart' if (dart.library.html) 'wardrobe_database_web.dart';
+import 'wardrobe_database_io.dart'
+    if (dart.library.html) 'wardrobe_database_web.dart';
 
 part 'wardrobe_database.g.dart';
 
@@ -20,7 +21,8 @@ class ClothingItems extends Table {
   TextColumn get brand => text().nullable()();
   TextColumn get material => text().nullable()();
   TextColumn get seasons => text().withDefault(const Constant('[]'))();
-  TextColumn get weatherConditions => text().withDefault(const Constant('[]'))();
+  TextColumn get weatherConditions =>
+      text().withDefault(const Constant('[]'))();
   TextColumn get occasions => text().withDefault(const Constant('[]'))();
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
@@ -54,7 +56,8 @@ class Outfits extends Table {
   RealColumn get comfortRating => real().withDefault(const Constant(0.0))();
   TextColumn get tags => text().withDefault(const Constant('[]'))();
   TextColumn get occasions => text().withDefault(const Constant('[]'))();
-  TextColumn get weatherConditions => text().withDefault(const Constant('[]'))();
+  TextColumn get weatherConditions =>
+      text().withDefault(const Constant('[]'))();
   TextColumn get seasons => text().withDefault(const Constant('[]'))();
   IntColumn get addedDate => integer()();
   IntColumn get createdAt => integer()();
@@ -104,33 +107,42 @@ class WardrobeDatabase extends _$WardrobeDatabase {
 
   // ==================== ClothingItems CRUD ====================
 
-  Future<List<DbClothingItem>> getAllClothingItems({bool includeArchived = false}) async {
+  Future<List<DbClothingItem>> getAllClothingItems({
+    bool includeArchived = false,
+  }) async {
     if (!includeArchived) {
-      return (select(clothingItems)..where((tbl) => tbl.isArchived.equals(false))).get();
+      return (select(clothingItems)
+        ..where((tbl) => tbl.isArchived.equals(false))).get();
     }
     return select(clothingItems).get();
   }
 
-  Stream<List<DbClothingItem>> watchAllClothingItems({bool includeArchived = false}) {
+  Stream<List<DbClothingItem>> watchAllClothingItems({
+    bool includeArchived = false,
+  }) {
     if (!includeArchived) {
       return (select(clothingItems)
             ..where((tbl) => tbl.isArchived.equals(false))
             ..orderBy([(t) => OrderingTerm.desc(t.addedDate)]))
           .watch();
     }
-    return (select(clothingItems)..orderBy([(t) => OrderingTerm.desc(t.addedDate)])).watch();
+    return (select(clothingItems)
+      ..orderBy([(t) => OrderingTerm.desc(t.addedDate)])).watch();
   }
 
   Future<DbClothingItem?> getClothingItemById(int id) async {
-    return (select(clothingItems)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (select(clothingItems)
+      ..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
   Future<DbClothingItem?> getClothingItemByExternalId(String externalId) async {
-    return (select(clothingItems)..where((tbl) => tbl.externalId.equals(externalId))).getSingleOrNull();
+    return (select(clothingItems)
+      ..where((tbl) => tbl.externalId.equals(externalId))).getSingleOrNull();
   }
 
   Future<DbClothingItem?> getClothingItemByServerId(String serverId) async {
-    return (select(clothingItems)..where((tbl) => tbl.serverId.equals(serverId))).getSingleOrNull();
+    return (select(clothingItems)
+      ..where((tbl) => tbl.serverId.equals(serverId))).getSingleOrNull();
   }
 
   Future<int> insertClothingItem(ClothingItemsCompanion item) async {
@@ -138,19 +150,27 @@ class WardrobeDatabase extends _$WardrobeDatabase {
   }
 
   Future<void> updateClothingItem(DbClothingItem item) async {
-    await (update(clothingItems)..where((tbl) => tbl.id.equals(item.id))).write(item);
+    await (update(clothingItems)
+      ..where((tbl) => tbl.id.equals(item.id))).write(item);
   }
 
-  Future<void> updateClothingItemById(int id, ClothingItemsCompanion item) async {
-    await (update(clothingItems)..where((tbl) => tbl.id.equals(id))).write(item);
+  Future<void> updateClothingItemById(
+    int id,
+    ClothingItemsCompanion item,
+  ) async {
+    await (update(clothingItems)
+      ..where((tbl) => tbl.id.equals(id))).write(item);
   }
 
   Future<bool> deleteClothingItem(int id) async {
-    return (await (delete(clothingItems)..where((tbl) => tbl.id.equals(id))).go()) > 0;
+    return (await (delete(clothingItems)
+          ..where((tbl) => tbl.id.equals(id))).go()) >
+        0;
   }
 
   Future<List<DbClothingItem>> getUnsyncedClothingItems() async {
-    return (select(clothingItems)..where((tbl) => tbl.dirty.equals(true))).get();
+    return (select(clothingItems)
+      ..where((tbl) => tbl.dirty.equals(true))).get();
   }
 
   Future<void> markClothingItemAsSynced(int id, String serverId) async {
@@ -164,17 +184,21 @@ class WardrobeDatabase extends _$WardrobeDatabase {
   }
 
   Future<void> markClothingItemAsDirty(int id) async {
-    await (update(clothingItems)..where((tbl) => tbl.id.equals(id))).write(
-      ClothingItemsCompanion(dirty: const Value(true)),
-    );
+    await (update(clothingItems)..where(
+      (tbl) => tbl.id.equals(id),
+    )).write(ClothingItemsCompanion(dirty: const Value(true)));
   }
 
   Future<List<DbClothingItem>> getFavoriteClothingItems() async {
-    return (select(clothingItems)..where((tbl) => tbl.isFavorite.equals(true))).get();
+    return (select(clothingItems)
+      ..where((tbl) => tbl.isFavorite.equals(true))).get();
   }
 
-  Future<List<DbClothingItem>> getClothingItemsByCategory(String category) async {
-    return (select(clothingItems)..where((tbl) => tbl.category.equals(category))).get();
+  Future<List<DbClothingItem>> getClothingItemsByCategory(
+    String category,
+  ) async {
+    return (select(clothingItems)
+      ..where((tbl) => tbl.category.equals(category))).get();
   }
 
   // ==================== Outfits CRUD ====================
@@ -182,25 +206,31 @@ class WardrobeDatabase extends _$WardrobeDatabase {
   Future<List<DbOutfit>> getAllOutfits() async => select(outfits).get();
 
   Stream<List<DbOutfit>> watchAllOutfits() {
-    return (select(outfits)..orderBy([(t) => OrderingTerm.desc(t.addedDate)])).watch();
+    return (select(outfits)
+      ..orderBy([(t) => OrderingTerm.desc(t.addedDate)])).watch();
   }
 
   Future<DbOutfit?> getOutfitById(int id) async {
-    return (select(outfits)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (select(outfits)
+      ..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
   Future<DbOutfit?> getOutfitByExternalId(String externalId) async {
-    return (select(outfits)..where((tbl) => tbl.externalId.equals(externalId))).getSingleOrNull();
+    return (select(outfits)
+      ..where((tbl) => tbl.externalId.equals(externalId))).getSingleOrNull();
   }
 
   Future<DbOutfit?> getOutfitByServerId(String serverId) async {
-    return (select(outfits)..where((tbl) => tbl.serverId.equals(serverId))).getSingleOrNull();
+    return (select(outfits)
+      ..where((tbl) => tbl.serverId.equals(serverId))).getSingleOrNull();
   }
 
-  Future<int> insertOutfit(OutfitsCompanion outfit) async => into(outfits).insert(outfit);
+  Future<int> insertOutfit(OutfitsCompanion outfit) async =>
+      into(outfits).insert(outfit);
 
   Future<void> updateOutfit(DbOutfit outfit) async {
-    await (update(outfits)..where((tbl) => tbl.id.equals(outfit.id))).write(outfit);
+    await (update(outfits)
+      ..where((tbl) => tbl.id.equals(outfit.id))).write(outfit);
   }
 
   Future<void> updateOutfitById(int id, OutfitsCompanion outfit) async {
@@ -208,7 +238,8 @@ class WardrobeDatabase extends _$WardrobeDatabase {
   }
 
   Future<bool> deleteOutfit(int id) async {
-    return (await (delete(outfits)..where((tbl) => tbl.id.equals(id))).go()) > 0;
+    return (await (delete(outfits)..where((tbl) => tbl.id.equals(id))).go()) >
+        0;
   }
 
   Future<List<DbOutfit>> getUnsyncedOutfits() async {
@@ -226,9 +257,9 @@ class WardrobeDatabase extends _$WardrobeDatabase {
   }
 
   Future<void> markOutfitAsDirty(int id) async {
-    await (update(outfits)..where((tbl) => tbl.id.equals(id))).write(
-      OutfitsCompanion(dirty: const Value(true)),
-    );
+    await (update(outfits)..where(
+      (tbl) => tbl.id.equals(id),
+    )).write(OutfitsCompanion(dirty: const Value(true)));
   }
 
   Future<List<DbOutfit>> getFavoriteOutfits() async {
@@ -252,7 +283,8 @@ class WardrobeDatabase extends _$WardrobeDatabase {
   }
 
   Future<DbOutfitItem?> getOutfitItemById(int id) async {
-    return (select(outfitItems)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (select(outfitItems)
+      ..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
   Future<int> insertOutfitItem(OutfitItemsCompanion item) async {
@@ -268,19 +300,26 @@ class WardrobeDatabase extends _$WardrobeDatabase {
   }
 
   Future<void> updateOutfitItem(DbOutfitItem item) async {
-    await (update(outfitItems)..where((tbl) => tbl.id.equals(item.id))).write(item);
+    await (update(outfitItems)
+      ..where((tbl) => tbl.id.equals(item.id))).write(item);
   }
 
   Future<bool> deleteOutfitItem(int id) async {
-    return (await (delete(outfitItems)..where((tbl) => tbl.id.equals(id))).go()) > 0;
+    return (await (delete(outfitItems)
+          ..where((tbl) => tbl.id.equals(id))).go()) >
+        0;
   }
 
   Future<void> deleteOutfitItemsByOutfitId(int outfitId) async {
-    await (delete(outfitItems)..where((tbl) => tbl.outfitId.equals(outfitId))).go();
+    await (delete(outfitItems)
+      ..where((tbl) => tbl.outfitId.equals(outfitId))).go();
   }
 
-  Future<List<DbOutfitItem>> getOutfitItemsByClothingItemId(int clothingItemId) async {
-    return (select(outfitItems)..where((tbl) => tbl.clothingItemId.equals(clothingItemId))).get();
+  Future<List<DbOutfitItem>> getOutfitItemsByClothingItemId(
+    int clothingItemId,
+  ) async {
+    return (select(outfitItems)
+      ..where((tbl) => tbl.clothingItemId.equals(clothingItemId))).get();
   }
 
   // ==================== Batch Operations ====================

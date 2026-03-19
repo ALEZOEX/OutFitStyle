@@ -12,7 +12,10 @@ class GetWeatherUsecaseImpl implements GetWeatherUsecase {
 
   @override
   Future<WeatherData?> execute(double latitude, double longitude) async {
-    final weatherData = await _repository.getCurrentWeather(latitude, longitude);
+    final weatherData = await _repository.getCurrentWeather(
+      latitude,
+      longitude,
+    );
     return WeatherData.fromJson(weatherData);
   }
 }
@@ -29,7 +32,10 @@ class GetWeatherForecastUsecaseImpl implements GetWeatherForecastUsecase {
   @override
   Future<List<WeatherData>?> execute(double latitude, double longitude) async {
     try {
-      final forecastData = await _repository.getWeatherForecast(latitude, longitude);
+      final forecastData = await _repository.getWeatherForecast(
+        latitude,
+        longitude,
+      );
       final forecast = [WeatherData.fromJson(forecastData)];
       return forecast;
     } catch (e) {
@@ -39,14 +45,24 @@ class GetWeatherForecastUsecaseImpl implements GetWeatherForecastUsecase {
 }
 
 abstract class GetHistoricalWeatherUsecase {
-  Future<List<WeatherData>?> execute(double latitude, double longitude, DateTime startDate, DateTime endDate);
+  Future<List<WeatherData>?> execute(
+    double latitude,
+    double longitude,
+    DateTime startDate,
+    DateTime endDate,
+  );
 }
 
 class GetHistoricalWeatherUsecaseImpl implements GetHistoricalWeatherUsecase {
   GetHistoricalWeatherUsecaseImpl();
 
   @override
-  Future<List<WeatherData>?> execute(double latitude, double longitude, DateTime startDate, DateTime endDate) async {
+  Future<List<WeatherData>?> execute(
+    double latitude,
+    double longitude,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     // For now, just return empty list as the repository doesn't have this method
     return [];
   }

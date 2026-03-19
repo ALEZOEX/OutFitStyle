@@ -45,31 +45,30 @@ class AppSnackBar {
         children: [
           Icon(displayIcon, color: textColor),
           const SizedBox(width: 12.0),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(color: textColor),
-            ),
-          ),
+          Expanded(child: Text(message, style: TextStyle(color: textColor))),
         ],
       ),
       backgroundColor: backgroundColor,
       duration: duration,
-      action: actionLabel != null && onAction != null
-          ? SnackBarAction(
-              label: actionLabel,
-              onPressed: onAction,
-              textColor: textColor,
-            )
-          : null,
+      action:
+          actionLabel != null && onAction != null
+              ? SnackBarAction(
+                label: actionLabel,
+                onPressed: onAction,
+                textColor: textColor,
+              )
+              : null,
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   /// Show a simple success message
-  static void showSuccess(BuildContext context, String message,
-      {Duration duration = const Duration(seconds: 4)}) {
+  static void showSuccess(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 4),
+  }) {
     show(
       context,
       message: message,
@@ -79,8 +78,11 @@ class AppSnackBar {
   }
 
   /// Show a simple error message
-  static void showError(BuildContext context, String message,
-      {Duration duration = const Duration(seconds: 4)}) {
+  static void showError(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 4),
+  }) {
     show(
       context,
       message: message,
@@ -90,8 +92,11 @@ class AppSnackBar {
   }
 
   /// Show a simple warning message
-  static void showWarning(BuildContext context, String message,
-      {Duration duration = const Duration(seconds: 4)}) {
+  static void showWarning(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 4),
+  }) {
     show(
       context,
       message: message,
@@ -101,8 +106,11 @@ class AppSnackBar {
   }
 
   /// Show a simple info message
-  static void showInfo(BuildContext context, String message,
-      {Duration duration = const Duration(seconds: 4)}) {
+  static void showInfo(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 4),
+  }) {
     show(
       context,
       message: message,

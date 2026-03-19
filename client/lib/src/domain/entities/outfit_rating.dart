@@ -15,7 +15,8 @@ abstract class OutfitRating with _$OutfitRating {
     @Default(0) int rating, // 1-5 звёзд
     @Default(0) int qualityScore, // -10 до +10
     String? feedback, // Текстовый отзыв
-    @Default(null) ThermalFeedback? thermalFeedback, // "too_hot", "too_cold", "just_right"
+    @Default(null)
+    ThermalFeedback? thermalFeedback, // "too_hot", "too_cold", "just_right"
     DateTime? createdAt,
   }) = _OutfitRating;
 
@@ -96,14 +97,14 @@ abstract class UserRatingStats with _$UserRatingStats {
       _$UserRatingStatsFromJson(json);
 
   factory UserRatingStats.empty() => const UserRatingStats(
-        userId: '',
-        totalRatings: 0,
-        avgRating: 0.0,
-        avgQualityScore: 0.0,
-        positiveRatings: 0,
-        negativeRatings: 0,
-        lastRatedAt: null,
-      );
+    userId: '',
+    totalRatings: 0,
+    avgRating: 0.0,
+    avgQualityScore: 0.0,
+    positiveRatings: 0,
+    negativeRatings: 0,
+    lastRatedAt: null,
+  );
 }
 
 /// Термальная обратная связь

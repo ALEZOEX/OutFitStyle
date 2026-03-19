@@ -14,10 +14,12 @@ class RecommendationDetailScreen extends ConsumerStatefulWidget {
   const RecommendationDetailScreen({super.key, required this.recommendationId});
 
   @override
-  ConsumerState<RecommendationDetailScreen> createState() => _RecommendationDetailScreenState();
+  ConsumerState<RecommendationDetailScreen> createState() =>
+      _RecommendationDetailScreenState();
 }
 
-class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetailScreen>
+class _RecommendationDetailScreenState
+    extends ConsumerState<RecommendationDetailScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -37,10 +39,9 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
     _animationController.forward();
   }
 
@@ -53,8 +54,10 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(recommendationsProvider);
-    final recommendation = state.recommendations
-        .firstWhere((r) => r.id == widget.recommendationId, orElse: () => _createPlaceholder());
+    final recommendation = state.recommendations.firstWhere(
+      (r) => r.id == widget.recommendationId,
+      orElse: () => _createPlaceholder(),
+    );
 
     final theme = Theme.of(context);
 
@@ -92,7 +95,9 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.5),
+                    color: theme.colorScheme.tertiaryContainer.withValues(
+                      alpha: 0.5,
+                    ),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -190,7 +195,9 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
         child: Icon(
           Icons.auto_awesome,
           size: 80,
-          color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
+          color: Theme.of(
+            context,
+          ).colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -243,7 +250,8 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
           ],
         ),
         const SizedBox(height: 16),
-        if (recommendation.description != null && recommendation.description!.isNotEmpty)
+        if (recommendation.description != null &&
+            recommendation.description!.isNotEmpty)
           Text(
             recommendation.description!,
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -284,11 +292,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
         children: [
           Row(
             children: [
-              Icon(
-                Icons.wb_sunny,
-                color: theme.colorScheme.primary,
-                size: 24,
-              ),
+              Icon(Icons.wb_sunny, color: theme.colorScheme.primary, size: 24),
               const SizedBox(width: 8),
               Text(
                 'Погодные условия',
@@ -338,11 +342,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
             color: theme.colorScheme.surface.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            color: theme.colorScheme.primary,
-            size: 28,
-          ),
+          child: Icon(icon, color: theme.colorScheme.primary, size: 28),
         ),
         const SizedBox(height: 8),
         Text(
@@ -383,11 +383,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
       children: [
         Row(
           children: [
-            Icon(
-              Icons.checkroom,
-              color: theme.colorScheme.primary,
-              size: 24,
-            ),
+            Icon(Icons.checkroom, color: theme.colorScheme.primary, size: 24),
             const SizedBox(width: 8),
             Text(
               'Рекомендуемые вещи',
@@ -407,7 +403,9 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -441,11 +439,7 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                       ),
                     ),
                   ),
-                  Icon(
-                    Icons.check_circle,
-                    color: Colors.green,
-                    size: 20,
-                  ),
+                  Icon(Icons.check_circle, color: Colors.green, size: 20),
                 ],
               ),
             );
@@ -542,47 +536,50 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
                 onPressed: () {
                   showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      icon: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
-                          size: 32,
-                        ),
-                      ),
-                      title: const Text('Удалить рекомендацию?'),
-                      content: const Text(
-                        'Это действие нельзя отменить',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Отмена'),
-                        ),
-                        FilledButton(
-                          onPressed: () {
-                            if (recommendation.id != null) {
-                              final notifier = ref.read(recommendationsProvider.notifier);
-                              notifier.removeRecommendation(recommendation.id!);
-                            }
-                            Navigator.pop(context);
-                            context.pop();
-                          },
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.red,
+                    builder:
+                        (context) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Text('Удалить'),
+                          icon: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                              size: 32,
+                            ),
+                          ),
+                          title: const Text('Удалить рекомендацию?'),
+                          content: const Text('Это действие нельзя отменить'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Отмена'),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                if (recommendation.id != null) {
+                                  final notifier = ref.read(
+                                    recommendationsProvider.notifier,
+                                  );
+                                  notifier.removeRecommendation(
+                                    recommendation.id!,
+                                  );
+                                }
+                                Navigator.pop(context);
+                                context.pop();
+                              },
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Colors.red,
+                              ),
+                              child: const Text('Удалить'),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
                   );
                 },
                 icon: const Icon(Icons.delete_outline),
@@ -600,137 +597,179 @@ class _RecommendationDetailScreenState extends ConsumerState<RecommendationDetai
   }
 
   /// Диалог планирования
-  void _showPlanDialog(BuildContext context, OutfitRecommendation recommendation) {
+  void _showPlanDialog(
+    BuildContext context,
+    OutfitRecommendation recommendation,
+  ) {
     DateTime selectedDate = DateTime.now();
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          icon: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.tertiaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.calendar_today,
-              color: Theme.of(context).colorScheme.tertiary,
-              size: 32,
-            ),
-          ),
-          title: const Text('Запланировать образ'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                recommendation.title ?? 'Образ',
-                style: Theme.of(context).textTheme.titleSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                    locale: const Locale('ru', 'RU'),
-                  );
-                  if (picked != null) {
-                    setState(() => selectedDate = picked);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).colorScheme.outline),
-                    borderRadius: BorderRadius.circular(12),
+      builder:
+          (context) => StatefulBuilder(
+            builder:
+                (context, setState) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  icon: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.tertiaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.calendar_today,
+                      color: Theme.of(context).colorScheme.tertiary,
+                      size: 32,
+                    ),
+                  ),
+                  title: const Text('Запланировать образ'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.calendar_today,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
                       Text(
-                        DateFormat('dd MMMM yyyy', 'ru_RU').format(selectedDate),
-                        style: Theme.of(context).textTheme.titleMedium,
+                        recommendation.title ?? 'Образ',
+                        style: Theme.of(context).textTheme.titleSmall,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365),
+                            ),
+                            locale: const Locale('ru', 'RU'),
+                          );
+                          if (picked != null) {
+                            setState(() => selectedDate = picked);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                DateFormat(
+                                  'dd MMMM yyyy',
+                                  'ru_RU',
+                                ).format(selectedDate),
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Быстрый выбор
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _QuickDateChip(
+                            label: 'Сегодня',
+                            date: DateTime.now(),
+                            isSelected: _isSameDay(
+                              selectedDate,
+                              DateTime.now(),
+                            ),
+                            onTap:
+                                () => setState(
+                                  () => selectedDate = DateTime.now(),
+                                ),
+                          ),
+                          _QuickDateChip(
+                            label: 'Завтра',
+                            date: DateTime.now().add(const Duration(days: 1)),
+                            isSelected: _isSameDay(
+                              selectedDate,
+                              DateTime.now().add(const Duration(days: 1)),
+                            ),
+                            onTap:
+                                () => setState(
+                                  () =>
+                                      selectedDate = DateTime.now().add(
+                                        const Duration(days: 1),
+                                      ),
+                                ),
+                          ),
+                          _QuickDateChip(
+                            label: 'Выходные',
+                            date: _getNextWeekend(),
+                            isSelected: _isSameDay(
+                              selectedDate,
+                              _getNextWeekend(),
+                            ),
+                            onTap:
+                                () => setState(
+                                  () => selectedDate = _getNextWeekend(),
+                                ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Быстрый выбор
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _QuickDateChip(
-                    label: 'Сегодня',
-                    date: DateTime.now(),
-                    isSelected: _isSameDay(selectedDate, DateTime.now()),
-                    onTap: () => setState(() => selectedDate = DateTime.now()),
-                  ),
-                  _QuickDateChip(
-                    label: 'Завтра',
-                    date: DateTime.now().add(const Duration(days: 1)),
-                    isSelected: _isSameDay(selectedDate, DateTime.now().add(const Duration(days: 1))),
-                    onTap: () => setState(() => selectedDate = DateTime.now().add(const Duration(days: 1))),
-                  ),
-                  _QuickDateChip(
-                    label: 'Выходные',
-                    date: _getNextWeekend(),
-                    isSelected: _isSameDay(selectedDate, _getNextWeekend()),
-                    onTap: () => setState(() => selectedDate = _getNextWeekend()),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Отмена'),
-            ),
-            FilledButton.icon(
-              onPressed: () {
-                if (recommendation.id == null) return;
-                final notifier = ref.read(recommendationsProvider.notifier);
-                notifier.planOutfit(
-                  recommendationId: recommendation.id!,
-                  date: selectedDate,
-                );
-                Navigator.pop(context);
-                
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green[700]),
-                        const SizedBox(width: 12),
-                        Text('Образ запланирован на ${DateFormat("dd MMMM", "ru_RU").format(selectedDate)}'),
-                      ],
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Отмена'),
                     ),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.check),
-              label: const Text('Запланировать'),
-            ),
-          ],
-        ),
-      ),
+                    FilledButton.icon(
+                      onPressed: () {
+                        if (recommendation.id == null) return;
+                        final notifier = ref.read(
+                          recommendationsProvider.notifier,
+                        );
+                        notifier.planOutfit(
+                          recommendationId: recommendation.id!,
+                          date: selectedDate,
+                        );
+                        Navigator.pop(context);
+
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green[700],
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Образ запланирован на ${DateFormat("dd MMMM", "ru_RU").format(selectedDate)}',
+                                ),
+                              ],
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.check),
+                      label: const Text('Запланировать'),
+                    ),
+                  ],
+                ),
+          ),
     );
   }
 
@@ -823,9 +862,10 @@ class _QuickDateChip extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outline.withValues(alpha: 0.3),
+          color:
+              isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
     );

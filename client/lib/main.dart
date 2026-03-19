@@ -32,9 +32,5 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(
-    ProviderScope(
-      child: const OutfitStyleApp(),
-    ),
-  );
+  runApp(ProviderScope(child: const OutfitStyleApp()));
 }

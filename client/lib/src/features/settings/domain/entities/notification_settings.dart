@@ -1,5 +1,5 @@
 /// Модель настроек уведомлений пользователя
-/// 
+///
 /// Содержит все типы уведомлений, сгруппированные по каналам:
 /// - Push уведомления
 /// - Email уведомления
@@ -15,7 +15,7 @@ class NotificationSettings {
   final bool smsEnabled;
 
   // === Push уведомления по типам ===
-  
+
   /// Уведомления о погоде и погодных предупреждениях
   final bool weatherAlerts;
 
@@ -41,7 +41,7 @@ class NotificationSettings {
   final bool tripUpdates;
 
   // === Email уведомления по типам ===
-  
+
   /// Email о погоде и погодных предупреждениях
   final bool emailWeatherAlerts;
 
@@ -61,7 +61,7 @@ class NotificationSettings {
   final bool emailNewsletter;
 
   // === SMS уведомления по типам ===
-  
+
   /// SMS о критических погодных предупреждениях
   final bool smsWeatherAlerts;
 
@@ -130,14 +130,17 @@ class NotificationSettings {
       outfitReminders: outfitReminders ?? this.outfitReminders,
       tripUpdates: tripUpdates ?? this.tripUpdates,
       emailWeatherAlerts: emailWeatherAlerts ?? this.emailWeatherAlerts,
-      emailRecommendationDigest: emailRecommendationDigest ?? this.emailRecommendationDigest,
+      emailRecommendationDigest:
+          emailRecommendationDigest ?? this.emailRecommendationDigest,
       emailAchievements: emailAchievements ?? this.emailAchievements,
       emailPromotional: emailPromotional ?? this.emailPromotional,
-      emailSubscriptionStatus: emailSubscriptionStatus ?? this.emailSubscriptionStatus,
+      emailSubscriptionStatus:
+          emailSubscriptionStatus ?? this.emailSubscriptionStatus,
       emailNewsletter: emailNewsletter ?? this.emailNewsletter,
       smsWeatherAlerts: smsWeatherAlerts ?? this.smsWeatherAlerts,
       smsReminders: smsReminders ?? this.smsReminders,
-      smsSubscriptionStatus: smsSubscriptionStatus ?? this.smsSubscriptionStatus,
+      smsSubscriptionStatus:
+          smsSubscriptionStatus ?? this.smsSubscriptionStatus,
     );
   }
 
@@ -182,10 +185,12 @@ class NotificationSettings {
       outfitReminders: map['outfit_reminders'] as bool? ?? true,
       tripUpdates: map['trip_updates'] as bool? ?? true,
       emailWeatherAlerts: map['email_weather_alerts'] as bool? ?? false,
-      emailRecommendationDigest: map['email_recommendation_digest'] as bool? ?? false,
+      emailRecommendationDigest:
+          map['email_recommendation_digest'] as bool? ?? false,
       emailAchievements: map['email_achievements'] as bool? ?? false,
       emailPromotional: map['email_promotional'] as bool? ?? false,
-      emailSubscriptionStatus: map['email_subscription_status'] as bool? ?? true,
+      emailSubscriptionStatus:
+          map['email_subscription_status'] as bool? ?? true,
       emailNewsletter: map['email_newsletter'] as bool? ?? false,
       smsWeatherAlerts: map['sms_weather_alerts'] as bool? ?? false,
       smsReminders: map['sms_reminders'] as bool? ?? false,
@@ -199,7 +204,8 @@ class NotificationSettings {
   }
 
   @override
-  String toString() => 'NotificationSettings(pushEnabled: $pushEnabled, emailEnabled: $emailEnabled)';
+  String toString() =>
+      'NotificationSettings(pushEnabled: $pushEnabled, emailEnabled: $emailEnabled)';
 
   @override
   bool operator ==(Object other) {
@@ -229,25 +235,25 @@ class NotificationSettings {
 
   @override
   int get hashCode => Object.hash(
-        pushEnabled,
-        emailEnabled,
-        smsEnabled,
-        weatherAlerts,
-        recommendationReady,
-        newArrivals,
-        achievementUnlocked,
-        promotional,
-        subscriptionStatus,
-        outfitReminders,
-        tripUpdates,
-        emailWeatherAlerts,
-        emailRecommendationDigest,
-        emailAchievements,
-        emailPromotional,
-        emailSubscriptionStatus,
-        emailNewsletter,
-        smsWeatherAlerts,
-        smsReminders,
-        smsSubscriptionStatus,
-      );
+    pushEnabled,
+    emailEnabled,
+    smsEnabled,
+    weatherAlerts,
+    recommendationReady,
+    newArrivals,
+    achievementUnlocked,
+    promotional,
+    subscriptionStatus,
+    outfitReminders,
+    tripUpdates,
+    emailWeatherAlerts,
+    emailRecommendationDigest,
+    emailAchievements,
+    emailPromotional,
+    emailSubscriptionStatus,
+    emailNewsletter,
+    smsWeatherAlerts,
+    smsReminders,
+    smsSubscriptionStatus,
+  );
 }

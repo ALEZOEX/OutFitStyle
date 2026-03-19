@@ -6,22 +6,22 @@ import '../../../../domain/services/recommendations_domain_service.dart';
 class RecommendationsController extends StateNotifier<RecommendationsState> {
   final RecommendationsDomainService _domainService;
 
-  RecommendationsController(this._domainService) : super(const RecommendationsState());
+  RecommendationsController(this._domainService)
+    : super(const RecommendationsState());
 
   /// Получение рекомендаций для пользователя
   Future<void> loadRecommendations(String userId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final recommendations = await _domainService.getUserRecommendations(userId);
+      final recommendations = await _domainService.getUserRecommendations(
+        userId,
+      );
       state = state.copyWith(
         isLoading: false,
         recommendations: recommendations.map((r) => r.toJson()).toList(),
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 

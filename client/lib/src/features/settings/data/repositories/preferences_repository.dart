@@ -9,9 +9,8 @@ import 'package:dio/dio.dart';
 class PreferencesRepository {
   final ApiClient _apiClient;
 
-  PreferencesRepository({
-    required ApiClient apiClient,
-  }) : _apiClient = apiClient;
+  PreferencesRepository({required ApiClient apiClient})
+    : _apiClient = apiClient;
 
   /// Получить предпочтения пользователя
   ///
@@ -25,7 +24,9 @@ class PreferencesRepository {
         final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
         return prefData;
       } else {
-        throw PreferencesException('Ошибка получения предпочтений: ${response.statusCode}');
+        throw PreferencesException(
+          'Ошибка получения предпочтений: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -41,7 +42,9 @@ class PreferencesRepository {
   /// [preferences] - новые предпочтения
   ///
   /// Endpoint: PUT /api/v1/users/preferences
-  Future<Map<String, dynamic>> updatePreferences(Map<String, dynamic> preferences) async {
+  Future<Map<String, dynamic>> updatePreferences(
+    Map<String, dynamic> preferences,
+  ) async {
     try {
       final body = _preparePreferencesBody(preferences);
 
@@ -55,7 +58,9 @@ class PreferencesRepository {
         final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
         return prefData;
       } else {
-        throw PreferencesException('Ошибка обновления предпочтений: ${response.statusCode}');
+        throw PreferencesException(
+          'Ошибка обновления предпочтений: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       _handleDioError(e);
@@ -67,7 +72,9 @@ class PreferencesRepository {
   }
 
   /// Подготовить тело запроса для обновления предпочтений
-  Map<String, dynamic> _preparePreferencesBody(Map<String, dynamic> preferences) {
+  Map<String, dynamic> _preparePreferencesBody(
+    Map<String, dynamic> preferences,
+  ) {
     final body = <String, dynamic>{};
 
     // Поля из preferences
@@ -97,10 +104,12 @@ class PreferencesRepository {
     }
 
     if (preferences.containsKey('prefers_natural_materials')) {
-      body['prefers_natural_materials'] = preferences['prefers_natural_materials'];
+      body['prefers_natural_materials'] =
+          preferences['prefers_natural_materials'];
     }
     if (preferences.containsKey('prefers_synthetic_materials')) {
-      body['prefers_synthetic_materials'] = preferences['prefers_synthetic_materials'];
+      body['prefers_synthetic_materials'] =
+          preferences['prefers_synthetic_materials'];
     }
     if (preferences.containsKey('sensitive_to_cold')) {
       body['sensitive_to_cold'] = preferences['sensitive_to_cold'];
@@ -114,11 +123,13 @@ class PreferencesRepository {
       body['occasions_of_interest'] = preferences['occasions_of_interest'];
     }
 
-    if (preferences.containsKey('max_budget') && preferences['max_budget'] != null) {
+    if (preferences.containsKey('max_budget') &&
+        preferences['max_budget'] != null) {
       body['max_budget'] = preferences['max_budget'];
     }
 
-    if (preferences.containsKey('fit_preference') && preferences['fit_preference'] != null) {
+    if (preferences.containsKey('fit_preference') &&
+        preferences['fit_preference'] != null) {
       body['fit_preference'] = preferences['fit_preference'];
     }
 
@@ -128,16 +139,18 @@ class PreferencesRepository {
   void _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
-      throw PreferencesException('Превышено время ожидания. Проверьте соединение.');
+      throw PreferencesException(
+        'Превышено время ожидания. Проверьте соединение.',
+      );
     }
-    
+
     if (e.type == DioExceptionType.connectionError) {
       throw PreferencesException('Нет соединения с интернетом.');
     }
-    
+
     final statusCode = e.response?.statusCode;
     final errorMessage = _extractErrorMessage(e.response?.data);
-    
+
     switch (statusCode) {
       case 401:
         throw PreferencesException('Требуется авторизация');
@@ -154,8 +167,7 @@ class PreferencesRepository {
 
   String? _extractErrorMessage(dynamic data) {
     if (data is Map<String, dynamic>) {
-      return data['message'] as String? ?? 
-             data['error'] as String?;
+      return data['message'] as String? ?? data['error'] as String?;
     }
     return null;
   }
@@ -164,9 +176,9 @@ class PreferencesRepository {
 /// Исключение репозитория предпочтений
 class PreferencesException implements Exception {
   final String message;
-  
+
   const PreferencesException(this.message);
-  
+
   @override
   String toString() => 'PreferencesException: $message';
 }

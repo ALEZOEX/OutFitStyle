@@ -11,24 +11,33 @@ abstract class IRecommendationsRemoteDataSource {
   Future<void> likeRecommendation(String id, bool liked);
   Future<void> saveRecommendationForLater(String id, bool saved);
   Future<List<OutfitRecommendation>> getRecommendationsByWeather(
-      String weatherCondition, double temperature);
+    String weatherCondition,
+    double temperature,
+  );
   Future<List<OutfitRecommendation>> getTrendingRecommendations();
   Future<void> submitFeedback(String recommendationId, String feedback);
 }
 
-class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSource {
+class RecommendationsRemoteDataSource
+    implements IRecommendationsRemoteDataSource {
   final ApiClient _apiClient;
 
   RecommendationsRemoteDataSource(this._apiClient);
 
   @override
-  Future<List<OutfitRecommendation>> getUserRecommendations(String userId) async {
+  Future<List<OutfitRecommendation>> getUserRecommendations(
+    String userId,
+  ) async {
     final response = await _apiClient.get('/users/$userId/recommendations');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
     throw RecommendationsRemoteException('Не удалось загрузить рекомендации');
@@ -96,13 +105,17 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
       data: {'saved': saved},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw RecommendationsRemoteException('Не удалось сохранить рекомендацию на потом');
+      throw RecommendationsRemoteException(
+        'Не удалось сохранить рекомендацию на потом',
+      );
     }
   }
 
   @override
   Future<List<OutfitRecommendation>> getRecommendationsByWeather(
-      String weatherCondition, double temperature) async {
+    String weatherCondition,
+    double temperature,
+  ) async {
     final response = await _apiClient.get(
       '/recommendations/weather',
       params: {
@@ -112,12 +125,18 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
-    throw RecommendationsRemoteException('Не удалось получить рекомендации по погоде');
+    throw RecommendationsRemoteException(
+      'Не удалось получить рекомендации по погоде',
+    );
   }
 
   @override
@@ -125,12 +144,18 @@ class RecommendationsRemoteDataSource implements IRecommendationsRemoteDataSourc
     final response = await _apiClient.get('/recommendations/trending');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
-    throw RecommendationsRemoteException('Не удалось получить трендовые рекомендации');
+    throw RecommendationsRemoteException(
+      'Не удалось получить трендовые рекомендации',
+    );
   }
 
   @override

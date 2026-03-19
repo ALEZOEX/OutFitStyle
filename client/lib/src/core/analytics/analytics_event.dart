@@ -144,10 +144,7 @@ class AnalyticsEvent {
   }) {
     return AnalyticsEvent(
       type: AnalyticsEventType.viewWardrobe,
-      properties: {
-        'item_count': itemCount,
-        'categories': categories,
-      },
+      properties: {'item_count': itemCount, 'categories': categories},
       userId: userId,
       timestamp: DateTime.now(),
     );

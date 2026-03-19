@@ -28,9 +28,10 @@ class WardrobeItemMapper {
       size: db.size,
       // Поля из ClothingItem - мапим на usage
       usage: db.usageCount,
-      lastSyncedAt: db.lastSyncedAt != null
-          ? DateTime.fromMillisecondsSinceEpoch(db.lastSyncedAt!)
-          : null,
+      lastSyncedAt:
+          db.lastSyncedAt != null
+              ? DateTime.fromMillisecondsSinceEpoch(db.lastSyncedAt!)
+              : null,
       dirty: db.dirty,
       // Дополнительные поля из tags JSON
       season: _parseSeasonFromTags(_parseStringList(db.tags)),
@@ -44,7 +45,9 @@ class WardrobeItemMapper {
       windOk: _parseStringList(db.weatherConditions).contains('windy'),
       minTemp: _parseMinTempFromWeather(_parseStringList(db.weatherConditions)),
       maxTemp: _parseMaxTempFromWeather(_parseStringList(db.weatherConditions)),
-      warmthLevel: _parseWarmthLevelFromWeather(_parseStringList(db.weatherConditions)),
+      warmthLevel: _parseWarmthLevelFromWeather(
+        _parseStringList(db.weatherConditions),
+      ),
       // Материалы из material поля
       materials: db.material != null ? [db.material!] : [],
       // Icon emoji и blurHash пока не поддерживаются
@@ -152,16 +155,17 @@ class WardrobeItemMapper {
     if (item.rainOk == true) conditions.add('rainy');
     if (item.snowOk == true) conditions.add('snowy');
     if (item.windOk == true) conditions.add('windy');
-    
+
     // Температурные условия
     final minTemp = item.minTemp;
     final maxTemp = item.maxTemp;
     if (maxTemp != null && maxTemp > 30) conditions.add('hot');
     if (minTemp != null && minTemp < 10) conditions.add('cold');
-    if ((minTemp == null || minTemp >= 15) && (maxTemp == null || maxTemp <= 25)) {
+    if ((minTemp == null || minTemp >= 15) &&
+        (maxTemp == null || maxTemp <= 25)) {
       conditions.add('mild');
     }
-    
+
     return _toJsonArray(conditions);
   }
 
@@ -276,10 +280,7 @@ class OutfitMapper {
   }
 
   /// Конвертировать Outfit в OutfitsCompanion для вставки
-  static OutfitsCompanion toCompanionForInsert(
-    Outfit entity, {
-    DateTime? now,
-  }) {
+  static OutfitsCompanion toCompanionForInsert(Outfit entity, {DateTime? now}) {
     final currentTime = now ?? DateTime.now();
     return OutfitsCompanion(
       externalId: const Value(null),
@@ -292,7 +293,9 @@ class OutfitMapper {
       comfortRating: Value(entity.comfortRating.toDouble()),
       tags: Value(_encodeStringList(entity.tags)),
       occasions: Value(_encodeOccasions(entity.occasions)),
-      weatherConditions: Value(_encodeWeatherConditions(entity.weatherConditions)),
+      weatherConditions: Value(
+        _encodeWeatherConditions(entity.weatherConditions),
+      ),
       seasons: Value(_encodeSeasons(entity.seasons)),
       addedDate: Value(currentTime.millisecondsSinceEpoch),
       createdAt: Value(currentTime.millisecondsSinceEpoch),
@@ -304,10 +307,7 @@ class OutfitMapper {
   }
 
   /// Конвертировать Outfit в OutfitsCompanion для обновления
-  static OutfitsCompanion toCompanionForUpdate(
-    Outfit entity, {
-    DateTime? now,
-  }) {
+  static OutfitsCompanion toCompanionForUpdate(Outfit entity, {DateTime? now}) {
     final currentTime = now ?? DateTime.now();
     return OutfitsCompanion(
       name: Value(entity.name ?? ''),
@@ -319,7 +319,9 @@ class OutfitMapper {
       comfortRating: Value(entity.comfortRating.toDouble()),
       tags: Value(_encodeStringList(entity.tags)),
       occasions: Value(_encodeOccasions(entity.occasions)),
-      weatherConditions: Value(_encodeWeatherConditions(entity.weatherConditions)),
+      weatherConditions: Value(
+        _encodeWeatherConditions(entity.weatherConditions),
+      ),
       seasons: Value(_encodeSeasons(entity.seasons)),
       updatedAt: Value(currentTime.millisecondsSinceEpoch),
       dirty: const Value(true),

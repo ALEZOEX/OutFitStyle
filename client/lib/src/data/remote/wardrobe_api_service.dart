@@ -19,7 +19,7 @@ class WardrobeApiService {
   WardrobeApiService({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Получить список вещей гардероба
-  /// 
+  ///
   /// [includeArchived] — включать архивированные вещи
   /// [category] — фильтр по категории
   /// [style] — фильтр по стилю
@@ -62,9 +62,12 @@ class WardrobeApiService {
       final itemsData = data['items'] as List<dynamic>? ?? [];
       final pagination = data['pagination'] as Map<String, dynamic>?;
 
-      final items = itemsData
-          .map((item) => WardrobeItem.fromJson(item as Map<String, dynamic>))
-          .toList();
+      final items =
+          itemsData
+              .map(
+                (item) => WardrobeItem.fromJson(item as Map<String, dynamic>),
+              )
+              .toList();
 
       return WardrobeListResponse(
         items: items,
@@ -97,7 +100,9 @@ class WardrobeApiService {
   }
 
   /// Создать новую вещь в гардеробе
-  Future<WardrobeItem> createWardrobeItem(WardrobeItemCreateRequest request) async {
+  Future<WardrobeItem> createWardrobeItem(
+    WardrobeItemCreateRequest request,
+  ) async {
     final response = await _apiClient.post(
       '/api/v1/wardrobe',
       data: jsonEncode(request.toJson()),
@@ -105,7 +110,10 @@ class WardrobeApiService {
 
     if (response.statusCode == 201 || response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final itemData = data['wardrobe_item'] as Map<String, dynamic>? ?? data['item'] as Map<String, dynamic>? ?? data;
+      final itemData =
+          data['wardrobe_item'] as Map<String, dynamic>? ??
+          data['item'] as Map<String, dynamic>? ??
+          data;
       return WardrobeItem.fromJson(itemData);
     } else {
       final errorData = _parseError(response);
@@ -118,7 +126,10 @@ class WardrobeApiService {
   }
 
   /// Обновить вещь в гардеробе
-  Future<WardrobeItem> updateWardrobeItem(String id, WardrobeItemUpdateRequest request) async {
+  Future<WardrobeItem> updateWardrobeItem(
+    String id,
+    WardrobeItemUpdateRequest request,
+  ) async {
     final response = await _apiClient.put(
       '/api/v1/wardrobe/$id',
       data: jsonEncode(request.toJson()),
@@ -126,12 +137,16 @@ class WardrobeApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final itemData = data['wardrobe_item'] as Map<String, dynamic>? ?? data['item'] as Map<String, dynamic>? ?? data;
+      final itemData =
+          data['wardrobe_item'] as Map<String, dynamic>? ??
+          data['item'] as Map<String, dynamic>? ??
+          data;
       return WardrobeItem.fromJson(itemData);
     } else {
       final errorData = _parseError(response);
       throw WardrobeApiException(
-        errorData['message'] ?? 'Ошибка обновления вещи: ${response.statusCode}',
+        errorData['message'] ??
+            'Ошибка обновления вещи: ${response.statusCode}',
         statusCode: response.statusCode,
         details: errorData['details'],
       );
@@ -188,9 +203,10 @@ class WardrobeApiService {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
       return WornResponse(
         wearCount: data['wear_count'] as int? ?? 0,
-        lastWornAt: data['last_worn_at'] != null
-            ? DateTime.tryParse(data['last_worn_at'] as String)
-            : null,
+        lastWornAt:
+            data['last_worn_at'] != null
+                ? DateTime.tryParse(data['last_worn_at'] as String)
+                : null,
       );
     } else {
       throw WardrobeApiException(
@@ -231,10 +247,7 @@ class WornResponse {
   final int wearCount;
   final DateTime? lastWornAt;
 
-  WornResponse({
-    required this.wearCount,
-    this.lastWornAt,
-  });
+  WornResponse({required this.wearCount, this.lastWornAt});
 }
 
 /// Исключение API гардероба
@@ -243,11 +256,7 @@ class WardrobeApiException implements Exception {
   final int? statusCode;
   final Map<String, dynamic>? details;
 
-  const WardrobeApiException(
-    this.message, {
-    this.statusCode,
-    this.details,
-  });
+  const WardrobeApiException(this.message, {this.statusCode, this.details});
 
   @override
   String toString() {

@@ -8,10 +8,10 @@ import 'achievement_definitions.dart';
 enum AchievementFilter {
   /// Все достижения
   all('Все'),
-  
+
   /// Доступные (не разблокированные)
   available('Доступные'),
-  
+
   /// Полученные (разблокированные)
   unlocked('Полученные');
 
@@ -23,7 +23,7 @@ enum AchievementFilter {
 class AchievementsRepository {
   final List<Achievement> _achievements = [];
   final _streamController = StreamController<List<Achievement>>.broadcast();
-  
+
   /// Stream для отслеживания изменений достижений
   Stream<List<Achievement>> get achievementsStream => _streamController.stream;
 
@@ -48,9 +48,7 @@ class AchievementsRepository {
 
   /// Получить достижения по категории
   List<Achievement> getByCategory(AchievementCategory category) {
-    return _achievements
-        .where((a) => a.category == category)
-        .toList();
+    return _achievements.where((a) => a.category == category).toList();
   }
 
   /// Получить достижения с фильтром
@@ -76,21 +74,27 @@ class AchievementsRepository {
   }
 
   /// Обновить прогресс достижения
-  Future<Achievement?> updateProgress(String achievementId, int progress) async {
+  Future<Achievement?> updateProgress(
+    String achievementId,
+    int progress,
+  ) async {
     final index = _achievements.indexWhere((a) => a.id == achievementId);
     if (index == -1) return null;
 
     final achievement = _achievements[index];
     final newProgress = progress.clamp(0, achievement.targetValue);
     final isNowUnlocked = newProgress >= achievement.targetValue;
-    
+
     // Если уже было разблокировано, не меняем unlockedAt
     final wasUnlocked = achievement.isUnlocked;
-    
+
     final updated = achievement.copyWith(
       currentProgress: newProgress,
       isUnlocked: isNowUnlocked,
-      unlockedAt: isNowUnlocked && !wasUnlocked ? DateTime.now() : achievement.unlockedAt,
+      unlockedAt:
+          isNowUnlocked && !wasUnlocked
+              ? DateTime.now()
+              : achievement.unlockedAt,
       updatedAt: DateTime.now(),
     );
 
@@ -102,7 +106,10 @@ class AchievementsRepository {
   }
 
   /// Увеличить прогресс достижения на указанное значение
-  Future<Achievement?> incrementProgress(String achievementId, {int by = 1}) async {
+  Future<Achievement?> incrementProgress(
+    String achievementId, {
+    int by = 1,
+  }) async {
     final achievement = getById(achievementId);
     if (achievement == null) return null;
 
@@ -165,14 +172,15 @@ class AchievementsRepository {
   CategoryProgress getCategoryProgress(AchievementCategory category) {
     final categoryAchievements = getByCategory(category);
     final unlocked = categoryAchievements.where((a) => a.isUnlocked).length;
-    
+
     return CategoryProgress(
       category: category,
       total: categoryAchievements.length,
       unlocked: unlocked,
-      progressPercent: categoryAchievements.isNotEmpty 
-          ? (unlocked / categoryAchievements.length * 100) 
-          : 0,
+      progressPercent:
+          categoryAchievements.isNotEmpty
+              ? (unlocked / categoryAchievements.length * 100)
+              : 0,
     );
   }
 

@@ -73,11 +73,7 @@ class _RatingSliderState extends State<RatingSlider>
     if (rating < 0) {
       // Красный градиент от тёмного к светлому
       final intensity = (rating.abs() / 10).clamp(0.0, 1.0);
-      return Color.lerp(
-        Colors.red.shade900,
-        Colors.red.shade400,
-        intensity,
-      )!;
+      return Color.lerp(Colors.red.shade900, Colors.red.shade400, intensity)!;
     } else if (rating > 0) {
       // Зелёный градиент от тёмного к светлому
       final intensity = (rating / 10).clamp(0.0, 1.0);
@@ -345,7 +341,11 @@ class CompactRatingSlider extends StatelessWidget {
       return Color.lerp(Colors.red.shade900, Colors.red.shade400, intensity)!;
     } else if (rating > 0) {
       final intensity = (rating / 10).clamp(0.0, 1.0);
-      return Color.lerp(Colors.green.shade900, Colors.green.shade400, intensity)!;
+      return Color.lerp(
+        Colors.green.shade900,
+        Colors.green.shade400,
+        intensity,
+      )!;
     } else {
       return Colors.grey.shade600;
     }
@@ -394,10 +394,7 @@ class CompactRatingSlider extends StatelessWidget {
                   onRatingChanged!(newRating);
                 }
               },
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-              ),
+              child: Container(width: double.infinity, height: double.infinity),
             ),
           Builder(
             builder: (context) {

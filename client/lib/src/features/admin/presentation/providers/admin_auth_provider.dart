@@ -33,7 +33,9 @@ class AdminAuthService {
   Future<void> requireAdmin() async {
     final isAdmin = await this.isAdmin();
     if (!isAdmin) {
-      throw AdminAccessDeniedException('Доступ запрещён. Требуются права администратора.');
+      throw AdminAccessDeniedException(
+        'Доступ запрещён. Требуются права администратора.',
+      );
     }
   }
 }

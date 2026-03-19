@@ -5,11 +5,20 @@ abstract class IProfileRepository {
   Future<void> updateUserProfile(User user);
   Future<void> uploadAvatar(String userId, String imagePath);
   Future<void> deleteAvatar(String userId);
-  Future<void> updatePreferences(String userId, Map<String, dynamic> preferences);
+  Future<void> updatePreferences(
+    String userId,
+    Map<String, dynamic> preferences,
+  );
   Future<Map<String, dynamic>?> getPreferences(String userId);
-  Future<void> updatePrivacySettings(String userId, Map<String, dynamic> settings);
+  Future<void> updatePrivacySettings(
+    String userId,
+    Map<String, dynamic> settings,
+  );
   Future<Map<String, dynamic>?> getPrivacySettings(String userId);
-  Future<void> updateNotificationSettings(String userId, Map<String, dynamic> settings);
+  Future<void> updateNotificationSettings(
+    String userId,
+    Map<String, dynamic> settings,
+  );
   Future<Map<String, dynamic>?> getNotificationSettings(String userId);
   Future<List<String>> getUserInterests(String userId);
   Future<void> updateUserInterests(String userId, List<String> interests);

@@ -8,10 +8,9 @@ import '../../../../domain/states/auth_state.dart';
 class AuthController extends StateNotifier<AuthState> {
   final SessionManager _sessionManager;
 
-  AuthController({
-    required SessionManager sessionManager,
-  })  : _sessionManager = sessionManager,
-        super(const AuthState());
+  AuthController({required SessionManager sessionManager})
+    : _sessionManager = sessionManager,
+      super(const AuthState());
 
   /// Выход из системы
   Future<void> signOut() async {
@@ -24,10 +23,7 @@ class AuthController extends StateNotifier<AuthState> {
         user: null,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
   }
@@ -42,14 +38,15 @@ class AuthController extends StateNotifier<AuthState> {
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: isAuthed,
-          user: session != null
-              ? {
-                  'id': session.uid,
-                  'email': session.email,
-                  'displayName': session.displayName,
-                  'photoUrl': session.photoUrl,
-                }
-              : null,
+          user:
+              session != null
+                  ? {
+                    'id': session.uid,
+                    'email': session.email,
+                    'displayName': session.displayName,
+                    'photoUrl': session.photoUrl,
+                  }
+                  : null,
         );
       } else {
         state = state.copyWith(
@@ -59,10 +56,7 @@ class AuthController extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -70,20 +64,24 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> loginWithEmail(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final success = await _sessionManager.signIn(email: email, password: password);
+      final success = await _sessionManager.signIn(
+        email: email,
+        password: password,
+      );
       if (success) {
         final session = _sessionManager.currentUserSession;
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: true,
-          user: session != null
-              ? {
-                  'id': session.uid,
-                  'email': session.email,
-                  'displayName': session.displayName,
-                  'photoUrl': session.photoUrl,
-                }
-              : null,
+          user:
+              session != null
+                  ? {
+                    'id': session.uid,
+                    'email': session.email,
+                    'displayName': session.displayName,
+                    'photoUrl': session.photoUrl,
+                  }
+                  : null,
         );
       } else {
         state = state.copyWith(
@@ -92,44 +90,44 @@ class AuthController extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
   }
 
   /// Регистрация по email/паролю
-  Future<void> registerWithEmail(String email, String password, String name) async {
+  Future<void> registerWithEmail(
+    String email,
+    String password,
+    String name,
+  ) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final success = await _sessionManager.signUp(email, password, displayName: name);
+      final success = await _sessionManager.signUp(
+        email,
+        password,
+        displayName: name,
+      );
       if (success) {
         final session = _sessionManager.currentUserSession;
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: true,
-          user: session != null
-              ? {
-                  'id': session.uid,
-                  'email': session.email,
-                  'displayName': session.displayName,
-                  'photoUrl': session.photoUrl,
-                }
-              : null,
+          user:
+              session != null
+                  ? {
+                    'id': session.uid,
+                    'email': session.email,
+                    'displayName': session.displayName,
+                    'photoUrl': session.photoUrl,
+                  }
+                  : null,
         );
       } else {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Ошибка регистрации',
-        );
+        state = state.copyWith(isLoading: false, error: 'Ошибка регистрации');
       }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
   }

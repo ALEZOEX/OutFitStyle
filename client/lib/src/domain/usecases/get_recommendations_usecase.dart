@@ -18,10 +18,7 @@ class GetRecommendationsUseCase {
     Map<String, dynamic> userPreferences = const {},
     int limit = 10,
   }) async {
-    final weather = WeatherData(
-      latitude: latitude,
-      longitude: longitude,
-    );
+    final weather = WeatherData(latitude: latitude, longitude: longitude);
 
     // Если указан повод — фильтруем по нему
     if (occasion != null && occasion.isNotEmpty) {

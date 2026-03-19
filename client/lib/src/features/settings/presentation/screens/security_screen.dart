@@ -209,7 +209,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  title: Text(isSettingPassword ? 'Установить пароль' : 'Смена пароля'),
+                  title: Text(
+                    isSettingPassword ? 'Установить пароль' : 'Смена пароля',
+                  ),
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -311,7 +313,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                         }
                         Navigator.of(context).pop();
                       },
-                      child: Text(isSettingPassword ? 'Установить' : 'Сохранить'),
+                      child: Text(
+                        isSettingPassword ? 'Установить' : 'Сохранить',
+                      ),
                     ),
                   ],
                 ),
@@ -756,7 +760,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      hasPassword ? 'Пароль установлен' : 'Пароль не установлен',
+                      hasPassword
+                          ? 'Пароль установлен'
+                          : 'Пароль не установлен',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -781,9 +787,10 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
               else
                 Icon(
                   hasPassword ? Icons.check_circle : Icons.warning_amber,
-                  color: hasPassword
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.tertiary,
+                  color:
+                      hasPassword
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.tertiary,
                   size: 24,
                 ),
             ],
@@ -794,7 +801,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             child: FilledButton.icon(
               onPressed: isLoading ? null : _showChangePasswordDialog,
               icon: Icon(hasPassword ? Icons.edit : Icons.add),
-              label: Text(hasPassword ? 'Изменить пароль' : 'Установить пароль'),
+              label: Text(
+                hasPassword ? 'Изменить пароль' : 'Установить пароль',
+              ),
             ),
           ),
         ],

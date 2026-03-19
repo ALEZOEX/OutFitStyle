@@ -14,9 +14,8 @@ import '../../../../domain/entities/wardrobe_request_entities.dart';
 class WardrobeRepository {
   final WardrobeApiService _apiService;
 
-  WardrobeRepository({
-    required WardrobeApiService apiService,
-  }) : _apiService = apiService;
+  WardrobeRepository({required WardrobeApiService apiService})
+    : _apiService = apiService;
 
   /// Получить список вещей гардероба
   ///
@@ -47,10 +46,7 @@ class WardrobeRepository {
         search: search,
       );
 
-      return WardrobeListResult(
-        items: response.items,
-        total: response.total,
-      );
+      return WardrobeListResult(items: response.items, total: response.total);
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
     } catch (e) {
@@ -73,7 +69,9 @@ class WardrobeRepository {
   }
 
   /// Создать новую вещь в гардеробе
-  Future<WardrobeItem> createWardrobeItem(WardrobeItemCreateRequest request) async {
+  Future<WardrobeItem> createWardrobeItem(
+    WardrobeItemCreateRequest request,
+  ) async {
     try {
       final item = await _apiService.createWardrobeItem(request);
       return item;
@@ -86,7 +84,10 @@ class WardrobeRepository {
   }
 
   /// Обновить вещь в гардеробе
-  Future<WardrobeItem> updateWardrobeItem(String id, WardrobeItemUpdateRequest request) async {
+  Future<WardrobeItem> updateWardrobeItem(
+    String id,
+    WardrobeItemUpdateRequest request,
+  ) async {
     try {
       final item = await _apiService.updateWardrobeItem(id, request);
       return item;
@@ -158,7 +159,9 @@ class WardrobeRepository {
       case 404:
         return const WardrobeException('Вещь не найдена');
       case 422:
-        return WardrobeException(e.details?['message']?.toString() ?? e.message);
+        return WardrobeException(
+          e.details?['message']?.toString() ?? e.message,
+        );
       case 500:
         return const WardrobeException('Ошибка сервера');
       default:
@@ -172,10 +175,7 @@ class WardrobeListResult {
   final List<WardrobeItem> items;
   final int total;
 
-  WardrobeListResult({
-    required this.items,
-    required this.total,
-  });
+  WardrobeListResult({required this.items, required this.total});
 }
 
 /// Исключение репозитория гардероба

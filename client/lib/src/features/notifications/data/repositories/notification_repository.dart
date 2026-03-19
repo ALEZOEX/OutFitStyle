@@ -26,9 +26,8 @@ class NotificationRepository {
       );
 
       return NotificationListResult(
-        notifications: response.notifications
-            .map((dto) => dto.toModel())
-            .toList(),
+        notifications:
+            response.notifications.map((dto) => dto.toModel()).toList(),
         unreadCount: response.unreadCount,
         total: response.total,
         hasMore: (page * limit) < response.total,

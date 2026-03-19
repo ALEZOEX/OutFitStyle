@@ -22,9 +22,5 @@ Future<void> main() async {
   // Инициализация обработчика ошибок
   await ErrorHandler.init();
 
-  runApp(
-    ProviderScope(
-      child: const OutfitStyleApp(),
-    ),
-  );
+  runApp(ProviderScope(child: const OutfitStyleApp()));
 }

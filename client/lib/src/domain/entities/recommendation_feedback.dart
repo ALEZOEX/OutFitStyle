@@ -17,7 +17,7 @@ abstract class RecommendationFeedback with _$RecommendationFeedback {
     List<String> likedItems, // specific items in the outfit that were liked
     @Default(<String>[])
     List<String>
-        dislikedItems, // specific items in the outfit that were disliked
+    dislikedItems, // specific items in the outfit that were disliked
     @Default(false) bool wouldReuse,
     @Default(false) bool wouldRecommend,
     @Default(<String>[]) List<String> improvementSuggestions,
@@ -29,22 +29,22 @@ abstract class RecommendationFeedback with _$RecommendationFeedback {
   }) = _RecommendationFeedback;
 
   factory RecommendationFeedback.empty() => RecommendationFeedback(
-        id: Uuid().v4(),
-        userId: '',
-        recommendationId: '',
-        rating: 0,
-        tags: const [],
-        comment: '',
-        likedItems: const [],
-        dislikedItems: const [],
-        wouldReuse: false,
-        wouldRecommend: false,
-        improvementSuggestions: const [],
-        category: FeedbackCategory.general,
-        source: FeedbackSource.user,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+    id: Uuid().v4(),
+    userId: '',
+    recommendationId: '',
+    rating: 0,
+    tags: const [],
+    comment: '',
+    likedItems: const [],
+    dislikedItems: const [],
+    wouldReuse: false,
+    wouldRecommend: false,
+    improvementSuggestions: const [],
+    category: FeedbackCategory.general,
+    source: FeedbackSource.user,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
 
   factory RecommendationFeedback.fromJson(Map<String, dynamic> json) =>
       _$RecommendationFeedbackFromJson(json);

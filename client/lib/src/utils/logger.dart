@@ -20,8 +20,11 @@ class AppLogger {
     _logger.i(message, error: error, stackTrace: stackTrace);
   }
 
-  static void warning(dynamic message,
-      [dynamic error, StackTrace? stackTrace]) {
+  static void warning(
+    dynamic message, [
+    dynamic error,
+    StackTrace? stackTrace,
+  ]) {
     _logger.w(message, error: error, stackTrace: stackTrace);
   }
 

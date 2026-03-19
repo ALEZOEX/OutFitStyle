@@ -59,21 +59,17 @@ class AppBadge extends StatelessWidget {
         break;
     }
 
-    Widget badgeContent = text != null
-        ? Text(
-            text!,
-            style: TextStyle(
-              fontSize: 10.0,
-              fontWeight: FontWeight.bold,
-              color: badgeTextColor,
-            ),
-          )
-        : icon ??
-            const Icon(
-              Icons.circle,
-              size: 8.0,
-              color: Colors.white,
-            );
+    Widget badgeContent =
+        text != null
+            ? Text(
+              text!,
+              style: TextStyle(
+                fontSize: 10.0,
+                fontWeight: FontWeight.bold,
+                color: badgeTextColor,
+              ),
+            )
+            : icon ?? const Icon(Icons.circle, size: 8.0, color: Colors.white);
 
     return Stack(
       clipBehavior: Clip.none,
@@ -88,14 +84,9 @@ class AppBadge extends StatelessWidget {
             decoration: BoxDecoration(
               color: badgeColor,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white,
-                width: 2.0,
-              ),
+              border: Border.all(color: Colors.white, width: 2.0),
             ),
-            child: Center(
-              child: badgeContent,
-            ),
+            child: Center(child: badgeContent),
           ),
         ),
       ],
@@ -125,11 +116,7 @@ class WeatherConditionBadge extends StatelessWidget {
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 20.0,
-        ),
+        child: Icon(icon, color: color, size: 20.0),
       ),
       text: condition,
       variant: BadgeVariant.custom,

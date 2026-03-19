@@ -27,9 +27,7 @@ class WardrobeItemCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       elevation: 2,
       shadowColor: theme.colorScheme.primary.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         child: IntrinsicHeight(
@@ -39,44 +37,43 @@ class WardrobeItemCard extends StatelessWidget {
               // Изображение
               Stack(
                 children: [
-                  AspectRatio(
-                    aspectRatio: 1,
-                    child: _buildImage(context),
-                  ),
+                  AspectRatio(aspectRatio: 1, child: _buildImage(context)),
                   // Кнопка избранного
                   if (onFavorite != null)
                     Positioned(
-                    top: 8,
-                    right: 8,
-                    child: InkWell(
-                      onTap: onFavorite,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.black.withOpacity(0.6)
-                              : Colors.white.withOpacity(0.9),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          item.isFavorite == true
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          size: 18,
-                          color: item.isFavorite == true
-                              ? Colors.red
-                              : theme.colorScheme.onSurfaceVariant,
+                      top: 8,
+                      right: 8,
+                      child: InkWell(
+                        onTap: onFavorite,
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color:
+                                isDark
+                                    ? Colors.black.withOpacity(0.6)
+                                    : Colors.white.withOpacity(0.9),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            item.isFavorite == true
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            size: 18,
+                            color:
+                                item.isFavorite == true
+                                    ? Colors.red
+                                    : theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   // Бейдж категории
                   if (item.category != null)
                     Positioned(
@@ -136,7 +133,8 @@ class WardrobeItemCard extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              if (item.color != null && item.color!.isNotEmpty) ...[
+                              if (item.color != null &&
+                                  item.color!.isNotEmpty) ...[
                                 Container(
                                   width: 16,
                                   height: 16,
@@ -144,7 +142,8 @@ class WardrobeItemCard extends StatelessWidget {
                                     color: _getColorFromString(item.color!),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: theme.colorScheme.outline.withOpacity(0.3),
+                                      color: theme.colorScheme.outline
+                                          .withOpacity(0.3),
                                       width: 1,
                                     ),
                                   ),
@@ -176,15 +175,16 @@ class WardrobeItemCard extends StatelessWidget {
       return CachedNetworkImage(
         imageUrl: item.imageUrl!,
         fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Theme.of(context).colorScheme.primary,
+        placeholder:
+            (context, url) => Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
-          ),
-        ),
         errorWidget: (context, url, error) => _buildPlaceholder(context),
       );
     }
@@ -198,7 +198,9 @@ class WardrobeItemCard extends StatelessWidget {
         child: Icon(
           Icons.checkroom_outlined,
           size: 48,
-          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withOpacity(0.5),
         ),
       ),
     );
@@ -285,9 +287,10 @@ class CategoryFilterChip extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? theme.colorScheme.onPrimary.withOpacity(0.3)
-                  : theme.colorScheme.surfaceContainerHighest,
+              color:
+                  isSelected
+                      ? theme.colorScheme.onPrimary.withOpacity(0.3)
+                      : theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
@@ -305,9 +308,10 @@ class CategoryFilterChip extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outline.withOpacity(0.3),
+          color:
+              isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline.withOpacity(0.3),
         ),
       ),
     );

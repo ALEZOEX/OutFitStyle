@@ -75,10 +75,7 @@ class AppButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (leading != null) ...[
-          leading!,
-          const SizedBox(width: 8.0),
-        ],
+        if (leading != null) ...[leading!, const SizedBox(width: 8.0)],
         if (isLoading)
           Container(
             width: 16,
@@ -93,12 +90,14 @@ class AppButton extends StatelessWidget {
           const SizedBox(width: 24), // To maintain consistent spacing
         Text(
           text,
-          style: textStyle ??
+          style:
+              textStyle ??
               theme.textTheme.labelLarge?.copyWith(
-                color: variant == ButtonVariant.text ||
-                        variant == ButtonVariant.outlined
-                    ? theme.primaryColor
-                    : Colors.white,
+                color:
+                    variant == ButtonVariant.text ||
+                            variant == ButtonVariant.outlined
+                        ? theme.primaryColor
+                        : Colors.white,
               ),
         ),
       ],
@@ -108,9 +107,10 @@ class AppButton extends StatelessWidget {
       padding: padding,
       child: SizedBox(
         width: double.infinity,
-        child: !isLoading
-            ? _buildButton(defaultStyle, content)
-            : _buildDisabledButton(defaultStyle, content),
+        child:
+            !isLoading
+                ? _buildButton(defaultStyle, content)
+                : _buildDisabledButton(defaultStyle, content),
       ),
     );
   }

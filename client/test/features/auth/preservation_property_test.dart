@@ -8,10 +8,15 @@ import 'dart:convert';
 
 // Mocks
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPublicApiClient extends Mock implements PublicApiClient {}
+
 class MockUser extends Mock implements User {}
+
 class MockUserCredential extends Mock implements UserCredential {}
+
 class FakeAuthProvider extends Fake implements AuthProvider {}
 
 /// **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
@@ -37,10 +42,16 @@ void main() {
       mockApiClient = MockPublicApiClient();
 
       when(() => mockSharedPreferences.getString(any())).thenReturn(null);
-      when(() => mockSharedPreferences.setString(any(), any())).thenAnswer((_) async => true);
-      when(() => mockSharedPreferences.remove(any())).thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.setString(any(), any()),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.remove(any()),
+      ).thenAnswer((_) async => true);
       when(() => mockFirebaseAuth.currentUser).thenReturn(null);
-      when(() => mockFirebaseAuth.authStateChanges()).thenAnswer((_) => Stream.value(null));
+      when(
+        () => mockFirebaseAuth.authStateChanges(),
+      ).thenAnswer((_) => Stream.value(null));
     });
 
     test('login API returns user data and tokens', () async {
@@ -53,13 +64,15 @@ void main() {
         },
       );
 
-      when(() => mockApiClient.post('/api/v1/auth/login', data: any(named: 'data')))
-          .thenAnswer((_) async => loginResponse);
+      when(
+        () =>
+            mockApiClient.post('/api/v1/auth/login', data: any(named: 'data')),
+      ).thenAnswer((_) async => loginResponse);
 
-      final response = await mockApiClient.post('/api/v1/auth/login', data: {
-        'email': 'user@example.com',
-        'password': 'password123',
-      });
+      final response = await mockApiClient.post(
+        '/api/v1/auth/login',
+        data: {'email': 'user@example.com', 'password': 'password123'},
+      );
 
       expect(response.statusCode, equals(200));
       expect(response.data['tokens']['access_token'], isNotNull);
@@ -76,13 +89,17 @@ void main() {
         },
       );
 
-      when(() => mockApiClient.post('/api/v1/auth/register', data: any(named: 'data')))
-          .thenAnswer((_) async => registerResponse);
+      when(
+        () => mockApiClient.post(
+          '/api/v1/auth/register',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer((_) async => registerResponse);
 
-      final response = await mockApiClient.post('/api/v1/auth/register', data: {
-        'email': 'new@example.com',
-        'password': 'password',
-      });
+      final response = await mockApiClient.post(
+        '/api/v1/auth/register',
+        data: {'email': 'new@example.com', 'password': 'password'},
+      );
 
       expect(response.statusCode, equals(201));
       expect(response.data['tokens']['access_token'], isNotNull);
@@ -97,10 +114,13 @@ void main() {
       final mockCredential = MockUserCredential();
       when(() => mockCredential.user).thenReturn(mockUser);
 
-      when(() => mockFirebaseAuth.signInWithPopup(any()))
-          .thenAnswer((_) async => mockCredential);
+      when(
+        () => mockFirebaseAuth.signInWithPopup(any()),
+      ).thenAnswer((_) async => mockCredential);
 
-      final credential = await mockFirebaseAuth.signInWithPopup(FakeAuthProvider());
+      final credential = await mockFirebaseAuth.signInWithPopup(
+        FakeAuthProvider(),
+      );
 
       expect(credential.user, isNotNull);
       expect(credential.user?.uid, equals('google-uid'));
@@ -120,7 +140,9 @@ void main() {
       );
 
       expect(result, isTrue);
-      verify(() => mockSharedPreferences.setString('user_session', any())).called(1);
+      verify(
+        () => mockSharedPreferences.setString('user_session', any()),
+      ).called(1);
       print('PRESERVED: Session storage works');
     });
 
@@ -131,7 +153,9 @@ void main() {
         'loginTime': DateTime.now().millisecondsSinceEpoch,
       });
 
-      when(() => mockSharedPreferences.getString('user_session')).thenReturn(sessionJson);
+      when(
+        () => mockSharedPreferences.getString('user_session'),
+      ).thenReturn(sessionJson);
 
       final storedSession = mockSharedPreferences.getString('user_session');
       final sessionData = jsonDecode(storedSession!);
@@ -141,7 +165,9 @@ void main() {
     });
 
     test('logout clears session data', () async {
-      when(() => mockSharedPreferences.remove(any())).thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.remove(any()),
+      ).thenAnswer((_) async => true);
       when(() => mockFirebaseAuth.signOut()).thenAnswer((_) async {});
 
       await mockFirebaseAuth.signOut();
@@ -153,20 +179,24 @@ void main() {
     });
 
     test('backend returns access_token in responses', () async {
-      when(() => mockApiClient.post('/api/v1/auth/login', data: any(named: 'data')))
-          .thenAnswer((_) async => Response(
-        requestOptions: RequestOptions(path: '/api/v1/auth/login'),
-        statusCode: 200,
-        data: {
-          'user': {'id': 'test-uid'},
-          'tokens': {'access_token': 'test-token'},
-        },
-      ));
+      when(
+        () =>
+            mockApiClient.post('/api/v1/auth/login', data: any(named: 'data')),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/api/v1/auth/login'),
+          statusCode: 200,
+          data: {
+            'user': {'id': 'test-uid'},
+            'tokens': {'access_token': 'test-token'},
+          },
+        ),
+      );
 
-      final response = await mockApiClient.post('/api/v1/auth/login', data: {
-        'email': 'user@example.com',
-        'password': 'password',
-      });
+      final response = await mockApiClient.post(
+        '/api/v1/auth/login',
+        data: {'email': 'user@example.com', 'password': 'password'},
+      );
 
       expect(response.data['tokens']['access_token'], equals('test-token'));
       print('PRESERVED: Backend returns access_token');

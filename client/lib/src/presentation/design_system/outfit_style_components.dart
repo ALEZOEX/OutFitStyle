@@ -7,9 +7,7 @@ class OutfitStyleComponents {
       backgroundColor: Colors.blue[600],
       foregroundColor: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 0,
     );
   }
@@ -18,9 +16,7 @@ class OutfitStyleComponents {
     return OutlinedButton.styleFrom(
       side: BorderSide(color: Colors.grey[300]!),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
 
@@ -29,55 +25,51 @@ class OutfitStyleComponents {
       backgroundColor: Colors.grey[100],
       foregroundColor: Colors.grey[800],
       padding: const EdgeInsets.all(12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
   // Карточки
   static CardTheme cardTheme() {
     return CardTheme(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 0,
     );
   }
 
   // Типографика
   static TextStyle headlineLarge(BuildContext context) {
-    return Theme.of(context).textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-            ) ??
+    return Theme.of(
+          context,
+        ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w900) ??
         const TextStyle(fontSize: 32, fontWeight: FontWeight.w900);
   }
 
   static TextStyle headlineMedium(BuildContext context) {
-    return Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ) ??
+    return Theme.of(
+          context,
+        ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800) ??
         const TextStyle(fontSize: 24, fontWeight: FontWeight.w800);
   }
 
   static TextStyle titleLarge(BuildContext context) {
-    return Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-            ) ??
+    return Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700) ??
         const TextStyle(fontSize: 20, fontWeight: FontWeight.w700);
   }
 
   static TextStyle titleMedium(BuildContext context) {
-    return Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ) ??
+    return Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700) ??
         const TextStyle(fontSize: 18, fontWeight: FontWeight.w700);
   }
 
   static TextStyle bodyLarge(BuildContext context) {
-    return Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ) ??
+    return Theme.of(
+          context,
+        ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500) ??
         const TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
   }
 

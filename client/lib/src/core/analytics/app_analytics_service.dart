@@ -86,11 +86,7 @@ class AppAnalyticsService {
   }) async {
     final event = AnalyticsEvent(
       type: AnalyticsEventType.addToWardrobe,
-      properties: {
-        'item_id': itemId,
-        'category': category,
-        'brand': brand,
-      },
+      properties: {'item_id': itemId, 'category': category, 'brand': brand},
     );
     await _analyticsService.logEvent(event);
   }
@@ -102,10 +98,7 @@ class AppAnalyticsService {
   }) async {
     final event = AnalyticsEvent(
       type: AnalyticsEventType.removeFromWardrobe,
-      properties: {
-        'item_id': itemId,
-        'category': category,
-      },
+      properties: {'item_id': itemId, 'category': category},
     );
     await _analyticsService.logEvent(event);
   }
@@ -118,11 +111,7 @@ class AppAnalyticsService {
   }) async {
     final event = AnalyticsEvent(
       type: AnalyticsEventType.updateWardrobeItem,
-      properties: {
-        'item_id': itemId,
-        'category': category,
-        'changes': changes,
-      },
+      properties: {'item_id': itemId, 'category': category, 'changes': changes},
     );
     await _analyticsService.logEvent(event);
   }
@@ -134,10 +123,7 @@ class AppAnalyticsService {
   }) async {
     final event = AnalyticsEvent(
       type: AnalyticsEventType.weatherForecastView,
-      properties: {
-        'location': location,
-        'forecast_data': forecastData,
-      },
+      properties: {'location': location, 'forecast_data': forecastData},
     );
     await _analyticsService.logEvent(event);
   }
@@ -149,10 +135,7 @@ class AppAnalyticsService {
   }) async {
     final event = AnalyticsEvent(
       type: AnalyticsEventType.weatherDataRefresh,
-      properties: {
-        'location': location,
-        'weather_data': weatherData,
-      },
+      properties: {'location': location, 'weather_data': weatherData},
     );
     await _analyticsService.logEvent(event);
   }

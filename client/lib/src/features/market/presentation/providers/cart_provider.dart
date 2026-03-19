@@ -7,12 +7,12 @@ import 'package:outfitstyle_client/src/features/market/presentation/providers/ma
 class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
   final MarketRepository _repository;
 
-  CartNotifier(this._repository) : super(AsyncValue.data(Cart(
-    userId: 0,
-    items: [],
-    totalAmount: 0,
-    updatedAt: DateTime.now(),
-  )));
+  CartNotifier(this._repository)
+    : super(
+        AsyncValue.data(
+          Cart(userId: 0, items: [], totalAmount: 0, updatedAt: DateTime.now()),
+        ),
+      );
 
   /// Set user ID for cart operations
   void setUserId(int userId) {
@@ -87,7 +87,9 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
       await _repository.clearCart();
       final currentState = state.value;
       if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(items: [], totalAmount: 0));
+        state = AsyncValue.data(
+          currentState.copyWith(items: [], totalAmount: 0),
+        );
       }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -105,7 +107,9 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
 }
 
 /// Cart provider
-final cartProvider = StateNotifierProvider<CartNotifier, AsyncValue<Cart>>((ref) {
+final cartProvider = StateNotifierProvider<CartNotifier, AsyncValue<Cart>>((
+  ref,
+) {
   final repository = ref.watch(marketRepositoryProvider);
   return CartNotifier(repository);
 });

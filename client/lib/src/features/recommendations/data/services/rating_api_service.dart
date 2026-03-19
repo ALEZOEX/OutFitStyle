@@ -45,7 +45,9 @@ class RatingApiService {
 
   /// Получить статистику качества рекомендации
   Future<RecommendationQuality> getQuality(String recommendationId) async {
-    final response = await _client.get('/recommendations/$recommendationId/quality');
+    final response = await _client.get(
+      '/recommendations/$recommendationId/quality',
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
@@ -61,7 +63,9 @@ class RatingApiService {
 
   /// Получить оценку пользователя для рекомендации
   Future<OutfitRating?> getUserRating(String recommendationId) async {
-    final response = await _client.get('/recommendations/$recommendationId/my-rating');
+    final response = await _client.get(
+      '/recommendations/$recommendationId/my-rating',
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
@@ -78,7 +82,9 @@ class RatingApiService {
 
   /// Проверить, оценил ли пользователь рекомендацию
   Future<bool> hasRated(String recommendationId) async {
-    final response = await _client.get('/recommendations/$recommendationId/has-rated');
+    final response = await _client.get(
+      '/recommendations/$recommendationId/has-rated',
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
@@ -102,7 +108,8 @@ class RatingApiService {
     } else {
       throw RatingApiException(
         statusCode: response.statusCode ?? 0,
-        message: 'Не удалось получить статистику пользователя: ${response.data}',
+        message:
+            'Не удалось получить статистику пользователя: ${response.data}',
       );
     }
   }
@@ -118,7 +125,8 @@ class RatingApiService {
     } else {
       throw RatingApiException(
         statusCode: response.statusCode ?? 0,
-        message: 'Не удалось получить вещи с низким рейтингом: ${response.data}',
+        message:
+            'Не удалось получить вещи с низким рейтингом: ${response.data}',
       );
     }
   }
@@ -130,10 +138,7 @@ class RatingApiService {
   }) async {
     final response = await _client.post(
       '/ratings/filter-low-quality',
-      data: {
-        'candidate_ids': candidateIds,
-        'threshold': threshold,
-      },
+      data: {'candidate_ids': candidateIds, 'threshold': threshold},
     );
 
     if (response.statusCode == 200) {
@@ -154,9 +159,7 @@ class RatingApiService {
   ) async {
     final response = await _client.post(
       '/ratings/bulk',
-      data: {
-        'recommendation_ids': recommendationIds,
-      },
+      data: {'recommendation_ids': recommendationIds},
     );
 
     if (response.statusCode == 200) {

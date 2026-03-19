@@ -21,52 +21,50 @@ class SavedRecommendationsScreen extends ConsumerWidget {
     final recommendationState = ref.watch(recommendationStateNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Сохраненные рекомендации'),
-      ),
-      body: recommendationState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : recommendationState.errorMessage != null
+      appBar: AppBar(title: const Text('Сохраненные рекомендации')),
+      body:
+          recommendationState.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : recommendationState.errorMessage != null
               ? Center(
-                  child: Text('Ошибка: ${recommendationState.errorMessage}'),
-                )
+                child: Text('Ошибка: ${recommendationState.errorMessage}'),
+              )
               : recommendationState.savedRecommendations.isEmpty
-                  ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.bookmark, size: 64, color: Colors.grey),
-                          SizedBox(height: 16),
-                          Text(
-                            'Нет сохраненных рекомендаций',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    )
-                  : GridView.builder(
-                      padding: const EdgeInsets.all(16),
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 200,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 0.7,
-                      ),
-                      itemCount:
-                          recommendationState.savedRecommendations.length,
-                      itemBuilder: (context, index) {
-                        final recommendation =
-                            recommendationState.savedRecommendations[index];
-                        return _buildSavedRecommendationCard(
-                            context, recommendation);
-                      },
+              ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.bookmark, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      'Нет сохраненных рекомендаций',
+                      style: TextStyle(fontSize: 16),
                     ),
+                  ],
+                ),
+              )
+              : GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 200,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.7,
+                ),
+                itemCount: recommendationState.savedRecommendations.length,
+                itemBuilder: (context, index) {
+                  final recommendation =
+                      recommendationState.savedRecommendations[index];
+                  return _buildSavedRecommendationCard(context, recommendation);
+                },
+              ),
     );
   }
 
   Widget _buildSavedRecommendationCard(
-      BuildContext context, Recommendation recommendation) {
+    BuildContext context,
+    Recommendation recommendation,
+  ) {
     return Card(
       elevation: 4,
       clipBehavior: Clip.hardEdge,
@@ -79,11 +77,14 @@ class SavedRecommendationsScreen extends ConsumerWidget {
               child: Wrap(
                 spacing: 6,
                 runSpacing: 6,
-                children: (recommendation.outfit?.clothingItemIds ?? [])
-                    .take(6) // Show first 6 items
-                    .map((itemId) =>
-                        _buildOutfitItem(itemId.toString(), context))
-                    .toList(),
+                children:
+                    (recommendation.outfit?.clothingItemIds ?? [])
+                        .take(6) // Show first 6 items
+                        .map(
+                          (itemId) =>
+                              _buildOutfitItem(itemId.toString(), context),
+                        )
+                        .toList(),
               ),
             ),
           ),
@@ -94,9 +95,9 @@ class SavedRecommendationsScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Доверие: ${recommendation.confidenceScore}%',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 4),
                 if (recommendation.occasion?.isNotEmpty ?? false)

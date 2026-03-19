@@ -24,13 +24,15 @@ class AchievementCard extends StatelessWidget {
 
     return Card(
       elevation: isUnlocked ? 4 : 2,
-      shadowColor: isUnlocked ? theme.colorScheme.primary.withOpacity(0.3) : null,
+      shadowColor:
+          isUnlocked ? theme.colorScheme.primary.withOpacity(0.3) : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isUnlocked
-              ? theme.colorScheme.primary.withOpacity(0.3)
-              : theme.colorScheme.outline.withOpacity(0.1),
+          color:
+              isUnlocked
+                  ? theme.colorScheme.primary.withOpacity(0.3)
+                  : theme.colorScheme.outline.withOpacity(0.1),
           width: isUnlocked ? 2 : 1,
         ),
       ),
@@ -57,9 +59,12 @@ class AchievementCard extends StatelessWidget {
                             achievement.title,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: isUnlocked
-                                  ? theme.colorScheme.onSurface
-                                  : theme.colorScheme.onSurface.withOpacity(0.6),
+                              color:
+                                  isUnlocked
+                                      ? theme.colorScheme.onSurface
+                                      : theme.colorScheme.onSurface.withOpacity(
+                                        0.6,
+                                      ),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -117,24 +122,24 @@ class AchievementCard extends StatelessWidget {
       width: 60,
       height: 60,
       decoration: BoxDecoration(
-        gradient: isUnlocked
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.colorScheme.primaryContainer,
-                  theme.colorScheme.primary.withOpacity(0.3),
-                ],
-              )
-            : null,
-        color: isUnlocked
-            ? null
-            : theme.colorScheme.surfaceContainerHighest,
+        gradient:
+            isUnlocked
+                ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primaryContainer,
+                    theme.colorScheme.primary.withOpacity(0.3),
+                  ],
+                )
+                : null,
+        color: isUnlocked ? null : theme.colorScheme.surfaceContainerHighest,
         shape: BoxShape.circle,
         border: Border.all(
-          color: isUnlocked
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outline.withOpacity(0.3),
+          color:
+              isUnlocked
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline.withOpacity(0.3),
           width: isUnlocked ? 2 : 1,
         ),
       ),
@@ -164,16 +169,18 @@ class AchievementCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressBar(ThemeData theme, bool isUnlocked, double progressPercent) {
+  Widget _buildProgressBar(
+    ThemeData theme,
+    bool isUnlocked,
+    double progressPercent,
+  ) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),
       child: LinearProgressIndicator(
         value: progressPercent / 100,
         backgroundColor: theme.colorScheme.outline.withOpacity(0.2),
         valueColor: AlwaysStoppedAnimation<Color>(
-          isUnlocked
-              ? theme.colorScheme.primary
-              : theme.colorScheme.secondary,
+          isUnlocked ? theme.colorScheme.primary : theme.colorScheme.secondary,
         ),
         minHeight: 6,
       ),
@@ -190,11 +197,7 @@ class AchievementCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.star,
-            size: 12,
-            color: theme.colorScheme.tertiary,
-          ),
+          Icon(Icons.star, size: 12, color: theme.colorScheme.tertiary),
           const SizedBox(width: 4),
           Text(
             '+${achievement.points}',

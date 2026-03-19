@@ -29,5 +29,6 @@ abstract class AppSettings with _$AppSettings {
     @Default(true) bool allowPersonalizedAds,
   }) = _AppSettings;
 
-  factory AppSettings.fromJson(Map<String, dynamic> json) => _$AppSettingsFromJson(json);
+  factory AppSettings.fromJson(Map<String, dynamic> json) =>
+      _$AppSettingsFromJson(json);
 }

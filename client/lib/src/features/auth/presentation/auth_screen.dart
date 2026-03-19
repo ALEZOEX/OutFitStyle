@@ -41,7 +41,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     // Проверяем есть ли redirect параметр
     final uri = GoRouterState.of(context).uri;
     final redirect = uri.queryParameters['redirect'];
-    
+
     if (redirect != null && redirect.isNotEmpty) {
       context.go(redirect);
     } else {
@@ -65,26 +65,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => PopScope(
-        canPop: false,
-        child: AlertDialog(
-          title: const Text('Вход через Google'),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Откройте окно Google для входа...'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Отмена'),
+      builder:
+          (context) => PopScope(
+            canPop: false,
+            child: AlertDialog(
+              title: const Text('Вход через Google'),
+              content: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Откройте окно Google для входа...'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Отмена'),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
 
     try {
@@ -95,7 +96,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
       if (!success) {
         if (mounted) {
-          ref.read(authErrorProvider.notifier).state = 'Не удалось войти через Google';
+          ref.read(authErrorProvider.notifier).state =
+              'Не удалось войти через Google';
         }
       } else {
         if (mounted) {
@@ -110,16 +112,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Ошибка входа'),
-            content: Text(e.toString()),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Ошибка входа'),
+                content: Text(e.toString()),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
       }
     }
@@ -146,7 +149,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         success = await sessionManager.signIn(email: email, password: password);
       } else {
         // Регистрация через email/password
-        success = await sessionManager.signUp(email, password, displayName: name.isNotEmpty ? name : null);
+        success = await sessionManager.signUp(
+          email,
+          password,
+          displayName: name.isNotEmpty ? name : null,
+        );
       }
 
       if (!success) {
@@ -159,8 +166,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ref.read(authErrorProvider.notifier).state =
-          e.toString().replaceAll('Exception: ', '');
+        ref.read(authErrorProvider.notifier).state = e.toString().replaceAll(
+          'Exception: ',
+          '',
+        );
       }
     } finally {
       if (mounted) {
@@ -187,10 +196,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Логотип
-                  const AppAvatar(
-                    radius: 50,
-                    placeholderText: 'OS',
-                  ),
+                  const AppAvatar(radius: 50, placeholderText: 'OS'),
                   const SizedBox(height: 24),
 
                   // Заголовок
@@ -198,9 +204,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     'OutfitStyle',
                     style: theme.textTheme.headlineLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: theme.brightness == Brightness.dark
-                          ? Colors.white
-                          : theme.colorScheme.primary,
+                      color:
+                          theme.brightness == Brightness.dark
+                              ? Colors.white
+                              : theme.colorScheme.primary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -329,17 +336,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     height: 50,
                     child: FilledButton.icon(
                       onPressed: isLoading ? null : _submit,
-                      icon: isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Icon(_isLogin ? Icons.login : Icons.person_add),
+                      icon:
+                          isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Icon(_isLogin ? Icons.login : Icons.person_add),
                       label: Text(
-                        isLoading ? 'Загрузка...' : (_isLogin ? 'Войти' : 'Зарегистрироваться'),
+                        isLoading
+                            ? 'Загрузка...'
+                            : (_isLogin ? 'Войти' : 'Зарегистрироваться'),
                       ),
                     ),
                   ),
@@ -376,10 +386,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       Expanded(child: Divider(color: theme.dividerColor)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'или',
-                          style: theme.textTheme.bodySmall,
-                        ),
+                        child: Text('или', style: theme.textTheme.bodySmall),
                       ),
                       Expanded(child: Divider(color: theme.dividerColor)),
                     ],

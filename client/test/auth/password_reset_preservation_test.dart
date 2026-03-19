@@ -28,15 +28,22 @@ void main() {
       mockSharedPreferences = MockSharedPreferences();
 
       // Mock authStateChanges to return empty stream
-      when(() => mockFirebaseAuth.authStateChanges())
-          .thenAnswer((_) => Stream<User?>.value(null));
+      when(
+        () => mockFirebaseAuth.authStateChanges(),
+      ).thenAnswer((_) => Stream<User?>.value(null));
 
       // Mock SharedPreferences methods
-      when(() => mockSharedPreferences.remove(any())).thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.remove(any()),
+      ).thenAnswer((_) async => true);
       when(() => mockSharedPreferences.getString(any())).thenReturn(null);
 
       // Инициализируем SessionManager с мок-объектами
-      sessionManager = SessionManager(mockFirebaseAuth, mockSharedPreferences, apiClient: mockApiClient);
+      sessionManager = SessionManager(
+        mockFirebaseAuth,
+        mockSharedPreferences,
+        apiClient: mockApiClient,
+      );
     });
 
     /// **Property 2: Preservation - Existing Password Reset Flow Behavior**
@@ -60,16 +67,15 @@ void main() {
         const email = 'test@example.com';
 
         // Mock the API to send code successfully
-        when(() => mockApiClient.post(
-          '/api/v1/auth/forgot-password',
-          data: any(named: 'data'),
-        )).thenAnswer((_) async => MockResponse());
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/forgot-password',
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer((_) async => MockResponse());
 
         // Act & Assert
-        expect(
-          () => sessionManager.resetPassword(email),
-          returnsNormally,
-        );
+        expect(() => sessionManager.resetPassword(email), returnsNormally);
       },
     );
 
@@ -82,10 +88,12 @@ void main() {
         const newPassword = 'NewPassword123!';
 
         // Mock the API to reset password successfully
-        when(() => mockApiClient.post(
-          '/api/v1/auth/reset-password',
-          data: any(named: 'data'),
-        )).thenAnswer((_) async => MockResponse());
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/reset-password',
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer((_) async => MockResponse());
 
         // Act & Assert
         expect(
@@ -95,54 +103,41 @@ void main() {
       },
     );
 
-    test(
-      'Preservation: Code resend sends new code',
-      () async {
-        // Arrange
-        const email = 'test@example.com';
+    test('Preservation: Code resend sends new code', () async {
+      // Arrange
+      const email = 'test@example.com';
 
-        // Mock the API to send code successfully (resend)
-        when(() => mockApiClient.post(
+      // Mock the API to send code successfully (resend)
+      when(
+        () => mockApiClient.post(
           '/api/v1/auth/forgot-password',
           data: any(named: 'data'),
-        )).thenAnswer((_) async => MockResponse());
+        ),
+      ).thenAnswer((_) async => MockResponse());
 
-        // Act & Assert
-        // First request
-        expect(
-          () => sessionManager.resetPassword(email),
-          returnsNormally,
-        );
+      // Act & Assert
+      // First request
+      expect(() => sessionManager.resetPassword(email), returnsNormally);
 
-        // Second request (resend)
-        expect(
-          () => sessionManager.resetPassword(email),
-          returnsNormally,
-        );
-      },
-    );
+      // Second request (resend)
+      expect(() => sessionManager.resetPassword(email), returnsNormally);
+    });
 
-    test(
-      'Preservation: Email submission with invalid email fails',
-      () async {
-        // Arrange
-        const invalidEmail = 'invalid-email';
+    test('Preservation: Email submission with invalid email fails', () async {
+      // Arrange
+      const invalidEmail = 'invalid-email';
 
-        // Mock the API to reject invalid email
-        when(() => mockApiClient.post(
+      // Mock the API to reject invalid email
+      when(
+        () => mockApiClient.post(
           '/api/v1/auth/forgot-password',
           data: any(named: 'data'),
-        )).thenThrow(
-          Exception('invalid email format'),
-        );
+        ),
+      ).thenThrow(Exception('invalid email format'));
 
-        // Act & Assert
-        expect(
-          () => sessionManager.resetPassword(invalidEmail),
-          throwsException,
-        );
-      },
-    );
+      // Act & Assert
+      expect(() => sessionManager.resetPassword(invalidEmail), throwsException);
+    });
 
     test(
       'Preservation: Final password reset with invalid code fails',
@@ -153,16 +148,20 @@ void main() {
         const newPassword = 'NewPassword123!';
 
         // Mock the API to reject invalid code
-        when(() => mockApiClient.post(
-          '/api/v1/auth/reset-password',
-          data: any(named: 'data'),
-        )).thenThrow(
-          Exception('invalid or expired code'),
-        );
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/reset-password',
+            data: any(named: 'data'),
+          ),
+        ).thenThrow(Exception('invalid or expired code'));
 
         // Act & Assert
         expect(
-          () => sessionManager.resetPasswordWithCode(email, invalidCode, newPassword),
+          () => sessionManager.resetPasswordWithCode(
+            email,
+            invalidCode,
+            newPassword,
+          ),
           throwsException,
         );
       },
@@ -177,12 +176,12 @@ void main() {
         const weakPassword = 'weak'; // Too short
 
         // Mock the API to reject weak password
-        when(() => mockApiClient.post(
-          '/api/v1/auth/reset-password',
-          data: any(named: 'data'),
-        )).thenThrow(
-          Exception('password must be at least 8 characters'),
-        );
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/reset-password',
+            data: any(named: 'data'),
+          ),
+        ).thenThrow(Exception('password must be at least 8 characters'));
 
         // Act & Assert
         expect(
@@ -200,23 +199,19 @@ void main() {
         const email2 = 'user2@example.com';
 
         // Mock the API to send code successfully for both emails
-        when(() => mockApiClient.post(
-          '/api/v1/auth/forgot-password',
-          data: any(named: 'data'),
-        )).thenAnswer((_) async => MockResponse());
+        when(
+          () => mockApiClient.post(
+            '/api/v1/auth/forgot-password',
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer((_) async => MockResponse());
 
         // Act & Assert
         // First user requests code
-        expect(
-          () => sessionManager.resetPassword(email1),
-          returnsNormally,
-        );
+        expect(() => sessionManager.resetPassword(email1), returnsNormally);
 
         // Second user requests code
-        expect(
-          () => sessionManager.resetPassword(email2),
-          returnsNormally,
-        );
+        expect(() => sessionManager.resetPassword(email2), returnsNormally);
       },
     );
   });

@@ -10,13 +10,19 @@ class RecommendationsRepository implements IRecommendationsRepository {
   RecommendationsRepository({required this.apiClient});
 
   @override
-  Future<List<OutfitRecommendation>> getUserRecommendations(String userId) async {
+  Future<List<OutfitRecommendation>> getUserRecommendations(
+    String userId,
+  ) async {
     final response = await apiClient.get('/users/$userId/recommendations');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
     throw RecommendationsException('Не удалось загрузить рекомендации');
@@ -84,13 +90,17 @@ class RecommendationsRepository implements IRecommendationsRepository {
       data: {'saved': saved},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw RecommendationsException('Не удалось сохранить рекомендацию на потом');
+      throw RecommendationsException(
+        'Не удалось сохранить рекомендацию на потом',
+      );
     }
   }
 
   @override
   Future<List<OutfitRecommendation>> getRecommendationsByWeather(
-      String weatherCondition, double temperature) async {
+    String weatherCondition,
+    double temperature,
+  ) async {
     final response = await apiClient.get(
       '/recommendations/weather',
       params: {
@@ -100,12 +110,18 @@ class RecommendationsRepository implements IRecommendationsRepository {
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
-    throw RecommendationsException('Не удалось получить рекомендации по погоде');
+    throw RecommendationsException(
+      'Не удалось получить рекомендации по погоде',
+    );
   }
 
   @override
@@ -113,12 +129,18 @@ class RecommendationsRepository implements IRecommendationsRepository {
     final response = await apiClient.get('/recommendations/trending');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
-    throw RecommendationsException('Не удалось получить трендовые рекомендации');
+    throw RecommendationsException(
+      'Не удалось получить трендовые рекомендации',
+    );
   }
 
   @override
@@ -133,29 +155,47 @@ class RecommendationsRepository implements IRecommendationsRepository {
   }
 
   @override
-  Future<List<OutfitRecommendation>> getRecommendationsHistory(String userId) async {
-    final response = await apiClient.get('/users/$userId/recommendations/history');
+  Future<List<OutfitRecommendation>> getRecommendationsHistory(
+    String userId,
+  ) async {
+    final response = await apiClient.get(
+      '/users/$userId/recommendations/history',
+    );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
     throw RecommendationsException('Не удалось получить историю рекомендаций');
   }
 
   @override
-  Future<List<OutfitRecommendation>> getSavedRecommendations(String userId) async {
-    final response = await apiClient.get('/users/$userId/recommendations/saved');
+  Future<List<OutfitRecommendation>> getSavedRecommendations(
+    String userId,
+  ) async {
+    final response = await apiClient.get(
+      '/users/$userId/recommendations/saved',
+    );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
-    throw RecommendationsException('Не удалось получить сохранённые рекомендации');
+    throw RecommendationsException(
+      'Не удалось получить сохранённые рекомендации',
+    );
   }
 
   @override
@@ -210,21 +250,33 @@ class RecommendationsRepository implements IRecommendationsRepository {
 
   @override
   Future<List<OutfitRecommendation>> getRecommendationsByUser(
-      String userId, {DateTime? fromDate, DateTime? toDate}) async {
+    String userId, {
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
     final params = <String, dynamic>{
       'user_id': userId,
       if (fromDate != null) 'from_date': fromDate.toIso8601String(),
       if (toDate != null) 'to_date': toDate.toIso8601String(),
     };
-    final response = await apiClient.get('/recommendations/user', params: params);
+    final response = await apiClient.get(
+      '/recommendations/user',
+      params: params,
+    );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items =
+          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
       return items
-          .map((item) => OutfitRecommendation.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+          )
           .toList();
     }
-    throw RecommendationsException('Не удалось получить рекомендации пользователя');
+    throw RecommendationsException(
+      'Не удалось получить рекомендации пользователя',
+    );
   }
 
   @override

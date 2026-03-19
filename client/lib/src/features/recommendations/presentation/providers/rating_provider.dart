@@ -76,10 +76,7 @@ class RatingNotifier extends StateNotifier<RatingState> {
 
       // Обновляем кэш оценки пользователя
       state = state.copyWith(
-        userRatingsCache: {
-          ...state.userRatingsCache,
-          recommendationId: result,
-        },
+        userRatingsCache: {...state.userRatingsCache, recommendationId: result},
         isLoading: false,
       );
 
@@ -88,10 +85,7 @@ class RatingNotifier extends StateNotifier<RatingState> {
 
       return result;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
   }
@@ -110,19 +104,13 @@ class RatingNotifier extends StateNotifier<RatingState> {
 
       // Обновляем кэш
       state = state.copyWith(
-        qualityCache: {
-          ...state.qualityCache,
-          recommendationId: quality,
-        },
+        qualityCache: {...state.qualityCache, recommendationId: quality},
         isLoading: false,
       );
 
       return quality;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
   }
@@ -162,10 +150,7 @@ class RatingNotifier extends StateNotifier<RatingState> {
       state = state.copyWith(userStats: stats, isLoading: false);
       return stats;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       return null;
     }
   }
@@ -182,19 +167,27 @@ class RatingNotifier extends StateNotifier<RatingState> {
 }
 
 /// Провайдер нотификера рейтинга
-final ratingNotifierProvider = StateNotifierProvider<RatingNotifier, RatingState>((ref) {
-  final apiService = ref.watch(ratingApiServiceProvider);
-  return RatingNotifier(apiService);
-});
+final ratingNotifierProvider =
+    StateNotifierProvider<RatingNotifier, RatingState>((ref) {
+      final apiService = ref.watch(ratingApiServiceProvider);
+      return RatingNotifier(apiService);
+    });
 
 /// Провайдер для получения качества конкретной рекомендации
-final recommendationQualityProvider = FutureProvider.family<RecommendationQuality, String>((ref, recommendationId) async {
-  final notifier = ref.watch(ratingNotifierProvider.notifier);
-  return notifier.getQuality(recommendationId);
-});
+final recommendationQualityProvider =
+    FutureProvider.family<RecommendationQuality, String>((
+      ref,
+      recommendationId,
+    ) async {
+      final notifier = ref.watch(ratingNotifierProvider.notifier);
+      return notifier.getQuality(recommendationId);
+    });
 
 /// Провайдер для получения оценки пользователя для конкретной рекомендации
-final userRatingProvider = FutureProvider.family<OutfitRating?, String>((ref, recommendationId) async {
+final userRatingProvider = FutureProvider.family<OutfitRating?, String>((
+  ref,
+  recommendationId,
+) async {
   final notifier = ref.watch(ratingNotifierProvider.notifier);
   return notifier.getUserRating(recommendationId);
 });

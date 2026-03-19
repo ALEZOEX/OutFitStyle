@@ -53,9 +53,7 @@ class NotificationRemoteDataSource {
 
   /// Удалить device token
   Future<void> deleteDeviceToken(String token) async {
-    await _apiClient.delete(
-      '/api/v1/notifications/token',
-    );
+    await _apiClient.delete('/api/v1/notifications/token');
     // Примечание: API требует токен в теле запроса, но delete не поддерживает тело
     // Используем POST с кастомным методом или передаём через query params
     // В данной реализации API принимает DELETE с телом через interceptor
@@ -63,7 +61,11 @@ class NotificationRemoteDataSource {
 
   /// Получить только количество непрочитанных уведомлений
   Future<int> getUnreadCount() async {
-    final response = await getNotifications(unreadOnly: false, page: 1, limit: 1);
+    final response = await getNotifications(
+      unreadOnly: false,
+      page: 1,
+      limit: 1,
+    );
     return response.unreadCount;
   }
 }

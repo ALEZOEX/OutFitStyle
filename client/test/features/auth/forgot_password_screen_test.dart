@@ -8,11 +8,7 @@ void main() {
   group('ForgotPasswordScreen Widget Tests', () {
     testWidgets('shows title and email input on initial load', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -24,11 +20,7 @@ void main() {
 
     testWidgets('shows validation error for empty email', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -39,11 +31,7 @@ void main() {
 
     testWidgets('shows validation error for invalid email', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -52,13 +40,11 @@ void main() {
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('navigates to code step after successful email submission', (tester) async {
+    testWidgets('navigates to code step after successful email submission', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -69,11 +55,7 @@ void main() {
 
     testWidgets('shows password step after code verification', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -84,11 +66,7 @@ void main() {
 
     testWidgets('shows error when passwords do not match', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -99,11 +77,7 @@ void main() {
 
     testWidgets('shows step indicator dots', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -114,11 +88,7 @@ void main() {
 
     testWidgets('back button navigates to auth screen', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -129,11 +99,7 @@ void main() {
 
     testWidgets('shows loading indicator when submitting', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();
@@ -144,11 +110,7 @@ void main() {
 
     testWidgets('resend code button is available on code step', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ForgotPasswordScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ForgotPasswordScreen())),
       );
 
       await tester.pumpAndSettle();

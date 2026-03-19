@@ -82,11 +82,7 @@ class WeatherCard extends StatelessWidget {
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                Icons.location_on,
-                color: Colors.white,
-                size: 18,
-              ),
+              child: Icon(Icons.location_on, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 8),
             Column(
@@ -119,11 +115,7 @@ class WeatherCard extends StatelessWidget {
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                Icons.refresh,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: Icon(Icons.refresh, color: Colors.white, size: 20),
             ),
           ),
       ],
@@ -134,7 +126,7 @@ class WeatherCard extends StatelessWidget {
     final theme = Theme.of(context);
     final data = weatherData;
     if (data == null) return const SizedBox.shrink();
-    
+
     final temp = data.temperature?.round() ?? 0;
     final feelsLike = data.feelsLike?.round();
     final description = data.description ?? '';
@@ -427,31 +419,39 @@ class WeatherCard extends StatelessWidget {
     final desc = description.toLowerCase();
 
     // Ясно / Солнечно
-    if (desc.contains('ясно') || desc.contains('sunny') || desc.contains('clear') || desc.contains('преимущ')) {
+    if (desc.contains('ясно') ||
+        desc.contains('sunny') ||
+        desc.contains('clear') ||
+        desc.contains('преимущ')) {
       return Icons.wb_sunny;
-    } 
+    }
     // Облачно / Пасмурно
-    else if (desc.contains('облач') || desc.contains('cloud') || desc.contains('пасмурно') || desc.contains('overcast')) {
+    else if (desc.contains('облач') ||
+        desc.contains('cloud') ||
+        desc.contains('пасмурно') ||
+        desc.contains('overcast')) {
       if (desc.contains('перемен')) {
         return Icons.cloud_queue;
       }
       return Icons.cloud;
-    } 
+    }
     // Дождь / Гроза
-    else if (desc.contains('дожд') || desc.contains('rain') || desc.contains('морось')) {
+    else if (desc.contains('дожд') ||
+        desc.contains('rain') ||
+        desc.contains('морось')) {
       if (desc.contains('гром') || desc.contains('thunder')) {
         return Icons.thunderstorm;
       }
       return Icons.grain;
-    } 
+    }
     // Снег
     else if (desc.contains('снег') || desc.contains('snow')) {
       return Icons.ac_unit;
-    } 
+    }
     // Туман
     else if (desc.contains('туман') || desc.contains('fog')) {
       return Icons.foggy;
-    } 
+    }
     // Ветер
     else if (desc.contains('ветр') || desc.contains('wind')) {
       return Icons.air;
@@ -469,7 +469,9 @@ class WeatherCard extends StatelessWidget {
 
     final desc = description.toLowerCase();
 
-    if (desc.contains('ясно') || desc.contains('sunny') || desc.contains('clear')) {
+    if (desc.contains('ясно') ||
+        desc.contains('sunny') ||
+        desc.contains('clear')) {
       return 'Ясно';
     } else if (desc.contains('облач') || desc.contains('cloud')) {
       if (desc.contains('перемен')) {
@@ -506,7 +508,9 @@ class WeatherCard extends StatelessWidget {
     }
 
     // Дождь/гроза
-    if (desc.contains('дожд') || desc.contains('thunder') || desc.contains('rain')) {
+    if (desc.contains('дожд') ||
+        desc.contains('thunder') ||
+        desc.contains('rain')) {
       return const Color(0xFF546E7A);
     }
 
@@ -538,7 +542,9 @@ class WeatherCard extends StatelessWidget {
       return const Color(0xFF0D47A1);
     }
 
-    if (desc.contains('дожд') || desc.contains('thunder') || desc.contains('rain')) {
+    if (desc.contains('дожд') ||
+        desc.contains('thunder') ||
+        desc.contains('rain')) {
       return const Color(0xFF37474F);
     }
 

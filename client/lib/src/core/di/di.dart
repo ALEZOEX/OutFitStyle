@@ -8,8 +8,9 @@ import 'package:logger/logger.dart';
 // Core
 final loggerProvider = Provider((ref) => Logger());
 
-final sharedPreferencesProvider =
-    FutureProvider<SharedPreferences>((ref) async {
+final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
+  ref,
+) async {
   return await SharedPreferences.getInstance();
 });
 
@@ -26,9 +27,10 @@ final sessionProvider = StateProvider<SessionStatus>((ref) {
 });
 
 // Providers для onboarding
-final onboardingDoneProvider = StateNotifierProvider<OnboardingDoneNotifier, bool>((ref) {
-  return OnboardingDoneNotifier();
-});
+final onboardingDoneProvider =
+    StateNotifierProvider<OnboardingDoneNotifier, bool>((ref) {
+      return OnboardingDoneNotifier();
+    });
 
 class OnboardingDoneNotifier extends StateNotifier<bool> {
   OnboardingDoneNotifier() : super(false) {

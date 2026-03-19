@@ -13,12 +13,9 @@ abstract class RecommendationState with _$RecommendationState {
   const factory RecommendationState({
     @Default(AsyncValue.loading())
     AsyncValue<List<Recommendation>> recommendations,
-    @Default([])
-    List<Recommendation> historyRecommendations,
-    @Default([])
-    List<Recommendation> savedRecommendations,
-    @Default(UserPreference())
-    UserPreference preferences,
+    @Default([]) List<Recommendation> historyRecommendations,
+    @Default([]) List<Recommendation> savedRecommendations,
+    @Default(UserPreference()) UserPreference preferences,
     @Default(false) bool isLoading,
     @Default(false) bool isRefreshing,
     String? error,
@@ -38,9 +35,9 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
   RecommendationStateNotifier({
     required RecommendationsRepository recommendationsRepository,
     required ProfileRepository profileRepository,
-  })  : _recommendationsRepository = recommendationsRepository,
-        _profileRepository = profileRepository,
-        super(const RecommendationState());
+  }) : _recommendationsRepository = recommendationsRepository,
+       _profileRepository = profileRepository,
+       super(const RecommendationState());
 
   /// Получить рекомендации для пользователя
   Future<void> fetchRecommendations({
@@ -51,17 +48,21 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final recommendations = await _recommendationsRepository.getUserRecommendations(userId);
-      final entityRecommendations = recommendations
-          .map((r) => Recommendation(
-                id: r.id != null ? int.tryParse(r.id!) : null,
-                title: r.title,
-                description: r.description,
-                outfit: null,
-                isFavorite: false,
-                isSaved: false,
-              ))
-          .toList();
+      final recommendations = await _recommendationsRepository
+          .getUserRecommendations(userId);
+      final entityRecommendations =
+          recommendations
+              .map(
+                (r) => Recommendation(
+                  id: r.id != null ? int.tryParse(r.id!) : null,
+                  title: r.title,
+                  description: r.description,
+                  outfit: null,
+                  isFavorite: false,
+                  isSaved: false,
+                ),
+              )
+              .toList();
 
       state = state.copyWith(
         isLoading: false,
@@ -79,15 +80,19 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
   /// Переключить лайк рекомендации
   Future<void> toggleLike(String recommendationId) async {
     try {
-      await _recommendationsRepository.likeRecommendation(recommendationId, true);
+      await _recommendationsRepository.likeRecommendation(
+        recommendationId,
+        true,
+      );
 
       final currentRecommendations = state.recommendations.value ?? [];
-      final updatedRecommendations = currentRecommendations.map((rec) {
-        if (rec.id.toString() == recommendationId) {
-          return rec.copyWith(isFavorite: !(rec.isFavorite));
-        }
-        return rec;
-      }).toList();
+      final updatedRecommendations =
+          currentRecommendations.map((rec) {
+            if (rec.id.toString() == recommendationId) {
+              return rec.copyWith(isFavorite: !(rec.isFavorite));
+            }
+            return rec;
+          }).toList();
 
       state = state.copyWith(
         recommendations: AsyncValue.data(updatedRecommendations),
@@ -101,15 +106,19 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
   /// Сохранить рекомендацию
   Future<void> saveRecommendation(String recommendationId) async {
     try {
-      await _recommendationsRepository.saveRecommendationForLater(recommendationId, true);
+      await _recommendationsRepository.saveRecommendationForLater(
+        recommendationId,
+        true,
+      );
 
       final currentRecommendations = state.recommendations.value ?? [];
-      final updatedRecommendations = currentRecommendations.map((rec) {
-        if (rec.id.toString() == recommendationId) {
-          return rec.copyWith(isSaved: true);
-        }
-        return rec;
-      }).toList();
+      final updatedRecommendations =
+          currentRecommendations.map((rec) {
+            if (rec.id.toString() == recommendationId) {
+              return rec.copyWith(isSaved: true);
+            }
+            return rec;
+          }).toList();
 
       state = state.copyWith(
         recommendations: AsyncValue.data(updatedRecommendations),
@@ -123,15 +132,19 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
   /// Удалить рекомендацию из сохранённых
   Future<void> unsaveRecommendation(String recommendationId) async {
     try {
-      await _recommendationsRepository.saveRecommendationForLater(recommendationId, false);
+      await _recommendationsRepository.saveRecommendationForLater(
+        recommendationId,
+        false,
+      );
 
       final currentRecommendations = state.recommendations.value ?? [];
-      final updatedRecommendations = currentRecommendations.map((rec) {
-        if (rec.id.toString() == recommendationId) {
-          return rec.copyWith(isSaved: false);
-        }
-        return rec;
-      }).toList();
+      final updatedRecommendations =
+          currentRecommendations.map((rec) {
+            if (rec.id.toString() == recommendationId) {
+              return rec.copyWith(isSaved: false);
+            }
+            return rec;
+          }).toList();
 
       state = state.copyWith(
         recommendations: AsyncValue.data(updatedRecommendations),
@@ -145,20 +158,24 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
   /// Переключить сохранение рекомендации
   Future<void> toggleSave(String recommendationId) async {
     try {
-      final isCurrentlySaved = state.recommendations.value
+      final isCurrentlySaved =
+          state.recommendations.value
               ?.firstWhere((rec) => rec.id.toString() == recommendationId)
               .isSaved ??
           false;
       await _recommendationsRepository.saveRecommendationForLater(
-          recommendationId, !isCurrentlySaved);
+        recommendationId,
+        !isCurrentlySaved,
+      );
 
       final currentRecommendations = state.recommendations.value ?? [];
-      final updatedRecommendations = currentRecommendations.map((rec) {
-        if (rec.id.toString() == recommendationId) {
-          return rec.copyWith(isSaved: !isCurrentlySaved);
-        }
-        return rec;
-      }).toList();
+      final updatedRecommendations =
+          currentRecommendations.map((rec) {
+            if (rec.id.toString() == recommendationId) {
+              return rec.copyWith(isSaved: !isCurrentlySaved);
+            }
+            return rec;
+          }).toList();
 
       state = state.copyWith(
         recommendations: AsyncValue.data(updatedRecommendations),
@@ -188,27 +205,28 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final history = await _recommendationsRepository.getRecommendationsHistory(userId);
-      final entityRecommendations = history
-          .map((r) => Recommendation(
-                id: r.id != null ? int.tryParse(r.id!) : null,
-                title: r.title,
-                description: r.description,
-                outfit: null,
-                isFavorite: false,
-                isSaved: false,
-              ))
-          .toList();
+      final history = await _recommendationsRepository
+          .getRecommendationsHistory(userId);
+      final entityRecommendations =
+          history
+              .map(
+                (r) => Recommendation(
+                  id: r.id != null ? int.tryParse(r.id!) : null,
+                  title: r.title,
+                  description: r.description,
+                  outfit: null,
+                  isFavorite: false,
+                  isSaved: false,
+                ),
+              )
+              .toList();
 
       state = state.copyWith(
         isLoading: false,
         historyRecommendations: entityRecommendations,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -217,27 +235,29 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final saved = await _recommendationsRepository.getSavedRecommendations(userId);
-      final entityRecommendations = saved
-          .map((r) => Recommendation(
-                id: r.id != null ? int.tryParse(r.id!) : null,
-                title: r.title,
-                description: r.description,
-                outfit: null,
-                isFavorite: false,
-                isSaved: true,
-              ))
-          .toList();
+      final saved = await _recommendationsRepository.getSavedRecommendations(
+        userId,
+      );
+      final entityRecommendations =
+          saved
+              .map(
+                (r) => Recommendation(
+                  id: r.id != null ? int.tryParse(r.id!) : null,
+                  title: r.title,
+                  description: r.description,
+                  outfit: null,
+                  isFavorite: false,
+                  isSaved: true,
+                ),
+              )
+              .toList();
 
       state = state.copyWith(
         isLoading: false,
         savedRecommendations: entityRecommendations,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -248,19 +268,14 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
     try {
       final profile = await _profileRepository.getMe();
       final preferencesData = profile['preferences'] as Map<String, dynamic>?;
-      final preferences = preferencesData != null
-          ? UserPreference.fromJson(preferencesData)
-          : const UserPreference();
+      final preferences =
+          preferencesData != null
+              ? UserPreference.fromJson(preferencesData)
+              : const UserPreference();
 
-      state = state.copyWith(
-        isLoading: false,
-        preferences: preferences,
-      );
+      state = state.copyWith(isLoading: false, preferences: preferences);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -291,8 +306,10 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
 
 /// Provider для нотификатора состояния рекомендаций
 final recommendationStateNotifierProvider =
-    StateNotifierProvider<RecommendationStateNotifier, RecommendationState>(
-  (ref) {
-    throw UnimplementedError('Используйте recommendationStateNotifierProvider.override');
-  },
-);
+    StateNotifierProvider<RecommendationStateNotifier, RecommendationState>((
+      ref,
+    ) {
+      throw UnimplementedError(
+        'Используйте recommendationStateNotifierProvider.override',
+      );
+    });

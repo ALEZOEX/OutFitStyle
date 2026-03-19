@@ -25,20 +25,22 @@ class NotificationTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: isUnread ? 2 : 0,
-      color: isUnread
-          ? theme.colorScheme.surfaceContainerHighest
-          : theme.cardTheme.color,
+      color:
+          isUnread
+              ? theme.colorScheme.surfaceContainerHighest
+              : theme.cardTheme.color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isUnread
-            ? BorderSide(
-                color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                width: 1,
-              )
-            : BorderSide(
-                color: theme.dividerColor.withValues(alpha: 0.5),
-                width: 1,
-              ),
+        side:
+            isUnread
+                ? BorderSide(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                  width: 1,
+                )
+                : BorderSide(
+                  color: theme.dividerColor.withValues(alpha: 0.5),
+                  width: 1,
+                ),
       ),
       child: InkWell(
         onTap: onTap,
@@ -49,10 +51,7 @@ class NotificationTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Иконка уведомления
-              NotificationIcon(
-                type: notification.type,
-                size: 40,
-              ),
+              NotificationIcon(type: notification.type, size: 40),
 
               const SizedBox(width: 12),
 
@@ -69,13 +68,15 @@ class NotificationTile extends StatelessWidget {
                           child: Text(
                             notification.title,
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: isUnread
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                              color: isUnread
-                                  ? theme.colorScheme.onSurface
-                                  : theme.textTheme.titleMedium?.color
-                                      ?.withValues(alpha: 0.8),
+                              fontWeight:
+                                  isUnread
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                              color:
+                                  isUnread
+                                      ? theme.colorScheme.onSurface
+                                      : theme.textTheme.titleMedium?.color
+                                          ?.withValues(alpha: 0.8),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -101,9 +102,10 @@ class NotificationTile extends StatelessWidget {
                       Text(
                         notification.message,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isUnread
-                              ? theme.textTheme.bodyLarge?.color
-                              : theme.hintColor,
+                          color:
+                              isUnread
+                                  ? theme.textTheme.bodyLarge?.color
+                                  : theme.hintColor,
                           height: 1.3,
                         ),
                         maxLines: 3,
@@ -178,15 +180,7 @@ class NotificationTile extends StatelessWidget {
 
     // Эта неделя
     if (difference.inDays < 7) {
-      const weekdays = [
-        'Пн',
-        'Вт',
-        'Ср',
-        'Чт',
-        'Пт',
-        'Сб',
-        'Вс',
-      ];
+      const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
       return weekdays[dateTime.weekday - 1];
     }
 

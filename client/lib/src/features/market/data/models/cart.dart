@@ -48,14 +48,14 @@ class CartItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        productId,
-        size,
-        color,
-        quantity,
-        price,
-        productName,
-        productImage,
-      ];
+    productId,
+    size,
+    color,
+    quantity,
+    price,
+    productName,
+    productImage,
+  ];
 
   CartItem copyWith({
     String? productId,
@@ -99,13 +99,15 @@ class Cart extends Equatable {
     return Cart(
       id: json['id'] as String? ?? '',
       userId: json['user_id'] as int,
-      items: itemsJson
-          .map((item) => CartItem.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      items:
+          itemsJson
+              .map((item) => CartItem.fromJson(item as Map<String, dynamic>))
+              .toList(),
       totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : DateTime.now(),
+      updatedAt:
+          json['updated_at'] != null
+              ? DateTime.parse(json['updated_at'] as String)
+              : DateTime.now(),
     );
   }
 

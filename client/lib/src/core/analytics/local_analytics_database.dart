@@ -16,9 +16,9 @@ class LocalAnalyticsStorage {
     final eventsQueue = await getEventsQueue();
 
     final event = {
-      'id': DateTime.now()
-          .millisecondsSinceEpoch
-          .toString(), // простой ID на основе времени
+      'id':
+          DateTime.now().millisecondsSinceEpoch
+              .toString(), // простой ID на основе времени
       'type': eventType,
       'properties': properties,
       'timestamp': timestamp.toIso8601String(),
@@ -28,7 +28,9 @@ class LocalAnalyticsStorage {
     eventsQueue.add(event);
 
     await prefs.setStringList(
-        _storageKey, eventsQueue.map((e) => jsonEncode(e)).toList());
+      _storageKey,
+      eventsQueue.map((e) => jsonEncode(e)).toList(),
+    );
   }
 
   /// Получить все неотправленные события
@@ -46,12 +48,15 @@ class LocalAnalyticsStorage {
     final prefs = await SharedPreferences.getInstance();
     final eventsQueue = await getEventsQueue();
 
-    final filteredEvents = eventsQueue
-        .where((event) => !idsToRemove.contains(event['id']))
-        .toList();
+    final filteredEvents =
+        eventsQueue
+            .where((event) => !idsToRemove.contains(event['id']))
+            .toList();
 
     await prefs.setStringList(
-        _storageKey, filteredEvents.map((e) => jsonEncode(e)).toList());
+      _storageKey,
+      filteredEvents.map((e) => jsonEncode(e)).toList(),
+    );
   }
 
   /// Очистить всю очередь событий

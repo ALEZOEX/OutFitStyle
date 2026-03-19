@@ -104,9 +104,10 @@ class Order extends Equatable {
       userId: json['user_id'] as int,
       status: OrderStatus.fromString(json['status'] as String),
       totalAmount: (json['total_amount'] as num).toDouble(),
-      items: itemsJson
-          .map((item) => OrderItem.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      items:
+          itemsJson
+              .map((item) => OrderItem.fromJson(item as Map<String, dynamic>))
+              .toList(),
       shippingAddress: json['shipping_address'] as Map<String, dynamic>?,
       paymentMethod: json['payment_method'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -132,16 +133,16 @@ class Order extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        status,
-        totalAmount,
-        items,
-        shippingAddress,
-        paymentMethod,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    userId,
+    status,
+    totalAmount,
+    items,
+    shippingAddress,
+    paymentMethod,
+    createdAt,
+    updatedAt,
+  ];
 
   Order copyWith({
     String? id,

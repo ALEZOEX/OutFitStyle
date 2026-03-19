@@ -15,10 +15,12 @@ void main() {
 
       // Setup default mock behaviors
       when(() => mockSharedPreferences.getString(any())).thenReturn(null);
-      when(() => mockSharedPreferences.setString(any(), any()))
-          .thenAnswer((_) async => true);
-      when(() => mockSharedPreferences.remove(any()))
-          .thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.setString(any(), any()),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockSharedPreferences.remove(any()),
+      ).thenAnswer((_) async => true);
     });
 
     /// **Property 2: Preservation - Login Flow and Session Management Unchanged**
@@ -78,8 +80,9 @@ void main() {
 
             // Assert
             // Verify that session data storage was called (preservation property)
-            verify(() => mockSharedPreferences.setString('user_session', any()))
-                .called(1);
+            verify(
+              () => mockSharedPreferences.setString('user_session', any()),
+            ).called(1);
           },
         );
       }
@@ -91,22 +94,22 @@ void main() {
         {
           'email': 'newuser1@example.com',
           'password': 'NewPass123!',
-          'displayName': 'New User 1'
+          'displayName': 'New User 1',
         },
         {
           'email': 'signup@test.com',
           'password': 'SignUp456!',
-          'displayName': 'Signup Test'
+          'displayName': 'Signup Test',
         },
         {
           'email': 'register@domain.org',
           'password': 'Register789',
-          'displayName': 'Register User'
+          'displayName': 'Register User',
         },
         {
           'email': 'create@account.net',
           'password': 'Create2024!',
-          'displayName': 'Created Account'
+          'displayName': 'Created Account',
         },
       ];
 
@@ -137,8 +140,9 @@ void main() {
 
             // Assert
             // Verify that session data storage was called (preservation property)
-            verify(() => mockSharedPreferences.setString('user_session', any()))
-                .called(1);
+            verify(
+              () => mockSharedPreferences.setString('user_session', any()),
+            ).called(1);
           },
         );
       }
@@ -151,19 +155,19 @@ void main() {
           'uid': 'google-user-1',
           'email': 'google1@gmail.com',
           'displayName': 'Google User 1',
-          'photoUrl': 'https://example.com/photo1.jpg'
+          'photoUrl': 'https://example.com/photo1.jpg',
         },
         {
           'uid': 'google-user-2',
           'email': 'google2@gmail.com',
           'displayName': 'Google User 2',
-          'photoUrl': 'https://example.com/photo2.jpg'
+          'photoUrl': 'https://example.com/photo2.jpg',
         },
         {
           'uid': 'google-user-3',
           'email': 'google3@gmail.com',
           'displayName': 'Google User 3',
-          'photoUrl': null
+          'photoUrl': null,
         },
       ];
 
@@ -195,8 +199,9 @@ void main() {
 
             // Assert
             // Verify that session data storage was called (preservation property)
-            verify(() => mockSharedPreferences.setString('user_session', any()))
-                .called(1);
+            verify(
+              () => mockSharedPreferences.setString('user_session', any()),
+            ).called(1);
           },
         );
       }
@@ -246,21 +251,24 @@ void main() {
             };
             final sessionJson = jsonEncode(sessionData);
 
-            when(() => mockSharedPreferences.getString('user_session'))
-                .thenReturn(sessionJson);
+            when(
+              () => mockSharedPreferences.getString('user_session'),
+            ).thenReturn(sessionJson);
 
             // Act
             // Simulate session restoration by reading from SharedPreferences
-            final restoredSession =
-                mockSharedPreferences.getString('user_session');
+            final restoredSession = mockSharedPreferences.getString(
+              'user_session',
+            );
 
             // Assert
             // Verify that session data was retrieved (preservation property)
             expect(restoredSession, isNotNull);
             expect(restoredSession, contains(testCase['uid'] as String));
             expect(restoredSession, contains(testCase['email'] as String));
-            verify(() => mockSharedPreferences.getString('user_session'))
-                .called(1);
+            verify(
+              () => mockSharedPreferences.getString('user_session'),
+            ).called(1);
           },
         );
       }
@@ -272,17 +280,17 @@ void main() {
         {
           'uid': 'logout-user-1',
           'email': 'logout1@example.com',
-          'displayName': 'Logout User 1'
+          'displayName': 'Logout User 1',
         },
         {
           'uid': 'logout-user-2',
           'email': 'logout2@example.com',
-          'displayName': 'Logout User 2'
+          'displayName': 'Logout User 2',
         },
         {
           'uid': 'logout-user-3',
           'email': 'logout3@example.com',
-          'displayName': 'Logout User 3'
+          'displayName': 'Logout User 3',
         },
       ];
 
@@ -306,8 +314,9 @@ void main() {
             };
             final sessionJson = jsonEncode(sessionData);
 
-            when(() => mockSharedPreferences.getString('user_session'))
-                .thenReturn(sessionJson);
+            when(
+              () => mockSharedPreferences.getString('user_session'),
+            ).thenReturn(sessionJson);
 
             // Act
             // Simulate what signOut does: clear session data
@@ -315,7 +324,9 @@ void main() {
 
             // Assert
             // Verify that session data was removed (preservation property)
-            verify(() => mockSharedPreferences.remove('user_session')).called(1);
+            verify(
+              () => mockSharedPreferences.remove('user_session'),
+            ).called(1);
           },
         );
       }
@@ -348,38 +359,37 @@ void main() {
     });
 
     group('Property: Session State Management Preservation', () {
-      test(
-        'Preservation: Session data can be stored and retrieved',
-        () async {
-          // Arrange
-          final sessionData = {
-            'uid': 'test-user-123',
-            'email': 'test@example.com',
-            'displayName': 'Test User',
-            'photoUrl': null,
-            'loginTime': DateTime.now().millisecondsSinceEpoch,
-            'isEmailVerified': false,
-          };
-          final sessionJson = jsonEncode(sessionData);
+      test('Preservation: Session data can be stored and retrieved', () async {
+        // Arrange
+        final sessionData = {
+          'uid': 'test-user-123',
+          'email': 'test@example.com',
+          'displayName': 'Test User',
+          'photoUrl': null,
+          'loginTime': DateTime.now().millisecondsSinceEpoch,
+          'isEmailVerified': false,
+        };
+        final sessionJson = jsonEncode(sessionData);
 
-          // Act
-          await mockSharedPreferences.setString('user_session', sessionJson);
-          when(() => mockSharedPreferences.getString('user_session'))
-              .thenReturn(sessionJson);
-          final retrieved = mockSharedPreferences.getString('user_session');
+        // Act
+        await mockSharedPreferences.setString('user_session', sessionJson);
+        when(
+          () => mockSharedPreferences.getString('user_session'),
+        ).thenReturn(sessionJson);
+        final retrieved = mockSharedPreferences.getString('user_session');
 
-          // Assert
-          expect(retrieved, isNotNull);
-          expect(retrieved, equals(sessionJson));
-        },
-      );
+        // Assert
+        expect(retrieved, isNotNull);
+        expect(retrieved, equals(sessionJson));
+      });
 
       test(
         'Preservation: Missing session data returns null gracefully',
         () async {
           // Arrange
-          when(() => mockSharedPreferences.getString('user_session'))
-              .thenReturn(null);
+          when(
+            () => mockSharedPreferences.getString('user_session'),
+          ).thenReturn(null);
 
           // Act
           final session = mockSharedPreferences.getString('user_session');
@@ -391,31 +401,30 @@ void main() {
     });
 
     group('Property: Error Handling Preservation', () {
-      test(
-        'Preservation: Invalid session JSON can be detected',
-        () async {
-          // Arrange
-          const invalidJson = 'invalid-json-{{{';
-          when(() => mockSharedPreferences.getString('user_session'))
-              .thenReturn(invalidJson);
+      test('Preservation: Invalid session JSON can be detected', () async {
+        // Arrange
+        const invalidJson = 'invalid-json-{{{';
+        when(
+          () => mockSharedPreferences.getString('user_session'),
+        ).thenReturn(invalidJson);
 
-          // Act
-          final sessionJson = mockSharedPreferences.getString('user_session');
+        // Act
+        final sessionJson = mockSharedPreferences.getString('user_session');
 
-          // Assert
-          // The preservation property: invalid JSON is returned as-is
-          // SessionManager handles the parsing error gracefully
-          expect(sessionJson, equals(invalidJson));
-          expect(() => jsonDecode(sessionJson!), throwsFormatException);
-        },
-      );
+        // Assert
+        // The preservation property: invalid JSON is returned as-is
+        // SessionManager handles the parsing error gracefully
+        expect(sessionJson, equals(invalidJson));
+        expect(() => jsonDecode(sessionJson!), throwsFormatException);
+      });
 
       test(
         'Preservation: Missing session data returns null gracefully',
         () async {
           // Arrange
-          when(() => mockSharedPreferences.getString('user_session'))
-              .thenReturn(null);
+          when(
+            () => mockSharedPreferences.getString('user_session'),
+          ).thenReturn(null);
 
           // Act
           final session = mockSharedPreferences.getString('user_session');

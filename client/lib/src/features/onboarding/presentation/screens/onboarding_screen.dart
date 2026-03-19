@@ -40,8 +40,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   void initState() {
     super.initState();
     _pageController = PageController();
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
     _fadeAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -134,7 +135,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   }
 
   void _selectCity(CityData city) {
-    ref.read(onboardingNotifierProvider.notifier).setCity(
+    ref
+        .read(onboardingNotifierProvider.notifier)
+        .setCity(
           cityId: 0, // ID будет назначен сервером
           cityName: city.name,
           cityLat: city.lat,
@@ -145,9 +148,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   void _openCitySelector() {
     showDialog<CityData>(
       context: context,
-      builder: (context) => CitySelectorDialog(
-        onCitySelected: (city) => _selectCity(city),
-      ),
+      builder:
+          (context) =>
+              CitySelectorDialog(onCitySelected: (city) => _selectCity(city)),
     );
   }
 
@@ -175,7 +178,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();
-    
+
     final state = ref.watch(onboardingNotifierProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -186,15 +189,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: isDarkMode
-                  ? [
-                      const Color(0xFF0F172A),
-                      const Color(0xFF1E293B),
-                    ]
-                  : [
-                      const Color(0xFFF0F9FF),
-                      const Color(0xFFE0F2FE),
-                    ],
+              colors:
+                  isDarkMode
+                      ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
+                      : [const Color(0xFFF0F9FF), const Color(0xFFE0F2FE)],
             ),
           ),
           child: Column(
@@ -235,12 +233,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   Widget _buildProgressIndicator(int currentPage) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final activeColor = isDarkMode
-        ? const Color(0xFF60A5FA)
-        : const Color(0xFF3B82F6);
-    final inactiveColor = isDarkMode
-        ? const Color(0xFF374151)
-        : const Color(0xFFD1D5DB);
+    final activeColor =
+        isDarkMode ? const Color(0xFF60A5FA) : const Color(0xFF3B82F6);
+    final inactiveColor =
+        isDarkMode ? const Color(0xFF374151) : const Color(0xFFD1D5DB);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
@@ -277,15 +273,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: isDarkMode
-                    ? [
-                        const Color(0xFF60A5FA),
-                        const Color(0xFF3B82F6),
-                      ]
-                    : [
-                        const Color(0xFF3B82F6),
-                        const Color(0xFF2563EB),
-                      ],
+                colors:
+                    isDarkMode
+                        ? [const Color(0xFF60A5FA), const Color(0xFF3B82F6)]
+                        : [const Color(0xFF3B82F6), const Color(0xFF2563EB)],
               ),
               borderRadius: BorderRadius.circular(40),
               boxShadow: [
@@ -310,36 +301,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             l10n.onboardingWelcomeTitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
-                ),
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             l10n.onboardingWelcomeSubtitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: isDarkMode
+              color:
+                  isDarkMode
                       ? const Color(0xFF9CA3AF)
                       : const Color(0xFF64748B),
-                ),
+            ),
           ),
           const SizedBox(height: 24),
           Text(
             l10n.onboardingWelcomeDescription,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: isDarkMode
+              color:
+                  isDarkMode
                       ? const Color(0xFF9CA3AF)
                       : const Color(0xFF64748B),
-                ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCityPage(AppLocalizations l10n, bool isDarkMode, OnboardingState state) {
+  Widget _buildCityPage(
+    AppLocalizations l10n,
+    bool isDarkMode,
+    OnboardingState state,
+  ) {
     final cityName = state.data.cityName;
 
     return Padding(
@@ -367,9 +364,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             child: Icon(
               Icons.location_on_rounded,
               size: 60,
-              color: isDarkMode
-                  ? const Color(0xFF60A5FA)
-                  : const Color(0xFF3B82F6),
+              color:
+                  isDarkMode
+                      ? const Color(0xFF60A5FA)
+                      : const Color(0xFF3B82F6),
             ),
           ),
           const SizedBox(height: 32),
@@ -377,19 +375,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             l10n.onboardingCityTitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
-                ),
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             l10n.onboardingCityDescription,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDarkMode
+              color:
+                  isDarkMode
                       ? const Color(0xFF9CA3AF)
                       : const Color(0xFF64748B),
-                ),
+            ),
           ),
           const SizedBox(height: 40),
 
@@ -398,24 +397,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: _isDetectingCity ? null : _detectCityByIp,
-              icon: _isDetectingCity
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.gps_fixed_rounded),
+              icon:
+                  _isDetectingCity
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : const Icon(Icons.gps_fixed_rounded),
               label: Text(l10n.onboardingCityDetectByIp),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 side: BorderSide(
-                  color: isDarkMode
-                      ? const Color(0xFF60A5FA)
-                      : const Color(0xFF3B82F6),
+                  color:
+                      isDarkMode
+                          ? const Color(0xFF60A5FA)
+                          : const Color(0xFF3B82F6),
                 ),
-                foregroundColor: isDarkMode
-                    ? const Color(0xFF60A5FA)
-                    : const Color(0xFF3B82F6),
+                foregroundColor:
+                    isDarkMode
+                        ? const Color(0xFF60A5FA)
+                        : const Color(0xFF3B82F6),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -433,11 +435,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               label: Text(cityName ?? l10n.onboardingCitySearchHint),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: cityName != null
-                    ? (isDarkMode
-                        ? const Color(0xFF60A5FA)
-                        : const Color(0xFF3B82F6))
-                    : null,
+                backgroundColor:
+                    cityName != null
+                        ? (isDarkMode
+                            ? const Color(0xFF60A5FA)
+                            : const Color(0xFF3B82F6))
+                        : null,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -472,7 +475,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     );
   }
 
-  Widget _buildStylesPage(AppLocalizations l10n, bool isDarkMode, OnboardingState state) {
+  Widget _buildStylesPage(
+    AppLocalizations l10n,
+    bool isDarkMode,
+    OnboardingState state,
+  ) {
     final selectedStyles = state.data.stylePreferences;
     final styles = StylePreference.values;
 
@@ -494,39 +501,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             child: Icon(
               Icons.palette_rounded,
               size: 40,
-              color: isDarkMode
-                  ? const Color(0xFF60A5FA)
-                  : const Color(0xFF3B82F6),
+              color:
+                  isDarkMode
+                      ? const Color(0xFF60A5FA)
+                      : const Color(0xFF3B82F6),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             l10n.onboardingStylesTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
-                ),
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.onboardingStylesDescription,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDarkMode
+              color:
+                  isDarkMode
                       ? const Color(0xFF9CA3AF)
                       : const Color(0xFF64748B),
-                ),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             '${selectedStyles.length}/3',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: selectedStyles.length >= 3
+              color:
+                  selectedStyles.length >= 3
                       ? Colors.green
                       : (isDarkMode
                           ? const Color(0xFF60A5FA)
                           : const Color(0xFF3B82F6)),
-                  fontWeight: FontWeight.bold,
-                ),
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 24),
           Expanded(
@@ -542,16 +552,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 final style = styles[index];
                 final isSelected = selectedStyles.contains(style.value);
 
-                return _buildStyleChip(
-                  style.displayName,
-                  isSelected,
-                  () {
-                    ref
-                        .read(onboardingNotifierProvider.notifier)
-                        .toggleStylePreference(style.value);
-                  },
-                  isDarkMode,
-                );
+                return _buildStyleChip(style.displayName, isSelected, () {
+                  ref
+                      .read(onboardingNotifierProvider.notifier)
+                      .toggleStylePreference(style.value);
+                }, isDarkMode);
               },
             ),
           ),
@@ -571,22 +576,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isDarkMode
-                  ? const Color(0xFF60A5FA)
-                  : const Color(0xFF3B82F6))
-              : (isDarkMode
-                  ? const Color(0xFF1E293B)
-                  : const Color(0xFFF1F5F9)),
+          color:
+              isSelected
+                  ? (isDarkMode
+                      ? const Color(0xFF60A5FA)
+                      : const Color(0xFF3B82F6))
+                  : (isDarkMode
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFF1F5F9)),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? (isDarkMode
-                    ? const Color(0xFF60A5FA)
-                    : const Color(0xFF3B82F6))
-                : (isDarkMode
-                    ? const Color(0xFF374151)
-                    : const Color(0xFFE2E8F0)),
+            color:
+                isSelected
+                    ? (isDarkMode
+                        ? const Color(0xFF60A5FA)
+                        : const Color(0xFF3B82F6))
+                    : (isDarkMode
+                        ? const Color(0xFF374151)
+                        : const Color(0xFFE2E8F0)),
             width: 2,
           ),
         ),
@@ -604,19 +611,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 Icon(
                   Icons.circle_outlined,
                   size: 18,
-                  color: isDarkMode
-                      ? const Color(0xFF9CA3AF)
-                      : const Color(0xFF94A3B8),
+                  color:
+                      isDarkMode
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF94A3B8),
                 ),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : (isDarkMode
-                          ? const Color(0xFFE5E7EB)
-                          : const Color(0xFF475569)),
+                  color:
+                      isSelected
+                          ? Colors.white
+                          : (isDarkMode
+                              ? const Color(0xFFE5E7EB)
+                              : const Color(0xFF475569)),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 ),
               ),
@@ -627,7 +636,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     );
   }
 
-  Widget _buildPreferencesPage(AppLocalizations l10n, bool isDarkMode, OnboardingState state) {
+  Widget _buildPreferencesPage(
+    AppLocalizations l10n,
+    bool isDarkMode,
+    OnboardingState state,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -646,27 +659,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             child: Icon(
               Icons.settings_rounded,
               size: 40,
-              color: isDarkMode
-                  ? const Color(0xFF60A5FA)
-                  : const Color(0xFF3B82F6),
+              color:
+                  isDarkMode
+                      ? const Color(0xFF60A5FA)
+                      : const Color(0xFF3B82F6),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             l10n.onboardingPreferencesTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
-                ),
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.onboardingPreferencesDescription,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDarkMode
+              color:
+                  isDarkMode
                       ? const Color(0xFF9CA3AF)
                       : const Color(0xFF64748B),
-                ),
+            ),
           ),
           const SizedBox(height: 32),
 
@@ -674,11 +689,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           Text(
             l10n.onboardingBudgetLabel,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDarkMode
+              fontWeight: FontWeight.w600,
+              color:
+                  isDarkMode
                       ? const Color(0xFFE5E7EB)
                       : const Color(0xFF374151),
-                ),
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -732,11 +748,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           Text(
             l10n.onboardingBrandsLabel,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDarkMode
+              fontWeight: FontWeight.w600,
+              color:
+                  isDarkMode
                       ? const Color(0xFFE5E7EB)
                       : const Color(0xFF374151),
-                ),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -749,14 +766,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             decoration: InputDecoration(
               hintText: l10n.onboardingBrandsHint,
               hintStyle: TextStyle(
-                color: isDarkMode
-                    ? const Color(0xFF6B7280)
-                    : const Color(0xFF9CA3AF),
+                color:
+                    isDarkMode
+                        ? const Color(0xFF6B7280)
+                        : const Color(0xFF9CA3AF),
               ),
               filled: true,
-              fillColor: isDarkMode
-                  ? const Color(0xFF1E293B)
-                  : const Color(0xFFF8FAFC),
+              fillColor:
+                  isDarkMode
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFF8FAFC),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
@@ -788,22 +807,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isDarkMode
-                  ? const Color(0xFF60A5FA)
-                  : const Color(0xFF3B82F6))
-              : (isDarkMode
-                  ? const Color(0xFF1E293B)
-                  : const Color(0xFFF1F5F9)),
+          color:
+              isSelected
+                  ? (isDarkMode
+                      ? const Color(0xFF60A5FA)
+                      : const Color(0xFF3B82F6))
+                  : (isDarkMode
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFF1F5F9)),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? (isDarkMode
-                    ? const Color(0xFF60A5FA)
-                    : const Color(0xFF3B82F6))
-                : (isDarkMode
-                    ? const Color(0xFF374151)
-                    : const Color(0xFFE2E8F0)),
+            color:
+                isSelected
+                    ? (isDarkMode
+                        ? const Color(0xFF60A5FA)
+                        : const Color(0xFF3B82F6))
+                    : (isDarkMode
+                        ? const Color(0xFF374151)
+                        : const Color(0xFFE2E8F0)),
             width: 2,
           ),
         ),
@@ -812,11 +833,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             Text(
               title,
               style: TextStyle(
-                color: isSelected
-                    ? Colors.white
-                    : (isDarkMode
-                        ? const Color(0xFFE5E7EB)
-                        : const Color(0xFF475569)),
+                color:
+                    isSelected
+                        ? Colors.white
+                        : (isDarkMode
+                            ? const Color(0xFFE5E7EB)
+                            : const Color(0xFF475569)),
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
@@ -826,11 +848,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             Text(
               subtitle,
               style: TextStyle(
-                color: isSelected
-                    ? Colors.white.withOpacity(0.9)
-                    : (isDarkMode
-                        ? const Color(0xFF9CA3AF)
-                        : const Color(0xFF64748B)),
+                color:
+                    isSelected
+                        ? Colors.white.withOpacity(0.9)
+                        : (isDarkMode
+                            ? const Color(0xFF9CA3AF)
+                            : const Color(0xFF64748B)),
                 fontSize: 11,
               ),
               textAlign: TextAlign.center,
@@ -856,10 +879,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      Colors.green.shade400,
-                      Colors.green.shade600,
-                    ],
+                    colors: [Colors.green.shade400, Colors.green.shade600],
                   ),
                   borderRadius: BorderRadius.circular(80),
                   boxShadow: [
@@ -881,20 +901,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 l10n.onboardingCompleteTitle,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color:
-                          isDarkMode ? Colors.white : const Color(0xFF1E293B),
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 l10n.onboardingCompleteDescription,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: isDarkMode
+                  color:
+                      isDarkMode
                           ? const Color(0xFF9CA3AF)
                           : const Color(0xFF64748B),
-                    ),
+                ),
               ),
             ],
           ),
@@ -941,13 +961,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 onPressed: _previousPage,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  foregroundColor: isDarkMode
-                      ? const Color(0xFF9CA3AF)
-                      : const Color(0xFF64748B),
+                  foregroundColor:
+                      isDarkMode
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF64748B),
                   side: BorderSide(
-                    color: isDarkMode
-                        ? const Color(0xFF374151)
-                        : const Color(0xFFE2E8F0),
+                    color:
+                        isDarkMode
+                            ? const Color(0xFF374151)
+                            : const Color(0xFFE2E8F0),
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -971,18 +993,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             child: SizedBox(
               height: 56,
               child: ElevatedButton(
-                onPressed: state.isSubmitting
-                    ? null
-                    : isLastPage
+                onPressed:
+                    state.isSubmitting
+                        ? null
+                        : isLastPage
                         ? widget.onComplete
                         : currentPage == 3
-                            ? _completeOnboarding
-                            : _nextPage,
+                        ? _completeOnboarding
+                        : _nextPage,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: isDarkMode
-                      ? const Color(0xFF60A5FA)
-                      : const Color(0xFF3B82F6),
+                  backgroundColor:
+                      isDarkMode
+                          ? const Color(0xFF60A5FA)
+                          : const Color(0xFF3B82F6),
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: (isDarkMode
                           ? const Color(0xFF60A5FA)
@@ -993,26 +1017,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   ),
                   elevation: 0,
                 ),
-                child: state.isSubmitting
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                child:
+                    state.isSubmitting
+                        ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : Text(
+                          isLastPage
+                              ? l10n.onboardingStartButton
+                              : currentPage == 3
+                              ? l10n.onboardingFinishButton
+                              : l10n.onboardingNextButton,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    : Text(
-                        isLastPage
-                            ? l10n.onboardingStartButton
-                            : currentPage == 3
-                                ? l10n.onboardingFinishButton
-                                : l10n.onboardingNextButton,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
             ),
           ),

@@ -6,11 +6,7 @@ class UserRoleBadge extends StatelessWidget {
   final UserRole role;
   final double size;
 
-  const UserRoleBadge({
-    super.key,
-    required this.role,
-    this.size = 12.0,
-  });
+  const UserRoleBadge({super.key, required this.role, this.size = 12.0});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +25,7 @@ class UserRoleBadge extends StatelessWidget {
           Container(
             width: size,
             height: size,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 6),
           Text(
@@ -63,9 +56,10 @@ class UserStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isActive ? Colors.green : Colors.red;
-    final label = isActive
-        ? (isVerified ? 'Активен' : 'Активен (не подтвержден)')
-        : 'Заблокирован';
+    final label =
+        isActive
+            ? (isVerified ? 'Активен' : 'Активен (не подтвержден)')
+            : 'Заблокирован';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -80,10 +74,7 @@ class UserStatusBadge extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 6),
           Text(

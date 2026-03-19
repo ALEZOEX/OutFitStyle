@@ -4,7 +4,8 @@ import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 
 class ServiceWorkerUpdateService {
-  static final ServiceWorkerUpdateService _instance = ServiceWorkerUpdateService._internal();
+  static final ServiceWorkerUpdateService _instance =
+      ServiceWorkerUpdateService._internal();
   factory ServiceWorkerUpdateService() => _instance;
   ServiceWorkerUpdateService._internal();
 
@@ -16,10 +17,15 @@ class ServiceWorkerUpdateService {
 
   void initialize() {
     debugPrint('ServiceWorkerUpdateService: Initializing update detection');
-    _timer = Timer.periodic(const Duration(minutes: 30), (_) => _checkForUpdates());
+    _timer = Timer.periodic(
+      const Duration(minutes: 30),
+      (_) => _checkForUpdates(),
+    );
     html.document.onVisibilityChange.listen((_) {
       if (html.document.visibilityState == 'visible') {
-        debugPrint('ServiceWorkerUpdateService: Page visible, checking for updates');
+        debugPrint(
+          'ServiceWorkerUpdateService: Page visible, checking for updates',
+        );
         _checkForUpdates();
       }
     });

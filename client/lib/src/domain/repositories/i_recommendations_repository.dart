@@ -25,7 +25,9 @@ abstract class IRecommendationsRepository {
 
   /// Получить рекомендации по погоде
   Future<List<OutfitRecommendation>> getRecommendationsByWeather(
-      String weatherCondition, double temperature);
+    String weatherCondition,
+    double temperature,
+  );
 
   /// Получить трендовые рекомендации
   Future<List<OutfitRecommendation>> getTrendingRecommendations();
@@ -59,7 +61,10 @@ abstract class IRecommendationsRepository {
 
   /// Получить рекомендации по пользователю
   Future<List<OutfitRecommendation>> getRecommendationsByUser(
-      String userId, {DateTime? fromDate, DateTime? toDate});
+    String userId, {
+    DateTime? fromDate,
+    DateTime? toDate,
+  });
 
   /// Оценить рекомендацию
   Future<void> rateRecommendation(String id, double rating);

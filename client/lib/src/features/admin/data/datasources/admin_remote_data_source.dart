@@ -9,10 +9,7 @@ class AdminRemoteDataSource {
   final ApiConfig config;
   final ApiClient apiClient;
 
-  AdminRemoteDataSource({
-    required this.config,
-    required this.apiClient,
-  });
+  AdminRemoteDataSource({required this.config, required this.apiClient});
 
   /// Получает статистику админ-панели
   Future<Map<String, dynamic>> getStats() async {
@@ -34,8 +31,9 @@ class AdminRemoteDataSource {
       if (filters != null) ...filters,
     };
 
-    final uri = Uri.parse('${config.apiBase}/admin/users')
-        .replace(queryParameters: queryParams);
+    final uri = Uri.parse(
+      '${config.apiBase}/admin/users',
+    ).replace(queryParameters: queryParams);
 
     final response = await http.get(
       uri,
@@ -70,7 +68,10 @@ class AdminRemoteDataSource {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final userData = data['data'] as Map<String, dynamic>? ?? data['user'] as Map<String, dynamic>? ?? data;
+      final userData =
+          data['data'] as Map<String, dynamic>? ??
+          data['user'] as Map<String, dynamic>? ??
+          data;
       return AdminUserDto.fromJson(userData);
     }
 
@@ -118,7 +119,9 @@ class AdminRemoteDataSource {
   /// Сбрасывает пароль пользователя
   Future<void> resetUserPassword(String userId) async {
     final token = await ApiConfig.getAccessToken();
-    final uri = Uri.parse('${config.apiBase}/admin/users/$userId/reset-password');
+    final uri = Uri.parse(
+      '${config.apiBase}/admin/users/$userId/reset-password',
+    );
 
     final response = await http.post(
       uri,
@@ -158,7 +161,8 @@ class AdminRemoteDataSource {
 
     try {
       final body = jsonDecode(response.body) as Map<String, dynamic>?;
-      message = body?['message'] as String? ?? body?['error'] as String? ?? message;
+      message =
+          body?['message'] as String? ?? body?['error'] as String? ?? message;
     } catch (_) {
       // Игнорируем ошибки парсинга
     }

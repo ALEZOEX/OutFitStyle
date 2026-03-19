@@ -37,7 +37,8 @@ class OutfitStyleApp extends ConsumerWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
         final brightness = MediaQuery.platformBrightnessOf(context);
-        final isDark = themeMode == ThemeMode.dark ||
+        final isDark =
+            themeMode == ThemeMode.dark ||
             (themeMode == ThemeMode.system && brightness == Brightness.dark);
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -45,12 +46,9 @@ class OutfitStyleApp extends ConsumerWidget {
             statusBarColor: Colors.transparent,
             statusBarIconBrightness:
                 isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness:
-                isDark ? Brightness.dark : Brightness.light,
+            statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
           ),
-          child: ServiceWorkerUpdateBanner(
-            child: AuthGate(child: child!),
-          ),
+          child: ServiceWorkerUpdateBanner(child: AuthGate(child: child!)),
         );
       },
     );

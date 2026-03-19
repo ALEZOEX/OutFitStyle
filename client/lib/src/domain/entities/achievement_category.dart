@@ -47,5 +47,6 @@ enum AchievementCategory {
   }
 
   /// Получить все категории для UI
-  static List<AchievementCategory> get allCategories => AchievementCategory.values;
+  static List<AchievementCategory> get allCategories =>
+      AchievementCategory.values;
 }
