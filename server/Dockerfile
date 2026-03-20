@@ -17,9 +17,9 @@ RUN go mod download
 COPY . ./
 
 # Обновить зависимости и собрать бинарники
-RUN go mod tidy
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server cmd/server/main.go
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate cmd/migrate/main.go
+RUN go mod tidy && \
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server cmd/server/main.go && \
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate cmd/migrate/main.go
 
 # Второй этап - минимальный образ
 FROM alpine:latest
