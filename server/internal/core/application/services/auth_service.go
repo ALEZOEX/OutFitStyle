@@ -422,7 +422,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 
 	// 1. Пробуем валидировать через Firebase Admin SDK (если доступен)
 	if s.firebaseAuth != nil {
-		firebaseToken, firebaseErr := s.firebaseAuth.VerifyIDToken(ctx, idToken)
+		_, firebaseErr := s.firebaseAuth.VerifyIDToken(ctx, idToken)
 		if firebaseErr == nil {
 			// Декодируем токен для получения email и других claims
 			claims, decodeErr := decodeFirebaseToken(idToken)
