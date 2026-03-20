@@ -16,7 +16,8 @@ RUN go mod download
 # Копировать исходный код
 COPY . ./
 
-# Собрать бинарники
+# Обновить зависимости и собрать бинарники
+RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server cmd/server/main.go
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate cmd/migrate/main.go
 
