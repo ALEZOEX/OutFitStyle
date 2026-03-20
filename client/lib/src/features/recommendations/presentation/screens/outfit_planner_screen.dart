@@ -724,8 +724,9 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
     final now = DateTime.now();
     int daysUntilSaturday = 6 - now.weekday;
     if (daysUntilSaturday < 0) daysUntilSaturday += 7;
-    if (daysUntilSaturday == 0)
+    if (daysUntilSaturday == 0) {
       daysUntilSaturday = 1; // Если сегодня суббота, показать воскресенье
+    }
     return DateTime(now.year, now.month, now.day + daysUntilSaturday);
   }
 }

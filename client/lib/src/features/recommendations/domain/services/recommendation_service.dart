@@ -100,8 +100,9 @@ class RecommendationService {
             item.category != 'top' &&
             item.category != 'bottom') {
           if (item.category == 'shoes' || item.category == 'outerwear') {
-            if (item.snowOk != true && (item.warmthLevel ?? 0) < 3)
+            if (item.snowOk != true && (item.warmthLevel ?? 0) < 3) {
               return false;
+            }
           }
         }
       }
