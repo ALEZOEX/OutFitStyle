@@ -67,6 +67,9 @@ type SessionRepository interface {
 	// Touch обновляет время последнего использования сессии
 	Touch(ctx context.Context, sessionID domain.ID) error
 
+	// GetRefreshToken возвращает refresh-токен сессии
+	GetRefreshToken(ctx context.Context, sessionID domain.ID) (string, error)
+
 	// Revoke отменяет сессию
 	Revoke(ctx context.Context, sessionID domain.ID) error
 

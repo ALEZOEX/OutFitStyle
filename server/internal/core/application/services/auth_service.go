@@ -136,7 +136,11 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 	}
 
 	email := strings.TrimSpace(strings.ToLower(input.Email))
-	s.logger.Info("Register attempt", zap.String("email", email[:3]+"***"))
+	maskedEmail := email
+	if len(email) > 3 {
+		maskedEmail = email[:3] + "***"
+	}
+	s.logger.Info("Register attempt", zap.String("email", maskedEmail))
 
 	existing, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil && !errors.Is(err, repositories.ErrNotFound) {
@@ -144,7 +148,7 @@ func (s *AuthService) Register(ctx context.Context, input domain.UserRegistratio
 		return nil, err
 	}
 	if existing != nil {
-		s.logger.Info("Register: email already exists", zap.String("email", email[:3]+"***"))
+		s.logger.Info("Register: email already exists", zap.String("email", maskedEmail))
 		return nil, repositories.ErrEmailAlreadyExists
 	}
 
@@ -221,19 +225,23 @@ func (s *AuthService) Login(ctx context.Context, input domain.UserLogin, device 
 		return nil, ErrInvalidCredentials
 	}
 
-	s.logger.Info("Login attempt", zap.String("email", email[:3]+"***"))
+	maskedEmail := email
+	if len(email) > 3 {
+		maskedEmail = email[:3] + "***"
+	}
+	s.logger.Info("Login attempt", zap.String("email", maskedEmail))
 
 	u, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, repositories.ErrNotFound) {
-			s.logger.Info("Login: user not found", zap.String("email", email[:3]+"***"))
+			s.logger.Info("Login: user not found", zap.String("email", maskedEmail))
 			return nil, ErrInvalidCredentials
 		}
 		s.logger.Error("Login: database error", zap.Error(err))
 		return nil, err
 	}
 	if u == nil {
-		s.logger.Info("Login: user is nil", zap.String("email", email[:3]+"***"))
+		s.logger.Info("Login: user is nil", zap.String("email", maskedEmail))
 		return nil, ErrInvalidCredentials
 	}
 
@@ -384,16 +392,8 @@ func decodeFirebaseToken(tokenString string) (*firebaseTokenClaims, error) {
 		return nil, errors.New("invalid token format")
 	}
 
-	// Добавляем padding для base64 decoding
-	claimsBase64 := parts[1]
-	switch len(claimsBase64) % 4 {
-	case 2:
-		claimsBase64 += "=="
-	case 3:
-		claimsBase64 += "="
-	}
-
-	claimsBytes, err := base64.URLEncoding.DecodeString(claimsBase64)
+	// Используем RawURLEncoding — он не требует padding
+	claimsBytes, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode claims: %w", err)
 	}
@@ -526,10 +526,11 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 			zap.String("email", gUser.Email),
 		)
 		// 3. Пользователя нет -> Регистрируем автоматически
-		displayName := gUser.FirstName
+		displayName := strings.TrimSpace(gUser.FirstName)
 		if gUser.LastName != "" {
-			displayName += " " + gUser.LastName
+			displayName += " " + strings.TrimSpace(gUser.LastName)
 		}
+		displayName = strings.TrimSpace(displayName)
 
 		provider := "google"
 
@@ -583,14 +584,34 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 				zap.String("user_id", u.ID.String()),
 				zap.String("email", u.Email),
 			)
-			// Обновляем профиль данными из Google
+			// Обновляем профиль данными из Google, только если текущие значения пустые
 			provider := "google"
+			
+			// Сохраняем текущие DisplayName и AvatarURL, если они заполнены
+			displayName := u.DisplayName
+			if displayName == nil || *displayName == "" {
+				name := strings.TrimSpace(gUser.FirstName)
+				if gUser.LastName != "" {
+					name += " " + strings.TrimSpace(gUser.LastName)
+				}
+				if name != "" {
+					displayName = &name
+				}
+			}
+			
+			avatarURL := u.AvatarURL
+			if avatarURL == nil || *avatarURL == "" {
+				if gUser.Picture != "" {
+					avatarURL = &gUser.Picture
+				}
+			}
+			
 			updatedUser := &domain.User{
 				ID:            u.ID,
 				Email:         u.Email,
 				PasswordHash:  u.PasswordHash, // Сохраняем старый пароль, если есть
-				DisplayName:   &gUser.FirstName,
-				AvatarURL:     &gUser.Picture,
+				DisplayName:   displayName,
+				AvatarURL:     avatarURL,
 				IsActive:      u.IsActive,
 				IsVerified:    true,      // Google проверил email
 				OAuthProvider: &provider, // Устанавливаем OAuth-провайдер
@@ -822,8 +843,7 @@ func (s *AuthService) SilentLogin(ctx context.Context, accessToken string, devic
 		}
 	}
 
-	// Обновляем время последнего использования сессии
-	_ = s.sessionRepo.Touch(ctx, sessionID)
+	// Touch вызывается внутри ValidateAccessToken, здесь не нужен
 
 	// Генерируем новую пару токенов для продолжения сессии
 	access, exp, err := s.tokenSvc.GenerateAccessToken(userID, sessionID)
@@ -831,14 +851,16 @@ func (s *AuthService) SilentLogin(ctx context.Context, accessToken string, devic
 		return nil, err
 	}
 
-	// Обновляем время последнего использования сессии
-	_ = s.sessionRepo.Touch(ctx, sessionID)
+	// Получаем оригинальный refresh-токен из сессии
+	originalRefresh, err := s.sessionRepo.GetRefreshToken(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
 
 	// Возвращаем новую пару токенов (access токен обновляется, refresh остается тем же)
-	// Refresh-токен не возвращаем при silent login, т.к. он уже есть у клиента
 	pair := domain.TokenPair{
 		AccessToken:  access,
-		RefreshToken: "", // Refresh-токен не обновляется при silent login
+		RefreshToken: originalRefresh, // Сохраняем оригинальный refresh-токен
 		ExpiresAt:    exp,
 	}
 
