@@ -55,6 +55,13 @@ func DefaultPerUserRateLimitConfig() PerUserRateLimitConfig {
 func PerUserRateLimitMiddleware(limiter *RateLimiter, config PerUserRateLimitConfig) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Skip rate limiting for health checks, metrics, and swagger
+			path := r.URL.Path
+			if path == "/health" || path == "/metrics" || strings.HasPrefix(path, "/swagger") {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			// Determine identifier (user ID or IP)
 			key, idType, idVal := rateIdentifier(r)
 
