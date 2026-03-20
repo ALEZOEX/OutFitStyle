@@ -352,25 +352,6 @@ func (r *SessionRepository) Touch(ctx context.Context, sessionID domain.ID) erro
 	return nil
 }
 
-func (r *SessionRepository) GetRefreshToken(ctx context.Context, sessionID domain.ID) (string, error) {
-	query := `
-		SELECT refresh_token_hash
-		FROM sessions
-		WHERE id = $1 AND is_active = true
-	`
-
-	var refreshToken string
-	err := r.db.QueryRow(ctx, query, sessionID).Scan(&refreshToken)
-	if err != nil {
-		if err.Error() == "no rows in result set" {
-			return "", errors.New("session not found")
-		}
-		return "", errors.Wrap(err, "failed to get refresh token")
-	}
-
-	return refreshToken, nil
-}
-
 func (r *SessionRepository) Revoke(ctx context.Context, sessionID domain.ID) error {
 	query := `
 		UPDATE sessions

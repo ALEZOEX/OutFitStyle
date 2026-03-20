@@ -413,9 +413,7 @@ func decodeFirebaseToken(tokenString string) (*firebaseTokenClaims, error) {
 // 3. Email извлекаем из claims токена (декодирование JWT) или из google.Verify()
 func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device DeviceInfo) (*LoginResult, error) {
 	s.logger.Info("[AuthService] [GoogleSignIn] Начало входа через Google",
-		zap.Int("token_length", len(idToken)),
 		zap.String("client_id", s.google.ClientID()),
-		zap.String("device_ip", device.IPAddressOrEmpty()),
 		zap.Bool("firebase_auth_available", s.firebaseAuth != nil),
 	)
 
@@ -424,96 +422,59 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 
 	// 1. Пробуем валидировать через Firebase Admin SDK (если доступен)
 	if s.firebaseAuth != nil {
-		s.logger.Debug("[AuthService] [GoogleSignIn] Попытка валидации через Firebase Admin SDK",
-			zap.Int("token_length", len(idToken)),
-		)
-
 		firebaseToken, firebaseErr := s.firebaseAuth.VerifyIDToken(ctx, idToken)
 		if firebaseErr == nil {
-			s.logger.Info("[AuthService] [GoogleSignIn] Firebase Admin SDK валидация успешна",
-				zap.String("firebase_uid", firebaseToken.UID),
-			)
-
 			// Декодируем токен для получения email и других claims
 			claims, decodeErr := decodeFirebaseToken(idToken)
-			if decodeErr != nil {
-				s.logger.Error("[AuthService] [GoogleSignIn] Ошибка декодирования claims из Firebase токена",
-					zap.String("error", decodeErr.Error()),
-				)
-				// Не прерываем, пробуем fallback
-			} else {
-				// Успешно декодировали claims
+			if decodeErr == nil {
 				gUser = &external.GoogleUser{
-					ID:            claims.UID,          // Firebase UID
+					ID:            claims.UID,
 					Email:         claims.Email,
 					EmailVerified: claims.EmailVerified,
 					FirstName:     claims.Name,
 					LastName:      "",
 					Picture:       claims.Picture,
 				}
-				s.logger.Info("[AuthService] [GoogleSignIn] Claims извлечены из Firebase токена",
-					zap.String("email", claims.Email),
-					zap.Bool("email_verified", claims.EmailVerified),
-				)
 			}
-		} else {
-			s.logger.Debug("[AuthService] [GoogleSignIn] Firebase Admin SDK валидация не удалась, fallback на google.Verify",
-				zap.String("error", firebaseErr.Error()),
-			)
 		}
-	} else {
-		s.logger.Debug("[AuthService] [GoogleSignIn] Firebase Admin SDK не доступен, используем google.Verify",
-			zap.Int("token_length", len(idToken)),
-		)
 	}
 
 	// 2. Fallback: если Firebase Admin SDK не доступен или вернул ошибку, используем google.Verify()
 	if gUser == nil {
-		s.logger.Debug("[AuthService] [GoogleSignIn] Валидация токена через Google API (fallback)",
-			zap.Int("token_length", len(idToken)),
-			zap.String("client_id", s.google.ClientID()),
-		)
-
 		gUser, err = s.google.Verify(ctx, idToken)
 		if err != nil {
-			s.logger.Error("[AuthService] [GoogleSignIn] Ошибка верификации токена (google.Verify)",
+			s.logger.Debug("[AuthService] [GoogleSignIn] Ошибка верификации токена",
 				zap.String("error", err.Error()),
-				zap.String("error_type", fmt.Sprintf("%T", err)),
-				zap.Int("token_length", len(idToken)),
 			)
 			return nil, ErrInvalidCredentials
 		}
-
-		s.logger.Info("[AuthService] [GoogleSignIn] Токен верифицирован через Google API",
-			zap.String("email", gUser.Email),
-			zap.Bool("email_verified", gUser.EmailVerified),
-			zap.String("google_sub", gUser.ID),
-		)
 	}
 
 	// 3. Проверка email
 	if gUser.Email == "" {
-		s.logger.Error("[AuthService] [GoogleSignIn] Email не получен из токена",
-			zap.String("firebase_uid", gUser.ID),
-		)
+		s.logger.Debug("[AuthService] [GoogleSignIn] Email не получен из токена")
 		return nil, errors.New("email не получен из токена")
 	}
 
 	if !gUser.EmailVerified {
-		s.logger.Warn("[AuthService] [GoogleSignIn] Email не подтверждён",
+		s.logger.Debug("[AuthService] [GoogleSignIn] Email не подтверждён",
 			zap.String("email", gUser.Email),
 		)
 		return nil, errors.New("email в Google не подтвержден")
 	}
 
-	// 2. Ищем пользователя в БД
+	// 4. Ищем пользователя в БД
+	maskedEmail := gUser.Email
+	if len(gUser.Email) > 3 {
+		maskedEmail = gUser.Email[:3] + "***"
+	}
 	s.logger.Debug("[AuthService] [GoogleSignIn] Поиск пользователя в БД",
-		zap.String("email", gUser.Email),
+		zap.String("email", maskedEmail),
 	)
 	u, err := s.userRepo.GetUserByEmail(ctx, gUser.Email)
-	if err != nil {
-		s.logger.Error("[AuthService] [GoogleSignIn] Ошибка поиска пользователя",
-			zap.String("email", gUser.Email),
+	if err != nil && !errors.Is(err, repositories.ErrNotFound) {
+		s.logger.Debug("[AuthService] [GoogleSignIn] Ошибка поиска пользователя",
+			zap.String("email", maskedEmail),
 			zap.String("error", err.Error()),
 		)
 		return nil, err
@@ -523,9 +484,9 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 
 	if u == nil {
 		s.logger.Info("[AuthService] [GoogleSignIn] Пользователь не найден, создаём нового",
-			zap.String("email", gUser.Email),
+			zap.String("email", maskedEmail),
 		)
-		// 3. Пользователя нет -> Регистрируем автоматически
+		// 5. Пользователя нет -> Регистрируем автоматически
 		displayName := strings.TrimSpace(gUser.FirstName)
 		if gUser.LastName != "" {
 			displayName += " " + strings.TrimSpace(gUser.LastName)
@@ -535,28 +496,24 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 		provider := "google"
 
 		newUser := &domain.User{
-			ID:            domain.NewID(), // Генерируем новый UUID
+			ID:            domain.NewID(),
 			Email:         gUser.Email,
-			PasswordHash:  "", // Пароля нет - пустая строка
+			PasswordHash:  "",
 			DisplayName:   &displayName,
 			AvatarURL:     &gUser.Picture,
 			IsActive:      true,
-			IsVerified:    true, // Google уже проверил
+			IsVerified:    true,
 			OAuthProvider: &provider,
-			OAuthID:       &gUser.ID, // Сохраняем Google sub
+			OAuthID:       &gUser.ID,
 			Locale:        ptr("ru"),
 			Timezone:      ptr("Europe/Moscow"),
-			CreatedAt:     time.Now(), // Устанавливаем время создания
-			UpdatedAt:     time.Now(), // Устанавливаем время обновления
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
 		}
 
-		s.logger.Debug("[AuthService] [GoogleSignIn] Создание пользователя в БД",
-			zap.String("email", gUser.Email),
-			zap.String("display_name", displayName),
-		)
 		if err := s.userRepo.CreateUser(ctx, newUser); err != nil {
 			s.logger.Error("[AuthService] [GoogleSignIn] Ошибка создания пользователя",
-				zap.String("email", gUser.Email),
+				zap.String("email", maskedEmail),
 				zap.String("error", err.Error()),
 			)
 			return nil, err
@@ -564,29 +521,25 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 		resultUser = newUser
 		s.logger.Info("[AuthService] [GoogleSignIn] Пользователь создан",
 			zap.String("user_id", resultUser.ID.String()),
-			zap.String("email", gUser.Email),
+			zap.String("email", maskedEmail),
 		)
 	} else {
 		s.logger.Info("[AuthService] [GoogleSignIn] Пользователь найден",
 			zap.String("user_id", u.ID.String()),
-			zap.String("email", u.Email),
+			zap.String("email", maskedEmail),
 		)
-		// 4. Пользователь существует
-		// Проверяем, если у пользователя уже есть OAuth-провайдер (Google), просто логиним
+		// 6. Пользователь существует
 		if u.OAuthProvider != nil && *u.OAuthProvider == "google" {
 			resultUser = u
-			s.logger.Debug("[AuthService] [GoogleSignIn] Существующий Google пользователь",
-				zap.String("user_id", u.ID.String()),
-			)
 		} else {
-			// 5. Пользователь существует с email-паролем, нужно "склеить" аккаунты
+			// 7. Пользователь существует с email-паролем, нужно "склеить" аккаунты
 			s.logger.Info("[AuthService] [GoogleSignIn] Связывание Google с email-аккаунтом",
 				zap.String("user_id", u.ID.String()),
-				zap.String("email", u.Email),
+				zap.String("email", maskedEmail),
 			)
 			// Обновляем профиль данными из Google, только если текущие значения пустые
 			provider := "google"
-			
+
 			// Сохраняем текущие DisplayName и AvatarURL, если они заполнены
 			displayName := u.DisplayName
 			if displayName == nil || *displayName == "" {
@@ -598,32 +551,28 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 					displayName = &name
 				}
 			}
-			
+
 			avatarURL := u.AvatarURL
 			if avatarURL == nil || *avatarURL == "" {
 				if gUser.Picture != "" {
 					avatarURL = &gUser.Picture
 				}
 			}
-			
+
 			updatedUser := &domain.User{
 				ID:            u.ID,
 				Email:         u.Email,
-				PasswordHash:  u.PasswordHash, // Сохраняем старый пароль, если есть
+				PasswordHash:  u.PasswordHash,
 				DisplayName:   displayName,
 				AvatarURL:     avatarURL,
 				IsActive:      u.IsActive,
-				IsVerified:    true,      // Google проверил email
-				OAuthProvider: &provider, // Устанавливаем OAuth-провайдер
-				OAuthID:       &gUser.ID, // Сохраняем Google sub
+				IsVerified:    true,
+				OAuthProvider: &provider,
+				OAuthID:       &gUser.ID,
 				Locale:        u.Locale,
 				Timezone:      u.Timezone,
 			}
 
-			// Обновляем пользователя в базе
-			s.logger.Debug("[AuthService] [GoogleSignIn] Обновление пользователя",
-				zap.String("user_id", u.ID.String()),
-			)
 			if err := s.userRepo.UpdateUser(ctx, updatedUser); err != nil {
 				s.logger.Error("[AuthService] [GoogleSignIn] Ошибка обновления пользователя",
 					zap.String("user_id", u.ID.String()),
@@ -635,11 +584,7 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 		}
 	}
 
-	// 6. Генерируем сессию и токены
-	s.logger.Info("[AuthService] [GoogleSignIn] Генерация сессии и токенов",
-		zap.String("user_id", resultUser.ID.String()),
-		zap.String("device_ip", device.IPAddressOrEmpty()),
-	)
+	// 8. Генерируем сессию и токены
 	pair, err := s.createSessionAndTokens(ctx, resultUser.ID, device)
 	if err != nil {
 		s.logger.Error("[AuthService] [GoogleSignIn] Ошибка генерации токенов",
@@ -649,11 +594,9 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 		return nil, err
 	}
 
-	s.logger.Info("[AuthService] [GoogleSignIn] Токены сгенерированы успешно",
+	s.logger.Info("[AuthService] [GoogleSignIn] Вход успешен",
 		zap.String("user_id", resultUser.ID.String()),
-		zap.String("email", resultUser.Email),
-		zap.Int("access_token_length", len(pair.AccessToken)),
-		zap.Int("refresh_token_length", len(pair.RefreshToken)),
+		zap.String("email", maskedEmail),
 	)
 
 	return &LoginResult{User: resultUser, Tokens: pair}, nil
@@ -792,8 +735,9 @@ func (s *AuthService) ValidateAccessToken(ctx context.Context, accessToken strin
 }
 
 // ValidateTokenForSilentLogin проверяет токен для тихого входа
+// Security: Touch вызывается внутри ValidateAccessToken, здесь не нужен
 func (s *AuthService) ValidateTokenForSilentLogin(ctx context.Context, accessToken string) (*domain.User, error) {
-	userID, sessionID, err := s.ValidateAccessToken(ctx, accessToken)
+	userID, _, err := s.ValidateAccessToken(ctx, accessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -805,9 +749,6 @@ func (s *AuthService) ValidateTokenForSilentLogin(ctx context.Context, accessTok
 	if user == nil {
 		return nil, ErrUnauthorized
 	}
-
-	// Обновляем время последнего использования сессии
-	_ = s.sessionRepo.Touch(ctx, sessionID)
 
 	return user, nil
 }
@@ -851,16 +792,10 @@ func (s *AuthService) SilentLogin(ctx context.Context, accessToken string, devic
 		return nil, err
 	}
 
-	// Получаем оригинальный refresh-токен из сессии
-	originalRefresh, err := s.sessionRepo.GetRefreshToken(ctx, sessionID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Возвращаем новую пару токенов (access токен обновляется, refresh остается тем же)
+	// Refresh-токен не возвращаем — клиент использует сохранённый
 	pair := domain.TokenPair{
 		AccessToken:  access,
-		RefreshToken: originalRefresh, // Сохраняем оригинальный refresh-токен
+		RefreshToken: "", // Клиент должен использовать свой сохранённый refresh-токен
 		ExpiresAt:    exp,
 	}
 
