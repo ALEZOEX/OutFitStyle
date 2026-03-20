@@ -569,7 +569,6 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 		s.logger.Info("[AuthService] [GoogleSignIn] Пользователь найден",
 			zap.String("user_id", u.ID.String()),
 			zap.String("email", u.Email),
-			zap.String("oauth_provider", *u.OAuthProvider),
 		)
 		// 4. Пользователь существует
 		// Проверяем, если у пользователя уже есть OAuth-провайдер (Google), просто логиним
