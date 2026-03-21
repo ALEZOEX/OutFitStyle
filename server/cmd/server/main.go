@@ -686,6 +686,10 @@ func setupRouter(
 	// /api/v1/user/*
 	user := protected.PathPrefix("/user").Subrouter()
 	userHandler.RegisterRoutes(user)
+	
+	// /api/v1/users/* — alias для совместимости с frontend
+	users := protected.PathPrefix("/users").Subrouter()
+	userHandler.RegisterRoutes(users)
 
 	// /api/v1/user/set-password, /api/v1/user/change-password
 	passwordHandler.RegisterRoutes(protected)
