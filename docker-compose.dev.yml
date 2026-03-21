@@ -53,8 +53,8 @@ services:
 
   ml-service:
     build:
-      context: ./ml-service
-      dockerfile: ../Dockerfile.ml-service
+      context: .
+      dockerfile: Dockerfile.ml-service
     volumes:
       - ./ml-service/models:/app/models:ro
     expose:

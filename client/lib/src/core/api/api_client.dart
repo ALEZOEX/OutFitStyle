@@ -3,7 +3,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'dart:developer' as developer;
+import 'package:web/web.dart' as web;
 import '../../utils/logger.dart';
+
+/// Получение access_token из localStorage (только для Web)
+/// SharedPreferences на Web может быть не инициализирован вовремя
+String? _getAccessTokenFromLocalStorage() {
+  try {
+    return web.window.localStorage.getItem('flutter.access_token');
+  } catch (_) {
+    // Игнорируем ошибки для non-web платформ
+  }
+  return null;
+}
 
 /// ApiClient — HTTP клиент для авторизованных запросов
 ///
@@ -63,6 +75,17 @@ class ApiClient {
 
             // Приоритет 1: Backend Access Token из SharedPreferences
             accessToken = _sharedPreferences?.getString('access_token');
+            
+            // Приоритет 2: Чтение напрямую из localStorage (для Web)
+            if (accessToken == null || accessToken.isEmpty) {
+              accessToken = _getAccessTokenFromLocalStorage();
+              if (accessToken != null && accessToken.isNotEmpty) {
+                developer.log(
+                  '🔑 [AUTH DEBUG] ✅ Token read from localStorage (Web fallback)',
+                  name: 'AuthDebug',
+                );
+              }
+            }
 
             if (accessToken != null && accessToken.isNotEmpty) {
               // Определяем тип токена по структуре JWT (xxx.xxx.xxx)

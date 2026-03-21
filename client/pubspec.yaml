@@ -88,6 +88,7 @@ dependencies:
 
   # Web support
   universal_html: ^2.2.4
+  web: ^1.1.0
 
   # Additional dependencies
   encrypt: ^5.0.3
