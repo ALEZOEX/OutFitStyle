@@ -334,10 +334,10 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (domain.
 		s.logger.Warn("REPLAY ATTACK DETECTED: refresh token already used",
 			zap.String("refresh_hash", hash[:16]+"..."),
 		)
-		// Security: при replay attack инвалидируем ВСЕ сессии пользователя
-		// Это защищает от дальнейшей атаки, но требует перелогинивания
-		// Здесь мы не можем получить userID, так как сессия не найдена
-		// Но хеш токена можно залогировать для мониторинга
+		// Security: replay attack detected
+		// UserID неизвестен (сессия уже удалена после rotation),
+		// поэтому инвалидировать сессии атакующего невозможно.
+		// Логируем для мониторинга и алертинга.
 		return domain.TokenPair{}, ErrUnauthorized
 	}
 
@@ -456,18 +456,20 @@ func (s *AuthService) GoogleSignIn(ctx context.Context, idToken string, device D
 		return nil, errors.New("email не получен из токена")
 	}
 
+	// Маскировка email для логирования
+	maskedEmail := gUser.Email
+	if len(gUser.Email) > 3 {
+		maskedEmail = gUser.Email[:3] + "***"
+	}
+
 	if !gUser.EmailVerified {
 		s.logger.Debug("[AuthService] [GoogleSignIn] Email не подтверждён",
-			zap.String("email", gUser.Email),
+			zap.String("email", maskedEmail),
 		)
 		return nil, errors.New("email в Google не подтвержден")
 	}
 
 	// 4. Ищем пользователя в БД
-	maskedEmail := gUser.Email
-	if len(gUser.Email) > 3 {
-		maskedEmail = gUser.Email[:3] + "***"
-	}
 	s.logger.Debug("[AuthService] [GoogleSignIn] Поиск пользователя в БД",
 		zap.String("email", maskedEmail),
 	)
@@ -876,9 +878,13 @@ func (s *AuthService) GetUserByOAuthID(ctx context.Context, provider string, oau
 	}
 
 	if user != nil {
+		maskedEmail := user.Email
+		if len(user.Email) > 3 {
+			maskedEmail = user.Email[:3] + "***"
+		}
 		s.logger.Debug("[AuthService] [GetUserByOAuthID] Пользователь найден",
 			zap.String("user_id", user.ID.String()),
-			zap.String("email", user.Email),
+			zap.String("email", maskedEmail),
 		)
 	}
 
