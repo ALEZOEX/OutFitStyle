@@ -3,18 +3,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
 import 'dart:developer' as developer;
-import 'package:web/web.dart' as web;
 import '../../utils/logger.dart';
+import 'web_token_storage_selector.dart';
 
 /// Получение access_token из localStorage (только для Web)
 /// SharedPreferences на Web может быть не инициализирован вовремя
 String? _getAccessTokenFromLocalStorage() {
-  try {
-    return web.window.localStorage.getItem('flutter.access_token');
-  } catch (_) {
-    // Игнорируем ошибки для non-web платформ
-  }
-  return null;
+  return getAccessTokenFromLocalStorage();
 }
 
 /// ApiClient — HTTP клиент для авторизованных запросов
