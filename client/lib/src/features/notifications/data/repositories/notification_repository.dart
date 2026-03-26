@@ -32,6 +32,8 @@ class NotificationRepository {
         total: response.total,
         hasMore: (page * limit) < response.total,
       );
+    } on NonJsonResponseException catch (e) {
+      throw NotificationException('Сервер вернул невалидный ответ (${e.statusCode}). Попробуйте позже.');
     } on NetworkException catch (e) {
       throw NotificationException('Нет соединения: ${e.message}');
     } on ApiException catch (e) {
@@ -93,6 +95,8 @@ class NotificationRepository {
   Future<int> getUnreadCount() async {
     try {
       return await _remoteDataSource.getUnreadCount();
+    } on NonJsonResponseException catch (e) {
+      throw NotificationException('Сервер вернул невалидный ответ (${e.statusCode}). Попробуйте позже.');
     } on NetworkException catch (e) {
       throw NotificationException('Нет соединения: ${e.message}');
     } on ApiException catch (e) {

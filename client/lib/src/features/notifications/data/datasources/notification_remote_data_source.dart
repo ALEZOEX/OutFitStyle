@@ -3,6 +3,16 @@ import 'dart:convert';
 import '../../../../core/api/api_client.dart';
 import '../models/notification_dto.dart';
 
+class NonJsonResponseException implements Exception {
+  final int statusCode;
+  final String responsePreview;
+
+  NonJsonResponseException(this.statusCode, this.responsePreview);
+
+  @override
+  String toString() => 'NonJsonResponseException: status=$statusCode, preview=${responsePreview.substring(0, responsePreview.length > 50 ? 50 : responsePreview.length)}';
+}
+
 /// Remote data source для работы с API уведомлений
 class NotificationRemoteDataSource {
   final ApiClient _apiClient;
@@ -29,8 +39,22 @@ class NotificationRemoteDataSource {
       params: params,
     );
 
-    final data = jsonDecode(response.data.toString()) as Map<String, dynamic>;
-    return NotificationsResponse.fromJson(data);
+    final responseData = response.data;
+    final dataStr = responseData?.toString() ?? '';
+
+    if (dataStr.isEmpty) {
+      throw NonJsonResponseException(response.statusCode ?? 0, 'empty response');
+    }
+
+    try {
+      final data = jsonDecode(dataStr) as Map<String, dynamic>;
+      return NotificationsResponse.fromJson(data);
+    } catch (e) {
+      throw NonJsonResponseException(
+        response.statusCode ?? 0,
+        dataStr,
+      );
+    }
   }
 
   /// Отметить уведомление как прочитанное
