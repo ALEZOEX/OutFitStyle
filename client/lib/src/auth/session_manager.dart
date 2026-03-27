@@ -7,6 +7,7 @@ import '../utils/logger.dart';
 import '../core/api/api_client.dart';
 import '../core/api/api_config.dart';
 import '../core/api/web_token_helper_selector.dart';
+import '../core/api/web_token_storage_selector.dart';
 
 /// Модель данных пользователя
 class UserSession {
@@ -228,18 +229,56 @@ class SessionManager {
       // Extract and store access_token for Bearer authentication
       final accessToken = tokens['access_token'] as String?;
       if (accessToken != null && accessToken.isNotEmpty) {
+        final timestamp = DateTime.now().toIso8601String();
+        
+        // Сохраняем в SharedPreferences
         await _sharedPreferences.setString('access_token', accessToken);
+        
         // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
         saveTokenToLocalStorage(accessToken);
-        AppLogger.info('Access token stored for user: ${_maskEmail(email)}');
-        // Verify it was saved
-        final saved = _sharedPreferences.getString('access_token');
-        AppLogger.info(
-          'Access token verification: ${saved != null ? "saved successfully (${saved.length} chars)" : "FAILED TO SAVE"}',
+        
+        developer.log(
+          '[$timestamp] [SessionManager] ✅ Access token stored for user: ${_maskEmail(email)}',
+          name: 'SessionManager',
         );
+        
+        // Верификация: читаем обратно из SharedPreferences
+        final saved = _sharedPreferences.getString('access_token');
+        if (saved != null && saved.isNotEmpty && saved == accessToken) {
+          developer.log(
+            '[$timestamp] [SessionManager] ✅ Access token verification: saved successfully (${saved.length} chars, match=true)',
+            name: 'SessionManager',
+          );
+        } else if (saved != null && saved.isNotEmpty) {
+          developer.log(
+            '[$timestamp] [SessionManager] ⚠️ Access token verification: saved but MISMATCH (saved=${saved.length} chars, expected=${accessToken.length} chars)',
+            name: 'SessionManager',
+          );
+        } else {
+          developer.log(
+            '[$timestamp] [SessionManager] ❌ ERROR: Access token verification: FAILED TO SAVE',
+            name: 'SessionManager',
+            level: 1000,
+          );
+        }
+        
+        // Верификация: читаем из localStorage (Web)
+        final savedInLocalStorage = getAccessTokenFromLocalStorage();
+        if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
+          developer.log(
+            '[$timestamp] [SessionManager] ✅ localStorage verification: token found (${savedInLocalStorage.length} chars)',
+            name: 'SessionManager',
+          );
+        } else {
+          developer.log(
+            '[$timestamp] [SessionManager] ⚠️ localStorage verification: token NOT found (expected on Web only)',
+            name: 'SessionManager',
+          );
+        }
       } else {
-        AppLogger.warning(
-          'No access_token in login response for user: ${_maskEmail(email)}',
+        developer.log(
+          '⚠️ [SessionManager] No access_token in login response for user: ${_maskEmail(email ?? 'unknown')}',
+          name: 'SessionManager',
         );
       }
 
@@ -459,6 +498,10 @@ class SessionManager {
             '[$backendTimestamp] [Auth] [GoogleSignIn] Сохранение access_token (длина: ${accessToken.length} символов)',
           );
           await _sharedPreferences.setString('access_token', accessToken);
+          
+          // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
+          saveTokenToLocalStorage(accessToken);
+          
           AppLogger.info(
             '[$backendTimestamp] [Auth] [GoogleSignIn] Access token сохранён для Google пользователя: ${_maskEmail(user.email ?? 'unknown')}',
           );
@@ -480,6 +523,18 @@ class SessionManager {
             } else if (saved.length > 1000) {
               AppLogger.error(
                 '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 WARNING: Сохранён Firebase ID Token вместо backend JWT!',
+              );
+            }
+            
+            // Верификация: читаем из localStorage (Web)
+            final savedInLocalStorage = getAccessTokenFromLocalStorage();
+            if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
+              AppLogger.info(
+                '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ localStorage verification: token found (${savedInLocalStorage.length} chars)',
+              );
+            } else {
+              AppLogger.warning(
+                '[$backendTimestamp] [Auth] [GoogleSignIn] ⚠️ localStorage verification: token NOT found (expected on Web only)',
               );
             }
           } else {
@@ -672,11 +727,50 @@ class SessionManager {
       // Extract and store access_token for Bearer authentication
       final accessToken = tokens['access_token'] as String?;
       if (accessToken != null && accessToken.isNotEmpty) {
+        final timestamp = DateTime.now().toIso8601String();
+        
         await _sharedPreferences.setString('access_token', accessToken);
-        AppLogger.info('Access token stored for user: ${_maskEmail(email)}');
+        
+        // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
+        saveTokenToLocalStorage(accessToken);
+        
+        developer.log(
+          '[$timestamp] [SessionManager] ✅ Access token stored for user: ${_maskEmail(email)}',
+          name: 'SessionManager',
+        );
+        
+        // Верификация: читаем обратно из SharedPreferences
+        final saved = _sharedPreferences.getString('access_token');
+        if (saved != null && saved.isNotEmpty && saved == accessToken) {
+          developer.log(
+            '[$timestamp] [SessionManager] ✅ Access token verification: saved successfully (${saved.length} chars, match=true)',
+            name: 'SessionManager',
+          );
+        } else {
+          developer.log(
+            '[$timestamp] [SessionManager] ❌ ERROR: Access token verification: FAILED',
+            name: 'SessionManager',
+            level: 1000,
+          );
+        }
+        
+        // Верификация: читаем из localStorage (Web)
+        final savedInLocalStorage = getAccessTokenFromLocalStorage();
+        if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
+          developer.log(
+            '[$timestamp] [SessionManager] ✅ localStorage verification: token found (${savedInLocalStorage.length} chars)',
+            name: 'SessionManager',
+          );
+        } else {
+          developer.log(
+            '[$timestamp] [SessionManager] ⚠️ localStorage verification: token NOT found (expected on Web only)',
+            name: 'SessionManager',
+          );
+        }
       } else {
-        AppLogger.warning(
-          'No access_token in register response for user: ${_maskEmail(email)}',
+        developer.log(
+          '⚠️ [SessionManager] No access_token in register response for user: ${_maskEmail(email ?? 'unknown')}',
+          name: 'SessionManager',
         );
       }
 

@@ -9,7 +9,15 @@ import 'web_token_storage_selector.dart';
 /// Получение access_token из localStorage (только для Web)
 /// SharedPreferences на Web может быть не инициализирован вовремя
 String? _getAccessTokenFromLocalStorage() {
-  return getAccessTokenFromLocalStorage();
+  final token = getAccessTokenFromLocalStorage();
+  if (token != null && token.isNotEmpty) {
+    final timestamp = DateTime.now().toIso8601String();
+    developer.log(
+      '[$timestamp] [ApiClient] ✅ Token read from localStorage (${token.length} chars)',
+      name: 'ApiClient',
+    );
+  }
+  return token;
 }
 
 /// ApiClient — HTTP клиент для авторизованных запросов
@@ -362,33 +370,83 @@ class ApiClient {
 
           // Если 401 — логируем для отладки
           if (statusCode == 401) {
+            final authTimestamp = DateTime.now().toIso8601String();
+            
             developer.log(
-              '[$timestamp] [ApiClient] [Auth] 401 Unauthorized — требуется авторизация',
+              '[$authTimestamp] [ApiClient] [Auth] ╔═══════════════════════════════════════════',
               name: 'ApiClient',
+              level: 1000,
             );
+            developer.log(
+              '[$authTimestamp] [ApiClient] [Auth] ║ 401 Unauthorized — требуется авторизация',
+              name: 'ApiClient',
+              level: 1000,
+            );
+            developer.log(
+              '[$authTimestamp] [ApiClient] [Auth] ║ Path: ${err.requestOptions.method} ${err.requestOptions.path}',
+              name: 'ApiClient',
+              level: 1000,
+            );
+            
             AppLogger.error(
-              '[$timestamp] [ApiClient] 401 ошибка на ${err.requestOptions.path}',
+              '[$authTimestamp] [ApiClient] 401 ошибка на ${err.requestOptions.path}',
             );
 
-            // Проверяем, есть ли токен
+            // Проверяем, есть ли токен в SharedPreferences
             final accessToken = _sharedPreferences?.getString('access_token');
             if (accessToken == null || accessToken.isEmpty) {
               developer.log(
-                '[$timestamp] [ApiClient] [Auth] 401 ошибка: access_token отсутствует в SharedPreferences',
+                '[$authTimestamp] [ApiClient] [Auth] ║ SharedPreferences: access_token ОТСУТСТВУЕТ',
                 name: 'ApiClient',
+                level: 1000,
               );
               AppLogger.error(
-                '[$timestamp] [ApiClient] 401 ошибка: access_token не найден',
+                '[$authTimestamp] [ApiClient] 401 ошибка: access_token не найден в SharedPreferences',
               );
             } else {
               developer.log(
-                '[$timestamp] [ApiClient] [Auth] 401 ошибка: access_token присутствует (${accessToken.length} chars), возможно истёк',
+                '[$authTimestamp] [ApiClient] [Auth] ║ SharedPreferences: access_token ПРИСУТСТВУЕТ (${accessToken.length} chars)',
                 name: 'ApiClient',
+                level: 1000,
+              );
+              developer.log(
+                '[$authTimestamp] [ApiClient] [Auth] ║ Token preview: ${accessToken.substring(0, accessToken.length > 50 ? 50 : accessToken.length)}...',
+                name: 'ApiClient',
+                level: 1000,
               );
               AppLogger.error(
-                '[$timestamp] [ApiClient] 401 ошибка: access_token есть, но не валиден (возможно истёк)',
+                '[$authTimestamp] [ApiClient] 401 ошибка: access_token есть, но не валиден (возможно истёк)',
               );
             }
+            
+            // Проверяем токен в localStorage (для Web)
+            final localStorageToken = _getAccessTokenFromLocalStorage();
+            if (localStorageToken != null && localStorageToken.isNotEmpty) {
+              developer.log(
+                '[$authTimestamp] [ApiClient] [Auth] ║ localStorage: access_token ПРИСУТСТВУЕТ (${localStorageToken.length} chars)',
+                name: 'ApiClient',
+                level: 1000,
+              );
+              if (accessToken == null || accessToken.isEmpty) {
+                developer.log(
+                  '[$authTimestamp] [ApiClient] [Auth] ║ ⚠️ WARNING: Token есть в localStorage, но НЕ в SharedPreferences!',
+                  name: 'ApiClient',
+                  level: 1000,
+                );
+              }
+            } else {
+              developer.log(
+                '[$authTimestamp] [ApiClient] [Auth] ║ localStorage: access_token ОТСУТСТВУЕТ',
+                name: 'ApiClient',
+                level: 1000,
+              );
+            }
+            
+            developer.log(
+              '[$authTimestamp] [ApiClient] [Auth] ╚═══════════════════════════════════════════',
+              name: 'ApiClient',
+              level: 1000,
+            );
           } else if (statusCode != null) {
             AppLogger.error(
               '[$timestamp] [ApiClient] HTTP ошибка $statusCode на ${err.requestOptions.path}',
