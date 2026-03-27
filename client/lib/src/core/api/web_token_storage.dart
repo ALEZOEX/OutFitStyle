@@ -10,13 +10,12 @@ import 'dart:developer' as developer;
 /// 1. 'access_token' - основной ключ (используется SessionManager)
 /// 2. 'flutter.access_token' - ключ SharedPreferences на Web
 String? getAccessTokenFromLocalStorage() {
-  final timestamp = DateTime.now().toIso8601String();
   try {
     // Приоритет 1: основной ключ 'access_token'
     final token1 = web.window.localStorage.getItem('access_token');
     if (token1 != null && token1.isNotEmpty) {
       developer.log(
-        '[$timestamp] [WebTokenStorage] ✅ Token read from localStorage with key "access_token" (${token1.length} chars)',
+        '[WebTokenStorage] ✅ Token read from localStorage with key "access_token" (${token1.length} chars)',
         name: 'WebTokenStorage',
       );
       return token1;
@@ -26,7 +25,7 @@ String? getAccessTokenFromLocalStorage() {
     final token2 = web.window.localStorage.getItem('flutter.access_token');
     if (token2 != null && token2.isNotEmpty) {
       developer.log(
-        '[$timestamp] [WebTokenStorage] ✅ Token read from localStorage with key "flutter.access_token" (${token2.length} chars)',
+        '[WebTokenStorage] ✅ Token read from localStorage with key "flutter.access_token" (${token2.length} chars)',
         name: 'WebTokenStorage',
       );
       return token2;
@@ -34,13 +33,13 @@ String? getAccessTokenFromLocalStorage() {
 
     // Токен не найден
     developer.log(
-      '[$timestamp] [WebTokenStorage] ⚠️ No token found in localStorage (checked both keys)',
+      '[WebTokenStorage] ⚠️ No token found in localStorage (checked both keys)',
       name: 'WebTokenStorage',
     );
     return null;
   } catch (e) {
     developer.log(
-      '❌ [$timestamp] [WebTokenStorage] ERROR reading token from localStorage: $e',
+      '❌ [WebTokenStorage] ERROR reading token from localStorage: $e',
       name: 'WebTokenStorage',
       level: 1000,
     );

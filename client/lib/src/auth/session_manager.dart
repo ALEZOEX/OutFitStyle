@@ -228,20 +228,20 @@ class SessionManager {
 
       // Extract and store access_token for Bearer authentication
       final accessToken = tokens['access_token'] as String?;
+      final timestamp = DateTime.now().toIso8601String();
+      
       if (accessToken != null && accessToken.isNotEmpty) {
-        final timestamp = DateTime.now().toIso8601String();
-        
         // Сохраняем в SharedPreferences
         await _sharedPreferences.setString('access_token', accessToken);
-        
+
         // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
         saveTokenToLocalStorage(accessToken);
-        
+
         developer.log(
           '[$timestamp] [SessionManager] ✅ Access token stored for user: ${_maskEmail(email)}',
           name: 'SessionManager',
         );
-        
+
         // Верификация: читаем обратно из SharedPreferences
         final saved = _sharedPreferences.getString('access_token');
         if (saved != null && saved.isNotEmpty && saved == accessToken) {
@@ -726,19 +726,19 @@ class SessionManager {
 
       // Extract and store access_token for Bearer authentication
       final accessToken = tokens['access_token'] as String?;
+      final timestamp = DateTime.now().toIso8601String();
+      
       if (accessToken != null && accessToken.isNotEmpty) {
-        final timestamp = DateTime.now().toIso8601String();
-        
         await _sharedPreferences.setString('access_token', accessToken);
-        
+
         // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
         saveTokenToLocalStorage(accessToken);
-        
+
         developer.log(
           '[$timestamp] [SessionManager] ✅ Access token stored for user: ${_maskEmail(email)}',
           name: 'SessionManager',
         );
-        
+
         // Верификация: читаем обратно из SharedPreferences
         final saved = _sharedPreferences.getString('access_token');
         if (saved != null && saved.isNotEmpty && saved == accessToken) {
@@ -753,7 +753,7 @@ class SessionManager {
             level: 1000,
           );
         }
-        
+
         // Верификация: читаем из localStorage (Web)
         final savedInLocalStorage = getAccessTokenFromLocalStorage();
         if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
