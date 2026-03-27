@@ -5,14 +5,13 @@ import 'dart:developer' as developer;
 
 /// Получение access_token из localStorage (только для Web)
 /// SharedPreferences на Web может быть не инициализирован вовремя
-/// 
+///
 /// Порядок чтения (приоритет):
 /// 1. 'access_token' - основной ключ (используется SessionManager)
 /// 2. 'flutter.access_token' - ключ SharedPreferences на Web
 String? getAccessTokenFromLocalStorage() {
+  final timestamp = DateTime.now().toIso8601String();
   try {
-    final timestamp = DateTime.now().toIso8601String();
-    
     // Приоритет 1: основной ключ 'access_token'
     final token1 = web.window.localStorage.getItem('access_token');
     if (token1 != null && token1.isNotEmpty) {
@@ -22,7 +21,7 @@ String? getAccessTokenFromLocalStorage() {
       );
       return token1;
     }
-    
+
     // Приоритет 2: ключ 'flutter.access_token' (SharedPreferences на Web)
     final token2 = web.window.localStorage.getItem('flutter.access_token');
     if (token2 != null && token2.isNotEmpty) {
@@ -32,7 +31,7 @@ String? getAccessTokenFromLocalStorage() {
       );
       return token2;
     }
-    
+
     // Токен не найден
     developer.log(
       '[$timestamp] [WebTokenStorage] ⚠️ No token found in localStorage (checked both keys)',
