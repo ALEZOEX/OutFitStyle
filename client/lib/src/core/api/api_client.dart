@@ -82,6 +82,20 @@ class ApiClient {
               }
             }
 
+            // Приоритет 3: Чтение access_token напрямую из localStorage (Flutter Web)
+            if (accessToken == null || accessToken.isEmpty) {
+              try {
+                // ignore: undefined_prefixed_name
+                accessToken = js.context.callMethod('localStorage.getItem', ['access_token']) as String?;
+                if (accessToken != null && accessToken.isNotEmpty) {
+                  developer.log(
+                    '🔑 [AUTH DEBUG] ✅ Token read from localStorage access_token key (Web fallback 2)',
+                    name: 'AuthDebug',
+                  );
+                }
+              } catch (_) {}
+            }
+
             if (accessToken != null && accessToken.isNotEmpty) {
               // Определяем тип токена по структуре JWT (xxx.xxx.xxx)
               final tokenParts = accessToken.split('.');

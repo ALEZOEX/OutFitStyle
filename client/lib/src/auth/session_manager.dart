@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'package:web/web.dart' as web;
 import '../utils/logger.dart';
 import '../core/api/api_client.dart';
 import '../core/api/api_config.dart';
@@ -228,6 +229,12 @@ class SessionManager {
       final accessToken = tokens['access_token'] as String?;
       if (accessToken != null && accessToken.isNotEmpty) {
         await _sharedPreferences.setString('access_token', accessToken);
+        // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
+        try {
+          web.window.localStorage.setItem('flutter.access_token', accessToken);
+        } catch (e) {
+          AppLogger.warning('Failed to save token to localStorage: $e');
+        }
         AppLogger.info('Access token stored for user: ${_maskEmail(email)}');
         // Verify it was saved
         final saved = _sharedPreferences.getString('access_token');
