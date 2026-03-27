@@ -51,6 +51,9 @@ class MockApiClient implements ApiClient {
       data: {},
     );
   }
+
+  @override
+  ApiException mapError(Object e) => e is ApiException ? e : ApiException('Unknown');
 }
 
 void main() {
@@ -63,20 +66,13 @@ void main() {
       dataSource = NotificationRemoteDataSource(mockApiClient);
     });
 
-    test('getNotifications throws FormatException when response is HTML not JSON', () async {
-      // Simulate HTML error page response (like from nginx 401 page)
-      mockApiClient.mockResponseData = '''
-<!DOCTYPE html>
-<html>
-<head><title>401 Authorization Required</title></head>
-<body><h1>401 Authorization Required</h1></body>
-</html>
-''';
+    test('getNotifications throws NonJsonResponseException when response is HTML', () async {
+      mockApiClient.mockResponseData = '<html><body>401</body></html>';
       mockApiClient.mockStatusCode = 401;
 
       expect(
         () => dataSource.getNotifications(),
-        throwsA(isA<FormatException>()),
+        throwsA(isA<NonJsonResponseException>()),
       );
     });
 
@@ -109,13 +105,13 @@ void main() {
       expect(result.unreadCount, 1);
     });
 
-    test('getUnreadCount throws when API returns non-JSON', () async {
+    test('getUnreadCount throws NonJsonResponseException when API returns non-JSON', () async {
       mockApiClient.mockResponseData = 'Internal Server Error';
       mockApiClient.mockStatusCode = 500;
 
       expect(
         () => dataSource.getUnreadCount(),
-        throwsA(isA<FormatException>()),
+        throwsA(isA<NonJsonResponseException>()),
       );
     });
   });
