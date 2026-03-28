@@ -347,11 +347,22 @@ class SessionManager {
         '[$timestamp] [Auth] [GoogleSignIn] Открытие OAuth окна для Google Sign-In',
       );
 
-      // На Web используем redirect вместо popup (избегаем COOP проблем)
-      await signInWithGoogleWeb(provider);
-
-      // После redirect приложение перезапустится и getRedirectResult вернёт credential
-      // Возвращаем false — сессия будет обработана после перезагрузки
+      // На Web используем popup (с fallback на redirect)
+      final webResult = await signInWithGoogleWeb(provider);
+      
+      // Если webResult != null, значит popup успешен — обрабатываем
+      if (webResult != null) {
+        final user = webResult.user;
+        if (user == null) {
+          AppLogger.warning('[$timestamp] [Auth] [GoogleSignIn] Google Sign-In отменён');
+          return false;
+        }
+        // Продолжаем обычный flow
+        return await _completeGoogleSignIn(user);
+      }
+      
+      // Если webResult == null, значит начался redirect — ждём перезагрузки
+      AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Начат redirect, ждём перезагрузки...');
       return false;
     } catch (e) {
       AppLogger.error('Google Sign-In error: $e', e);

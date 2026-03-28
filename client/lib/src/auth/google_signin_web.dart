@@ -1,5 +1,6 @@
 // Web-specific Google Sign-In implementation
-// Uses signInWithRedirect instead of signInWithPopup to avoid COOP issues
+// Uses signInWithPopup instead of redirect for better UX
+// Requires Firebase Console configuration (Authorized domains)
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -25,15 +26,21 @@ Future<UserCredential?> checkGoogleRedirectResult() async {
   return null;
 }
 
-/// Выполняет Google Sign-In используя redirect (для Web)
-/// Это обходит проблему Cross-Origin-Opener-Policy
-Future<void> signInWithGoogleWeb(GoogleAuthProvider provider) async {
-  if (!kIsWeb) return;
+/// Выполняет Google Sign-In используя popup (для Web)
+/// Требует настройки Firebase Console (Authorized domains)
+Future<UserCredential?> signInWithGoogleWeb(GoogleAuthProvider provider) async {
+  if (!kIsWeb) return null;
 
-  // Начинаем редирект
-  // Приложение будет перезапущено после возврата от Google
-  await FirebaseAuth.instance.signInWithRedirect(provider);
-
-  // Ждём немного пока Firebase обработает
-  await Future.delayed(const Duration(milliseconds: 100));
+  try {
+    // Пробуем signInWithPopup
+    final result = await FirebaseAuth.instance.signInWithPopup(provider);
+    debugPrint('✅ Google popup sign-in success: ${result.user?.email}');
+    return result;
+  } catch (e) {
+    debugPrint('❌ Google popup sign-in error: $e');
+    // Если popup заблокирован, пробуем redirect
+    await FirebaseAuth.instance.signInWithRedirect(provider);
+    await Future.delayed(const Duration(milliseconds: 100));
+    return null;
+  }
 }
