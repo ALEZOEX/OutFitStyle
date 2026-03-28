@@ -8,21 +8,33 @@ import 'package:flutter/foundation.dart' show debugPrint;
 
 /// Проверяет результат редиректа после Google Sign-In
 /// Вызывать один раз при инициализации приложения
+/// Повторяет попытку несколько раз с задержкой
 Future<UserCredential?> checkGoogleRedirectResult() async {
   if (!kIsWeb) return null;
 
-  try {
-    final result = await FirebaseAuth.instance.getRedirectResult();
-    if (result != null) {
-      debugPrint('✅ Google redirect result: ${result.user?.email}');
-      return result;
+  // Пробуем несколько раз с задержкой (Firebase может быть не готов сразу)
+  for (int attempt = 1; attempt <= 5; attempt++) {
+    try {
+      debugPrint('🔄 Google redirect check attempt $attempt/5...');
+      
+      final result = await FirebaseAuth.instance.getRedirectResult();
+      if (result != null) {
+        debugPrint('✅ Google redirect result: ${result.user?.email}');
+        return result;
+      }
+      
+      // Если результат null, ждём и пробуем снова
+      if (attempt < 5) {
+        await Future.delayed(Duration(milliseconds: 500 * attempt));
+      }
+    } catch (e) {
+      debugPrint('❌ Google redirect error (attempt $attempt): $e');
+      // Ошибка редиректа (пользователь отменил или таймаут)
+      return null;
     }
-  } catch (e) {
-    debugPrint('❌ Google redirect error: $e');
-    // Ошибка редиректа (пользователь отменил или таймаут)
-    return null;
   }
 
+  debugPrint('⚠️ Google redirect result: null (after 5 attempts)');
   return null;
 }
 
