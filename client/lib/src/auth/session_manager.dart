@@ -660,18 +660,6 @@ class SessionManager {
         );
       }
       rethrow;
-    } on FirebaseAuthException catch (e) {
-      AppLogger.error(
-        '[$timestamp] [Auth] [GoogleSignIn] Ошибка Google Sign-In: ${e.code} - ${e.message}',
-        e,
-      );
-      return false;
-    } catch (e) {
-      AppLogger.error(
-        '[$timestamp] [Auth] [GoogleSignIn] Ошибка Google Sign-In: $e',
-        e,
-      );
-      return false;
     }
   }
 
