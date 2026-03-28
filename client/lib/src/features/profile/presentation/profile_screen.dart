@@ -235,13 +235,7 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final achievementsStats = ref.watch(achievementsStatsProvider);
 
-    // Получаем количество дней в приложении из профиля
-    final daysInApp = profileState.when(
-      data: (profile) => profile.daysInApp,
-      loading: () => 0,
-      error: (_, __) => 0,
-    );
-
+    // Упрощённая статистика — только вещи и избранное
     final statsData = [
       {
         'label': 'Вещей',
@@ -249,19 +243,9 @@ class ProfileScreen extends ConsumerWidget {
         'icon': Icons.checkroom,
       },
       {
-        'label': 'Категорий',
-        'value': stats.categoriesCount.toString(),
-        'icon': Icons.category,
-      },
-      {
         'label': 'Избранное',
         'value': stats.favoritesCount.toString(),
         'icon': Icons.favorite,
-      },
-      {
-        'label': 'Дней',
-        'value': daysInApp.toString(),
-        'icon': Icons.calendar_today,
       },
     ];
 
