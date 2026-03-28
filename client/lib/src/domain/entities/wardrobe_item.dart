@@ -226,6 +226,14 @@ abstract class WardrobeItem with _$WardrobeItem {
     // ignore: invalid_annotation_target
     @JsonKey(name: 'is_archived') bool? isArchived,
 
+    /// Количество использований (носков)
+    // ignore: invalid_annotation_target
+    @JsonKey(name: 'wear_count') int? wearCount,
+
+    /// Дата последней носки
+    // ignore: invalid_annotation_target
+    @JsonKey(name: 'last_worn_at') DateTime? lastWornAt,
+
     /// Сезон: all_season, spring, summer, autumn, winter
     String? season,
 

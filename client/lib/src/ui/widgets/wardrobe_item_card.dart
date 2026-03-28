@@ -158,6 +158,44 @@ class WardrobeItemCard extends StatelessWidget {
                               ],
                             ],
                           ),
+                          // Количество носок и последняя носка
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              if (item.wearCount != null) ...[
+                                Icon(
+                                  Icons.refresh,
+                                  size: 14,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${item.wearCount} нос.',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                              if (item.wearCount != null &&
+                                  item.lastWornAt != null) ...[
+                                const SizedBox(width: 12),
+                              ],
+                              if (item.lastWornAt != null) ...[
+                                Icon(
+                                  Icons.calendar_today,
+                                  size: 14,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _formatLastWorn(item.lastWornAt!),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -228,6 +266,25 @@ class WardrobeItemCard extends StatelessWidget {
       'верхняя одежда' || 'outerwear' => 'Верхняя',
       _ => category,
     };
+  }
+
+  String _formatLastWorn(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return 'Сегодня';
+    } else if (difference.inDays == 1) {
+      return 'Вчера';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} дн. назад';
+    } else if (difference.inDays < 30) {
+      return '${(difference.inDays / 7).floor()} нед. назад';
+    } else if (difference.inDays < 365) {
+      return '${(difference.inDays / 30).floor()} мес. назад';
+    } else {
+      return '${(difference.inDays / 365).floor()} г. назад';
+    }
   }
 
   Color _getColorFromString(String colorName) {
