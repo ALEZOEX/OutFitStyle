@@ -413,254 +413,253 @@ class SessionManager {
       '[$timestamp] [Auth] [GoogleSignIn] Обмен Firebase token на backend access_token...',
     );
 
-      // Call backend to exchange Firebase token for access_token
-      try {
-        final backendTimestamp = DateTime.now().toIso8601String();
+    // Call backend to exchange Firebase token for access_token
+    try {
+      final backendTimestamp = DateTime.now().toIso8601String();
 
-        // 🔍 DEBUG: Логирование перед вызовом API
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ PRE-API CALL DEBUG',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Endpoint: POST /api/v1/auth/google',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Base URL: ${ApiConfig.baseUrl}',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Full URL: ${ApiConfig.baseUrl}/api/v1/auth/google',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token length: ${idToken.length}',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token preview: ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient instance: $_apiClient',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient type: ${_apiClient.runtimeType}',
-          name: 'GoogleSignIn',
-        );
-        developer.log(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════',
-          name: 'GoogleSignIn',
-        );
+      // 🔍 DEBUG: Логирование перед вызовом API
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ PRE-API CALL DEBUG',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Endpoint: POST /api/v1/auth/google',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Base URL: ${ApiConfig.baseUrl}',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Full URL: ${ApiConfig.baseUrl}/api/v1/auth/google',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token length: ${idToken.length}',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token preview: ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient instance: $_apiClient',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient type: ${_apiClient.runtimeType}',
+        name: 'GoogleSignIn',
+      );
+      developer.log(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════',
+        name: 'GoogleSignIn',
+      );
 
+      AppLogger.debug(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] Отправка запроса на POST /api/v1/auth/google',
+      );
+      AppLogger.info(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] Вызов _apiClient.post()...',
+      );
+
+      final response = await _apiClient.post(
+        '/api/v1/auth/google',
+        data: {'id_token': idToken},
+      );
+
+      AppLogger.info(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ _apiClient.post() ЗАВЕРШЁН УСПЕШНО',
+      );
+      AppLogger.info(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] Backend response status: ${response.statusCode}',
+      );
+      AppLogger.debug(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] Backend response data: ${response.data}',
+      );
+
+      final data = response.data;
+      if (data is! Map) {
+        AppLogger.warning(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Неверный формат ответа от Google auth endpoint',
+        );
+        throw Exception('Неверный формат ответа сервера');
+      }
+
+      // Extract tokens from backend response
+      final backendUser = data['user'] as Map?;
+      final tokens = data['tokens'] as Map?;
+
+      if (backendUser == null || tokens == null) {
+        AppLogger.warning(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Неверная структура ответа от Google auth',
+        );
+        throw Exception('Ошибка получения данных пользователя');
+      }
+
+      // Extract and store access_token for Bearer authentication
+      final accessToken = tokens['access_token'] as String?;
+      final refreshToken = tokens['refresh_token'] as String?;
+
+      if (accessToken != null && accessToken.isNotEmpty) {
         AppLogger.debug(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Отправка запроса на POST /api/v1/auth/google',
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Сохранение access_token (длина: ${accessToken.length} символов)',
         );
-        AppLogger.info(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Вызов _apiClient.post()...',
-        );
+        await _sharedPreferences.setString('access_token', accessToken);
 
-        final response = await _apiClient.post(
-          '/api/v1/auth/google',
-          data: {'id_token': idToken},
-        );
+        // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
+        saveTokenToLocalStorage(accessToken);
 
         AppLogger.info(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ _apiClient.post() ЗАВЕРШЁН УСПЕШНО',
-        );
-        AppLogger.info(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Backend response status: ${response.statusCode}',
-        );
-        AppLogger.debug(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Backend response data: ${response.data}',
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Access token сохранён для Google пользователя: ${_maskEmail(user.email ?? 'unknown')}',
         );
 
-        final data = response.data;
-        if (data is! Map) {
-          AppLogger.warning(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Неверный формат ответа от Google auth endpoint',
-          );
-          throw Exception('Неверный формат ответа сервера');
-        }
-
-        // Extract tokens from backend response
-        final backendUser = data['user'] as Map?;
-        final tokens = data['tokens'] as Map?;
-
-        if (backendUser == null || tokens == null) {
-          AppLogger.warning(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Неверная структура ответа от Google auth',
-          );
-          throw Exception('Ошибка получения данных пользователя');
-        }
-
-        // Extract and store access_token for Bearer authentication
-        final accessToken = tokens['access_token'] as String?;
-        final refreshToken = tokens['refresh_token'] as String?;
-
-        if (accessToken != null && accessToken.isNotEmpty) {
+        // Verify it was saved
+        final saved = _sharedPreferences.getString('access_token');
+        if (saved != null && saved.isNotEmpty) {
           AppLogger.debug(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Сохранение access_token (длина: ${accessToken.length} символов)',
-          );
-          await _sharedPreferences.setString('access_token', accessToken);
-          
-          // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
-          saveTokenToLocalStorage(accessToken);
-          
-          AppLogger.info(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Access token сохранён для Google пользователя: ${_maskEmail(user.email ?? 'unknown')}',
+            '[$backendTimestamp] [Auth] [GoogleSignIn] Access token успешно сохранён и верифицирован',
           );
 
-          // Verify it was saved
-          final saved = _sharedPreferences.getString('access_token');
-          if (saved != null && saved.isNotEmpty) {
-            AppLogger.debug(
-              '[$backendTimestamp] [Auth] [GoogleSignIn] Access token успешно сохранён и верифицирован',
+          // 🔑 КРИТИЧНО: Дополнительная верификация типа токена
+          final tokenParts = saved.split('.');
+          final isJwt = tokenParts.length == 3;
+          if (isJwt && saved.length < 500) {
+            AppLogger.info(
+              '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ JWT Access Token подтверждён (JWT=$isJwt, length=${saved.length})',
             );
-
-            // 🔑 КРИТИЧНО: Дополнительная верификация типа токена
-            final tokenParts = saved.split('.');
-            final isJwt = tokenParts.length == 3;
-            if (isJwt && saved.length < 500) {
-              AppLogger.info(
-                '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ JWT Access Token подтверждён (JWT=$isJwt, length=${saved.length})',
-              );
-            } else if (saved.length > 1000) {
-              AppLogger.error(
-                '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 WARNING: Сохранён Firebase ID Token вместо backend JWT!',
-              );
-            }
-            
-            // Верификация: читаем из localStorage (Web)
-            final savedInLocalStorage = getAccessTokenFromLocalStorage();
-            if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
-              AppLogger.info(
-                '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ localStorage verification: token found (${savedInLocalStorage.length} chars)',
-              );
-            } else {
-              AppLogger.warning(
-                '[$backendTimestamp] [Auth] [GoogleSignIn] ⚠️ localStorage verification: token NOT found (expected on Web only)',
-              );
-            }
-          } else {
+          } else if (saved.length > 1000) {
             AppLogger.error(
-              '[$backendTimestamp] [Auth] [GoogleSignIn] НЕ УДАЛОСЬ сохранить access_token в SharedPreferences',
+              '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 WARNING: Сохранён Firebase ID Token вместо backend JWT!',
+            );
+          }
+
+          // Верификация: читаем из localStorage (Web)
+          final savedInLocalStorage = getAccessTokenFromLocalStorage();
+          if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
+            AppLogger.info(
+              '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ localStorage verification: token found (${savedInLocalStorage.length} chars)',
+            );
+          } else {
+            AppLogger.warning(
+              '[$backendTimestamp] [Auth] [GoogleSignIn] ⚠️ localStorage verification: token NOT found (expected on Web only)',
             );
           }
         } else {
-          AppLogger.warning(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Нет access_token в ответе Google auth для пользователя: ${_maskEmail(user.email ?? 'unknown')}',
-          );
-        }
-
-        // Сохраняем refresh token (для будущего refresh flow)
-        if (refreshToken != null && refreshToken.isNotEmpty) {
-          await _sharedPreferences.setString('refresh_token', refreshToken);
-          AppLogger.debug(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Refresh token сохранён (${refreshToken.length} символов)',
-          );
-        }
-
-        // Update session with backend user data
-        final backendUid = backendUser['id'] as String?;
-        if (backendUid == null) {
-          AppLogger.warning(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Нет user ID в ответе Google auth',
-          );
-          throw Exception('Не удалось получить ID пользователя');
-        }
-
-        AppLogger.debug(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Обновление сессии с backend данными',
-        );
-        _currentUserSession = UserSession(
-          uid: backendUid,
-          email: backendUser['email'] as String?,
-          displayName: backendUser['display_name'] as String?,
-          photoUrl: backendUser['avatar_url'] as String?,
-          loginTime: DateTime.now(),
-          isEmailVerified: backendUser['is_verified'] as bool? ?? false,
-        );
-
-        // Save session to SharedPreferences
-        final sessionJson = _currentUserSession?.toJson();
-        if (sessionJson != null) {
-          await _sharedPreferences.setString(
-            'user_session',
-            jsonEncode(sessionJson),
-          );
-          AppLogger.debug(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Сессия сохранена в SharedPreferences',
-          );
-        }
-
-        // Notify subscribers
-        _sessionStreamController.add(_currentUserSession);
-
-        AppLogger.info(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Google Sign-In завершён для пользователя: ${user.uid}',
-        );
-        AppLogger.info(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Сессия обновлена, токены сохранены',
-        );
-        return true;
-      } catch (e) {
-        // 🔍 DEBUG: Детальное логирование ошибок backend вызова
-        final errorTimestamp = DateTime.now().toIso8601String();
-        developer.log(
-          '[$errorTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════',
-          name: 'GoogleSignIn',
-          level: 1000,
-        );
-        developer.log(
-          '[$errorTimestamp] [Auth] [GoogleSignIn] ║ BACKEND API CALL ERROR',
-          name: 'GoogleSignIn',
-          level: 1000,
-        );
-        developer.log(
-          '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error type: ${e.runtimeType}',
-          name: 'GoogleSignIn',
-          level: 1000,
-        );
-        developer.log(
-          '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error message: $e',
-          name: 'GoogleSignIn',
-          level: 1000,
-        );
-        developer.log(
-          '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Stack trace: ${StackTrace.current}',
-          name: 'GoogleSignIn',
-          level: 1000,
-        );
-        developer.log(
-          '[$errorTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════',
-          name: 'GoogleSignIn',
-          level: 1000,
-        );
-
-        AppLogger.error(
-          '[$errorTimestamp] [Auth] [GoogleSignIn] Ошибка backend Google auth: $e',
-          e,
-        );
-        if (e.toString().contains('401')) {
           AppLogger.error(
-            '[$errorTimestamp] [Auth] [GoogleSignIn] 401 Unauthorized от backend - Firebase token может быть невалиден или истёк',
+            '[$backendTimestamp] [Auth] [GoogleSignIn] НЕ УДАЛОСЬ сохранить access_token в SharedPreferences',
           );
         }
-        if (e.toString().contains('SocketException') ||
-            e.toString().contains('Failed host lookup')) {
-          AppLogger.error(
-            '[$errorTimestamp] [Auth] [GoogleSignIn] Network error - проверьте подключение к серверу и CORS настройки',
-          );
-        }
-        rethrow;
+      } else {
+        AppLogger.warning(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Нет access_token в ответе Google auth для пользователя: ${_maskEmail(user.email ?? 'unknown')}',
+        );
       }
+
+      // Сохраняем refresh token (для будущего refresh flow)
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        await _sharedPreferences.setString('refresh_token', refreshToken);
+        AppLogger.debug(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Refresh token сохранён (${refreshToken.length} символов)',
+        );
+      }
+
+      // Update session with backend user data
+      final backendUid = backendUser['id'] as String?;
+      if (backendUid == null) {
+        AppLogger.warning(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Нет user ID в ответе Google auth',
+        );
+        throw Exception('Не удалось получить ID пользователя');
+      }
+
+      AppLogger.debug(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] Обновление сессии с backend данными',
+      );
+      _currentUserSession = UserSession(
+        uid: backendUid,
+        email: backendUser['email'] as String?,
+        displayName: backendUser['display_name'] as String?,
+        photoUrl: backendUser['avatar_url'] as String?,
+        loginTime: DateTime.now(),
+        isEmailVerified: backendUser['is_verified'] as bool? ?? false,
+      );
+
+      // Save session to SharedPreferences
+      final sessionJson = _currentUserSession?.toJson();
+      if (sessionJson != null) {
+        await _sharedPreferences.setString(
+          'user_session',
+          jsonEncode(sessionJson),
+        );
+        AppLogger.debug(
+          '[$backendTimestamp] [Auth] [GoogleSignIn] Сессия сохранена в SharedPreferences',
+        );
+      }
+
+      // Notify subscribers
+      _sessionStreamController.add(_currentUserSession);
+
+      AppLogger.info(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] Google Sign-In завершён для пользователя: ${user.uid}',
+      );
+      AppLogger.info(
+        '[$backendTimestamp] [Auth] [GoogleSignIn] Сессия обновлена, токены сохранены',
+      );
+      return true;
+    } catch (e) {
+      // 🔍 DEBUG: Детальное логирование ошибок backend вызова
+      final errorTimestamp = DateTime.now().toIso8601String();
+      developer.log(
+        '[$errorTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════',
+        name: 'GoogleSignIn',
+        level: 1000,
+      );
+      developer.log(
+        '[$errorTimestamp] [Auth] [GoogleSignIn] ║ BACKEND API CALL ERROR',
+        name: 'GoogleSignIn',
+        level: 1000,
+      );
+      developer.log(
+        '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error type: ${e.runtimeType}',
+        name: 'GoogleSignIn',
+        level: 1000,
+      );
+      developer.log(
+        '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Error message: $e',
+        name: 'GoogleSignIn',
+        level: 1000,
+      );
+      developer.log(
+        '[$errorTimestamp] [Auth] [GoogleSignIn] ║ Stack trace: ${StackTrace.current}',
+        name: 'GoogleSignIn',
+        level: 1000,
+      );
+      developer.log(
+        '[$errorTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════',
+        name: 'GoogleSignIn',
+        level: 1000,
+      );
+
+      AppLogger.error(
+        '[$errorTimestamp] [Auth] [GoogleSignIn] Ошибка backend Google auth: $e',
+        e,
+      );
+      if (e.toString().contains('401')) {
+        AppLogger.error(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] 401 Unauthorized от backend - Firebase token может быть невалиден или истёк',
+        );
+      }
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('Failed host lookup')) {
+        AppLogger.error(
+          '[$errorTimestamp] [Auth] [GoogleSignIn] Network error - проверьте подключение к серверу и CORS настройки',
+        );
+      }
+      rethrow;
     } on FirebaseAuthException catch (e) {
       AppLogger.error(
         '[$timestamp] [Auth] [GoogleSignIn] Ошибка Google Sign-In: ${e.code} - ${e.message}',
