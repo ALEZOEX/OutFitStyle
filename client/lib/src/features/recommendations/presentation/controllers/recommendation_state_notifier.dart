@@ -88,7 +88,7 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
       final currentRecommendations = state.recommendations.value ?? [];
       final updatedRecommendations =
           currentRecommendations.map((rec) {
-            if (rec.id.toString() == recommendationId) {
+            if ((rec.id?.toString() ?? '') == recommendationId) {
               return rec.copyWith(isFavorite: !(rec.isFavorite));
             }
             return rec;
@@ -114,7 +114,7 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
       final currentRecommendations = state.recommendations.value ?? [];
       final updatedRecommendations =
           currentRecommendations.map((rec) {
-            if (rec.id.toString() == recommendationId) {
+            if ((rec.id?.toString() ?? '') == recommendationId) {
               return rec.copyWith(isSaved: true);
             }
             return rec;
@@ -140,7 +140,7 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
       final currentRecommendations = state.recommendations.value ?? [];
       final updatedRecommendations =
           currentRecommendations.map((rec) {
-            if (rec.id.toString() == recommendationId) {
+            if ((rec.id?.toString() ?? '') == recommendationId) {
               return rec.copyWith(isSaved: false);
             }
             return rec;
@@ -160,7 +160,7 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
     try {
       final isCurrentlySaved =
           state.recommendations.value
-              ?.firstWhere((rec) => rec.id.toString() == recommendationId)
+              ?.firstWhere((rec) => (rec.id?.toString() ?? '') == recommendationId)
               .isSaved ??
           false;
       await _recommendationsRepository.saveRecommendationForLater(
@@ -171,7 +171,7 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
       final currentRecommendations = state.recommendations.value ?? [];
       final updatedRecommendations =
           currentRecommendations.map((rec) {
-            if (rec.id.toString() == recommendationId) {
+            if ((rec.id?.toString() ?? '') == recommendationId) {
               return rec.copyWith(isSaved: !isCurrentlySaved);
             }
             return rec;

@@ -19,7 +19,7 @@ Future<UserCredential?> checkGoogleRedirectResult() async {
       
       final result = await FirebaseAuth.instance.getRedirectResult();
       if (result != null) {
-        debugPrint('✅ Google redirect result: ${result.user?.email}');
+        debugPrint('✅ Google redirect result: ${result.user?.email ?? 'unknown'}');
         return result;
       }
       
@@ -46,7 +46,7 @@ Future<UserCredential?> signInWithGoogleWeb(GoogleAuthProvider provider) async {
   try {
     // Пробуем signInWithPopup
     final result = await FirebaseAuth.instance.signInWithPopup(provider);
-    debugPrint('✅ Google popup sign-in success: ${result.user?.email}');
+    debugPrint('✅ Google popup sign-in success: ${result.user?.email ?? 'unknown'}');
     return result;
   } catch (e) {
     debugPrint('❌ Google popup sign-in error: $e');

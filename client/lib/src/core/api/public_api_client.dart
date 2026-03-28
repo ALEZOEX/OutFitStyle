@@ -75,6 +75,6 @@ class PublicApiClient {
     if (e.response?.statusCode == 429) {
       return Exception('Слишком много попыток. Попробуйте позже');
     }
-    return Exception('Ошибка сервера: ${e.response?.statusCode}');
+    return Exception('Ошибка сервера: ${e.response?.statusCode ?? 'unknown'}');
   }
 }

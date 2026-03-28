@@ -311,7 +311,7 @@ class FirebaseNotificationService extends NotificationService {
 
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Foreground message received: ${message.notification?.title}');
+      debugPrint('Foreground message received: ${message.notification?.title ?? ''}');
 
       if (_settings.enablePushNotifications) {
         _processPushNotification(message);
@@ -321,7 +321,7 @@ class FirebaseNotificationService extends NotificationService {
     // Handle background messages
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint(
-        'Background message opened app: ${message.notification?.title}',
+        'Background message opened app: ${message.notification?.title ?? ''}',
       );
       _navigateToNotification(message);
     });

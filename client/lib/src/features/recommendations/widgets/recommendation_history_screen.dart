@@ -68,7 +68,7 @@ class RecommendationHistoryScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Рекомендация от ${recommendation.createdAt?.day}.${recommendation.createdAt?.month}.${recommendation.createdAt?.year}',
+                    'Рекомендация от ${recommendation.createdAt?.day ?? '—'}.${recommendation.createdAt?.month ?? '—'}.${recommendation.createdAt?.year ?? '—'}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -95,14 +95,14 @@ class RecommendationHistoryScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Повод: ${(recommendation.occasion?.isNotEmpty ?? false) ? recommendation.occasion : 'Общий'}',
+              'Повод: ${(recommendation.occasion?.isNotEmpty ?? false) ? (recommendation.occasion ?? 'Общий') : 'Общий'}',
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
-              'Активность: ${(recommendation.activity?.isNotEmpty ?? false) ? recommendation.activity : 'Общая'}',
+              'Активность: ${(recommendation.activity?.isNotEmpty ?? false) ? (recommendation.activity ?? 'Общая') : 'Общая'}',
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),

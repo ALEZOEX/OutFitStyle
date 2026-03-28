@@ -238,7 +238,7 @@ class ApiClient {
             name: 'ApiClient',
           );
           developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 1 onError] Response data: ${err.response?.data}',
+            '[$timestamp] [ApiClient] [Interceptor 1 onError] Response data: ${err.response?.data ?? 'null'}',
             name: 'ApiClient',
           );
 
@@ -358,7 +358,7 @@ class ApiClient {
             level: 1000,
           );
           developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Response Data: ${err.response?.data}',
+            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Response Data: ${err.response?.data ?? 'null'}',
             name: 'ApiClient',
             level: 1000,
           );
@@ -525,7 +525,7 @@ class ApiClient {
       if (e.response?.statusCode == 401) {
         return const UnauthorizedException('Требуется авторизация');
       }
-      return ApiException('Ошибка сервера: ${e.response?.statusCode}');
+      return ApiException('Ошибка сервера: ${e.response?.statusCode ?? 'unknown'}');
     }
     return const ApiException('Неизвестная ошибка');
   }

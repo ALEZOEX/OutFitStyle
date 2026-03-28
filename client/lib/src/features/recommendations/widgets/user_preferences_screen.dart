@@ -58,7 +58,7 @@ class UserPreferencesScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
                     _buildSectionTitle('Бюджет'),
                     Text(
-                      'Максимальный бюджет: ${(state.preferences.maxBudget ?? 0) > 0 ? '${state.preferences.maxBudget} руб.' : 'Не указан'}',
+                      'Максимальный бюджет: ${(state.preferences.maxBudget ?? 0) > 0 ? '${state.preferences.maxBudget ?? 0} руб.' : 'Не указан'}',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 24),
@@ -79,7 +79,7 @@ class UserPreferencesScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
                     _buildSectionTitle('Размер'),
                     Text(
-                      'Предпочтение по фасону: ${(state.preferences.fitPreference?.isNotEmpty ?? false) ? state.preferences.fitPreference : 'Не указано'}',
+                      'Предпочтение по фасону: ${(state.preferences.fitPreference?.isNotEmpty ?? false) ? (state.preferences.fitPreference ?? 'Не указано') : 'Не указано'}',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 24),

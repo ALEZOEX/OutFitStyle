@@ -31,7 +31,7 @@ class RecommendationHistoryItem extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Рекомендация ${recommendation.createdAt?.day}.${recommendation.createdAt?.month}',
+          'Рекомендация ${recommendation.createdAt?.day ?? '—'}.${recommendation.createdAt?.month ?? '—'}',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         subtitle: Text(
