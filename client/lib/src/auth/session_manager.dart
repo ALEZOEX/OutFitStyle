@@ -348,66 +348,70 @@ class SessionManager {
       );
 
       // На Web используем redirect вместо popup (избегаем COOP проблем)
-      final webResult = await signInWithGoogleWeb(provider);
-      
-      UserCredential credential;
-      if (webResult != null) {
-        // Web redirect результат
-        credential = webResult;
-      } else {
-        // Mobile/Desktop popup или продолжение после redirect
-        credential = await _firebaseAuth.signInWithPopup(provider);
-      }
+      await signInWithGoogleWeb(provider);
+
+      // После redirect приложение перезапустится и getRedirectResult вернёт credential
+      // Возвращаем false — сессия будет обработана после перезагрузки
+      return false;
+    } catch (e) {
+      AppLogger.error('Google Sign-In error: $e', e);
+      rethrow;
+    }
+  }
+
+  /// Обработка результата Google redirect после возврата от OAuth
+  /// Вызывается при инициализации приложения
+  Future<bool> handleGoogleRedirectResult() async {
+    try {
+      final credential = await checkGoogleRedirectResult();
+      if (credential == null) return false;
 
       final User? user = credential.user;
       if (user == null) {
-        AppLogger.warning(
-          '[$timestamp] [Auth] [GoogleSignIn] Google Sign-In отменён пользователем',
-        );
+        AppLogger.warning('[GoogleSignIn] Redirect result: user is null');
         return false;
       }
 
-      AppLogger.info(
-        '[$timestamp] [Auth] [GoogleSignIn] Google Sign-In успешен: ${_maskEmail(user.email ?? 'unknown')}',
-      );
-      AppLogger.debug(
-        '[$timestamp] [Auth] [GoogleSignIn] Firebase user UID: ${user.uid}',
-      );
+      AppLogger.info('[GoogleSignIn] ✅ Redirect result: ${_maskEmail(user.email ?? 'unknown')}');
+      
+      // Продолжаем обычный flow входа через Google
+      return await _completeGoogleSignIn(user);
+    } catch (e) {
+      AppLogger.error('[GoogleSignIn] Redirect result error: $e', e);
+      return false;
+    }
+  }
 
-      // Явно ждём событие authStateChanges, подтверждающее вход
-      AppLogger.debug(
-        '[$timestamp] [Auth] [GoogleSignIn] Ожидание authStateChanges...',
-      );
-      await _authStateChanges
-          .firstWhere((firebaseUser) => firebaseUser?.uid == user.uid)
-          .timeout(
-            const Duration(seconds: 5),
-            onTimeout:
-                () => throw TimeoutException('Auth state change timeout'),
-          );
+  /// Завершение входа через Google (общая логика)
+  Future<bool> _completeGoogleSignIn(User user) async {
+    final timestamp = DateTime.now().toIso8601String();
 
-      // Get Firebase ID token to exchange for backend access_token
-      AppLogger.debug(
-        '[$timestamp] [Auth] [GoogleSignIn] Получение Firebase ID token...',
-      );
-      final idToken = await user.getIdToken();
-      if (idToken == null || idToken.isEmpty) {
-        AppLogger.error(
-          '[$timestamp] [Auth] [GoogleSignIn] Не удалось получить Firebase ID token для пользователя: ${user.uid}',
-        );
-        throw Exception('Не удалось получить токен аутентификации');
-      }
+    AppLogger.info(
+      '[$timestamp] [Auth] [GoogleSignIn] Google Sign-In успешен: ${_maskEmail(user.email ?? 'unknown')}',
+    );
+    AppLogger.debug(
+      '[$timestamp] [Auth] [GoogleSignIn] Firebase user UID: ${user.uid}',
+    );
 
-      AppLogger.info(
-        '[$timestamp] [Auth] [GoogleSignIn] Firebase ID token получен (длина: ${idToken.length} символов)',
+    // Get Firebase ID token to exchange for backend access_token
+    AppLogger.debug(
+      '[$timestamp] [Auth] [GoogleSignIn] Получение Firebase ID token...',
+    );
+    final idToken = await user.getIdToken();
+    if (idToken == null || idToken.isEmpty) {
+      AppLogger.error(
+        '[$timestamp] [Auth] [GoogleSignIn] Не удалось получить Firebase ID token для пользователя: ${user.uid}',
       );
-      AppLogger.debug(
-        '[$timestamp] [Auth] [GoogleSignIn] Firebase ID token (первые 50 символов): ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...',
-      );
+      throw Exception('Не удалось получить токен аутентификации');
+    }
 
-      AppLogger.info(
-        '[$timestamp] [Auth] [GoogleSignIn] Обмен Firebase token на backend access_token...',
-      );
+    AppLogger.info(
+      '[$timestamp] [Auth] [GoogleSignIn] Firebase ID token получен (длина: ${idToken.length} символов)',
+    );
+
+    AppLogger.info(
+      '[$timestamp] [Auth] [GoogleSignIn] Обмен Firebase token на backend access_token...',
+    );
 
       // Call backend to exchange Firebase token for access_token
       try {

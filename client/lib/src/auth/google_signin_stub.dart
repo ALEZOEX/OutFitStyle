@@ -3,8 +3,12 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 
-/// Выполняет Google Sign-In используя popup (для Mobile/Desktop)
-Future<UserCredential?> signInWithGoogleWeb(GoogleAuthProvider provider) async {
-  // На не-web платформах возвращаем null — будет использован стандартный flow
+/// Проверяет результат редиректа после Google Sign-In (stub для не-web)
+Future<UserCredential?> checkGoogleRedirectResult() async {
   return null;
+}
+
+/// Выполняет Google Sign-In используя popup (для Mobile/Desktop)
+Future<void> signInWithGoogleWeb(GoogleAuthProvider provider) async {
+  // На не-web платформах ничего не делаем — будет использован стандартный flow
 }

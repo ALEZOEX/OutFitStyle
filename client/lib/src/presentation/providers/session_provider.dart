@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,6 +40,12 @@ final sessionManagerProvider = Provider<SessionManager>((ref) {
       );
       // ✅ Правильная очистка при уничтожении провайдера
       ref.onDispose(() => manager.dispose());
+      
+      // Проверяем результат Google redirect при инициализации
+      manager.handleGoogleRedirectResult().catchError((e) {
+        debugPrint('❌ Google redirect result error: $e');
+      });
+      
       return manager;
     },
     loading: () {
