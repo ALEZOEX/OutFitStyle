@@ -41,7 +41,7 @@ final sessionManagerProvider = Provider<SessionManager>((ref) {
       // ✅ Правильная очистка при уничтожении провайдера
       ref.onDispose(() => manager.dispose());
       
-      // Проверяем результат Google redirect при инициализации
+      // Проверяем результат Google redirect асинхронно (не блокируем загрузку)
       manager.handleGoogleRedirectResult().catchError((e) {
         debugPrint('❌ Google redirect result error: $e');
       });
