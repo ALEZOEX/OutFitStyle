@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
@@ -272,13 +273,13 @@ class SessionManager {
           );
         } else {
           developer.log(
-            '[$timestamp] [SessionManager] ⚠️ localStorage verification: token NOT found (expected on Web only)',
+            '[$timestamp] [SessionManager] ⚠️ localStorage verification: token NOT found',
             name: 'SessionManager',
           );
         }
       } else {
         developer.log(
-          '⚠️ [SessionManager] No access_token in login response for user: ${_maskEmail(email ?? 'unknown')}',
+          '⚠️ [SessionManager] No access_token in login response for user: ${_maskEmail(email)}',
           name: 'SessionManager',
         );
       }
@@ -348,8 +349,14 @@ class SessionManager {
       );
 
       // На Web используем popup (с fallback на redirect)
-      final webResult = await signInWithGoogleWeb(provider);
-      
+      UserCredential? webResult;
+      if (kIsWeb) {
+        webResult = await signInWithGoogleWeb(provider);
+      } else {
+        // Mobile/Desktop — используем стандартный popup
+        webResult = await _firebaseAuth.signInWithPopup(provider);
+      }
+
       // Если webResult != null, значит popup успешен — обрабатываем
       if (webResult != null) {
         final user = webResult.user;
@@ -360,7 +367,7 @@ class SessionManager {
         // Продолжаем обычный flow
         return await _completeGoogleSignIn(user);
       }
-      
+
       // Если webResult == null, значит начался redirect — ждём перезагрузки
       AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Начат redirect, ждём перезагрузки...');
       return false;
@@ -772,7 +779,7 @@ class SessionManager {
           );
         } else {
           developer.log(
-            '[$timestamp] [SessionManager] ⚠️ localStorage verification: token NOT found (expected on Web only)',
+            '[$timestamp] [SessionManager] ⚠️ localStorage verification: token NOT found',
             name: 'SessionManager',
           );
         }

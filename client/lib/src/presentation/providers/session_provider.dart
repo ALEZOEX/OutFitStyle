@@ -44,6 +44,7 @@ final sessionManagerProvider = Provider<SessionManager>((ref) {
       // Проверяем результат Google redirect асинхронно (не блокируем загрузку)
       manager.handleGoogleRedirectResult().catchError((e) {
         debugPrint('❌ Google redirect result error: $e');
+        return false;
       });
       
       return manager;

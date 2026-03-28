@@ -9,6 +9,8 @@ Future<UserCredential?> checkGoogleRedirectResult() async {
 }
 
 /// Выполняет Google Sign-In используя popup (для Mobile/Desktop)
-Future<void> signInWithGoogleWeb(GoogleAuthProvider provider) async {
-  // На не-web платформах ничего не делаем — будет использован стандартный flow
+/// Возвращает null — на не-web платформах используется стандартный flow
+Future<UserCredential?> signInWithGoogleWeb(GoogleAuthProvider provider) async {
+  // На не-web платформах возвращаем null — будет использован стандартный flow
+  return null;
 }
