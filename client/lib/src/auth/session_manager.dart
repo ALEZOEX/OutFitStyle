@@ -7,6 +7,7 @@ import '../utils/logger.dart';
 import '../core/api/api_client.dart';
 import '../core/api/api_config.dart';
 import '../core/api/web_token_helper_selector.dart';
+import 'google_signin_selector.dart';
 import '../core/api/web_token_storage_selector.dart';
 
 /// Модель данных пользователя
@@ -343,14 +344,20 @@ class SessionManager {
       provider.addScope('profile');
 
       AppLogger.debug(
-        '[$timestamp] [Auth] [GoogleSignIn] Открытие popup для Google OAuth',
+        '[$timestamp] [Auth] [GoogleSignIn] Открытие OAuth окна для Google Sign-In',
       );
 
-      // Открываем popup для входа через Google
-      // На Web: signInWithPopup, на Mobile: нативное окно
-      final UserCredential credential = await _firebaseAuth.signInWithPopup(
-        provider,
-      );
+      // На Web используем redirect вместо popup (избегаем COOP проблем)
+      final webResult = await signInWithGoogleWeb(provider);
+      
+      UserCredential credential;
+      if (webResult != null) {
+        // Web redirect результат
+        credential = webResult;
+      } else {
+        // Mobile/Desktop popup или продолжение после redirect
+        credential = await _firebaseAuth.signInWithPopup(provider);
+      }
 
       final User? user = credential.user;
       if (user == null) {
