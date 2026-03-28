@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../data/remote/wardrobe_api_service.dart';
 import '../../../../domain/entities/catalog_entity.dart';
@@ -115,9 +116,19 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
         error: null,
       );
     } catch (e) {
+      // Извлекаем сообщение об ошибке
+      String errorMessage;
+      if (e is WardrobeException) {
+        errorMessage = e.message;
+      } else if (e is DioException) {
+        errorMessage = 'Ошибка сети: ${e.message}';
+      } else {
+        errorMessage = e.toString().replaceFirst('WardrobeException: ', '');
+      }
+      
       state = state.copyWith(
         status: WardrobeLoadStatus.error,
-        error: e.toString(),
+        error: errorMessage,
       );
     }
   }
