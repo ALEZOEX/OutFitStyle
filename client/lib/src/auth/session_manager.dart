@@ -405,6 +405,22 @@ class SessionManager {
     final timestamp = DateTime.now().toIso8601String();
 
     AppLogger.info(
+      '[$timestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════',
+    );
+    AppLogger.info(
+      '[$timestamp] [Auth] [GoogleSignIn] ║ НАЧАЛО _completeGoogleSignIn',
+    );
+    AppLogger.info(
+      '[$timestamp] [Auth] [GoogleSignIn] ║ User UID: ${user.uid}',
+    );
+    AppLogger.info(
+      '[$timestamp] [Auth] [GoogleSignIn] ║ User Email: ${user.email}',
+    );
+    AppLogger.info(
+      '[$timestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════',
+    );
+
+    AppLogger.info(
       '[$timestamp] [Auth] [GoogleSignIn] Google Sign-In успешен: ${_maskEmail(user.email ?? 'unknown')}',
     );
     AppLogger.debug(
