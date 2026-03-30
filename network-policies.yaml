@@ -79,6 +79,37 @@ spec:
           port: 8080
 ---
 # ============================================================
+# 3b. Traefik (ingress) → frontend:80
+# Разрешает входящий трафик от Traefik (kube-system) к frontend
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-frontend
+  namespace: outfitstyle
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+    - Ingress
+  ingress:
+    # От всех подов в kube-system (Traefik)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 80
+    # От всех подов в namespace (для internal трафика)
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 80
+---
+# ============================================================
 # 4. backend → postgres:5432
 # ============================================================
 apiVersion: networking.k8s.io/v1
@@ -255,3 +286,65 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+---
+# ============================================================
+# 7b. Traefik (ingress) → backend:8080
+# Разрешает входящий трафик от Traefik (kube-system) к backend для /api routes
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-backend
+  namespace: outfitstyle
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+    - Ingress
+  ingress:
+    # От всех подов в kube-system (Traefik)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8080
+    # От всех подов в namespace (для internal трафика)
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# ============================================================
+# 7c. Traefik (ingress) → landing:80
+# Разрешает входящий трафик от Traefik (kube-system) к landing
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-landing
+  namespace: outfitstyle
+spec:
+  podSelector:
+    matchLabels:
+      app: landing
+  policyTypes:
+    - Ingress
+  ingress:
+    # От всех подов в kube-system (Traefik)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 80
+    # От всех подов в namespace (для internal трафика)
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 80

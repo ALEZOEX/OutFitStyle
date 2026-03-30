@@ -64,6 +64,9 @@ data:
     # TLS подключения из кластера (requiring SSL)
     hostssl all             all             0.0.0.0/0               scram-sha-256
 
+    # Внутренние подключения кластера без TLS (ClusterIP)
+    host    all             all             10.42.0.0/16            scram-sha-256
+
     # Fallback для health checks без TLS (pg_isready)
     host    all             all             127.0.0.1/32            trust
 ---

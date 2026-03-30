@@ -139,8 +139,8 @@ spec:
             - sh
             - -c
             - |
-              # Подставляем пароль из env в конфиг
-              envsubst < /etc/redis/redis.conf.template > /tmp/redis.conf
+              # Подставляем пароль из env в конфиг (используем sed вместо envsubst)
+              sed "s|\${REDIS_PASSWORD}|${REDIS_PASSWORD}|g" /etc/redis/redis.conf.template > /tmp/redis.conf
               exec redis-server /tmp/redis.conf
           env:
             - name: REDIS_PASSWORD
