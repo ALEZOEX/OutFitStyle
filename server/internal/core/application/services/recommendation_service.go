@@ -27,9 +27,9 @@ type RecommendationService struct {
 	personalization repositories.PersonalizationRepository // Репозиторий персонализации
 	ratingRepo      repositories.OutfitRatingRepository    // Репозиторий оценок
 
-	eventPublisher eventing.EventPublisher  // Паблишер событий
-	weather        *external.WeatherService // Сервис погоды
-	ml             *external.MLClient       // ML-клиент
+	eventPublisher eventing.EventPublisher    // Паблишер событий
+	weather        *external.WeatherService   // Сервис погоды
+	ml             *external.MLClient         // ML-клиент
 	recCache       *cache.RecommendationCache // Кэш рекомендаций
 
 	fallbackSvc *FallbackRecommendationService // Fallback сервис рекомендаций
@@ -110,6 +110,14 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 	wardrobeLite, _ := s.clothingRepo.ListWardrobeCandidatesLite(ctx, userID, 140)
 	catalogLite, _ := s.clothingRepo.ListCatalogCandidatesLite(ctx, includePartners, 140)
 
+	s.logger.Info("[RecPipeline] Stage 1: Candidates loaded",
+		zap.String("user_id", userID.String()),
+		zap.Int("wardrobe_items", len(wardrobeLite)),
+		zap.Int("catalog_items", len(catalogLite)),
+		zap.Float64("temperature", ws.Temperature),
+		zap.String("weather_main", ws.WeatherMain),
+	)
+
 	// удаление дубликатов и ограничение до 250
 	candByID := make(map[domain.ID]domain.CandidateLite, 250)
 	add := func(c domain.CandidateLite) {
@@ -133,6 +141,24 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 	for _, c := range candByID {
 		candidates = append(candidates, c)
 	}
+
+	// Подсчёт кандидатов по категориям
+	catCounts := map[string]int{}
+	for _, c := range candidates {
+		catCounts[c.Category]++
+	}
+
+	s.logger.Info("[RecPipeline] Stage 2: Candidates merged",
+		zap.String("user_id", userID.String()),
+		zap.Int("total_candidates", len(candidates)),
+		zap.Int("from_wardrobe", len(wardrobeLite)),
+		zap.Int("upper", catCounts["upper"]),
+		zap.Int("lower", catCounts["lower"]),
+		zap.Int("footwear", catCounts["footwear"]),
+		zap.Int("outerwear", catCounts["outerwear"]),
+		zap.Int("accessory", catCounts["accessory"]),
+		zap.Int("headwear", catCounts["headwear"]),
+	)
 
 	reqStyle := ""
 	if req.Style != nil {
@@ -994,6 +1020,23 @@ func (s *RecommendationService) rankLiteOrFallback(
 
 		mlReq.Candidates = append(mlReq.Candidates, candidate)
 	}
+
+	// Подсчёт кандидатов по категориям после фильтрации
+	mlCatCounts := map[string]int{}
+	for _, c := range mlReq.Candidates {
+		mlCatCounts[c.Category]++
+	}
+
+	s.logger.Info("[RecPipeline] Stage 3: Candidates for ML (after low-quality filter)",
+		zap.String("user_id", userID.String()),
+		zap.Int("ml_input_candidates", len(mlReq.Candidates)),
+		zap.Int("low_quality_excluded", len(lowQualitySet)),
+		zap.Int("upper", mlCatCounts["upper"]),
+		zap.Int("lower", mlCatCounts["lower"]),
+		zap.Int("footwear", mlCatCounts["footwear"]),
+		zap.Int("outerwear", mlCatCounts["outerwear"]),
+		zap.Int("accessory", mlCatCounts["accessory"]),
+	)
 
 	// Создаем сессию для логирования в ML сервисе
 	session := &repositories.RecommendationSession{
