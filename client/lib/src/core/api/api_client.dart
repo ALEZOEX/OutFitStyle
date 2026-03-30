@@ -392,6 +392,29 @@ class ApiClient {
       if (e.response?.statusCode == 401) {
         return const UnauthorizedException('Требуется авторизация');
       }
+
+      // Извлекаем конкретное сообщение об ошибке из тела ответа бэкенда
+      final responseData = e.response?.data;
+      if (responseData is Map) {
+        // Формат validation errors: {"error": "validation failed", "errors": {"field": "msg"}}
+        if (responseData.containsKey('errors') &&
+            responseData['errors'] is Map) {
+          final errors = responseData['errors'] as Map;
+          if (errors.isNotEmpty) {
+            final messages = errors.values.map((v) => v.toString()).join('; ');
+            return ApiException(messages);
+          }
+        }
+        // Формат простой ошибки: {"error": "message"}
+        if (responseData.containsKey('error') &&
+            responseData['error'] is String) {
+          final msg = responseData['error'] as String;
+          if (msg.isNotEmpty && msg != 'validation failed') {
+            return ApiException(msg);
+          }
+        }
+      }
+
       return ApiException(
         'Ошибка сервера: ${e.response?.statusCode ?? 'unknown'}',
       );

@@ -288,13 +288,40 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             if (value == null || value.isEmpty) {
                               return 'Введите пароль';
                             }
-                            // Security: минимум 8 символов (соответствует backend)
-                            if (value.length < 8) {
-                              return 'Минимум 8 символов';
+                            if (value.length < 12) {
+                              return 'Минимум 12 символов';
+                            }
+                            if (value.length > 72) {
+                              return 'Максимум 72 символа';
+                            }
+                            if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                              return 'Нужна хотя бы одна заглавная буква';
+                            }
+                            if (!RegExp(r'[a-z]').hasMatch(value)) {
+                              return 'Нужна хотя бы одна строчная буква';
+                            }
+                            if (!RegExp(r'[0-9]').hasMatch(value)) {
+                              return 'Нужна хотя бы одна цифра';
+                            }
+                            if (!RegExp(
+                              r'[!@#$%^&*()\-_=+\[\]{}|;:<>?,./~`\\]',
+                            ).hasMatch(value)) {
+                              return 'Нужен хотя бы один спецсимвол';
                             }
                             return null;
                           },
                         ),
+
+                        // Подсказка к паролю при регистрации
+                        if (!_isLogin) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Мин. 12 символов: A-Z, a-z, 0-9, спецсимвол',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

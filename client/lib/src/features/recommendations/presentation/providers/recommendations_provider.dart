@@ -220,7 +220,7 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     state = state.copyWith(plannedOutfits: plannedOutfits);
   }
 
-  /// Сгенерировать новую рекомендацию
+  /// Сгенерировать новую рекомендацию через API
   Future<OutfitRecommendation?> generateRecommendation({
     double? temperature,
     String? weatherCondition,
@@ -229,31 +229,43 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     state = state.copyWith(isGenerating: true);
 
     try {
-      // Имитация генерации рекомендации
-      await Future.delayed(const Duration(seconds: 2));
+      final body = <String, dynamic>{};
+      if (occasion != null) body['occasion'] = occasion;
+      if (temperature != null) body['temperature'] = temperature;
 
-      final newRecommendation = OutfitRecommendation(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: _generateTitle(occasion, weatherCondition),
-        description: _generateDescription(occasion, weatherCondition),
-        recommendedItems: _getRandomItems(),
-        temperature: temperature ?? 15.0,
-        weatherCondition: weatherCondition ?? 'sunny',
-        createdAt: DateTime.now(),
+      final response = await _apiClient.post(
+        '/api/v1/recommendations',
+        data: body,
       );
 
-      final recommendations = [newRecommendation, ...state.recommendations];
-      state = state.copyWith(
-        recommendations: recommendations,
-        status: RecommendationsLoadStatus.success,
-        isGenerating: false,
-      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data =
+            response.data is Map
+                ? response.data as Map<String, dynamic>
+                : jsonDecode(response.data.toString()) as Map<String, dynamic>;
 
-      return newRecommendation;
+        final recommendation = OutfitRecommendation.fromJson(data);
+
+        final recommendations = [recommendation, ...state.recommendations];
+        state = state.copyWith(
+          recommendations: recommendations,
+          status: RecommendationsLoadStatus.success,
+          isGenerating: false,
+        );
+
+        return recommendation;
+      } else {
+        state = state.copyWith(
+          status: RecommendationsLoadStatus.error,
+          error: 'Ошибка генерации (${response.statusCode})',
+          isGenerating: false,
+        );
+        return null;
+      }
     } catch (e) {
       state = state.copyWith(
         status: RecommendationsLoadStatus.error,
-        error: 'Ошибка генерации: $e',
+        error: 'Ошибка генерации рекомендации',
         isGenerating: false,
       );
       return null;
@@ -286,36 +298,6 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     return state.recommendations
         .where((r) => state.usedIds.contains(r.id))
         .toList();
-  }
-
-  // ==================== Private Methods ====================
-
-  String _generateTitle(String? occasion, String? weather) {
-    final titles = [
-      'Персональная рекомендация',
-      'Ваш идеальный образ',
-      'Стильный outfit дня',
-      'Рекомендация на основе погоды',
-    ];
-    return titles[DateTime.now().millisecond % titles.length];
-  }
-
-  String _generateDescription(String? occasion, String? weather) {
-    return 'Индивидуально подобранный outfit с учётом ваших предпочтений и текущих условий.';
-  }
-
-  List<String> _getRandomItems() {
-    const items = [
-      'Белая футболка Basic',
-      'Джинсы Slim Fit',
-      'Кроссовки белые',
-      'Худи серое',
-      'Рубашка оксфорд',
-      'Куртка зимняя',
-      'Шапка вязаная',
-    ];
-    final shuffled = List<String>.from(items)..shuffle();
-    return shuffled.sublist(0, shuffled.length < 3 ? shuffled.length : 3);
   }
 }
 

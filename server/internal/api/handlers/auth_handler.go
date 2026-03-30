@@ -23,8 +23,8 @@ import (
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/infrastructure/email"
-	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
+	"outfitstyle/server/internal/validation"
 )
 
 // AuthService интерфейс сервиса аутентификации
@@ -62,14 +62,14 @@ func sanitizeRegistrationRequest(req *domain.UserRegistration) {
 // AuthHandler структура обработчика аутентификации
 // Содержит зависимости для обработки запросов аутентификации
 type AuthHandler struct {
-	auth            AuthService                        // Сервис аутентификации для выполнения бизнес-логики
-	lockout         AccountLockout                     // Защита от brute-force атак
-	lockoutDuration time.Duration                      // Длительность блокировки
-	redis           *redis.Client                      // Redis для кэширования кодов восстановления
-	userRepo        repositories.UserRepository        // Репозиторий пользователей
-	smtp            *email.SMTPService                 // SMTP сервис для отправки email
-	logger          *zap.Logger                        // Логгер для отладки
-	cookieSecure    bool                               // Secure flag для refresh token cookie
+	auth            AuthService                 // Сервис аутентификации для выполнения бизнес-логики
+	lockout         AccountLockout              // Защита от brute-force атак
+	lockoutDuration time.Duration               // Длительность блокировки
+	redis           *redis.Client               // Redis для кэширования кодов восстановления
+	userRepo        repositories.UserRepository // Репозиторий пользователей
+	smtp            *email.SMTPService          // SMTP сервис для отправки email
+	logger          *zap.Logger                 // Логгер для отладки
+	cookieSecure    bool                        // Secure flag для refresh token cookie
 }
 
 // NewAuthHandler создает новый экземпляр обработчика аутентификации
@@ -146,6 +146,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		// Проверяем, является ли это ошибкой валидации
 		if validationErr, ok := err.(*services.ValidationError); ok {
 			resp.ValidationError(w, validationErr.Errors)
+			return
+		}
+
+		// Email уже зарегистрирован
+		if errors.Is(err, repositories.ErrEmailAlreadyExists) {
+			resp.Error(w, http.StatusConflict, errors.New("Пользователь с таким email уже существует"))
 			return
 		}
 
