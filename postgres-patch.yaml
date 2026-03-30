@@ -1,0 +1,14 @@
+data:
+  pg_hba.conf: |
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+    # Локальные подключения
+    local   all             all                                     trust
+
+    # TLS подключения из кластера
+    hostssl all             all             0.0.0.0/0               scram-sha-256
+
+    # Подключения из Kubernetes кластера без TLS (для backend)
+    host    all             all             10.0.0.0/8              scram-sha-256
+
+    # Fallback для health checks без TLS (pg_isready)
+    host    all             all             127.0.0.1/32            trust

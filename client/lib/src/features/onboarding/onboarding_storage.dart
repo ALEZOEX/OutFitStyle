@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data/models/onboarding_data.dart' as models;
+import '../../utils/logger.dart';
 
 /// Хранилище данных онбординга в SharedPreferences
 class OnboardingStorage {
@@ -14,12 +15,17 @@ class OnboardingStorage {
 
   Future<bool> isDone() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_kDone) ?? false;
+    final isDone = prefs.getBool(_kDone) ?? false;
+    AppLogger.info('OnboardingStorage.isDone() = $isDone');
+    return isDone;
   }
 
   Future<void> setDone() async {
+    AppLogger.info('OnboardingStorage.setDone() - setting flag to true');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kDone, true);
+    final verified = prefs.getBool(_kDone) ?? false;
+    AppLogger.info('OnboardingStorage.setDone() - verified = $verified');
   }
 
   Future<void> reset() async {

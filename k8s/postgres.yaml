@@ -187,19 +187,10 @@ spec:
             name: postgres-config
         - name: tls-certs
           projected:
+            defaultMode: 0600
             sources:
               - secret:
                   name: postgres-tls-secret
-                  items:
-                    - key: tls.crt
-                      path: tls.crt
-                      mode: 0644
-                    - key: ca.crt
-                      path: ca.crt
-                      mode: 0644
-                    - key: tls.key
-                      path: tls.key
-                      mode: 0600
 ---
 apiVersion: v1
 kind: Service

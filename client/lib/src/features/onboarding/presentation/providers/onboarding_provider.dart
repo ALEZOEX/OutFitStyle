@@ -180,26 +180,36 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   Future<bool> completeOnboarding() async {
     // Проверка валидности данных
     if (!state.data.isValid) {
+      AppLogger.error('Onboarding validation failed');
       state = state.copyWith(error: 'Не все обязательные поля заполнены');
       return false;
     }
 
+    AppLogger.info('Starting onboarding completion...');
     state = state.copyWith(isSubmitting: true, error: null);
 
     try {
       // Сохранение локально
+      AppLogger.info('Saving onboarding data to local storage...');
       await _storage.saveOnboardingData(state.data);
+      AppLogger.info('Setting onboarding done flag...');
       await _storage.setDone();
+      
+      AppLogger.info('Onboarding data saved locally. City: ${state.data.cityName}, Styles: ${state.data.stylePreferences.length}');
 
       try {
+        AppLogger.info('Sending preferences to server...');
         await _repository.savePreferences(state.data);
+        AppLogger.info('Preferences sent to server successfully');
       } catch (e) {
         AppLogger.error('Error sending preferences to server', e);
       }
 
       state = state.copyWith(currentPage: 4, isSubmitting: false);
+      AppLogger.info('Onboarding completed successfully');
       return true;
     } catch (e) {
+      AppLogger.error('Error completing onboarding', e);
       state = state.copyWith(
         isSubmitting: false,
         error: 'Ошибка сохранения: ${e.toString()}',

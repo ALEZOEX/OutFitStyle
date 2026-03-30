@@ -2,20 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/di/di.dart';
 import '../onboarding/onboarding_storage.dart' as onboarding_storage;
 import '../../presentation/providers/session_provider.dart'
     show sessionManagerProvider;
 
 /// Провайдер для отслеживания состояния проверки onboarding
+/// Использует прямой вызов OnboardingStorage() для избежания циклических зависимостей
 final splashInitProvider = FutureProvider<String>((ref) async {
   // Проверяем, пройден ли onboarding
   final storage = onboarding_storage.OnboardingStorage();
   final onboardingDone = await storage.isDone();
-
-  // Обновляем состояние в ди через update метод
-  final notifier = ref.read(onboardingDoneProvider.notifier);
-  notifier.updateState(onboardingDone);
 
   // Проверяем авторизацию через SessionManager (Firebase Auth)
   final sessionManager = ref.read(sessionManagerProvider);
