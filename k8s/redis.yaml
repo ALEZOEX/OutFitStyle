@@ -69,11 +69,11 @@ data:
     # ==============================================
     # Security
     # ==============================================
-    # Отключаем опасные команды
-    rename-command FLUSHDB ""
-    rename-command FLUSHALL ""
-    rename-command CONFIG "REDIS_CONFIG_SECRET"
-    rename-command DEBUG ""
+    # Переименовываем опасные команды (но не отключаем, чтобы не ломать AOF)
+    # rename-command FLUSHDB ""
+    # rename-command FLUSHALL ""
+    # rename-command CONFIG "REDIS_CONFIG_SECRET"
+    # rename-command DEBUG ""
 
     # ==============================================
     # Logging
