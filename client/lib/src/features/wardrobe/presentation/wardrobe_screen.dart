@@ -303,28 +303,39 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     if (state.status == WardrobeLoadStatus.error) {
       return SliverFillRemaining(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                state.error ?? 'Ошибка загрузки',
-                style: theme.textTheme.bodyLarge?.copyWith(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  state.isAuthError ? Icons.lock_outline : Icons.error_outline,
+                  size: 64,
                   color: theme.colorScheme.error,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.read(wardrobeProvider.notifier).refresh(),
-                child: const Text('Повторить'),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  state.error ?? 'Ошибка загрузки',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                if (state.isAuthError) ...[
+                  ElevatedButton.icon(
+                    onPressed: () => context.go('/auth'),
+                    icon: const Icon(Icons.login),
+                    label: const Text('Войти снова'),
+                  ),
+                ] else
+                  ElevatedButton(
+                    onPressed:
+                        () => ref.read(wardrobeProvider.notifier).refresh(),
+                    child: const Text('Повторить'),
+                  ),
+              ],
+            ),
           ),
         ),
       );

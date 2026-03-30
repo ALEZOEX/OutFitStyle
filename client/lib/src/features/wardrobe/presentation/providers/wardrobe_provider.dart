@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+import '../../../../core/api/api_client.dart' show UnauthorizedException;
 import '../../../../data/remote/wardrobe_api_service.dart';
 import '../../../../domain/entities/catalog_entity.dart';
 import '../../data/repositories/wardrobe_repository.dart';
@@ -17,6 +18,7 @@ class WardrobeState {
   final String? selectedCategory;
   final String? error;
   final bool isAddingItem;
+  final bool isAuthError;
 
   const WardrobeState({
     this.items = const [],
@@ -24,6 +26,7 @@ class WardrobeState {
     this.selectedCategory,
     this.error,
     this.isAddingItem = false,
+    this.isAuthError = false,
   });
 
   WardrobeState copyWith({
@@ -32,6 +35,7 @@ class WardrobeState {
     String? selectedCategory,
     String? error,
     bool? isAddingItem,
+    bool? isAuthError,
   }) {
     return WardrobeState(
       items: items ?? this.items,
@@ -39,6 +43,7 @@ class WardrobeState {
       selectedCategory: selectedCategory ?? this.selectedCategory,
       error: error ?? this.error,
       isAddingItem: isAddingItem ?? this.isAddingItem,
+      isAuthError: isAuthError ?? this.isAuthError,
     );
   }
 
@@ -99,7 +104,10 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
 
   /// Загрузить гардероб с сервера
   Future<void> _loadWardrobe() async {
-    state = state.copyWith(status: WardrobeLoadStatus.loading);
+    state = state.copyWith(
+      status: WardrobeLoadStatus.loading,
+      isAuthError: false,
+    );
 
     try {
       final result = await _repository.getWardrobeItems(
@@ -112,13 +120,26 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
         items: result.items,
         status: WardrobeLoadStatus.success,
         error: null,
+        isAuthError: false,
       );
     } catch (e) {
+      final isAuth = _isAuthError(e);
       state = state.copyWith(
         status: WardrobeLoadStatus.error,
         error: _extractErrorMessage(e),
+        isAuthError: isAuth,
       );
     }
+  }
+
+  /// Проверить, является ли ошибка связанной с авторизацией
+  bool _isAuthError(Object error) {
+    if (error is UnauthorizedException) return true;
+    if (error is WardrobeException) {
+      return error.message.contains('авторизац') ||
+          error.message.contains('авторизов');
+    }
+    return false;
   }
 
   /// Выбрать категорию для фильтрации
@@ -272,6 +293,7 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
 String _extractErrorMessage(Object error) {
   if (error is WardrobeException) return error.message;
   if (error is WardrobeApiException) return error.message;
+  if (error is UnauthorizedException) return 'Требуется авторизация';
   if (error is DioException) return error.message ?? error.type.name;
   if (error is FormatException) return error.message;
   if (error is TypeError) return 'Ошибка типа данных';

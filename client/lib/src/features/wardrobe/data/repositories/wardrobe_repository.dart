@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../../core/api/api_client.dart' show UnauthorizedException;
 import '../../../../data/remote/wardrobe_api_service.dart';
 import '../../../../domain/entities/wardrobe_item.dart';
 import '../../../../domain/entities/wardrobe_request_entities.dart';
@@ -50,6 +51,8 @@ class WardrobeRepository {
       return WardrobeListResult(items: response.items, total: response.total);
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
+    } on UnauthorizedException {
+      throw const WardrobeException('Требуется авторизация');
     } on WardrobeException {
       rethrow;
     } on DioException catch (e) {
@@ -70,6 +73,8 @@ class WardrobeRepository {
       return item;
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
+    } on UnauthorizedException {
+      throw const WardrobeException('Требуется авторизация');
     } on WardrobeException {
       rethrow;
     } on DioException catch (e) {
@@ -90,6 +95,8 @@ class WardrobeRepository {
       return item;
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
+    } on UnauthorizedException {
+      throw const WardrobeException('Требуется авторизация');
     } on WardrobeException {
       rethrow;
     } on DioException catch (e) {
@@ -111,6 +118,8 @@ class WardrobeRepository {
       return item;
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
+    } on UnauthorizedException {
+      throw const WardrobeException('Требуется авторизация');
     } on WardrobeException {
       rethrow;
     } on DioException catch (e) {
@@ -128,6 +137,8 @@ class WardrobeRepository {
       await _apiService.deleteWardrobeItem(id);
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
+    } on UnauthorizedException {
+      throw const WardrobeException('Требуется авторизация');
     } on WardrobeException {
       rethrow;
     } on DioException catch (e) {
@@ -146,6 +157,8 @@ class WardrobeRepository {
       return await getWardrobeItem(id);
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
+    } on UnauthorizedException {
+      throw const WardrobeException('Требуется авторизация');
     } on WardrobeException {
       rethrow;
     } on DioException catch (e) {
@@ -164,6 +177,8 @@ class WardrobeRepository {
       return await getWardrobeItem(id);
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
+    } on UnauthorizedException {
+      throw const WardrobeException('Требуется авторизация');
     } on WardrobeException {
       rethrow;
     } on DioException catch (e) {
@@ -181,6 +196,8 @@ class WardrobeRepository {
       await _apiService.markAsWorn(id);
     } on WardrobeApiException catch (e) {
       throw _mapApiException(e);
+    } on UnauthorizedException {
+      throw const WardrobeException('Требуется авторизация');
     } on WardrobeException {
       rethrow;
     } on DioException catch (e) {
@@ -220,6 +237,7 @@ class WardrobeRepository {
   static String _extractErrorMessage(Object error) {
     if (error is WardrobeException) return error.message;
     if (error is WardrobeApiException) return error.message;
+    if (error is UnauthorizedException) return 'Требуется авторизация';
     if (error is DioException) return error.message ?? error.type.name;
     if (error is FormatException) return error.message;
     if (error is TypeError) return 'Ошибка типа данных';

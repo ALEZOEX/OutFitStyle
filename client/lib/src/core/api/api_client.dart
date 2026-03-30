@@ -78,7 +78,7 @@ class ApiClient {
 
             // Приоритет 1: Backend Access Token из SharedPreferences
             accessToken = _sharedPreferences?.getString('access_token');
-            
+
             // Приоритет 2: Чтение напрямую из localStorage (для Web)
             if (accessToken == null || accessToken.isEmpty) {
               accessToken = _getAccessTokenFromLocalStorage();
@@ -298,156 +298,18 @@ class ApiClient {
             '[$timestamp] [ApiClient] [Interceptor 2] HTTP Response: ${response.statusCode} ${response.requestOptions.path}',
             name: 'ApiClient',
           );
-          if (response.statusCode == 200 || response.statusCode == 201) {
-            developer.log(
-              '[$timestamp] [ApiClient] [Interceptor 2] Успешный ответ',
-              name: 'ApiClient',
-            );
-          }
 
           return handler.next(response);
         },
         onRequest: (options, handler) {
-          final timestamp = DateTime.now().toIso8601String();
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2] HTTP Request: ${options.method} ${options.path}',
-            name: 'ApiClient',
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2] Headers: ${options.headers}',
-            name: 'ApiClient',
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2] Data: ${options.data}',
-            name: 'ApiClient',
-          );
           return handler.next(options);
         },
         onError: (DioException err, ErrorInterceptorHandler handler) async {
           final timestamp = DateTime.now().toIso8601String();
           final statusCode = err.response?.statusCode;
 
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ╔═══════════════════════════════════════════',
-            name: 'ApiClient',
-            level: 1000,
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ DioException DETECTED',
-            name: 'ApiClient',
-            level: 1000,
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Type: ${err.type}',
-            name: 'ApiClient',
-            level: 1000,
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Path: ${err.requestOptions.method} ${err.requestOptions.path}',
-            name: 'ApiClient',
-            level: 1000,
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Status Code: $statusCode',
-            name: 'ApiClient',
-            level: 1000,
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Message: ${err.message}',
-            name: 'ApiClient',
-            level: 1000,
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ║ Response Data: ${err.response?.data ?? 'null'}',
-            name: 'ApiClient',
-            level: 1000,
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2 onError] ╚═══════════════════════════════════════════',
-            name: 'ApiClient',
-            level: 1000,
-          );
-
-          // Если 401 — логируем для отладки
-          if (statusCode == 401) {
-            final authTimestamp = DateTime.now().toIso8601String();
-            
-            developer.log(
-              '[$authTimestamp] [ApiClient] [Auth] ╔═══════════════════════════════════════════',
-              name: 'ApiClient',
-              level: 1000,
-            );
-            developer.log(
-              '[$authTimestamp] [ApiClient] [Auth] ║ 401 Unauthorized — требуется авторизация',
-              name: 'ApiClient',
-              level: 1000,
-            );
-            developer.log(
-              '[$authTimestamp] [ApiClient] [Auth] ║ Path: ${err.requestOptions.method} ${err.requestOptions.path}',
-              name: 'ApiClient',
-              level: 1000,
-            );
-            
-            AppLogger.error(
-              '[$authTimestamp] [ApiClient] 401 ошибка на ${err.requestOptions.path}',
-            );
-
-            // Проверяем, есть ли токен в SharedPreferences
-            final accessToken = _sharedPreferences?.getString('access_token');
-            if (accessToken == null || accessToken.isEmpty) {
-              developer.log(
-                '[$authTimestamp] [ApiClient] [Auth] ║ SharedPreferences: access_token ОТСУТСТВУЕТ',
-                name: 'ApiClient',
-                level: 1000,
-              );
-              AppLogger.error(
-                '[$authTimestamp] [ApiClient] 401 ошибка: access_token не найден в SharedPreferences',
-              );
-            } else {
-              developer.log(
-                '[$authTimestamp] [ApiClient] [Auth] ║ SharedPreferences: access_token ПРИСУТСТВУЕТ (${accessToken.length} chars)',
-                name: 'ApiClient',
-                level: 1000,
-              );
-              developer.log(
-                '[$authTimestamp] [ApiClient] [Auth] ║ Token preview: ${accessToken.substring(0, accessToken.length > 50 ? 50 : accessToken.length)}...',
-                name: 'ApiClient',
-                level: 1000,
-              );
-              AppLogger.error(
-                '[$authTimestamp] [ApiClient] 401 ошибка: access_token есть, но не валиден (возможно истёк)',
-              );
-            }
-            
-            // Проверяем токен в localStorage (для Web)
-            final localStorageToken = _getAccessTokenFromLocalStorage();
-            if (localStorageToken != null && localStorageToken.isNotEmpty) {
-              developer.log(
-                '[$authTimestamp] [ApiClient] [Auth] ║ localStorage: access_token ПРИСУТСТВУЕТ (${localStorageToken.length} chars)',
-                name: 'ApiClient',
-                level: 1000,
-              );
-              if (accessToken == null || accessToken.isEmpty) {
-                developer.log(
-                  '[$authTimestamp] [ApiClient] [Auth] ║ ⚠️ WARNING: Token есть в localStorage, но НЕ в SharedPreferences!',
-                  name: 'ApiClient',
-                  level: 1000,
-                );
-              }
-            } else {
-              developer.log(
-                '[$authTimestamp] [ApiClient] [Auth] ║ localStorage: access_token ОТСУТСТВУЕТ',
-                name: 'ApiClient',
-                level: 1000,
-              );
-            }
-            
-            developer.log(
-              '[$authTimestamp] [ApiClient] [Auth] ╚═══════════════════════════════════════════',
-              name: 'ApiClient',
-              level: 1000,
-            );
-          } else if (statusCode != null) {
+          if (statusCode != 401) {
+            // 401 обрабатывается в AuthInterceptor
             AppLogger.error(
               '[$timestamp] [ApiClient] HTTP ошибка $statusCode на ${err.requestOptions.path}',
             );
@@ -456,6 +318,11 @@ class ApiClient {
           return handler.next(err);
         },
       ),
+    );
+
+    // Interceptor 3: Auth — перехват 401 с диагностикой
+    _dio.interceptors.add(
+      AuthInterceptor(sharedPreferences: _sharedPreferences),
     );
   }
 
@@ -525,7 +392,9 @@ class ApiClient {
       if (e.response?.statusCode == 401) {
         return const UnauthorizedException('Требуется авторизация');
       }
-      return ApiException('Ошибка сервера: ${e.response?.statusCode ?? 'unknown'}');
+      return ApiException(
+        'Ошибка сервера: ${e.response?.statusCode ?? 'unknown'}',
+      );
     }
     return const ApiException('Неизвестная ошибка');
   }
@@ -534,6 +403,9 @@ class ApiClient {
 class ApiException implements Exception {
   final String message;
   const ApiException(this.message);
+
+  @override
+  String toString() => message;
 }
 
 class NetworkException extends ApiException {
@@ -542,4 +414,68 @@ class NetworkException extends ApiException {
 
 class UnauthorizedException extends ApiException {
   const UnauthorizedException(super.message);
+}
+
+/// Interceptor для обработки 401 Unauthorized
+///
+/// - Логирует диагностику (есть ли токен, валидность)
+/// - Очищает невалидный токен из SharedPreferences
+/// - Пробрасывает ошибку с понятным сообщением
+class AuthInterceptor extends Interceptor {
+  final SharedPreferences? sharedPreferences;
+
+  AuthInterceptor({this.sharedPreferences});
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    if (err.response?.statusCode == 401) {
+      final timestamp = DateTime.now().toIso8601String();
+      final path = '${err.requestOptions.method} ${err.requestOptions.path}';
+
+      developer.log(
+        '[$timestamp] [AuthInterceptor] ╔═══════════════════════════════════════════',
+        name: 'AuthInterceptor',
+        level: 1000,
+      );
+      developer.log(
+        '[$timestamp] [AuthInterceptor] ║ 401 Unauthorized',
+        name: 'AuthInterceptor',
+        level: 1000,
+      );
+      developer.log(
+        '[$timestamp] [AuthInterceptor] ║ Path: $path',
+        name: 'AuthInterceptor',
+        level: 1000,
+      );
+
+      // Проверяем наличие токена
+      final token = sharedPreferences?.getString('access_token');
+      if (token == null || token.isEmpty) {
+        developer.log(
+          '[$timestamp] [AuthInterceptor] ║ Токен ОТСУТСТВУЕТ — запрос ушёл без авторизации',
+          name: 'AuthInterceptor',
+          level: 1000,
+        );
+        AppLogger.error('[AuthInterceptor] 401: запрос без токена на $path');
+      } else {
+        developer.log(
+          '[$timestamp] [AuthInterceptor] ║ Токен ПРИСУТСТВУЕТ (${token.length} chars), но не валиден',
+          name: 'AuthInterceptor',
+          level: 1000,
+        );
+        AppLogger.error(
+          '[AuthInterceptor] 401: токен истёк или невалиден на $path',
+        );
+      }
+
+      developer.log(
+        '[$timestamp] [AuthInterceptor] ╚═══════════════════════════════════════════',
+        name: 'AuthInterceptor',
+        level: 1000,
+      );
+    }
+
+    // Пробрасываем ошибку дальше (ApiClient.mapError() преобразует в UnauthorizedException)
+    handler.next(err);
+  }
 }
