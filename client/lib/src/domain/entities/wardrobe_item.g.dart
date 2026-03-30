@@ -36,6 +36,11 @@ _WardrobeItem _$WardrobeItemFromJson(Map<String, dynamic> json) =>
       style: json['style'] as String?,
       isFavorite: json['is_favorite'] as bool?,
       isArchived: json['is_archived'] as bool?,
+      wearCount: (json['wear_count'] as num?)?.toInt(),
+      lastWornAt:
+          json['last_worn_at'] == null
+              ? null
+              : DateTime.parse(json['last_worn_at'] as String),
       season: json['season'] as String?,
       serverId: json['server_id'] as String?,
       dirty: json['dirty'] as bool?,
@@ -72,6 +77,8 @@ Map<String, dynamic> _$WardrobeItemToJson(_WardrobeItem instance) =>
       'style': instance.style,
       'is_favorite': instance.isFavorite,
       'is_archived': instance.isArchived,
+      'wear_count': instance.wearCount,
+      'last_worn_at': instance.lastWornAt?.toIso8601String(),
       'season': instance.season,
       'server_id': instance.serverId,
       'dirty': instance.dirty,
