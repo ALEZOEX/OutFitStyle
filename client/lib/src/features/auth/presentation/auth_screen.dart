@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../presentation/providers/session_provider.dart';
 import '../../../ui/misc/app_avatar.dart';
+import '../../../utils/auth_utils.dart';
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
 final authErrorProvider = StateProvider<String?>((ref) => null);
@@ -108,14 +109,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       if (mounted) Navigator.of(context).pop(false);
 
       if (mounted) {
-        ref.read(authErrorProvider.notifier).state = e.toString();
+        final errorMsg = AuthUtils.extractAuthError(e);
+        ref.read(authErrorProvider.notifier).state = errorMsg;
 
         showDialog(
           context: context,
           builder:
               (context) => AlertDialog(
                 title: const Text('Ошибка входа'),
-                content: Text(e.toString()),
+                content: Text(errorMsg),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
@@ -166,9 +168,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ref.read(authErrorProvider.notifier).state = e.toString().replaceAll(
-          'Exception: ',
-          '',
+        ref.read(authErrorProvider.notifier).state = AuthUtils.extractAuthError(
+          e,
         );
       }
     } finally {

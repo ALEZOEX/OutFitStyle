@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../presentation/providers/session_provider.dart';
+import '../../../../utils/auth_utils.dart';
 
 /// Экран восстановления пароля с 3 шагами:
 /// 1. Ввод email
@@ -65,7 +66,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = AuthUtils.extractAuthError(e);
         _isLoading = false;
       });
     }
@@ -98,7 +99,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = AuthUtils.extractAuthError(e);
         _isLoading = false;
       });
     }
@@ -154,7 +155,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = AuthUtils.extractAuthError(e);
         _isLoading = false;
       });
     }
@@ -182,7 +183,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Ошибка: ${e.toString()}';
+        _error = AuthUtils.extractAuthError(e);
         _isLoading = false;
       });
     }

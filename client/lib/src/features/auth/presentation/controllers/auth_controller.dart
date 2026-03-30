@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../auth/session_manager.dart';
 import '../../../../domain/states/auth_state.dart';
+import '../../../../utils/auth_utils.dart';
 
 /// Контроллер аутентификации
 ///
@@ -23,7 +24,10 @@ class AuthController extends StateNotifier<AuthState> {
         user: null,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error: AuthUtils.extractAuthError(e),
+      );
       rethrow;
     }
   }
@@ -56,7 +60,10 @@ class AuthController extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error: AuthUtils.extractAuthError(e),
+      );
     }
   }
 
@@ -90,7 +97,10 @@ class AuthController extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error: AuthUtils.extractAuthError(e),
+      );
       rethrow;
     }
   }
@@ -127,7 +137,10 @@ class AuthController extends StateNotifier<AuthState> {
         state = state.copyWith(isLoading: false, error: 'Ошибка регистрации');
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error: AuthUtils.extractAuthError(e),
+      );
       rethrow;
     }
   }
