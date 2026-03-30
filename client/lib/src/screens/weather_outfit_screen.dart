@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../presentation/providers/weather_provider.dart';
 import '../presentation/providers/user_location_provider.dart';
 import '../features/recommendations/presentation/providers/recommendations_provider.dart';
 import '../ui/widgets/weather_card.dart';
-import '../ui/widgets/recommendation_card.dart';
 
 /// Экран «Образ по погоде» — показывает текущую погоду и рекомендации одежды
 class WeatherOutfitScreen extends ConsumerWidget {
@@ -38,9 +36,26 @@ class WeatherOutfitScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Карточка погоды
-              WeatherCard(
-                weatherAsync: weatherAsync,
-                userLocation: userLocation,
+              weatherAsync.when(
+                data:
+                    (weather) => WeatherCard(
+                      weatherData: weather,
+                      onRefresh: () => ref.invalidate(weatherProvider),
+                    ),
+                loading:
+                    () => const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+                error:
+                    (e, _) => Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text('Ошибка загрузки погоды: $e'),
+                      ),
+                    ),
               ),
               const SizedBox(height: 24),
 
@@ -69,14 +84,24 @@ class WeatherOutfitScreen extends ConsumerWidget {
                 )
               else if (recState.recommendations.isEmpty)
                 _EmptyState(
-                  onGenerate:
-                      () => _generateFromWeather(context, ref, weatherAsync),
+                  onGenerate: () => _generateFromWeather(ref, weatherAsync),
                 )
               else
                 ...recState.recommendations.map(
-                  (rec) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: RecommendationCard(recommendation: rec),
+                  (rec) => Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.checkroom),
+                      title: Text(rec.title ?? 'Рекомендация'),
+                      subtitle: Text(
+                        rec.description ?? '',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing:
+                          rec.recommendedItems != null
+                              ? Text('${rec.recommendedItems!.length} вещ.')
+                              : null,
+                    ),
                   ),
                 ),
 
@@ -90,8 +115,7 @@ class WeatherOutfitScreen extends ConsumerWidget {
                   onPressed:
                       recState.isGenerating
                           ? null
-                          : () =>
-                              _generateFromWeather(context, ref, weatherAsync),
+                          : () => _generateFromWeather(ref, weatherAsync),
                   icon:
                       recState.isGenerating
                           ? const SizedBox(
@@ -115,7 +139,6 @@ class WeatherOutfitScreen extends ConsumerWidget {
   }
 
   Future<void> _generateFromWeather(
-    BuildContext context,
     WidgetRef ref,
     AsyncValue<dynamic> weatherAsync,
   ) async {
@@ -127,15 +150,9 @@ class WeatherOutfitScreen extends ConsumerWidget {
       condition = w.weatherMain;
     });
 
-    final result = await ref
+    await ref
         .read(recommendationsProvider.notifier)
         .generateRecommendation(temperature: temp, weatherCondition: condition);
-
-    if (result == null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось сгенерировать образ')),
-      );
-    }
   }
 }
 
@@ -182,11 +199,11 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.all(32),
       child: Column(
         children: [
+          const SizedBox(height: 32),
           Icon(
             Icons.checkroom_outlined,
             size: 64,
@@ -202,6 +219,7 @@ class _EmptyState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 32),
         ],
       ),
     );
