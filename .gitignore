@@ -233,6 +233,7 @@ client/build/
 POSTER_LOCAL.md
 secret-edit.yaml
 *.secret.yaml
+k8s/*-secret.yaml
 
 # Scraper API artifacts
 scraper-api/artifacts/*.json
