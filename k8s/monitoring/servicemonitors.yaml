@@ -1,0 +1,39 @@
+# Prometheus ServiceMonitor для сбора метрик
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: outfitstyle-api
+  namespace: outfitstyle
+  labels:
+    app: api
+spec:
+  selector:
+    matchLabels:
+      app: api
+  namespaceSelector:
+    matchNames:
+      - outfitstyle
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+# ServiceMonitor для ML Service
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: outfitstyle-ml
+  namespace: outfitstyle
+  labels:
+    app: ml-service
+spec:
+  selector:
+    matchLabels:
+      app: ml-service
+  namespaceSelector:
+    matchNames:
+      - outfitstyle
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

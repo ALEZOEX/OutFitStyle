@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-credentials
+  namespace: monitoring
+  labels:
+    app: grafana
+type: Opaque
+stringData:
+  admin-user: "admin"
+  admin-password: "grafana-admin-password-change-me"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:11.4.0
+        ports:
+          - containerPort: 3000
+            name: http
+            protocol: TCP
+        env:
+          - name: GF_SECURITY_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                name: grafana-credentials
+                key: admin-user
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: grafana-credentials
+                key: admin-password
+          - name: GF_INSTALL_PLUGINS
+            value: "grafana-clock-panel,grafana-simple-json-datasource"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+          - name: storage
+            mountPath: /var/lib/grafana
+          - name: provisioning-datasources
+            mountPath: /etc/grafana/provisioning/datasources
+          - name: provisioning-dashboards
+            mountPath: /etc/grafana/provisioning/dashboards
+      volumes:
+        - name: storage
+          emptyDir: {}
+        - name: provisioning-datasources
+          configMap:
+            name: grafana-datasources
+        - name: provisioning-dashboards
+          configMap:
+            name: grafana-dashboards
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: grafana
