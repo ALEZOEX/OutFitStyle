@@ -1,51 +1,75 @@
-apiVersion: Networking.istio.io/v1alpha3
+# ServiceEntries - регистрация сервисов в Istio mesh
+#
+# Определяет какие сервисы видны внутри mesh
+# MESH_INTERNAL = сервисы кластера
+# MESH_EXTERNAL = внешние API (Google, Firebase, OpenWeather и т.д.)
+#
+apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
   name: internal-services
   namespace: outfitstyle
 spec:
   hosts:
-  - api-service.outfitstyle.svc.cluster.local
+  - backend.outfitstyle.svc.cluster.local
   - ml-service.outfitstyle.svc.cluster.local
+  - frontend.outfitstyle.svc.cluster.local
+  - redis.outfitstyle.svc.cluster.local
+  - postgres.outfitstyle.svc.cluster.local
   ports:
   - number: 80
-    name: http-api
+    name: http
     protocol: HTTP
-  - number: 80
+  - number: 8080
+    name: http-backend
+    protocol: HTTP
+  - number: 8000
     name: http-ml
     protocol: HTTP
+  - number: 6379
+    name: tcp-redis
+    protocol: TCP
+  - number: 5432
+    name: tcp-postgres
+    protocol: TCP
   location: MESH_INTERNAL
   resolution: DNS
 ---
-apiVersion: Networking.istio.io/v1alpha3
-kind: VirtualService
+# Внешние сервисы - разрешаем доступ
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
 metadata:
-  name: internal-routing
+  name: external-services
   namespace: outfitstyle
 spec:
   hosts:
-  - ml-service.outfitstyle.svc.cluster.local
-  http:
-  - match:
-    - sourceLabels:
-        app: api
-    route:
-    - destination:
-        host: ml-service.outfitstyle.svc.cluster.local
-        port:
-          number: 80
-      weight: 100
+  - "*.googleapis.com"
+  - "*.firebaseio.com"
+  - "*.firebase.google.com"
+  - "api.openweathermap.org"
+  - "*.google.com"
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  - number: 80
+    name: http
+    protocol: HTTP
+  location: MESH_EXTERNAL
+  resolution: DNS
 ---
-apiVersion: Networking.istio.io/v1alpha3
+# Sidecar resource - ограничивает видимость для sidecar
+apiVersion: networking.istio.io/v1alpha3
 kind: Sidecar
 metadata:
-  name: outfitstyle-sidecar
+  name: default
   namespace: outfitstyle
 spec:
-  workloadSelector:
-    labels:
-      app: api
   egress:
   - hosts:
-    - "./*"
-    - "istiod.istio-system.svc.cluster.local"
+    - "./*"                    # Все сервисы в namespace
+    - "istio-system/*"         # Istio control plane
+    - "*.googleapis.com"       # Google APIs
+    - "*.firebaseio.com"       # Firebase
+    - "*.google.com"           # Google
+    - "api.openweathermap.org" # Weather API

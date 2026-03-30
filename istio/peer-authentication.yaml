@@ -1,0 +1,43 @@
+# PeerAuthentication - mTLS в PERMISSIVE режиме
+#
+# PERMISSIVE = принимает И mTLS, И plaintext трафик
+# Это позволяет постепенно включать mTLS не ломая существующие соединения
+#
+# После проверки что всё работает, можно переключить на STRICT:
+#   tls.mode: STRICT
+#
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  # Глобальный PERMISSIVE режим для всего mesh
+  # Сторонний трафик (Traefik, внешние сервисы) продолжит работать
+  mtls:
+    mode: PERMISSIVE
+---
+# Namespace-level PERMISSIVE (избыточно, но для явности)
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: outfitstyle-mesh
+  namespace: outfitstyle
+spec:
+  mtls:
+    mode: PERMISSIVE
+---
+# Исключение: health check endpoint не требует mTLS
+# Нужно для Traefik/K3s liveness/readiness probes
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: backend-health-exclude
+  namespace: outfitstyle
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  portLevelMtls:
+    8080:
+      mode: PERMISSIVE

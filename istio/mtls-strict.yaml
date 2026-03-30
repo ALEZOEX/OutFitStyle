@@ -1,0 +1,58 @@
+# PeerAuthentication - STRICT mTLS
+#
+# ПРИМЕНЯТЬ ТОЛЬКО ПОСЛЕ ПРОВЕРКИ ЧТО ВСЁ РАБОТАЕТ В PERMISSIVE MODE!
+#
+# STRICT = принимает ТОЛЬКО mTLS трафик
+# Внешний трафик без sidecar будет отклонён
+#
+# Для применения:
+#   kubectl apply -f mtls-strict.yaml
+#
+# Для отката:
+#   kubectl apply -f peer-authentication.yaml (возвращает PERMISSIVE)
+#
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: outfitstyle-mesh
+  namespace: outfitstyle
+spec:
+  mtls:
+    mode: STRICT
+---
+# Исключение: health check endpoint от Traefik (plaintext)
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: backend-health-exclude
+  namespace: outfitstyle
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  portLevelMtls:
+    8080:
+      mode: PERMISSIVE
+---
+# Исключение: frontend от Traefik
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: frontend-health-exclude
+  namespace: outfitstyle
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  portLevelMtls:
+    80:
+      mode: PERMISSIVE

@@ -1,11 +1,19 @@
-apiVersion: Networking.istio.io/v1alpha3
+# DestinationRules с mTLS политикой и балансировкой
+#
+# tls.mode: ISTIO_MUTUAL = автоматически использует mTLS сертификаты от Istio
+# В PERMISSIVE mode это НЕ обязательно - трафик работает и без него
+# Но когда переключитесь на STRICT, эти правила уже будут на месте
+#
+apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: api-destination-rule
   namespace: outfitstyle
 spec:
-  host: api-service
+  host: backend.outfitstyle.svc.cluster.local
   trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
     loadBalancer:
       simple: ROUND_ROBIN
     connectionPool:
@@ -19,14 +27,16 @@ spec:
       interval: 30s
       baseEjectionTime: 30s
 ---
-apiVersion: Networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: ml-destination-rule
   namespace: outfitstyle
 spec:
-  host: ml-service
+  host: ml-service.outfitstyle.svc.cluster.local
   trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
     loadBalancer:
       simple: ROUND_ROBIN
     connectionPool:
@@ -39,3 +49,50 @@ spec:
       consecutive5xxErrors: 10
       interval: 30s
       baseEjectionTime: 30s
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: frontend-destination-rule
+  namespace: outfitstyle
+spec:
+  host: frontend.outfitstyle.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      http:
+        http1MaxPendingRequests: 500
+        maxRequestsPerConnection: 50
+      tcp:
+        maxConnections: 500
+---
+# Redis - plaintext (не mTLS, т.к. Redis не имеет sidecar в PERMISSIVE)
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: redis-destination-rule
+  namespace: outfitstyle
+spec:
+  host: redis.outfitstyle.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+    connectionPool:
+      tcp:
+        maxConnections: 100
+---
+# PostgreSQL - plaintext
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: postgres-destination-rule
+  namespace: outfitstyle
+spec:
+  host: postgres.outfitstyle.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+    connectionPool:
+      tcp:
+        maxConnections: 50

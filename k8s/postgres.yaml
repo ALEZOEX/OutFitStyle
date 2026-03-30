@@ -13,6 +13,60 @@ spec:
       storage: 1Gi
   storageClassName: local-path
 ---
+# ConfigMap для postgresql.conf с SSL включённым
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: outfitstyle
+  labels:
+    app: postgres
+data:
+  postgresql.conf: |
+    # ==============================================
+    # SSL / TLS Configuration
+    # ==============================================
+    ssl = on
+    ssl_cert_file = '/var/lib/postgresql/certs/tls.crt'
+    ssl_key_file = '/var/lib/postgresql/certs/tls.key'
+    ssl_ca_file = '/var/lib/postgresql/certs/ca.crt'
+
+    # Минимальная версия TLS (TLS 1.2+)
+    ssl_min_protocol_version = 'TLSv1.2'
+
+    # Безопасные шифры
+    ssl_ciphers = 'HIGH:!aNULL:!MD5'
+
+    # Проверка клиентских сертификатов (optional = не требуем, но принимаем)
+    # Для mTLS: замените на 'require'
+    ssl_ca_file = '/var/lib/postgresql/certs/ca.crt'
+
+    # ==============================================
+    # Connection Settings
+    # ==============================================
+    listen_addresses = '*'
+    port = 5432
+    max_connections = 100
+
+    # ==============================================
+    # Logging
+    # ==============================================
+    log_statement = 'ddl'
+    log_connections = on
+    log_disconnections = on
+    log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+
+  pg_hba.conf: |
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+    # Локальные подключения
+    local   all             all                                     trust
+
+    # TLS подключения из кластера (requiring SSL)
+    hostssl all             all             0.0.0.0/0               scram-sha-256
+
+    # Fallback для health checks без TLS (pg_isready)
+    host    all             all             127.0.0.1/32            trust
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,12 +102,46 @@ spec:
             capabilities:
               drop: ["ALL"]
               add: ["CHOWN"]
+
+        # Копируем certs с правильными правами для postgres (uid 70)
+        - name: init-certs
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              # Копируем сертификаты из secret в volume
+              cp /certs-source/tls.crt /certs/tls.crt
+              cp /certs-source/tls.key /certs/tls.key
+              cp /certs-source/ca.crt /certs/ca.crt
+
+              # Устанавливаем права: postgres (uid 70) должен читать ключ
+              chown 70:70 /certs/tls.key
+              chmod 600 /certs/tls.key
+              chown 70:70 /certs/tls.crt /certs/ca.crt
+              chmod 644 /certs/tls.crt /certs/ca.crt
+
+              echo "TLS certificates configured"
+          volumeMounts:
+            - name: tls-certs-source
+              mountPath: /certs-source
+              readOnly: true
+            - name: tls-certs
+              mountPath: /certs
+          securityContext:
+            runAsUser: 0
+            runAsNonRoot: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["CHOWN"]
+
       containers:
         - name: postgres
           image: postgres:15-alpine
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
+              name: postgres
           env:
             - name: POSTGRES_DB
               valueFrom:
@@ -70,15 +158,31 @@ spec:
                 secretKeyRef:
                   name: outfitstyle-secrets
                   key: db-password
+          args:
+            - -c
+            - config_file=/etc/postgresql/postgresql.conf
+            - -c
+            - hba_file=/etc/postgresql/pg_hba.conf
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
+            - name: tls-certs
+              mountPath: /var/lib/postgresql/certs
+              readOnly: true
+            - name: postgres-config
+              mountPath: /etc/postgresql/postgresql.conf
+              subPath: postgresql.conf
+              readOnly: true
+            - name: postgres-config
+              mountPath: /etc/postgresql/pg_hba.conf
+              subPath: pg_hba.conf
+              readOnly: true
           livenessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+                - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB -h 127.0.0.1
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -88,7 +192,7 @@ spec:
               command:
                 - sh
                 - -c
-                - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+                - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB -h 127.0.0.1
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
@@ -110,6 +214,15 @@ spec:
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: postgres-pvc
+        - name: postgres-config
+          configMap:
+            name: postgres-config
+        - name: tls-certs
+          emptyDir: {}
+        - name: tls-certs-source
+          secret:
+            secretName: postgres-tls-secret
+            optional: false
 ---
 apiVersion: v1
 kind: Service
@@ -125,4 +238,5 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
+      name: postgres
   type: ClusterIP

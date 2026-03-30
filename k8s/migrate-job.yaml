@@ -16,7 +16,7 @@ spec:
         command: ["/app/migrate"]
         env:
         - name: DB_HOST
-          value: postgres.outfitstyle.svc.cluster.local
+          value: "postgres.outfitstyle.svc.cluster.local"
         - name: DB_PORT
           value: "5432"
         - name: DB_USER
@@ -39,13 +39,21 @@ spec:
             secretKeyRef:
               name: outfitstyle-secrets
               key: database-url
+        # CA cert для верификации TLS сертификата PostgreSQL
+        - name: PGSSLROOTCERT
+          value: "/etc/ssl/certs/internal-ca.crt"
         - name: LOG_LEVEL
           value: info
         - name: ENVIRONMENT
           value: production
+        volumeMounts:
+          - name: internal-ca
+            mountPath: /etc/ssl/certs/internal-ca.crt
+            subPath: ca.crt
+            readOnly: true
         securityContext:
           allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false  # Миграции могут требовать записи во временные файлы
+          readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 999
           capabilities:
@@ -55,7 +63,16 @@ spec:
       initContainers:
       - name: wait-for-db
         image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z postgres.outfitstyle.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;']
+        command:
+          - sh
+          - -c
+          - |
+            echo "Waiting for PostgreSQL with TLS..."
+            until nc -z postgres.outfitstyle.svc.cluster.local 5432; do
+              echo "waiting for postgres..."
+              sleep 2
+            done
+            echo "PostgreSQL is reachable"
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -64,3 +81,10 @@ spec:
           capabilities:
             drop:
             - ALL
+      volumes:
+        - name: internal-ca
+          secret:
+            secretName: internal-ca-secret
+            items:
+              - key: ca.crt
+                path: ca.crt

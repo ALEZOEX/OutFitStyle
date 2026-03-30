@@ -4,3 +4,7 @@ metadata:
   name: outfitstyle
   labels:
     name: outfitstyle
+    # Istio sidecar auto-injection
+    # istio-injection: enabled
+    # Установите label после установки Istio:
+    #   kubectl label namespace outfitstyle istio-injection=enabled

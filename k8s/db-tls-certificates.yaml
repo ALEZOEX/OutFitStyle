@@ -1,0 +1,125 @@
+# =============================================================================
+# PostgreSQL + Redis TLS Certificates через cert-manager
+#
+# Для внутренних сервисов используем self-signed CA (не Let's Encrypt).
+# Let's Encrypt требует публичный DNS, а postgres/redis доступны только внутри кластера.
+#
+# Предварительно: cert-manager должен быть установлен в кластере
+#   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+# =============================================================================
+
+# 1. Self-signed CA issuer (корневой для внутренних сервисов)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: internal-ca-issuer
+spec:
+  selfSigned: {}
+---
+# 2. CA Certificate (корневой сертификат)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: internal-ca
+  namespace: outfitstyle
+spec:
+  isCA: true
+  commonName: outfitstyle-internal-ca
+  secretName: internal-ca-secret
+  duration: 87600h    # 10 лет
+  renewBefore: 8760h  # Обновлять за год
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: internal-ca-issuer
+    kind: ClusterIssuer
+---
+# 3. CA Issuer, подписывающий сертификаты нашим CA
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: internal-ca-signer
+  namespace: outfitstyle
+spec:
+  ca:
+    secretName: internal-ca-secret
+---
+# 4. PostgreSQL TLS Certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: postgres-tls
+  namespace: outfitstyle
+spec:
+  secretName: postgres-tls-secret
+  duration: 8760h      # 1 год
+  renewBefore: 720h    # Обновлять за 30 дней
+  commonName: postgres
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - postgres
+    - postgres.outfitstyle
+    - postgres.outfitstyle.svc
+    - postgres.outfitstyle.svc.cluster.local
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+    name: internal-ca-signer
+    kind: Issuer
+---
+# 5. Redis TLS Certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: redis-tls
+  namespace: outfitstyle
+spec:
+  secretName: redis-tls-secret
+  duration: 8760h      # 1 год
+  renewBefore: 720h    # Обновлять за 30 дней
+  commonName: redis
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - redis
+    - redis.outfitstyle
+    - redis.outfitstyle.svc
+    - redis.outfitstyle.svc.cluster.local
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+    name: internal-ca-signer
+    kind: Issuer
+---
+# 6. Backend Client Certificate для mTLS (PostgreSQL client auth)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: backend-client-tls
+  namespace: outfitstyle
+spec:
+  secretName: backend-client-tls-secret
+  duration: 8760h
+  renewBefore: 720h
+  commonName: backend
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - client auth
+  dnsNames:
+    - backend
+    - backend.outfitstyle.svc.cluster.local
+  issuerRef:
+    name: internal-ca-signer
+    kind: Issuer

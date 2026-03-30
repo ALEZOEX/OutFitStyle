@@ -13,6 +13,73 @@ spec:
       storage: 100Mi
   storageClassName: local-path
 ---
+# ConfigMap для Redis TLS и auth конфигурации
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: outfitstyle
+  labels:
+    app: redis
+data:
+  redis.conf: |
+    # ==============================================
+    # TLS Configuration
+    # ==============================================
+    # Отключаем plaintext порт
+    port 0
+
+    # TLS порт
+    tls-port 6379
+    tls-cert-file /etc/redis/certs/tls.crt
+    tls-key-file /etc/redis/certs/tls.key
+    tls-ca-cert-file /etc/redis/certs/ca.crt
+
+    # Минимальная версия TLS
+    tls-protocols "TLSv1.2 TLSv1.3"
+
+    # Безопасные шифры
+    tls-ciphers DEFAULT:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK
+    tls-ciphersuites TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256
+
+    # Не требуем клиентский сертификат (server-only TLS)
+    tls-auth-clients no
+
+    # ==============================================
+    # Authentication
+    # ==============================================
+    # Пароль задаётся через переменную окREDIS_PASSWORD
+    # В redis.conf будет подставлен через envsubst
+    requirepass ${REDIS_PASSWORD}
+
+    # ==============================================
+    # Persistence
+    # ==============================================
+    appendonly yes
+    appendfsync everysec
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+
+    # ==============================================
+    # Memory
+    # ==============================================
+    maxmemory 100mb
+    maxmemory-policy allkeys-lru
+
+    # ==============================================
+    # Security
+    # ==============================================
+    # Отключаем опасные команды
+    rename-command FLUSHDB ""
+    rename-command FLUSHALL ""
+    rename-command CONFIG "REDIS_CONFIG_SECRET"
+    rename-command DEBUG ""
+
+    # ==============================================
+    # Logging
+    # ==============================================
+    loglevel notice
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,31 +100,79 @@ spec:
       securityContext:
         runAsNonRoot: true
         fsGroup: 999
+
+      initContainers:
+        # Копируем TLS сертификаты с правильными правами
+        - name: init-certs
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              cp /certs-source/tls.crt /certs/tls.crt
+              cp /certs-source/tls.key /certs/tls.key
+              cp /certs-source/ca.crt /certs/ca.crt
+              chown 999:999 /certs/*
+              chmod 600 /certs/tls.key
+              chmod 644 /certs/tls.crt /certs/ca.crt
+              echo "Redis TLS certificates configured"
+          volumeMounts:
+            - name: tls-certs-source
+              mountPath: /certs-source
+              readOnly: true
+            - name: tls-certs
+              mountPath: /certs
+          securityContext:
+            runAsUser: 0
+            runAsNonRoot: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["CHOWN"]
+
       containers:
         - name: redis
           image: redis:7-alpine
           ports:
             - containerPort: 6379
+              name: redis
           command:
-            - redis-server
-            - --appendonly
-            - "yes"
+            - sh
+            - -c
+            - |
+              # Подставляем пароль из env в конфиг
+              envsubst < /etc/redis/redis.conf.template > /tmp/redis.conf
+              exec redis-server /tmp/redis.conf
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: redis-password
           volumeMounts:
             - name: redis-storage
               mountPath: /data
+            - name: tls-certs
+              mountPath: /etc/redis/certs
+              readOnly: true
+            - name: redis-config
+              mountPath: /etc/redis/redis.conf.template
+              subPath: redis.conf
+              readOnly: true
           livenessProbe:
             exec:
               command:
-                - redis-cli
-                - ping
+                - sh
+                - -c
+                - redis-cli --tls --cert /etc/redis/certs/tls.crt --key /etc/redis/certs/tls.key --cacert /etc/redis/certs/ca.crt -h 127.0.0.1 -p 6379 -a "$REDIS_PASSWORD" ping
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
           readinessProbe:
             exec:
               command:
-                - redis-cli
-                - ping
+                - sh
+                - -c
+                - redis-cli --tls --cert /etc/redis/certs/tls.crt --key /etc/redis/certs/tls.key --cacert /etc/redis/certs/ca.crt -h 127.0.0.1 -p 6379 -a "$REDIS_PASSWORD" ping
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
@@ -79,6 +194,15 @@ spec:
         - name: redis-storage
           persistentVolumeClaim:
             claimName: redis-pvc
+        - name: redis-config
+          configMap:
+            name: redis-config
+        - name: tls-certs
+          emptyDir: {}
+        - name: tls-certs-source
+          secret:
+            secretName: redis-tls-secret
+            optional: false
 ---
 apiVersion: v1
 kind: Service
@@ -94,4 +218,5 @@ spec:
     - protocol: TCP
       port: 6379
       targetPort: 6379
+      name: redis
   type: ClusterIP

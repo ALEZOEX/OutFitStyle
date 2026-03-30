@@ -87,8 +87,10 @@ data:
           - source_labels: [__meta_kubernetes_namespace]
             action: keep
             regex: outfitstyle
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            action: keep
+            regex: "8080"
         metrics_path: /metrics
-        port: 8080
 
       # OutfitStyle ML Service
       - job_name: 'outfitstyle-ml'
@@ -101,8 +103,10 @@ data:
           - source_labels: [__meta_kubernetes_namespace]
             action: keep
             regex: outfitstyle
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            action: keep
+            regex: "8000"
         metrics_path: /metrics
-        port: 8000
 
       # Traefik metrics
       - job_name: 'traefik'

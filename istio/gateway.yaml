@@ -1,43 +1,64 @@
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: outfitstyle-gateway
-  namespace: outfitstyle
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
+# Istio Gateway - НЕ используется (Traefik работает как ingress)
+#
+# Этот файл оставлен для справки и потенциальной миграции в будущем.
+# Сейчас Traefik (K3s built-in) обрабатывает ingress трафик.
+#
+# Архитектура трафика:
+#   Internet -> Traefik (TLS termination) -> Service -> Istio sidecar -> Pod
+#
+# Если в будущем захотите перейти на Istio Gateway:
+#   1. Раскомментируйте ресурсы ниже
+#   2. Установите istio-ingressgateway (enabled=true в install.sh)
+#   3. Настройте DNS записи на IP ingress gateway
+#   4. Отключите Traefik: --disable traefik при установке K3s
+
+# ---
+# apiVersion: networking.istio.io/v1alpha3
+# kind: Gateway
+# metadata:
+#   name: outfitstyle-gateway
+#   namespace: outfitstyle
+# spec:
+#   selector:
+#     istio: ingressgateway
+#   servers:
+#   - port:
+#       number: 443
+#       name: https
+#       protocol: HTTPS
+#     tls:
+#       mode: SIMPLE
+#       credentialName: outfitstyle-tls
+#     hosts:
+#     - "app.outfitstyle.ru"
+#     - "outfitstyle.ru"
+#   - port:
+#       number: 80
+#       name: http
+#       protocol: HTTP
+#     tls:
+#       httpsRedirect: true
+#     hosts:
+#     - "app.outfitstyle.ru"
+#     - "outfitstyle.ru"
 ---
+# VirtualService для внутреннего роутинга (используется с Traefik)
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: outfitstyle
+  name: internal-routing
   namespace: outfitstyle
 spec:
   hosts:
-  - "*"
-  gateways:
-  - outfitstyle-gateway
+  - backend.outfitstyle.svc.cluster.local
+  - ml-service.outfitstyle.svc.cluster.local
   http:
   - match:
-    - uri:
-        prefix: /api/
+    - sourceLabels:
+        app: backend
     route:
     - destination:
-        host: api-service
+        host: ml-service.outfitstyle.svc.cluster.local
         port:
           number: 80
-  - match:
-    - uri:
-        prefix: /ml/
-    route:
-    - destination:
-        host: ml-service
-        port:
-          number: 80
+      weight: 100

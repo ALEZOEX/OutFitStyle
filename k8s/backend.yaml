@@ -32,6 +32,14 @@ spec:
                 secretKeyRef:
                   name: outfitstyle-secrets
                   key: database-url
+            # CA cert для верификации серверного сертификата PostgreSQL
+            - name: PGSSLROOTCERT
+              value: "/etc/ssl/certs/internal-ca.crt"
+          volumeMounts:
+            - name: internal-ca
+              mountPath: /etc/ssl/certs/internal-ca.crt
+              subPath: ca.crt
+              readOnly: true
           resources:
             requests:
               cpu: 50m
@@ -48,11 +56,26 @@ spec:
             - containerPort: 8080
               name: http
           env:
+            # PostgreSQL с TLS
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: outfitstyle-secrets
                   key: database-url
+            # CA cert для верификации серверного сертификата PostgreSQL
+            - name: PGSSLROOTCERT
+              value: "/etc/ssl/certs/internal-ca.crt"
+            # Redis с TLS + Auth
+            - name: REDIS_URL
+              value: "rediss://redis:6379"
+              # rediss:// = TLS, redis:// = plaintext
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: redis-password
+            - name: REDIS_TLS_CA_CERT
+              value: "/etc/ssl/certs/internal-ca.crt"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -71,8 +94,6 @@ spec:
               value: "production"
             - name: ML_SERVICE_URL
               value: "http://ml-service"
-            - name: REDIS_URL
-              value: "redis://redis:6379"
             - name: EVENTING_ENABLED
               value: "0"
             - name: LOG_LEVEL
@@ -80,13 +101,19 @@ spec:
             - name: CORS_ALLOWED_ORIGINS
               value: "https://outfitstyle.play2go.cloud"
             - name: DB_HOST
-              value: "outfitstyle"
+              value: "postgres.outfitstyle.svc.cluster.local"
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
-              value: "outfitstyle"
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: db-name
             - name: DB_USER
-              value: "outfitstyle"
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: db-user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -109,6 +136,11 @@ spec:
             - name: firebase-credentials
               mountPath: /etc/firebase
               readOnly: true
+            # CA сертификат для проверки TLS сертификатов postgres и redis
+            - name: internal-ca
+              mountPath: /etc/ssl/certs/internal-ca.crt
+              subPath: ca.crt
+              readOnly: true
           resources:
             requests:
               cpu: 100m
@@ -130,6 +162,14 @@ spec:
           secret:
             secretName: firebase-credentials-secret
             optional: true
+        # CA сертификат из cert-manager (общий для postgres и redis)
+        - name: internal-ca
+          secret:
+            secretName: internal-ca-secret
+            items:
+              - key: ca.crt
+                path: ca.crt
+            optional: false
 ---
 apiVersion: v1
 kind: Service
