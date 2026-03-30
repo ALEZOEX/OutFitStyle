@@ -34,7 +34,10 @@ spec:
       services:
         - name: frontend
           port: 80
-    
+          serversTransport:
+            name: frontend-transport
+            namespace: outfitstyle
+
     # Landing
     - match: Host(`outfitstyle.ru`) && PathPrefix(`/`)
       kind: Rule

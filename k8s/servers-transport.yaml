@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: frontend-transport
+  namespace: outfitstyle
+spec:
+  # Увеличиваем timeout для больших файлов (main.dart.js ~4.7MB)
+  forwardingTimeouts:
+    dialTimeout: 30s
+    responseHeaderTimeout: 120s
+    idleConnTimeout: 90s
+    readIdleTimeout: 120s
+  maxIdleConnsPerHost: 100
+  disableHTTP2: false
