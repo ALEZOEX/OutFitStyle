@@ -4,9 +4,6 @@ import '../../../../domain/entities/outfit_recommendation.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../presentation/providers/session_provider.dart';
 
-/// Временные рекомендации для демонстрации UI
-final mockRecommendations = <OutfitRecommendation>[];
-
 /// Запись запланированного образа
 class PlannedOutfit {
   final String id;
@@ -159,26 +156,19 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
                 .toList();
 
         state = state.copyWith(
-          recommendations:
-              recommendations.isNotEmpty
-                  ? recommendations
-                  : mockRecommendations,
+          recommendations: recommendations,
           status: RecommendationsLoadStatus.success,
         );
       } else {
-        // Если API вернуло ошибку - используем mock для демонстрации
         state = state.copyWith(
-          recommendations: mockRecommendations,
-          status: RecommendationsLoadStatus.success,
-          error: 'API вернуло статус ${response.statusCode}',
+          status: RecommendationsLoadStatus.error,
+          error: 'Ошибка загрузки рекомендаций (${response.statusCode})',
         );
       }
     } catch (e) {
-      // При ошибке показываем mock данные
       state = state.copyWith(
-        recommendations: mockRecommendations,
         status: RecommendationsLoadStatus.error,
-        error: 'Ошибка: $e',
+        error: 'Ошибка загрузки рекомендаций',
       );
     }
   }

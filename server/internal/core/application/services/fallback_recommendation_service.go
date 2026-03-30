@@ -70,11 +70,31 @@ func (s *FallbackRecommendationService) Rank(
 		byCategory[c.Category] = append(byCategory[c.Category], c)
 	}
 
+	// Подсчёт обязательных категорий (upper, lower, footwear)
+	mandatoryCats := []string{"upper", "lower", "footwear"}
+	mandatoryFound := 0
+	for _, cat := range mandatoryCats {
+		if len(byCategory[cat]) > 0 {
+			mandatoryFound++
+		}
+	}
+
+	// Режим выживания: если обязательных категорий < 3, отключаем агрессивные штрафы
+	survivalMode := mandatoryFound < 3
+
+	if survivalMode {
+		s.logger.Warn("[Fallback] SURVIVAL MODE activated — relaxing filters",
+			zap.Int("mandatory_categories_found", mandatoryFound),
+			zap.Int("total_candidates", len(candidates)),
+			zap.Float64("temperature", weather.Temperature),
+		)
+	}
+
 	rankings := make(map[string][]RankedItem)
 
 	// Ранжирование по каждой категории
-	categories := []string{"outerwear", "upper", "lower", "footwear", "accessory"}
-	for _, cat := range categories {
+	allCategories := []string{"outerwear", "upper", "lower", "footwear", "accessory"}
+	for _, cat := range allCategories {
 		cats := byCategory[cat]
 		if len(cats) == 0 {
 			continue
@@ -83,7 +103,13 @@ func (s *FallbackRecommendationService) Rank(
 		// Вычисляем scores для всех кандидатов категории
 		scored := make([]RankedItem, 0, len(cats))
 		for _, c := range cats {
-			score := s.calculateScore(weather, c, requestedStyle, requestedFormality, occasion)
+			var score float64
+			if survivalMode {
+				// В режиме выживания: приоритет температуры, минимум штрафов
+				score = s.calculateSurvivalScore(weather, c)
+			} else {
+				score = s.calculateScore(weather, c, requestedStyle, requestedFormality, occasion)
+			}
 			scored = append(scored, RankedItem{
 				ID:         c.ID,
 				Score:      score,
@@ -163,6 +189,54 @@ func (s *FallbackRecommendationService) calculateScore(
 	return score
 }
 
+// calculateSurvivalScore — упрощённый скоринг для «режима выживания».
+// Штрафы за погоду минимальны (только температура важна).
+// Стиль и формальность игнорируются.
+// Цель: гарантировать, что пользователь получит комплект даже при экстремальной погоде.
+func (s *FallbackRecommendationService) calculateSurvivalScore(
+	weather domain.WeatherSnapshot,
+	c domain.CandidateLite,
+) float64 {
+	score := 0.5 // базовый скор — все вещи имеют шанс
+
+	// Только температура (вес 50%)
+	tempScore := s.temperatureMatchScore(weather.Temperature, c)
+	score += tempScore * 0.30
+
+	// Минимальный штраф за погоду: -0.10 вместо -0.50
+	weatherMain := strings.ToLower(weather.WeatherMain)
+	isRain := strings.Contains(weatherMain, "rain")
+	isSnow := strings.Contains(weatherMain, "snow")
+
+	if isRain && !c.RainOK {
+		score -= 0.10
+	}
+	if isSnow && !c.SnowOK {
+		score -= 0.10
+	}
+	if weather.WindSpeed >= 10 && !c.WindOK {
+		score -= 0.05
+	}
+
+	// Источник (5%)
+	switch c.Source {
+	case "user":
+		score += 0.05
+	}
+
+	// Случайный фактор для разнообразия
+	score += s.rng.Float64() * 0.10
+
+	if score < 0.05 {
+		score = 0.05 // минимальный скор — никто не должен быть полностью исключён
+	}
+	if score > 1 {
+		score = 1
+	}
+
+	return score
+}
+
 // temperatureMatchScore оценивает соответствие температуры
 // Использует min_temp, max_temp и warmth_level
 func (s *FallbackRecommendationService) temperatureMatchScore(temp float64, c domain.CandidateLite) float64 {
@@ -179,7 +253,7 @@ func (s *FallbackRecommendationService) temperatureMatchScore(temp float64, c do
 				deviation := abs(temp - center)
 				rangeSize := maxT - minT
 				if rangeSize > 0 {
-					return 1.0 - (deviation / rangeSize)*0.3
+					return 1.0 - (deviation/rangeSize)*0.3
 				}
 				return 1.0
 			}
@@ -268,11 +342,11 @@ func (s *FallbackRecommendationService) styleMatchScore(itemStyle, requestedStyl
 
 	// Частичное совпадение
 	styleSynonyms := map[string][]string{
-		"casual":      {"casual", "повседневный", "relaxed"},
-		"business":    {"business", "деловой", "formal", "официальный"},
-		"sport":       {"sport", "спортивный", "athletic"},
+		"casual":       {"casual", "повседневный", "relaxed"},
+		"business":     {"business", "деловой", "formal", "официальный"},
+		"sport":        {"sport", "спортивный", "athletic"},
 		"smart casual": {"smart casual", "повседневно-деловой"},
-		"evening":     {"evening", "вечерний", "cocktail"},
+		"evening":      {"evening", "вечерний", "cocktail"},
 	}
 
 	for style, synonyms := range styleSynonyms {
@@ -330,7 +404,7 @@ func (s *FallbackRecommendationService) desiredWarmth(temp float64) float64 {
 		return 1
 	}
 	// Линейная интерполяция: -20°C -> 10, 30°C -> 1
-	return 10 - ((temp + 20) / 50.0)*9
+	return 10 - ((temp+20)/50.0)*9
 }
 
 // calculateStyleCoherence вычисляет согласованность стиля в рекомендациях

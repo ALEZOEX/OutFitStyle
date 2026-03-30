@@ -80,11 +80,13 @@ def _weather_fit(items: List[Dict[str, Any]], temperature: float) -> float:
     """
     Проверка соответствия одежды температуре.
     Возвращает долю предметов, подходящих для данной температуры.
+    Допуск ±2°C для смягчения фильтрации.
     """
     ok = 0
+    tolerance = 2.0
     for it in items:
-        mn = _safe_float(it.get("min_temp"), -100.0)
-        mx = _safe_float(it.get("max_temp"), 100.0)
+        mn = _safe_float(it.get("min_temp"), -100.0) - tolerance
+        mx = _safe_float(it.get("max_temp"), 100.0) + tolerance
         if mn <= temperature <= mx:
             ok += 1
     return ok / max(1, len(items))
@@ -174,10 +176,14 @@ def generate_outfits(
         optional.append("accessory")
 
     # Проверяем наличие всех обязательных категорий
-    for cat in required:
-        if cat not in by_cat or not by_cat[cat]:
-            # Нельзя собрать полный аутфит без обязательной категории
-            return []
+    missing_required = [cat for cat in required if cat not in by_cat or not by_cat[cat]]
+    if missing_required:
+        logger.warning("Missing required categories: %s — switching to survival mode", missing_required)
+        # Survival mode: убираем недостающие из required, добавляем любые доступные
+        required = [cat for cat in required if cat not in missing_required]
+        available_optional = [cat for cat in ALLOWED_CATS if cat in by_cat and cat not in required]
+        required.extend(available_optional[:len(missing_required)])
+        optional = [cat for cat in optional if cat in by_cat and cat not in required]
 
     cats = [c for c in required if c in by_cat] + [c for c in optional if c in by_cat]
     if not cats:
@@ -224,16 +230,25 @@ def generate_outfits(
 
     scored.sort(key=lambda o: o.outfit_score, reverse=True)
 
+    # Динамическая диверсификация: чем меньше гардероб, тем мягче ограничение
+    total_candidates = sum(len(items) for items in by_cat.values())
+    if total_candidates < 15:
+        max_shared = len(cats)  # малый гардероб: разрешаем любые пересечения
+    elif total_candidates < 30:
+        max_shared = len(cats) - 1  # средний: минимум 1 уникальная вещь
+    else:
+        max_shared = 1  # большой гардероб: максимум 1 общая вещь
+
     # Диверсификация: сравниваем каждый аутфит с уже выбранными попарно
     result: List[Outfit] = []
     selected_ids: List[Set[str]] = []
     for o in scored:
         ids: Set[str] = {v["id"] for v in o.items.values() if v.get("id") is not None}
-        
+
         # Проверяем пересечение с каждым уже выбранным аутфитом
         is_duplicate = False
         for prev_ids in selected_ids:
-            if len(ids & prev_ids) >= 2:  # не более 1 общего предмета
+            if len(ids & prev_ids) > max_shared:
                 is_duplicate = True
                 break
         

@@ -1090,6 +1090,26 @@ func (s *RecommendationService) rankLiteOrFallback(
 			rankings[cat] = out
 		}
 
+		// Подсчёт результатов ML
+		mlCatOut := map[string]int{}
+		totalMLItems := 0
+		for cat, list := range rankings {
+			mlCatOut[cat] = len(list)
+			totalMLItems += len(list)
+		}
+
+		s.logger.Info("[RecPipeline] Stage 4: ML result",
+			zap.String("user_id", userID.String()),
+			zap.String("model_version", modelVersion),
+			zap.Int("total_ranked_items", totalMLItems),
+			zap.Int("upper", mlCatOut["upper"]),
+			zap.Int("lower", mlCatOut["lower"]),
+			zap.Int("footwear", mlCatOut["footwear"]),
+			zap.Int("outerwear", mlCatOut["outerwear"]),
+			zap.Int("accessory", mlCatOut["accessory"]),
+			zap.Int("processing_ms", processingMs),
+		)
+
 		s.logger.Debug("ML ранжирование успешно",
 			zap.String("request_id", mlReq.RequestID),
 			zap.String("model_version", modelVersion),
@@ -1106,11 +1126,10 @@ func (s *RecommendationService) rankLiteOrFallback(
 	}
 
 	// Fallback: используем новый fallback сервис
-	s.logger.Info("Используем fallback алгоритм рекомендаций",
+	s.logger.Info("[RecPipeline] Stage 4: Using FALLBACK (ML failed or unavailable)",
 		zap.String("user_id", userID.String()),
-		zap.String("request_id", mlReq.RequestID),
-		zap.Int64("latency_ms", latency),
-		zap.Int("candidates_count", len(candidates)))
+		zap.Int("candidates_count", len(candidates)),
+	)
 
 	processingMs = int(latency)
 
@@ -1123,10 +1142,25 @@ func (s *RecommendationService) rankLiteOrFallback(
 		colorH = fallbackResult.ColorHarmony
 		rankings = fallbackResult.ToRankedLite()
 
-		s.logger.Info("Fallback сервис выполнил ранжирование",
+		// Подсчёт результатов fallback
+		fbCatOut := map[string]int{}
+		totalFBItems := 0
+		for cat, list := range rankings {
+			fbCatOut[cat] = len(list)
+			totalFBItems += len(list)
+		}
+
+		s.logger.Info("[RecPipeline] Stage 4b: Fallback result",
 			zap.String("user_id", userID.String()),
 			zap.String("model_version", modelVersion),
-			zap.Int("processing_ms", processingMs))
+			zap.Int("total_ranked_items", totalFBItems),
+			zap.Int("upper", fbCatOut["upper"]),
+			zap.Int("lower", fbCatOut["lower"]),
+			zap.Int("footwear", fbCatOut["footwear"]),
+			zap.Int("outerwear", fbCatOut["outerwear"]),
+			zap.Int("accessory", fbCatOut["accessory"]),
+			zap.Int("processing_ms", processingMs),
+		)
 	} else {
 		// Legacy fallback
 		modelVersion = "fallback-v1"

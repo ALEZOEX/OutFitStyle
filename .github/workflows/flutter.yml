@@ -69,7 +69,12 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
+          cache: false
+
+      - name: Clean Gradle cache
+        run: |
+          rm -rf android/.gradle
+          rm -rf ~/.gradle/caches
 
       - name: Create google-services.json (fallback)
         run: |
