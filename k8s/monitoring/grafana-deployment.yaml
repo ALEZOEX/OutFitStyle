@@ -8,7 +8,7 @@ metadata:
 type: Opaque
 stringData:
   admin-user: "admin"
-  admin-password: "grafana-admin-password-change-me"
+  admin-password: "outfitstyle!2026mobileapp"
 ---
 apiVersion: apps/v1
 kind: Deployment
