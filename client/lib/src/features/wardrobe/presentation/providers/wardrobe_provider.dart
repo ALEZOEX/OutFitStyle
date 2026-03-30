@@ -1,13 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
-import '../../../../core/api/api_client.dart';
 import '../../../../data/remote/wardrobe_api_service.dart';
 import '../../../../domain/entities/catalog_entity.dart';
 import '../../data/repositories/wardrobe_repository.dart';
 import '../../../../domain/entities/wardrobe_item.dart';
 import '../../../../domain/entities/wardrobe_request_entities.dart';
 import '../../../../presentation/providers/session_provider.dart';
-import '../../../../presentation/routing/router.dart';
 
 /// Состояние гардероба
 enum WardrobeLoadStatus { initial, loading, success, error }
@@ -116,19 +114,9 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
         error: null,
       );
     } catch (e) {
-      // Извлекаем сообщение об ошибке
-      String errorMessage;
-      if (e is WardrobeException) {
-        errorMessage = e.message;
-      } else if (e is DioException) {
-        errorMessage = 'Ошибка сети: ${e.message}';
-      } else {
-        errorMessage = e.toString().replaceFirst('WardrobeException: ', '');
-      }
-      
       state = state.copyWith(
         status: WardrobeLoadStatus.error,
-        error: errorMessage,
+        error: _extractErrorMessage(e),
       );
     }
   }
@@ -174,7 +162,10 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
 
       return newItem;
     } catch (e) {
-      state = state.copyWith(isAddingItem: false, error: e.toString());
+      state = state.copyWith(
+        isAddingItem: false,
+        error: _extractErrorMessage(e),
+      );
       rethrow;
     }
   }
@@ -189,7 +180,7 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
         ..removeWhere((item) => item.id == itemId);
       state = state.copyWith(items: items);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: _extractErrorMessage(e));
       rethrow;
     }
   }
@@ -210,7 +201,7 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
         state = state.copyWith(items: items);
       }
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: _extractErrorMessage(e));
       rethrow;
     }
   }
@@ -266,9 +257,32 @@ class WardrobeNotifier extends StateNotifier<WardrobeState> {
 
       return newItem;
     } catch (e) {
-      state = state.copyWith(isAddingItem: false, error: e.toString());
+      state = state.copyWith(
+        isAddingItem: false,
+        error: _extractErrorMessage(e),
+      );
       rethrow;
     }
+  }
+}
+
+/// Извлечь человекочитаемое сообщение из любого исключения.
+/// В релизе Dart обфусцирует имена классов — обычная интерполяция '$e'
+/// даёт 'Instance of minified:acz'.
+String _extractErrorMessage(Object error) {
+  if (error is WardrobeException) return error.message;
+  if (error is WardrobeApiException) return error.message;
+  if (error is DioException) return error.message ?? error.type.name;
+  if (error is FormatException) return error.message;
+  if (error is TypeError) return 'Ошибка типа данных';
+  try {
+    final s = error.toString();
+    if (s.startsWith('Instance of')) {
+      return error.runtimeType.toString();
+    }
+    return s;
+  } catch (_) {
+    return 'Неизвестная ошибка';
   }
 }
 
