@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:developer' as developer;
 import '../../utils/logger.dart';
 import 'web_token_storage_selector.dart';
@@ -76,18 +77,18 @@ class ApiClient {
               name: 'AuthDebug',
             );
 
-            // Приоритет 1: Backend Access Token из SharedPreferences
-            accessToken = _sharedPreferences?.getString('access_token');
-
-            // Приоритет 2: Чтение напрямую из localStorage (для Web)
-            if (accessToken == null || accessToken.isEmpty) {
+            // 🔑 КРИТИЧНО: На Web читаем ТОЛЬКО из localStorage (SharedPreferences не работает)
+            if (kIsWeb) {
               accessToken = _getAccessTokenFromLocalStorage();
               if (accessToken != null && accessToken.isNotEmpty) {
                 developer.log(
-                  '🔑 [AUTH DEBUG] ✅ Token read from localStorage (Web fallback)',
+                  '🔑 [AUTH DEBUG] ✅ Token read from localStorage (Web)',
                   name: 'AuthDebug',
                 );
               }
+            } else {
+              // Mobile/Desktop: читаем из SharedPreferences
+              accessToken = _sharedPreferences?.getString('access_token');
             }
 
             if (accessToken != null && accessToken.isNotEmpty) {
