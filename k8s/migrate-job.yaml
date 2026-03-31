@@ -62,17 +62,23 @@ spec:
       restartPolicy: OnFailure
       initContainers:
       - name: wait-for-db
-        image: busybox:1.35
+        image: postgres:15-alpine
         command:
           - sh
           - -c
           - |
             echo "Waiting for PostgreSQL with TLS..."
-            until nc -z postgres.outfitstyle.svc.cluster.local 5432; do
+            until pg_isready -h postgres.outfitstyle.svc.cluster.local -p 5432 -U "$$DB_USER"; do
               echo "waiting for postgres..."
               sleep 2
             done
-            echo "PostgreSQL is reachable"
+            echo "PostgreSQL is ready!"
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: outfitstyle-secrets
+              key: db-user
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
