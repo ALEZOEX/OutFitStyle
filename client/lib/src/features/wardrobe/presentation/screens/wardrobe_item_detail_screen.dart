@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../domain/entities/wardrobe_item.dart';
+import '../../../../domain/entities/wardrobe_item.dart';
 import '../providers/wardrobe_provider.dart';
-import '../../../../../ui/widgets/max_width_container.dart';
 
 /// Экран деталей предмета гардероба
 class WardrobeItemDetailScreen extends ConsumerStatefulWidget {
@@ -22,7 +21,18 @@ class _WardrobeItemDetailScreenState
     extends ConsumerState<WardrobeItemDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    final itemAsync = ref.watch(wardrobeItemProvider(widget.itemId));
+    final wardrobeState = ref.watch(wardrobeProvider);
+    final item = wardrobeState.items.cast<WardrobeItem?>().firstWhere(
+      (i) => i?.id == widget.itemId,
+      orElse: () => null,
+    );
+
+    if (item == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Детали предмета')),
+        body: _buildNotFound(),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -30,73 +40,52 @@ class _WardrobeItemDetailScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () => itemAsync.value != null
-                ? context.push('/wardrobe/item/${widget.itemId}/edit')
-                : null,
+            onPressed:
+                () => context.push('/wardrobe/item/${widget.itemId}/edit'),
             tooltip: 'Редактировать',
           ),
         ],
       ),
-      body: itemAsync.when(
-        data: (item) {
-          if (item == null) {
-            return _buildNotFound();
-          }
-          return _buildContent(item);
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => _buildError(error.toString()),
-      ),
+      body: _buildContent(item),
     );
   }
 
   Widget _buildContent(WardrobeItem item) {
     final theme = Theme.of(context);
 
-    return ResponsiveMaxWidthContainer(
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Изображение
-          _buildItemImage(item),
-          const SizedBox(height: 24),
-
-          // Название и категория
-          Text(
-            item.name ?? 'Без названия',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _buildItemImage(item),
+        const SizedBox(height: 24),
+        Text(
+          item.name ?? 'Без названия',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (item.category != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              _getCategoryName(item.category!),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          if (item.category != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _getCategoryName(item.category!),
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
-              ),
-            ),
-          const SizedBox(height: 24),
-
-          // Информация
-          _buildInfoSection(theme, item),
-          const SizedBox(height: 24),
-
-          // Статистика
-          _buildStatsSection(theme, item),
-          const SizedBox(height: 24),
-
-          // Действия
-          _buildActions(item),
-        ],
-      ),
+        const SizedBox(height: 24),
+        _buildInfoSection(theme, item),
+        const SizedBox(height: 24),
+        _buildStatsSection(theme, item),
+        const SizedBox(height: 24),
+        _buildActions(item),
+      ],
     );
   }
 
@@ -115,10 +104,7 @@ class _WardrobeItemDetailScreenState
           children: [
             Icon(Icons.checkroom_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              'Нет изображения',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            Text('Нет изображения', style: TextStyle(color: Colors.grey[600])),
           ],
         ),
       );
@@ -131,16 +117,18 @@ class _WardrobeItemDetailScreenState
         height: 300,
         width: double.infinity,
         fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          height: 300,
-          color: Colors.grey[200],
-          child: const Center(child: CircularProgressIndicator()),
-        ),
-        errorWidget: (context, url, error) => Container(
-          height: 300,
-          color: Colors.grey[200],
-          child: const Center(child: Icon(Icons.error)),
-        ),
+        placeholder:
+            (context, url) => Container(
+              height: 300,
+              color: Colors.grey[200],
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        errorWidget:
+            (context, url, error) => Container(
+              height: 300,
+              color: Colors.grey[200],
+              child: const Center(child: Icon(Icons.error)),
+            ),
       ),
     );
   }
@@ -251,13 +239,7 @@ class _WardrobeItemDetailScreenState
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         ],
       ),
     );
@@ -265,47 +247,24 @@ class _WardrobeItemDetailScreenState
 
   Widget _buildActions(WardrobeItem item) {
     final isFavorite = item.isFavorite ?? false;
-    final isArchived = item.isArchived ?? false;
 
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  ref
-                      .read(wardrobeProvider.notifier)
-                      .toggleFavorite(widget.itemId);
-                },
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.red : null,
-                ),
-                label: Text(isFavorite ? 'В избранном' : 'В избранное'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              ref.read(wardrobeProvider.notifier).toggleFavorite(widget.itemId);
+            },
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? Colors.red : null,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  ref
-                      .read(wardrobeProvider.notifier)
-                      .archiveItem(widget.itemId, !isArchived);
-                },
-                icon: Icon(
-                  isArchived ? Icons.unarchive : Icons.archive,
-                ),
-                label: Text(isArchived ? 'Восстановить' : 'Архивировать'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
+            label: Text(isFavorite ? 'В избранном' : 'В избранное'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-          ],
+          ),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -349,41 +308,6 @@ class _WardrobeItemDetailScreenState
     );
   }
 
-  Widget _buildError(String error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-            const SizedBox(height: 16),
-            Text(
-              'Ошибка загрузки',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.red[700],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              error,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () => ref.invalidate(wardrobeProvider),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Повторить'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,
@@ -400,9 +324,7 @@ class _WardrobeItemDetailScreenState
               ),
               FilledButton.icon(
                 onPressed: () {
-                  ref
-                      .read(wardrobeProvider.notifier)
-                      .deleteItem(widget.itemId);
+                  ref.read(wardrobeProvider.notifier).removeItem(widget.itemId);
                   Navigator.pop(context);
                   if (context.mounted) {
                     context.pop();
