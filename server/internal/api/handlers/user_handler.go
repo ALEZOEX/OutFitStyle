@@ -405,8 +405,8 @@ func (h *UserHandler) GetPreferences(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Возвращаем только предпочтения
-	resp.Success(w, map[string]any{"preferences": out.User.Preferences})
+	// Возвращаем только предпочтения напрямую
+	resp.Success(w, out.User.Preferences)
 }
 
 // DeleteAccount обрабатывает запрос на удаление пользовательского аккаунта
