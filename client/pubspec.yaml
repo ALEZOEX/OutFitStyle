@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.7.0 <4.0.0'
+  sdk: ^3.8.0
 
 dependencies:
   flutter:
@@ -31,7 +31,7 @@ dependencies:
 
   # Networking
   dio: ^5.7.0
-  json_annotation: ^4.9.0
+  json_annotation: ^4.11.0
 
   # UI
   google_fonts: ^6.3.2

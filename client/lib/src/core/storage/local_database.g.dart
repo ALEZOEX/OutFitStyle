@@ -237,46 +237,38 @@ class $RecommendationTableTable extends RecommendationTable
   }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RecommendationTableData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
-      outfitItems:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}outfit_items'],
-          )!,
-      temperature:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}temperature'],
-          )!,
-      weatherCondition:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}weather_condition'],
-          )!,
-      occasion:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}occasion'],
-          )!,
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timestamp'],
-          )!,
-      confidenceScore:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}confidence_score'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      outfitItems: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outfit_items'],
+      )!,
+      temperature: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temperature'],
+      )!,
+      weatherCondition: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_condition'],
+      )!,
+      occasion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occasion'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      confidenceScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}confidence_score'],
+      )!,
       feedback: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}feedback'],
@@ -348,12 +340,12 @@ class RecommendationTableData extends DataClass
       occasion: Value(occasion),
       timestamp: Value(timestamp),
       confidenceScore: Value(confidenceScore),
-      feedback:
-          feedback == null && nullToAbsent
-              ? const Value.absent()
-              : Value(feedback),
-      rating:
-          rating == null && nullToAbsent ? const Value.absent() : Value(rating),
+      feedback: feedback == null && nullToAbsent
+          ? const Value.absent()
+          : Value(feedback),
+      rating: rating == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rating),
     );
   }
 
@@ -419,20 +411,20 @@ class RecommendationTableData extends DataClass
     return RecommendationTableData(
       id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
-      outfitItems:
-          data.outfitItems.present ? data.outfitItems.value : this.outfitItems,
-      temperature:
-          data.temperature.present ? data.temperature.value : this.temperature,
-      weatherCondition:
-          data.weatherCondition.present
-              ? data.weatherCondition.value
-              : this.weatherCondition,
+      outfitItems: data.outfitItems.present
+          ? data.outfitItems.value
+          : this.outfitItems,
+      temperature: data.temperature.present
+          ? data.temperature.value
+          : this.temperature,
+      weatherCondition: data.weatherCondition.present
+          ? data.weatherCondition.value
+          : this.weatherCondition,
       occasion: data.occasion.present ? data.occasion.value : this.occasion,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
-      confidenceScore:
-          data.confidenceScore.present
-              ? data.confidenceScore.value
-              : this.confidenceScore,
+      confidenceScore: data.confidenceScore.present
+          ? data.confidenceScore.value
+          : this.confidenceScore,
       feedback: data.feedback.present ? data.feedback.value : this.feedback,
       rating: data.rating.present ? data.rating.value : this.rating,
     );
@@ -1038,95 +1030,78 @@ class $WardrobeTableTable extends WardrobeTable
   WardrobeTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return WardrobeTableData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      externalId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}external_id'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      imageUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}image_url'],
-          )!,
-      category:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}category'],
-          )!,
-      season:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}season'],
-          )!,
-      weatherCondition:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}weather_condition'],
-          )!,
-      temperatureMin:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}temperature_min'],
-          )!,
-      temperatureMax:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}temperature_max'],
-          )!,
-      occasions:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}occasions'],
-          )!,
-      addedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}added_at'],
-          )!,
-      isActive:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_active'],
-          )!,
-      isFavorite:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_favorite'],
-          )!,
-      isArchived:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_archived'],
-          )!,
-      wearCount:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}wear_count'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      season: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}season'],
+      )!,
+      weatherCondition: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_condition'],
+      )!,
+      temperatureMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temperature_min'],
+      )!,
+      temperatureMax: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temperature_max'],
+      )!,
+      occasions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occasions'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}added_at'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_archived'],
+      )!,
+      wearCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}wear_count'],
+      )!,
       lastWornAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_worn_at'],
       ),
-      isSynced:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_synced'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
     );
   }
 
@@ -1219,10 +1194,9 @@ class WardrobeTableData extends DataClass
       isFavorite: Value(isFavorite),
       isArchived: Value(isArchived),
       wearCount: Value(wearCount),
-      lastWornAt:
-          lastWornAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(lastWornAt),
+      lastWornAt: lastWornAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastWornAt),
       isSynced: Value(isSynced),
       updatedAt: Value(updatedAt),
     );
@@ -1321,34 +1295,35 @@ class WardrobeTableData extends DataClass
   WardrobeTableData copyWithCompanion(WardrobeTableCompanion data) {
     return WardrobeTableData(
       id: data.id.present ? data.id.value : this.id,
-      externalId:
-          data.externalId.present ? data.externalId.value : this.externalId,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
       name: data.name.present ? data.name.value : this.name,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       category: data.category.present ? data.category.value : this.category,
       season: data.season.present ? data.season.value : this.season,
-      weatherCondition:
-          data.weatherCondition.present
-              ? data.weatherCondition.value
-              : this.weatherCondition,
-      temperatureMin:
-          data.temperatureMin.present
-              ? data.temperatureMin.value
-              : this.temperatureMin,
-      temperatureMax:
-          data.temperatureMax.present
-              ? data.temperatureMax.value
-              : this.temperatureMax,
+      weatherCondition: data.weatherCondition.present
+          ? data.weatherCondition.value
+          : this.weatherCondition,
+      temperatureMin: data.temperatureMin.present
+          ? data.temperatureMin.value
+          : this.temperatureMin,
+      temperatureMax: data.temperatureMax.present
+          ? data.temperatureMax.value
+          : this.temperatureMax,
       occasions: data.occasions.present ? data.occasions.value : this.occasions,
       addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
-      isFavorite:
-          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
-      isArchived:
-          data.isArchived.present ? data.isArchived.value : this.isArchived,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
       wearCount: data.wearCount.present ? data.wearCount.value : this.wearCount,
-      lastWornAt:
-          data.lastWornAt.present ? data.lastWornAt.value : this.lastWornAt,
+      lastWornAt: data.lastWornAt.present
+          ? data.lastWornAt.value
+          : this.lastWornAt,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2225,135 +2200,110 @@ class $WeatherDataTableTable extends WeatherDataTable
   WeatherDataTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return WeatherDataTableData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      latitude:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}latitude'],
-          )!,
-      longitude:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}longitude'],
-          )!,
-      locationName:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}location_name'],
-          )!,
-      temperature:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}temperature'],
-          )!,
-      feelsLike:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}feels_like'],
-          )!,
-      tempMin:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}temp_min'],
-          )!,
-      tempMax:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}temp_max'],
-          )!,
-      pressure:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}pressure'],
-          )!,
-      humidity:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}humidity'],
-          )!,
-      dewPoint:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}dew_point'],
-          )!,
-      uvi:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}uvi'],
-          )!,
-      clouds:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}clouds'],
-          )!,
-      visibility:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}visibility'],
-          )!,
-      windSpeed:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}wind_speed'],
-          )!,
-      windDeg:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}wind_deg'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      )!,
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      )!,
+      locationName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location_name'],
+      )!,
+      temperature: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temperature'],
+      )!,
+      feelsLike: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}feels_like'],
+      )!,
+      tempMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temp_min'],
+      )!,
+      tempMax: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}temp_max'],
+      )!,
+      pressure: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pressure'],
+      )!,
+      humidity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}humidity'],
+      )!,
+      dewPoint: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}dew_point'],
+      )!,
+      uvi: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}uvi'],
+      )!,
+      clouds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}clouds'],
+      )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}visibility'],
+      )!,
+      windSpeed: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}wind_speed'],
+      )!,
+      windDeg: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}wind_deg'],
+      )!,
       windGust: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}wind_gust'],
       ),
-      weatherMain:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}weather_main'],
-          )!,
-      weatherDescription:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}weather_description'],
-          )!,
-      weatherIcon:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}weather_icon'],
-          )!,
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timestamp'],
-          )!,
-      timezone:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timezone'],
-          )!,
-      country:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}country'],
-          )!,
-      sunrise:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}sunrise'],
-          )!,
-      sunset:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}sunset'],
-          )!,
-      isCurrent:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_current'],
-          )!,
+      weatherMain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_main'],
+      )!,
+      weatherDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_description'],
+      )!,
+      weatherIcon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_icon'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      timezone: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timezone'],
+      )!,
+      country: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}country'],
+      )!,
+      sunrise: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sunrise'],
+      )!,
+      sunset: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sunset'],
+      )!,
+      isCurrent: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_current'],
+      )!,
     );
   }
 
@@ -2471,10 +2421,9 @@ class WeatherDataTableData extends DataClass
       visibility: Value(visibility),
       windSpeed: Value(windSpeed),
       windDeg: Value(windDeg),
-      windGust:
-          windGust == null && nullToAbsent
-              ? const Value.absent()
-              : Value(windGust),
+      windGust: windGust == null && nullToAbsent
+          ? const Value.absent()
+          : Value(windGust),
       weatherMain: Value(weatherMain),
       weatherDescription: Value(weatherDescription),
       weatherIcon: Value(weatherIcon),
@@ -2616,12 +2565,12 @@ class WeatherDataTableData extends DataClass
       id: data.id.present ? data.id.value : this.id,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
-      locationName:
-          data.locationName.present
-              ? data.locationName.value
-              : this.locationName,
-      temperature:
-          data.temperature.present ? data.temperature.value : this.temperature,
+      locationName: data.locationName.present
+          ? data.locationName.value
+          : this.locationName,
+      temperature: data.temperature.present
+          ? data.temperature.value
+          : this.temperature,
       feelsLike: data.feelsLike.present ? data.feelsLike.value : this.feelsLike,
       tempMin: data.tempMin.present ? data.tempMin.value : this.tempMin,
       tempMax: data.tempMax.present ? data.tempMax.value : this.tempMax,
@@ -2630,19 +2579,21 @@ class WeatherDataTableData extends DataClass
       dewPoint: data.dewPoint.present ? data.dewPoint.value : this.dewPoint,
       uvi: data.uvi.present ? data.uvi.value : this.uvi,
       clouds: data.clouds.present ? data.clouds.value : this.clouds,
-      visibility:
-          data.visibility.present ? data.visibility.value : this.visibility,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
       windSpeed: data.windSpeed.present ? data.windSpeed.value : this.windSpeed,
       windDeg: data.windDeg.present ? data.windDeg.value : this.windDeg,
       windGust: data.windGust.present ? data.windGust.value : this.windGust,
-      weatherMain:
-          data.weatherMain.present ? data.weatherMain.value : this.weatherMain,
-      weatherDescription:
-          data.weatherDescription.present
-              ? data.weatherDescription.value
-              : this.weatherDescription,
-      weatherIcon:
-          data.weatherIcon.present ? data.weatherIcon.value : this.weatherIcon,
+      weatherMain: data.weatherMain.present
+          ? data.weatherMain.value
+          : this.weatherMain,
+      weatherDescription: data.weatherDescription.present
+          ? data.weatherDescription.value
+          : this.weatherDescription,
+      weatherIcon: data.weatherIcon.present
+          ? data.weatherIcon.value
+          : this.weatherIcon,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
       timezone: data.timezone.present ? data.timezone.value : this.timezone,
       country: data.country.present ? data.country.value : this.country,
@@ -3330,18 +3281,15 @@ class $$RecommendationTableTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$RecommendationTableTableFilterComposer(
+          createFilteringComposer: () =>
+              $$RecommendationTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecommendationTableTableOrderingComposer(
                 $db: db,
                 $table: table,
               ),
-          createOrderingComposer:
-              () => $$RecommendationTableTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer:
-              () => $$RecommendationTableTableAnnotationComposer(
+          createComputedFieldComposer: () =>
+              $$RecommendationTableTableAnnotationComposer(
                 $db: db,
                 $table: table,
               ),
@@ -3393,16 +3341,9 @@ class $$RecommendationTableTableTableManager
                 feedback: feedback,
                 rating: rating,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -3779,16 +3720,12 @@ class $$WardrobeTableTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$WardrobeTableTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () =>
-                  $$WardrobeTableTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$WardrobeTableTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () =>
+              $$WardrobeTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WardrobeTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WardrobeTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -3869,16 +3806,9 @@ class $$WardrobeTableTableTableManager
                 isSynced: isSynced,
                 updatedAt: updatedAt,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -4369,19 +4299,12 @@ class $$WeatherDataTableTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () =>
-                  $$WeatherDataTableTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$WeatherDataTableTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer:
-              () => $$WeatherDataTableTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () =>
+              $$WeatherDataTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WeatherDataTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WeatherDataTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -4494,16 +4417,9 @@ class $$WeatherDataTableTableTableManager
                 sunset: sunset,
                 isCurrent: isCurrent,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

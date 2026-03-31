@@ -12,16 +12,14 @@ _OutfitRecommendation _$OutfitRecommendationFromJson(
   id: json['id'] as String?,
   title: json['title'] as String?,
   description: json['description'] as String?,
-  recommendedItems:
-      (json['recommendedItems'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+  recommendedItems: (json['recommendedItems'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
   temperature: (json['temperature'] as num?)?.toDouble(),
   weatherCondition: json['weatherCondition'] as String?,
-  createdAt:
-      json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
 );
 
 Map<String, dynamic> _$OutfitRecommendationToJson(

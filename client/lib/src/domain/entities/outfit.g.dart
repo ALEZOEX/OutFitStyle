@@ -35,16 +35,14 @@ _Outfit _$OutfitFromJson(Map<String, dynamic> json) => _Outfit(
       (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
   isFavorite: json['is_favorite'] as bool? ?? false,
-  createdAt:
-      json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
+  createdAt: json['created_at'] == null
+      ? null
+      : DateTime.parse(json['created_at'] as String),
   timesWorn: (json['timesWorn'] as num?)?.toInt() ?? 0,
   comfortRating: (json['comfortRating'] as num?)?.toDouble() ?? 0.0,
-  addedDate:
-      json['addedDate'] == null
-          ? null
-          : DateTime.parse(json['addedDate'] as String),
+  addedDate: json['addedDate'] == null
+      ? null
+      : DateTime.parse(json['addedDate'] as String),
 );
 
 Map<String, dynamic> _$OutfitToJson(_Outfit instance) => <String, dynamic>{
@@ -53,12 +51,12 @@ Map<String, dynamic> _$OutfitToJson(_Outfit instance) => <String, dynamic>{
   'description': instance.description,
   'image_url': instance.imageUrl,
   'clothing_item_ids': instance.clothingItemIds,
-  'occasions':
-      instance.occasions.map((e) => _$OutfitOccasionEnumMap[e]!).toList(),
-  'weather_conditions':
-      instance.weatherConditions
-          .map((e) => _$OutfitWeatherEnumMap[e]!)
-          .toList(),
+  'occasions': instance.occasions
+      .map((e) => _$OutfitOccasionEnumMap[e]!)
+      .toList(),
+  'weather_conditions': instance.weatherConditions
+      .map((e) => _$OutfitWeatherEnumMap[e]!)
+      .toList(),
   'seasons': instance.seasons.map((e) => _$OutfitSeasonEnumMap[e]!).toList(),
   'tags': instance.tags,
   'is_favorite': instance.isFavorite,

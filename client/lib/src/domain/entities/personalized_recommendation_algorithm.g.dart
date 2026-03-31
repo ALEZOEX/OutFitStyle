@@ -41,14 +41,12 @@ _$PersonalizedRecommendationAlgorithmFromJson(
       (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const <String>[],
   dummyField: json['dummyField'] as String? ?? '',
-  createdAt:
-      json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-  updatedAt:
-      json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$PersonalizedRecommendationAlgorithmToJson(

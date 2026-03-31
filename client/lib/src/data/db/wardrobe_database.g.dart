@@ -562,20 +562,18 @@ class $ClothingItemsTable extends ClothingItems
   DbClothingItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbClothingItem(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
       externalId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}external_id'],
       ),
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -584,16 +582,14 @@ class $ClothingItemsTable extends ClothingItems
         DriftSqlType.string,
         data['${effectivePrefix}image_url'],
       ),
-      category:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}category'],
-          )!,
-      tags:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}tags'],
-          )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      )!,
       color: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}color'],
@@ -606,56 +602,46 @@ class $ClothingItemsTable extends ClothingItems
         DriftSqlType.string,
         data['${effectivePrefix}material'],
       ),
-      seasons:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}seasons'],
-          )!,
-      weatherConditions:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}weather_conditions'],
-          )!,
-      occasions:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}occasions'],
-          )!,
-      isFavorite:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_favorite'],
-          )!,
-      isArchived:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_archived'],
-          )!,
-      timesWorn:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}times_worn'],
-          )!,
-      comfortRating:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}comfort_rating'],
-          )!,
-      addedDate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}added_date'],
-          )!,
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}created_at'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      seasons: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seasons'],
+      )!,
+      weatherConditions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_conditions'],
+      )!,
+      occasions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occasions'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_archived'],
+      )!,
+      timesWorn: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}times_worn'],
+      )!,
+      comfortRating: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}comfort_rating'],
+      )!,
+      addedDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}added_date'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
       lastWornDate: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_worn_date'],
@@ -668,20 +654,18 @@ class $ClothingItemsTable extends ClothingItems
         DriftSqlType.string,
         data['${effectivePrefix}size'],
       ),
-      usageCount:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}usage_count'],
-          )!,
+      usageCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}usage_count'],
+      )!,
       serverId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}server_id'],
       ),
-      dirty:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}dirty'],
-          )!,
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
       lastSyncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_synced_at'],
@@ -811,33 +795,27 @@ class DbClothingItem extends drift.DataClass
   ClothingItemsCompanion toCompanion(bool nullToAbsent) {
     return ClothingItemsCompanion(
       id: drift.Value(id),
-      externalId:
-          externalId == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(externalId),
+      externalId: externalId == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(externalId),
       name: drift.Value(name),
-      description:
-          description == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(description),
-      imageUrl:
-          imageUrl == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(imageUrl),
+      description: description == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(description),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(imageUrl),
       category: drift.Value(category),
       tags: drift.Value(tags),
-      color:
-          color == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(color),
-      brand:
-          brand == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(brand),
-      material:
-          material == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(material),
+      color: color == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(color),
+      brand: brand == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(brand),
+      material: material == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(material),
       seasons: drift.Value(seasons),
       weatherConditions: drift.Value(weatherConditions),
       occasions: drift.Value(occasions),
@@ -848,28 +826,23 @@ class DbClothingItem extends drift.DataClass
       addedDate: drift.Value(addedDate),
       createdAt: drift.Value(createdAt),
       updatedAt: drift.Value(updatedAt),
-      lastWornDate:
-          lastWornDate == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(lastWornDate),
-      price:
-          price == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(price),
-      size:
-          size == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(size),
+      lastWornDate: lastWornDate == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(lastWornDate),
+      price: price == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(price),
+      size: size == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(size),
       usageCount: drift.Value(usageCount),
-      serverId:
-          serverId == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(serverId),
+      serverId: serverId == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(serverId),
       dirty: drift.Value(dirty),
-      lastSyncedAt:
-          lastSyncedAt == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(lastSyncedAt),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(lastSyncedAt),
     );
   }
 
@@ -1002,11 +975,13 @@ class DbClothingItem extends drift.DataClass
   DbClothingItem copyWithCompanion(ClothingItemsCompanion data) {
     return DbClothingItem(
       id: data.id.present ? data.id.value : this.id,
-      externalId:
-          data.externalId.present ? data.externalId.value : this.externalId,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
       name: data.name.present ? data.name.value : this.name,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       category: data.category.present ? data.category.value : this.category,
       tags: data.tags.present ? data.tags.value : this.tags,
@@ -1014,37 +989,36 @@ class DbClothingItem extends drift.DataClass
       brand: data.brand.present ? data.brand.value : this.brand,
       material: data.material.present ? data.material.value : this.material,
       seasons: data.seasons.present ? data.seasons.value : this.seasons,
-      weatherConditions:
-          data.weatherConditions.present
-              ? data.weatherConditions.value
-              : this.weatherConditions,
+      weatherConditions: data.weatherConditions.present
+          ? data.weatherConditions.value
+          : this.weatherConditions,
       occasions: data.occasions.present ? data.occasions.value : this.occasions,
-      isFavorite:
-          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
-      isArchived:
-          data.isArchived.present ? data.isArchived.value : this.isArchived,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
       timesWorn: data.timesWorn.present ? data.timesWorn.value : this.timesWorn,
-      comfortRating:
-          data.comfortRating.present
-              ? data.comfortRating.value
-              : this.comfortRating,
+      comfortRating: data.comfortRating.present
+          ? data.comfortRating.value
+          : this.comfortRating,
       addedDate: data.addedDate.present ? data.addedDate.value : this.addedDate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      lastWornDate:
-          data.lastWornDate.present
-              ? data.lastWornDate.value
-              : this.lastWornDate,
+      lastWornDate: data.lastWornDate.present
+          ? data.lastWornDate.value
+          : this.lastWornDate,
       price: data.price.present ? data.price.value : this.price,
       size: data.size.present ? data.size.value : this.size,
-      usageCount:
-          data.usageCount.present ? data.usageCount.value : this.usageCount,
+      usageCount: data.usageCount.present
+          ? data.usageCount.value
+          : this.usageCount,
       serverId: data.serverId.present ? data.serverId.value : this.serverId,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
-      lastSyncedAt:
-          data.lastSyncedAt.present
-              ? data.lastSyncedAt.value
-              : this.lastSyncedAt,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
     );
   }
 
@@ -1886,20 +1860,18 @@ class $OutfitsTable extends Outfits
   DbOutfit map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbOutfit(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
       externalId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}external_id'],
       ),
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -1908,70 +1880,58 @@ class $OutfitsTable extends Outfits
         DriftSqlType.string,
         data['${effectivePrefix}image_url'],
       ),
-      clothingItemIds:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}clothing_item_ids'],
-          )!,
-      isFavorite:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_favorite'],
-          )!,
-      timesWorn:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}times_worn'],
-          )!,
-      comfortRating:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}comfort_rating'],
-          )!,
-      tags:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}tags'],
-          )!,
-      occasions:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}occasions'],
-          )!,
-      weatherConditions:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}weather_conditions'],
-          )!,
-      seasons:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}seasons'],
-          )!,
-      addedDate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}added_date'],
-          )!,
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}created_at'],
-          )!,
-      updatedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}updated_at'],
-          )!,
+      clothingItemIds: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}clothing_item_ids'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      timesWorn: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}times_worn'],
+      )!,
+      comfortRating: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}comfort_rating'],
+      )!,
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      )!,
+      occasions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occasions'],
+      )!,
+      weatherConditions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weather_conditions'],
+      )!,
+      seasons: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seasons'],
+      )!,
+      addedDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}added_date'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
       serverId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}server_id'],
       ),
-      dirty:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}dirty'],
-          )!,
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
       lastSyncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_synced_at'],
@@ -2064,19 +2024,16 @@ class DbOutfit extends drift.DataClass implements drift.Insertable<DbOutfit> {
   OutfitsCompanion toCompanion(bool nullToAbsent) {
     return OutfitsCompanion(
       id: drift.Value(id),
-      externalId:
-          externalId == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(externalId),
+      externalId: externalId == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(externalId),
       name: drift.Value(name),
-      description:
-          description == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(description),
-      imageUrl:
-          imageUrl == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(imageUrl),
+      description: description == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(description),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(imageUrl),
       clothingItemIds: drift.Value(clothingItemIds),
       isFavorite: drift.Value(isFavorite),
       timesWorn: drift.Value(timesWorn),
@@ -2088,15 +2045,13 @@ class DbOutfit extends drift.DataClass implements drift.Insertable<DbOutfit> {
       addedDate: drift.Value(addedDate),
       createdAt: drift.Value(createdAt),
       updatedAt: drift.Value(updatedAt),
-      serverId:
-          serverId == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(serverId),
+      serverId: serverId == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(serverId),
       dirty: drift.Value(dirty),
-      lastSyncedAt:
-          lastSyncedAt == null && nullToAbsent
-              ? const drift.Value.absent()
-              : drift.Value(lastSyncedAt),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(lastSyncedAt),
     );
   }
 
@@ -2197,39 +2152,38 @@ class DbOutfit extends drift.DataClass implements drift.Insertable<DbOutfit> {
   DbOutfit copyWithCompanion(OutfitsCompanion data) {
     return DbOutfit(
       id: data.id.present ? data.id.value : this.id,
-      externalId:
-          data.externalId.present ? data.externalId.value : this.externalId,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
       name: data.name.present ? data.name.value : this.name,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
-      clothingItemIds:
-          data.clothingItemIds.present
-              ? data.clothingItemIds.value
-              : this.clothingItemIds,
-      isFavorite:
-          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
+      clothingItemIds: data.clothingItemIds.present
+          ? data.clothingItemIds.value
+          : this.clothingItemIds,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
       timesWorn: data.timesWorn.present ? data.timesWorn.value : this.timesWorn,
-      comfortRating:
-          data.comfortRating.present
-              ? data.comfortRating.value
-              : this.comfortRating,
+      comfortRating: data.comfortRating.present
+          ? data.comfortRating.value
+          : this.comfortRating,
       tags: data.tags.present ? data.tags.value : this.tags,
       occasions: data.occasions.present ? data.occasions.value : this.occasions,
-      weatherConditions:
-          data.weatherConditions.present
-              ? data.weatherConditions.value
-              : this.weatherConditions,
+      weatherConditions: data.weatherConditions.present
+          ? data.weatherConditions.value
+          : this.weatherConditions,
       seasons: data.seasons.present ? data.seasons.value : this.seasons,
       addedDate: data.addedDate.present ? data.addedDate.value : this.addedDate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       serverId: data.serverId.present ? data.serverId.value : this.serverId,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
-      lastSyncedAt:
-          data.lastSyncedAt.present
-              ? data.lastSyncedAt.value
-              : this.lastSyncedAt,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
     );
   }
 
@@ -2701,36 +2655,30 @@ class $OutfitItemsTable extends OutfitItems
   DbOutfitItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DbOutfitItem(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      outfitId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}outfit_id'],
-          )!,
-      clothingItemId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}clothing_item_id'],
-          )!,
-      sortOrder:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}sort_order'],
-          )!,
-      isPrimary:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_primary'],
-          )!,
-      metadata:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}metadata'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      outfitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}outfit_id'],
+      )!,
+      clothingItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}clothing_item_id'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      isPrimary: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_primary'],
+      )!,
+      metadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata'],
+      )!,
     );
   }
 
@@ -2825,10 +2773,9 @@ class DbOutfitItem extends drift.DataClass
     return DbOutfitItem(
       id: data.id.present ? data.id.value : this.id,
       outfitId: data.outfitId.present ? data.outfitId.value : this.outfitId,
-      clothingItemId:
-          data.clothingItemId.present
-              ? data.clothingItemId.value
-              : this.clothingItemId,
+      clothingItemId: data.clothingItemId.present
+          ? data.clothingItemId.value
+          : this.clothingItemId,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
       metadata: data.metadata.present ? data.metadata.value : this.metadata,
@@ -3467,16 +3414,12 @@ class $$ClothingItemsTableTableManager
         drift.TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$ClothingItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () =>
-                  $$ClothingItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$ClothingItemsTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () =>
+              $$ClothingItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ClothingItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ClothingItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 drift.Value<int> id = const drift.Value.absent(),
@@ -3595,16 +3538,11 @@ class $$ClothingItemsTableTableManager
                 dirty: dirty,
                 lastSyncedAt: lastSyncedAt,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          drift.BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (e.readTable(table), drift.BaseReferences(db, table, e)),
+              )
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -3990,12 +3928,12 @@ class $$OutfitsTableTableManager
         drift.TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$OutfitsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$OutfitsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$OutfitsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$OutfitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OutfitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OutfitsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 drift.Value<int> id = const drift.Value.absent(),
@@ -4084,16 +4022,11 @@ class $$OutfitsTableTableManager
                 dirty: dirty,
                 lastSyncedAt: lastSyncedAt,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          drift.BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (e.readTable(table), drift.BaseReferences(db, table, e)),
+              )
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -4272,13 +4205,12 @@ class $$OutfitItemsTableTableManager
         drift.TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $$OutfitItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$OutfitItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () =>
-                  $$OutfitItemsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $$OutfitItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OutfitItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OutfitItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 drift.Value<int> id = const drift.Value.absent(),
@@ -4311,16 +4243,11 @@ class $$OutfitItemsTableTableManager
                 isPrimary: isPrimary,
                 metadata: metadata,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          drift.BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (e.readTable(table), drift.BaseReferences(db, table, e)),
+              )
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
