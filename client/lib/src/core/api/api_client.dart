@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:developer' as developer;
 import '../../utils/logger.dart';
 import 'web_token_storage_selector.dart';
+import 'web_token_helper_selector.dart';
 
 /// Получение access_token из localStorage (только для Web)
 /// SharedPreferences на Web может быть не инициализирован вовремя
@@ -274,6 +275,15 @@ class ApiClient {
                     '[$timestamp] [ApiClient] [Interceptor 2] ✅ ACCESS TOKEN сохранён из response (${accessToken.length} chars)',
                     name: 'ApiClient',
                   );
+
+                  // 🔑 КРИТИЧНО: На Web сохраняем в localStorage
+                  if (kIsWeb) {
+                    saveTokenToLocalStorage(accessToken);
+                    developer.log(
+                      '[$timestamp] [ApiClient] [Interceptor 2] ✅ Token saved to localStorage (Web)',
+                      name: 'ApiClient',
+                    );
+                  }
 
                   // 🔑 DEBUG: Верификация типа токена
                   final tokenParts = accessToken.split('.');
