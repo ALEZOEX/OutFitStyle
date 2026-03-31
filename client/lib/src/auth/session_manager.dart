@@ -503,72 +503,39 @@ class SessionManager {
         throw Exception('Ошибка получения данных пользователя');
       }
 
-      // Extract and store access_token for Bearer authentication
+      // 🔑 КРИТИЧНО: Токен уже сохранён в response interceptor (api_client.dart)
+      // Не сохраняем здесь чтобы избежать race condition
       final accessToken = tokens['access_token'] as String?;
       final refreshToken = tokens['refresh_token'] as String?;
 
       if (accessToken != null && accessToken.isNotEmpty) {
-        AppLogger.debug(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Сохранение access_token (длина: ${accessToken.length} символов)',
-        );
-        await _sharedPreferences.setString('access_token', accessToken);
-
-        // 🔑 КРИТИЧНО: Сохраняем в localStorage ДО навигации (Web)
-        saveTokenToLocalStorage(accessToken);
-        
-        // 🔑 КРИТИЧНО: Верификация что токен сохранён в localStorage
-        await Future.delayed(const Duration(milliseconds: 200));
-        final verifiedToken = getAccessTokenFromLocalStorage();
-        if (verifiedToken == null || verifiedToken.isEmpty) {
-          AppLogger.error(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 CRITICAL: Token NOT saved to localStorage after delay!',
-          );
-          saveTokenToLocalStorage(accessToken);
-          await Future.delayed(const Duration(milliseconds: 100));
-        } else {
-          AppLogger.info(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ Token verified in localStorage (${verifiedToken.length} chars)',
-          );
-        }
-
         AppLogger.info(
-          '[$backendTimestamp] [Auth] [GoogleSignIn] Access token сохранён для Google пользователя: ${_maskEmail(user.email ?? 'unknown')}',
+          '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ Access token получен от backend (${accessToken.length} символов)',
         );
 
-        // Verify it was saved
-        final saved = _sharedPreferences.getString('access_token');
-        if (saved != null && saved.isNotEmpty) {
-          AppLogger.debug(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] Access token успешно сохранён и верифицирован',
+        // 🔑 ВЕРИФИКАЦИЯ: Проверяем что токен сохранён в localStorage
+        await Future.delayed(const Duration(milliseconds: 100));
+        final savedInLocalStorage = getAccessTokenFromLocalStorage();
+        if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
+          AppLogger.info(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ Token verified in localStorage (${savedInLocalStorage.length} chars)',
           );
-
-          // 🔑 КРИТИЧНО: Дополнительная верификация типа токена
-          final tokenParts = saved.split('.');
+          
+          // Проверяем что это backend JWT, а не Firebase ID Token
+          final tokenParts = savedInLocalStorage.split('.');
           final isJwt = tokenParts.length == 3;
-          if (isJwt && saved.length < 500) {
+          if (isJwt && savedInLocalStorage.length >= 400 && savedInLocalStorage.length < 600) {
             AppLogger.info(
-              '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ JWT Access Token подтверждён (JWT=$isJwt, length=${saved.length})',
+              '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ Backend JWT подтверждён (JWT=$isJwt, length=${savedInLocalStorage.length})',
             );
-          } else if (saved.length > 1000) {
+          } else if (savedInLocalStorage.length < 400) {
             AppLogger.error(
-              '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 WARNING: Сохранён Firebase ID Token вместо backend JWT!',
-            );
-          }
-
-          // Верификация: читаем из localStorage (Web)
-          final savedInLocalStorage = getAccessTokenFromLocalStorage();
-          if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
-            AppLogger.info(
-              '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ localStorage verification: token found (${savedInLocalStorage.length} chars)',
-            );
-          } else {
-            AppLogger.warning(
-              '[$backendTimestamp] [Auth] [GoogleSignIn] ⚠️ localStorage verification: token NOT found (expected on Web only)',
+              '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 WARNING: Токен <400 символов - это может быть Firebase ID Token!',
             );
           }
         } else {
           AppLogger.error(
-            '[$backendTimestamp] [Auth] [GoogleSignIn] НЕ УДАЛОСЬ сохранить access_token в SharedPreferences',
+            '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 CRITICAL: Token NOT found in localStorage!',
           );
         }
       } else {
