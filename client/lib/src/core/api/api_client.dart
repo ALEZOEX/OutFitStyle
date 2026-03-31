@@ -253,26 +253,63 @@ class ApiClient {
     // Критично: должен выполняться ДО interceptor'а авторизации
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onResponse: (Response response, ResponseInterceptorHandler handler) {
+        onResponse: (Response response, ResponseInterceptorHandler handler) async {
           final timestamp = DateTime.now().toIso8601String();
           final path = response.requestOptions.path;
+
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2] ╔═══════════════════════════════════════════',
+            name: 'ApiClient',
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2] HTTP Response: ${response.statusCode} ${response.requestOptions.path}',
+            name: 'ApiClient',
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2] Response data type: ${response.data.runtimeType}',
+            name: 'ApiClient',
+          );
+          developer.log(
+            '[$timestamp] [ApiClient] [Interceptor 2] Response data: ${response.data}',
+            name: 'ApiClient',
+          );
 
           // Извлекаем токены только из auth endpoints
           if (path.contains('/auth/login') ||
               path.contains('/auth/register') ||
               path.contains('/auth/google') ||
               path.contains('/auth/refresh')) {
+            developer.log(
+              '[$timestamp] [ApiClient] [Interceptor 2] Auth endpoint detected, extracting tokens...',
+              name: 'ApiClient',
+            );
+
             final data = response.data;
             if (data is Map) {
+              developer.log(
+                '[$timestamp] [ApiClient] [Interceptor 2] Data is Map, checking for tokens...',
+                name: 'ApiClient',
+              );
+
               final tokens = data['tokens'] as Map?;
               if (tokens != null) {
+                developer.log(
+                  '[$timestamp] [ApiClient] [Interceptor 2] Tokens map found!',
+                  name: 'ApiClient',
+                );
+
                 final accessToken = tokens['access_token'] as String?;
                 final refreshToken = tokens['refresh_token'] as String?;
 
                 if (accessToken != null && accessToken.isNotEmpty) {
+                  developer.log(
+                    '[$timestamp] [ApiClient] [Interceptor 2] ✅ ACCESS TOKEN найден (${accessToken.length} chars)',
+                    name: 'ApiClient',
+                  );
+
                   _sharedPreferences?.setString('access_token', accessToken);
                   developer.log(
-                    '[$timestamp] [ApiClient] [Interceptor 2] ✅ ACCESS TOKEN сохранён из response (${accessToken.length} chars)',
+                    '[$timestamp] [ApiClient] [Interceptor 2] ✅ ACCESS TOKEN сохранён в SharedPreferences',
                     name: 'ApiClient',
                   );
 
@@ -283,6 +320,22 @@ class ApiClient {
                       '[$timestamp] [ApiClient] [Interceptor 2] ✅ Token saved to localStorage (Web)',
                       name: 'ApiClient',
                     );
+
+                    // Верификация сразу после сохранения
+                    await Future.delayed(const Duration(milliseconds: 50));
+                    final savedToken = getAccessTokenFromLocalStorage();
+                    if (savedToken != null && savedToken.isNotEmpty) {
+                      developer.log(
+                        '[$timestamp] [ApiClient] [Interceptor 2] ✅ VERIFICATION: Token verified in localStorage (${savedToken.length} chars)',
+                        name: 'ApiClient',
+                      );
+                    } else {
+                      developer.log(
+                        '[$timestamp] [ApiClient] [Interceptor 2] ❌ ERROR: Token NOT found in localStorage after save!',
+                        name: 'ApiClient',
+                        level: 1000,
+                      );
+                    }
                   }
 
                   // 🔑 DEBUG: Верификация типа токена
@@ -290,6 +343,15 @@ class ApiClient {
                   final isJwt = tokenParts.length == 3;
                   developer.log(
                     '[$timestamp] [ApiClient] [Interceptor 2] 🔑 Token type: JWT=$isJwt, parts=${tokenParts.length}',
+                    name: 'ApiClient',
+                  );
+                  developer.log(
+                    '[$timestamp] [ApiClient] [Interceptor 2] 🔑 Token preview: ${accessToken.substring(0, accessToken.length > 50 ? 50 : accessToken.length)}...',
+                    name: 'ApiClient',
+                  );
+                } else {
+                  developer.log(
+                    '[$timestamp] [ApiClient] [Interceptor 2] ❌ WARNING: access_token is null or empty',
                     name: 'ApiClient',
                   );
                 }
@@ -301,12 +363,27 @@ class ApiClient {
                     name: 'ApiClient',
                   );
                 }
+              } else {
+                developer.log(
+                  '[$timestamp] [ApiClient] [Interceptor 2] ❌ WARNING: tokens map not found in response',
+                  name: 'ApiClient',
+                );
               }
+            } else {
+              developer.log(
+                '[$timestamp] [ApiClient] [Interceptor 2] ❌ WARNING: response.data is not a Map',
+                name: 'ApiClient',
+              );
             }
+          } else {
+            developer.log(
+              '[$timestamp] [ApiClient] [Interceptor 2] Non-auth endpoint, skipping token extraction',
+              name: 'ApiClient',
+            );
           }
 
           developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 2] HTTP Response: ${response.statusCode} ${response.requestOptions.path}',
+            '[$timestamp] [ApiClient] [Interceptor 2] ╚═══════════════════════════════════════════',
             name: 'ApiClient',
           );
 
