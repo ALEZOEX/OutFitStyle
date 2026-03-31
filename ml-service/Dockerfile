@@ -29,7 +29,11 @@ COPY --from=builder /app/app ./app
 COPY --from=builder /app/contracts ./contracts
 COPY --from=builder /app/model ./model
 COPY --from=builder /app/models ./models
+COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/services ./services
+
+# Deploy model (create model.pkl manifest from metadata.json)
+RUN python scripts/deploy_model.py
 
 # Non-root user
 RUN groupadd -g 1000 mluser && \
