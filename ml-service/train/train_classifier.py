@@ -10,10 +10,15 @@ from sklearn.metrics import roc_auc_score, log_loss
 from catboost import CatBoostClassifier
 
 CAT_FEATURES = [
-    "weather_condition", "season", "age_range", "style_preference",
-    "temperature_sensitivity", "formality_preference",
-    "item_name", "category", "subcategory", "style",
-    "base_colour", "pattern", "fit", "usage"
+    "weather_condition",
+    "season",
+    "age_range",
+    "style_preference",
+    "temperature_sensitivity",
+    "formality_preference",
+    "item_name",
+    "category",
+    "item_style"
 ]
 
 def main():
@@ -53,8 +58,11 @@ def main():
         eval_metric="AUC",
         random_seed=42,
         verbose=100,
-        cat_features=[c for c in CAT_FEATURES if c in X.columns],
+        cat_features=[X.columns.get_loc(c) for c in CAT_FEATURES if c in X.columns],
     )
+
+    print("Категориальные колонки:", [c for c in CAT_FEATURES if c in X.columns])
+    print("Все колонки X:", X.columns.tolist())
 
     model.fit(X_train, y_train, eval_set=(X_test, y_test), use_best_model=True)
 

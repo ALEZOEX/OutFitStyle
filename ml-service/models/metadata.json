@@ -1,91 +1,41 @@
 {
   "format": "catboost_cbm",
-  "model_kind": "fashion_classifier",
-  "model_path": "fashion_model.cbm",
-  "version": "20260227_210635",
-  "feature_columns": [
-    "gender",
+  "model_kind": "classifier",
+  "cbm_path": "model.cbm",
+  "version": "20260331_025349",
+  "cat_features": [
     "weather_condition",
-    "location",
-    "activity",
-    "top",
-    "bottom",
-    "outerwear",
-    "footwear",
-    "temperature",
-    "humidity",
-    "duration"
+    "season",
+    "age_range",
+    "style_preference",
+    "temperature_sensitivity",
+    "formality_preference",
+    "item_name",
+    "category",
+    "item_style"
   ],
-  "label_encoders": {
-    "gender": [
-      "Laki-laki",
-      "Perempuan"
-    ],
-    "weather_condition": [
-      "Berawan",
-      "Cerah",
-      "Gerimis",
-      "Hujan",
-      "Mendung"
-    ],
-    "location": [
-      "Indoor",
-      "Outdoor"
-    ],
-    "activity": [
-      "Bekerja",
-      "Berjalan",
-      "Kondangan",
-      "Olahraga",
-      "Santai"
-    ],
-    "top": [
-      "Blouse",
-      "Jas",
-      "Kaos",
-      "Kemeja"
-    ],
-    "bottom": [
-      "Celana Olahraga",
-      "Celana Panjang",
-      "Celana Pendek",
-      "Legging",
-      "Rok"
-    ],
-    "outerwear": [
-      "Hoodie",
-      "Jaket",
-      "Tanpa Pakaian Luar"
-    ],
-    "footwear": [
-      "Sandal",
-      "Sepatu Bot",
-      "Sepatu Hak",
-      "Sepatu Pantofel",
-      "Sneakers"
-    ]
-  },
+  "feature_columns": [
+    "temperature",
+    "feels_like",
+    "humidity",
+    "wind_speed",
+    "weather_condition",
+    "season",
+    "age_range",
+    "style_preference",
+    "temperature_sensitivity",
+    "formality_preference",
+    "item_name",
+    "category",
+    "min_temp",
+    "max_temp",
+    "warmth_level",
+    "formality_level",
+    "item_style"
+  ],
   "metrics": {
-    "accuracy": 0.9525,
-    "auc_roc": 0.989425,
-    "precision": 0.95662100456621,
-    "recall": 0.9525,
-    "f1_score": 0.9523925857716472
+    "auc": 0.99981099137519,
+    "logloss": 0.05092598370117785
   },
-  "inference_times": {
-    "single_p50_ms": 0.5049000028520823,
-    "single_p95_ms": 0.6508000078611076,
-    "single_p99_ms": 0.7605999999213964,
-    "batch_p50_ms": 0.8749999979045242,
-    "batch_p95_ms": 1.0560000082477927,
-    "batch_p99_ms": 2.9332999838516116
-  },
-  "dataset": {
-    "name": "Season Fashion Dataset (multilabel)",
-    "source": "Kaggle",
-    "language": "Indonesian",
-    "samples": 1001,
-    "negative_samples_generated": 1000
-  },
-  "created_at": "2026-02-27T21:06:35.519813"
+  "created_at": "2026-03-31T02:53:49.387641"
 }

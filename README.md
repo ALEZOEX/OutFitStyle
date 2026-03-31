@@ -13,14 +13,14 @@
 
 ## Технологии
 
-| Компонент | Стек |
-|-----------|------|
-| Backend API | Go + Gorilla Mux |
-| ML-сервис | Python + FastAPI + CatBoost |
-| Клиент | Flutter + Riverpod |
-| База данных | PostgreSQL |
-| Кэш | Redis |
-| Деплой | Docker, k3s, GitHub Actions |
+| Компонент   | Стек                        |
+|-------------|-----------------------------|
+| Backend API | Go + Gorilla Mux            |
+| ML-сервис   | Python + FastAPI + CatBoost |
+| Клиент      | Flutter + Riverpod          |
+| База данных | PostgreSQL                  |
+| Кэш         | Redis                       |
+| Деплой      | Docker, k3s, GitHub Actions |
 
 ## Архитектура
 
@@ -38,13 +38,13 @@ Flutter App ──► Go API ──► ML Service (CatBoost)
 - **Разделение:** 80% train / 20% test
 
 **Метрики на тесте:**
-| Метрика | Значение |
-|---------|----------|
-| Accuracy | 95.25% |
-| AUC-ROC | 98.94% |
-| Precision | 95.66% |
-| Recall | 95.25% |
-| F1-Score | 95.24% |
+| Метрика   | Значение |
+|-----------|----------|
+| Accuracy  | 95.25%   |
+| AUC-ROC   | 98.94%   |
+| Precision | 95.66%   |
+| Recall    | 95.25%   |
+| F1-Score  | 95.24%   |
 
 ## Запуск
 
