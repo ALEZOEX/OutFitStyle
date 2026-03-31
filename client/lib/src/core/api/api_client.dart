@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:outfitstyle_client/src/core/api/api_config.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:developer' as developer;
 import '../../utils/logger.dart';
 import 'web_token_storage_selector.dart';
@@ -76,18 +77,18 @@ class ApiClient {
               name: 'AuthDebug',
             );
 
-            // Приоритет 1: Backend Access Token из SharedPreferences
-            accessToken = _sharedPreferences?.getString('access_token');
-            
-            // Приоритет 2: Чтение напрямую из localStorage (для Web)
-            if (accessToken == null || accessToken.isEmpty) {
+            // 🔑 КРИТИЧНО: На Web читаем ТОЛЬКО из localStorage (SharedPreferences не работает)
+            if (kIsWeb) {
               accessToken = _getAccessTokenFromLocalStorage();
               if (accessToken != null && accessToken.isNotEmpty) {
                 developer.log(
-                  '🔑 [AUTH DEBUG] ✅ Token read from localStorage (Web fallback)',
+                  '🔑 [AUTH DEBUG] ✅ Token read from localStorage (Web)',
                   name: 'AuthDebug',
                 );
               }
+            } else {
+              // Mobile/Desktop: читаем из SharedPreferences
+              accessToken = _sharedPreferences?.getString('access_token');
             }
 
             if (accessToken != null && accessToken.isNotEmpty) {
@@ -371,7 +372,7 @@ class ApiClient {
           // Если 401 — логируем для отладки
           if (statusCode == 401) {
             final authTimestamp = DateTime.now().toIso8601String();
-            
+
             developer.log(
               '[$authTimestamp] [ApiClient] [Auth] ╔═══════════════════════════════════════════',
               name: 'ApiClient',
@@ -387,7 +388,7 @@ class ApiClient {
               name: 'ApiClient',
               level: 1000,
             );
-            
+
             AppLogger.error(
               '[$authTimestamp] [ApiClient] 401 ошибка на ${err.requestOptions.path}',
             );
@@ -418,7 +419,7 @@ class ApiClient {
                 '[$authTimestamp] [ApiClient] 401 ошибка: access_token есть, но не валиден (возможно истёк)',
               );
             }
-            
+
             // Проверяем токен в localStorage (для Web)
             final localStorageToken = _getAccessTokenFromLocalStorage();
             if (localStorageToken != null && localStorageToken.isNotEmpty) {
@@ -441,7 +442,7 @@ class ApiClient {
                 level: 1000,
               );
             }
-            
+
             developer.log(
               '[$authTimestamp] [ApiClient] [Auth] ╚═══════════════════════════════════════════',
               name: 'ApiClient',
