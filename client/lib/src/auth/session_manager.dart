@@ -513,8 +513,23 @@ class SessionManager {
         );
         await _sharedPreferences.setString('access_token', accessToken);
 
-        // Дополнительно сохраняем в localStorage для Web (fallback для api_client.dart)
+        // 🔑 КРИТИЧНО: Сохраняем в localStorage ДО навигации (Web)
         saveTokenToLocalStorage(accessToken);
+        
+        // 🔑 КРИТИЧНО: Верификация что токен сохранён в localStorage
+        await Future.delayed(const Duration(milliseconds: 200));
+        final verifiedToken = getAccessTokenFromLocalStorage();
+        if (verifiedToken == null || verifiedToken.isEmpty) {
+          AppLogger.error(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] 🔴 CRITICAL: Token NOT saved to localStorage after delay!',
+          );
+          saveTokenToLocalStorage(accessToken);
+          await Future.delayed(const Duration(milliseconds: 100));
+        } else {
+          AppLogger.info(
+            '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ Token verified in localStorage (${verifiedToken.length} chars)',
+          );
+        }
 
         AppLogger.info(
           '[$backendTimestamp] [Auth] [GoogleSignIn] Access token сохранён для Google пользователя: ${_maskEmail(user.email ?? 'unknown')}',
