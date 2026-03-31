@@ -115,6 +115,11 @@ func (h *WardrobeHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Security: items never null, return empty slice instead
+	if items == nil {
+		items = []domain.WardrobeItem{}
+	}
+
 	resp.Success(w, map[string]any{
 		"items": items,
 		"pagination": domain.Pagination{

@@ -31,8 +31,7 @@ class RecommendationsRemoteDataSource
     final response = await _apiClient.get('/users/$userId/recommendations');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items =
-          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      final items = data['recommendations'] as List<dynamic>? ?? [];
       return items
           .map(
             (item) =>

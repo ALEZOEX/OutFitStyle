@@ -189,6 +189,11 @@ func (h *RecommendationHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Security: recommendations never null, return empty slice instead
+	if list == nil {
+		list = []domain.RecommendationRecord{}
+	}
+
 	resp.Success(w, map[string]any{
 		"recommendations": list,
 		"pagination": domain.Pagination{
