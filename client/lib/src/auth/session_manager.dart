@@ -456,42 +456,11 @@ class SessionManager {
         '[$backendTimestamp] [Auth] [GoogleSignIn] ╔═══════════════════════════════════════════',
         name: 'GoogleSignIn',
       );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ PRE-API CALL DEBUG',
-        name: 'GoogleSignIn',
-      );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Endpoint: POST /api/v1/auth/google',
-        name: 'GoogleSignIn',
-      );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Base URL: ${ApiConfig.baseUrl}',
-        name: 'GoogleSignIn',
-      );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ Full URL: ${ApiConfig.baseUrl}/api/v1/auth/google',
-        name: 'GoogleSignIn',
-      );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token length: ${idToken.length}',
-        name: 'GoogleSignIn',
-      );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ id_token preview: ${idToken.substring(0, idToken.length > 50 ? 50 : idToken.length)}...',
-        name: 'GoogleSignIn',
-      );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient instance: $_apiClient',
-        name: 'GoogleSignIn',
-      );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ║ _apiClient type: ${_apiClient.runtimeType}',
-        name: 'GoogleSignIn',
-      );
-      developer.log(
-        '[$backendTimestamp] [Auth] [GoogleSignIn] ╚═══════════════════════════════════════════',
-        name: 'GoogleSignIn',
-      );
+      // 🖨️ PRINT для отладки (видно в консоли браузера)
+      print('🔑 [GOOGLE SIGN-IN] POST /api/v1/auth/google');
+      print('🔑 [GOOGLE SIGN-IN] Base URL: ${ApiConfig.baseUrl}');
+      print('🔑 [GOOGLE SIGN-IN] id_token length: ${idToken.length}');
+      print('🔑 [GOOGLE SIGN-IN] Calling _apiClient.post()...');
 
       AppLogger.debug(
         '[$backendTimestamp] [Auth] [GoogleSignIn] Отправка запроса на POST /api/v1/auth/google',
