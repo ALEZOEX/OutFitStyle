@@ -115,8 +115,9 @@ func (v *importValidator) ValidateBatch(ctx context.Context, items []*ClothingIt
 // GenerateReport creates a validation report file
 func (v *importValidator) GenerateReport(report *ValidationReport, outputPath string) error {
 	// Ensure the output directory exists
+	// G301: Используем 0750 вместо 0755 для безопасности
 	dir := filepath.Dir(outputPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 

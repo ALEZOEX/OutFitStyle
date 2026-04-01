@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -36,7 +37,18 @@ func NewFirebaseAdminClient(ctx context.Context, logger *zap.Logger) (*FirebaseA
 			return nil, err
 		}
 
-		credentialsBytes, err := os.ReadFile(absPath)
+		// G304: Используем os.Root для ограничения доступа к файлам
+		root := os.DirFS(".")
+		file, err := root.Open(credentialsPath)
+		if err != nil {
+			logger.Error("firebase: failed to open credentials file",
+				zap.String("path", absPath),
+				zap.Error(err))
+			return nil, err
+		}
+		defer file.(interface{ Close() error }).Close()
+
+		credentialsBytes, err := io.ReadAll(file)
 		if err != nil {
 			logger.Error("firebase: failed to read credentials file",
 				zap.String("path", absPath),

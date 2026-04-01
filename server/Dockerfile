@@ -22,14 +22,15 @@ RUN go mod tidy && \
     CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate cmd/migrate/main.go
 
 # Второй этап - минимальный образ
-FROM alpine:latest
+FROM alpine:3.23.4
 
 # Установить локаль
 ENV LANG=ru_RU.UTF-8
 ENV LC_ALL=ru_RU.UTF-8
 
-# Установить ca-certificates для HTTPS
-RUN apk --no-cache add ca-certificates
+# Установить ca-certificates для HTTPS и обновить zlib
+RUN apk --no-cache add ca-certificates && \
+    apk upgrade --no-cache zlib
 
 WORKDIR /app/
 

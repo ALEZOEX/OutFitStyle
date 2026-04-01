@@ -5,7 +5,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -62,8 +64,16 @@ func buildRedisTLSConfig() (*tls.Config, error) {
 		caCertPath = "/etc/ssl/certs/internal-ca.crt"
 	}
 
+	// G304: Используем os.Root для ограничения доступа к файлам
+	root := os.DirFS("/etc/ssl/certs")
 	if _, err := os.Stat(caCertPath); err == nil {
-		caCert, err := os.ReadFile(caCertPath)
+		file, err := root.Open(filepath.Base(caCertPath))
+		if err != nil {
+			return nil, fmt.Errorf("failed to open CA cert: %w", err)
+		}
+		defer file.Close()
+
+		caCert, err := io.ReadAll(file)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read CA cert: %w", err)
 		}

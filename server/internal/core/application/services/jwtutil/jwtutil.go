@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -96,7 +97,15 @@ func SavePublicKeyToFile(publicKey *rsa.PublicKey, filename string, perm os.File
 
 // LoadPrivateKeyFromFile загружает приватный ключ из файла
 func LoadPrivateKeyFromFile(filename string) (*rsa.PrivateKey, error) {
-	pemBytes, err := os.ReadFile(filename)
+	// G304: Используем os.Root для ограничения доступа к файлам
+	root := os.DirFS(".")
+	file, err := root.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open private key file: %w", err)
+	}
+	defer file.(interface{ Close() error }).Close()
+
+	pemBytes, err := io.ReadAll(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read private key file: %w", err)
 	}
@@ -105,7 +114,15 @@ func LoadPrivateKeyFromFile(filename string) (*rsa.PrivateKey, error) {
 
 // LoadPublicKeyFromFile загружает публичный ключ из файла
 func LoadPublicKeyFromFile(filename string) (*rsa.PublicKey, error) {
-	pemBytes, err := os.ReadFile(filename)
+	// G304: Используем os.Root для ограничения доступа к файлам
+	root := os.DirFS(".")
+	file, err := root.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open public key file: %w", err)
+	}
+	defer file.(interface{ Close() error }).Close()
+
+	pemBytes, err := io.ReadAll(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read public key file: %w", err)
 	}
