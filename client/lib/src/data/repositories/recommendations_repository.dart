@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:outfitstyle_client/src/core/api/api_client.dart';
 import '../../domain/entities/outfit_recommendation.dart';
 import '../../domain/repositories/i_recommendations_repository.dart';
+import '../../utils/logger.dart';
 
 /// Репозиторий рекомендаций
 class RecommendationsRepository implements IRecommendationsRepository {
@@ -13,11 +14,14 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<List<OutfitRecommendation>> getUserRecommendations(
     String userId,
   ) async {
+    AppLogger.info('[RecommendationsRepository] getUserRecommendations: userId=$userId');
     final response = await apiClient.get('/api/v1/recommendations');
+    AppLogger.info('[RecommendationsRepository] getUserRecommendations response: ${response.statusCode}');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items =
           data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+      AppLogger.info('[RecommendationsRepository] Получено ${items.length} рекомендаций');
       return items
           .map(
             (item) =>
@@ -203,6 +207,11 @@ class RecommendationsRepository implements IRecommendationsRepository {
     required List<String> preferredStyles,
     required String userId,
   }) async {
+    AppLogger.info('[RecommendationsRepository] generateRecommendation вызван');
+    AppLogger.info('[RecommendationsRepository] latitude: $latitude, longitude: $longitude');
+    AppLogger.info('[RecommendationsRepository] occasion: $occasion, preferredStyles: $preferredStyles');
+    AppLogger.info('[RecommendationsRepository] userId: $userId, excludedItems: $excludedItems');
+    
     final response = await apiClient.post(
       '/api/v1/recommendations',
       data: {
@@ -211,9 +220,14 @@ class RecommendationsRepository implements IRecommendationsRepository {
         'occasion': occasion,
       },
     );
+    
+    AppLogger.info('[RecommendationsRepository] generateRecommendation response: ${response.statusCode}');
+    AppLogger.info('[RecommendationsRepository] Response data: ${response.data}');
+    
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
       final recData = data['recommendation'] as Map<String, dynamic>? ?? data;
+      AppLogger.info('[RecommendationsRepository] Рекомендация: $recData');
       return OutfitRecommendation.fromJson(recData);
     }
     throw RecommendationsException('Не удалось сгенерировать рекомендацию');

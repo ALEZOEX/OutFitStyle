@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../recommendations/presentation/providers/recommendations_provider.dart';
 import '../../../presentation/providers/weather_provider.dart';
 import '../../../theme/app_theme.dart';
+import '../../../utils/logger.dart';
 
 /// Экран генератора образов — создание персональной рекомендации
 class GeneratorScreen extends ConsumerStatefulWidget {
@@ -493,6 +494,10 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
   }
 
   Future<void> _generateRecommendation(BuildContext context) async {
+    AppLogger.info('[GeneratorScreen] _generateRecommendation вызван');
+    AppLogger.info('[GeneratorScreen] _selectedOccasion: $_selectedOccasion');
+    AppLogger.info('[GeneratorScreen] _useCurrentWeather: $_useCurrentWeather');
+    
     final notifier = ref.read(recommendationsProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
 
@@ -503,20 +508,25 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           weatherProvider((lat: 55.7558, lon: 37.6173)).future,
         );
         temperature = weatherAsync.temperature ?? temperature;
+        AppLogger.info('[GeneratorScreen] Температура из погоды: $temperature');
       } catch (e) {
-        // Игнорируем ошибку, используем дефолтную
+        AppLogger.warning('[GeneratorScreen] Ошибка получения погоды: $e');
       }
     }
 
+    AppLogger.info('[GeneratorScreen] Вызов notifier.generateRecommendation...');
     final result = await notifier.generateRecommendation(
       temperature: temperature,
       weatherCondition: 'sunny',
       occasion: _selectedOccasion,
     );
+    
+    AppLogger.info('[GeneratorScreen] Результат: $result');
 
     if (!context.mounted) return;
 
     if (result != null) {
+      AppLogger.info('[GeneratorScreen] Успешная генерация, показываю SnackBar');
       messenger.showSnackBar(
         SnackBar(
           content: Row(
