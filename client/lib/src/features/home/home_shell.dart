@@ -173,8 +173,8 @@ class HomeShell extends StatelessWidget {
           body,
           // Floating glass bottom bar
           Positioned(
-            left: 24,
-            right: 24,
+            left: 28,
+            right: 28,
             bottom: 16,
             child: _GlassBottomBar(
               currentIndex: currentIndex,
@@ -232,7 +232,7 @@ class _GlassBottomBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
-          height: 68,
+          height: 62,
           decoration: BoxDecoration(
             color: isDark
                 ? const Color(0xFF1F2937).withValues(alpha: 0.4) // gray-800/40
