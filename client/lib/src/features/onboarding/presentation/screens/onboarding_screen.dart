@@ -425,7 +425,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               decoration: BoxDecoration(
                 color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: AppRadius.radiusMd,
-                border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.success.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
@@ -789,8 +791,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppColors.success.shade400,
-                      AppColors.success.shade600,
+                      AppColors.success.withValues(alpha: 0.8),
+                      AppColors.success,
                     ],
                   ),
                   borderRadius: BorderRadius.circular(80),
