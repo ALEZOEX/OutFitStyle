@@ -178,9 +178,9 @@ class HomeShell extends StatelessWidget {
             bottom: 16,
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
+                constraints: const BoxConstraints(maxWidth: 480),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: _GlassBottomBar(
                     currentIndex: currentIndex,
                     onTap: (index) =>

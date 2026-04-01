@@ -76,34 +76,6 @@ class _WeatherSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          child: Row(
-            children: [
-              Icon(Icons.location_on, color: AppColors.primary, size: 18),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                userLocation.cityName ?? 'Город не выбран',
-                style: AppTypography.labelLarge(context),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xs,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text('Изменить', style: TextStyle(fontSize: 12)),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-
         weatherAsync.when(
           data: (weather) => WeatherCard(
             weatherData: weather,
