@@ -367,7 +367,7 @@ class _OutfitOfDaySection extends StatelessWidget {
             title: 'Нет рекомендаций',
             subtitle: 'Сгенерируйте персональный образ',
             actionLabel: 'Сгенерировать',
-            onAction: () => context.go('/generator'),
+            onAction: () => context.push('/generator'),
           ),
         ),
       ),
