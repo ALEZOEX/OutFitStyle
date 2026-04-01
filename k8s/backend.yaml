@@ -129,7 +129,6 @@ spec:
                 secretKeyRef:
                   name: outfitstyle-secrets
                   key: firebase-credentials-json
-              optional: true
             - name: FIREBASE_CREDENTIALS_PATH
               value: "/etc/firebase/serviceAccountKey.json"
           volumeMounts:
@@ -161,7 +160,6 @@ spec:
         - name: firebase-credentials
           secret:
             secretName: firebase-credentials-secret
-            optional: true
         # CA сертификат из cert-manager (общий для postgres и redis)
         - name: internal-ca
           secret:
@@ -169,7 +167,6 @@ spec:
             items:
               - key: ca.crt
                 path: ca.crt
-            optional: false
 ---
 apiVersion: v1
 kind: Service
