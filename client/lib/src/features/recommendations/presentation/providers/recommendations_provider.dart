@@ -144,11 +144,12 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
       final response = await _apiClient.get('/api/v1/recommendations');
 
       if (response.statusCode == 200) {
-        final data =
-            jsonDecode(response.data.toString()) as Map<String, dynamic>;
+        final rawData = response.data is Map
+            ? response.data as Map<String, dynamic>
+            : jsonDecode(response.data.toString()) as Map<String, dynamic>;
         final items =
-            data['recommendations'] as List<dynamic>? ??
-            data['items'] as List<dynamic>? ??
+            rawData['recommendations'] as List<dynamic>? ??
+            rawData['items'] as List<dynamic>? ??
             [];
 
         final recommendations = items
@@ -257,9 +258,14 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data is Map
+        final rawData = response.data is Map
             ? response.data as Map<String, dynamic>
             : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+
+        // Backend возвращает {"recommendation": {...}, ...} или сразу объект
+        final data = rawData.containsKey('recommendation')
+            ? rawData['recommendation'] as Map<String, dynamic>
+            : rawData;
 
         AppLogger.info('[RecommendationsProvider] Распарсенные данные: $data');
         final recommendation = OutfitRecommendation.fromJson(data);

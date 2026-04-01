@@ -58,16 +58,15 @@ class WardrobeApiService {
     final response = await _apiClient.get('/api/v1/wardrobe', params: params);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final itemsData = data['items'] as List<dynamic>? ?? [];
-      final pagination = data['pagination'] as Map<String, dynamic>?;
+      final rawData = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      final itemsData = rawData['items'] as List<dynamic>? ?? [];
+      final pagination = rawData['pagination'] as Map<String, dynamic>?;
 
-      final items =
-          itemsData
-              .map(
-                (item) => WardrobeItem.fromJson(item as Map<String, dynamic>),
-              )
-              .toList();
+      final items = itemsData
+          .map((item) => WardrobeItem.fromJson(item as Map<String, dynamic>))
+          .toList();
 
       return WardrobeListResponse(
         items: items,
@@ -203,10 +202,9 @@ class WardrobeApiService {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
       return WornResponse(
         wearCount: data['wear_count'] as int? ?? 0,
-        lastWornAt:
-            data['last_worn_at'] != null
-                ? DateTime.tryParse(data['last_worn_at'] as String)
-                : null,
+        lastWornAt: data['last_worn_at'] != null
+            ? DateTime.tryParse(data['last_worn_at'] as String)
+            : null,
       );
     } else {
       throw WardrobeApiException(

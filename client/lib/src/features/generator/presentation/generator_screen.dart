@@ -92,9 +92,29 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     final state = ref.watch(recommendationsProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Генератор'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          onPressed: () => context.pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, size: 20),
+            onPressed: () {
+              setState(() {
+                _selectedOccasion = 'casual';
+                _selectedActivity = 'everyday';
+                _temperatureOverride = 20;
+                _useCurrentWeather = true;
+              });
+            },
+            tooltip: 'Сбросить',
+          ),
+        ],
+      ),
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _buildHeader(context)),
           SliverToBoxAdapter(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -130,58 +150,6 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xxl,
-        AppSpacing.lg,
-        AppSpacing.xxl,
-        AppSpacing.lg,
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
-            decoration: BoxDecoration(
-              gradient: AppGradients.primary,
-              borderRadius: AppRadius.radiusMd,
-            ),
-            child: const Icon(
-              Icons.auto_awesome,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Генератор', style: AppTypography.headlineSmall(context)),
-                Text(
-                  'Подберите образ',
-                  style: AppTypography.bodySmall(context),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh, size: 20),
-            onPressed: () {
-              setState(() {
-                _selectedOccasion = 'casual';
-                _selectedActivity = 'everyday';
-                _temperatureOverride = 20;
-                _useCurrentWeather = true;
-              });
-            },
-            tooltip: 'Сбросить',
           ),
         ],
       ),
