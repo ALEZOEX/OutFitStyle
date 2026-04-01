@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/outfit_recommendation.dart';
 import '../../../ui/widgets/max_width_container.dart';
+import '../../../theme/app_theme.dart';
 
 /// Экран деталей образа
 class OutfitDetailsScreen extends ConsumerStatefulWidget {
@@ -21,8 +22,6 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Для демонстрации - моковые данные
-    // В реальности нужно загрузить outfit по ID через провайдер
     final outfit = OutfitRecommendation(
       id: widget.outfitId,
       title: 'Повседневный образ',
@@ -51,53 +50,43 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
       ),
       body: ResponsiveMaxWidthContainer(
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           children: [
-            // Заголовок
             Text(
               outfit.title ?? 'Без названия',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTypography.headlineSmall(context),
             ),
             if (outfit.description != null &&
                 outfit.description!.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 outfit.description!,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: AppTypography.bodyMedium(context),
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
 
-            // Погода
-            _buildWeatherInfo(theme, outfit),
-            const SizedBox(height: 24),
+            _buildWeatherInfo(context, outfit),
+            const SizedBox(height: AppSpacing.xxl),
 
-            // Предметы
-            _buildItemsList(theme, outfit),
-            const SizedBox(height: 24),
+            _buildItemsList(context, outfit),
+            const SizedBox(height: AppSpacing.xxl),
 
-            // Дата создания
             if (outfit.createdAt != null) ...[
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: AppRadius.radiusLg,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Информация',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTypography.labelLarge(context),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     _buildInfoRow(
                       'Создан',
                       '${outfit.createdAt!.day}.${outfit.createdAt!.month}.${outfit.createdAt!.year}',
@@ -109,26 +98,23 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
             ],
 
-            // Действия
-            _buildActions(outfit),
+            _buildActions(context, outfit),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWeatherInfo(
-    ThemeData theme,
-    OutfitRecommendation outfit,
-  ) {
+  Widget _buildWeatherInfo(BuildContext context, OutfitRecommendation outfit) {
+    final theme = Theme.of(context);
     final temperature = outfit.temperature;
     final weatherCondition = outfit.weatherCondition;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -138,7 +124,7 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
             theme.colorScheme.secondaryContainer,
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.radiusLg,
       ),
       child: Row(
         children: [
@@ -147,7 +133,7 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
             size: 48,
             color: theme.colorScheme.onPrimaryContainer,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.lg),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -160,18 +146,17 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
               const SizedBox(height: 4),
               Text(
                 temperature != null ? '${temperature.round()}°C' : '—',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTypography.headlineSmall(
+                  context,
+                ).copyWith(color: theme.colorScheme.onPrimaryContainer),
               ),
               if (weatherCondition != null) ...[
                 const SizedBox(height: 4),
                 Text(
                   _getWeatherName(weatherCondition),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
+                  style: AppTypography.bodyMedium(
+                    context,
+                  ).copyWith(color: theme.colorScheme.onPrimaryContainer),
                 ),
               ],
             ],
@@ -181,72 +166,68 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
     );
   }
 
-  Widget _buildItemsList(
-    ThemeData theme,
-    OutfitRecommendation outfit,
-  ) {
+  Widget _buildItemsList(BuildContext context, OutfitRecommendation outfit) {
+    final theme = Theme.of(context);
     final items = outfit.recommendedItems ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Предметы в образе',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
+        Text('Предметы в образе', style: AppTypography.headlineSmall(context)),
+        const SizedBox(height: AppSpacing.lg),
         if (items.isEmpty)
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppSpacing.xxl),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.grey100,
+              borderRadius: AppRadius.radiusMd,
             ),
-            child: const Center(
+            child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.checkroom_outlined, size: 48, color: Colors.grey),
-                  SizedBox(height: 8),
-                  Text('Нет предметов'),
+                  Icon(
+                    Icons.checkroom_outlined,
+                    size: 48,
+                    color: AppColors.grey400,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  const Text('Нет предметов'),
                 ],
               ),
             ),
           )
         else
-          ...items.map((itemId) => _buildItemRow(theme, itemId)),
+          ...items.map((itemId) => _buildItemRow(context, itemId)),
       ],
     );
   }
 
-  Widget _buildItemRow(ThemeData theme, String itemId) {
+  Widget _buildItemRow(BuildContext context, String itemId) {
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: AppRadius.radiusSm,
             ),
             child: Icon(
               Icons.checkroom,
-              color: Colors.grey[500],
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Предмет $itemId',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ],
+            child: Text(
+              'Предмет $itemId',
+              style: AppTypography.bodyMedium(
+                context,
+              ).copyWith(fontWeight: FontWeight.w500),
             ),
           ),
           IconButton(
@@ -260,25 +241,31 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
   }
 
   Widget _buildInfoRow(String label, String value) {
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: TextStyle(color: Colors.grey[600]),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.w500),
+            style: AppTypography.bodyMedium(
+              context,
+            ).copyWith(fontWeight: FontWeight.w500),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActions(OutfitRecommendation outfit) {
+  Widget _buildActions(BuildContext context, OutfitRecommendation outfit) {
     return Column(
       children: [
         SizedBox(
@@ -288,11 +275,11 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
             icon: const Icon(Icons.copy),
             label: const Text('Использовать как шаблон'),
             style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -300,8 +287,9 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
             icon: const Icon(Icons.flag_outlined),
             label: const Text('Пожаловаться'),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              foregroundColor: Colors.red,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+              foregroundColor: AppColors.error,
+              side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
             ),
           ),
         ),
@@ -316,54 +304,42 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
   }
 
   void _saveOutfit(OutfitRecommendation outfit) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Образ сохранён')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Образ сохранён')));
   }
 
   void _useAsTemplate(OutfitRecommendation outfit) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Открывается конструктор...')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Открывается конструктор...')));
   }
 
   void _reportOutfit(OutfitRecommendation outfit) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Функция жалоб в разработке')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Функция жалоб в разработке')));
   }
 
   IconData _getWeatherIcon(String? condition) {
-    switch (condition) {
-      case 'clear':
-        return Icons.wb_sunny;
-      case 'cloudy':
-        return Icons.cloud;
-      case 'rain':
-        return Icons.water_drop;
-      case 'snow':
-        return Icons.ac_unit;
-      case 'thunderstorm':
-        return Icons.thunderstorm;
-      default:
-        return Icons.wb_sunny;
-    }
+    return switch (condition) {
+      'clear' => Icons.wb_sunny,
+      'cloudy' => Icons.cloud,
+      'rain' => Icons.water_drop,
+      'snow' => Icons.ac_unit,
+      'thunderstorm' => Icons.thunderstorm,
+      _ => Icons.wb_sunny,
+    };
   }
 
   String _getWeatherName(String? condition) {
-    switch (condition) {
-      case 'clear':
-        return 'Ясно';
-      case 'cloudy':
-        return 'Облачно';
-      case 'rain':
-        return 'Дождь';
-      case 'snow':
-        return 'Снег';
-      case 'thunderstorm':
-        return 'Гроза';
-      default:
-        return condition ?? '—';
-    }
+    return switch (condition) {
+      'clear' => 'Ясно',
+      'cloudy' => 'Облачно',
+      'rain' => 'Дождь',
+      'snow' => 'Снег',
+      'thunderstorm' => 'Гроза',
+      _ => condition ?? '—',
+    };
   }
 }
