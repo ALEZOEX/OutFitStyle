@@ -44,29 +44,26 @@ class NotificationDto {
       title: json['title'] as String,
       body: json['body'] as String?,
       imageUrl: json['image_url'] as String?,
-      data:
-          json['data'] != null ? Map<String, dynamic>.from(json['data']) : null,
+      data: json['data'] != null
+          ? Map<String, dynamic>.from(json['data'])
+          : null,
       actionType: json['action_type'] as String?,
-      actionData:
-          json['action_data'] != null
-              ? Map<String, dynamic>.from(json['action_data'])
-              : null,
+      actionData: json['action_data'] != null
+          ? Map<String, dynamic>.from(json['action_data'])
+          : null,
       isRead: json['is_read'] as bool? ?? false,
-      readAt:
-          json['read_at'] != null
-              ? DateTime.parse(json['read_at'] as String)
-              : null,
+      readAt: json['read_at'] != null
+          ? DateTime.parse(json['read_at'] as String)
+          : null,
       pushSent: json['push_sent'] as bool? ?? false,
-      pushSentAt:
-          json['push_sent_at'] != null
-              ? DateTime.parse(json['push_sent_at'] as String)
-              : null,
+      pushSentAt: json['push_sent_at'] != null
+          ? DateTime.parse(json['push_sent_at'] as String)
+          : null,
       pushError: json['push_error'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
-      expiresAt:
-          json['expires_at'] != null
-              ? DateTime.parse(json['expires_at'] as String)
-              : null,
+      expiresAt: json['expires_at'] != null
+          ? DateTime.parse(json['expires_at'] as String)
+          : null,
     );
   }
 
@@ -164,14 +161,20 @@ class NotificationsResponse {
   });
 
   factory NotificationsResponse.fromJson(Map<String, dynamic> json) {
-    final notificationsJson = json['notifications'] as List<dynamic>;
-    final pagination = json['pagination'] as Map<String, dynamic>;
+    final notificationsRaw = json['notifications'];
+    final notificationsJson = notificationsRaw is List
+        ? notificationsRaw
+        : <dynamic>[];
+    final paginationRaw = json['pagination'];
+    final pagination = paginationRaw is Map<String, dynamic>
+        ? paginationRaw
+        : <String, dynamic>{};
 
     return NotificationsResponse(
-      notifications:
-          notificationsJson
-              .map((n) => NotificationDto.fromJson(n as Map<String, dynamic>))
-              .toList(),
+      notifications: notificationsJson
+          .whereType<Map<String, dynamic>>()
+          .map((n) => NotificationDto.fromJson(n))
+          .toList(),
       unreadCount: json['unread_count'] as int? ?? 0,
       page: pagination['page'] as int? ?? 1,
       limit: pagination['limit'] as int? ?? 20,

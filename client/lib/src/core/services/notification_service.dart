@@ -58,10 +58,9 @@ class NotificationData {
         orElse: () => NotificationType.system,
       ),
       timestamp: DateTime.parse(json['timestamp']),
-      payload:
-          json['payload'] != null
-              ? Map<String, dynamic>.from(json['payload'])
-              : null,
+      payload: json['payload'] != null
+          ? Map<String, dynamic>.from(json['payload'])
+          : null,
       read: json['read'] ?? false,
     );
   }
@@ -123,20 +122,18 @@ class NotificationSettings {
       enablePushNotifications: json['enablePushNotifications'] ?? true,
       enableWeatherAlerts: json['enableWeatherAlerts'] ?? true,
       enableOutfitRecommendations: json['enableOutfitRecommendations'] ?? true,
-      dailyRecommendationTime:
-          json['dailyRecommendationTime'] != null
-              ? _parseTimeOfDay(json['dailyRecommendationTime'])
-              : null,
+      dailyRecommendationTime: json['dailyRecommendationTime'] != null
+          ? _parseTimeOfDay(json['dailyRecommendationTime'])
+          : null,
       temperatureThreshold:
           (json['temperatureThreshold'] as num?)?.toDouble() ?? 5.0,
     );
   }
 
   Map<String, dynamic> toJson() {
-    final timeString =
-        dailyRecommendationTime != null
-            ? '${dailyRecommendationTime!.hour}:${dailyRecommendationTime!.minute.toString().padLeft(2, '0')}'
-            : null;
+    final timeString = dailyRecommendationTime != null
+        ? '${dailyRecommendationTime!.hour}:${dailyRecommendationTime!.minute.toString().padLeft(2, '0')}'
+        : null;
 
     return {
       'enableLocalNotifications': enableLocalNotifications,
@@ -265,10 +262,15 @@ class FirebaseNotificationService extends NotificationService {
 
   @override
   Future<void> initialize() async {
-    await _initializeLocalNotifications();
-    await _initializePushNotifications();
-    await _loadSettings();
-    await _loadNotifications();
+    try {
+      await _initializeLocalNotifications();
+      await _initializePushNotifications();
+      await _loadSettings();
+      await _loadNotifications();
+    } catch (e) {
+      debugPrint('⚠️ NotificationService initialization failed: $e');
+      // Не блокируем запуск приложения при ошибке инициализации уведомлений
+    }
   }
 
   /// Initialize local notifications
@@ -311,7 +313,9 @@ class FirebaseNotificationService extends NotificationService {
 
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Foreground message received: ${message.notification?.title ?? ''}');
+      debugPrint(
+        'Foreground message received: ${message.notification?.title ?? ''}',
+      );
 
       if (_settings.enablePushNotifications) {
         _processPushNotification(message);
@@ -458,11 +462,10 @@ class FirebaseNotificationService extends NotificationService {
     final prefs = await SharedPreferences.getInstance();
     final notificationsJson = prefs.getStringList('notifications') ?? [];
 
-    _notifications =
-        notificationsJson
-            .map((str) => jsonDecode(str))
-            .map((json) => NotificationData.fromJson(json))
-            .toList();
+    _notifications = notificationsJson
+        .map((str) => jsonDecode(str))
+        .map((json) => NotificationData.fromJson(json))
+        .toList();
 
     notifyListeners();
   }
