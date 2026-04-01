@@ -235,14 +235,14 @@ class ApiClient {
             level: 1000,
             error: err,
           );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 1 onError] Error message: ${err.message}',
-            name: 'ApiClient',
-          );
-          developer.log(
-            '[$timestamp] [ApiClient] [Interceptor 1 onError] Response data: ${err.response?.data ?? 'null'}',
-            name: 'ApiClient',
-          );
+
+          // Авто-очистка токена при 401 Unauthorized
+          if (statusCode == 401) {
+            AppLogger.warning(
+              '[$timestamp] [ApiClient] 401 Unauthorized — авто-очистка токена',
+            );
+            await _clearAuthTokens();
+          }
 
           return handler.next(err);
         },
@@ -588,5 +588,21 @@ class AuthInterceptor extends Interceptor {
 
     // Пробрасываем ошибку дальше (ApiClient.mapError() преобразует в UnauthorizedException)
     handler.next(err);
+  }
+
+  /// Очистка токенов авторизации (SharedPreferences + localStorage на Web)
+  Future<void> _clearAuthTokens() async {
+    try {
+      if (_sharedPreferences != null) {
+        await _sharedPreferences.remove('access_token');
+        await _sharedPreferences.remove('refresh_token');
+        await _sharedPreferences.remove('user_session');
+      }
+      if (kIsWeb) {
+        clearAccessTokenFromLocalStorage();
+      }
+    } catch (e) {
+      AppLogger.warning('[ApiClient] Ошибка очистки токенов: $e');
+    }
   }
 }

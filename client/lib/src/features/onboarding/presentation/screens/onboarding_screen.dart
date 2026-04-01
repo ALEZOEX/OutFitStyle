@@ -113,7 +113,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Город определён: $cityName'),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.success,
               ),
             );
           }
@@ -248,7 +248,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             height: 8,
             decoration: BoxDecoration(
               color: isActive ? activeColor : inactiveColor,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: AppRadius.radiusSm,
             ),
           );
         }),
@@ -274,12 +274,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     ? [AppColors.primaryLight, AppColors.primary]
                     : [AppColors.primary, AppColors.primaryDark],
               ),
-              borderRadius: BorderRadius.circular(40),
+              borderRadius: AppRadius.radiusPill,
               boxShadow: [
                 BoxShadow(
                   color:
                       (isDarkMode ? AppColors.primaryLight : AppColors.primary)
-                          .withOpacity(0.3),
+                          .withValues(alpha: 0.3),
                   blurRadius: 20,
                   spreadRadius: 5,
                 ),
@@ -338,11 +338,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             height: 120,
             decoration: BoxDecoration(
               color: (isDarkMode ? AppColors.primaryLight : AppColors.primary)
-                  .withOpacity(0.1),
-              borderRadius: BorderRadius.circular(60),
+                  .withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(30),
               border: Border.all(
                 color: (isDarkMode ? AppColors.primaryLight : AppColors.primary)
-                    .withOpacity(0.3),
+                    .withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -394,9 +394,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 foregroundColor: isDarkMode
                     ? AppColors.primaryLight
                     : AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusLg),
               ),
             ),
           ),
@@ -415,9 +413,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     ? (isDarkMode ? AppColors.primaryLight : AppColors.primary)
                     : null,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusLg),
               ),
             ),
           ),
@@ -427,17 +423,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green.withOpacity(0.3)),
+                color: AppColors.success.withValues(alpha: 0.1),
+                borderRadius: AppRadius.radiusMd,
+                border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle_rounded, color: Colors.green),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.success,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Город выбран: $cityName',
-                    style: const TextStyle(color: Colors.green),
+                    style: const TextStyle(color: AppColors.success),
                   ),
                 ],
               ),
@@ -466,8 +465,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             height: 80,
             decoration: BoxDecoration(
               color: (isDarkMode ? AppColors.primaryLight : AppColors.primary)
-                  .withOpacity(0.1),
-              borderRadius: BorderRadius.circular(40),
+                  .withValues(alpha: 0.1),
+              borderRadius: AppRadius.radiusPill,
             ),
             child: Icon(
               Icons.palette_rounded,
@@ -495,7 +494,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             '${selectedStyles.length}/3',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: selectedStyles.length >= 3
-                  ? Colors.green
+                  ? AppColors.success
                   : (isDarkMode ? AppColors.primaryLight : AppColors.primary),
               fontWeight: FontWeight.bold,
             ),
@@ -541,7 +540,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           color: isSelected
               ? (isDarkMode ? AppColors.primaryLight : AppColors.primary)
               : (isDarkMode ? AppColors.grey900 : AppColors.grey50),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppRadius.radiusMd,
           border: Border.all(
             color: isSelected
                 ? (isDarkMode ? AppColors.primaryLight : AppColors.primary)
@@ -597,8 +596,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             height: 80,
             decoration: BoxDecoration(
               color: (isDarkMode ? AppColors.primaryLight : AppColors.primary)
-                  .withOpacity(0.1),
-              borderRadius: BorderRadius.circular(40),
+                  .withValues(alpha: 0.1),
+              borderRadius: AppRadius.radiusPill,
             ),
             child: Icon(
               Icons.settings_rounded,
@@ -703,7 +702,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               filled: true,
               fillColor: isDarkMode ? AppColors.grey900 : AppColors.grey100,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: AppRadius.radiusLg,
                 borderSide: BorderSide.none,
               ),
               contentPadding: const EdgeInsets.symmetric(
@@ -736,7 +735,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           color: isSelected
               ? (isDarkMode ? AppColors.primaryLight : AppColors.primary)
               : (isDarkMode ? AppColors.grey900 : AppColors.grey50),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppRadius.radiusMd,
           border: Border.all(
             color: isSelected
                 ? (isDarkMode ? AppColors.primaryLight : AppColors.primary)
@@ -762,7 +761,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               subtitle,
               style: TextStyle(
                 color: isSelected
-                    ? Colors.white.withOpacity(0.9)
+                    ? Colors.white.withValues(alpha: 0.9)
                     : (isDarkMode ? AppColors.grey400 : AppColors.grey500),
                 fontSize: 11,
               ),
@@ -789,12 +788,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Colors.green.shade400, Colors.green.shade600],
+                    colors: [
+                      AppColors.success.shade400,
+                      AppColors.success.shade600,
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(80),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.3),
+                      color: AppColors.success.withValues(alpha: 0.3),
                       blurRadius: 30,
                       spreadRadius: 10,
                     ),
@@ -875,7 +877,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: AppRadius.radiusLg,
                   ),
                 ),
                 child: Text(
@@ -911,9 +913,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   foregroundColor: Colors.white,
                   disabledBackgroundColor:
                       (isDarkMode ? AppColors.primaryLight : AppColors.primary)
-                          .withOpacity(0.5),
+                          .withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: AppRadius.radiusLg,
                   ),
                   elevation: 0,
                 ),
