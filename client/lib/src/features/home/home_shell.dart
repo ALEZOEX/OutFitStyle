@@ -173,9 +173,9 @@ class HomeShell extends StatelessWidget {
           body,
           // Floating glass bottom bar
           Positioned(
-            left: 16,
-            right: 16,
-            bottom: 12,
+            left: 24,
+            right: 24,
+            bottom: 16,
             child: _GlassBottomBar(
               currentIndex: currentIndex,
               onTap: (index) => onNavigationDestinationSelected?.call(index),
@@ -252,38 +252,41 @@ class _GlassBottomBar extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _NavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home_rounded,
-                label: 'Главная',
-                isActive: currentIndex == 0,
-                onTap: () => onTap(0),
-              ),
-              _NavItem(
-                icon: Icons.checkroom_outlined,
-                activeIcon: Icons.checkroom_rounded,
-                label: 'Гардероб',
-                isActive: currentIndex == 1,
-                onTap: () => onTap(1),
-              ),
-              _NavItem(
-                icon: Icons.auto_awesome_outlined,
-                activeIcon: Icons.auto_awesome_rounded,
-                label: 'Рекомендации',
-                isActive: currentIndex == 2,
-                onTap: () => onTap(2),
-              ),
-              _NavItem(
-                icon: Icons.person_outline_rounded,
-                activeIcon: Icons.person_rounded,
-                label: 'Профиль',
-                isActive: currentIndex == 3,
-                onTap: () => onTap(3),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _NavItem(
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: 'Главная',
+                  isActive: currentIndex == 0,
+                  onTap: () => onTap(0),
+                ),
+                _NavItem(
+                  icon: Icons.checkroom_outlined,
+                  activeIcon: Icons.checkroom_rounded,
+                  label: 'Гардероб',
+                  isActive: currentIndex == 1,
+                  onTap: () => onTap(1),
+                ),
+                _NavItem(
+                  icon: Icons.auto_awesome_outlined,
+                  activeIcon: Icons.auto_awesome_rounded,
+                  label: 'Рекомендации',
+                  isActive: currentIndex == 2,
+                  onTap: () => onTap(2),
+                ),
+                _NavItem(
+                  icon: Icons.person_outline_rounded,
+                  activeIcon: Icons.person_rounded,
+                  label: 'Профиль',
+                  isActive: currentIndex == 3,
+                  onTap: () => onTap(3),
+                ),
+              ],
+            ),
           ),
         ),
       ),

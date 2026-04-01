@@ -398,7 +398,7 @@ class _OutfitOfDaySection extends StatelessWidget {
       subtitle:
           'Получите персональный образ на основе погоды и вашего гардероба',
       actionLabel: 'Сгенерировать',
-      onAction: () => context.go('/', extra: 2),
+      onAction: () => context.go('/generator'),
     );
   }
 

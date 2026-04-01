@@ -241,7 +241,14 @@ class ApiClient {
             AppLogger.warning(
               '[$timestamp] [ApiClient] 401 Unauthorized — авто-очистка токена',
             );
-            await _clearAuthTokens();
+            try {
+              await _sharedPreferences?.remove('access_token');
+              await _sharedPreferences?.remove('refresh_token');
+              await _sharedPreferences?.remove('user_session');
+              if (kIsWeb) {
+                clearAccessTokenFromLocalStorage();
+              }
+            } catch (_) {}
           }
 
           return handler.next(err);
@@ -508,20 +515,6 @@ class ApiClient {
       );
     }
     return const ApiException('Неизвестная ошибка');
-  }
-
-  /// Очистка токенов авторизации (SharedPreferences + localStorage на Web)
-  Future<void> _clearAuthTokens() async {
-    try {
-      await _sharedPreferences?.remove('access_token');
-      await _sharedPreferences?.remove('refresh_token');
-      await _sharedPreferences?.remove('user_session');
-      if (kIsWeb) {
-        clearAccessTokenFromLocalStorage();
-      }
-    } catch (e) {
-      AppLogger.warning('[ApiClient] Ошибка очистки токенов: $e');
-    }
   }
 }
 
