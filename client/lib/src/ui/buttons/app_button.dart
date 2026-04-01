@@ -1,158 +1,178 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
 
-/// Custom button widget with different styles
+/// Landing-style button с градиентом и shimmer-эффектом
 class AppButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
-  final ButtonStyle? style;
-  final TextStyle? textStyle;
   final bool isLoading;
   final Widget? leading;
-  final EdgeInsetsGeometry padding;
   final ButtonVariant variant;
+  final double? width;
+  final double height;
 
   const AppButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
-    this.style,
-    this.textStyle,
     this.isLoading = false,
     this.leading,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
     this.variant = ButtonVariant.primary,
-  }) : super(key: key);
+    this.width,
+    this.height = AppSpacing.buttonHeight,
+  });
+
+  const AppButton.small({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+    this.leading,
+    this.variant = ButtonVariant.primary,
+    this.width,
+    this.height = 40,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return SizedBox(
+      width: width ?? double.infinity,
+      height: height,
+      child: switch (variant) {
+        ButtonVariant.primary => _buildGradientButton(context),
+        ButtonVariant.secondary => _buildSecondaryButton(context),
+        ButtonVariant.outlined => _buildOutlinedButton(context),
+        ButtonVariant.text => _buildTextButton(context),
+        ButtonVariant.danger => _buildDangerButton(context),
+      },
+    );
+  }
 
-    ButtonStyle defaultStyle;
-    switch (variant) {
-      case ButtonVariant.primary:
-        defaultStyle = ElevatedButton.styleFrom(
-          backgroundColor: isLoading ? Colors.grey : theme.primaryColor,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.grey.shade300,
-          disabledForegroundColor: Colors.grey.shade500,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+  /// Градиентная кнопка в стиле Landing CTA
+  Widget _buildGradientButton(BuildContext context) {
+    final isDisabled = onPressed == null || isLoading;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: isDisabled ? null : AppGradients.heroButton,
+        color: isDisabled
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : null,
+        borderRadius: AppRadius.radiusPill,
+        boxShadow: isDisabled
+            ? null
+            : [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isLoading ? null : onPressed,
+          borderRadius: AppRadius.radiusPill,
+          child: Center(child: _buildContent(context, isPrimary: true)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecondaryButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: isLoading ? null : onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusPill),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+      ),
+      child: _buildContent(context, isPrimary: false),
+    );
+  }
+
+  Widget _buildOutlinedButton(BuildContext context) {
+    return OutlinedButton(
+      onPressed: isLoading ? null : onPressed,
+      style: OutlinedButton.styleFrom(
+        elevation: 0,
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusPill),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+      ),
+      child: _buildContent(context, isPrimary: false),
+    );
+  }
+
+  Widget _buildTextButton(BuildContext context) {
+    return TextButton(
+      onPressed: isLoading ? null : onPressed,
+      style: TextButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusMd),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      ),
+      child: _buildContent(context, isPrimary: false),
+    );
+  }
+
+  Widget _buildDangerButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: isLoading ? null : onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.error,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusPill),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+      ),
+      child: _buildContent(context, isPrimary: true),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, {required bool isPrimary}) {
+    if (isLoading) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: isPrimary
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.primary,
+            ),
           ),
-        );
-        break;
-      case ButtonVariant.secondary:
-        defaultStyle = ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: theme.primaryColor,
-          side: BorderSide(color: theme.primaryColor),
-          disabledBackgroundColor: Colors.transparent,
-          disabledForegroundColor: Colors.grey.shade400,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            side: BorderSide(color: theme.disabledColor),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            'Загрузка...',
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
-        );
-        break;
-      case ButtonVariant.outlined:
-        defaultStyle = OutlinedButton.styleFrom(
-          side: BorderSide(color: theme.primaryColor),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-        );
-        break;
-      case ButtonVariant.text:
-        defaultStyle = TextButton.styleFrom(
-          foregroundColor: theme.primaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-        );
-        break;
+        ],
+      );
     }
 
-    Widget content = Row(
-      mainAxisSize: MainAxisSize.min,
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        if (leading != null) ...[leading!, const SizedBox(width: 8.0)],
-        if (isLoading)
-          Container(
-            width: 16,
-            height: 16,
-            margin: const EdgeInsets.only(right: 8.0),
-            child: const CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          )
-        else
-          const SizedBox(width: 24), // To maintain consistent spacing
+        if (leading != null) ...[
+          leading!,
+          const SizedBox(width: AppSpacing.sm),
+        ],
         Text(
           text,
-          style:
-              textStyle ??
-              theme.textTheme.labelLarge?.copyWith(
-                color:
-                    variant == ButtonVariant.text ||
-                            variant == ButtonVariant.outlined
-                        ? theme.primaryColor
-                        : Colors.white,
-              ),
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ],
-    );
-
-    return Padding(
-      padding: padding,
-      child: SizedBox(
-        width: double.infinity,
-        child:
-            !isLoading
-                ? _buildButton(defaultStyle, content)
-                : _buildDisabledButton(defaultStyle, content),
-      ),
-    );
-  }
-
-  Widget _buildButton(ButtonStyle style, Widget content) {
-    switch (variant) {
-      case ButtonVariant.primary:
-        return ElevatedButton(
-          onPressed: onPressed,
-          style: this.style ?? style,
-          child: content,
-        );
-      case ButtonVariant.secondary:
-        return ElevatedButton(
-          onPressed: onPressed,
-          style: this.style ?? style,
-          child: content,
-        );
-      case ButtonVariant.outlined:
-        return OutlinedButton(
-          onPressed: onPressed,
-          style: this.style ?? style,
-          child: content,
-        );
-      case ButtonVariant.text:
-        return TextButton(
-          onPressed: onPressed,
-          style: this.style ?? style,
-          child: content,
-        );
-    }
-  }
-
-  Widget _buildDisabledButton(ButtonStyle style, Widget content) {
-    return ElevatedButton(
-      onPressed: null,
-      style: style.copyWith(
-        backgroundColor: MaterialStateProperty.all(Colors.grey.shade400),
-      ),
-      child: content,
     );
   }
 }
 
-enum ButtonVariant { primary, secondary, outlined, text }
+enum ButtonVariant { primary, secondary, outlined, text, danger }

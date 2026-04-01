@@ -11,6 +11,7 @@ import 'package:outfitstyle_client/src/ui/widgets/empty_state.dart';
 import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import 'package:outfitstyle_client/src/domain/entities/outfit_recommendation.dart';
 import 'package:outfitstyle_client/src/domain/entities/wardrobe_item.dart';
+import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
 /// Упрощённый главный экран-дашборд.
 ///
@@ -50,12 +51,15 @@ class HomeScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Погода
-                _WeatherSection(weatherAsync: weatherAsync, userLocation: userLocation),
-                const SizedBox(height: 20),
+                _WeatherSection(
+                  weatherAsync: weatherAsync,
+                  userLocation: userLocation,
+                ),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Образ дня
                 _OutfitOfDaySection(recommendationsState: recommendationsState),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Гардероб
                 _WardrobePreviewSection(
@@ -83,7 +87,10 @@ class _WeatherSection extends ConsumerWidget {
   final AsyncValue<dynamic> weatherAsync;
   final UserLocation userLocation;
 
-  const _WeatherSection({required this.weatherAsync, required this.userLocation});
+  const _WeatherSection({
+    required this.weatherAsync,
+    required this.userLocation,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,7 +99,7 @@ class _WeatherSection extends ConsumerWidget {
       children: [
         // Город + кнопка смены
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: Row(
             children: [
               Icon(
@@ -100,18 +107,21 @@ class _WeatherSection extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.primary,
                 size: 18,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.xs),
               Text(
                 userLocation.cityName ?? 'Город не выбран',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               const Spacer(),
               TextButton(
                 onPressed: () => _showCitySelector(context, ref),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
+                  ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -120,7 +130,7 @@ class _WeatherSection extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
 
         // Карточка погоды
         weatherAsync.when(
@@ -142,7 +152,9 @@ class _WeatherSection extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Выбор города'),
-        content: const Text('Используйте кнопку местоположения в верхней панели'),
+        content: const Text(
+          'Используйте кнопку местоположения в верхней панели',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -155,7 +167,7 @@ class _WeatherSection extends ConsumerWidget {
 
   Widget _buildLoadingCard(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXxl),
       child: const SizedBox(
         height: 180,
         child: Center(child: CircularProgressIndicator()),
@@ -165,15 +177,15 @@ class _WeatherSection extends ConsumerWidget {
 
   Widget _buildErrorCard(BuildContext context, WidgetRef ref) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXxl),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           children: [
-            Icon(Icons.cloud_off, size: 40, color: Colors.grey[400]),
-            const SizedBox(height: 12),
+            Icon(Icons.cloud_off, size: 40, color: AppColors.grey400),
+            const SizedBox(height: AppSpacing.md),
             const Text('Не удалось загрузить погоду'),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             OutlinedButton.icon(
               onPressed: () => ref.invalidate(weatherProvider),
               icon: const Icon(Icons.refresh),
@@ -199,14 +211,15 @@ class _OutfitOfDaySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final recommendations = recommendationsState.recommendations;
-    final isLoading = recommendationsState.status == RecommendationsLoadStatus.loading;
+    final isLoading =
+        recommendationsState.status == RecommendationsLoadStatus.loading;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Заголовок
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: Row(
             children: [
               Text(
@@ -224,7 +237,7 @@ class _OutfitOfDaySection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
 
         // Контент
         if (isLoading)
@@ -243,7 +256,7 @@ class _OutfitOfDaySection extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXl),
       child: InkWell(
         onTap: () {
           if (rec.id != null) {
@@ -253,22 +266,10 @@ class _OutfitOfDaySection extends StatelessWidget {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                  ? [
-                      theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                      theme.colorScheme.secondaryContainer.withValues(alpha: 0.15),
-                    ]
-                  : [
-                      theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-                      theme.colorScheme.secondaryContainer.withValues(alpha: 0.25),
-                    ],
-            ),
+            gradient: isDark ? AppGradients.cardDark : AppGradients.cardLight,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -278,19 +279,20 @@ class _OutfitOfDaySection extends StatelessWidget {
                     Expanded(
                       child: Text(
                         rec.title ?? 'Ваш образ',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTypography.headlineSmall(context),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (rec.temperature != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.xs,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: AppRadius.radiusPill,
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -300,7 +302,7 @@ class _OutfitOfDaySection extends StatelessWidget {
                               size: 16,
                               color: theme.colorScheme.onPrimaryContainer,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: AppSpacing.xs),
                             Text(
                               '${rec.temperature?.round() ?? 0}°C',
                               style: theme.textTheme.labelLarge?.copyWith(
@@ -316,7 +318,7 @@ class _OutfitOfDaySection extends StatelessWidget {
 
                 // Описание
                 if (rec.description?.isNotEmpty ?? false) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     rec.description!,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -327,21 +329,28 @@ class _OutfitOfDaySection extends StatelessWidget {
                   ),
                 ],
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
 
                 // Список вещей
                 if (rec.recommendedItems?.isNotEmpty ?? false)
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
                     children: rec.recommendedItems!.take(6).map((item) {
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surface.withValues(alpha: 0.7),
-                          borderRadius: BorderRadius.circular(12),
+                          color: theme.colorScheme.surface.withValues(
+                            alpha: 0.7,
+                          ),
+                          borderRadius: AppRadius.radiusMd,
                           border: Border.all(
-                            color: theme.colorScheme.outline.withValues(alpha: 0.15),
+                            color: theme.colorScheme.outline.withValues(
+                              alpha: 0.15,
+                            ),
                           ),
                         ),
                         child: Text(
@@ -354,7 +363,7 @@ class _OutfitOfDaySection extends StatelessWidget {
                     }).toList(),
                   ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
 
                 // Кнопка
                 SizedBox(
@@ -368,7 +377,9 @@ class _OutfitOfDaySection extends StatelessWidget {
                     icon: const Icon(Icons.visibility_outlined, size: 18),
                     label: const Text('Подробнее'),
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                      ),
                     ),
                   ),
                 ),
@@ -384,7 +395,8 @@ class _OutfitOfDaySection extends StatelessWidget {
     return EmptyState(
       icon: Icons.checkroom_outlined,
       title: 'Нет рекомендаций',
-      subtitle: 'Получите персональный образ на основе погоды и вашего гардероба',
+      subtitle:
+          'Получите персональный образ на основе погоды и вашего гардероба',
       actionLabel: 'Сгенерировать',
       onAction: () => context.go('/', extra: 2),
     );
@@ -392,7 +404,7 @@ class _OutfitOfDaySection extends StatelessWidget {
 
   Widget _buildLoadingCard(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXl),
       child: const SizedBox(
         height: 200,
         child: Center(child: CircularProgressIndicator()),
@@ -424,7 +436,7 @@ class _WardrobePreviewSection extends StatelessWidget {
       children: [
         // Заголовок
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: Row(
             children: [
               Text(
@@ -433,7 +445,7 @@ class _WardrobePreviewSection extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 '${items.length} ${_itemsWord(items.length)}',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -441,14 +453,11 @@ class _WardrobePreviewSection extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              TextButton(
-                onPressed: onTap,
-                child: const Text('Открыть'),
-              ),
+              TextButton(onPressed: onTap, child: const Text('Открыть')),
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
 
         // Карточки категорий
         if (items.isEmpty)
@@ -474,8 +483,8 @@ class _WardrobePreviewSection extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+        mainAxisSpacing: AppSpacing.sm,
+        crossAxisSpacing: AppSpacing.sm,
         childAspectRatio: 1.3,
       ),
       itemCount: categories.length,
@@ -529,20 +538,20 @@ class _CategoryCard extends StatelessWidget {
     final color = _getCategoryColor(category);
 
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusLg),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.radiusLg,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: isDark ? 0.2 : 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: AppRadius.radiusMd,
                 ),
                 child: Icon(
                   WardrobeCategories.getIcon(category),
@@ -550,7 +559,7 @@ class _CategoryCard extends StatelessWidget {
                   size: 22,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 WardrobeCategories.getNameRu(category),
                 style: theme.textTheme.labelMedium?.copyWith(
@@ -583,11 +592,11 @@ class _CategoryCard extends StatelessWidget {
       case 'outerwear':
         return Colors.indigo;
       case 'accessories':
-        return Colors.purple;
+        return AppColors.primary;
       case 'headwear':
         return Colors.teal;
       default:
-        return Colors.grey;
+        return AppColors.grey400;
     }
   }
 }

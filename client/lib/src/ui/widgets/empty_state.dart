@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
-/// Виджет пустого состояния с призывом к действию
+/// Единое пустое состояние в стиле Landing
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final Widget? secondaryAction;
 
   const EmptyState({
     super.key,
@@ -15,67 +17,69 @@ class EmptyState extends StatelessWidget {
     required this.subtitle,
     this.actionLabel,
     this.onAction,
+    this.secondaryAction,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              shape: BoxShape.circle,
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Gradient circle icon — Landing style
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                gradient: isDark
+                    ? AppGradients.cardDark
+                    : AppGradients.cardLight,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 44, color: theme.colorScheme.primary),
             ),
-            child: Icon(
-              icon,
-              size: 40,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            const SizedBox(height: AppSpacing.xxl),
+            Text(
+              title,
+              style: AppTypography.headlineSmall(context),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-            textAlign: TextAlign.center,
-          ),
-          if (actionLabel != null && onAction != null) ...[
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onAction,
-                icon: const Icon(Icons.add),
-                label: Text(actionLabel!),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              subtitle,
+              style: AppTypography.bodyMedium(context).copyWith(height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: AppSpacing.xxl),
+              SizedBox(
+                width: 200,
+                child: FilledButton.icon(
+                  onPressed: onAction,
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(actionLabel!),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.md,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.radiusPill,
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
+            if (secondaryAction != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              secondaryAction!,
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

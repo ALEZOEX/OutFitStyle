@@ -10,7 +10,7 @@ class OnboardingRepository {
 
   Future<bool> savePreferences(OnboardingData data) async {
     try {
-      final response = await _apiClient.post(
+      final response = await _apiClient.put(
         '/api/v1/user/preferences',
         data: data.toJson(),
       );

@@ -1,7 +1,9 @@
 // UI Widgets Export
 export 'widgets/weather_card.dart';
-export 'widgets/daily_outfit_card.dart';
-export 'widgets/quick_actions.dart';
-export 'widgets/wardrobe_summary.dart';
-export 'widgets/style_tips_carousel.dart';
+export 'widgets/empty_state.dart';
 export 'widgets/auth_wrapper.dart';
+export 'widgets/max_width_container.dart';
+export 'widgets/wardrobe_item_card.dart';
+export 'buttons/app_button.dart';
+export 'cards/app_card.dart';
+export 'loading/app_loading.dart';

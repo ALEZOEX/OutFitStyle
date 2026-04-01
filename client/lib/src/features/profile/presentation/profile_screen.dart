@@ -5,13 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../../../auth/session_manager.dart';
 import '../../../presentation/providers/session_provider.dart';
 import '../../../theme/theme_controller.dart';
+import '../../../theme/app_theme.dart';
 import '../../../ui/widgets/max_width_container.dart';
 import '../../achievements/data/repositories/achievements_repository.dart';
 import '../../achievements/presentation/providers/achievements_providers.dart';
 import 'providers/profile_provider.dart';
 import '../../admin/presentation/providers/admin_auth_provider.dart';
 
-/// Экран профиля пользователя
+/// Экран профиля пользователя — обновлённый дизайн
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -24,42 +25,36 @@ class ProfileScreen extends ConsumerWidget {
       body: ResponsiveMaxWidthContainer(
         child: CustomScrollView(
           slivers: [
-            // Заголовок профиля
             SliverToBoxAdapter(
               child: _buildProfileHeader(context, profileState, ref),
             ),
-            // Статистика
             SliverToBoxAdapter(
               child: _buildStats(context, stats, profileState, ref),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            // Меню настроек
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
             SliverToBoxAdapter(child: _buildSettingsMenu(context, ref)),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            // Дополнительные опции
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
             SliverToBoxAdapter(child: _buildAdditionalOptions(context)),
-            // Кнопка выхода
             SliverToBoxAdapter(child: _buildLogoutButtonFromRef(context, ref)),
-            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxxl)),
           ],
         ),
       ),
     );
   }
 
-  /// Заголовок профиля
   Widget _buildProfileHeader(
     BuildContext context,
     AsyncValue<ProfileData> profileState,
     WidgetRef ref,
   ) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       child: Column(
         children: [
-          // Аватар и данные пользователя
           profileState.when(
             data: (profile) {
               final avatarUrl = profile.photoUrl;
@@ -69,84 +64,72 @@ class ProfileScreen extends ConsumerWidget {
 
               return Column(
                 children: [
-                  // Аватар
+                  // Градиентный аватар — Landing style
                   Container(
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          theme.colorScheme.primary,
-                          theme.colorScheme.secondary,
-                        ],
-                      ),
+                      gradient: AppGradients.primary,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.3,
-                          ),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
-                    child:
-                        avatarUrl != null && avatarUrl.isNotEmpty
-                            ? ClipOval(
-                              child: Image.network(
-                                avatarUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stack) {
-                                  return Center(
-                                    child: Text(
-                                      firstLetter,
-                                      style: theme.textTheme.headlineLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                    ),
-                                  );
-                                },
-                                loadingBuilder: (
-                                  context,
-                                  child,
-                                  loadingProgress,
-                                ) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
+                    child: avatarUrl != null && avatarUrl.isNotEmpty
+                        ? ClipOval(
+                            child: Image.network(
+                              avatarUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stack) {
+                                return Center(
+                                  child: Text(
+                                    firstLetter,
+                                    style: AppTypography.headlineLarge(
+                                      context,
+                                    ).copyWith(color: Colors.white),
+                                  ),
+                                );
+                              },
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value:
+                                            loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
                                                       .cumulativeBytesLoaded /
                                                   loadingProgress
                                                       .expectedTotalBytes!
-                                              : null,
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white.withValues(alpha: 0.7),
+                                            : null,
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white.withValues(
+                                                alpha: 0.7,
+                                              ),
+                                            ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                            : Center(
-                              child: Text(
-                                firstLetter,
-                                style: theme.textTheme.headlineLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                                    );
+                                  },
                             ),
+                          )
+                        : Center(
+                            child: Text(
+                              firstLetter,
+                              style: AppTypography.headlineLarge(
+                                context,
+                              ).copyWith(color: Colors.white),
+                            ),
+                          ),
                   ),
-                  // Скрытая кнопка админ-панели (долгое нажатие)
+                  // Скрытая кнопка админ-панели
                   GestureDetector(
                     onLongPress: () async {
                       final adminAuth = ref.read(adminAuthProvider);
@@ -158,74 +141,64 @@ class ProfileScreen extends ConsumerWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Требуется роль администратора'),
-                            backgroundColor: Colors.orange,
+                            backgroundColor: AppColors.warning,
                           ),
                         );
                       }
                     },
                     child: const SizedBox.shrink(),
                   ),
-                  const SizedBox(height: 16),
-                  // Имя пользователя
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
                     displayName,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTypography.headlineSmall(context),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     email,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                    style: AppTypography.bodyMedium(context),
                     textAlign: TextAlign.center,
                   ),
                 ],
               );
             },
-            loading:
-                () => const Column(
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Загрузка профиля...'),
-                  ],
+            loading: () => const Column(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: AppSpacing.lg),
+                Text('Загрузка профиля...'),
+              ],
+            ),
+            error: (error, stack) => Column(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: theme.colorScheme.error,
                 ),
-            error:
-                (error, stack) => Column(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: theme.colorScheme.error,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Ошибка загрузки профиля',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.error,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      error.toString(),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Ошибка загрузки профиля',
+                  style: AppTypography.bodyLarge(
+                    context,
+                  ).copyWith(color: theme.colorScheme.error),
                 ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  error.toString(),
+                  style: AppTypography.bodySmall(context),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
   }
 
-  /// Статистика пользователя
   Widget _buildStats(
     BuildContext context,
     ProfileStats stats,
@@ -235,7 +208,6 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final achievementsStats = ref.watch(achievementsStatsProvider);
 
-    // Упрощённая статистика — только вещи и избранное
     final statsData = [
       {
         'label': 'Вещей',
@@ -250,77 +222,52 @@ class ProfileScreen extends ConsumerWidget {
     ];
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.radiusXl,
       ),
       child: Column(
         children: [
-          Text(
-            'Статистика',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 16),
+          Text('Статистика', style: AppTypography.labelLarge(context)),
+          const SizedBox(height: AppSpacing.lg),
           Wrap(
-            spacing: 16,
-            runSpacing: 16,
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.lg,
             alignment: WrapAlignment.center,
-            children:
-                statsData.map((stat) {
-                  return _buildStatItem(context, stat);
-                }).toList(),
+            children: statsData
+                .map((stat) => _buildStatItem(context, stat))
+                .toList(),
           ),
-          // Статистика достижений
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _buildAchievementsStats(context, achievementsStats),
         ],
       ),
     );
   }
 
-  /// Статистика достижений в профиле
   Widget _buildAchievementsStats(BuildContext context, AchievementStats stats) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return InkWell(
       onTap: () => context.push('/achievements'),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: AppRadius.radiusMd,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              theme.colorScheme.primaryContainer.withOpacity(0.5),
-              theme.colorScheme.secondaryContainer.withOpacity(0.5),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: theme.colorScheme.primary.withOpacity(0.2),
-            width: 1,
-          ),
+          gradient: isDark ? AppGradients.cardDark : AppGradients.cardLight,
+          borderRadius: AppRadius.radiusMd,
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.secondary,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10),
+                gradient: AppGradients.primary,
+                borderRadius: AppRadius.radiusSm,
               ),
               child: const Icon(
                 Icons.emoji_events,
@@ -328,7 +275,7 @@ class ProfileScreen extends ConsumerWidget {
                 size: 24,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,22 +284,16 @@ class ProfileScreen extends ConsumerWidget {
                     'Достижения',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onPrimaryContainer,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     stats.progressText,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer.withOpacity(
-                        0.8,
-                      ),
-                    ),
+                    style: AppTypography.bodySmall(context),
                   ),
                 ],
               ),
             ),
-            // Прогресс бар
             SizedBox(
               width: 80,
               child: Column(
@@ -364,13 +305,13 @@ class ProfileScreen extends ConsumerWidget {
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
                     child: LinearProgressIndicator(
                       value: stats.progressPercent / 100,
-                      backgroundColor: theme.colorScheme.outline.withOpacity(
-                        0.2,
+                      backgroundColor: theme.colorScheme.outline.withValues(
+                        alpha: 0.2,
                       ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         theme.colorScheme.primary,
@@ -387,17 +328,16 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  /// Элемент статистики
   Widget _buildStatItem(BuildContext context, Map<String, dynamic> stat) {
     final theme = Theme.of(context);
 
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
           decoration: BoxDecoration(
             color: theme.colorScheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.radiusMd,
           ),
           child: Icon(
             stat['icon'] as IconData,
@@ -405,25 +345,18 @@ class ProfileScreen extends ConsumerWidget {
             size: 24,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           stat['value'] as String,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
           ),
         ),
-        Text(
-          stat['label'] as String,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
+        Text(stat['label'] as String, style: AppTypography.labelSmall(context)),
       ],
     );
   }
 
-  /// Меню настроек
   Widget _buildSettingsMenu(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final themeMode = ref.watch(themeModeProvider);
@@ -433,33 +366,33 @@ class ProfileScreen extends ConsumerWidget {
         'icon': Icons.person_outline,
         'label': 'Профиль и аккаунт',
         'route': '/settings/profile',
-        'color': Colors.blue,
+        'color': AppColors.info,
       },
       {
         'icon': Icons.palette_outlined,
         'label': 'Предпочтения',
         'route': '/settings/preferences',
-        'color': Colors.purple,
+        'color': AppColors.primary,
       },
       {
         'icon': Icons.notifications_outlined,
         'label': 'Уведомления',
         'route': '/notifications',
-        'color': Colors.orange,
+        'color': AppColors.warning,
       },
       {
         'icon': Icons.emoji_events_outlined,
         'label': 'Достижения',
         'route': '/achievements',
-        'color': Colors.green,
+        'color': AppColors.success,
       },
     ];
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.radiusXl,
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
@@ -473,30 +406,32 @@ class ProfileScreen extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          // Переключатель темы
           _buildThemeTile(context, themeMode, ref),
-          // Остальные пункты меню
           ...menuItems.map((item) {
             final index = menuItems.indexOf(item);
             final isLast = index == menuItems.length - 1;
 
             return InkWell(
-              onTap: () {
-                context.push(item['route'] as String);
-              },
+              onTap: () => context.push(item['route'] as String),
               borderRadius: BorderRadius.vertical(
-                top: index == 0 ? const Radius.circular(20) : Radius.zero,
-                bottom: isLast ? const Radius.circular(20) : Radius.zero,
+                top: index == 0
+                    ? const Radius.circular(AppRadius.xl)
+                    : Radius.zero,
+                bottom: isLast
+                    ? const Radius.circular(AppRadius.xl)
+                    : Radius.zero,
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(
+                        AppSpacing.sm + AppSpacing.xs,
+                      ),
                       decoration: BoxDecoration(
                         color: (item['color'] as Color).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: AppRadius.radiusMd,
                       ),
                       child: Icon(
                         item['icon'] as IconData,
@@ -504,13 +439,11 @@ class ProfileScreen extends ConsumerWidget {
                         size: 22,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppSpacing.lg),
                     Expanded(
                       child: Text(
                         item['label'] as String,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
+                        style: AppTypography.bodyLarge(context),
                       ),
                     ),
                     Icon(
@@ -521,13 +454,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
   }
 
-  /// Плитка переключателя темы
   Widget _buildThemeTile(
     BuildContext context,
     ThemeMode themeMode,
@@ -541,19 +473,19 @@ class ProfileScreen extends ConsumerWidget {
     };
 
     return InkWell(
-      onTap: () {
-        _showThemeSelectionDialog(context, ref);
-      },
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      onTap: () => _showThemeSelectionDialog(context, ref),
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(AppRadius.xl),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
               decoration: BoxDecoration(
                 color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.radiusMd,
               ),
               child: Icon(
                 Icons.brightness_6,
@@ -561,24 +493,18 @@ class ProfileScreen extends ConsumerWidget {
                 size: 22,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Тема',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTypography.bodyLarge(
+                      context,
+                    ).copyWith(fontWeight: FontWeight.w500),
                   ),
-                  Text(
-                    themeText,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                  Text(themeText, style: AppTypography.bodySmall(context)),
                 ],
               ),
             ),
@@ -592,68 +518,65 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  /// Диалог выбора темы
   void _showThemeSelectionDialog(BuildContext context, WidgetRef ref) {
     final themeMode = ref.read(themeModeProvider);
     final notifier = ref.read(themeModeProvider.notifier);
 
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Выберите тему'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile<ThemeMode>(
-                  title: const Text('Светлая'),
-                  subtitle: const Text('Всегда светлая тема'),
-                  value: ThemeMode.light,
-                  groupValue: themeMode,
-                  onChanged: (value) {
-                    if (value != null) {
-                      notifier.setLight();
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-                RadioListTile<ThemeMode>(
-                  title: const Text('Тёмная'),
-                  subtitle: const Text('Всегда тёмная тема'),
-                  value: ThemeMode.dark,
-                  groupValue: themeMode,
-                  onChanged: (value) {
-                    if (value != null) {
-                      notifier.setDark();
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-                RadioListTile<ThemeMode>(
-                  title: const Text('Системная'),
-                  subtitle: const Text('Автоматически от настроек устройства'),
-                  value: ThemeMode.system,
-                  groupValue: themeMode,
-                  onChanged: (value) {
-                    if (value != null) {
-                      notifier.setSystem();
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: const Text('Выберите тему'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<ThemeMode>(
+              title: const Text('Светлая'),
+              subtitle: const Text('Всегда светлая тема'),
+              value: ThemeMode.light,
+              groupValue: themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  notifier.setLight();
+                  Navigator.pop(context);
+                }
+              },
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Отмена'),
-              ),
-            ],
+            RadioListTile<ThemeMode>(
+              title: const Text('Тёмная'),
+              subtitle: const Text('Всегда тёмная тема'),
+              value: ThemeMode.dark,
+              groupValue: themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  notifier.setDark();
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('Системная'),
+              subtitle: const Text('Автоматически от настроек устройства'),
+              value: ThemeMode.system,
+              groupValue: themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  notifier.setSystem();
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
           ),
+        ],
+      ),
     );
   }
 
-  /// Дополнительные опции
   Widget _buildAdditionalOptions(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -681,10 +604,10 @@ class ProfileScreen extends ConsumerWidget {
     ];
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.radiusXl,
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
@@ -697,64 +620,62 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
       child: Column(
-        children:
-            options.map((option) {
-              final index = options.indexOf(option);
-              final isLast = index == options.length - 1;
+        children: options.map((option) {
+          final index = options.indexOf(option);
+          final isLast = index == options.length - 1;
 
-              return InkWell(
-                onTap: () {
-                  context.push(option['route'] as String);
-                },
-                borderRadius: BorderRadius.vertical(
-                  top: index == 0 ? const Radius.circular(20) : Radius.zero,
-                  bottom: isLast ? const Radius.circular(20) : Radius.zero,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          option['icon'] as IconData,
-                          color: theme.colorScheme.onSurfaceVariant,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        option['label'] as String,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.chevron_right,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ],
+          return InkWell(
+            onTap: () => context.push(option['route'] as String),
+            borderRadius: BorderRadius.vertical(
+              top: index == 0
+                  ? const Radius.circular(AppRadius.xl)
+                  : Radius.zero,
+              bottom: isLast
+                  ? const Radius.circular(AppRadius.xl)
+                  : Radius.zero,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(
+                      AppSpacing.sm + AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: AppRadius.radiusMd,
+                    ),
+                    child: Icon(
+                      option['icon'] as IconData,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      size: 22,
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                  const SizedBox(width: AppSpacing.lg),
+                  Text(
+                    option['label'] as String,
+                    style: AppTypography.bodyLarge(context),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
-  /// Кнопка выхода (обёртка для получения SessionManager из ref)
   Widget _buildLogoutButtonFromRef(BuildContext context, WidgetRef ref) {
-    // Получаем SessionManager
     final sessionManager = ref.watch(sessionManagerProvider);
     return _buildLogoutButton(context, sessionManager);
   }
 
-  /// Кнопка выхода
   Widget _buildLogoutButton(
     BuildContext context,
     SessionManager sessionManager,
@@ -762,9 +683,9 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
         child: OutlinedButton.icon(
           onPressed: () => _showLogoutDialog(context, sessionManager),
           icon: const Icon(Icons.logout),
@@ -774,62 +695,51 @@ class ProfileScreen extends ConsumerWidget {
             side: BorderSide(
               color: theme.colorScheme.error.withValues(alpha: 0.3),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusMd),
           ),
         ),
       ),
     );
   }
 
-  /// Диалог подтверждения выхода
   void _showLogoutDialog(BuildContext context, SessionManager sessionManager) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            icon: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.logout, color: Colors.red, size: 32),
-            ),
-            title: const Text(
-              'Выйти из аккаунта?',
-              textAlign: TextAlign.center,
-            ),
-            content: const Text(
-              'Вы будете перенаправлены на экран входа',
-              textAlign: TextAlign.center,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Отмена'),
-              ),
-              FilledButton(
-                onPressed: () async {
-                  await sessionManager.signOut();
-                  if (context.mounted) {
-                    context.go('/auth');
-                  }
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Выйти'),
-              ),
-            ],
-            actionsAlignment: MainAxisAlignment.center,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusLg),
+        icon: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.error.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
           ),
+          child: const Icon(Icons.logout, color: AppColors.error, size: 32),
+        ),
+        title: const Text('Выйти из аккаунта?', textAlign: TextAlign.center),
+        content: const Text(
+          'Вы будете перенаправлены на экран входа',
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              await sessionManager.signOut();
+              if (context.mounted) context.go('/auth');
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Выйти'),
+          ),
+        ],
+        actionsAlignment: MainAxisAlignment.center,
+      ),
     );
   }
 }

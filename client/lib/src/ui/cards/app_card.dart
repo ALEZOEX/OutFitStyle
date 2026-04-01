@@ -1,133 +1,232 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
-/// Custom card widget with different styles
+/// Унифицированная карточка в стиле Landing
+/// Поддерживает: обычный, glass, gradient варианты
 class AppCard extends StatelessWidget {
   final Widget child;
-  final Color? color;
-  final double? elevation;
-  final ShapeBorder? shape;
-  final EdgeInsetsGeometry? margin;
   final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final VoidCallback? onTap;
+  final CardVariant variant;
   final Gradient? gradient;
-  final Widget? header;
-  final Widget? footer;
-  final bool showShadow;
+  final double? width;
+  final double? height;
 
   const AppCard({
-    Key? key,
+    super.key,
     required this.child,
-    this.color,
-    this.elevation,
-    this.shape,
+    this.padding,
     this.margin,
-    this.padding = const EdgeInsets.all(16.0),
+    this.onTap,
+    this.variant = CardVariant.outlined,
     this.gradient,
-    this.header,
-    this.footer,
-    this.showShadow = true,
-  }) : super(key: key);
+    this.width,
+    this.height,
+  });
+
+  /// Glassmorphism карточка (Landing glass-card)
+  const AppCard.glass({
+    super.key,
+    required this.child,
+    this.padding,
+    this.margin,
+    this.onTap,
+    this.gradient,
+    this.width,
+    this.height,
+  }) : variant = CardVariant.glass;
+
+  /// Градиентная карточка
+  const AppCard.gradient({
+    super.key,
+    required this.child,
+    this.padding,
+    this.margin,
+    this.onTap,
+    this.gradient,
+    this.width,
+    this.height,
+  }) : variant = CardVariant.gradient;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectivePadding = padding ?? const EdgeInsets.all(AppSpacing.lg);
+    final effectiveMargin = margin ?? EdgeInsets.zero;
 
-    Widget content = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (header != null) ...[header!, const SizedBox(height: 8.0)],
-        Expanded(child: child),
-        if (footer != null) ...[const SizedBox(height: 8.0), footer!],
-      ],
+    Widget card = switch (variant) {
+      CardVariant.outlined => _buildOutlined(context, isDark),
+      CardVariant.glass => _buildGlass(context, isDark),
+      CardVariant.gradient => _buildGradient(context, isDark),
+      CardVariant.elevated => _buildElevated(context, isDark),
+      CardVariant.flat => _buildFlat(context, isDark),
+    };
+
+    card = Container(
+      width: width,
+      height: height,
+      margin: effectiveMargin,
+      child: card,
     );
 
-    BoxDecoration? decoration;
-    if (gradient != null) {
-      decoration = BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(12.0),
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.radiusLg,
+        child: card,
       );
     }
 
-    return Card(
-      color: color,
-      elevation: showShadow ? elevation ?? 2.0 : 0.0,
-      shape:
-          shape ??
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-            side: BorderSide(color: theme.dividerColor, width: 0.5),
-          ),
-      margin: margin ?? const EdgeInsets.all(8.0),
-      child: Container(
-        padding: padding,
-        decoration: decoration,
-        child: content,
+    return card;
+  }
+
+  /// Обычная карточка с тонкой рамкой (Landing default)
+  Widget _buildOutlined(BuildContext context, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDarkElevated : Colors.white,
+        borderRadius: AppRadius.radiusLg,
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF374151).withValues(alpha: 0.5)
+              : AppColors.grey200,
+        ),
       ),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
+      child: child,
+    );
+  }
+
+  /// Glassmorphism (Landing glass-card)
+  Widget _buildGlass(BuildContext context, bool isDark) {
+    return ClipRRect(
+      borderRadius: AppRadius.radiusLg,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.white.withValues(alpha: 0.6),
+            borderRadius: AppRadius.radiusLg,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.4),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  /// Градиентная карточка
+  Widget _buildGradient(BuildContext context, bool isDark) {
+    final effectiveGradient =
+        gradient ?? (isDark ? AppGradients.cardDark : AppGradients.cardLight);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: effectiveGradient,
+        borderRadius: AppRadius.radiusLg,
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+      ),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
+      child: child,
+    );
+  }
+
+  /// Карточка с тенью
+  Widget _buildElevated(BuildContext context, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDarkElevated : Colors.white,
+        borderRadius: AppRadius.radiusLg,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
+      child: child,
+    );
+  }
+
+  /// Плоская карточка без рамки/тени
+  Widget _buildFlat(BuildContext context, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.surfaceDarkElevated.withValues(alpha: 0.5)
+            : AppColors.grey50,
+        borderRadius: AppRadius.radiusLg,
+      ),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
+      child: child,
     );
   }
 }
 
-/// Specialized card for outfit recommendations
-class OutfitRecommendationCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget? image;
-  final VoidCallback? onTap;
-  final List<String>? tags;
+enum CardVariant { outlined, glass, gradient, elevated, flat }
 
-  const OutfitRecommendationCard({
-    Key? key,
-    required this.title,
-    required this.subtitle,
-    this.image,
-    this.onTap,
-    this.tags,
-  }) : super(key: key);
+// ══════════════════════════════════════════════════════════════
+// Glassmorphism helper для модальных bottom sheets
+// ══════════════════════════════════════════════════════════════
+
+/// Обёртка для glassmorphism-эффекта на модалках
+class GlassContainer extends StatelessWidget {
+  final Widget child;
+  final double blur;
+  final double opacity;
+  final EdgeInsetsGeometry? padding;
+  final BorderRadius? borderRadius;
+
+  const GlassContainer({
+    super.key,
+    required this.child,
+    this.blur = 20,
+    this.opacity = 0.08,
+    this.padding,
+    this.borderRadius,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (image != null) ...[
-            ClipRRect(borderRadius: BorderRadius.circular(8.0), child: image),
-            const SizedBox(height: 12.0),
-          ],
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4.0),
-          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-          if (tags != null && tags!.isNotEmpty) ...[
-            const SizedBox(height: 8.0),
-            Wrap(
-              spacing: 4.0,
-              runSpacing: 4.0,
-              children: tags!.map((tag) => _buildTag(tag, context)).toList(),
-            ),
-          ],
-        ],
-      ),
-      showShadow: true,
-    );
-  }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final radius = borderRadius ?? AppRadius.radiusXxl;
 
-  Widget _buildTag(String tag, BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Text(
-        tag,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).primaryColor,
-          fontSize: 12.0,
+    return ClipRRect(
+      borderRadius: radius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: opacity * 0.5)
+                : Colors.white.withValues(alpha: opacity + 0.5),
+            borderRadius: radius,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.white.withValues(alpha: 0.3),
+            ),
+          ),
+          padding: padding ?? const EdgeInsets.all(AppSpacing.xxl),
+          child: child,
         ),
       ),
     );

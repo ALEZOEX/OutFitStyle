@@ -7,8 +7,9 @@ import '../../../domain/entities/wardrobe_request_entities.dart';
 import '../../../ui/widgets/max_width_container.dart';
 import '../presentation/providers/wardrobe_provider.dart';
 import '../../../ui/widgets/wardrobe_item_card.dart';
+import '../../../theme/app_theme.dart';
 
-/// Экран гардероба - личные вещи пользователя
+/// Экран гардероба — личные вещи пользователя
 class WardrobeScreen extends ConsumerStatefulWidget {
   const WardrobeScreen({super.key});
 
@@ -27,11 +28,11 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 400), // Optimized: 800 → 400
     );
     _fadeAnimation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOut,
     );
     _animationController.forward();
   }
@@ -51,42 +52,36 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
       body: ResponsiveMaxWidthContainer(
         child: CustomScrollView(
           slivers: [
-            // Заголовок со статистикой
             SliverToBoxAdapter(child: _buildHeader(context, wardrobeState)),
-            // Фильтры по категориям
             if (categories.isNotEmpty)
               SliverToBoxAdapter(
                 child: _buildCategoryFilters(context, categories),
               ),
-            // Список элементов
             _buildWardrobeGrid(context, wardrobeState),
           ],
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // Основная кнопка "Добавить"
-          FloatingActionButton.extended(
-            heroTag: 'addBtn',
-            onPressed: () => _showAddItemBottomSheet(context),
-            icon: const Icon(Icons.add),
-            label: const Text('Добавить'),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'addBtn',
+        onPressed: () => _showAddItemBottomSheet(context),
+        icon: const Icon(Icons.add),
+        label: const Text('Добавить'),
       ),
     );
   }
 
-  /// Заголовок со статистикой
   Widget _buildHeader(BuildContext context, WardrobeState state) {
     final theme = Theme.of(context);
 
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.sm,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -98,23 +93,18 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                   children: [
                     Text(
                       'Гардероб',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                      style: AppTypography.headlineMedium(context),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       '${state.totalCount} вещей',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                      style: AppTypography.bodyMedium(context),
                     ),
                   ],
                 ),
                 IconButton(
-                  onPressed:
-                      () => ref.read(wardrobeProvider.notifier).refresh(),
+                  onPressed: () =>
+                      ref.read(wardrobeProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh),
                   tooltip: 'Обновить',
                   style: IconButton.styleFrom(
@@ -123,8 +113,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // Статистика
+            const SizedBox(height: AppSpacing.lg),
             _buildStatsRow(context, state),
           ],
         ),
@@ -132,7 +121,6 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     );
   }
 
-  /// Строка статистики
   Widget _buildStatsRow(BuildContext context, WardrobeState state) {
     final theme = Theme.of(context);
 
@@ -147,31 +135,30 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
             color: theme.colorScheme.primary,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _buildStatCard(
             context,
             icon: Icons.favorite,
             label: 'Избранное',
             value: state.favoritesCount.toString(),
-            color: Colors.red,
+            color: AppColors.secondary,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _buildStatCard(
             context,
             icon: Icons.category,
             label: 'Категории',
             value: state.categoryCounts.length.toString(),
-            color: theme.colorScheme.secondary,
+            color: theme.colorScheme.tertiary,
           ),
         ),
       ],
     );
   }
 
-  /// Карточка статистики
   Widget _buildStatCard(
     BuildContext context, {
     required IconData icon,
@@ -180,18 +167,22 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     required Color color,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.lg,
+      ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
+        color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+        borderRadius: AppRadius.radiusMd,
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.3 : 0.2)),
       ),
       child: Column(
         children: [
           Icon(icon, color: color, size: 24),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             value,
             style: theme.textTheme.titleLarge?.copyWith(
@@ -210,14 +201,12 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     );
   }
 
-  /// Фильтры по категориям
   Widget _buildCategoryFilters(
     BuildContext context,
     Map<String, int> categories,
   ) {
     final theme = Theme.of(context);
 
-    // Добавляем категорию "Все"
     final allCategories = {'all': categories.values.fold(0, (a, b) => a + b)}
       ..addAll(categories);
 
@@ -226,41 +215,45 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
       child: SizedBox(
         height: 56,
         child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
           scrollDirection: Axis.horizontal,
           itemCount: allCategories.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
           itemBuilder: (context, index) {
             final entry = allCategories.entries.elementAt(index);
-            final category =
-                entry.key == 'all' ? 'Все' : _getCategoryName(entry.key);
+            final category = entry.key == 'all'
+                ? 'Все'
+                : _getCategoryName(entry.key);
 
             return FilterChip(
               selected: _selectedCategory == entry.key,
               onSelected: (_) {
                 setState(() {
-                  _selectedCategory =
-                      _selectedCategory == entry.key ? null : entry.key;
+                  _selectedCategory = _selectedCategory == entry.key
+                      ? null
+                      : entry.key;
                 });
               },
               label: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(_getCategoryEmoji(entry.key)),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                   Text(category),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: AppSpacing.xs),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
+                      horizontal: AppSpacing.xs,
+                      vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          _selectedCategory == entry.key
-                              ? theme.colorScheme.onPrimary.withOpacity(0.3)
-                              : theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(10),
+                      color: _selectedCategory == entry.key
+                          ? theme.colorScheme.onPrimary.withValues(alpha: 0.3)
+                          : theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     child: Text(
                       '${entry.value}',
@@ -275,12 +268,11 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
               selectedColor: theme.colorScheme.primaryContainer,
               checkmarkColor: theme.colorScheme.onPrimaryContainer,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.radiusMd,
                 side: BorderSide(
-                  color:
-                      _selectedCategory == entry.key
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline.withOpacity(0.3),
+                  color: _selectedCategory == entry.key
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outline.withValues(alpha: 0.3),
                 ),
               ),
             );
@@ -290,7 +282,6 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     );
   }
 
-  /// Сетка элементов гардероба
   Widget _buildWardrobeGrid(BuildContext context, WardrobeState state) {
     final theme = Theme.of(context);
 
@@ -304,7 +295,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
       return SliverFillRemaining(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -313,7 +304,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                   size: 64,
                   color: theme.colorScheme.error,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
                   state.error ?? 'Ошибка загрузки',
                   style: theme.textTheme.bodyLarge?.copyWith(
@@ -321,17 +312,17 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
-                if (state.isAuthError) ...[
+                const SizedBox(height: AppSpacing.lg),
+                if (state.isAuthError)
                   ElevatedButton.icon(
                     onPressed: () => context.go('/auth'),
                     icon: const Icon(Icons.login),
                     label: const Text('Войти снова'),
-                  ),
-                ] else
+                  )
+                else
                   ElevatedButton(
-                    onPressed:
-                        () => ref.read(wardrobeProvider.notifier).refresh(),
+                    onPressed: () =>
+                        ref.read(wardrobeProvider.notifier).refresh(),
                     child: const Text('Повторить'),
                   ),
               ],
@@ -341,11 +332,11 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
       );
     }
 
-    // Фильтрация по категории
     var items = state.items;
     if (_selectedCategory != null && _selectedCategory != 'all') {
-      items =
-          items.where((item) => item.category == _selectedCategory).toList();
+      items = items
+          .where((item) => item.category == _selectedCategory)
+          .toList();
     }
 
     if (items.isEmpty) {
@@ -353,13 +344,13 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     }
 
     return SliverPadding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.85,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          crossAxisSpacing: AppSpacing.md,
+          mainAxisSpacing: AppSpacing.md,
         ),
         delegate: SliverChildBuilderDelegate((context, index) {
           final item = items[index];
@@ -368,10 +359,8 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
             child: WardrobeItemCard(
               item: item,
               onTap: () => context.push('/wardrobe/item/${item.id}'),
-              onFavorite:
-                  () => ref
-                      .read(wardrobeProvider.notifier)
-                      .toggleFavorite(item.id!),
+              onFavorite: () =>
+                  ref.read(wardrobeProvider.notifier).toggleFavorite(item.id!),
             ),
           );
         }, childCount: items.length),
@@ -379,13 +368,13 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     );
   }
 
-  /// Пустое состояние
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xxxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -393,14 +382,9 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primaryContainer.withOpacity(0.5),
-                    theme.colorScheme.secondaryContainer.withOpacity(0.5),
-                  ],
-                ),
+                gradient: isDark
+                    ? AppGradients.cardDark
+                    : AppGradients.cardLight,
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -409,31 +393,23 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                 color: theme.colorScheme.primary,
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
-              'Гардероб пуст',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xxl),
+            Text('Гардероб пуст', style: AppTypography.headlineSmall(context)),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               'Добавьте первую вещь в свой гардероб',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              style: AppTypography.bodyMedium(context),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             ElevatedButton.icon(
               onPressed: () => _showAddItemBottomSheet(context),
               icon: const Icon(Icons.add),
               label: const Text('Добавить вещь'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 14,
+                  horizontal: AppSpacing.xxl,
+                  vertical: AppSpacing.md,
                 ),
               ),
             ),
@@ -443,20 +419,20 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
     );
   }
 
-  /// Bottom sheet для добавления элемента
   void _showAddItemBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xxl),
+        ),
       ),
-      builder:
-          (context) => _AddItemSheet(
-            onItemAdded: () {
-              ref.read(wardrobeProvider.notifier).refresh();
-            },
-          ),
+      builder: (context) => _AddItemSheet(
+        onItemAdded: () {
+          ref.read(wardrobeProvider.notifier).refresh();
+        },
+      ),
     );
   }
 
@@ -487,7 +463,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
   }
 }
 
-/// Bottom sheet для добавления вещи
+/// Bottom sheet для добавления вещи — без изменений бизнес-логики
 class _AddItemSheet extends ConsumerStatefulWidget {
   final VoidCallback? onItemAdded;
 
@@ -542,7 +518,6 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
   }
 
   Future<void> _saveItem() async {
-    // Валидация
     final name = _nameController.text.trim();
 
     if (name.isEmpty) {
@@ -565,7 +540,6 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
     });
 
     try {
-      // Создаём запрос на добавление вещи в формате API
       final request = WardrobeItemCreateRequest(
         name: '${_selectedEmoji} $name',
         category: _selectedCategory,
@@ -577,11 +551,10 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
         rainOk: false,
         snowOk: false,
         windOk: false,
-        userId: 'current_user', // В реальном приложении брать из auth
-        clothingItemId: '', // Пусто для новых вещей
+        userId: 'current_user',
+        clothingItemId: '',
       );
 
-      // Добавляем через провайдер с интеграцией API
       await ref.read(wardrobeProvider.notifier).addItem(request);
 
       widget.onItemAdded?.call();
@@ -593,15 +566,13 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
             content: Row(
               children: [
                 const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Text('Вещь "${request.name}" добавлена'),
               ],
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusMd),
           ),
         );
       }
@@ -617,22 +588,19 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
             content: Row(
               children: [
                 const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(child: Text(_errorMessage!)),
               ],
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusMd),
           ),
         );
       }
     }
   }
 
-  /// Получить подкатегорию по категории
   String _getSubcategory(String category) {
     return switch (category) {
       'top' => 'tshirt',
@@ -645,7 +613,6 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
     };
   }
 
-  /// Получить понятное сообщение об ошибке
   String _getErrorMessage(dynamic error) {
     final errorStr = error.toString();
     if (errorStr.contains('Требуется авторизация')) {
@@ -668,9 +635,9 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 24,
-        right: 24,
-        top: 24,
+        left: AppSpacing.xxl,
+        right: AppSpacing.xxl,
+        top: AppSpacing.xxl,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -682,134 +649,109 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.3,
+                ),
+                borderRadius: BorderRadius.circular(AppRadius.xs),
               ),
             ),
           ),
-          const SizedBox(height: 24),
-          // Заголовок
-          Text(
-            'Добавить вещь',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xxl),
+          Text('Добавить вещь', style: AppTypography.headlineSmall(context)),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Выберите эмодзи и введите название',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            style: AppTypography.bodyMedium(context),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
+
           // Выбор категории
-          Text(
-            'Категория',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 12),
+          Text('Категория', style: AppTypography.labelLarge(context)),
+          const SizedBox(height: AppSpacing.md),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children:
-                _categories.map((cat) {
-                  final isSelected = _selectedCategory == cat['value'];
-                  return ChoiceChip(
-                    label: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(cat['icon'] as IconData, size: 18),
-                        const SizedBox(width: 4),
-                        Text(cat['label'] as String),
-                      ],
-                    ),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() {
-                          _selectedCategory = cat['value'] as String;
-                          final emojis =
-                              _emojiCategories[_selectedCategory] ?? [];
-                          _selectedEmoji = emojis.firstOrNull ?? '😊';
-                        });
-                      }
-                    },
-                    selectedColor: theme.colorScheme.primaryContainer,
-                    checkmarkColor: theme.colorScheme.onPrimaryContainer,
-                  );
-                }).toList(),
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: _categories.map((cat) {
+              final isSelected = _selectedCategory == cat['value'];
+              return ChoiceChip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(cat['icon'] as IconData, size: 18),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(cat['label'] as String),
+                  ],
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _selectedCategory = cat['value'] as String;
+                      final emojis = _emojiCategories[_selectedCategory] ?? [];
+                      _selectedEmoji = emojis.firstOrNull ?? '😊';
+                    });
+                  }
+                },
+                selectedColor: theme.colorScheme.primaryContainer,
+                checkmarkColor: theme.colorScheme.onPrimaryContainer,
+              );
+            }).toList(),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
+
           // Выбор эмодзи
-          Text(
-            'Выберите эмодзи',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 12),
+          Text('Выберите эмодзи', style: AppTypography.labelLarge(context)),
+          const SizedBox(height: AppSpacing.md),
           Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children:
-                (_emojiCategories[_selectedCategory] ?? []).map((emoji) {
-                  final isSelected = _selectedEmoji == emoji;
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedEmoji = emoji),
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected
-                                ? theme.colorScheme.primaryContainer
-                                : theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color:
-                              isSelected
-                                  ? theme.colorScheme.primary
-                                  : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          emoji,
-                          style: const TextStyle(fontSize: 28),
-                        ),
-                      ),
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
+            children: (_emojiCategories[_selectedCategory] ?? []).map((emoji) {
+              final isSelected = _selectedEmoji == emoji;
+              return GestureDetector(
+                onTap: () => setState(() => _selectedEmoji = emoji),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? theme.colorScheme.primaryContainer
+                        : theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: AppRadius.radiusMd,
+                    border: Border.all(
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : Colors.transparent,
+                      width: 2,
                     ),
-                  );
-                }).toList(),
+                  ),
+                  child: Center(
+                    child: Text(emoji, style: const TextStyle(fontSize: 28)),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
+
           // Название
           TextField(
             controller: _nameController,
             decoration: InputDecoration(
               labelText: 'Название вещи',
               hintText: 'Например: любимая футболка',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
               prefixText: '$_selectedEmoji  ',
               errorText:
                   _errorMessage != null && _nameController.text.trim().isEmpty
-                      ? _errorMessage
-                      : null,
+                  ? _errorMessage
+                  : null,
             ),
             autofocus: true,
             enabled: !_isSubmitting,
             onSubmitted: (_) => _saveItem(),
           ),
-          // Сообщение об ошибке
           if (_errorMessage != null && _nameController.text.trim().isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
               child: Text(
                 _errorMessage!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -817,37 +759,30 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                 ),
               ),
             ),
-          const SizedBox(height: 24),
-          // Кнопка сохранения с индикатором загрузки
+          const SizedBox(height: AppSpacing.xxl),
+
+          // Кнопка сохранения
           SizedBox(
             width: double.infinity,
-            height: 56,
+            height: AppSpacing.inputHeight,
             child: FilledButton.icon(
               onPressed: _isSubmitting ? null : _saveItem,
-              icon:
-                  _isSubmitting
-                      ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                      : const Icon(Icons.save),
+              icon: _isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.save),
               label: Text(
                 _isSubmitting ? 'Добавление...' : 'Добавить в гардероб',
               ),
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );

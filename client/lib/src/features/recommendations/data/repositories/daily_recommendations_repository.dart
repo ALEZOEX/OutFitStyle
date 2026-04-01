@@ -6,9 +6,10 @@ import 'package:dio/dio.dart';
 /// Репозиторий для работы с ежедневными рекомендациями
 ///
 /// Взаимодействует с API эндпоинтами:
-/// - GET /api/v1/recommendations/daily - ежедневная рекомендация
-/// - GET /api/v1/recommendations/alternatives - альтернативные варианты
-/// - GET /api/v1/tips/daily - советы дня
+/// - GET /api/v1/recommendations - список рекомендаций
+/// - POST /api/v1/recommendations - создание рекомендации
+/// - POST /api/v1/recommendations/{id}/rate - оценка
+/// - POST /api/v1/recommendations/{id}/favorite - избранное
 class DailyRecommendationsRepository {
   final ApiClient _apiClient;
 
@@ -17,10 +18,10 @@ class DailyRecommendationsRepository {
 
   /// Получить ежедневную рекомендацию
   ///
-  /// Endpoint: GET /api/v1/recommendations/daily
+  /// Endpoint: GET /api/v1/recommendations
   Future<OutfitRecommendation> getDailyRecommendation() async {
     try {
-      final response = await _apiClient.get('/api/v1/recommendations/daily');
+      final response = await _apiClient.get('/api/v1/recommendations');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
@@ -44,13 +45,13 @@ class DailyRecommendationsRepository {
   ///
   /// [limit] - количество рекомендаций (по умолчанию 3)
   ///
-  /// Endpoint: GET /api/v1/recommendations/alternatives
+  /// Endpoint: GET /api/v1/recommendations
   Future<List<OutfitRecommendation>> getAlternativeRecommendations({
     int limit = 3,
   }) async {
     try {
       final response = await _apiClient.get(
-        '/api/v1/recommendations/alternatives',
+        '/api/v1/recommendations',
         params: {'limit': limit},
       );
 
@@ -140,18 +141,15 @@ class DailyRecommendationsRepository {
 
       // Добавляем предпочтения пользователя для персонализации рекомендаций
       if (userPreferences != null) {
-        body['user_preferences'] =
-            {
-              'style_preferences':
-                  userPreferences.preferredStyles.isNotEmpty
-                      ? userPreferences.preferredStyles
-                      : null,
-              'budget_range': _calculateBudgetRange(userPreferences.maxBudget),
-              'favorite_brands':
-                  userPreferences.preferredBrands.isNotEmpty
-                      ? userPreferences.preferredBrands
-                      : null,
-            }.removeNulls();
+        body['user_preferences'] = {
+          'style_preferences': userPreferences.preferredStyles.isNotEmpty
+              ? userPreferences.preferredStyles
+              : null,
+          'budget_range': _calculateBudgetRange(userPreferences.maxBudget),
+          'favorite_brands': userPreferences.preferredBrands.isNotEmpty
+              ? userPreferences.preferredBrands
+              : null,
+        }.removeNulls();
       }
 
       final response = await _apiClient.post(
@@ -237,11 +235,11 @@ class DailyRecommendationsRepository {
   ///
   /// [id] - ID рекомендации
   ///
-  /// Endpoint: POST /api/v1/recommendations/{id}/save
+  /// Endpoint: POST /api/v1/recommendations/{id}/favorite
   Future<OutfitRecommendation> saveRecommendation(String id) async {
     try {
       final response = await _apiClient.post(
-        '/api/v1/recommendations/$id/save',
+        '/api/v1/recommendations/$id/favorite',
       );
 
       if (response.statusCode == 200) {

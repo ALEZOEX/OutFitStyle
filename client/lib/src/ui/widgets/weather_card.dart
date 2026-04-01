@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/weather_data.dart';
+import '../../theme/app_theme.dart';
 
 /// Расширенная карточка погоды с прогнозом и деталями
 class WeatherCard extends StatelessWidget {
@@ -29,9 +30,9 @@ class WeatherCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: AppRadius.radiusXxl,
         side: BorderSide(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
         ),
       ),
       child: InkWell(
@@ -79,8 +80,8 @@ class WeatherCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: AppRadius.radiusMd,
               ),
               child: Icon(Icons.location_on, color: Colors.white, size: 18),
             ),
@@ -112,8 +113,8 @@ class WeatherCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: AppRadius.radiusMd,
               ),
               child: Icon(Icons.refresh, color: Colors.white, size: 20),
             ),

@@ -28,7 +28,7 @@ class RecommendationsRemoteDataSource
   Future<List<OutfitRecommendation>> getUserRecommendations(
     String userId,
   ) async {
-    final response = await _apiClient.get('/users/$userId/recommendations');
+    final response = await _apiClient.get('/api/v1/recommendations');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items = data['recommendations'] as List<dynamic>? ?? [];
@@ -44,7 +44,7 @@ class RecommendationsRemoteDataSource
 
   @override
   Future<OutfitRecommendation?> getRecommendationById(String id) async {
-    final response = await _apiClient.get('/recommendations/$id');
+    final response = await _apiClient.get('/api/v1/recommendations/$id');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
       return OutfitRecommendation.fromJson(data);
@@ -55,7 +55,7 @@ class RecommendationsRemoteDataSource
   @override
   Future<void> saveRecommendation(OutfitRecommendation recommendation) async {
     final response = await _apiClient.post(
-      '/recommendations',
+      '/api/v1/recommendations',
       data: recommendation.toJson(),
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
@@ -70,7 +70,7 @@ class RecommendationsRemoteDataSource
       throw RecommendationsRemoteException('ID рекомендации не указан');
     }
     final response = await _apiClient.put(
-      '/recommendations/$id',
+      '/api/v1/recommendations/$id',
       data: recommendation.toJson(),
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
@@ -80,7 +80,7 @@ class RecommendationsRemoteDataSource
 
   @override
   Future<void> deleteRecommendation(String id) async {
-    final response = await _apiClient.delete('/recommendations/$id');
+    final response = await _apiClient.delete('/api/v1/recommendations/$id');
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsRemoteException('Не удалось удалить рекомендацию');
     }
@@ -89,8 +89,8 @@ class RecommendationsRemoteDataSource
   @override
   Future<void> likeRecommendation(String id, bool liked) async {
     final response = await _apiClient.post(
-      '/recommendations/$id/like',
-      data: {'liked': liked},
+      '/api/v1/recommendations/$id/favorite',
+      data: {'is_favorite': liked},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsRemoteException('Не удалось лайкнуть рекомендацию');
@@ -100,8 +100,8 @@ class RecommendationsRemoteDataSource
   @override
   Future<void> saveRecommendationForLater(String id, bool saved) async {
     final response = await _apiClient.post(
-      '/recommendations/$id/save',
-      data: {'saved': saved},
+      '/api/v1/recommendations/$id/favorite',
+      data: {'is_favorite': saved},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw RecommendationsRemoteException(
@@ -116,7 +116,7 @@ class RecommendationsRemoteDataSource
     double temperature,
   ) async {
     final response = await _apiClient.get(
-      '/recommendations/weather',
+      '/api/v1/recommendations',
       params: {
         'condition': weatherCondition,
         'temperature': temperature.toString(),
@@ -140,7 +140,7 @@ class RecommendationsRemoteDataSource
 
   @override
   Future<List<OutfitRecommendation>> getTrendingRecommendations() async {
-    final response = await _apiClient.get('/recommendations/trending');
+    final response = await _apiClient.get('/api/v1/recommendations');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
       final items =
@@ -160,7 +160,7 @@ class RecommendationsRemoteDataSource
   @override
   Future<void> submitFeedback(String recommendationId, String feedback) async {
     final response = await _apiClient.post(
-      '/recommendations/$recommendationId/feedback',
+      '/api/v1/recommendations/$recommendationId/rate',
       data: {'feedback': feedback},
     );
     if (response.statusCode != 200 && response.statusCode != 204) {

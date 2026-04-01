@@ -228,15 +228,15 @@ class ProfileRepository {
 
   /// Получить предпочтения пользователя
   ///
-  /// Endpoint: GET /api/v1/users/preferences
+  /// Endpoint: GET /api/v1/user/preferences
   Future<Map<String, dynamic>> getPreferences() async {
     try {
-      final response = await _apiClient.get('/api/v1/users/preferences');
+      final response = await _apiClient.get('/api/v1/user/preferences');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
-        return prefData;
+        // Backend возвращает объект напрямую (не в {"preferences": {...}})
+        return data;
       } else {
         throw ProfileException(
           'Ошибка получения предпочтений: ${response.statusCode}',
@@ -255,20 +255,20 @@ class ProfileRepository {
   ///
   /// [preferences] - новые предпочтения
   ///
-  /// Endpoint: PUT /api/v1/users/preferences
+  /// Endpoint: PUT /api/v1/user/preferences
   Future<Map<String, dynamic>> updatePreferences(
     Map<String, dynamic> preferences,
   ) async {
     try {
       final response = await _apiClient.put(
-        '/api/v1/users/preferences',
+        '/api/v1/user/preferences',
         data: preferences,
       );
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
-        return prefData;
+        // Backend возвращает объект напрямую (не в {"preferences": {...}})
+        return data;
       } else {
         throw ProfileException(
           'Ошибка обновления предпочтений: ${response.statusCode}',

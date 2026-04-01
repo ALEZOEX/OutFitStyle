@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 /// Репозиторий для работы с предпочтениями пользователя
 ///
 /// Взаимодействует с API эндпоинтами:
-/// - GET /api/v1/users/preferences - получение предпочтений
-/// - PUT /api/v1/users/preferences - обновление предпочтений
+/// - GET /api/v1/user/preferences - получение предпочтений
+/// - PUT /api/v1/user/preferences - обновление предпочтений
 class PreferencesRepository {
   final ApiClient _apiClient;
 
@@ -14,15 +14,15 @@ class PreferencesRepository {
 
   /// Получить предпочтения пользователя
   ///
-  /// Endpoint: GET /api/v1/users/preferences
+  /// Endpoint: GET /api/v1/user/preferences
   Future<Map<String, dynamic>> getPreferences() async {
     try {
-      final response = await _apiClient.get('/api/v1/users/preferences');
+      final response = await _apiClient.get('/api/v1/user/preferences');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
-        return prefData;
+        // Backend возвращает объект напрямую (не в {"preferences": {...}})
+        return data;
       } else {
         throw PreferencesException(
           'Ошибка получения предпочтений: ${response.statusCode}',
@@ -41,7 +41,7 @@ class PreferencesRepository {
   ///
   /// [preferences] - новые предпочтения
   ///
-  /// Endpoint: PUT /api/v1/users/preferences
+  /// Endpoint: PUT /api/v1/user/preferences
   Future<Map<String, dynamic>> updatePreferences(
     Map<String, dynamic> preferences,
   ) async {
@@ -49,14 +49,14 @@ class PreferencesRepository {
       final body = _preparePreferencesBody(preferences);
 
       final response = await _apiClient.put(
-        '/api/v1/users/preferences',
+        '/api/v1/user/preferences',
         data: body,
       );
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final prefData = data['preferences'] as Map<String, dynamic>? ?? data;
-        return prefData;
+        // Backend возвращает объект напрямую (не в {"preferences": {...}})
+        return data;
       } else {
         throw PreferencesException(
           'Ошибка обновления предпочтений: ${response.statusCode}',

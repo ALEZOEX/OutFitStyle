@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../presentation/providers/session_provider.dart';
 import '../../../ui/misc/app_avatar.dart';
 import '../../../utils/auth_utils.dart';
+import '../../../theme/app_theme.dart';
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
 final authErrorProvider = StateProvider<String?>((ref) => null);
@@ -26,27 +27,23 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    // Проверяем, не авторизован ли уже пользователь
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authState = ref.read(authStateProvider);
       authState.whenData((isLoggedIn) {
         if (isLoggedIn) {
-          // Уже авторизован, GoRouter сам перенаправит через redirect
-          // НЕ вызывать context.go() вручную
+          // GoRouter redirect обработает
         }
       });
     });
   }
 
   void _handleAuthSuccess() {
-    // Проверяем есть ли redirect параметр
     final uri = GoRouterState.of(context).uri;
     final redirect = uri.queryParameters['redirect'];
 
     if (redirect != null && redirect.isNotEmpty) {
       context.go(redirect);
     } else {
-      // По умолчанию на главную
       context.go('/home');
     }
   }
@@ -59,34 +56,32 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.dispose();
   }
 
-  /// Вход через Google через Firebase Auth
   Future<void> _signInWithGoogle() async {
     if (!mounted) return;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => PopScope(
-            canPop: false,
-            child: AlertDialog(
-              title: const Text('Вход через Google'),
-              content: const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Откройте окно Google для входа...'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Отмена'),
-                ),
-              ],
-            ),
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          title: const Text('Вход через Google'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: AppSpacing.lg),
+              Text('Откройте окно Google для входа...'),
+            ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Отмена'),
+            ),
+          ],
+        ),
+      ),
     );
 
     try {
@@ -101,9 +96,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               'Не удалось войти через Google';
         }
       } else {
-        if (mounted) {
-          _handleAuthSuccess();
-        }
+        if (mounted) _handleAuthSuccess();
       }
     } catch (e) {
       if (mounted) Navigator.of(context).pop(false);
@@ -114,17 +107,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
         showDialog(
           context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Ошибка входа'),
-                content: Text(errorMsg),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
+          builder: (context) => AlertDialog(
+            title: const Text('Ошибка входа'),
+            content: Text(errorMsg),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
               ),
+            ],
+          ),
         );
       }
     }
@@ -142,15 +134,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       final password = _passwordController.text;
       final name = _nameController.text.trim();
 
-      // Получаем SessionManager
       final sessionManager = ref.read(sessionManagerProvider);
 
       bool success;
       if (_isLogin) {
-        // Вход через email/password
         success = await sessionManager.signIn(email: email, password: password);
       } else {
-        // Регистрация через email/password
         success = await sessionManager.signUp(
           email,
           password,
@@ -158,14 +147,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         );
       }
 
-      if (!success) {
-        throw Exception('Не удалось выполнить операцию');
-      }
+      if (!success) throw Exception('Не удалось выполнить операцию');
 
-      // При успехе перенаправляем на нужную страницу
-      if (mounted) {
-        _handleAuthSuccess();
-      }
+      if (mounted) _handleAuthSuccess();
     } catch (e) {
       if (mounted) {
         ref.read(authErrorProvider.notifier).state = AuthUtils.extractAuthError(
@@ -173,9 +157,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         );
       }
     } finally {
-      if (mounted) {
-        ref.read(authLoadingProvider.notifier).state = false;
-      }
+      if (mounted) ref.read(authLoadingProvider.notifier).state = false;
     }
   }
 
@@ -184,125 +166,123 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final isLoading = ref.watch(authLoadingProvider);
     final error = ref.watch(authErrorProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isWide = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(AppSpacing.xxl),
             child: SizedBox(
               width: isWide ? 400 : double.infinity,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Логотип
-                  const AppAvatar(radius: 50, placeholderText: 'OS'),
-                  const SizedBox(height: 24),
+                  // Градиентный аватар с логотипом
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: AppGradients.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'OS',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
 
                   // Заголовок
                   Text(
                     'OutfitStyle',
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color:
-                          theme.brightness == Brightness.dark
-                              ? Colors.white
-                              : theme.colorScheme.primary,
-                    ),
+                    style: AppTypography.headlineLarge(
+                      context,
+                    ).copyWith(color: theme.colorScheme.primary),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     _isLogin ? 'С возвращением!' : 'Создать аккаунт',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                    style: AppTypography.bodyLarge(
+                      context,
+                    ).copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xxxl),
 
                   // Форма
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Имя (только для регистрации)
                         if (!_isLogin) ...[
                           TextFormField(
                             controller: _nameController,
                             textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Имя',
-                              prefixIcon: const Icon(Icons.person_outlined),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                              prefixIcon: Icon(Icons.person_outlined),
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
+                              if (value == null || value.isEmpty)
                                 return 'Введите имя';
-                              }
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.lg),
                         ],
 
-                        // Email
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Email',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            prefixIcon: Icon(Icons.email_outlined),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
+                            if (value == null || value.isEmpty)
                               return 'Введите email';
-                            }
-                            if (!value.contains('@')) {
+                            if (!value.contains('@'))
                               return 'Некорректный email';
-                            }
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.lg),
 
-                        // Пароль
                         TextFormField(
                           controller: _passwordController,
                           obscureText: true,
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _submit(),
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Пароль',
-                            prefixIcon: const Icon(Icons.lock_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            prefixIcon: Icon(Icons.lock_outlined),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
+                            if (value == null || value.isEmpty)
                               return 'Введите пароль';
-                            }
-                            if (value.length < 12) {
-                              return 'Минимум 12 символов';
-                            }
-                            if (value.length > 72) {
-                              return 'Максимум 72 символа';
-                            }
-                            if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                            if (value.length < 12) return 'Минимум 12 символов';
+                            if (value.length > 72) return 'Максимум 72 символа';
+                            if (!RegExp(r'[A-Z]').hasMatch(value))
                               return 'Нужна хотя бы одна заглавная буква';
-                            }
-                            if (!RegExp(r'[a-z]').hasMatch(value)) {
+                            if (!RegExp(r'[a-z]').hasMatch(value))
                               return 'Нужна хотя бы одна строчная буква';
-                            }
-                            if (!RegExp(r'[0-9]').hasMatch(value)) {
+                            if (!RegExp(r'[0-9]').hasMatch(value))
                               return 'Нужна хотя бы одна цифра';
-                            }
                             if (!RegExp(
                               r'[!@#$%^&*()\-_=+\[\]{}|;:<>?,./~`\\]',
                             ).hasMatch(value)) {
@@ -312,14 +292,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           },
                         ),
 
-                        // Подсказка к паролю при регистрации
                         if (!_isLogin) ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: AppSpacing.xs),
                           Text(
                             'Мин. 12 символов: A-Z, a-z, 0-9, спецсимвол',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
+                            style: AppTypography.bodySmall(context),
                           ),
                         ],
                       ],
@@ -328,12 +305,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
                   // Ошибка
                   if (error != null) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.errorContainer,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: AppRadius.radiusSm,
                       ),
                       child: Row(
                         children: [
@@ -342,7 +319,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             color: theme.colorScheme.onErrorContainer,
                             size: 20,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: Text(
                               error,
@@ -356,33 +333,75 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                   ],
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
 
-                  // Кнопка входа/регистрации
+                  // Кнопка входа/регистрации — gradient style
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: FilledButton.icon(
-                      onPressed: isLoading ? null : _submit,
-                      icon:
-                          isLoading
-                              ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: isLoading ? null : AppGradients.heroButton,
+                        color: isLoading
+                            ? theme.colorScheme.surfaceContainerHighest
+                            : null,
+                        borderRadius: AppRadius.radiusPill,
+                        boxShadow: isLoading
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
                                 ),
-                              )
-                              : Icon(_isLogin ? Icons.login : Icons.person_add),
-                      label: Text(
-                        isLoading
-                            ? 'Загрузка...'
-                            : (_isLogin ? 'Войти' : 'Зарегистрироваться'),
+                              ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: isLoading ? null : _submit,
+                          borderRadius: AppRadius.radiusPill,
+                          child: Center(
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        _isLogin
+                                            ? Icons.login
+                                            : Icons.person_add,
+                                        size: 18,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: AppSpacing.sm),
+                                      Text(
+                                        _isLogin
+                                            ? 'Войти'
+                                            : 'Зарегистрироваться',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Переключатель вход/регистрация
                   TextButton(
@@ -399,28 +418,32 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                   ),
 
-                  // Забыли пароль?
                   if (_isLogin)
                     TextButton(
                       onPressed: () => context.push('/forgot-password'),
                       child: const Text('Забыли пароль?'),
                     ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xxxl),
 
                   // Разделитель
                   Row(
                     children: [
-                      Expanded(child: Divider(color: theme.dividerColor)),
+                      Expanded(child: Divider(color: theme.dividerTheme.color)),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('или', style: theme.textTheme.bodySmall),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                        ),
+                        child: Text(
+                          'или',
+                          style: AppTypography.bodySmall(context),
+                        ),
                       ),
-                      Expanded(child: Divider(color: theme.dividerColor)),
+                      Expanded(child: Divider(color: theme.dividerTheme.color)),
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
 
                   // Кнопка Google
                   OutlinedButton.icon(
@@ -432,7 +455,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     label: const Text('Продолжить с Google'),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                      ),
                       minimumSize: const Size(double.infinity, 50),
                     ),
                   ),

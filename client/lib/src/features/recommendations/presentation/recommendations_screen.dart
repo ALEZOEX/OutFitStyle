@@ -6,6 +6,7 @@ import '../presentation/providers/recommendations_provider.dart';
 import '../widgets/recommendation_card.dart';
 import '../../../ui/widgets/city_selector_widget.dart';
 import '../../../ui/widgets/max_width_container.dart';
+import '../../../theme/app_theme.dart';
 
 /// Экран персональных рекомендаций
 /// Без социальной функциональности — только персональные подборки
@@ -27,11 +28,11 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 400),
     );
     _fadeAnimation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOut,
     );
     _animationController.forward();
   }
@@ -173,9 +174,8 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                   ],
                 ),
                 IconButton(
-                  onPressed:
-                      () =>
-                          ref.read(recommendationsProvider.notifier).refresh(),
+                  onPressed: () =>
+                      ref.read(recommendationsProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh),
                   tooltip: 'Обновить',
                   style: IconButton.styleFrom(
@@ -244,30 +244,30 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.lg,
+      ),
       decoration: BoxDecoration(
-        color:
-            isDarkMode
-                ? color.withValues(alpha: 0.2)
-                : color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: isDarkMode
+            ? color.withValues(alpha: 0.2)
+            : color.withValues(alpha: 0.1),
+        borderRadius: AppRadius.radiusMd,
         border: Border.all(
-          color:
-              isDarkMode
-                  ? color.withValues(alpha: 0.3)
-                  : color.withValues(alpha: 0.2),
+          color: isDarkMode
+              ? color.withValues(alpha: 0.3)
+              : color.withValues(alpha: 0.2),
           width: 1,
         ),
-        boxShadow:
-            isDarkMode
-                ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.15),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                  ),
-                ]
-                : null,
+        boxShadow: isDarkMode
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.15),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                ),
+              ]
+            : null,
       ),
       child: Column(
         children: [
@@ -283,10 +283,9 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color:
-                  isDarkMode
-                      ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
-                      : theme.colorScheme.onSurfaceVariant,
+              color: isDarkMode
+                  ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -342,29 +341,25 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           shadowColor: theme.colorScheme.primary.withValues(
             alpha: isDarkMode ? 0.4 : 0.2,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXl),
           child: InkWell(
-            onTap:
-                state.isGenerating
-                    ? null
-                    : () => _generateRecommendation(context),
+            onTap: state.isGenerating
+                ? null
+                : () => _generateRecommendation(context),
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors:
-                      isDarkMode
-                          ? [
-                            theme.colorScheme.primary.withValues(alpha: 0.95),
-                            theme.colorScheme.secondary.withValues(alpha: 1.0),
-                          ]
-                          : [
-                            theme.colorScheme.primary.withValues(alpha: 0.8),
-                            theme.colorScheme.secondary.withValues(alpha: 0.9),
-                          ],
+                  colors: isDarkMode
+                      ? [
+                          theme.colorScheme.primary.withValues(alpha: 0.95),
+                          theme.colorScheme.secondary.withValues(alpha: 1.0),
+                        ]
+                      : [
+                          theme.colorScheme.primary.withValues(alpha: 0.8),
+                          theme.colorScheme.secondary.withValues(alpha: 0.9),
+                        ],
                 ),
               ),
               padding: const EdgeInsets.all(20),
@@ -406,31 +401,29 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                         alpha: 0.25,
                       ),
                       shape: BoxShape.circle,
-                      boxShadow:
-                          isDarkMode
-                              ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.3),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                ),
-                              ]
-                              : null,
-                    ),
-                    child:
-                        state.isGenerating
-                            ? Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: theme.colorScheme.onPrimary,
+                      boxShadow: isDarkMode
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                spreadRadius: 2,
                               ),
-                            )
-                            : Icon(
-                              Icons.auto_awesome,
+                            ]
+                          : null,
+                    ),
+                    child: state.isGenerating
+                        ? Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
                               color: theme.colorScheme.onPrimary,
-                              size: 28,
                             ),
+                          )
+                        : Icon(
+                            Icons.auto_awesome,
+                            color: theme.colorScheme.onPrimary,
+                            size: 28,
+                          ),
                   ),
                 ],
               ),
@@ -502,13 +495,12 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
                 padding: const EdgeInsets.only(bottom: 16),
                 child: RecommendationCard(
                   recommendation: recommendation,
-                  onDetailsPressed:
-                      () =>
-                          context.push('/recommendations/${recommendation.id}'),
-                  onPlanPressed:
-                      () => _planRecommendation(context, recommendation.id),
-                  onUsePressed:
-                      () => _useRecommendation(context, recommendation.id),
+                  onDetailsPressed: () =>
+                      context.push('/recommendations/${recommendation.id}'),
+                  onPlanPressed: () =>
+                      _planRecommendation(context, recommendation.id),
+                  onUsePressed: () =>
+                      _useRecommendation(context, recommendation.id),
                 ),
               ),
             ),
@@ -646,12 +638,15 @@ class _QuickActionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: AppRadius.radiusLg,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.md,
+          horizontal: AppSpacing.lg,
+        ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.radiusLg,
           border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
