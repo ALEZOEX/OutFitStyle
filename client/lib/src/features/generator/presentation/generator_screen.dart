@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +8,6 @@ import '../../../presentation/providers/weather_provider.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/logger.dart';
 
-/// Экран генератора образов — создание персональной рекомендации
 class GeneratorScreen extends ConsumerStatefulWidget {
   const GeneratorScreen({super.key});
 
@@ -20,7 +20,6 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  // Параметры генерации
   String _selectedOccasion = 'casual';
   String _selectedActivity = 'everyday';
   double _temperatureOverride = 20;
@@ -60,7 +59,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
   ];
 
   final _activities = [
-    {'id': 'everyday', 'label': 'На каждый день', 'icon': Icons.calendar_today},
+    {'id': 'everyday', 'label': 'Каждый день', 'icon': Icons.calendar_today},
     {'id': 'work', 'label': 'Работа', 'icon': Icons.work},
     {'id': 'walk', 'label': 'Прогулка', 'icon': Icons.park},
     {'id': 'party', 'label': 'Вечеринка', 'icon': Icons.celebration},
@@ -100,7 +99,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -110,23 +109,23 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
                       icon: Icons.event,
                       child: _buildOccasionSelector(context),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.lg),
                     _buildSection(
                       context,
                       title: 'Активность',
                       icon: Icons.directions_run,
                       child: _buildActivitySelector(context),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.lg),
                     _buildSection(
                       context,
                       title: 'Температура',
                       icon: Icons.thermostat,
                       child: _buildTemperatureSelector(context),
                     ),
-                    const SizedBox(height: AppSpacing.xxxl),
+                    const SizedBox(height: AppSpacing.xxl),
                     _buildGenerateButton(context, state),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),
@@ -138,47 +137,42 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
   }
 
   Widget _buildHeader(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
+    return Padding(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xl,
-        AppSpacing.lg,
-        AppSpacing.xl,
         AppSpacing.xxl,
+        AppSpacing.lg,
+        AppSpacing.xxl,
+        AppSpacing.lg,
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
             decoration: BoxDecoration(
               gradient: AppGradients.primary,
-              borderRadius: AppRadius.radiusLg,
+              borderRadius: AppRadius.radiusMd,
             ),
             child: const Icon(
               Icons.auto_awesome,
               color: Colors.white,
-              size: 32,
+              size: 20,
             ),
           ),
-          const SizedBox(width: AppSpacing.lg),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text('Генератор', style: AppTypography.headlineSmall(context)),
                 Text(
-                  'Генератор образов',
-                  style: AppTypography.headlineSmall(context),
-                ),
-                Text(
-                  'Создайте идеальный outfit',
+                  'Подберите образ',
                   style: AppTypography.bodySmall(context),
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, size: 20),
             onPressed: () {
               setState(() {
                 _selectedOccasion = 'casual';
@@ -194,47 +188,59 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     );
   }
 
+  /// Glass секция
   Widget _buildSection(
     BuildContext context, {
     required String title,
     required IconData icon,
     required Widget child,
   }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDarkElevated : AppColors.grey50,
-        borderRadius: AppRadius.radiusXl,
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return ClipRRect(
+      borderRadius: AppRadius.radiusXl,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.white.withValues(alpha: 0.6),
+            borderRadius: AppRadius.radiusXl,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.white.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: theme.colorScheme.primary, size: 24),
-              const SizedBox(width: AppSpacing.sm),
-              Text(title, style: AppTypography.labelLarge(context)),
+              Row(
+                children: [
+                  Icon(icon, color: AppColors.primary, size: 18),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(title, style: AppTypography.labelLarge(context)),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              child,
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          child,
-        ],
+        ),
       ),
     );
   }
 
+  /// Карточки случая — компактные, без толстых бордеров
   Widget _buildOccasionSelector(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Wrap(
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.md,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
       children: _occasions.map((occasion) {
         final isSelected = _selectedOccasion == occasion['id'];
         final color = occasion['color'] as Color;
@@ -245,46 +251,103 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? color.withValues(alpha: 0.15)
-                  : theme.colorScheme.surface.withValues(alpha: 0.5),
-              borderRadius: AppRadius.radiusLg,
+                  ? color.withValues(alpha: isDark ? 0.2 : 0.12)
+                  : Colors.transparent,
+              borderRadius: AppRadius.radiusPill,
               border: Border.all(
                 color: isSelected
-                    ? color
-                    : theme.colorScheme.outline.withValues(alpha: 0.2),
-                width: isSelected ? 2 : 1,
+                    ? color.withValues(alpha: 0.6)
+                    : (isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : AppColors.grey200),
+                width: 1,
               ),
             ),
-            child: Column(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? color.withValues(alpha: 0.3)
-                        : theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: AppRadius.radiusMd,
-                  ),
-                  child: Icon(
-                    occasion['icon'] as IconData,
-                    color: isSelected
-                        ? color
-                        : theme.colorScheme.onSurfaceVariant,
-                    size: 28,
-                  ),
+                Icon(
+                  occasion['icon'] as IconData,
+                  size: 16,
+                  color: isSelected
+                      ? color
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(width: AppSpacing.xs),
                 Text(
                   occasion['label'] as String,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected
                         ? color
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  /// Чипы активности — pill-стиль
+  Widget _buildActivitySelector(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: _activities.map((activity) {
+        final isSelected = _selectedActivity == activity['id'];
+
+        return GestureDetector(
+          onTap: () =>
+              setState(() => _selectedActivity = activity['id'] as String),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm - 2,
+            ),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? theme.colorScheme.primaryContainer
+                  : Colors.transparent,
+              borderRadius: AppRadius.radiusPill,
+              border: Border.all(
+                color: isSelected
+                    ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                    : (isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : AppColors.grey200),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  activity['icon'] as IconData,
+                  size: 14,
+                  color: isSelected
+                      ? theme.colorScheme.onPrimaryContainer
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  activity['label'] as String,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected
+                        ? theme.colorScheme.onPrimaryContainer
                         : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -296,56 +359,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     );
   }
 
-  Widget _buildActivitySelector(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: _activities.map((activity) {
-        final isSelected = _selectedActivity == activity['id'];
-
-        return ChoiceChip(
-          avatar: Icon(
-            activity['icon'] as IconData,
-            size: 18,
-            color: isSelected
-                ? theme.colorScheme.onPrimaryContainer
-                : theme.colorScheme.onSurfaceVariant,
-          ),
-          label: Text(
-            activity['label'] as String,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isSelected
-                  ? theme.colorScheme.onPrimaryContainer
-                  : theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          selected: isSelected,
-          onSelected: (selected) {
-            if (selected) {
-              setState(() => _selectedActivity = activity['id'] as String);
-            }
-          },
-          selectedColor: theme.colorScheme.primaryContainer,
-          checkmarkColor: theme.colorScheme.onPrimaryContainer,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.radiusMd,
-            side: BorderSide(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withValues(alpha: 0.3),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
   Widget _buildTemperatureSelector(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Column(
       children: [
         Row(
@@ -355,31 +369,31 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
                 _useCurrentWeather
                     ? 'Использовать текущую погоду'
                     : 'Температура: ${_temperatureOverride.round()}°C',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTypography.bodyMedium(
+                  context,
+                ).copyWith(fontWeight: FontWeight.w500),
               ),
             ),
-            Switch(
-              value: _useCurrentWeather,
-              onChanged: (value) {
-                setState(() => _useCurrentWeather = value);
-              },
+            Transform.scale(
+              scale: 0.8,
+              child: Switch(
+                value: _useCurrentWeather,
+                onChanged: (value) =>
+                    setState(() => _useCurrentWeather = value),
+              ),
             ),
           ],
         ),
         if (!_useCurrentWeather) ...[
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
           SliderTheme(
             data: SliderThemeData(
-              activeTrackColor: theme.colorScheme.primary,
-              inactiveTrackColor: theme.colorScheme.primary.withValues(
-                alpha: 0.3,
-              ),
-              thumbColor: theme.colorScheme.primary,
-              overlayColor: theme.colorScheme.primary.withValues(alpha: 0.2),
-              trackHeight: 6,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+              activeTrackColor: AppColors.primary,
+              inactiveTrackColor: AppColors.primary.withValues(alpha: 0.2),
+              thumbColor: AppColors.primary,
+              overlayColor: AppColors.primary.withValues(alpha: 0.1),
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
             ),
             child: Slider(
               value: _temperatureOverride,
@@ -387,28 +401,17 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
               max: 40,
               divisions: 60,
               label: '${_temperatureOverride.round()}°C',
-              onChanged: (value) {
-                setState(() => _temperatureOverride = value);
-              },
+              onChanged: (value) =>
+                  setState(() => _temperatureOverride = value),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '-20°C',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: const Color(0xFF60A5FA), // cold blue
-                  ),
-                ),
-                Text(
-                  '40°C',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: const Color(0xFFF87171), // hot red
-                  ),
-                ),
+                Text('-20°', style: AppTypography.bodySmall(context)),
+                Text('40°', style: AppTypography.bodySmall(context)),
               ],
             ),
           ),
@@ -421,72 +424,73 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     BuildContext context,
     RecommendationsState state,
   ) {
-    final theme = Theme.of(context);
     final isGenerating = state.isGenerating;
 
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      height: 64,
-      decoration: BoxDecoration(
-        gradient: isGenerating ? null : AppGradients.heroButton,
-        color: isGenerating ? theme.colorScheme.surfaceContainerHighest : null,
-        borderRadius: AppRadius.radiusXl,
-        boxShadow: isGenerating
-            ? null
-            : [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isGenerating ? null : () => _generateRecommendation(context),
-          borderRadius: AppRadius.radiusXl,
-          child: Center(
-            child: isGenerating
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+      height: 52,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: isGenerating ? null : AppGradients.heroButton,
+          color: isGenerating ? AppColors.grey200 : null,
+          borderRadius: AppRadius.radiusPill,
+          boxShadow: isGenerating
+              ? null
+              : [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: isGenerating ? null : () => _generateRecommendation(context),
+            borderRadius: AppRadius.radiusPill,
+            child: Center(
+              child: isGenerating
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Text(
-                        'Генерация...',
-                        style: AppTypography.headlineSmall(
-                          context,
-                        ).copyWith(color: Colors.white),
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.auto_awesome,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Text(
-                        'Сгенерировать образ',
-                        style: AppTypography.headlineSmall(
-                          context,
-                        ).copyWith(color: Colors.white),
-                      ),
-                    ],
-                  ),
+                        SizedBox(width: AppSpacing.sm),
+                        Text(
+                          'Генерация...',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.auto_awesome, color: Colors.white, size: 18),
+                        SizedBox(width: AppSpacing.sm),
+                        Text(
+                          'Сгенерировать образ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
           ),
         ),
       ),
@@ -495,9 +499,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
 
   Future<void> _generateRecommendation(BuildContext context) async {
     AppLogger.info('[GeneratorScreen] _generateRecommendation вызван');
-    AppLogger.info('[GeneratorScreen] _selectedOccasion: $_selectedOccasion');
-    AppLogger.info('[GeneratorScreen] _useCurrentWeather: $_useCurrentWeather');
-    
+
     final notifier = ref.read(recommendationsProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
 
@@ -508,32 +510,27 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           weatherProvider((lat: 55.7558, lon: 37.6173)).future,
         );
         temperature = weatherAsync.temperature ?? temperature;
-        AppLogger.info('[GeneratorScreen] Температура из погоды: $temperature');
       } catch (e) {
         AppLogger.warning('[GeneratorScreen] Ошибка получения погоды: $e');
       }
     }
 
-    AppLogger.info('[GeneratorScreen] Вызов notifier.generateRecommendation...');
     final result = await notifier.generateRecommendation(
       temperature: temperature,
       weatherCondition: 'sunny',
       occasion: _selectedOccasion,
     );
-    
-    AppLogger.info('[GeneratorScreen] Результат: $result');
 
     if (!context.mounted) return;
 
     if (result != null) {
-      AppLogger.info('[GeneratorScreen] Успешная генерация, показываю SnackBar');
       messenger.showSnackBar(
         SnackBar(
           content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: AppSpacing.md),
-              const Text('Образ сгенерирован!'),
+            children: const [
+              Icon(Icons.check_circle, color: Colors.white, size: 18),
+              SizedBox(width: AppSpacing.sm),
+              Text('Образ сгенерирован!'),
             ],
           ),
           backgroundColor: AppColors.success,
@@ -542,9 +539,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           action: SnackBarAction(
             label: 'Посмотреть',
             textColor: Colors.white,
-            onPressed: () {
-              context.go('/recommendations');
-            },
+            onPressed: () => context.go('/recommendations'),
           ),
         ),
       );
@@ -552,10 +547,10 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
       messenger.showSnackBar(
         SnackBar(
           content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: AppSpacing.md),
-              const Text('Ошибка генерации'),
+            children: const [
+              Icon(Icons.error_outline, color: Colors.white, size: 18),
+              SizedBox(width: AppSpacing.sm),
+              Text('Ошибка генерации'),
             ],
           ),
           backgroundColor: AppColors.error,
