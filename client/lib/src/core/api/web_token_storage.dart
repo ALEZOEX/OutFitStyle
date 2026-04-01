@@ -46,3 +46,23 @@ String? getAccessTokenFromLocalStorage() {
     return null;
   }
 }
+
+/// Очистка access_token из localStorage (только для Web)
+void clearAccessTokenFromLocalStorage() {
+  try {
+    web.window.localStorage.removeItem('access_token');
+    web.window.localStorage.removeItem('flutter.access_token');
+    web.window.localStorage.removeItem('refresh_token');
+    web.window.localStorage.removeItem('user_session');
+    developer.log(
+      '[WebTokenStorage] ✅ Tokens cleared from localStorage',
+      name: 'WebTokenStorage',
+    );
+  } catch (e) {
+    developer.log(
+      '❌ [WebTokenStorage] ERROR clearing tokens from localStorage: $e',
+      name: 'WebTokenStorage',
+      level: 1000,
+    );
+  }
+}
