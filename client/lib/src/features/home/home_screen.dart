@@ -248,22 +248,22 @@ class _OutfitOfDaySection extends StatelessWidget {
                             vertical: AppSpacing.xs,
                           ),
                           decoration: BoxDecoration(
-                            gradient: AppGradients.primary,
+                            color: theme.colorScheme.primaryContainer,
                             borderRadius: AppRadius.radiusPill,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.thermostat,
                                 size: 16,
-                                color: Colors.white,
+                                color: theme.colorScheme.onPrimaryContainer,
                               ),
                               const SizedBox(width: AppSpacing.xs),
                               Text(
                                 '${rec.temperature?.round() ?? 0}°C',
                                 style: theme.textTheme.labelLarge?.copyWith(
-                                  color: Colors.white,
+                                  color: theme.colorScheme.onPrimaryContainer,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -320,49 +320,20 @@ class _OutfitOfDaySection extends StatelessWidget {
 
                   SizedBox(
                     width: double.infinity,
-                    height: AppSpacing.buttonHeight,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: AppGradients.heroButton,
-                        borderRadius: AppRadius.radiusPill,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            if (rec.id != null) {
-                              context.push('/outfit/${rec.id}');
-                            }
-                          },
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        if (rec.id != null) {
+                          context.push('/outfit/${rec.id}');
+                        }
+                      },
+                      icon: const Icon(Icons.visibility_outlined, size: 18),
+                      label: const Text('Смотреть образ'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.md,
+                        ),
+                        shape: RoundedRectangleBorder(
                           borderRadius: AppRadius.radiusPill,
-                          child: const Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.visibility_outlined,
-                                  size: 18,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: AppSpacing.sm),
-                                Text(
-                                  'Смотреть образ',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ),
                       ),
                     ),

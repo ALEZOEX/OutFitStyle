@@ -71,7 +71,7 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper>
     setState(() {
       _slideAnimation =
           Tween<Offset>(
-            begin: Offset(fromLeft ? -1.0 : 1.0, 0),
+            begin: Offset(fromLeft ? 1.0 : -1.0, 0),
             end: Offset.zero,
           ).animate(
             CurvedAnimation(

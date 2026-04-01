@@ -173,58 +173,27 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 		occ = *req.Occasion
 	}
 
-	// Вместо синхронного вызова ML-сервиса, публикуем событие
-	contextData := map[string]interface{}{
-		"temperature":         ws.Temperature,
-		"feels_like":          ws.FeelsLike,
-		"humidity":            ws.Humidity,
-		"wind_speed":          ws.WindSpeed,
-		"weather_code":        ws.WeatherCode,
-		"occasion":            occ,
-		"requested_style":     reqStyle,
-		"requested_formality": reqFormality,
-		"location":            req.Location,
-		"latitude":            lat,
-		"longitude":           lon,
-	}
+	// Синхронный fallback — для 100 пользователей Kafka не нужна
+	// TODO: включить Kafka когда будет >1000 пользователей
+	modelVersion, processingMs, styleC, colorH, rankings := s.rankLiteOrFallback(ctx, userID, ws, occ, reqStyle, reqFormality, candidates, nil)
 
-	// Публикуем событие запроса рекомендации
-	err = s.eventPublisher.PublishRecommendationRequested(ctx, userID, contextData, convertCandidatesToInterface(candidates))
+	rec, itemsCreate, err := s.buildRecommendationFromRankings(ctx, userID, req, weatherJSON, modelVersion, processingMs, styleC, colorH, rankings, candByID, wardrobeLite, lat, lon)
 	if err != nil {
-		s.logger.Error("Не удалось опубликовать событие запроса рекомендации", zap.Error(err))
-		// Возвращаемся к синхронному вызову в случае ошибки публикации события
-		modelVersion, processingMs, styleC, colorH, rankings := s.rankLiteOrFallback(ctx, userID, ws, occ, reqStyle, reqFormality, candidates, nil)
-
-		rec, itemsCreate, err := s.buildRecommendationFromRankings(ctx, userID, req, weatherJSON, modelVersion, processingMs, styleC, colorH, rankings, candByID, wardrobeLite, lat, lon)
-		if err != nil {
-			return nil, err
-		}
-
-		// Создаем сессию для логирования в ML сервисе
-		session := &repositories.RecommendationSession{
-			UserID:          userID,
-			ContextHash:     nil, // Можно вычислить хэш от контекста
-			ModelVersion:    &modelVersion,
-			WeatherData:     weatherJSON,
-			UserPreferences: nil, // Можно сериализовать предпочтения пользователя
-		}
-
-		_, err = s.recRepo.CreateWithSession(ctx, session, rec, itemsCreate)
-		if err != nil {
-			return nil, errors.Wrap(err, "сохранение рекомендации с сессией")
-		}
-
-		return rec, nil
+		return nil, err
 	}
 
-	// Возвращаем заглушку рекомендации, пока асинхронная обработка не завершена
-	// В реальной системе здесь может быть логика возврата промиса или ID задачи
-	status := "processing"
-	rec := &domain.RecommendationRecord{
-		ID:        domain.NewID(),
-		UserID:    userID,
-		Status:    &status, // Статус указывает, что рекомендация обрабатывается
-		CreatedAt: time.Now(),
+	// Создаем сессию для логирования в ML сервисе
+	session := &repositories.RecommendationSession{
+		UserID:          userID,
+		ContextHash:     nil,
+		ModelVersion:    &modelVersion,
+		WeatherData:     weatherJSON,
+		UserPreferences: nil,
+	}
+
+	_, err = s.recRepo.CreateWithSession(ctx, session, rec, itemsCreate)
+	if err != nil {
+		return nil, errors.Wrap(err, "сохранение рекомендации с сессией")
 	}
 
 	return rec, nil
