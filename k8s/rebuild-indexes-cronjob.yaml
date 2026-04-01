@@ -57,7 +57,7 @@ spec:
           serviceAccountName: rebuild-indexes-monitor
           containers:
           - name: rebuild-indexes
-            image: ghcr.io/alezoex/outfitstyle-server:latest
+            image: postgres:15-alpine
             command:
             - /bin/sh
             - -c
@@ -65,22 +65,22 @@ spec:
               echo "=== Начало пересоздания индексов ==="
               echo "Время: $(date)"
               echo ""
-              
+
               # Запуск пересоздания индексов с логированием
-              psql "$DATABASE_URL" -f /app/migrations/rebuild_indexes.sql 2>&1 | tee /var/log/rebuild_indexes.log
-              
+              psql "$DATABASE_URL" -f /migrations/rebuild_indexes.sql 2>&1 | tee /var/log/rebuild_indexes.log
+
               EXIT_CODE=${PIPESTATUS[0]}
-              
+
               echo ""
               echo "=== Завершение пересоздания индексов ==="
               echo "Время завершения: $(date)"
               echo "Статус: $([ $EXIT_CODE -eq 0 ] && echo 'УСПЕШНО' || echo 'ОШИБКА')"
-              
+
               # Вывод размера индексов после пересоздания
               echo ""
               echo "=== Размер индексов после пересоздания ==="
               psql "$DATABASE_URL" -c "
-              SELECT 
+              SELECT
                   schemaname,
                   tablename,
                   indexname,
@@ -88,11 +88,11 @@ spec:
               FROM pg_indexes
               WHERE schemaname = 'public'
               ORDER BY pg_relation_size(indexrelid) DESC LIMIT 20;"
-              
+
               exit $EXIT_CODE
             env:
             - name: DB_HOST
-              value: postgres.outfitstyle.svc.cluster.local
+              value: postgres
             - name: DB_PORT
               value: "5432"
             - name: DB_USER
@@ -130,14 +130,46 @@ spec:
             volumeMounts:
             - name: log-volume
               mountPath: /var/log
+            - name: sql-volume
+              mountPath: /migrations
+              readOnly: true
           volumes:
           - name: log-volume
             emptyDir: {}
+          - name: sql-volume
+            configMap:
+              name: rebuild-indexes-sql
+              defaultMode: 0444
           restartPolicy: OnFailure
           initContainers:
           - name: wait-for-db
-            image: busybox:1.35
-            command: ['sh', '-c', 'until nc -z postgres.outfitstyle.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;']
+            image: postgres:15-alpine
+            command:
+              - sh
+              - -c
+              - |
+                echo "Waiting for PostgreSQL..."
+                until PGPASSWORD="$${DB_PASSWORD}" PGSSLMODE=disable psql -h postgres -p 5432 -U "$${DB_USER}" -d "$${DB_NAME}" -c "SELECT 1" > /dev/null 2>&1; do
+                  echo "waiting for postgres..."
+                  sleep 2
+                done
+                echo "PostgreSQL is ready!"
+            env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: db-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: db-password
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: outfitstyle-secrets
+                  key: db-name
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
