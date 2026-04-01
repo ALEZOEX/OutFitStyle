@@ -231,7 +231,7 @@ class SessionManager {
       // Extract and store access_token for Bearer authentication
       final accessToken = tokens['access_token'] as String?;
       final timestamp = DateTime.now().toIso8601String();
-      
+
       if (accessToken != null && accessToken.isNotEmpty) {
         // Сохраняем в SharedPreferences
         await _sharedPreferences.setString('access_token', accessToken);
@@ -263,7 +263,7 @@ class SessionManager {
             level: 1000,
           );
         }
-        
+
         // Верификация: читаем из localStorage (Web)
         final savedInLocalStorage = getAccessTokenFromLocalStorage();
         if (savedInLocalStorage != null && savedInLocalStorage.isNotEmpty) {
@@ -361,7 +361,9 @@ class SessionManager {
       if (webResult != null) {
         final user = webResult.user;
         if (user == null) {
-          AppLogger.warning('[$timestamp] [Auth] [GoogleSignIn] Google Sign-In отменён');
+          AppLogger.warning(
+            '[$timestamp] [Auth] [GoogleSignIn] Google Sign-In отменён',
+          );
           return false;
         }
         // Продолжаем обычный flow
@@ -369,7 +371,9 @@ class SessionManager {
       }
 
       // Если webResult == null, значит начался redirect — ждём перезагрузки
-      AppLogger.debug('[$timestamp] [Auth] [GoogleSignIn] Начат redirect, ждём перезагрузки...');
+      AppLogger.debug(
+        '[$timestamp] [Auth] [GoogleSignIn] Начат redirect, ждём перезагрузки...',
+      );
       return false;
     } catch (e) {
       AppLogger.error('Google Sign-In error: $e', e);
@@ -390,8 +394,10 @@ class SessionManager {
         return false;
       }
 
-      AppLogger.info('[GoogleSignIn] ✅ Redirect result: ${_maskEmail(user.email ?? 'unknown')}');
-      
+      AppLogger.info(
+        '[GoogleSignIn] ✅ Redirect result: ${_maskEmail(user.email ?? 'unknown')}',
+      );
+
       // Продолжаем обычный flow входа через Google
       return await _completeGoogleSignIn(user);
     } catch (e) {
@@ -520,11 +526,13 @@ class SessionManager {
           AppLogger.info(
             '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ Token verified in localStorage (${savedInLocalStorage.length} chars)',
           );
-          
+
           // Проверяем что это backend JWT, а не Firebase ID Token
           final tokenParts = savedInLocalStorage.split('.');
           final isJwt = tokenParts.length == 3;
-          if (isJwt && savedInLocalStorage.length >= 400 && savedInLocalStorage.length < 600) {
+          if (isJwt &&
+              savedInLocalStorage.length >= 400 &&
+              savedInLocalStorage.length < 600) {
             AppLogger.info(
               '[$backendTimestamp] [Auth] [GoogleSignIn] ✅ Backend JWT подтверждён (JWT=$isJwt, length=${savedInLocalStorage.length})',
             );
@@ -710,7 +718,7 @@ class SessionManager {
       // Extract and store access_token for Bearer authentication
       final accessToken = tokens['access_token'] as String?;
       final timestamp = DateTime.now().toIso8601String();
-      
+
       if (accessToken != null && accessToken.isNotEmpty) {
         await _sharedPreferences.setString('access_token', accessToken);
 
@@ -752,7 +760,7 @@ class SessionManager {
         }
       } else {
         developer.log(
-          '⚠️ [SessionManager] No access_token in register response for user: ${_maskEmail(email ?? 'unknown')}',
+          '⚠️ [SessionManager] No access_token in register response for user: ${_maskEmail(email)}',
           name: 'SessionManager',
         );
       }

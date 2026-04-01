@@ -16,14 +16,16 @@ Future<UserCredential?> checkGoogleRedirectResult() async {
   for (int attempt = 1; attempt <= 5; attempt++) {
     try {
       debugPrint('🔄 Google redirect check attempt $attempt/5...');
-      
+
       final result = await FirebaseAuth.instance.getRedirectResult();
-      if (result != null) {
-        debugPrint('✅ Google redirect result: ${result.user?.email ?? 'unknown'}');
+      if (result.user != null) {
+        debugPrint(
+          '✅ Google redirect result: ${result.user?.email ?? 'unknown'}',
+        );
         return result;
       }
-      
-      // Если результат null, ждём и пробуем снова
+
+      // Если пользователь не авторизован, ждём и пробуем снова
       if (attempt < 5) {
         await Future.delayed(Duration(milliseconds: 500 * attempt));
       }
@@ -46,7 +48,9 @@ Future<UserCredential?> signInWithGoogleWeb(GoogleAuthProvider provider) async {
   try {
     // Пробуем signInWithPopup
     final result = await FirebaseAuth.instance.signInWithPopup(provider);
-    debugPrint('✅ Google popup sign-in success: ${result.user?.email ?? 'unknown'}');
+    debugPrint(
+      '✅ Google popup sign-in success: ${result.user?.email ?? 'unknown'}',
+    );
     return result;
   } catch (e) {
     debugPrint('❌ Google popup sign-in error: $e');
