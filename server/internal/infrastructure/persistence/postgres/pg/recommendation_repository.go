@@ -77,6 +77,10 @@ func (r *RecommendationRepository) createWithSessionInternal(ctx context.Context
 			userPrefs = []byte("{}")
 		}
 
+		// DEBUG: Логирование weatherData перед вставкой
+		fmt.Printf("[DEBUG] weatherData: %s\n", string(weatherData))
+		fmt.Printf("[DEBUG] userPrefs: %s\n", string(userPrefs))
+
 		_, err = tx.Exec(ctx, `
 			INSERT INTO recommendation_sessions (
 				id, user_id, context_hash, model_version, weather_data, user_preferences
