@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
 import '../../features/notifications/presentation/widgets/notification_icon.dart';
 import '../../theme/theme_controller.dart';
+import '../../theme/app_theme.dart';
 import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
 import 'package:outfitstyle_client/src/presentation/providers/weather_provider.dart'
     show weatherProvider;
@@ -35,7 +37,6 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Проверяем есть ли extra параметр с индексом вкладки
     final args = GoRouterState.of(context).extra as int?;
     if (args != null && args >= 0 && args < _screens.length) {
       setState(() {
@@ -62,19 +63,16 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
       showBottomNav: true,
       showAppBar: true,
       appBarActions: [
-        // Кнопка местоположения
         IconButton(
           icon: Icon(
             Icons.location_on_outlined,
-            color:
-                _currentIndex == 0
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
+            color: _currentIndex == 0
+                ? Theme.of(context).colorScheme.primary
+                : null,
           ),
           onPressed: () => _showCitySelector(context),
           tooltip: userLocation.cityName ?? 'Выбрать город',
         ),
-        // Кнопка смены темы
         IconButton(
           icon: Icon(_getThemeIcon(themeMode)),
           onPressed: () {
@@ -82,14 +80,12 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
           },
           tooltip: _getThemeTooltip(themeMode),
         ),
-        // Кнопка уведомлений с badge
         NotificationIconButton(
           unreadCount: unreadCount,
           onPressed: () {
             context.push('/notifications');
           },
         ),
-        // Кнопка настроек в профиле
         if (_currentIndex == 3)
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -105,14 +101,12 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
   void _showCitySelector(BuildContext context) {
     showDialog<CityData>(
       context: context,
-      builder:
-          (context) => CitySelectorDialog(
-            onCitySelected: (city) {
-              // Инвалидируем провайдеры для обновления данных
-              ref.invalidate(userLocationProvider);
-              ref.invalidate(weatherProvider);
-            },
-          ),
+      builder: (context) => CitySelectorDialog(
+        onCitySelected: (city) {
+          ref.invalidate(userLocationProvider);
+          ref.invalidate(weatherProvider);
+        },
+      ),
     );
   }
 
@@ -154,7 +148,7 @@ class HomeShell extends StatelessWidget {
   final Function(int)? onNavigationDestinationSelected;
 
   const HomeShell({
-    Key? key,
+    super.key,
     required this.title,
     required this.child,
     this.appBarActions,
@@ -162,63 +156,188 @@ class HomeShell extends StatelessWidget {
     this.showBottomNav = true,
     this.currentIndex = 0,
     this.onNavigationDestinationSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     Widget body = SafeArea(
       top: false,
       child: showAppBar ? child : SingleChildScrollView(child: child),
     );
 
     if (showBottomNav) {
-      body = Column(
+      body = Stack(
         children: [
-          Expanded(child: body),
-          NavigationBar(
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Главная',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.checkroom_outlined),
-                selectedIcon: Icon(Icons.checkroom),
-                label: 'Гардероб',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.auto_awesome_outlined),
-                selectedIcon: Icon(Icons.auto_awesome),
-                label: 'Рекомендации',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outlined),
-                selectedIcon: Icon(Icons.person),
-                label: 'Профиль',
-              ),
-            ],
-            selectedIndex: currentIndex,
-            onDestinationSelected: (int index) {
-              onNavigationDestinationSelected?.call(index);
-            },
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          body,
+          // Floating glass bottom bar
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 12,
+            child: _GlassBottomBar(
+              currentIndex: currentIndex,
+              onTap: (index) => onNavigationDestinationSelected?.call(index),
+              isDark: isDark,
+            ),
           ),
         ],
       );
     }
 
     return Scaffold(
-      appBar:
-          showAppBar
-              ? AppBar(
-                title: Text(title),
-                centerTitle: false,
-                scrolledUnderElevation: 0,
-                actions: appBarActions ?? const [],
-              )
-              : null,
+      appBar: showAppBar
+          ? AppBar(
+              title: Text(title),
+              centerTitle: false,
+              scrolledUnderElevation: 0,
+              actions: appBarActions ?? const [],
+            )
+          : null,
       body: body,
+    );
+  }
+}
+
+/// Glassmorphism floating bottom navigation bar
+class _GlassBottomBar extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+  final bool isDark;
+
+  const _GlassBottomBar({
+    required this.currentIndex,
+    required this.onTap,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: AppRadius.radiusXxl,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          height: 64,
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.white.withValues(alpha: 0.85),
+            borderRadius: AppRadius.radiusXxl,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.5),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _NavItem(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home_rounded,
+                label: 'Главная',
+                isActive: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+              _NavItem(
+                icon: Icons.checkroom_outlined,
+                activeIcon: Icons.checkroom_rounded,
+                label: 'Гардероб',
+                isActive: currentIndex == 1,
+                onTap: () => onTap(1),
+              ),
+              _NavItem(
+                icon: Icons.auto_awesome_outlined,
+                activeIcon: Icons.auto_awesome_rounded,
+                label: 'Рекомендации',
+                isActive: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
+              _NavItem(
+                icon: Icons.person_outline_rounded,
+                activeIcon: Icons.person_rounded,
+                label: 'Профиль',
+                isActive: currentIndex == 3,
+                onTap: () => onTap(3),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Навигационный элемент с градиентным пузырём для активного
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          gradient: isActive ? AppGradients.primary : null,
+          borderRadius: AppRadius.radiusPill,
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isActive ? activeIcon : icon,
+              size: 22,
+              color: isActive
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
