@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,12 +14,6 @@ import 'package:outfitstyle_client/src/domain/entities/outfit_recommendation.dar
 import 'package:outfitstyle_client/src/domain/entities/wardrobe_item.dart';
 import 'package:outfitstyle_client/src/theme/app_theme.dart';
 
-/// Упрощённый главный экран-дашборд.
-///
-/// Структура (сверху вниз):
-/// 1. Погода — WeatherCard
-/// 2. Образ дня — первая рекомендация или пустое состояние
-/// 3. Гардероб — превью по категориям с количеством
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -33,6 +28,7 @@ class HomeScreen extends ConsumerWidget {
     );
     final wardrobeState = ref.watch(wardrobeProvider);
     final recommendationsState = ref.watch(recommendationsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -44,22 +40,26 @@ class HomeScreen extends ConsumerWidget {
         top: false,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 100),
+          padding: const EdgeInsets.only(bottom: 120),
           child: ResponsiveMaxWidthContainer(
             maxWidth: 800,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Hero-заголовок как на Landing
+                _buildHeroHeader(context, isDark),
+                const SizedBox(height: AppSpacing.xxl),
+
                 // Погода
                 _WeatherSection(
                   weatherAsync: weatherAsync,
                   userLocation: userLocation,
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.xxl),
 
                 // Образ дня
                 _OutfitOfDaySection(recommendationsState: recommendationsState),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.xxl),
 
                 // Гардероб
                 _WardrobePreviewSection(
@@ -77,10 +77,71 @@ class HomeScreen extends ConsumerWidget {
   void _navigateToTab(BuildContext context, int index) {
     context.go('/', extra: index);
   }
+
+  /// Landing-style hero header с градиентным текстом
+  Widget _buildHeroHeader(BuildContext context, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xxl,
+        AppSpacing.xxxl,
+        AppSpacing.xxl,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Градиентный badge
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs + 2,
+            ),
+            decoration: BoxDecoration(
+              gradient: isDark ? AppGradients.cardDark : AppGradients.cardLight,
+              borderRadius: AppRadius.radiusPill,
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.auto_awesome, size: 14, color: AppColors.primary),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  'AI-подбор одежды',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Заголовок
+          Text(
+            'Что надеть\nсегодня?',
+            style: AppTypography.displayLarge(context).copyWith(height: 1.1),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // Подзаголовок
+          Text(
+            'Персональные рекомендации на основе погоды и вашего стиля',
+            style: AppTypography.bodyMedium(
+              context,
+            ).copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
-// Погода
+// Погода — glass card
 // ══════════════════════════════════════════════════════════════
 
 class _WeatherSection extends ConsumerWidget {
@@ -97,22 +158,16 @@ class _WeatherSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Город + кнопка смены
+        // Город
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: Row(
             children: [
-              Icon(
-                Icons.location_on,
-                color: Theme.of(context).colorScheme.primary,
-                size: 18,
-              ),
+              Icon(Icons.location_on, color: AppColors.primary, size: 18),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 userLocation.cityName ?? 'Город не выбран',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                style: AppTypography.labelLarge(context),
               ),
               const Spacer(),
               TextButton(
@@ -132,7 +187,6 @@ class _WeatherSection extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
 
-        // Карточка погоды
         weatherAsync.when(
           data: (weather) => WeatherCard(
             weatherData: weather,
@@ -166,32 +220,45 @@ class _WeatherSection extends ConsumerWidget {
   }
 
   Widget _buildLoadingCard(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXxl),
-      child: const SizedBox(
-        height: 180,
-        child: Center(child: CircularProgressIndicator()),
+    return Container(
+      height: 180,
+      decoration: BoxDecoration(
+        color: AppColors.grey100,
+        borderRadius: AppRadius.radiusXxl,
       ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
   Widget _buildErrorCard(BuildContext context, WidgetRef ref) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXxl),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            Icon(Icons.cloud_off, size: 40, color: AppColors.grey400),
-            const SizedBox(height: AppSpacing.md),
-            const Text('Не удалось загрузить погоду'),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton.icon(
-              onPressed: () => ref.invalidate(weatherProvider),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Повторить'),
-            ),
-          ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ClipRRect(
+      borderRadius: AppRadius.radiusXxl,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.white.withValues(alpha: 0.6),
+            borderRadius: AppRadius.radiusXxl,
+            border: Border.all(color: AppColors.grey200.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.cloud_off, size: 40, color: AppColors.grey400),
+              const SizedBox(height: AppSpacing.md),
+              const Text('Не удалось загрузить погоду'),
+              const SizedBox(height: AppSpacing.md),
+              OutlinedButton.icon(
+                onPressed: () => ref.invalidate(weatherProvider),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Повторить'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -199,7 +266,7 @@ class _WeatherSection extends ConsumerWidget {
 }
 
 // ══════════════════════════════════════════════════════════════
-// Образ дня
+// Образ дня — glass card
 // ══════════════════════════════════════════════════════════════
 
 class _OutfitOfDaySection extends StatelessWidget {
@@ -209,7 +276,6 @@ class _OutfitOfDaySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final recommendations = recommendationsState.recommendations;
     final isLoading =
         recommendationsState.status == RecommendationsLoadStatus.loading;
@@ -217,17 +283,11 @@ class _OutfitOfDaySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Заголовок
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: Row(
             children: [
-              Text(
-                'Образ дня',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text('Образ дня', style: AppTypography.headlineSmall(context)),
               const Spacer(),
               if (recommendations.isNotEmpty)
                 TextButton(
@@ -239,7 +299,6 @@ class _OutfitOfDaySection extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
 
-        // Контент
         if (isLoading)
           _buildLoadingCard(context)
         else if (recommendations.isEmpty)
@@ -254,136 +313,190 @@ class _OutfitOfDaySection extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXl),
-      child: InkWell(
-        onTap: () {
-          if (rec.id != null) {
-            context.push('/outfit/${rec.id}');
-          }
-        },
+    return ClipRRect(
+      borderRadius: AppRadius.radiusXl,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: isDark ? AppGradients.cardDark : AppGradients.cardLight,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [
+                      AppColors.primary.withValues(alpha: 0.15),
+                      AppColors.secondary.withValues(alpha: 0.08),
+                    ]
+                  : [
+                      AppColors.primary.withValues(alpha: 0.12),
+                      AppColors.secondary.withValues(alpha: 0.06),
+                    ],
+            ),
+            borderRadius: AppRadius.radiusXl,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.5),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Заголовок + температура
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        rec.title ?? 'Ваш образ',
-                        style: AppTypography.headlineSmall(context),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+          child: InkWell(
+            onTap: () {
+              if (rec.id != null) context.push('/outfit/${rec.id}');
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xxl),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Заголовок + температура
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          rec.title ?? 'Ваш образ',
+                          style: AppTypography.headlineSmall(context),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    if (rec.temperature != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: AppRadius.radiusPill,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.thermostat,
-                              size: 16,
-                              color: theme.colorScheme.onPrimaryContainer,
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
-                            Text(
-                              '${rec.temperature?.round() ?? 0}°C',
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer,
-                                fontWeight: FontWeight.w600,
+                      if (rec.temperature != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: AppGradients.primary,
+                            borderRadius: AppRadius.radiusPill,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.thermostat,
+                                size: 16,
+                                color: Colors.white,
                               ),
+                              const SizedBox(width: AppSpacing.xs),
+                              Text(
+                                '${rec.temperature?.round() ?? 0}°C',
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  if (rec.description?.isNotEmpty ?? false) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      rec.description!,
+                      style: AppTypography.bodyMedium(context),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // Вещи в пузырях
+                  if (rec.recommendedItems?.isNotEmpty ?? false)
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: rec.recommendedItems!.take(6).map((item) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.white.withValues(alpha: 0.7),
+                            borderRadius: AppRadius.radiusPill,
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.1)
+                                  : AppColors.grey200.withValues(alpha: 0.5),
                             ),
-                          ],
+                          ),
+                          child: Text(
+                            item,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // Кнопка — gradient
+                  SizedBox(
+                    width: double.infinity,
+                    height: AppSpacing.buttonHeight,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: AppGradients.heroButton,
+                        borderRadius: AppRadius.radiusPill,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            if (rec.id != null) {
+                              context.push('/outfit/${rec.id}');
+                            }
+                          },
+                          borderRadius: AppRadius.radiusPill,
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(
+                                  Icons.visibility_outlined,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: AppSpacing.sm),
+                                Text(
+                                  'Смотреть образ',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                  ],
-                ),
-
-                // Описание
-                if (rec.description?.isNotEmpty ?? false) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    rec.description!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // Список вещей
-                if (rec.recommendedItems?.isNotEmpty ?? false)
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: rec.recommendedItems!.take(6).map((item) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.sm,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surface.withValues(
-                            alpha: 0.7,
-                          ),
-                          borderRadius: AppRadius.radiusMd,
-                          border: Border.all(
-                            color: theme.colorScheme.outline.withValues(
-                              alpha: 0.15,
-                            ),
-                          ),
-                        ),
-                        child: Text(
-                          item,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // Кнопка
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      if (rec.id != null) {
-                        context.push('/outfit/${rec.id}');
-                      }
-                    },
-                    icon: const Icon(Icons.visibility_outlined, size: 18),
-                    label: const Text('Подробнее'),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.md,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -392,29 +505,45 @@ class _OutfitOfDaySection extends StatelessWidget {
   }
 
   Widget _buildEmptyCard(BuildContext context) {
-    return EmptyState(
-      icon: Icons.checkroom_outlined,
-      title: 'Нет рекомендаций',
-      subtitle:
-          'Получите персональный образ на основе погоды и вашего гардероба',
-      actionLabel: 'Сгенерировать',
-      onAction: () => context.go('/generator'),
+    return ClipRRect(
+      borderRadius: AppRadius.radiusXl,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.white.withValues(alpha: 0.6),
+            borderRadius: AppRadius.radiusXl,
+            border: Border.all(color: AppColors.grey200.withValues(alpha: 0.3)),
+          ),
+          child: EmptyState(
+            icon: Icons.checkroom_outlined,
+            title: 'Нет рекомендаций',
+            subtitle:
+                'Получите персональный образ на основе погоды и вашего гардероба',
+            actionLabel: 'Сгенерировать',
+            onAction: () => context.go('/generator'),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildLoadingCard(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXl),
-      child: const SizedBox(
-        height: 200,
-        child: Center(child: CircularProgressIndicator()),
+    return Container(
+      height: 200,
+      decoration: BoxDecoration(
+        color: AppColors.grey100,
+        borderRadius: AppRadius.radiusXl,
       ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 }
 
 // ══════════════════════════════════════════════════════════════
-// Превью гардероба
+// Превью гардероба — glass category cards
 // ══════════════════════════════════════════════════════════════
 
 class _WardrobePreviewSection extends StatelessWidget {
@@ -428,29 +557,20 @@ class _WardrobePreviewSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final items = wardrobeState.items;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Заголовок
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           child: Row(
             children: [
-              Text(
-                'Гардероб',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text('Гардероб', style: AppTypography.headlineSmall(context)),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 '${items.length} ${_itemsWord(items.length)}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: AppTypography.bodyMedium(context),
               ),
               const Spacer(),
               TextButton(onPressed: onTap, child: const Text('Открыть')),
@@ -459,7 +579,6 @@ class _WardrobePreviewSection extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
 
-        // Карточки категорий
         if (items.isEmpty)
           _buildEmptyWardrobe(context)
         else
@@ -483,9 +602,9 @@ class _WardrobePreviewSection extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        mainAxisSpacing: AppSpacing.sm,
-        crossAxisSpacing: AppSpacing.sm,
-        childAspectRatio: 1.3,
+        mainAxisSpacing: AppSpacing.md,
+        crossAxisSpacing: AppSpacing.md,
+        childAspectRatio: 1.1,
       ),
       itemCount: categories.length,
       itemBuilder: (context, index) {
@@ -537,44 +656,61 @@ class _CategoryCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final color = _getCategoryColor(category);
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusLg),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.radiusLg,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: isDark ? 0.2 : 0.12),
-                  borderRadius: AppRadius.radiusMd,
-                ),
-                child: Icon(
-                  WardrobeCategories.getIcon(category),
-                  color: color,
-                  size: 22,
-                ),
+    return ClipRRect(
+      borderRadius: AppRadius.radiusLg,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.white.withValues(alpha: 0.6),
+              borderRadius: AppRadius.radiusLg,
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.white.withValues(alpha: 0.4),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                WardrobeCategories.getNameRu(category),
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(
+                      AppSpacing.sm + AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          color.withValues(alpha: isDark ? 0.25 : 0.15),
+                          color.withValues(alpha: isDark ? 0.15 : 0.08),
+                        ],
+                      ),
+                      borderRadius: AppRadius.radiusMd,
+                    ),
+                    child: Icon(
+                      WardrobeCategories.getIcon(category),
+                      color: color,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    WardrobeCategories.getNameRu(category),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text('$count', style: AppTypography.bodySmall(context)),
+                ],
               ),
-              Text(
-                '$count',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -584,17 +720,17 @@ class _CategoryCard extends StatelessWidget {
   Color _getCategoryColor(String category) {
     switch (category) {
       case 'top':
-        return Colors.blue;
+        return AppColors.info;
       case 'bottom':
-        return Colors.green;
+        return AppColors.success;
       case 'shoes':
-        return Colors.orange;
+        return AppColors.warning;
       case 'outerwear':
-        return Colors.indigo;
+        return const Color(0xFF6366F1);
       case 'accessories':
         return AppColors.primary;
       case 'headwear':
-        return Colors.teal;
+        return const Color(0xFF14B8A6);
       default:
         return AppColors.grey400;
     }
