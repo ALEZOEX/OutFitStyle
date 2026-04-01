@@ -7,6 +7,7 @@ import '../widgets/recommendation_card.dart';
 import '../../../ui/widgets/city_selector_widget.dart';
 import '../../../ui/widgets/max_width_container.dart';
 import '../../../theme/app_theme.dart';
+import '../../../presentation/providers/user_location_provider.dart';
 
 /// Экран персональных рекомендаций
 /// Без социальной функциональности — только персональные подборки
@@ -574,14 +575,15 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
   /// Генерация рекомендации
   Future<void> _generateRecommendation(BuildContext context) async {
     final notifier = ref.read(recommendationsProvider.notifier);
+    final userLocation = ref.read(userLocationProvider);
 
     if (!context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     final result = await notifier.generateRecommendation(
-      temperature: 15,
-      weatherCondition: 'sunny',
+      latitude: userLocation.latitude,
+      longitude: userLocation.longitude,
       occasion: 'casual',
     );
 

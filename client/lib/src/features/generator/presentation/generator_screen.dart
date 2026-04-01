@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../recommendations/presentation/providers/recommendations_provider.dart';
 import '../../../presentation/providers/weather_provider.dart';
+import '../../../presentation/providers/user_location_provider.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/logger.dart';
 
@@ -469,23 +470,12 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     AppLogger.info('[GeneratorScreen] _generateRecommendation вызван');
 
     final notifier = ref.read(recommendationsProvider.notifier);
+    final userLocation = ref.read(userLocationProvider);
     final messenger = ScaffoldMessenger.of(context);
 
-    double? temperature = _useCurrentWeather ? null : _temperatureOverride;
-    if (_useCurrentWeather) {
-      try {
-        final weatherAsync = await ref.read(
-          weatherProvider((lat: 55.7558, lon: 37.6173)).future,
-        );
-        temperature = weatherAsync.temperature ?? temperature;
-      } catch (e) {
-        AppLogger.warning('[GeneratorScreen] Ошибка получения погоды: $e');
-      }
-    }
-
     final result = await notifier.generateRecommendation(
-      temperature: temperature,
-      weatherCondition: 'sunny',
+      latitude: userLocation.latitude,
+      longitude: userLocation.longitude,
       occasion: _selectedOccasion,
     );
 

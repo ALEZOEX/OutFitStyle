@@ -226,21 +226,23 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 
   /// Сгенерировать новую рекомендацию через API
   Future<OutfitRecommendation?> generateRecommendation({
-    double? temperature,
-    String? weatherCondition,
+    required double latitude,
+    required double longitude,
     String? occasion,
   }) async {
     AppLogger.info('[RecommendationsProvider] generateRecommendation вызван');
     AppLogger.info(
-      '[RecommendationsProvider] temperature: $temperature, weatherCondition: $weatherCondition, occasion: $occasion',
+      '[RecommendationsProvider] latitude: $latitude, longitude: $longitude, occasion: $occasion',
     );
 
     state = state.copyWith(isGenerating: true);
 
     try {
-      final body = <String, dynamic>{};
+      final body = <String, dynamic>{
+        'latitude': latitude,
+        'longitude': longitude,
+      };
       if (occasion != null) body['occasion'] = occasion;
-      if (temperature != null) body['temperature'] = temperature;
 
       AppLogger.info(
         '[RecommendationsProvider] Отправка POST /api/v1/recommendations: $body',

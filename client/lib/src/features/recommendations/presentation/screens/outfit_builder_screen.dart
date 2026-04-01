@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../domain/entities/wardrobe_item.dart';
 import '../../../wardrobe/presentation/providers/wardrobe_provider.dart';
 import '../providers/recommendations_provider.dart';
+import '../../../../presentation/providers/user_location_provider.dart';
 
 /// Экран конструктора образов
 /// Позволяет создать свой образ из вещей гардероба по категориям
@@ -509,12 +510,13 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
 
     // Создаем рекомендацию из выбранных вещей
     final notifier = ref.read(recommendationsProvider.notifier);
+    final userLocation = ref.read(userLocationProvider);
 
     // Генерируем рекомендацию на основе выбранных вещей
     notifier
         .generateRecommendation(
-          temperature: 20,
-          weatherCondition: 'clear',
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
           occasion: 'custom',
         )
         .then((recommendation) {
