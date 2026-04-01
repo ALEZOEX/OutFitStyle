@@ -60,21 +60,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
         with:
-          version: 'v1.30.0'
-
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
       - name: Deploy to k3s
         run: |
-          kubectl -n outfitstyle set image deployment/frontend frontend=ghcr.io/alezoex/outfitstyle-frontend:${{ github.sha }}
-          kubectl -n outfitstyle rollout status deployment/frontend --timeout=300s
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=30 root@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            export LANG=en_US.UTF-8
+            export LC_ALL=en_US.UTF-8
+            set -e
+            kubectl -n outfitstyle set image deployment/frontend frontend=ghcr.io/alezoex/outfitstyle-frontend:${{ github.sha }}
+            kubectl -n outfitstyle rollout status deployment/frontend --timeout=300s
+          EOF
 
   cleanup-old-images:
     needs: deploy
