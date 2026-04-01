@@ -467,11 +467,17 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
   }
 
   Future<void> _generateRecommendation(BuildContext context) async {
-    AppLogger.info('[GeneratorScreen] _generateRecommendation вызван');
+    AppLogger.info('[GeneratorScreen] 🔵 _generateRecommendation ВЫЗВАН');
+    AppLogger.info('[GeneratorScreen] _selectedOccasion: $_selectedOccasion');
+    AppLogger.info('[GeneratorScreen] _useCurrentWeather: $_useCurrentWeather');
+    AppLogger.info('[GeneratorScreen] _temperatureOverride: $_temperatureOverride°C');
 
     final notifier = ref.read(recommendationsProvider.notifier);
     final userLocation = ref.read(userLocationProvider);
     final messenger = ScaffoldMessenger.of(context);
+
+    AppLogger.info('[GeneratorScreen] 📍 User location: lat=${userLocation.latitude}, lon=${userLocation.longitude}');
+    AppLogger.info('[GeneratorScreen] 📡 Вызов notifier.generateRecommendation...');
 
     final result = await notifier.generateRecommendation(
       latitude: userLocation.latitude,
@@ -479,9 +485,15 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
       occasion: _selectedOccasion,
     );
 
-    if (!context.mounted) return;
+    AppLogger.info('[GeneratorScreen] 📬 Результат генерации: ${result != null ? "УСПЕХ" : "ОШИБКА"}');
+
+    if (!context.mounted) {
+      AppLogger.warning('[GeneratorScreen] ⚠️ Context не примонтирован, выход');
+      return;
+    }
 
     if (result != null) {
+      AppLogger.info('[GeneratorScreen] ✅ Образ сгенерирован: ${result.id}');
       messenger.showSnackBar(
         SnackBar(
           content: Row(
@@ -504,6 +516,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     } else {
       final errorMsg =
           ref.read(recommendationsProvider).error ?? 'Что-то пошло не так';
+      AppLogger.error('[GeneratorScreen] ❌ Ошибка генерации: $errorMsg');
       messenger.showSnackBar(
         SnackBar(
           content: Row(

@@ -207,11 +207,12 @@ class RecommendationsRepository implements IRecommendationsRepository {
     required List<String> preferredStyles,
     required String userId,
   }) async {
-    AppLogger.info('[RecommendationsRepository] generateRecommendation вызван');
-    AppLogger.info('[RecommendationsRepository] latitude: $latitude, longitude: $longitude');
-    AppLogger.info('[RecommendationsRepository] occasion: $occasion, preferredStyles: $preferredStyles');
-    AppLogger.info('[RecommendationsRepository] userId: $userId, excludedItems: $excludedItems');
-    
+    AppLogger.info('[RecommendationsRepository] 🔵 generateRecommendation ВЫЗВАН');
+    AppLogger.info('[RecommendationsRepository] 📍 latitude: $latitude, longitude: $longitude');
+    AppLogger.info('[RecommendationsRepository] 🎯 occasion: $occasion, preferredStyles: $preferredStyles');
+    AppLogger.info('[RecommendationsRepository] 👤 userId: $userId, excludedItems: $excludedItems');
+
+    AppLogger.info('[RecommendationsRepository] 📤 ОТПРАВКА POST /api/v1/recommendations');
     final response = await apiClient.post(
       '/api/v1/recommendations',
       data: {
@@ -220,17 +221,19 @@ class RecommendationsRepository implements IRecommendationsRepository {
         'occasion': occasion,
       },
     );
-    
-    AppLogger.info('[RecommendationsRepository] generateRecommendation response: ${response.statusCode}');
-    AppLogger.info('[RecommendationsRepository] Response data: ${response.data}');
-    
+
+    AppLogger.info('[RecommendationsRepository] 📥 Response statusCode: ${response.statusCode}');
+    AppLogger.info('[RecommendationsRepository] 📦 Response data: ${response.data}');
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.data) as Map<String, dynamic>;
       final recData = data['recommendation'] as Map<String, dynamic>? ?? data;
-      AppLogger.info('[RecommendationsRepository] Рекомендация: $recData');
+      AppLogger.info('[RecommendationsRepository] ✅ Рекомендация: $recData');
       return OutfitRecommendation.fromJson(recData);
     }
-    throw RecommendationsException('Не удалось сгенерировать рекомендацию');
+    
+    AppLogger.error('[RecommendationsRepository] ❌ Ошибка: statusCode=${response.statusCode}');
+    throw RecommendationsException('Не удалось сгенерировать рекомендацию (код: ${response.statusCode})');
   }
 
   @override

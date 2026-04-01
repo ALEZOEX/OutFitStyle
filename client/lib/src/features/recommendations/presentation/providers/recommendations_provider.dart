@@ -230,12 +230,13 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     required double longitude,
     String? occasion,
   }) async {
-    AppLogger.info('[RecommendationsProvider] generateRecommendation вызван');
+    AppLogger.info('[RecommendationsProvider] 🔵 generateRecommendation ВЫЗВАН');
     AppLogger.info(
-      '[RecommendationsProvider] latitude: $latitude, longitude: $longitude, occasion: $occasion',
+      '[RecommendationsProvider] 📍 latitude: $latitude, longitude: $longitude, occasion: $occasion',
     );
 
     state = state.copyWith(isGenerating: true);
+    AppLogger.info('[RecommendationsProvider] ⚙️ isGenerating=true');
 
     try {
       final body = <String, dynamic>{
@@ -245,18 +246,20 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
       if (occasion != null) body['occasion'] = occasion;
 
       AppLogger.info(
-        '[RecommendationsProvider] Отправка POST /api/v1/recommendations: $body',
+        '[RecommendationsProvider] 📤 ОТПРАВКА POST /api/v1/recommendations',
       );
+      AppLogger.info('[RecommendationsProvider] 📦 Body: $body');
+      
       final response = await _apiClient.post(
         '/api/v1/recommendations',
         data: body,
       );
 
       AppLogger.info(
-        '[RecommendationsProvider] Response statusCode: ${response.statusCode}',
+        '[RecommendationsProvider] 📥 Response statusCode: ${response.statusCode}',
       );
       AppLogger.info(
-        '[RecommendationsProvider] Response data: ${response.data}',
+        '[RecommendationsProvider] 📦 Response data: ${response.data}',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -269,11 +272,11 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
             ? rawData['recommendation'] as Map<String, dynamic>
             : rawData;
 
-        AppLogger.info('[RecommendationsProvider] Распарсенные данные: $data');
+        AppLogger.info('[RecommendationsProvider] 📋 Распарсенные данные: $data');
         final recommendation = OutfitRecommendation.fromJson(data);
 
         AppLogger.info(
-          '[RecommendationsProvider] Рекомендация создана: $recommendation',
+          '[RecommendationsProvider] ✅ Рекомендация создана: ID=${recommendation.id}, occasion=${recommendation.occasion}',
         );
         final recommendations = [recommendation, ...state.recommendations];
         state = state.copyWith(
@@ -281,14 +284,16 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
           status: RecommendationsLoadStatus.success,
           isGenerating: false,
         );
+        AppLogger.info('[RecommendationsProvider] 🎉 Возвращаем рекомендацию клиенту');
 
         return recommendation;
       } else {
         AppLogger.error(
-          '[RecommendationsProvider] Ошибка генерации: statusCode=${response.statusCode}',
+          '[RecommendationsProvider] ❌ Ошибка генерации: statusCode=${response.statusCode}',
         );
         final statusCode = response.statusCode;
         final userMessage = _getUserMessage(statusCode);
+        AppLogger.error('[RecommendationsProvider] 💬 User message: $userMessage');
         state = state.copyWith(
           status: RecommendationsLoadStatus.error,
           error: userMessage,
@@ -298,11 +303,12 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
       }
     } catch (e, stackTrace) {
       AppLogger.error(
-        '[RecommendationsProvider] Исключение: $e',
+        '[RecommendationsProvider] 💥 Исключение: $e',
         e,
         stackTrace,
       );
       final userMessage = _getExceptionMessage(e);
+      AppLogger.error('[RecommendationsProvider] 💬 User message from exception: $userMessage');
       state = state.copyWith(
         status: RecommendationsLoadStatus.error,
         error: userMessage,

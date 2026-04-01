@@ -72,20 +72,30 @@ func (h *RecommendationHandler) RegisterRoutes(r *mux.Router) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/recommendations [post]
 func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
+	h.log.Info("🔵 [RECOMMENDATION] POST /api/v1/recommendations - START")
+	
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
-		h.log.Info("Auth required for recommendation creation")
+		h.log.Warn("⚠️ [RECOMMENDATION] Auth required for recommendation creation")
 		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
 		return
 	}
+	h.log.Info("👤 [RECOMMENDATION] User ID: " + userID.String())
 	defer r.Body.Close()
 
 	var req domain.RecommendationCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.log.Error("Failed to decode recommendation request", zap.Error(err))
+		h.log.Error("❌ [RECOMMENDATION] Failed to decode recommendation request", zap.Error(err))
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
 		return
 	}
+
+	h.log.Info("📦 [RECOMMENDATION] Request body", 
+		zap.Any("latitude", req.Latitude),
+		zap.Any("longitude", req.Longitude),
+		zap.Any("occasion", req.Occasion),
+		zap.Any("location", req.Location),
+	)
 
 	// Validate input data
 	v := validation.NewValidator()
@@ -110,19 +120,23 @@ func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !v.Valid() {
+		h.log.Warn("⚠️ [RECOMMENDATION] Validation failed", zap.Any("errors", v.Errors))
 		resp.ValidationError(w, v.Errors)
 		return
 	}
 
-	h.log.Info("Creating recommendation", zap.Any("request", req))
+	h.log.Info("⚙️ [RECOMMENDATION] Calling service.Create...")
 	rec, err := h.svc.Create(r.Context(), userID, req)
 	if err != nil {
-		h.log.Error("Failed to create recommendation", zap.Error(err))
+		h.log.Error("❌ [RECOMMENDATION] Failed to create recommendation", zap.Error(err))
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to create recommendation"))
 		return
 	}
 
-	h.log.Info("Successfully created recommendation", zap.String("id", rec.ID.String()))
+	h.log.Info("✅ [RECOMMENDATION] Successfully created recommendation", 
+		zap.String("id", rec.ID.String()),
+		zap.String("occasion", rec.Occasion),
+	)
 	resp.Success(w, map[string]any{
 		"recommendation": rec,
 		// remaining_today добавим позже вместе с подписками/лимитами
