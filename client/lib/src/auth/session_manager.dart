@@ -46,7 +46,9 @@ class UserSession {
       email: json['email'] as String?,
       displayName: json['displayName'] as String?,
       photoUrl: json['photoUrl'] as String?,
-      loginTime: DateTime.fromMillisecondsSinceEpoch(json['loginTime'] as int),
+      loginTime: DateTime.fromMillisecondsSinceEpoch(
+        (json['loginTime'] as num?)?.toInt() ?? 0,
+      ),
       isEmailVerified: json['isEmailVerified'] as bool? ?? false,
     );
   }

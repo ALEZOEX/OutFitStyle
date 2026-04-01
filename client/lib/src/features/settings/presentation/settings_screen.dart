@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../ui/widgets/max_width_container.dart';
 import '../../../theme/theme_controller.dart';
 import '../../../ui/widgets/notification_dialog.dart';
+import '../../onboarding/onboarding_storage.dart' as onboarding_storage;
 import 'screens/preferences_screen.dart';
 import 'screens/profile_settings_screen.dart';
 import 'screens/security_screen.dart';
@@ -268,6 +269,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             SliverToBoxAdapter(
               child: _buildThemeSection(context, themeMode, themeController),
             ),
+            // Debug-кнопка
+            SliverToBoxAdapter(child: _buildDebugSection()),
             const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         ),
@@ -811,5 +814,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ThemeMode.system =>
         'Тема автоматически подстраивается под настройки системы',
     };
+  }
+
+  /// Debug-кнопка для сброса онбординга (только для тестирования)
+  Widget _buildDebugSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: OutlinedButton.icon(
+        onPressed: () async {
+          final storage = onboarding_storage.OnboardingStorage();
+          await storage.reset();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Онбординг сброшен (debug)')),
+            );
+          }
+        },
+        icon: const Icon(Icons.bug_report, size: 18),
+        label: const Text('Сбросить онбординг (debug)'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.orange,
+          side: const BorderSide(color: Colors.orange),
+        ),
+      ),
+    );
   }
 }

@@ -175,10 +175,10 @@ class NotificationsResponse {
           .whereType<Map<String, dynamic>>()
           .map((n) => NotificationDto.fromJson(n))
           .toList(),
-      unreadCount: json['unread_count'] as int? ?? 0,
-      page: pagination['page'] as int? ?? 1,
-      limit: pagination['limit'] as int? ?? 20,
-      total: pagination['total'] as int? ?? 0,
+      unreadCount: (json['unread_count'] as num?)?.toInt() ?? 0,
+      page: (pagination['page'] as num?)?.toInt() ?? 1,
+      limit: (pagination['limit'] as num?)?.toInt() ?? 20,
+      total: (pagination['total'] as num?)?.toInt() ?? 0,
     );
   }
 }
