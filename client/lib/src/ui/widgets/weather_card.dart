@@ -89,15 +89,8 @@ class WeatherCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.xs + 2,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: AppRadius.radiusPill,
-          ),
+        // Локация
+        Expanded(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -107,21 +100,49 @@ class WeatherCard extends StatelessWidget {
                 size: 14,
               ),
               const SizedBox(width: AppSpacing.xs),
-              Text(
-                'Москва',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+              Flexible(
+                child: Text(
+                  'Москва',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
         ),
-        Text(
-          _formatDate(),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.white.withValues(alpha: 0.7),
-          ),
+        // Дата + кнопка обновить
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _formatDate(),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 11,
+              ),
+            ),
+            if (onRefresh != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              GestureDetector(
+                onTap: onRefresh,
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.xs),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: AppRadius.radiusSm,
+                  ),
+                  child: Icon(
+                    Icons.refresh,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    size: 16,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ],
     );

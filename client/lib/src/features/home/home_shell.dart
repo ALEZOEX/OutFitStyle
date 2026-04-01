@@ -16,7 +16,6 @@ import 'package:outfitstyle_client/src/presentation/providers/weather_provider.d
     show weatherProvider;
 import 'package:outfitstyle_client/src/ui/widgets/city_selector_dialog.dart';
 
-/// Wrapper для главного экрана с навигацией
 class HomeShellWrapper extends ConsumerStatefulWidget {
   const HomeShellWrapper({super.key});
 
@@ -24,8 +23,11 @@ class HomeShellWrapper extends ConsumerStatefulWidget {
   ConsumerState<HomeShellWrapper> createState() => _HomeShellWrapperState();
 }
 
-class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
+class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper>
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -33,6 +35,19 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
     RecommendationsScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _slideAnimation = Tween<Offset>(begin: Offset.zero, end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
+  }
 
   @override
   void didChangeDependencies() {
@@ -46,6 +61,30 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
   }
 
   @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  void _switchTo(int index, {required bool fromLeft}) {
+    if (index == _currentIndex) return;
+    setState(() {
+      _slideAnimation =
+          Tween<Offset>(
+            begin: Offset(fromLeft ? -1.0 : 1.0, 0),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(
+              parent: _slideController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+      _slideController.forward(from: 0);
+      _currentIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(unreadCountProvider);
     final themeMode = ref.watch(themeModeProvider);
@@ -56,26 +95,21 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
       child: GestureDetector(
         onHorizontalDragEnd: (details) {
           if (details.primaryVelocity == null) return;
-          // Свайп влево — следующий экран
-          if (details.primaryVelocity! < -300) {
-            if (_currentIndex < _screens.length - 1) {
-              setState(() => _currentIndex++);
-            }
-          }
-          // Свайп вправо — предыдущий экран
-          else if (details.primaryVelocity! > 300) {
-            if (_currentIndex > 0) {
-              setState(() => _currentIndex--);
-            }
+          if (details.primaryVelocity! < -300 &&
+              _currentIndex < _screens.length - 1) {
+            _switchTo(_currentIndex + 1, fromLeft: true);
+          } else if (details.primaryVelocity! > 300 && _currentIndex > 0) {
+            _switchTo(_currentIndex - 1, fromLeft: false);
           }
         },
-        child: _screens[_currentIndex],
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: _screens[_currentIndex],
+        ),
       ),
       currentIndex: _currentIndex,
       onNavigationDestinationSelected: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
+        _switchTo(index, fromLeft: index > _currentIndex);
       },
       showBottomNav: true,
       showAppBar: true,
@@ -154,7 +188,7 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
   }
 }
 
-/// Shell layout для главного экрана с навигацией
+/// Shell layout с glass bottom bar и glass app bar
 class HomeShell extends StatelessWidget {
   final String title;
   final Widget child;
@@ -185,35 +219,35 @@ class HomeShell extends StatelessWidget {
     );
 
     if (showBottomNav) {
-      body = Stack(
-        children: [
-          body,
-          // Floating glass bottom bar — constrained width on wide screens
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 16,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 480),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _GlassBottomBar(
-                    currentIndex: currentIndex,
-                    onTap: (index) =>
-                        onNavigationDestinationSelected?.call(index),
-                    isDark: isDark,
+      body = SizedBox.expand(
+        child: Stack(
+          children: [
+            body,
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 16,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _GlassBottomBar(
+                      currentIndex: currentIndex,
+                      onTap: (index) =>
+                          onNavigationDestinationSelected?.call(index),
+                      isDark: isDark,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
     return Scaffold(
-      // Glass app bar — замороженное стекло как Landing glass-header
       appBar: showAppBar
           ? PreferredSize(
               preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -227,7 +261,7 @@ class HomeShell extends StatelessWidget {
                     backgroundColor: isDark
                         ? Colors.white.withValues(alpha: 0.05)
                         : Colors.white.withValues(alpha: 0.7),
-                    actions: appBarActions ?? const [],
+                    actions: appBarActions ?? [],
                   ),
                 ),
               ),
@@ -238,7 +272,6 @@ class HomeShell extends StatelessWidget {
   }
 }
 
-/// Glassmorphism floating bottom navigation bar — Landing style
 class _GlassBottomBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -252,7 +285,6 @@ class _GlassBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Landing: bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl border-white/40
     return ClipRRect(
       borderRadius: AppRadius.radiusXxl,
       child: BackdropFilter(
@@ -261,13 +293,13 @@ class _GlassBottomBar extends StatelessWidget {
           height: 62,
           decoration: BoxDecoration(
             color: isDark
-                ? const Color(0xFF1F2937).withValues(alpha: 0.4) // gray-800/40
-                : Colors.white.withValues(alpha: 0.6), // white/60
+                ? const Color(0xFF1F2937).withValues(alpha: 0.4)
+                : Colors.white.withValues(alpha: 0.6),
             borderRadius: AppRadius.radiusXxl,
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.1) // white/10
-                  : Colors.white.withValues(alpha: 0.4), // white/40
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.4),
             ),
             boxShadow: [
               BoxShadow(
@@ -278,41 +310,38 @@ class _GlassBottomBar extends StatelessWidget {
               ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _NavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home_rounded,
-                  label: 'Главная',
-                  isActive: currentIndex == 0,
-                  onTap: () => onTap(0),
-                ),
-                _NavItem(
-                  icon: Icons.checkroom_outlined,
-                  activeIcon: Icons.checkroom_rounded,
-                  label: 'Гардероб',
-                  isActive: currentIndex == 1,
-                  onTap: () => onTap(1),
-                ),
-                _NavItem(
-                  icon: Icons.auto_awesome_outlined,
-                  activeIcon: Icons.auto_awesome_rounded,
-                  label: 'Рекомендации',
-                  isActive: currentIndex == 2,
-                  onTap: () => onTap(2),
-                ),
-                _NavItem(
-                  icon: Icons.person_outline_rounded,
-                  activeIcon: Icons.person_rounded,
-                  label: 'Профиль',
-                  isActive: currentIndex == 3,
-                  onTap: () => onTap(3),
-                ),
-              ],
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _NavItem(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home_rounded,
+                label: 'Главная',
+                isActive: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+              _NavItem(
+                icon: Icons.checkroom_outlined,
+                activeIcon: Icons.checkroom_rounded,
+                label: 'Гардероб',
+                isActive: currentIndex == 1,
+                onTap: () => onTap(1),
+              ),
+              _NavItem(
+                icon: Icons.auto_awesome_outlined,
+                activeIcon: Icons.auto_awesome_rounded,
+                label: 'Рекомендации',
+                isActive: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
+              _NavItem(
+                icon: Icons.person_outline_rounded,
+                activeIcon: Icons.person_rounded,
+                label: 'Профиль',
+                isActive: currentIndex == 3,
+                onTap: () => onTap(3),
+              ),
+            ],
           ),
         ),
       ),
@@ -320,7 +349,6 @@ class _GlassBottomBar extends StatelessWidget {
   }
 }
 
-/// Навигационный элемент с градиентным пузырём для активного
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final IconData activeIcon;

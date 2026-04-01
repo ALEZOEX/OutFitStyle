@@ -41,6 +41,9 @@ class HomeScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Отступ сверху
+                const SizedBox(height: AppSpacing.lg),
+
                 // Погода
                 _WeatherSection(
                   weatherAsync: weatherAsync,

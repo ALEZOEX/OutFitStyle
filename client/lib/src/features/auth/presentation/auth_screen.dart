@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -221,94 +222,114 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xxxl),
 
-                  // Форма
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        if (!_isLogin) ...[
-                          TextFormField(
-                            controller: _nameController,
-                            textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Имя',
-                              prefixIcon: Icon(Icons.person_outlined),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Введите имя';
-                              }
-                              return null;
-                            },
+                  // Форма — glass container
+                  ClipRRect(
+                    borderRadius: AppRadius.radiusXl,
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.xxl),
+                        decoration: BoxDecoration(
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white.withValues(alpha: 0.06)
+                              : Colors.white.withValues(alpha: 0.6),
+                          borderRadius: AppRadius.radiusXl,
+                          border: Border.all(
+                            color: theme.brightness == Brightness.dark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.white.withValues(alpha: 0.4),
                           ),
-                          const SizedBox(height: AppSpacing.lg),
-                        ],
-
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email_outlined),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Введите email';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Некорректный email';
-                            }
-                            return null;
-                          },
                         ),
-                        const SizedBox(height: AppSpacing.lg),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              if (!_isLogin) ...[
+                                TextFormField(
+                                  controller: _nameController,
+                                  textInputAction: TextInputAction.next,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Имя',
+                                    prefixIcon: Icon(Icons.person_outlined),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Введите имя';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                              ],
 
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _submit(),
-                          decoration: const InputDecoration(
-                            labelText: 'Пароль',
-                            prefixIcon: Icon(Icons.lock_outlined),
+                              TextFormField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                decoration: const InputDecoration(
+                                  labelText: 'Email',
+                                  prefixIcon: Icon(Icons.email_outlined),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Введите email';
+                                  }
+                                  if (!value.contains('@')) {
+                                    return 'Некорректный email';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: AppSpacing.lg),
+
+                              TextFormField(
+                                controller: _passwordController,
+                                obscureText: true,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _submit(),
+                                decoration: const InputDecoration(
+                                  labelText: 'Пароль',
+                                  prefixIcon: Icon(Icons.lock_outlined),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Введите пароль';
+                                  }
+                                  if (value.length < 12) {
+                                    return 'Минимум 12 символов';
+                                  }
+                                  if (value.length > 72) {
+                                    return 'Максимум 72 символа';
+                                  }
+                                  if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                                    return 'Нужна хотя бы одна заглавная буква';
+                                  }
+                                  if (!RegExp(r'[a-z]').hasMatch(value)) {
+                                    return 'Нужна хотя бы одна строчная буква';
+                                  }
+                                  if (!RegExp(r'[0-9]').hasMatch(value)) {
+                                    return 'Нужна хотя бы одна цифра';
+                                  }
+                                  if (!RegExp(
+                                    r'[!@#$%^&*()\-_=+\[\]{}|;:<>?,./~`\\]',
+                                  ).hasMatch(value)) {
+                                    return 'Нужен хотя бы один спецсимвол';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              if (!_isLogin) ...[
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  'Мин. 12 символов: A-Z, a-z, 0-9, спецсимвол',
+                                  style: AppTypography.bodySmall(context),
+                                ),
+                              ],
+                            ],
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Введите пароль';
-                            }
-                            if (value.length < 12) {
-                              return 'Минимум 12 символов';
-                            }
-                            if (value.length > 72) {
-                              return 'Максимум 72 символа';
-                            }
-                            if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                              return 'Нужна хотя бы одна заглавная буква';
-                            }
-                            if (!RegExp(r'[a-z]').hasMatch(value)) {
-                              return 'Нужна хотя бы одна строчная буква';
-                            }
-                            if (!RegExp(r'[0-9]').hasMatch(value)) {
-                              return 'Нужна хотя бы одна цифра';
-                            }
-                            if (!RegExp(
-                              r'[!@#$%^&*()\-_=+\[\]{}|;:<>?,./~`\\]',
-                            ).hasMatch(value)) {
-                              return 'Нужен хотя бы один спецсимвол';
-                            }
-                            return null;
-                          },
                         ),
-
-                        if (!_isLogin) ...[
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            'Мин. 12 символов: A-Z, a-z, 0-9, спецсимвол',
-                            style: AppTypography.bodySmall(context),
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
                   ),
 
