@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 
-/// Landing-style button с градиентом и shimmer-эффектом
+/// Premium кнопка с мягким градиентом и цветной тенью
 class AppButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -49,24 +49,46 @@ class AppButton extends StatelessWidget {
     );
   }
 
-  /// Градиентная кнопка в стиле Landing CTA
+  /// Премиальная кнопка — мягкий градиент + цветная тень + border
   Widget _buildGradientButton(BuildContext context) {
     final isDisabled = onPressed == null || isLoading;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Тёмная тема — приглушённее
+    final colors = isDark
+        ? [const Color(0xFFC026D3), const Color(0xFFA21CAF)]
+        : [const Color(0xFFD946EF), const Color(0xFFC026D3)];
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: isDisabled ? null : AppGradients.heroButton,
+        gradient: isDisabled
+            ? null
+            : LinearGradient(
+                colors: colors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
         color: isDisabled
             ? Theme.of(context).colorScheme.surfaceContainerHighest
             : null,
         borderRadius: AppRadius.radiusPill,
+        border: isDisabled
+            ? null
+            : Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
         boxShadow: isDisabled
             ? null
             : [
+                // Мягкая цветная тень
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 16,
+                  color: colors.first.withValues(alpha: 0.25),
+                  blurRadius: 12,
                   offset: const Offset(0, 4),
+                ),
+                // Лёгкое свечение
+                BoxShadow(
+                  color: colors.first.withValues(alpha: 0.1),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
                 ),
               ],
       ),
@@ -168,7 +190,11 @@ class AppButton extends StatelessWidget {
         ],
         Text(
           text,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isPrimary ? Colors.white : null,
+          ),
         ),
       ],
     );
