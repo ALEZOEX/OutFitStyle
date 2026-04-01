@@ -41,7 +41,7 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Analyze
-        run: flutter analyze --no-fatal-warnings
+        run: flutter analyze
 
       - name: Run unit tests
         run: flutter test --coverage --test-randomize-ordering-seed=random
@@ -52,7 +52,8 @@ jobs:
           file: ./client/coverage/lcov.info
           flags: flutter
           token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
+          fail_ci_if_error: true
+        continue-on-error: true
 
   build-android:
     needs: test
@@ -76,14 +77,14 @@ jobs:
           rm -rf android/.gradle
           rm -rf ~/.gradle/caches
 
-      - name: Create google-services.json (fallback)
+      - name: Create google-services.json
         run: |
           mkdir -p android/app
-          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
-            echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
-          else
-            echo '{"project_info":{"project_number":"000000000000","project_id":"outfitstyle-dummy","storage_bucket":"outfitstyle-dummy.appspot.com"},"client":[{"client_info":{"mobile_client_id":"000000000000-android:0000000000000000","android_client_info":{"package_name":"com.outfitstyle.app","certificate_hash":[]}},"oauth_client":[],"api_key":[{"current_key":"dummy_api_key_for_ci_build"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > android/app/google-services.json
+          if [ -z "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo "Error: GOOGLE_SERVICES_JSON secret is not set"
+            exit 1
           fi
+          echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 

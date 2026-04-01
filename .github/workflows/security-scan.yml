@@ -22,7 +22,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: '1.23'
           cache: true
 
       - name: Install govulncheck
@@ -32,13 +32,13 @@ jobs:
         working-directory: ./server
         run: |
           echo "🔍 Scanning Go dependencies for vulnerabilities..."
-          govulncheck ./... || echo "::warning::Vulnerabilities found in Go dependencies"
+          govulncheck ./...
 
       - name: Run govulncheck on event-driven
         working-directory: ./event-driven
         run: |
           echo "🔍 Scanning event-driven service for vulnerabilities..."
-          govulncheck ./... || echo "::warning::Vulnerabilities found in event-driven service"
+          govulncheck ./...
 
   python-vulnerability-scan:
     name: Python Vulnerability Scan
@@ -62,9 +62,10 @@ jobs:
         run: |
           echo "🔍 Scanning Python dependencies for vulnerabilities..."
           if [ -f requirements.txt ]; then
-            pip-audit -r requirements.txt --desc || echo "::warning::Vulnerabilities found in Python dependencies"
+            pip-audit -r requirements.txt --desc
           else
-            echo "::warning::No requirements.txt found"
+            echo "Error: No requirements.txt found"
+            exit 1
           fi
 
   dependency-review:
@@ -79,7 +80,7 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          fail-on-severity: high
+          fail-on-severity: moderate
           deny-licenses: GPL-3.0, AGPL-3.0
 
   security-summary:

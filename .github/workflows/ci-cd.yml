@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version: "1.23"
           cache: true
           cache-dependency-path: server/go.sum
 
@@ -65,20 +65,27 @@ jobs:
         working-directory: server
         run: |
           go build -v ./...
-          go test -v $(go list ./... | grep -v internal/core/application/services)
+          go test -v ./...
 
       - name: Test ML service
         working-directory: ml-service
         run: |
           pip install --upgrade -r requirements.txt
-          pip install pytest
+          pip install pytest httpx
 
           # Start ML service in background
           python -m uvicorn main:app --host 0.0.0.0 --port 8001 &
           ML_PID=$!
 
-          # Wait for service to be ready
-          sleep 5
+          # Wait for service to be ready with health check
+          for i in {1..30}; do
+            if curl -f http://localhost:8001/health 2>/dev/null; then
+              echo "ML service is ready"
+              break
+            fi
+            echo "Waiting for ML service... ($i/30)"
+            sleep 2
+          done
 
           # Run all tests including integration
           python -m pytest tests/ -v
@@ -130,9 +137,6 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
-          build-args: |
-            BUILDKIT_INLINE_CACHE=0
-          no-cache: true
 
       - name: Build and push ml-service
         uses: docker/build-push-action@v6
@@ -147,9 +151,6 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
-          no-cache: true
-          build-args: |
-            BUILDKIT_INLINE_CACHE=0
 
       - name: Build and push marketplace-service
         uses: docker/build-push-action@v6
@@ -164,7 +165,6 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
-          no-cache: true
 
   deploy-k3s:
     needs: build-and-push

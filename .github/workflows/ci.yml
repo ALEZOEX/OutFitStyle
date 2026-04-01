@@ -26,7 +26,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: '1.23'
           cache: true
           cache-dependency-path: server/go.sum
 
@@ -38,10 +38,9 @@ jobs:
           cd server
           go test -v -race ./internal/core/... ./internal/api/... ./internal/infrastructure/... ./internal/validation/...
 
-  # 2. Проверка уязвимостей в Go-зависимостях (информационно)
+  # 2. Проверка уязвимостей в Go-зависимостях
   go-vuln-check:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,7 +48,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: '1.23'
           cache: true
           cache-dependency-path: server/go.sum
 
@@ -59,12 +58,11 @@ jobs:
       - name: Run govulncheck
         run: |
           cd server
-          govulncheck ./... || echo "govulncheck: найдены уязвимости в crypto/tls (GO-2026-4337) - не блокируем CI"
+          govulncheck ./...
 
-  # 3. SAST анализ с gosec (информационно)
+  # 3. SAST анализ с gosec
   gosec:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,7 +70,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: '1.23'
           cache: true
           cache-dependency-path: server/go.sum
 
@@ -82,12 +80,11 @@ jobs:
       - name: Run gosec
         run: |
           cd server
-          gosec -exclude-dir=vendor ./... || true
+          gosec -exclude-dir=vendor -severity=medium ./...
 
-  # 4. Сборка и сканирование Docker-образа (информационно)
+  # 4. Сборка и сканирование Docker-образа
   docker-scan:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -99,11 +96,11 @@ jobs:
         run: |
           docker build -t outfitstyle/api:test -f ./server/Dockerfile ./server
 
-      - name: Install Trivy
+      - name: Scan with Trivy
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'image'
           image-ref: 'outfitstyle/api:test'
           format: 'table'
-          exit-code: '0'
-          severity: 'CRITICAL'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
