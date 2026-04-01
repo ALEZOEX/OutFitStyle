@@ -53,7 +53,24 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper> {
 
     return HomeShell(
       title: _getTitle(_currentIndex),
-      child: _screens[_currentIndex],
+      child: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity == null) return;
+          // Свайп влево — следующий экран
+          if (details.primaryVelocity! < -300) {
+            if (_currentIndex < _screens.length - 1) {
+              setState(() => _currentIndex++);
+            }
+          }
+          // Свайп вправо — предыдущий экран
+          else if (details.primaryVelocity! > 300) {
+            if (_currentIndex > 0) {
+              setState(() => _currentIndex--);
+            }
+          }
+        },
+        child: _screens[_currentIndex],
+      ),
       currentIndex: _currentIndex,
       onNavigationDestinationSelected: (index) {
         setState(() {

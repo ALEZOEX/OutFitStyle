@@ -51,6 +51,7 @@ class RecommendationsState {
   final RecommendationsLoadStatus status;
   final String? error;
   final Set<String> usedIds;
+  final Set<String> likedIds;
   final Map<DateTime, PlannedOutfit> plannedOutfits;
   final bool isGenerating;
 
@@ -59,6 +60,7 @@ class RecommendationsState {
     this.status = RecommendationsLoadStatus.initial,
     this.error,
     this.usedIds = const {},
+    this.likedIds = const {},
     this.plannedOutfits = const {},
     this.isGenerating = false,
   });
@@ -68,6 +70,7 @@ class RecommendationsState {
     RecommendationsLoadStatus? status,
     String? error,
     Set<String>? usedIds,
+    Set<String>? likedIds,
     Map<DateTime, PlannedOutfit>? plannedOutfits,
     bool? isGenerating,
   }) {
@@ -76,6 +79,7 @@ class RecommendationsState {
       status: status ?? this.status,
       error: error ?? this.error,
       usedIds: usedIds ?? this.usedIds,
+      likedIds: likedIds ?? this.likedIds,
       plannedOutfits: plannedOutfits ?? this.plannedOutfits,
       isGenerating: isGenerating ?? this.isGenerating,
     );
