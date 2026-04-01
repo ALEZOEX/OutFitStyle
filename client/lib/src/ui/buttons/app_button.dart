@@ -56,8 +56,8 @@ class AppButton extends StatelessWidget {
 
     // Тёмная тема — приглушённее
     final colors = isDark
-        ? [const Color(0xFFC026D3), const Color(0xFFA21CAF)]
-        : [const Color(0xFFD946EF), const Color(0xFFC026D3)];
+        ? [const Color(0xFF9333EA), const Color(0xFFD946EF)]
+        : [const Color(0xFFA855F7), const Color(0xFFF43F5E)];
 
     return DecoratedBox(
       decoration: BoxDecoration(

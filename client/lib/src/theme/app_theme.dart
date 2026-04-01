@@ -63,22 +63,26 @@ class AppGradients {
   static const LinearGradient primary = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF7C3AED), Color(0xFFA855F7), Color(0xFFD946EF)],
+    colors: [
+      Color(0xFF9333EA), // purple-600
+      Color(0xFFD946EF), // fuchsia-500
+      Color(0xFFF43F5E), // rose-500
+    ],
   );
 
   static const LinearGradient primaryReversed = LinearGradient(
     begin: Alignment.bottomRight,
     end: Alignment.topLeft,
-    colors: [Color(0xFF7C3AED), Color(0xFFA855F7), Color(0xFFD946EF)],
+    colors: [Color(0xFF9333EA), Color(0xFFD946EF), Color(0xFFF43F5E)],
   );
 
   static const LinearGradient heroButton = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF7C3AED), // vivid purple
-      Color(0xFFA855F7), // purple-500
+      Color(0xFF9333EA), // purple-600
       Color(0xFFD946EF), // fuchsia-500
+      Color(0xFFF43F5E), // rose-500
     ],
   );
 
