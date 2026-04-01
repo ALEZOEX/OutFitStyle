@@ -493,19 +493,79 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
               maxWidth: 800,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: RecommendationCard(
-                  recommendation: recommendation,
-                  onDetailsPressed: () =>
-                      context.push('/recommendations/${recommendation.id}'),
-                  onPlanPressed: () =>
-                      _planRecommendation(context, recommendation.id),
-                  onUsePressed: () =>
-                      _useRecommendation(context, recommendation.id),
+                child: Dismissible(
+                  key: ValueKey(recommendation.id ?? index),
+                  background: _buildSwipeBackground(
+                    context,
+                    alignment: Alignment.centerLeft,
+                    icon: Icons.favorite,
+                    color: Colors.green,
+                    label: 'Нравится',
+                  ),
+                  secondaryBackground: _buildSwipeBackground(
+                    context,
+                    alignment: Alignment.centerRight,
+                    icon: Icons.skip_next,
+                    color: Colors.orange,
+                    label: 'Пропустить',
+                  ),
+                  confirmDismiss: (direction) async {
+                    if (direction == DismissDirection.startToEnd) {
+                      notifier.toggleLike(recommendation.id ?? '');
+                      return false;
+                    } else {
+                      return true;
+                    }
+                  },
+                  onDismissed: (_) {
+                    notifier.removeRecommendation(recommendation.id ?? '');
+                  },
+                  child: RecommendationCard(
+                    recommendation: recommendation,
+                    onDetailsPressed: () =>
+                        context.push('/recommendations/${recommendation.id}'),
+                    onPlanPressed: () =>
+                        _planRecommendation(context, recommendation.id),
+                    onUsePressed: () =>
+                        _useRecommendation(context, recommendation.id),
+                  ),
                 ),
               ),
             ),
           );
         }, childCount: state.recommendations.length),
+      ),
+    );
+  }
+
+  Widget _buildSwipeBackground(
+    BuildContext context, {
+    required Alignment alignment,
+    required IconData icon,
+    required Color color,
+    required String label,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: AppRadius.radiusLg,
+      ),
+      alignment: alignment,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }

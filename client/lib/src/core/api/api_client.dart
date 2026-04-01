@@ -449,10 +449,14 @@ class ApiClient {
 
   // POST-запрос
   Future<Response> post(String path, {dynamic data}) async {
+    AppLogger.info('[ApiClient] POST $path, data: $data');
     try {
       final response = await _dio.post(_normalizePath(path), data: data);
+      AppLogger.info('[ApiClient] POST response: ${response.statusCode}');
+      AppLogger.info('[ApiClient] POST response data: ${response.data}');
       return response;
     } on DioException catch (e) {
+      AppLogger.error('[ApiClient] POST error: ${e.message}, response: ${e.response?.data}', e);
       throw mapError(e);
     }
   }

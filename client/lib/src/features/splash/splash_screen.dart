@@ -15,12 +15,9 @@ final splashInitProvider = FutureProvider<String>((ref) async {
   final sessionManager = ref.read(sessionManagerProvider);
   final isAuthenticated = sessionManager.isAuthenticated;
 
-  // DEBUG: Всегда возвращаем /home если авторизован
-  // if (!onboardingDone) {
-  //   return '/onboarding';
-  // }
-  
-  if (isAuthenticated) {
+  if (!onboardingDone) {
+    return '/onboarding';
+  } else if (isAuthenticated) {
     return '/home';
   } else {
     return '/auth';

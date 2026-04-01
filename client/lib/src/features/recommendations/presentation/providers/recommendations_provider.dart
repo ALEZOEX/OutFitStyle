@@ -147,14 +147,12 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
             data['items'] as List<dynamic>? ??
             [];
 
-        final recommendations =
-            items
-                .map(
-                  (item) => OutfitRecommendation.fromJson(
-                    item as Map<String, dynamic>,
-                  ),
-                )
-                .toList();
+        final recommendations = items
+            .map(
+              (item) =>
+                  OutfitRecommendation.fromJson(item as Map<String, dynamic>),
+            )
+            .toList();
 
         state = state.copyWith(
           recommendations: recommendations,
@@ -228,8 +226,10 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     String? occasion,
   }) async {
     AppLogger.info('[RecommendationsProvider] generateRecommendation вызван');
-    AppLogger.info('[RecommendationsProvider] temperature: $temperature, weatherCondition: $weatherCondition, occasion: $occasion');
-    
+    AppLogger.info(
+      '[RecommendationsProvider] temperature: $temperature, weatherCondition: $weatherCondition, occasion: $occasion',
+    );
+
     state = state.copyWith(isGenerating: true);
 
     try {
@@ -237,25 +237,32 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
       if (occasion != null) body['occasion'] = occasion;
       if (temperature != null) body['temperature'] = temperature;
 
-      AppLogger.info('[RecommendationsProvider] Отправка POST /api/v1/recommendations: $body');
+      AppLogger.info(
+        '[RecommendationsProvider] Отправка POST /api/v1/recommendations: $body',
+      );
       final response = await _apiClient.post(
         '/api/v1/recommendations',
         data: body,
       );
 
-      AppLogger.info('[RecommendationsProvider] Response statusCode: ${response.statusCode}');
-      AppLogger.info('[RecommendationsProvider] Response data: ${response.data}');
+      AppLogger.info(
+        '[RecommendationsProvider] Response statusCode: ${response.statusCode}',
+      );
+      AppLogger.info(
+        '[RecommendationsProvider] Response data: ${response.data}',
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final data =
-            response.data is Map
-                ? response.data as Map<String, dynamic>
-                : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+        final data = response.data is Map
+            ? response.data as Map<String, dynamic>
+            : jsonDecode(response.data.toString()) as Map<String, dynamic>;
 
         AppLogger.info('[RecommendationsProvider] Распарсенные данные: $data');
         final recommendation = OutfitRecommendation.fromJson(data);
 
-        AppLogger.info('[RecommendationsProvider] Рекомендация создана: $recommendation');
+        AppLogger.info(
+          '[RecommendationsProvider] Рекомендация создана: $recommendation',
+        );
         final recommendations = [recommendation, ...state.recommendations];
         state = state.copyWith(
           recommendations: recommendations,
@@ -265,7 +272,9 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 
         return recommendation;
       } else {
-        AppLogger.error('[RecommendationsProvider] Ошибка генерации: statusCode=${response.statusCode}');
+        AppLogger.error(
+          '[RecommendationsProvider] Ошибка генерации: statusCode=${response.statusCode}',
+        );
         state = state.copyWith(
           status: RecommendationsLoadStatus.error,
           error: 'Ошибка генерации (${response.statusCode})',
@@ -274,7 +283,11 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
         return null;
       }
     } catch (e, stackTrace) {
-      AppLogger.error('[RecommendationsProvider] Исключение: $e', e, stackTrace);
+      AppLogger.error(
+        '[RecommendationsProvider] Исключение: $e',
+        e,
+        stackTrace,
+      );
       state = state.copyWith(
         status: RecommendationsLoadStatus.error,
         error: 'Ошибка генерации рекомендации',
@@ -286,8 +299,9 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 
   /// Удалить рекомендацию
   void removeRecommendation(String id) {
-    final recommendations =
-        state.recommendations.where((r) => r.id != id).toList();
+    final recommendations = state.recommendations
+        .where((r) => r.id != id)
+        .toList();
     state = state.copyWith(recommendations: recommendations);
   }
 
@@ -310,6 +324,17 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     return state.recommendations
         .where((r) => state.usedIds.contains(r.id))
         .toList();
+  }
+
+  /// Переключить лайк рекомендации
+  void toggleLike(String id) {
+    final likedIds = Set<String>.from(state.likedIds);
+    if (likedIds.contains(id)) {
+      likedIds.remove(id);
+    } else {
+      likedIds.add(id);
+    }
+    state = state.copyWith(likedIds: likedIds);
   }
 }
 
