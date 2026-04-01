@@ -70,8 +70,8 @@ spec:
           - sh
           - -c
           - |
-            echo "Waiting for PostgreSQL with TLS..."
-            until pg_isready -h postgres.outfitstyle.svc.cluster.local -p 5432 -U "$$DB_USER"; do
+            echo "Waiting for PostgreSQL..."
+            until PGPASSWORD="$${DB_PASSWORD}" psql -h postgres -p 5432 -U "$${DB_USER}" -d "$${DB_NAME}" -c "SELECT 1" > /dev/null 2>&1; do
               echo "waiting for postgres..."
               sleep 2
             done
@@ -82,6 +82,16 @@ spec:
             secretKeyRef:
               name: outfitstyle-secrets
               key: db-user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: outfitstyle-secrets
+              key: db-password
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: outfitstyle-secrets
+              key: db-name
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
