@@ -276,7 +276,7 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
         final recommendation = OutfitRecommendation.fromJson(data);
 
         AppLogger.info(
-          '[RecommendationsProvider] ✅ Рекомендация создана: ID=${recommendation.id}, occasion=${recommendation.occasion}',
+          '[RecommendationsProvider] ✅ Рекомендация создана: ID=${recommendation.id}, title=${recommendation.title}',
         );
         final recommendations = [recommendation, ...state.recommendations];
         state = state.copyWith(

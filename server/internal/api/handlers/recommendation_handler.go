@@ -133,9 +133,9 @@ func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.log.Info("✅ [RECOMMENDATION] Successfully created recommendation", 
+	h.log.Info("✅ [RECOMMENDATION] Successfully created recommendation",
 		zap.String("id", rec.ID.String()),
-		zap.String("occasion", rec.Occasion),
+		zap.Stringp("occasion", rec.Occasion),
 	)
 	resp.Success(w, map[string]any{
 		"recommendation": rec,
