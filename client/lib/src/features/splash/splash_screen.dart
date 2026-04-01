@@ -5,19 +5,16 @@ import 'package:go_router/go_router.dart';
 import '../onboarding/onboarding_storage.dart' as onboarding_storage;
 import '../../presentation/providers/session_provider.dart'
     show sessionManagerProvider;
+import '../../theme/app_theme.dart';
 
 /// Провайдер для отслеживания состояния проверки onboarding
-/// Использует прямой вызов OnboardingStorage() для избежания циклических зависимостей
 final splashInitProvider = FutureProvider<String>((ref) async {
-  // Проверяем, пройден ли onboarding
   final storage = onboarding_storage.OnboardingStorage();
   final onboardingDone = await storage.isDone();
 
-  // Проверяем авторизацию через SessionManager (Firebase Auth)
   final sessionManager = ref.read(sessionManagerProvider);
   final isAuthenticated = sessionManager.isAuthenticated;
 
-  // Возвращаем маршрут для редиректа
   if (!onboardingDone) {
     return '/onboarding';
   } else if (isAuthenticated) {
@@ -32,9 +29,7 @@ class SplashScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Слушаем завершение инициализации и делаем редирект
     ref.watch(splashInitProvider).whenData((route) {
-      // Редирект на нужный экран (используем async gap - context может быть неактивен)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
           context.go(route);
@@ -48,39 +43,50 @@ class SplashScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Логотип
+              // Градиентный логотип
               Container(
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(60),
+                  gradient: AppGradients.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.35),
+                      blurRadius: 30,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  Icons.checkroom,
-                  size: 60,
-                  color: Theme.of(context).primaryColor,
+                child: const Center(
+                  child: Text(
+                    'OS',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 32),
-              // Название приложения
+              const SizedBox(height: AppSpacing.xxxl),
               Text(
                 'OutfitStyle',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+                style: AppTypography.headlineMedium(
+                  context,
+                ).copyWith(color: AppColors.primary),
+              ),
+              const SizedBox(height: AppSpacing.huge),
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: AppColors.primary,
                 ),
               ),
-              const SizedBox(height: 48),
-              // Индикатор загрузки
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text(
-                'Загрузка...',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text('Загрузка...', style: AppTypography.bodyMedium(context)),
             ],
           ),
         ),

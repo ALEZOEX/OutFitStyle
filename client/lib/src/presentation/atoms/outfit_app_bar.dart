@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/theme_controller.dart';
+import '../../theme/app_theme.dart';
 import '../design_system/outfit_style_components.dart';
 
 class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -38,24 +39,22 @@ class OutfitAppBar extends ConsumerWidget implements PreferredSizeWidget {
     }
 
     return AppBar(
-      leading:
-          showThemeToggle
-              ? IconButton(
-                tooltip: 'Тема',
-                onPressed: () {
-                  // цикл: system -> dark -> light -> system
-                  final next =
-                      themeMode == ThemeMode.system
-                          ? ThemeMode.dark
-                          : (themeMode == ThemeMode.dark
-                              ? ThemeMode.light
-                              : ThemeMode.system);
-                  themeNotifier.setMode(next);
-                },
-                icon: Icon(themeIcon),
-                style: OutfitStyleComponents.iconButtonStyle(),
-              )
-              : null,
+      leading: showThemeToggle
+          ? IconButton(
+              tooltip: 'Тема',
+              onPressed: () {
+                // цикл: system -> dark -> light -> system
+                final next = themeMode == ThemeMode.system
+                    ? ThemeMode.dark
+                    : (themeMode == ThemeMode.dark
+                          ? ThemeMode.light
+                          : ThemeMode.system);
+                themeNotifier.setMode(next);
+              },
+              icon: Icon(themeIcon),
+              style: OutfitStyleComponents.iconButtonStyle(),
+            )
+          : null,
       titleSpacing: 0,
       title: Row(
         children: [
@@ -79,19 +78,19 @@ class BrandBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const purple = Color(0xFF7C3AED);
+    final primary = AppColors.primary;
 
     return Container(
       width: 34,
       height: 34,
       decoration: BoxDecoration(
-        color: purple,
-        borderRadius: BorderRadius.circular(12),
+        color: primary,
+        borderRadius: AppRadius.radiusMd,
         boxShadow: [
           BoxShadow(
             blurRadius: 14,
             offset: const Offset(0, 8),
-            color: purple.withValues(alpha: 0.25),
+            color: primary.withValues(alpha: 0.25),
           ),
         ],
       ),
