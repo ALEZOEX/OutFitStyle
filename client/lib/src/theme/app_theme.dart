@@ -63,19 +63,27 @@ class AppGradients {
   static const LinearGradient primary = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [AppColors.primary, AppColors.secondary],
+    colors: [
+      Color(0xFF9333EA), // vivid purple-600
+      Color(0xFFD946EF), // primary-500
+      Color(0xFFF43F5E), // accent-500
+    ],
   );
 
   static const LinearGradient primaryReversed = LinearGradient(
     begin: Alignment.bottomRight,
     end: Alignment.topLeft,
-    colors: [AppColors.primary, AppColors.secondary],
+    colors: [Color(0xFF9333EA), Color(0xFFD946EF), Color(0xFFF43F5E)],
   );
 
   static const LinearGradient heroButton = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [AppColors.primaryDark, AppColors.secondary],
+    colors: [
+      Color(0xFF9333EA), // vivid purple-600
+      Color(0xFFD946EF), // primary-500
+      Color(0xFFF43F5E), // accent-500
+    ],
   );
 
   static const LinearGradient subtleCard = LinearGradient(
