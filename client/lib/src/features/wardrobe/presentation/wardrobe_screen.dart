@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../domain/entities/wardrobe_item.dart';
 import '../../../domain/entities/wardrobe_request_entities.dart';
 import '../../../ui/widgets/max_width_container.dart';
 import '../presentation/providers/wardrobe_provider.dart';
@@ -541,7 +540,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
 
     try {
       final request = WardrobeItemCreateRequest(
-        name: '${_selectedEmoji} $name',
+        name: '$_selectedEmoji $name',
         category: _selectedCategory,
         subcategory: _getSubcategory(_selectedCategory),
         style: 'casual',

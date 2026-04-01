@@ -54,11 +54,11 @@ class WeatherCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(context),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 _buildCurrentWeather(context),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.xl),
                 _buildWeatherDetails(context),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.xl),
                 if (forecast != null && forecast!.isNotEmpty)
                   _buildForecast(context),
               ],
@@ -78,14 +78,18 @@ class WeatherCard extends StatelessWidget {
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: AppRadius.radiusMd,
               ),
-              child: Icon(Icons.location_on, color: Colors.white, size: 18),
+              child: const Icon(
+                Icons.location_on,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -99,7 +103,7 @@ class WeatherCard extends StatelessWidget {
                 Text(
                   _formatCurrentTime(),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -109,14 +113,14 @@ class WeatherCard extends StatelessWidget {
         if (onRefresh != null)
           InkWell(
             onTap: onRefresh,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.radiusMd,
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: AppRadius.radiusMd,
               ),
-              child: Icon(Icons.refresh, color: Colors.white, size: 20),
+              child: const Icon(Icons.refresh, color: Colors.white, size: 20),
             ),
           ),
       ],
@@ -152,7 +156,7 @@ class WeatherCard extends StatelessWidget {
                   Text(
                     '°C',
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       height: 1.5,
                     ),
                   ),
@@ -162,7 +166,7 @@ class WeatherCard extends StatelessWidget {
               Text(
                 description,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
               ),
               if (feelsLike != null) ...[
@@ -170,7 +174,7 @@ class WeatherCard extends StatelessWidget {
                 Text(
                   'Ощущается как $feelsLike°',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -184,7 +188,7 @@ class WeatherCard extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -193,11 +197,11 @@ class WeatherCard extends StatelessWidget {
                 size: 44,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               _getWeatherDescription(data.description ?? ''),
               style: theme.textTheme.labelLarge?.copyWith(
-                color: Colors.white.withOpacity(0.95),
+                color: Colors.white.withValues(alpha: 0.95),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -208,7 +212,6 @@ class WeatherCard extends StatelessWidget {
   }
 
   Widget _buildWeatherDetails(BuildContext context) {
-    final theme = Theme.of(context);
     final data = weatherData;
     if (data == null) return const SizedBox.shrink();
 
@@ -216,10 +219,10 @@ class WeatherCard extends StatelessWidget {
     final windSpeed = data.windSpeed;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.radiusLg,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -252,7 +255,7 @@ class WeatherCard extends StatelessWidget {
 
     return Column(
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.8), size: 20),
+        Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 20),
         const SizedBox(height: 4),
         Text(
           value,
@@ -264,7 +267,7 @@ class WeatherCard extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -275,7 +278,7 @@ class WeatherCard extends StatelessWidget {
     return Container(
       height: 40,
       width: 1,
-      color: Colors.white.withOpacity(0.3),
+      color: Colors.white.withValues(alpha: 0.3),
     );
   }
 
@@ -289,17 +292,17 @@ class WeatherCard extends StatelessWidget {
           'Прогноз на 3 дня',
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         SizedBox(
           height: 80,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             itemCount: forecast!.take(3).length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
             itemBuilder: (context, index) {
               final day = forecast![index];
               return _buildForecastItem(context, day, index);
@@ -316,10 +319,13 @@ class WeatherCard extends StatelessWidget {
 
     return Container(
       width: 70,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.radiusMd,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -354,14 +360,14 @@ class WeatherCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusXxl),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
                 color: theme.colorScheme.errorContainer,
                 shape: BoxShape.circle,
@@ -372,14 +378,14 @@ class WeatherCard extends StatelessWidget {
                 size: 32,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               'Нет данных о погоде',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               'Проверьте подключение к интернету',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -388,7 +394,7 @@ class WeatherCard extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             if (onRefresh != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               ElevatedButton.icon(
                 onPressed: onRefresh,
                 icon: const Icon(Icons.refresh),
@@ -419,54 +425,35 @@ class WeatherCard extends StatelessWidget {
   IconData _getWeatherIcon(String description) {
     final desc = description.toLowerCase();
 
-    // Ясно / Солнечно
     if (desc.contains('ясно') ||
         desc.contains('sunny') ||
         desc.contains('clear') ||
         desc.contains('преимущ')) {
       return Icons.wb_sunny;
-    }
-    // Облачно / Пасмурно
-    else if (desc.contains('облач') ||
+    } else if (desc.contains('облач') ||
         desc.contains('cloud') ||
         desc.contains('пасмурно') ||
         desc.contains('overcast')) {
-      if (desc.contains('перемен')) {
-        return Icons.cloud_queue;
-      }
-      return Icons.cloud;
-    }
-    // Дождь / Гроза
-    else if (desc.contains('дожд') ||
+      return desc.contains('перемен') ? Icons.cloud_queue : Icons.cloud;
+    } else if (desc.contains('дожд') ||
         desc.contains('rain') ||
         desc.contains('морось')) {
-      if (desc.contains('гром') || desc.contains('thunder')) {
-        return Icons.thunderstorm;
-      }
-      return Icons.grain;
-    }
-    // Снег
-    else if (desc.contains('снег') || desc.contains('snow')) {
+      return (desc.contains('гром') || desc.contains('thunder'))
+          ? Icons.thunderstorm
+          : Icons.grain;
+    } else if (desc.contains('снег') || desc.contains('snow')) {
       return Icons.ac_unit;
-    }
-    // Туман
-    else if (desc.contains('туман') || desc.contains('fog')) {
+    } else if (desc.contains('туман') || desc.contains('fog')) {
       return Icons.foggy;
-    }
-    // Ветер
-    else if (desc.contains('ветр') || desc.contains('wind')) {
+    } else if (desc.contains('ветр') || desc.contains('wind')) {
       return Icons.air;
     }
 
-    // По умолчанию - ясно
     return Icons.wb_sunny;
   }
 
-  /// Возвращает краткое понятное описание погоды
   String _getWeatherDescription(String description) {
-    if (description.isEmpty) {
-      return 'Ясно';
-    }
+    if (description.isEmpty) return 'Ясно';
 
     final desc = description.toLowerCase();
 
@@ -475,15 +462,11 @@ class WeatherCard extends StatelessWidget {
         desc.contains('clear')) {
       return 'Ясно';
     } else if (desc.contains('облач') || desc.contains('cloud')) {
-      if (desc.contains('перемен')) {
-        return 'Переменная облачность';
-      }
-      return 'Облачно';
+      return desc.contains('перемен') ? 'Переменная облачность' : 'Облачно';
     } else if (desc.contains('дожд') || desc.contains('rain')) {
-      if (desc.contains('гром') || desc.contains('thunder')) {
-        return 'Гроза';
-      }
-      return 'Дождь';
+      return (desc.contains('гром') || desc.contains('thunder'))
+          ? 'Гроза'
+          : 'Дождь';
     } else if (desc.contains('снег') || desc.contains('snow')) {
       return 'Снег';
     } else if (desc.contains('туман') || desc.contains('fog')) {
@@ -492,75 +475,44 @@ class WeatherCard extends StatelessWidget {
       return 'Ветрено';
     }
 
-    // Если описание не распознано — возвращаем оригинальное
     return description;
   }
 
   Color _getGradientStartColor(WeatherData weather) {
     final temp = weather.temperature ?? 20;
     final desc = weather.description?.toLowerCase() ?? '';
-
-    // Ночная тема
     final hour = DateTime.now().hour;
     final isNight = hour < 6 || hour > 21;
 
-    if (isNight) {
-      return const Color(0xFF1A237E);
-    }
-
-    // Дождь/гроза
+    if (isNight) return const Color(0xFF1A237E);
     if (desc.contains('дожд') ||
         desc.contains('thunder') ||
-        desc.contains('rain')) {
+        desc.contains('rain'))
       return const Color(0xFF546E7A);
-    }
-
-    // Снег
-    if (desc.contains('снег') || desc.contains('snow')) {
+    if (desc.contains('снег') || desc.contains('snow'))
       return const Color(0xFF90A4AE);
-    }
-
-    // Температура
-    if (temp >= 25) {
-      return const Color(0xFFFF6F00); // Тепло
-    } else if (temp >= 15) {
-      return const Color(0xFF42A5F5); // Комфортно
-    } else if (temp >= 5) {
-      return const Color(0xFF78909C); // Прохладно
-    } else {
-      return const Color(0xFF5C6BC0); // Холодно
-    }
+    if (temp >= 25) return const Color(0xFFFF6F00);
+    if (temp >= 15) return const Color(0xFF42A5F5);
+    if (temp >= 5) return const Color(0xFF78909C);
+    return const Color(0xFF5C6BC0);
   }
 
   Color _getGradientEndColor(WeatherData weather) {
     final temp = weather.temperature ?? 20;
     final desc = weather.description?.toLowerCase() ?? '';
-
     final hour = DateTime.now().hour;
     final isNight = hour < 6 || hour > 21;
 
-    if (isNight) {
-      return const Color(0xFF0D47A1);
-    }
-
+    if (isNight) return const Color(0xFF0D47A1);
     if (desc.contains('дожд') ||
         desc.contains('thunder') ||
-        desc.contains('rain')) {
+        desc.contains('rain'))
       return const Color(0xFF37474F);
-    }
-
-    if (desc.contains('снег') || desc.contains('snow')) {
+    if (desc.contains('снег') || desc.contains('snow'))
       return const Color(0xFF607D8B);
-    }
-
-    if (temp >= 25) {
-      return const Color(0xFFFF8F00);
-    } else if (temp >= 15) {
-      return const Color(0xFF2196F3);
-    } else if (temp >= 5) {
-      return const Color(0xFF546E7A);
-    } else {
-      return const Color(0xFF3949AB);
-    }
+    if (temp >= 25) return const Color(0xFFFF8F00);
+    if (temp >= 15) return const Color(0xFF2196F3);
+    if (temp >= 5) return const Color(0xFF546E7A);
+    return const Color(0xFF3949AB);
   }
 }

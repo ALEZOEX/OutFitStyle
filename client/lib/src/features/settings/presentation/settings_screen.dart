@@ -106,25 +106,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => NotificationPermissionDialog(
-            onEnable: () async {
-              Navigator.of(context).pop();
-              await _saveNotificationDialogFlag();
-              await _requestNotificationPermission();
-            },
-            onLater: () {
-              Navigator.of(context).pop();
-              _saveNotificationDialogFlag();
-              NotificationSnackbar.show(
-                context: context,
-                title: 'Уведомления отложены',
-                message: 'Вы можете включить уведомления в любое время',
-                icon: Icons.notifications_none,
-                duration: const Duration(seconds: 3),
-              );
-            },
-          ),
+      builder: (context) => NotificationPermissionDialog(
+        onEnable: () async {
+          Navigator.of(context).pop();
+          await _saveNotificationDialogFlag();
+          await _requestNotificationPermission();
+        },
+        onLater: () {
+          Navigator.of(context).pop();
+          _saveNotificationDialogFlag();
+          NotificationSnackbar.show(
+            context: context,
+            title: 'Уведомления отложены',
+            message: 'Вы можете включить уведомления в любое время',
+            icon: Icons.notifications_none,
+            duration: const Duration(seconds: 3),
+          );
+        },
+      ),
     );
   }
 
@@ -161,40 +160,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showSettingsDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            icon: Icon(
-              Icons.settings_outlined,
-              size: 48,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            title: const Text(
-              'Открыть настройки?',
-              textAlign: TextAlign.center,
-            ),
-            content: const Text(
-              'Уведомления были отключены навсегда. '
-              'Откройте настройки приложения, чтобы включить их.',
-              textAlign: TextAlign.center,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Отмена'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  openAppSettings();
-                },
-                child: const Text('Настройки'),
-              ),
-            ],
-            actionsPadding: const EdgeInsets.all(16),
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: Icon(
+          Icons.settings_outlined,
+          size: 48,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: const Text('Открыть настройки?', textAlign: TextAlign.center),
+        content: const Text(
+          'Уведомления были отключены навсегда. '
+          'Откройте настройки приложения, чтобы включить их.',
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Отмена'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              openAppSettings();
+            },
+            child: const Text('Настройки'),
+          ),
+        ],
+        actionsPadding: const EdgeInsets.all(16),
+      ),
     );
   }
 
@@ -521,23 +514,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors:
-              _notificationsEnabled
-                  ? [
-                    theme.colorScheme.primary.withValues(alpha: 0.2),
-                    theme.colorScheme.secondary.withValues(alpha: 0.1),
-                  ]
-                  : [
-                    theme.colorScheme.surface,
-                    theme.colorScheme.surfaceContainerHighest,
-                  ],
+          colors: _notificationsEnabled
+              ? [
+                  theme.colorScheme.primary.withValues(alpha: 0.2),
+                  theme.colorScheme.secondary.withValues(alpha: 0.1),
+                ]
+              : [
+                  theme.colorScheme.surface,
+                  theme.colorScheme.surfaceContainerHighest,
+                ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color:
-              _notificationsEnabled
-                  ? theme.colorScheme.primary.withValues(alpha: 0.3)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2),
+          color: _notificationsEnabled
+              ? theme.colorScheme.primary.withValues(alpha: 0.3)
+              : theme.colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -549,13 +540,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors:
-                        _notificationsEnabled
-                            ? [
-                              theme.colorScheme.primary,
-                              theme.colorScheme.secondary,
-                            ]
-                            : [Colors.grey.shade400, Colors.grey.shade600],
+                    colors: _notificationsEnabled
+                        ? [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.secondary,
+                          ]
+                        : [Colors.grey.shade400, Colors.grey.shade600],
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -692,20 +682,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color:
-                  _locationEnabled
-                      ? theme.colorScheme.primary.withValues(alpha: 0.2)
-                      : theme.colorScheme.error.withValues(alpha: 0.1),
+              color: _locationEnabled
+                  ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                  : theme.colorScheme.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               _locationEnabled
                   ? Icons.location_on
                   : Icons.location_off_outlined,
-              color:
-                  _locationEnabled
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.error,
+              color: _locationEnabled
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.error,
               size: 24,
             ),
           ),
@@ -776,21 +764,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           SegmentedButton<ThemeMode>(
-            segments: const [
-              ButtonSegment<ThemeMode>(
+            segments: [
+              const ButtonSegment<ThemeMode>(
                 value: ThemeMode.light,
                 label: Text('Светлая'),
-                icon: Icon(Icons.light_mode, color: Color(0xFFFFC107)),
+                icon: Icon(Icons.light_mode, color: Colors.amber),
               ),
-              ButtonSegment<ThemeMode>(
+              const ButtonSegment<ThemeMode>(
                 value: ThemeMode.dark,
                 label: Text('Тёмная'),
-                icon: Icon(Icons.dark_mode, color: Color(0xFF9FA8DA)),
+                icon: Icon(Icons.dark_mode, color: Colors.indigo),
               ),
               ButtonSegment<ThemeMode>(
                 value: ThemeMode.system,
-                label: Text('Системная'),
-                icon: Icon(Icons.phone_android, color: Color(0xFF4A6CF7)),
+                label: const Text('Системная'),
+                icon: Icon(
+                  Icons.phone_android,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ],
             selected: {themeMode},

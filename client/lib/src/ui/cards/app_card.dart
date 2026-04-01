@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../../theme/app_theme.dart';
 
 /// Унифицированная карточка в стиле Landing
 /// Поддерживает: обычный, glass, gradient варианты
@@ -53,8 +53,6 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final effectivePadding = padding ?? const EdgeInsets.all(AppSpacing.lg);
-    final effectiveMargin = margin ?? EdgeInsets.zero;
 
     Widget card = switch (variant) {
       CardVariant.outlined => _buildOutlined(context, isDark),
@@ -67,7 +65,7 @@ class AppCard extends StatelessWidget {
     card = Container(
       width: width,
       height: height,
-      margin: effectiveMargin,
+      margin: margin ?? EdgeInsets.zero,
       child: card,
     );
 

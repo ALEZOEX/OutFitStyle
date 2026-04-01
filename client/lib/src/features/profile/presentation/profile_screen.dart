@@ -49,7 +49,6 @@ class ProfileScreen extends ConsumerWidget {
     WidgetRef ref,
   ) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xxl),

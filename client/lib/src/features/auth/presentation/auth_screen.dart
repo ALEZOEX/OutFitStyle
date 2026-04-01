@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../presentation/providers/session_provider.dart';
-import '../../../ui/misc/app_avatar.dart';
 import '../../../utils/auth_utils.dart';
 import '../../../theme/app_theme.dart';
 
@@ -166,7 +165,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final isLoading = ref.watch(authLoadingProvider);
     final error = ref.watch(authErrorProvider);
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final isWide = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
@@ -237,8 +235,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               prefixIcon: Icon(Icons.person_outlined),
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty)
+                              if (value == null || value.isEmpty) {
                                 return 'Введите имя';
+                              }
                               return null;
                             },
                           ),
@@ -254,10 +253,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             prefixIcon: Icon(Icons.email_outlined),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return 'Введите email';
-                            if (!value.contains('@'))
+                            }
+                            if (!value.contains('@')) {
                               return 'Некорректный email';
+                            }
                             return null;
                           },
                         ),
@@ -273,16 +274,24 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             prefixIcon: Icon(Icons.lock_outlined),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return 'Введите пароль';
-                            if (value.length < 12) return 'Минимум 12 символов';
-                            if (value.length > 72) return 'Максимум 72 символа';
-                            if (!RegExp(r'[A-Z]').hasMatch(value))
+                            }
+                            if (value.length < 12) {
+                              return 'Минимум 12 символов';
+                            }
+                            if (value.length > 72) {
+                              return 'Максимум 72 символа';
+                            }
+                            if (!RegExp(r'[A-Z]').hasMatch(value)) {
                               return 'Нужна хотя бы одна заглавная буква';
-                            if (!RegExp(r'[a-z]').hasMatch(value))
+                            }
+                            if (!RegExp(r'[a-z]').hasMatch(value)) {
                               return 'Нужна хотя бы одна строчная буква';
-                            if (!RegExp(r'[0-9]').hasMatch(value))
+                            }
+                            if (!RegExp(r'[0-9]').hasMatch(value)) {
                               return 'Нужна хотя бы одна цифра';
+                            }
                             if (!RegExp(
                               r'[!@#$%^&*()\-_=+\[\]{}|;:<>?,./~`\\]',
                             ).hasMatch(value)) {
