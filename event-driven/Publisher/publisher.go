@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"github.com/segmentio/kafka-go"
-	contracts "outfitstyle/event-driven/contracts"
 )
 
 // KafkaPublisher публикует события в Kafka
@@ -47,7 +46,7 @@ func (kp *KafkaPublisher) computeSignature(data []byte) string {
 }
 
 // PublishRecommendationRequestedEvent публикует событие запроса рекомендации
-func (kp *KafkaPublisher) PublishRecommendationRequestedEvent(ctx context.Context, event contracts.RecommendationRequestedEvent) error {
+func (kp *KafkaPublisher) PublishRecommendationRequestedEvent(ctx context.Context, event RecommendationRequestedEvent) error {
 	data, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("не удалось маршализовать событие: %w", err)
@@ -71,7 +70,7 @@ func (kp *KafkaPublisher) PublishRecommendationRequestedEvent(ctx context.Contex
 }
 
 // PublishRecommendationProcessedEvent публикует событие обработки рекомендации
-func (kp *KafkaPublisher) PublishRecommendationProcessedEvent(ctx context.Context, event contracts.RecommendationProcessedEvent) error {
+func (kp *KafkaPublisher) PublishRecommendationProcessedEvent(ctx context.Context, event RecommendationProcessedEvent) error {
 	data, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("не удалось маршализовать событие: %w", err)
@@ -95,7 +94,7 @@ func (kp *KafkaPublisher) PublishRecommendationProcessedEvent(ctx context.Contex
 }
 
 // PublishUserFeedbackEvent публикует событие обратной связи пользователя
-func (kp *KafkaPublisher) PublishUserFeedbackEvent(ctx context.Context, event contracts.UserFeedbackEvent) error {
+func (kp *KafkaPublisher) PublishUserFeedbackEvent(ctx context.Context, event UserFeedbackEvent) error {
 	data, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("не удалось маршализовать событие: %w", err)

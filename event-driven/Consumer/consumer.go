@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"github.com/segmentio/kafka-go"
-	contracts "outfitstyle/event-driven/contracts"
 )
 
 // KafkaConsumer потребляет события из Kafka
@@ -61,7 +60,7 @@ func getSignatureFromHeaders(headers []kafka.Header) (string, bool) {
 }
 
 // ConsumeRecommendationEvents начинает потребление событий рекомендаций
-func (kc *KafkaConsumer) ConsumeRecommendationEvents(ctx context.Context, handler func(contracts.RecommendationRequestedEvent)) error {
+func (kc *KafkaConsumer) ConsumeRecommendationEvents(ctx context.Context, handler func(RecommendationRequestedEvent)) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -88,7 +87,7 @@ func (kc *KafkaConsumer) ConsumeRecommendationEvents(ctx context.Context, handle
 				continue
 			}
 
-			var event contracts.RecommendationRequestedEvent
+			var event RecommendationRequestedEvent
 			err = json.Unmarshal(msg.Value, &event)
 			if err != nil {
 				log.Printf("Ошибка демаршалинга события: %v", err)
