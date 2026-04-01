@@ -171,15 +171,24 @@ class HomeShell extends StatelessWidget {
       body = Stack(
         children: [
           body,
-          // Floating glass bottom bar
+          // Floating glass bottom bar — constrained width on wide screens
           Positioned(
-            left: 28,
-            right: 28,
+            left: 0,
+            right: 0,
             bottom: 16,
-            child: _GlassBottomBar(
-              currentIndex: currentIndex,
-              onTap: (index) => onNavigationDestinationSelected?.call(index),
-              isDark: isDark,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: _GlassBottomBar(
+                    currentIndex: currentIndex,
+                    onTap: (index) =>
+                        onNavigationDestinationSelected?.call(index),
+                    isDark: isDark,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
