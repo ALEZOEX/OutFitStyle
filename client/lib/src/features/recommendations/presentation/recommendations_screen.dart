@@ -126,6 +126,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           ),
           // Список рекомендаций
           _buildRecommendationsList(context, state),
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

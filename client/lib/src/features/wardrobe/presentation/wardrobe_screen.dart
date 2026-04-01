@@ -57,6 +57,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
                 child: _buildCategoryFilters(context, categories),
               ),
             _buildWardrobeGrid(context, wardrobeState),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
       ),

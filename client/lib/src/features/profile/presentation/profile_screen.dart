@@ -36,7 +36,7 @@ class ProfileScreen extends ConsumerWidget {
             const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
             SliverToBoxAdapter(child: _buildAdditionalOptions(context)),
             SliverToBoxAdapter(child: _buildLogoutButtonFromRef(context, ref)),
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxxl)),
+            const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
         ),
       ),
