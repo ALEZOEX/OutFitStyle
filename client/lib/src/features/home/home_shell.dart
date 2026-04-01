@@ -187,12 +187,24 @@ class HomeShell extends StatelessWidget {
     }
 
     return Scaffold(
+      // Glass app bar — замороженное стекло как Landing glass-header
       appBar: showAppBar
-          ? AppBar(
-              title: Text(title),
-              centerTitle: false,
-              scrolledUnderElevation: 0,
-              actions: appBarActions ?? const [],
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+              child: ClipRRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                  child: AppBar(
+                    title: Text(title),
+                    centerTitle: false,
+                    scrolledUnderElevation: 0,
+                    backgroundColor: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.white.withValues(alpha: 0.7),
+                    actions: appBarActions ?? const [],
+                  ),
+                ),
+              ),
             )
           : null,
       body: body,
@@ -200,7 +212,7 @@ class HomeShell extends StatelessWidget {
   }
 }
 
-/// Glassmorphism floating bottom navigation bar
+/// Glassmorphism floating bottom navigation bar — Landing style
 class _GlassBottomBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -214,27 +226,29 @@ class _GlassBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Landing: bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl border-white/40
     return ClipRRect(
       borderRadius: AppRadius.radiusXxl,
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
-          height: 64,
+          height: 68,
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.white.withValues(alpha: 0.85),
+                ? const Color(0xFF1F2937).withValues(alpha: 0.4) // gray-800/40
+                : Colors.white.withValues(alpha: 0.6), // white/60
             borderRadius: AppRadius.radiusXxl,
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.5),
+                  ? Colors.white.withValues(alpha: 0.1) // white/10
+                  : Colors.white.withValues(alpha: 0.4), // white/40
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-                blurRadius: 24,
+                color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.1),
+                blurRadius: 32,
                 offset: const Offset(0, 8),
+                spreadRadius: -4,
               ),
             ],
           ),
