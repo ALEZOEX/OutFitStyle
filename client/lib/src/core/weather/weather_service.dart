@@ -95,6 +95,7 @@ class WeatherService {
           'longitude': longitude,
           'daily':
               'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+          'hourly': 'relative_humidity_2m',
           'timezone': 'auto',
           'forecast_days': days.clamp(1, 14),
         },
@@ -169,9 +170,8 @@ class WeatherService {
 
     return WeatherData(
       temperature: (current['temperature'] as num).toDouble(),
-      feelsLike:
-          (current['temperature'] as num)
-              .toDouble(), // Open-Meteo не предоставляет feels_like
+      feelsLike: (current['temperature'] as num)
+          .toDouble(), // Open-Meteo не предоставляет feels_like
       condition: _getWeatherCondition(weatherCode),
       description: _getWeatherDescription(weatherCode),
       humidity: humidity,
@@ -183,10 +183,19 @@ class WeatherService {
 
   List<WeatherData> _parseOpenMeteoForecast(Map<String, dynamic> data) {
     final daily = data['daily'] as Map<String, dynamic>;
+    final hourly = data['hourly'] as Map<String, dynamic>?;
     final times = daily['time'] as List;
     final maxTemps = daily['temperature_2m_max'] as List;
     final minTemps = daily['temperature_2m_min'] as List;
-    final weatherCodes = daily['weathercode'] as List;
+    final weatherCodes = daily['weather_code'] as List;
+
+    // Средняя влажность за день из hourly данных
+    List<int>? hourlyHumidity;
+    if (hourly != null && hourly['relative_humidity_2m'] != null) {
+      hourlyHumidity = (hourly['relative_humidity_2m'] as List)
+          .map((e) => (e as num).toInt())
+          .toList();
+    }
 
     final forecast = <WeatherData>[];
 
@@ -195,12 +204,26 @@ class WeatherService {
       i < times.length && i < maxTemps.length && i < minTemps.length;
       i++
     ) {
+      // Средняя влажность за день (24 часа)
+      int humidity = 50;
+      if (hourlyHumidity != null) {
+        final start = i * 24;
+        final end = (start + 24).clamp(0, hourlyHumidity.length);
+        if (start < hourlyHumidity.length) {
+          final daySlice = hourlyHumidity.sublist(start, end);
+          if (daySlice.isNotEmpty) {
+            humidity = (daySlice.reduce((a, b) => a + b) / daySlice.length)
+                .round();
+          }
+        }
+      }
+
       forecast.add(
         WeatherData(
           temperature: ((maxTemps[i] as num) + (minTemps[i] as num)) / 2,
           feelsLike: (maxTemps[i] as num).toDouble(),
           condition: _getWeatherCondition(weatherCodes[i] as int),
-          humidity: 50,
+          humidity: humidity,
           windSpeed: 0,
           latitude: (data['latitude'] as num).toDouble(),
           longitude: (data['longitude'] as num).toDouble(),
