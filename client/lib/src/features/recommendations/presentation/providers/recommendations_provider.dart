@@ -285,9 +285,11 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
         AppLogger.error(
           '[RecommendationsProvider] Ошибка генерации: statusCode=${response.statusCode}',
         );
+        final statusCode = response.statusCode;
+        final userMessage = _getUserMessage(statusCode);
         state = state.copyWith(
           status: RecommendationsLoadStatus.error,
-          error: 'Ошибка генерации (${response.statusCode})',
+          error: userMessage,
           isGenerating: false,
         );
         return null;
@@ -298,13 +300,47 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
         e,
         stackTrace,
       );
+      final userMessage = _getExceptionMessage(e);
       state = state.copyWith(
         status: RecommendationsLoadStatus.error,
-        error: 'Ошибка генерации рекомендации',
+        error: userMessage,
         isGenerating: false,
       );
       return null;
     }
+  }
+
+  /// Понятное сообщение для пользователя по коду ошибки
+  String _getUserMessage(int? statusCode) {
+    switch (statusCode) {
+      case 500:
+        return 'Сервис временно недоступен. Попробуйте через минуту';
+      case 502:
+      case 503:
+        return 'Сервер перегружен. Подождите немного';
+      case 401:
+        return 'Сессия истекла. Войдите заново';
+      case 400:
+        return 'Неверные данные запроса';
+      case 429:
+        return 'Слишком много запросов. Подождите';
+      default:
+        return 'Ошибка соединения ($statusCode)';
+    }
+  }
+
+  /// Понятное сообщение для исключений
+  String _getExceptionMessage(dynamic e) {
+    final msg = e.toString().toLowerCase();
+    if (msg.contains('socket') ||
+        msg.contains('network') ||
+        msg.contains('connection')) {
+      return 'Нет соединения с интернетом';
+    }
+    if (msg.contains('timeout')) {
+      return 'Время ожидания истекло. Попробуйте снова';
+    }
+    return 'Что-то пошло не так. Попробуйте снова';
   }
 
   /// Удалить рекомендацию

@@ -591,16 +591,45 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
       messenger.showSnackBar(
         SnackBar(
           content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green[700]),
-              const SizedBox(width: 12),
-              const Text('Рекомендация сгенерирована!'),
+            children: const [
+              Icon(Icons.check_circle, color: Colors.white, size: 18),
+              SizedBox(width: 12),
+              Text('Рекомендация сгенерирована!'),
             ],
           ),
-          backgroundColor: colorScheme.primary,
+          backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    } else {
+      final errorMsg =
+          ref.read(recommendationsProvider).error ?? 'Что-то пошло не так';
+      messenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Text(errorMsg)),
+            ],
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'Повторить',
+            textColor: Colors.white,
+            onPressed: () => _generateRecommendation(context),
           ),
         ),
       );

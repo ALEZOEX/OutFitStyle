@@ -512,18 +512,30 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
         ),
       );
     } else {
+      final errorMsg =
+          ref.read(recommendationsProvider).error ?? 'Что-то пошло не так';
       messenger.showSnackBar(
         SnackBar(
           content: Row(
-            children: const [
-              Icon(Icons.error_outline, color: Colors.white, size: 18),
-              SizedBox(width: AppSpacing.sm),
-              Text('Ошибка генерации'),
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: Text(errorMsg)),
             ],
           ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusMd),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'Повторить',
+            textColor: Colors.white,
+            onPressed: () => _generateRecommendation(context),
+          ),
         ),
       );
     }
