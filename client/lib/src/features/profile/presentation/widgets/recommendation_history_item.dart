@@ -42,8 +42,10 @@ class RecommendationHistoryItem extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         trailing: Icon(
-          recommendation.isLiked ? Icons.favorite : Icons.favorite_border,
-          color: recommendation.isLiked ? Colors.red : null,
+          (recommendation.isLiked ?? false)
+              ? Icons.favorite
+              : Icons.favorite_border,
+          color: (recommendation.isLiked ?? false) ? Colors.red : null,
         ),
         onTap: onTap,
       ),

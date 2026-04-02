@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:confetti/confetti.dart';
 import '../../../../domain/entities/achievement.dart';
+import '../providers/achievements_providers.dart';
 
 /// Сервис для отображения уведомлений о разблокировке достижений
 class AchievementNotificationService {
@@ -98,19 +99,16 @@ class AchievementNotificationService {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       elevation: 8,
       backgroundColor: theme.colorScheme.inverseSurface,
+      action: onTap != null
+          ? SnackBarAction(
+              label: 'Открыть',
+              textColor: theme.colorScheme.primary,
+              onPressed: onTap,
+            )
+          : null,
     );
 
     messengerState.showSnackBar(snackBar);
-
-    // Вызов callback при нажатии
-    if (onTap != null) {
-      // Обработка нажатия на уведомление
-      snackBar.action = SnackBarAction(
-        label: 'Открыть',
-        textColor: theme.colorScheme.primary,
-        onPressed: onTap,
-      );
-    }
   }
 
   /// Показать диалог разблокировки достижения
@@ -336,8 +334,3 @@ class AchievementConfettiOverlay extends ConsumerWidget {
     );
   }
 }
-
-/// Провайдер для отслеживания только что разблокированных достижений
-final newlyUnlockedAchievementsProvider = StateProvider<List<Achievement>>(
-  (ref) => [],
-);

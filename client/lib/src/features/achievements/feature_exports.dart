@@ -1,6 +1,5 @@
 // Domain entities
 export '../../domain/entities/achievement.dart';
-export '../../domain/entities/achievement_progress.dart';
 export '../../domain/entities/user_achievement_status.dart';
 
 // Domain enums
@@ -16,7 +15,6 @@ export 'data/models/achievement_dto.dart';
 // Presentation - Pages
 export 'presentation/pages/achievements_page.dart';
 export 'presentation/pages/achievement_detail_page.dart';
-export 'presentation/demo/achievement_demo_page.dart';
 
 // Presentation - Widgets
 export 'presentation/widgets/achievement_card_widget.dart';
@@ -24,7 +22,6 @@ export 'presentation/widgets/achievement_card.dart';
 export 'presentation/widgets/achievement_list_widget.dart';
 export 'presentation/widgets/achievement_category_tab.dart';
 export 'presentation/widgets/achievement_icon.dart';
-export 'presentation/widgets/achievement_progress.dart';
 export 'presentation/widgets/achievement_badge.dart';
 
 // Presentation - Providers

@@ -331,21 +331,28 @@ class HomeShell extends StatelessWidget {
                                   horizontal: 16,
                                 ),
                                 child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      title,
-                                      style: theme.textTheme.titleLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                            color: isDark
-                                                ? Colors.white
-                                                : const Color(0xFF1F2937),
-                                          ),
+                                    Expanded(
+                                      child: Text(
+                                        title,
+                                        style: theme.textTheme.titleLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : const Color(0xFF1F2937),
+                                            ),
+                                      ),
                                     ),
-                                    const Spacer(),
                                     if (appBarActions != null &&
                                         appBarActions!.isNotEmpty)
-                                      ...appBarActions!,
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: appBarActions!,
+                                      ),
                                   ],
                                 ),
                               ),
