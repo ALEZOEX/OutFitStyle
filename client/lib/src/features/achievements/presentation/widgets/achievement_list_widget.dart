@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/achievement.dart';
-import '../providers/achievement_provider.dart';
 import 'achievement_card_widget.dart';
 
-class AchievementListWidget extends ConsumerWidget {
+class AchievementListWidget extends StatelessWidget {
   final List<Achievement> achievements;
   final String? userId;
 
@@ -15,7 +13,7 @@ class AchievementListWidget extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: achievements.length,
       itemBuilder: (context, index) {
@@ -23,16 +21,7 @@ class AchievementListWidget extends ConsumerWidget {
 
         return AchievementCardWidget(
           achievement: achievement,
-          onTap:
-              userId != null
-                  ? () {
-                    // При нажатии можно увеличить прогресс ачивки (для демонстрации)
-                    // В реальном приложении это будет зависеть от типа ачивки
-                    ref
-                        .read(achievementNotifierProvider.notifier)
-                        .updateUserAchievement(userId!, achievement.id);
-                  }
-                  : null,
+          onTap: userId != null ? () {} : null,
         );
       },
     );

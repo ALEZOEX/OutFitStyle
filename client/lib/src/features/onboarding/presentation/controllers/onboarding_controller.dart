@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/states/onboarding_state.dart';
+import '../../../../domain/states/onboarding_state.dart';
 
 class OnboardingController extends StateNotifier<OnboardingState> {
   OnboardingController() : super(const OnboardingState.initial());

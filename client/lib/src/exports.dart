@@ -5,8 +5,8 @@ export 'domain/domain_exports.dart';
 // Data layer exports - repository implementations only
 // Примечание: Не экспортируем интерфейсы domain здесь, чтобы избежать неоднозначных экспортов
 export 'data/repositories/auth_repository.dart';
-export 'data/repositories/profile_repository.dart';
-export 'data/repositories/wardrobe_repository.dart';
+// export 'data/repositories/profile_repository.dart'; // Закомментировано, чтобы избежать конфликта с features/profile
+// export 'data/repositories/wardrobe_repository.dart'; // Закомментировано, чтобы избежать конфликта с features/wardrobe
 export 'data/repositories/recommendations_repository.dart';
 
 // UI layer exports

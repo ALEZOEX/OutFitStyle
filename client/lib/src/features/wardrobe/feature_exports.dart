@@ -8,7 +8,7 @@ export '../../domain/enums/clothing_weather.dart';
 export '../../domain/enums/outfit_occasion.dart';
 export '../../domain/enums/outfit_season.dart';
 export '../../domain/enums/outfit_weather.dart';
-export '../../domain/repositories/wardrobe_repository.dart';
+export 'domain/repositories/wardrobe_repository.dart';
 
 // Presentation
 export 'presentation/wardrobe_screen.dart';

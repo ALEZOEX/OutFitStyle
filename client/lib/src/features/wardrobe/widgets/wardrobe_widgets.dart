@@ -106,6 +106,8 @@ class ClothingItemCard extends StatelessWidget {
         return 'Верх';
       case ClothingCategory.bottoms:
         return 'Низ';
+      case ClothingCategory.dresses:
+        return 'Платья';
       case ClothingCategory.shoes:
         return 'Обувь';
       case ClothingCategory.accessories:
@@ -179,7 +181,7 @@ class OutfitCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          outfit.name,
+                          outfit.name ?? '',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,

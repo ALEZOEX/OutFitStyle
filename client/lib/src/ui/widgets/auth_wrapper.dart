@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../presentation/providers/session_provider.dart';
+import '../../presentation/providers/session_provider.dart';
 
 /// Обёртка для защиты маршрутов, требующих аутентификации
 ///

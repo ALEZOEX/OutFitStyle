@@ -1022,7 +1022,7 @@ func (r *ClothingRepository) ListCatalogCandidatesLite(ctx context.Context, incl
 		var item domain.CandidateLite
 		var minTemp, maxTemp, warmthLevel *int
 		var formalityLevel *int
-		var baseColour *string
+		var baseColour, pattern *string
 
 		err := rows.Scan(
 			&item.ID,
@@ -1061,6 +1061,9 @@ func (r *ClothingRepository) ListCatalogCandidatesLite(ctx context.Context, incl
 		}
 		if baseColour != nil {
 			item.BaseColour = baseColour
+		}
+		if pattern != nil {
+			item.Pattern = *pattern
 		}
 
 		// Set IsFromWardrobe to false since these are catalog items
