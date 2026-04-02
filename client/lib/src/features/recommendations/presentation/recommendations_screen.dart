@@ -579,7 +579,6 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
 
     if (!context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     final result = await notifier.generateRecommendation(
       latitude: userLocation.latitude,
