@@ -1,7 +1,6 @@
 package services
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -241,7 +240,6 @@ func TestFallbackRecommendationService_StyleMatch(t *testing.T) {
 	// Фиксируем seed для детерминированного теста
 	svc := &FallbackRecommendationService{
 		logger: logger,
-		rng:    rand.New(rand.NewSource(42)),
 	}
 
 	weather := domain.WeatherSnapshot{

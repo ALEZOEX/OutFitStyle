@@ -128,7 +128,8 @@ func (v *importValidator) GenerateReport(report *ValidationReport, outputPath st
 	}
 
 	// Write to file
-	if err := os.WriteFile(outputPath, data, 0644); err != nil {
+	// G306: Отчёт валидации должен быть доступен только владельцу
+	if err := os.WriteFile(outputPath, data, 0600); err != nil {
 		return fmt.Errorf("failed to write report file: %w", err)
 	}
 

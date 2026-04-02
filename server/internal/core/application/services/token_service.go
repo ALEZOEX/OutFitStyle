@@ -290,7 +290,8 @@ func savePublicKey(publicKey *rsa.PublicKey, filename string) error {
 		Bytes: pubBytes,
 	})
 
-	return os.WriteFile(filename, pubPEM, 0644)
+	// G306: Публичный ключ должен быть доступен только владельцу для записи
+	return os.WriteFile(filename, pubPEM, 0600)
 }
 
 // loadPrivateKey загружает приватный ключ из файла

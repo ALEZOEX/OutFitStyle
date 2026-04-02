@@ -251,6 +251,7 @@ func (h *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// max 10MB
+	// G120: MaxBytesReader уже ограничивает размер, ParseMultipartForm использует тот же лимит
 	r.Body = http.MaxBytesReader(w, r.Body, 10*1024*1024)
 
 	if err := r.ParseMultipartForm(10 * 1024 * 1024); err != nil {

@@ -53,10 +53,6 @@ func main() {
 		if *v < 0 {
 			log.Fatal("use -v for goto")
 		}
-		// G115: Проверка на отрицательные значения перед конвертацией
-		if *v < 0 {
-			log.Fatal("version must be non-negative")
-		}
 		err = m.Migrate(uint(*v))
 	case "force":
 		if *v < 0 {
