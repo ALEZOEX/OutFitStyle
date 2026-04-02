@@ -22,7 +22,7 @@ RUN go mod tidy && \
     CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate cmd/migrate/main.go
 
 # Второй этап - минимальный образ
-FROM alpine:3.23.4
+FROM alpine:3.23
 
 # Установить локаль
 ENV LANG=ru_RU.UTF-8
