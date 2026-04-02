@@ -37,9 +37,11 @@ class WeatherCard extends StatelessWidget {
         ? Colors.white.withValues(alpha: 0.5)
         : const Color(0xFF9CA3AF);
 
-    return ClipRRect(
-      borderRadius: AppRadius.radiusXxl,
-      child: BackdropFilter(
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: AppRadius.radiusXxl,
+        child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             width: double.infinity,
