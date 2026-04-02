@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // ══════════════════════════════════════════════════════════════
-// Цвета — синхронизированы с Landing Page (#d946ef, #f43f5e)
+// Цвета — Rich Violet (#7C3AED) с гармоничными акцентами
 // ══════════════════════════════════════════════════════════════
 class AppColors {
-  // Бренд — Landing: primary-500 #d946ef, accent-500 #f43f5e
-  static const Color primary = Color(0xFFD946EF);
-  static const Color primaryLight = Color(0xFFF0ABFC); // primary-300
-  static const Color primaryDark = Color(0xFFA21CAF); // primary-700
+  // Бренд — Rich Violet primary с гармоничными оттенками
+  static const Color primary = Color(0xFF7C3AED); // Rich Violet
+  static const Color primaryLight = Color(0xFFA78BFA); // Lighter Violet
+  static const Color primaryDark = Color(0xFF5B21B6); // Deep Violet
   static const Color secondary = Color(0xFFF43F5E); // accent-500
   static const Color secondaryLight = Color(0xFFFDA4AF); // accent-300
   static const Color secondaryDark = Color(0xFFBE123C); // accent-700
@@ -20,7 +20,7 @@ class AppColors {
   static const Color backgroundDark = Color(
     0xFF090A0F,
   ); // Landing dark:bg-[#090a0f]
-  static const Color surfaceLight = Colors.white;
+  static const Color surfaceLight = Color(0xFFF8FAFC); // Soft white (slate-50)
   static const Color surfaceDark = Color(0xFF1A1A2E); // Deep purple-tinted dark
   static const Color surfaceDarkElevated = Color(
     0xFF232340,
