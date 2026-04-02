@@ -179,13 +179,14 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
           command_timeout: 10m
           envs: LANG,LC_ALL
           envs_format: "true"
           script: |
             export LANG=en_US.UTF-8
             export LC_ALL=en_US.UTF-8
-            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
             cd /root/OutFitStyle
             git fetch origin main
             git reset --hard origin/main

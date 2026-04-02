@@ -167,7 +167,6 @@ class _OutfitDetailsScreenState extends ConsumerState<OutfitDetailsScreen> {
   }
 
   Widget _buildItemsList(BuildContext context, OutfitRecommendation outfit) {
-    final theme = Theme.of(context);
     final items = outfit.recommendedItems ?? [];
 
     return Column(

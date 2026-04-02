@@ -14,8 +14,8 @@ import (
 	"outfitstyle/server/internal/core/application/services"
 	"outfitstyle/server/internal/core/domain"
 	"outfitstyle/server/internal/core/use_cases"
-	"outfitstyle/server/internal/validation"
 	resp "outfitstyle/server/internal/pkg/http"
+	"outfitstyle/server/internal/validation"
 )
 
 type RecommendationHandler struct {
@@ -38,9 +38,9 @@ func NewRecommendationHandlerWithUseCases(
 	getRecommendationsUC usecases.GetRecommendationsUseCase,
 ) *RecommendationHandler {
 	return &RecommendationHandler{
-		svc: svc,
-		ach: ach,
-		log: log,
+		svc:                  svc,
+		ach:                  ach,
+		log:                  log,
 		getRecommendationsUC: getRecommendationsUC,
 	}
 }
@@ -73,7 +73,7 @@ func (h *RecommendationHandler) RegisterRoutes(r *mux.Router) {
 // @Router /api/v1/recommendations [post]
 func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	h.log.Info("🔵 [RECOMMENDATION] POST /api/v1/recommendations - START")
-	
+
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
 		h.log.Warn("⚠️ [RECOMMENDATION] Auth required for recommendation creation")
@@ -90,7 +90,7 @@ func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.log.Info("📦 [RECOMMENDATION] Request body", 
+	h.log.Info("📦 [RECOMMENDATION] Request body",
 		zap.Any("latitude", req.Latitude),
 		zap.Any("longitude", req.Longitude),
 		zap.Any("occasion", req.Occasion),
@@ -128,8 +128,13 @@ func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	h.log.Info("⚙️ [RECOMMENDATION] Calling service.Create...")
 	rec, err := h.svc.Create(r.Context(), userID, req)
 	if err != nil {
-		h.log.Error("❌ [RECOMMENDATION] Failed to create recommendation", zap.Error(err))
-		resp.Error(w, http.StatusInternalServerError, errors.New("failed to create recommendation"))
+		h.log.Error("❌ [RECOMMENDATION] Failed to create recommendation",
+			zap.Error(err),
+			zap.String("error_msg", err.Error()),
+			zap.String("user_id", userID.String()),
+		)
+		// Возвращаем конкретное сообщение об ошибке
+		resp.Error(w, http.StatusInternalServerError, errors.New(err.Error()))
 		return
 	}
 
