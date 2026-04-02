@@ -97,33 +97,83 @@ class AppCard extends StatelessWidget {
     );
   }
 
-  /// Glassmorphism (Landing glass-card)
+  /// iOS-style Glassmorphism
   Widget _buildGlass(BuildContext context, bool isDark) {
-    return ClipRRect(
-      borderRadius: AppRadius.radiusLg,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.white.withValues(alpha: 0.6),
-            borderRadius: AppRadius.radiusLg,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.4),
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.radiusXxl,
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(
+              alpha: isDark ? 0.2 : 0.1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
-          padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
-          child: child,
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: AppRadius.radiusXxl,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        Colors.white.withValues(alpha: 0.12),
+                        Colors.white.withValues(alpha: 0.04),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.7),
+                        Colors.white.withValues(alpha: 0.4),
+                      ],
+              ),
+              borderRadius: AppRadius.radiusXxl,
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.08),
+                width: 1,
+              ),
+            ),
+            child: Stack(
+              children: [
+                // Верхний блик (iOS highlight)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 40,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: isDark ? 0.1 : 0.2),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 1.0],
+                      ),
+                      borderRadius: BorderRadius.vertical(
+                        top: AppRadius.radiusXxl.topLeft,
+                      ),
+                    ),
+                  ),
+                ),
+                // Контент
+                Padding(
+                  padding: padding ?? const EdgeInsets.all(AppSpacing.xxl),
+                  child: child,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -185,11 +235,10 @@ enum CardVariant { outlined, glass, gradient, elevated, flat }
 // Glassmorphism helper для модальных bottom sheets
 // ══════════════════════════════════════════════════════════════
 
-/// Обёртка для glassmorphism-эффекта на модалках
+/// iOS-style Glassmorphism контейнер для модалок и bottom sheets
 class GlassContainer extends StatelessWidget {
   final Widget child;
   final double blur;
-  final double opacity;
   final EdgeInsetsGeometry? padding;
   final BorderRadius? borderRadius;
 
@@ -197,7 +246,6 @@ class GlassContainer extends StatelessWidget {
     super.key,
     required this.child,
     this.blur = 20,
-    this.opacity = 0.08,
     this.padding,
     this.borderRadius,
   });
@@ -205,26 +253,79 @@ class GlassContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
     final radius = borderRadius ?? AppRadius.radiusXxl;
 
-    return ClipRRect(
-      borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: opacity * 0.5)
-                : Colors.white.withValues(alpha: opacity + 0.5),
-            borderRadius: radius,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.white.withValues(alpha: 0.3),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(
+              alpha: isDark ? 0.25 : 0.12,
+            ),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        const Color(0xFF1F2937).withValues(alpha: 0.6),
+                        const Color(0xFF111827).withValues(alpha: 0.4),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.75),
+                        Colors.white.withValues(alpha: 0.5),
+                      ],
+              ),
+              borderRadius: radius,
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.06),
+                width: 1,
+              ),
+            ),
+            child: Stack(
+              children: [
+                // Верхний блик
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 50,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: isDark ? 0.08 : 0.18),
+                          Colors.transparent,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.vertical(top: radius.topLeft),
+                    ),
+                  ),
+                ),
+                // Контент
+                Padding(
+                  padding: padding ?? const EdgeInsets.all(AppSpacing.xxl),
+                  child: child,
+                ),
+              ],
             ),
           ),
-          padding: padding ?? const EdgeInsets.all(AppSpacing.xxl),
-          child: child,
         ),
       ),
     );
