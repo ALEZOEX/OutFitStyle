@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../recommendations/presentation/providers/recommendations_provider.dart';
-import '../../../presentation/providers/weather_provider.dart';
-import '../../../presentation/providers/user_location_provider.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/logger.dart';
 
@@ -470,14 +468,20 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     AppLogger.info('[GeneratorScreen] 🔵 _generateRecommendation ВЫЗВАН');
     AppLogger.info('[GeneratorScreen] _selectedOccasion: $_selectedOccasion');
     AppLogger.info('[GeneratorScreen] _useCurrentWeather: $_useCurrentWeather');
-    AppLogger.info('[GeneratorScreen] _temperatureOverride: $_temperatureOverride°C');
+    AppLogger.info(
+      '[GeneratorScreen] _temperatureOverride: $_temperatureOverride°C',
+    );
 
     final notifier = ref.read(recommendationsProvider.notifier);
     final userLocation = ref.read(userLocationProvider);
     final messenger = ScaffoldMessenger.of(context);
 
-    AppLogger.info('[GeneratorScreen] 📍 User location: lat=${userLocation.latitude}, lon=${userLocation.longitude}');
-    AppLogger.info('[GeneratorScreen] 📡 Вызов notifier.generateRecommendation...');
+    AppLogger.info(
+      '[GeneratorScreen] 📍 User location: lat=${userLocation.latitude}, lon=${userLocation.longitude}',
+    );
+    AppLogger.info(
+      '[GeneratorScreen] 📡 Вызов notifier.generateRecommendation...',
+    );
 
     final result = await notifier.generateRecommendation(
       latitude: userLocation.latitude,
@@ -485,7 +489,9 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
       occasion: _selectedOccasion,
     );
 
-    AppLogger.info('[GeneratorScreen] 📬 Результат генерации: ${result != null ? "УСПЕХ" : "ОШИБКА"}');
+    AppLogger.info(
+      '[GeneratorScreen] 📬 Результат генерации: ${result != null ? "УСПЕХ" : "ОШИБКА"}',
+    );
 
     if (!context.mounted) {
       AppLogger.warning('[GeneratorScreen] ⚠️ Context не примонтирован, выход');
