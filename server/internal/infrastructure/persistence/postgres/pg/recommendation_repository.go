@@ -111,8 +111,8 @@ func (r *RecommendationRepository) createWithSessionInternal(ctx context.Context
 	_, err = tx.Exec(ctx, `
 		INSERT INTO recommendations (
 			id, user_id, temperature, weather, outfit_score, ml_powered, algorithm, location
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	`, recID, rec.UserID, 0.0, "", outfitScore, true, algorithm, location)
+		) VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $8)
+	`, recID, rec.UserID, 0.0, "{}", outfitScore, true, algorithm, location)
 	if err != nil {
 		return domain.NilID, fmt.Errorf("failed to insert recommendation: %w", err)
 	}
