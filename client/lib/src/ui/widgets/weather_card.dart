@@ -28,6 +28,15 @@ class WeatherCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final temp = data.temperature?.round() ?? 0;
 
+    // Цвета текста — тёмные в светлой теме, белые в тёмной
+    final textColor = isDark ? Colors.white : const Color(0xFF1F2937);
+    final textSecondary = isDark
+        ? Colors.white.withValues(alpha: 0.7)
+        : const Color(0xFF4B5563);
+    final textMuted = isDark
+        ? Colors.white.withValues(alpha: 0.5)
+        : const Color(0xFF9CA3AF);
+
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
@@ -47,20 +56,22 @@ class WeatherCard extends StatelessWidget {
                         Colors.white.withValues(alpha: 0.05),
                       ]
                     : [
-                        AppColors.primary.withValues(alpha: 0.15),
+                        AppColors.primary.withValues(alpha: 0.12),
                         AppColors.secondary.withValues(alpha: 0.08),
-                        Colors.white.withValues(alpha: 0.6),
+                        Colors.white.withValues(alpha: 0.85),
                       ],
               ),
               borderRadius: AppRadius.radiusXxl,
               border: Border.all(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.white.withValues(alpha: 0.5),
+                    : AppColors.primary.withValues(alpha: 0.15),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: isDark
+                      ? AppColors.primary.withValues(alpha: 0.12)
+                      : AppColors.primary.withValues(alpha: 0.08),
                   blurRadius: 32,
                   offset: const Offset(0, 12),
                 ),
@@ -71,11 +82,25 @@ class WeatherCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(context),
+                  _buildHeader(context, textColor, textSecondary, textMuted),
                   const SizedBox(height: AppSpacing.xl),
-                  _buildMainWeather(context, data, temp),
+                  _buildMainWeather(
+                    context,
+                    data,
+                    temp,
+                    isDark,
+                    textColor,
+                    textSecondary,
+                    textMuted,
+                  ),
                   const SizedBox(height: AppSpacing.xxl),
-                  _buildDetails(context, data),
+                  _buildDetails(
+                    context,
+                    data,
+                    isDark,
+                    textColor,
+                    textSecondary,
+                  ),
                 ],
               ),
             ),
@@ -85,26 +110,26 @@ class WeatherCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(
+    BuildContext context,
+    Color textColor,
+    Color textSecondary,
+    Color textMuted,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Локация
         Expanded(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.location_on,
-                color: Colors.white.withValues(alpha: 0.9),
-                size: 14,
-              ),
+              Icon(Icons.location_on, color: textColor, size: 14),
               const SizedBox(width: AppSpacing.xs),
               Flexible(
                 child: Text(
                   'Москва',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Colors.white,
+                    color: textColor,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -113,16 +138,14 @@ class WeatherCard extends StatelessWidget {
             ],
           ),
         ),
-        // Дата + кнопка обновить
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               _formatDate(),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: 11,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: textMuted, fontSize: 11),
             ),
             if (onRefresh != null) ...[
               const SizedBox(width: AppSpacing.sm),
@@ -131,14 +154,10 @@ class WeatherCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.xs),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: textColor.withValues(alpha: 0.1),
                     borderRadius: AppRadius.radiusSm,
                   ),
-                  child: Icon(
-                    Icons.refresh,
-                    color: Colors.white.withValues(alpha: 0.8),
-                    size: 16,
-                  ),
+                  child: Icon(Icons.refresh, color: textSecondary, size: 16),
                 ),
               ),
             ],
@@ -148,7 +167,15 @@ class WeatherCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMainWeather(BuildContext context, WeatherData data, int temp) {
+  Widget _buildMainWeather(
+    BuildContext context,
+    WeatherData data,
+    int temp,
+    bool isDark,
+    Color textColor,
+    Color textSecondary,
+    Color textMuted,
+  ) {
     final theme = Theme.of(context);
     final icon = _getWeatherIcon(data.description ?? '');
 
@@ -158,28 +185,21 @@ class WeatherCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.white, Color(0xCCFFFFFF)],
-                ).createShader(bounds),
-                child: Text(
-                  '$temp°',
-                  style: const TextStyle(
-                    fontSize: 64,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    height: 1,
-                    letterSpacing: -2,
-                  ),
+              Text(
+                '$temp°',
+                style: TextStyle(
+                  fontSize: 64,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                  height: 1,
+                  letterSpacing: -2,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 _getWeatherDescription(data.description ?? ''),
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.85),
+                  color: textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -187,9 +207,7 @@ class WeatherCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Ощущается как ${data.feelsLike!.round()}°',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.6),
-                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(color: textMuted),
                 ),
               ],
             ],
@@ -202,21 +220,40 @@ class WeatherCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.25),
-                Colors.white.withValues(alpha: 0.08),
-              ],
+              colors: isDark
+                  ? [
+                      Colors.white.withValues(alpha: 0.25),
+                      Colors.white.withValues(alpha: 0.08),
+                    ]
+                  : [
+                      AppColors.primary.withValues(alpha: 0.15),
+                      AppColors.primary.withValues(alpha: 0.05),
+                    ],
             ),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : AppColors.primary.withValues(alpha: 0.2),
+            ),
           ),
-          child: Icon(icon, color: Colors.white, size: 36),
+          child: Icon(
+            icon,
+            color: isDark ? Colors.white : AppColors.primary,
+            size: 36,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildDetails(BuildContext context, WeatherData data) {
+  Widget _buildDetails(
+    BuildContext context,
+    WeatherData data,
+    bool isDark,
+    Color textColor,
+    Color textSecondary,
+  ) {
     final humidity = data.humidity;
     final windSpeed = data.windSpeed;
 
@@ -228,6 +265,9 @@ class WeatherCard extends StatelessWidget {
             icon: Icons.water_drop_outlined,
             value: humidity != null ? '$humidity%' : '—',
             label: 'Влажность',
+            isDark: isDark,
+            textColor: textColor,
+            textSecondary: textSecondary,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -237,6 +277,9 @@ class WeatherCard extends StatelessWidget {
             icon: Icons.air,
             value: windSpeed != null ? '${windSpeed.round()} м/с' : '—',
             label: 'Ветер',
+            isDark: isDark,
+            textColor: textColor,
+            textSecondary: textSecondary,
           ),
         ),
       ],
@@ -248,6 +291,9 @@ class WeatherCard extends StatelessWidget {
     required IconData icon,
     required String value,
     required String label,
+    required bool isDark,
+    required Color textColor,
+    required Color textSecondary,
   }) {
     final theme = Theme.of(context);
 
@@ -257,13 +303,19 @@ class WeatherCard extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.12)
+            : AppColors.primary.withValues(alpha: 0.08),
         borderRadius: AppRadius.radiusLg,
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.15)
+              : AppColors.primary.withValues(alpha: 0.12),
+        ),
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 18),
+          Icon(icon, color: textSecondary, size: 18),
           const SizedBox(width: AppSpacing.sm),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,14 +323,14 @@ class WeatherCard extends StatelessWidget {
               Text(
                 value,
                 style: theme.textTheme.titleSmall?.copyWith(
-                  color: Colors.white,
+                  color: textColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
                 label,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: textSecondary,
                 ),
               ),
             ],

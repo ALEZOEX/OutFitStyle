@@ -61,11 +61,15 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'addBtn',
-        onPressed: () => _showAddItemBottomSheet(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Добавить'),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 78),
+        child: FloatingActionButton.extended(
+          heroTag: 'addBtn',
+          onPressed: () => _showAddItemBottomSheet(context),
+          icon: const Icon(Icons.add),
+          label: const Text('Добавить'),
+        ),
       ),
     );
   }

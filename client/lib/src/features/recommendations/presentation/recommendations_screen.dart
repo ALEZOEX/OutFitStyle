@@ -130,10 +130,13 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/recommendations/planner'),
-        icon: const Icon(Icons.calendar_today),
-        label: const Text('Планировщик'),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 78),
+        child: FloatingActionButton.extended(
+          onPressed: () => context.push('/recommendations/planner'),
+          icon: const Icon(Icons.calendar_today),
+          label: const Text('Планировщик'),
+        ),
       ),
     );
   }
