@@ -1,7 +1,8 @@
 package services
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"sort"
 	"strings"
 	"time"
@@ -16,7 +17,6 @@ import (
 // Используется при недоступности ML-сервиса для graceful degradation
 type FallbackRecommendationService struct {
 	logger *zap.Logger
-	rng    *rand.Rand
 }
 
 // FallbackRankResult — результат работы fallback алгоритма
@@ -39,7 +39,6 @@ type RankedItem struct {
 func NewFallbackRecommendationService(logger *zap.Logger) *FallbackRecommendationService {
 	return &FallbackRecommendationService{
 		logger: logger,
-		rng:    rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
@@ -175,7 +174,8 @@ func (s *FallbackRecommendationService) calculateScore(
 	score += sourceScore * 0.05
 
 	// 6. Случайный фактор для разнообразия (вес 5%)
-	randomScore := s.rng.Float64() * 0.05
+	// G404: Используем crypto/rand вместо math/rand
+	randomScore := cryptoRandFloat64() * 0.05
 	score += randomScore
 
 	// Нормализация [0, 1]
@@ -225,7 +225,7 @@ func (s *FallbackRecommendationService) calculateSurvivalScore(
 	}
 
 	// Случайный фактор для разнообразия
-	score += s.rng.Float64() * 0.10
+	score += cryptoRandFloat64() * 0.10
 
 	if score < 0.05 {
 		score = 0.05 // минимальный скор — никто не должен быть полностью исключён
@@ -428,10 +428,10 @@ func (s *FallbackRecommendationService) calculateStyleCoherence(rankings map[str
 
 	// Если запрошен стиль — оцениваем соответствие
 	if requestedStyle != "" {
-		return 0.7 + 0.3*s.rng.Float64() // Fallback не может точно оценить без полных данных
+		return 0.7 + 0.3*cryptoRandFloat64() // Fallback не может точно оценить без полных данных
 	}
 
-	return 0.6 + 0.2*s.rng.Float64()
+	return 0.6 + 0.2*cryptoRandFloat64()
 }
 
 // calculateColorHarmony вычисляет гармоничность цветов
@@ -441,7 +441,7 @@ func (s *FallbackRecommendationService) calculateColorHarmony(rankings map[strin
 	}
 
 	// Fallback не имеет полных данных о цветах, возвращаем оценку по умолчанию
-	return 0.6 + 0.2*s.rng.Float64()
+	return 0.6 + 0.2*cryptoRandFloat64()
 }
 
 // shuffleTop3 добавляет небольшую рандомизацию в топ-3 элементов
@@ -452,10 +452,33 @@ func (s *FallbackRecommendationService) shuffleTop3(items []RankedItem) {
 	}
 
 	// Перемешиваем только топ-3 (первые 3 элемента)
+	// G404: Используем crypto/rand
 	for i := 2; i > 0; i-- {
-		j := s.rng.Intn(i + 1)
+		j := cryptoRandInt(i + 1)
 		items[i], items[j] = items[j], items[i]
 	}
+}
+
+// cryptoRandFloat64 генерирует криптографически безопасное случайное число [0, 1)
+func cryptoRandFloat64() float64 {
+	max := big.NewInt(1 << 53)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return 0.5 // fallback
+	}
+	return float64(n.Int64()) / float64(max.Int64())
+}
+
+// cryptoRandInt генерирует криптографически безопасное случайное целое число [0, max)
+func cryptoRandInt(max int) int {
+	if max <= 0 {
+		return 0
+	}
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	if err != nil {
+		return 0 // fallback
+	}
+	return int(n.Int64())
 }
 
 // ToRankedLite конвертирует результат в формат rankedLite для совместимости

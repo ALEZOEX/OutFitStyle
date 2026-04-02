@@ -66,7 +66,8 @@ func buildRedisTLSConfig() (*tls.Config, error) {
 
 	// G304: Используем os.Root для ограничения доступа к файлам
 	root := os.DirFS("/etc/ssl/certs")
-	if _, err := os.Stat(caCertPath); err == nil {
+	// G703: Проверяем ошибку os.Stat перед использованием
+	if stat, err := os.Stat(caCertPath); err == nil && !stat.IsDir() {
 		file, err := root.Open(filepath.Base(caCertPath))
 		if err != nil {
 			return nil, fmt.Errorf("failed to open CA cert: %w", err)

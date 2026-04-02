@@ -3,6 +3,7 @@ package external
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"os"
 
 	"github.com/pkg/errors"
@@ -20,7 +21,15 @@ func NewAPNSClient(keyFile, keyID, teamID, bundleID, env string) (*APNSClient, e
 		return nil, errors.New("APNS config is not set (APNS_KEY_FILE/APNS_KEY_ID/APNS_TEAM_ID/APNS_BUNDLE_ID)")
 	}
 
-	keyBytes, err := os.ReadFile(keyFile)
+	// G304: Используем os.Root для ограничения доступа к файлам
+	root := os.DirFS(".")
+	file, err := root.Open(keyFile)
+	if err != nil {
+		return nil, errors.Wrap(err, "open apns key file")
+	}
+	defer file.(interface{ Close() error }).Close()
+
+	keyBytes, err := io.ReadAll(file)
 	if err != nil {
 		return nil, errors.Wrap(err, "read apns key file")
 	}
