@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/repositories/achievement_repository.dart';
-import '../../core/di/di.dart';
+
+// TODO: добавить в di.dart
+final achievementRepositoryProvider = Provider<AchievementRepository>((ref) {
+  throw UnimplementedError('achievementRepositoryProvider not configured');
+});
 
 // UseCase провайдеры для achievements будут добавлены позже
 // Пока используем репозиторий напрямую

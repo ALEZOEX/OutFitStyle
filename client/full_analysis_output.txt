@@ -1,0 +1,196 @@
+﻿Analyzing client...                                             
+
+  error - Undefined name 'achievementRepositoryProvider' - lib\src\features\achievements\achievement_providers.dart:10:46 - undefined_identifier
+warning - Unused import: 'package:flutter/foundation.dart' - lib\src\features\achievements\data\repositories\achievements_repository.dart:2:8 - unused_import
+warning - This default clause is covered by the previous cases - lib\src\features\achievements\data\repositories\achievements_repository.dart:62:7 - unreachable_switch_default
+warning - Unused import: '../../../../core/api/api_client.dart' - lib\src\features\achievements\data\repositories\achievements_repository_impl.dart:4:8 - unused_import
+warning - Unused import: '../../../../core/di/di.dart' - lib\src\features\achievements\data\repositories\achievements_repository_impl.dart:5:8 - unused_import
+warning - This default clause is covered by the previous cases - lib\src\features\achievements\data\repositories\achievements_repository_impl.dart:285:7 - unreachable_switch_default
+warning - The method doesn't override an inherited method - lib\src\features\achievements\data\repositories\achievements_repository_impl.dart:427:32 - override_on_non_overriding_member
+warning - Unused import: '../../../../core/api/api_config.dart' - lib\src\features\achievements\data\services\achievements_api_service.dart:4:8 - unused_import
+  error - The name 'AchievementProgress' is defined in the libraries 'package:outfitstyle_client/src/domain/entities/achievement_progress.dart' and 'package:outfitstyle_client/src/features/achievements/presentation/widgets/achievement_progress.dart' - lib\src\features\achievements\feature_exports.dart:27:8 - ambiguous_export
+  error - The name 'newlyUnlockedAchievementsProvider' is defined in the libraries 'package:outfitstyle_client/src/features/achievements/presentation/providers/achievements_providers.dart' and 'package:outfitstyle_client/src/features/achievements/presentation/services/achievement_notification_service.dart' - lib\src\features\achievements\feature_exports.dart:34:8 - ambiguous_export
+  error - Target of URI doesn't exist: '../src/features/achievements/feature_exports.dart' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:3:8 - uri_does_not_exist
+  error - Undefined name 'achievementNotifierProvider' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:19:25 - undefined_identifier
+  error - The method 'Achievement' isn't defined for the type 'AchievementDemoPage' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:28:41 - undefined_method
+  error - Undefined name 'AchievementType' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:33:23 - undefined_identifier
+  error - Undefined name 'achievementNotifierProvider' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:41:25 - undefined_identifier
+  error - Undefined name 'achievementNotifierProvider' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:50:41 - undefined_identifier
+  error - Undefined name 'AchievementStatus' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:53:19 - undefined_identifier
+  error - Undefined name 'AchievementStatus' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:53:48 - undefined_identifier
+  error - Undefined name 'AchievementStatus' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:55:19 - undefined_identifier
+  error - The method 'AchievementListWidget' isn't defined for the type 'AchievementDemoPage' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:57:27 - undefined_method
+  error - Undefined name 'AchievementStatus' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:61:19 - undefined_identifier
+  error - The method 'AchievementListWidget' isn't defined for the type 'AchievementDemoPage' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:63:27 - undefined_method
+  error - Undefined name 'AchievementStatus' - lib\src\features\achievements\presentation\demo\achievement_demo_page.dart:69:19 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:34:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:188:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:221:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:309:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:310:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:315:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:367:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:370:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:391:65 - deprecated_member_use
+warning - The value of the local variable 'theme' isn't used - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:433:11 - unused_local_variable
+   info - 'Share' is deprecated and shouldn't be used. Use SharePlus instead - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:491:13 - deprecated_member_use
+   info - 'share' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead - lib\src\features\achievements\presentation\pages\achievement_detail_page.dart:491:19 - deprecated_member_use
+warning - Unused import: '../widgets/achievement_card.dart' - lib\src\features\achievements\presentation\pages\achievements_page.dart:7:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievements_page.dart:216:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievements_page.dart:253:26 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\pages\achievements_page.dart:338:65 - deprecated_member_use
+warning - Unused import: '../../../../core/api/api_client.dart' - lib\src\features\achievements\presentation\providers\achievements_providers.dart:4:8 - unused_import
+warning - Unused import: '../../../wardrobe/presentation/providers/wardrobe_provider.dart' - lib\src\features\achievements\presentation\providers\achievements_providers.dart:8:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\services\achievement_notification_service.dart:41:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\services\achievement_notification_service.dart:77:63 - deprecated_member_use
+  error - 'action' can't be used as a setter because it's final - lib\src\features\achievements\presentation\services\achievement_notification_service.dart:108:16 - assignment_to_final
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\services\achievement_notification_service.dart:142:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\services\achievement_notification_service.dart:173:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\services\achievement_notification_service.dart:221:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:34:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:43:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:44:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:74:60 - deprecated_member_use
+warning - The value of the local variable 'percent' isn't used - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:131:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:136:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:139:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:160:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:197:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:202:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_badge.dart:224:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:28:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:34:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:35:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:65:69 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:132:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:142:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:162:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:181:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:194:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_card.dart:231:42 - deprecated_member_use
+  error - Target of URI doesn't exist: '../providers/achievement_provider.dart' - lib\src\features\achievements\presentation\widgets\achievement_card_widget.dart:4:8 - uri_does_not_exist
+warning - The left operand can't be null, so the right operand is never executed - lib\src\features\achievements\presentation\widgets\achievement_card_widget.dart:15:50 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\src\features\achievements\presentation\widgets\achievement_card_widget.dart:16:53 - dead_null_aware_expression
+  error - The getter 'targetProgress' isn't defined for the type 'Achievement' - lib\src\features\achievements\presentation\widgets\achievement_card_widget.dart:17:32 - undefined_getter
+  error - Undefined name 'achievementNotifierProvider' - lib\src\features\achievements\presentation\widgets\achievement_card_widget.dart:29:23 - undefined_identifier
+warning - This default clause is covered by the previous cases - lib\src\features\achievements\presentation\widgets\achievement_category_tab.dart:94:7 - unreachable_switch_default
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_category_tab.dart:160:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_category_tab.dart:176:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_category_tab.dart:230:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_category_tab.dart:274:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_category_tab.dart:372:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_category_tab.dart:390:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_category_tab.dart:393:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_icon.dart:39:23 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_icon.dart:51:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_icon.dart:62:23 - deprecated_member_use
+warning - The value of the local variable 'theme' isn't used - lib\src\features\achievements\presentation\widgets\achievement_icon.dart:114:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_icon.dart:125:41 - deprecated_member_use
+  error - Target of URI doesn't exist: '../providers/achievement_provider.dart' - lib\src\features\achievements\presentation\widgets\achievement_list_widget.dart:4:8 - uri_does_not_exist
+  error - Undefined name 'achievementNotifierProvider' - lib\src\features\achievements\presentation\widgets\achievement_list_widget.dart:32:31 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_progress.dart:38:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_progress.dart:52:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\achievements\presentation\widgets\achievement_progress.dart:140:48 - deprecated_member_use
+   info - The 'child' argument should be last in widget constructor invocations - lib\src\features\home\home_shell.dart:95:7 - sort_child_properties_last
+  error - Target of URI doesn't exist: '../../../domain/states/onboarding_state.dart' - lib\src\features\onboarding\presentation\controllers\onboarding_controller.dart:2:8 - uri_does_not_exist
+  error - The name 'OnboardingState' isn't a type, so it can't be used as a type argument - lib\src\features\onboarding\presentation\controllers\onboarding_controller.dart:4:50 - non_type_as_type_argument
+  error - The name 'initial' isn't a class - lib\src\features\onboarding\presentation\controllers\onboarding_controller.dart:5:40 - creation_with_non_type
+warning - Unused import: 'package:outfitstyle_client/src/core/api/api_client.dart' - lib\src\features\onboarding\presentation\providers\onboarding_provider.dart:2:8 - unused_import
+warning - Unused import: 'package:http/http.dart' - lib\src\features\onboarding\presentation\screens\onboarding_screen.dart:4:8 - unused_import
+warning - Unused import: 'dart:convert' - lib\src\features\onboarding\presentation\screens\onboarding_screen.dart:5:8 - unused_import
+warning - Unused import: 'dart:math' - lib\src\features\onboarding\presentation\screens\onboarding_screen.dart:6:8 - unused_import
+warning - The member 'state' can only be used within 'package:state_notifier/state_notifier.dart' or a test - lib\src\features\onboarding\presentation\screens\onboarding_screen.dart:170:34 - invalid_use_of_visible_for_testing_member
+warning - The member 'state' can only be used within instance members of subclasses of 'StateNotifier' - lib\src\features\onboarding\presentation\screens\onboarding_screen.dart:170:34 - invalid_use_of_protected_member
+warning - The operand can't be 'null', so the condition is always 'false' - lib\src\features\onboarding\presentation\screens\onboarding_screen.dart:180:14 - unnecessary_null_comparison
+  error - Target of URI doesn't exist: '../../domain/repositories/profile_repository.dart' - lib\src\features\profile\feature_exports.dart:4:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'profile_screen.dart' - lib\src\features\profile\feature_exports.dart:5:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../../domain/states/profile_state.dart' - lib\src\features\profile\presentation\controllers\profile_controller.dart:2:8 - uri_does_not_exist
+  error - The name 'ProfileState' isn't a type, so it can't be used as a type argument - lib\src\features\profile\presentation\controllers\profile_controller.dart:4:47 - non_type_as_type_argument
+  error - The name 'initial' isn't a class - lib\src\features\profile\presentation\controllers\profile_controller.dart:5:37 - creation_with_non_type
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\src\features\profile\presentation\profile_screen.dart:535:15 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\src\features\profile\presentation\profile_screen.dart:536:15 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\src\features\profile\presentation\profile_screen.dart:547:15 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\src\features\profile\presentation\profile_screen.dart:548:15 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\src\features\profile\presentation\profile_screen.dart:559:15 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\src\features\profile\presentation\profile_screen.dart:560:15 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\profile\presentation\widgets\recommendation_history_item.dart:26:51 - deprecated_member_use
+  error - A nullable expression can't be used as a condition - lib\src\features\profile\presentation\widgets\recommendation_history_item.dart:45:11 - unchecked_use_of_nullable_value
+  error - A nullable expression can't be used as a condition - lib\src\features\profile\presentation\widgets\recommendation_history_item.dart:46:18 - unchecked_use_of_nullable_value
+   info - Unnecessary use of 'toList' in a spread - lib\src\features\profile\presentation\widgets\settings_section.dart:27:55 - unnecessary_to_list_in_spreads
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\profile\presentation\widgets\settings_section.dart:61:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\profile\presentation\widgets\statistics_card.dart:27:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\profile\presentation\widgets\user_statistics_widget.dart:68:42 - deprecated_member_use
+  error - Target of URI doesn't exist: '../../domain/repositories/profile_repository.dart' - lib\src\features\profile\profile_exports.dart:3:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'profile_screen.dart' - lib\src\features\profile\profile_exports.dart:4:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../domain/repositories/wardrobe_repository.dart' - lib\src\features\wardrobe\feature_exports.dart:11:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../../domain/states/wardrobe_state.dart' - lib\src\features\wardrobe\presentation\controllers\wardrobe_controller.dart:2:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../../domain/services/wardrobe_domain_service.dart' - lib\src\features\wardrobe\presentation\controllers\wardrobe_controller.dart:3:8 - uri_does_not_exist
+  error - The name 'WardrobeState' isn't a type, so it can't be used as a type argument - lib\src\features\wardrobe\presentation\controllers\wardrobe_controller.dart:5:48 - non_type_as_type_argument
+  error - The name 'initial' isn't a class - lib\src\features\wardrobe\presentation\controllers\wardrobe_controller.dart:8:47 - creation_with_non_type
+   info - Dangling library doc comment - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen.dart:1:1 - dangling_library_doc_comments
+warning - The value of the local variable 'theme' isn't used - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_io.dart:335:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_io.dart:459:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_io.dart:460:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_io.dart:531:58 - deprecated_member_use
+warning - Unused import: 'package:universal_html/html.dart' - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_web.dart:7:8 - unused_import
+warning - The value of the local variable 'theme' isn't used - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_web.dart:345:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_web.dart:432:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_web.dart:433:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_web.dart:523:58 - deprecated_member_use
+warning - The value of the local variable 'theme' isn't used - lib\src\features\wardrobe\presentation\screens\add_wardrobe_item_screen_web.dart:668:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\presentation\screens\wardrobe_item_detail_screen.dart:225:22 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\presentation\screens\wardrobe_item_detail_screen.dart:227:41 - deprecated_member_use
+warning - Unused import: 'package:flutter_riverpod/flutter_riverpod.dart' - lib\src\features\wardrobe\widgets\wardrobe_widgets.dart:2:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\widgets\wardrobe_widgets.dart:87:41 - deprecated_member_use
+  error - The type 'ClothingCategory' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'ClothingCategory.dresses' - lib\src\features\wardrobe\widgets\wardrobe_widgets.dart:104:5 - non_exhaustive_switch_statement
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\features\wardrobe\widgets\wardrobe_widgets.dart:178:47 - deprecated_member_use
+  error - The argument type 'String?' can't be assigned to the parameter type 'String'.  - lib\src\features\wardrobe\widgets\wardrobe_widgets.dart:182:27 - argument_type_not_assignable
+   info - The private field _hasFocus could be 'final' - lib\src\ui\inputs\app_search_bar.dart:35:8 - prefer_final_fields
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\inputs\app_search_bar.dart:157:33 - deprecated_member_use
+   info - Unnecessary 'const' keyword - lib\src\ui\loading\app_loading.dart:210:33 - unnecessary_const
+   info - Unnecessary 'const' keyword - lib\src\ui\loading\app_loading.dart:216:33 - unnecessary_const
+   info - Unnecessary 'const' keyword - lib\src\ui\loading\app_loading.dart:222:33 - unnecessary_const
+warning - The declaration '_getInitials' isn't referenced - lib\src\ui\misc\app_avatar.dart:143:10 - unused_element
+   info - The 'child' argument should be last in widget constructor invocations - lib\src\ui\misc\app_badge.dart:113:7 - sort_child_properties_last
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\misc\app_badge.dart:116:24 - deprecated_member_use
+warning - The '!' will have no effect because the receiver can't be null - lib\src\ui\misc\app_empty_state.dart:89:31 - unnecessary_non_null_assertion
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\misc\app_image.dart:147:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\misc\app_image.dart:176:38 - deprecated_member_use
+  error - Target of URI doesn't exist: '../../../presentation/providers/session_provider.dart' - lib\src\ui\widgets\auth_wrapper.dart:3:8 - uri_does_not_exist
+  error - Undefined name 'authStateProvider' - lib\src\ui\widgets\auth_wrapper.dart:15:38 - undefined_identifier
+   info - The private field _showDropdown could be 'final' - lib\src\ui\widgets\city_selector_widget.dart:35:8 - prefer_final_fields
+warning - The value of the local variable 'isDark' isn't used - lib\src\ui\widgets\notification_dialog.dart:13:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\notification_dialog.dart:31:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\notification_dialog.dart:32:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\notification_dialog.dart:139:22 - deprecated_member_use
+   info - Use a 'SizedBox' to add whitespace to a layout - lib\src\ui\widgets\rating_slider.dart:397:22 - sized_box_for_whitespace
+warning - The value of the local variable 'isDark' isn't used - lib\src\ui\widgets\recommendation_card.dart:27:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\recommendation_card.dart:32:46 - deprecated_member_use
+warning - The left operand can't be null, so the right operand is never executed - lib\src\ui\widgets\recommendation_card.dart:48:45 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\src\ui\widgets\recommendation_card.dart:58:51 - dead_null_aware_expression
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\recommendation_card.dart:106:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\recommendation_card.dart:163:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\recommendation_card.dart:164:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\wardrobe_item_card.dart:29:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\wardrobe_item_card.dart:54:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\wardrobe_item_card.dart:55:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\wardrobe_item_card.dart:59:53 - deprecated_member_use
+   info - Use interpolation to compose strings and values - lib\src\ui\widgets\wardrobe_item_card.dart:92:27 - prefer_interpolation_to_compose_strings
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\wardrobe_item_card.dart:146:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\wardrobe_item_card.dart:241:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\wardrobe_item_card.dart:349:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\src\ui\widgets\wardrobe_item_card.dart:371:47 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\src\ui\widgets\weather_card.dart:371:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\src\ui\widgets\weather_card.dart:375:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\src\ui\widgets\weather_card.dart:381:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\src\ui\widgets\weather_card.dart:385:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\src\ui\widgets\weather_card.dart:395:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\src\ui\widgets\weather_card.dart:397:7 - curly_braces_in_flow_control_structures
+
+flutter : 186 issues found. (ran in 3.5s)
+строка:1 знак:1
++ flutter analyze 2>&1 | Out-File -FilePath "full_analysis_output.txt"  ...
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (186 issues found. (ran in 3.5s):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

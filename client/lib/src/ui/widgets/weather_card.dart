@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/weather_data.dart';
 import '../../theme/app_theme.dart';
 
-/// Glassmorphism weather card — Landing liquid glass style
 class WeatherCard extends StatelessWidget {
   final WeatherData? weatherData;
   final List<WeatherData>? forecast;
@@ -27,8 +26,6 @@ class WeatherCard extends StatelessWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final temp = data.temperature?.round() ?? 0;
-
-    // Цвета текста — тёмные в светлой теме, белые в тёмной
     final textColor = isDark ? Colors.white : const Color(0xFF1F2937);
     final textSecondary = isDark
         ? Colors.white.withValues(alpha: 0.7)
@@ -37,73 +34,62 @@ class WeatherCard extends StatelessWidget {
         ? Colors.white.withValues(alpha: 0.5)
         : const Color(0xFF9CA3AF);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: AppRadius.radiusXxl,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDark
-                    ? [
-                        AppColors.primary.withValues(alpha: 0.2),
-                        AppColors.secondary.withValues(alpha: 0.12),
-                        Colors.white.withValues(alpha: 0.05),
-                      ]
-                    : [
-                        AppColors.primary.withValues(alpha: 0.12),
-                        AppColors.secondary.withValues(alpha: 0.08),
-                        Colors.white.withValues(alpha: 0.85),
-                      ],
-              ),
-              borderRadius: AppRadius.radiusXxl,
-              border: Border.all(
+    return ClipRRect(
+      borderRadius: AppRadius.radiusXxl,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [
+                      AppColors.primary.withValues(alpha: 0.2),
+                      AppColors.secondary.withValues(alpha: 0.12),
+                      Colors.white.withValues(alpha: 0.05),
+                    ]
+                  : [
+                      AppColors.primary.withValues(alpha: 0.12),
+                      AppColors.secondary.withValues(alpha: 0.08),
+                      Colors.white.withValues(alpha: 0.85),
+                    ],
+            ),
+            borderRadius: AppRadius.radiusXxl,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : AppColors.primary.withValues(alpha: 0.15),
+            ),
+            boxShadow: [
+              BoxShadow(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : AppColors.primary.withValues(alpha: 0.15),
+                    ? AppColors.primary.withValues(alpha: 0.12)
+                    : AppColors.primary.withValues(alpha: 0.08),
+                blurRadius: 32,
+                offset: const Offset(0, 12),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? AppColors.primary.withValues(alpha: 0.12)
-                      : AppColors.primary.withValues(alpha: 0.08),
-                  blurRadius: 32,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xxl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(context, textColor, textSecondary, textMuted),
-                  const SizedBox(height: AppSpacing.xl),
-                  _buildMainWeather(
-                    context,
-                    data,
-                    temp,
-                    isDark,
-                    textColor,
-                    textSecondary,
-                    textMuted,
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  _buildDetails(
-                    context,
-                    data,
-                    isDark,
-                    textColor,
-                    textSecondary,
-                  ),
-                ],
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context, textColor, textSecondary, textMuted),
+              const SizedBox(height: AppSpacing.xl),
+              _buildMainWeather(
+                context,
+                data,
+                temp,
+                isDark,
+                textColor,
+                textSecondary,
+                textMuted,
               ),
-            ),
+              const SizedBox(height: AppSpacing.xxl),
+              _buildDetails(context, data, isDark, textColor, textSecondary),
+            ],
           ),
         ),
       ),
@@ -215,8 +201,6 @@ class WeatherCard extends StatelessWidget {
           height: 80,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
               colors: isDark
                   ? [
                       Colors.white.withValues(alpha: 0.25),
@@ -251,16 +235,13 @@ class WeatherCard extends StatelessWidget {
     Color textColor,
     Color textSecondary,
   ) {
-    final humidity = data.humidity;
-    final windSpeed = data.windSpeed;
-
     return Row(
       children: [
         Expanded(
           child: _buildDetailPill(
             context,
             icon: Icons.water_drop_outlined,
-            value: humidity != null ? '$humidity%' : '—',
+            value: data.humidity != null ? '${data.humidity}%' : '—',
             label: 'Влажность',
             isDark: isDark,
             textColor: textColor,
@@ -272,7 +253,9 @@ class WeatherCard extends StatelessWidget {
           child: _buildDetailPill(
             context,
             icon: Icons.air,
-            value: windSpeed != null ? '${windSpeed.round()} м/с' : '—',
+            value: data.windSpeed != null
+                ? '${data.windSpeed!.round()} м/с'
+                : '—',
             label: 'Ветер',
             isDark: isDark,
             textColor: textColor,
@@ -293,7 +276,6 @@ class WeatherCard extends StatelessWidget {
     required Color textSecondary,
   }) {
     final theme = Theme.of(context);
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -339,7 +321,6 @@ class WeatherCard extends StatelessWidget {
 
   Widget _buildErrorState(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return ClipRRect(
       borderRadius: AppRadius.radiusXxl,
       child: BackdropFilter(
@@ -386,25 +367,23 @@ class WeatherCard extends StatelessWidget {
     final desc = description.toLowerCase();
     if (desc.contains('ясно') ||
         desc.contains('clear') ||
-        desc.contains('sunny')) {
+        desc.contains('sunny'))
       return Icons.wb_sunny_rounded;
-    } else if (desc.contains('облач') ||
+    if (desc.contains('облач') ||
         desc.contains('cloud') ||
-        desc.contains('пасмурно')) {
+        desc.contains('пасмурно'))
       return desc.contains('перемен')
           ? Icons.cloud_queue_rounded
           : Icons.cloud_rounded;
-    } else if (desc.contains('дожд') ||
+    if (desc.contains('дожд') ||
         desc.contains('rain') ||
-        desc.contains('морось')) {
+        desc.contains('морось'))
       return (desc.contains('гром') || desc.contains('thunder'))
           ? Icons.thunderstorm_rounded
           : Icons.water_drop_rounded;
-    } else if (desc.contains('снег') || desc.contains('snow')) {
+    if (desc.contains('снег') || desc.contains('snow'))
       return Icons.ac_unit_rounded;
-    } else if (desc.contains('туман') || desc.contains('fog')) {
-      return Icons.foggy;
-    }
+    if (desc.contains('туман') || desc.contains('fog')) return Icons.foggy;
     return Icons.wb_sunny_rounded;
   }
 
@@ -412,14 +391,12 @@ class WeatherCard extends StatelessWidget {
     if (description.isEmpty) return 'Ясно';
     final desc = description.toLowerCase();
     if (desc.contains('ясно') || desc.contains('clear')) return 'Ясно';
-    if (desc.contains('облач') || desc.contains('cloud')) {
+    if (desc.contains('облач') || desc.contains('cloud'))
       return desc.contains('перемен') ? 'Переменная облачность' : 'Облачно';
-    }
-    if (desc.contains('дожд') || desc.contains('rain')) {
+    if (desc.contains('дожд') || desc.contains('rain'))
       return (desc.contains('гром') || desc.contains('thunder'))
           ? 'Гроза'
           : 'Дождь';
-    }
     if (desc.contains('снег') || desc.contains('snow')) return 'Снег';
     if (desc.contains('туман') || desc.contains('fog')) return 'Туман';
     return description;

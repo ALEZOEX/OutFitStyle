@@ -11,14 +11,6 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
-    - lib/src/features/achievements/**
-    - lib/src/features/home/**
-    - lib/src/features/onboarding/**
-    - lib/src/features/profile/**
-    - lib/src/features/wardrobe/**
-    - lib/src/screens/**
-    - lib/src/ui/**
-    - lib/src/config/**
     - '**/*.g.dart'
     - '**/*.freezed.dart'
   errors:
