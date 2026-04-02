@@ -289,13 +289,19 @@ class AppThemes {
         scrolledUnderElevation: 0.5,
       ),
       cardTheme: CardThemeData(
+        color: Colors.white.withValues(alpha: 0.7),
         elevation: 0,
+        shadowColor: AppColors.primary.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.radiusLg,
-          side: BorderSide(color: AppColors.grey200, width: 0.5),
+          borderRadius: AppRadius.radiusXxl,
+          side: BorderSide(
+            color: Colors.black.withValues(alpha: 0.06),
+            width: 1,
+          ),
         ),
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
+        surfaceTintColor: Colors.transparent,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -457,16 +463,19 @@ class AppThemes {
         scrolledUnderElevation: 0,
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surfaceDarkElevated,
+        color: const Color(0xFF1F2937).withValues(alpha: 0.5),
         elevation: 0,
+        shadowColor: AppColors.primary.withValues(alpha: 0.15),
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.radiusLg,
+          borderRadius: AppRadius.radiusXxl,
           side: BorderSide(
-            color: const Color(0xFF374151).withValues(alpha: 0.5),
+            color: Colors.white.withValues(alpha: 0.12),
+            width: 1,
           ),
         ),
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
+        surfaceTintColor: Colors.transparent,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
