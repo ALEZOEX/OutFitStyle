@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../recommendations/presentation/providers/recommendations_provider.dart';
-import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/logger.dart';
 
@@ -474,19 +473,22 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     );
 
     final notifier = ref.read(recommendationsProvider.notifier);
-    final userLocation = ref.read(userLocationProvider);
     final messenger = ScaffoldMessenger.of(context);
 
+    // Используем координаты Москвы по умолчанию
+    const latitude = 55.7558;
+    const longitude = 37.6173;
+
     AppLogger.info(
-      '[GeneratorScreen] 📍 User location: lat=${userLocation.latitude}, lon=${userLocation.longitude}',
+      '[GeneratorScreen] 📍 User location: lat=$latitude, lon=$longitude',
     );
     AppLogger.info(
       '[GeneratorScreen] 📡 Вызов notifier.generateRecommendation...',
     );
 
     final result = await notifier.generateRecommendation(
-      latitude: userLocation.latitude,
-      longitude: userLocation.longitude,
+      latitude: latitude,
+      longitude: longitude,
       occasion: _selectedOccasion,
     );
 
