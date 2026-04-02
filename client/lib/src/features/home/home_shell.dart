@@ -285,63 +285,105 @@ class _GlassBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: AppRadius.radiusXxl,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          height: 62,
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF1F2937).withValues(alpha: 0.4)
-                : Colors.white.withValues(alpha: 0.6),
-            borderRadius: AppRadius.radiusXxl,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.4),
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.radiusXxl,
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(
+              alpha: isDark ? 0.25 : 0.12,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.1),
-                blurRadius: 32,
-                offset: const Offset(0, 8),
-                spreadRadius: -4,
-              ),
-            ],
+            blurRadius: 32,
+            offset: const Offset(0, 8),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _NavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home_rounded,
-                label: 'Главная',
-                isActive: currentIndex == 0,
-                onTap: () => onTap(0),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: AppRadius.radiusXxl,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: Container(
+            height: 62,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        const Color(0xFF1F2937).withValues(alpha: 0.55),
+                        const Color(0xFF111827).withValues(alpha: 0.4),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.85),
+                        Colors.white.withValues(alpha: 0.65),
+                      ],
               ),
-              _NavItem(
-                icon: Icons.checkroom_outlined,
-                activeIcon: Icons.checkroom_rounded,
-                label: 'Гардероб',
-                isActive: currentIndex == 1,
-                onTap: () => onTap(1),
+              borderRadius: AppRadius.radiusXxl,
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.08),
+                width: 1,
               ),
-              _NavItem(
-                icon: Icons.auto_awesome_outlined,
-                activeIcon: Icons.auto_awesome_rounded,
-                label: 'Рекомендации',
-                isActive: currentIndex == 2,
-                onTap: () => onTap(2),
-              ),
-              _NavItem(
-                icon: Icons.person_outline_rounded,
-                activeIcon: Icons.person_rounded,
-                label: 'Профиль',
-                isActive: currentIndex == 3,
-                onTap: () => onTap(3),
-              ),
-            ],
+            ),
+            child: Stack(
+              children: [
+                // Верхний блик (iOS highlight)
+                Positioned(
+                  top: 0,
+                  left: 20,
+                  right: 20,
+                  height: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          Colors.white.withValues(alpha: isDark ? 0.15 : 0.5),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Кнопки
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _NavItem(
+                      icon: Icons.home_outlined,
+                      activeIcon: Icons.home_rounded,
+                      label: 'Главная',
+                      isActive: currentIndex == 0,
+                      onTap: () => onTap(0),
+                    ),
+                    _NavItem(
+                      icon: Icons.checkroom_outlined,
+                      activeIcon: Icons.checkroom_rounded,
+                      label: 'Гардероб',
+                      isActive: currentIndex == 1,
+                      onTap: () => onTap(1),
+                    ),
+                    _NavItem(
+                      icon: Icons.auto_awesome_outlined,
+                      activeIcon: Icons.auto_awesome_rounded,
+                      label: 'Рекомендации',
+                      isActive: currentIndex == 2,
+                      onTap: () => onTap(2),
+                    ),
+                    _NavItem(
+                      icon: Icons.person_outline_rounded,
+                      activeIcon: Icons.person_rounded,
+                      label: 'Профиль',
+                      isActive: currentIndex == 3,
+                      onTap: () => onTap(3),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
