@@ -22,22 +22,8 @@ func Error(w http.ResponseWriter, status int, err error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	// Sanitize error message based on status code
-	var message string
-	switch {
-	case status >= 500:
-		message = "Internal server error"
-	case status == http.StatusNotFound:
-		message = "Resource not found"
-	case status == http.StatusUnauthorized || status == http.StatusForbidden:
-		message = "Unauthorized"
-	case status >= 400:
-		// For validation errors, we can provide the actual error message
-		// as it should already be user-friendly
-		message = err.Error()
-	default:
-		message = err.Error()
-	}
+	// ВРЕМЕННО: не скрываем ошибки для отладки (TODO: вернуть sanitize на проде)
+	message := err.Error()
 
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"error": message,

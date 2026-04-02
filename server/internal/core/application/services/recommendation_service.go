@@ -704,6 +704,14 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 		finalChosen[cat] = list[0].ID
 	}
 
+	// Проверка: если ни одна категория не выбрана
+	if len(finalChosen) == 0 {
+		s.logger.Error("❌ [Create] Нет выбранных элементов — rankings пусты",
+			zap.Int("total_candidates", len(candByID)),
+		)
+		return nil, nil, errors.New("не удалось подобрать образ: нет подходящих вещей в каталоге")
+	}
+
 	// загружаем полные элементы только для выбранных
 	chosenIDs := make([]domain.ID, 0, len(finalChosen))
 	for _, cat := range []string{"outerwear", "upper", "lower", "footwear", "accessory"} {

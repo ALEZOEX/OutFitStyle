@@ -133,7 +133,7 @@ func (h *RecommendationHandler) Create(w http.ResponseWriter, r *http.Request) {
 			zap.String("error_msg", err.Error()),
 			zap.String("user_id", userID.String()),
 		)
-		// Возвращаем конкретное сообщение об ошибке
+		// Временно: возвращаем реальную ошибку для отладки
 		resp.Error(w, http.StatusInternalServerError, errors.New(err.Error()))
 		return
 	}
