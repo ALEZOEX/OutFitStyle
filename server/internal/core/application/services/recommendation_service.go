@@ -83,12 +83,18 @@ type altItem struct {
 
 // Create создает новую рекомендацию
 func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, req domain.RecommendationCreateRequest) (*domain.RecommendationRecord, error) {
+	s.logger.Info("🚀 [Create] START", zap.String("user_id", userID.String()))
+
+	// === ШАГ 1: Координаты ===
+	s.logger.Info("📍 [Create] Шаг 1: Получение координат")
 	lat := req.Latitude
 	lon := req.Longitude
 
 	if lat == nil || lon == nil {
+		s.logger.Info("📍 [Create] Координаты не в запросе, берём из профиля")
 		dLat, dLon, err := s.userRepo.GetDefaultCoords(ctx, userID)
 		if err != nil {
+			s.logger.Error("❌ [Create] Не удалось получить координаты из профиля", zap.Error(err))
 			return nil, errors.Wrap(err, "загрузка координат пользователя по умолчанию")
 		}
 		lat = dLat
@@ -96,19 +102,34 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 	}
 
 	if lat == nil || lon == nil {
+		s.logger.Error("❌ [Create] Нет координат ни в запросе, ни в профиле")
 		return nil, errors.New("широта/долгота обязательны (установите местоположение в профиле)")
 	}
+	s.logger.Info("📍 [Create] Координаты OK", zap.Float64("lat", *lat), zap.Float64("lon", *lon))
 
+	// === ШАГ 2: Погода ===
+	s.logger.Info("🌤️ [Create] Шаг 2: Запрос погоды")
 	ws, _, err := s.weather.GetCurrent(ctx, *lat, *lon)
 	if err != nil {
+		s.logger.Error("❌ [Create] Ошибка получения погоды", zap.Error(err))
 		return nil, errors.Wrap(err, "получение погоды")
 	}
 	weatherJSON, _ := json.Marshal(ws)
+	s.logger.Info("🌤️ [Create] Погода OK", zap.Float64("temp", ws.Temperature), zap.String("condition", ws.WeatherMain))
 
+	// === ШАГ 3: Гардероб + каталог ===
+	s.logger.Info("👕 [Create] Шаг 3: Загрузка кандидатов")
 	includePartners := req.IncludePartnerItems != nil && *req.IncludePartnerItems
 
-	wardrobeLite, _ := s.clothingRepo.ListWardrobeCandidatesLite(ctx, userID, 140)
-	catalogLite, _ := s.clothingRepo.ListCatalogCandidatesLite(ctx, includePartners, 140)
+	wardrobeLite, wardrobeErr := s.clothingRepo.ListWardrobeCandidatesLite(ctx, userID, 140)
+	if wardrobeErr != nil {
+		s.logger.Warn("⚠️ [Create] Ошибка загрузки гардероба", zap.Error(wardrobeErr))
+	}
+	catalogLite, catalogErr := s.clothingRepo.ListCatalogCandidatesLite(ctx, includePartners, 140)
+	if catalogErr != nil {
+		s.logger.Warn("⚠️ [Create] Ошибка загрузки каталога", zap.Error(catalogErr))
+	}
+	s.logger.Info("👕 [Create] Кандидаты OK", zap.Int("wardrobe", len(wardrobeLite)), zap.Int("catalog", len(catalogLite)))
 
 	s.logger.Info("[RecPipeline] Stage 1: Candidates loaded",
 		zap.String("user_id", userID.String()),
@@ -175,14 +196,26 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 
 	// Синхронный fallback — для 100 пользователей Kafka не нужна
 	// TODO: включить Kafka когда будет >1000 пользователей
+	// === ШАГ 4: Ранжирование (ML/fallback) ===
+	s.logger.Info("🧠 [Create] Шаг 4: Ранжирование (rankLiteOrFallback)")
 	modelVersion, processingMs, styleC, colorH, rankings := s.rankLiteOrFallback(ctx, userID, ws, occ, reqStyle, reqFormality, candidates, nil)
+	s.logger.Info("🧠 [Create] Ранжирование OK",
+		zap.String("model", modelVersion),
+		zap.Int("processing_ms", processingMs),
+		zap.Int("rankings_count", len(rankings)),
+	)
 
+	// === ШАГ 5: Сборка рекомендации ===
+	s.logger.Info("📦 [Create] Шаг 5: Сборка рекомендации (buildRecommendationFromRankings)")
 	rec, itemsCreate, err := s.buildRecommendationFromRankings(ctx, userID, req, weatherJSON, modelVersion, processingMs, styleC, colorH, rankings, candByID, wardrobeLite, lat, lon)
 	if err != nil {
+		s.logger.Error("❌ [Create] Ошибка сборки рекомендации", zap.Error(err))
 		return nil, err
 	}
+	s.logger.Info("📦 [Create] Сборка OK", zap.Int("items", len(itemsCreate)))
 
-	// Создаем сессию для логирования в ML сервисе
+	// === ШАГ 6: Сохранение в БД ===
+	s.logger.Info("💾 [Create] Шаг 6: Сохранение в БД")
 	session := &repositories.RecommendationSession{
 		UserID:          userID,
 		ContextHash:     nil,
@@ -193,9 +226,11 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 
 	_, err = s.recRepo.CreateWithSession(ctx, session, rec, itemsCreate)
 	if err != nil {
+		s.logger.Error("❌ [Create] Ошибка сохранения в БД", zap.Error(err))
 		return nil, errors.Wrap(err, "сохранение рекомендации с сессией")
 	}
 
+	s.logger.Info("✅ [Create] SUCCESS", zap.String("rec_id", rec.ID.String()))
 	return rec, nil
 }
 
