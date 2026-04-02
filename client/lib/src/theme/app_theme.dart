@@ -80,9 +80,8 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF9333EA), // purple-600
-      Color(0xFFD946EF), // fuchsia-500
-      Color(0xFFF43F5E), // rose-500
+      Color(0xCC9333EA), // purple-600 @ 80%
+      Color(0xCCD946EF), // fuchsia-500 @ 80%
     ],
   );
 

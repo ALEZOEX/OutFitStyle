@@ -166,6 +166,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final isLoading = ref.watch(authLoadingProvider);
     final error = ref.watch(authErrorProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isWide = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
@@ -365,26 +366,54 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
                   const SizedBox(height: AppSpacing.xxl),
 
-                  // Кнопка входа/регистрации — gradient style
+                  // Кнопка входа/регистрации — glass gradient style
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        gradient: isLoading ? null : AppGradients.heroButton,
+                        gradient: isLoading
+                            ? null
+                            : LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: isDark
+                                    ? [
+                                        AppColors.primary.withValues(
+                                          alpha: 0.6,
+                                        ),
+                                        const Color(
+                                          0xFFD946EF,
+                                        ).withValues(alpha: 0.4),
+                                      ]
+                                    : [
+                                        AppColors.primary.withValues(
+                                          alpha: 0.85,
+                                        ),
+                                        const Color(
+                                          0xFFD946EF,
+                                        ).withValues(alpha: 0.75),
+                                      ],
+                              ),
                         color: isLoading
                             ? theme.colorScheme.surfaceContainerHighest
                             : null,
                         borderRadius: AppRadius.radiusPill,
+                        border: Border.all(
+                          color: Colors.white.withValues(
+                            alpha: isDark ? 0.15 : 0.25,
+                          ),
+                          width: 1,
+                        ),
                         boxShadow: isLoading
                             ? null
                             : [
                                 BoxShadow(
                                   color: AppColors.primary.withValues(
-                                    alpha: 0.3,
+                                    alpha: isDark ? 0.3 : 0.15,
                                   ),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 6),
                                 ),
                               ],
                       ),

@@ -326,28 +326,28 @@ class HomeShell extends StatelessWidget {
                                 ),
                               ),
                               // AppBar контент
-                              NavigationToolbar(
-                                leading: null,
-                                middle: Padding(
-                                  padding: const EdgeInsets.only(left: 4),
-                                  child: Text(
-                                    title,
-                                    style: theme.textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: isDark
-                                          ? Colors.white
-                                          : const Color(0xFF1F2937),
-                                    ),
-                                  ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
                                 ),
-                                trailing:
-                                    appBarActions != null &&
-                                        appBarActions!.isNotEmpty
-                                    ? Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: appBarActions!,
-                                      )
-                                    : null,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      title,
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: isDark
+                                                ? Colors.white
+                                                : const Color(0xFF1F2937),
+                                          ),
+                                    ),
+                                    const Spacer(),
+                                    if (appBarActions != null &&
+                                        appBarActions!.isNotEmpty)
+                                      ...appBarActions!,
+                                  ],
+                                ),
                               ),
                             ],
                           ),

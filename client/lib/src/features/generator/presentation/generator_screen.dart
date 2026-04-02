@@ -392,21 +392,42 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     RecommendationsState state,
   ) {
     final isGenerating = state.isGenerating;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: isGenerating ? null : AppGradients.heroButton,
+          gradient: isGenerating
+              ? null
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark
+                      ? [
+                          AppColors.primary.withValues(alpha: 0.6),
+                          const Color(0xFFD946EF).withValues(alpha: 0.4),
+                        ]
+                      : [
+                          AppColors.primary.withValues(alpha: 0.85),
+                          const Color(0xFFD946EF).withValues(alpha: 0.75),
+                        ],
+                ),
           color: isGenerating ? AppColors.grey200 : null,
           borderRadius: AppRadius.radiusPill,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: isDark ? 0.15 : 0.25),
+            width: 1,
+          ),
           boxShadow: isGenerating
               ? null
               : [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.25),
-                    blurRadius: 16,
+                    color: AppColors.primary.withValues(
+                      alpha: isDark ? 0.3 : 0.15,
+                    ),
+                    blurRadius: 20,
                     offset: const Offset(0, 6),
                   ),
                 ],

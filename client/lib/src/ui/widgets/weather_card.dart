@@ -37,11 +37,9 @@ class WeatherCard extends StatelessWidget {
         ? Colors.white.withValues(alpha: 0.5)
         : const Color(0xFF9CA3AF);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: AppRadius.radiusXxl,
-        child: BackdropFilter(
+    return ClipRRect(
+      borderRadius: AppRadius.radiusXxl,
+      child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             width: double.infinity,
@@ -149,14 +147,11 @@ class WeatherCard extends StatelessWidget {
             ),
             if (onRefresh != null) ...[
               const SizedBox(width: AppSpacing.sm),
-              GestureDetector(
+              InkWell(
                 onTap: onRefresh,
-                child: Container(
+                borderRadius: AppRadius.radiusSm,
+                child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: textColor.withValues(alpha: 0.1),
-                    borderRadius: AppRadius.radiusSm,
-                  ),
                   child: Icon(Icons.refresh, color: textSecondary, size: 16),
                 ),
               ),
