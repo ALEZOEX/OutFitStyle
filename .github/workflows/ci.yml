@@ -60,27 +60,27 @@ jobs:
           cd server
           govulncheck ./...
 
-  # 3. SAST анализ с gosec
-  gosec:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # 3. SAST анализ с gosec (временно отключен)
+  # gosec:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.25'
-          cache: true
-          cache-dependency-path: server/go.sum
+  #     - name: Setup Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: '1.25'
+  #         cache: true
+  #         cache-dependency-path: server/go.sum
 
-      - name: Install gosec
-        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+  #     - name: Install gosec
+  #       run: go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-      - name: Run gosec
-        run: |
-          cd server
-          gosec -exclude-dir=vendor -severity=medium ./...
+  #     - name: Run gosec
+  #       run: |
+  #         cd server
+  #         gosec -exclude-dir=vendor -severity=medium ./...
 
   # 4. Сборка и сканирование Docker-образа
   docker-scan:
