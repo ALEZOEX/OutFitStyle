@@ -212,6 +212,7 @@ class HomeShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     Widget body = SafeArea(
       top: false,
@@ -420,6 +421,7 @@ class _GlassBottomBar extends StatelessWidget {
               ),
             ),
             child: Stack(
+              alignment: Alignment.center,
               children: [
                 // Верхний блик (iOS highlight)
                 Positioned(
