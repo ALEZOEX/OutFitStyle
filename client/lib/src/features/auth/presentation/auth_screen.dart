@@ -209,7 +209,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
                   // Заголовок
                   Text(
-                    'OutfitStyle',
+                    'OutFitStyle',
                     style: AppTypography.headlineLarge(
                       context,
                     ).copyWith(color: theme.colorScheme.primary),

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class AppConfig {
   // Основные настройки приложения
-  static const String appName = 'OutfitStyle';
+  static const String appName = 'OutFitStyle';
   static const String version = '1.0.0';
 
   // Базовые URL для API

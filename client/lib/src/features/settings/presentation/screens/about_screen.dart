@@ -52,7 +52,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
   void _showLicensesDialog() {
     showLicensePage(
       context: context,
-      applicationName: 'OutfitStyle',
+      applicationName: 'OutFitStyle',
       applicationVersion: '$_version ($_buildNumber)',
       applicationIcon: Container(
         width: 64,
@@ -168,7 +168,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            'OutfitStyle',
+            'OutFitStyle',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onSurface,
@@ -223,13 +223,13 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'OutfitStyle — ваш персональный помощник по стилю.\n\n'
+            'OutFitStyle — ваш персональный помощник по стилю.\n\n'
             'Приложение помогает создавать идеальные образы на основе:\n'
             '• Текущей погоды и прогноза\n'
             '• Ваших личных предпочтений\n'
             '• Современных трендов стиля\n'
             '• Искусственного интеллекта\n\n'
-            'С OutfitStyle вы всегда будете выглядеть стильно и уместно!',
+            'С OutFitStyle вы всегда будете выглядеть стильно и уместно!',
             style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
           ),
         ],
@@ -440,7 +440,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'OutfitStyle использует программное обеспечение с открытым исходным кодом. Ознакомьтесь с лицензиями.',
+              'OutFitStyle использует программное обеспечение с открытым исходным кодом. Ознакомьтесь с лицензиями.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

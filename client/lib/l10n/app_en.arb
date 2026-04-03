@@ -1,9 +1,9 @@
 {
-  "appName": "OutfitStyle",
+  "appName": "OutFitStyle",
   "@appName": {
     "description": "The name of the application"
   },
-  "welcomeMessage": "Welcome to OutfitStyle!",
+  "welcomeMessage": "Welcome to OutFitStyle!",
   "@welcomeMessage": {
     "description": "Welcome message displayed to the user"
   },
@@ -171,7 +171,7 @@
   "@avatarUpdated": {
     "description": "Avatar update success message"
   },
-  "onboardingWelcomeTitle": "Welcome to OutfitStyle!",
+  "onboardingWelcomeTitle": "Welcome to OutFitStyle!",
   "@onboardingWelcomeTitle": {
     "description": "Onboarding welcome screen title"
   },

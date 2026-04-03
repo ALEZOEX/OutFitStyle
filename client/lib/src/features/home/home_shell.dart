@@ -178,7 +178,7 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper>
       1 => 'Гардероб',
       2 => 'Рекомендации',
       3 => 'Профиль',
-      _ => 'OutfitStyle',
+      _ => 'OutFitStyle',
     };
   }
 }

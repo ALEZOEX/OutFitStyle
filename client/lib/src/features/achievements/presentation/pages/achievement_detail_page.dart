@@ -482,14 +482,14 @@ ${achievement.description}
 Награда: ${achievement.points} очков
 Прогресс: ${achievement.progressText}
 
-#OutfitStyle #Достижения
+#OutFitStyle #Достижения
 ''';
 
     try {
       await SharePlus.instance.share(
         ShareParams(
           text: shareText,
-          subject: 'Моё достижение в OutfitStyle: ${achievement.title}',
+          subject: 'Моё достижение в OutFitStyle: ${achievement.title}',
         ),
       );
     } catch (e) {

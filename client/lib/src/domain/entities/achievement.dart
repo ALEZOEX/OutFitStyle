@@ -4,7 +4,7 @@ import 'achievement_category.dart';
 part 'achievement.freezed.dart';
 part 'achievement.g.dart';
 
-/// Достижение пользователя в приложении OutfitStyle
+/// Достижение пользователя в приложении OutFitStyle
 @freezed
 abstract class Achievement with _$Achievement {
   const factory Achievement({

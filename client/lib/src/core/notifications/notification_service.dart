@@ -229,7 +229,7 @@ class NotificationService {
     if (title != null || body != null) {
       await _localNotifications.show(
         DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title ?? 'OutfitStyle',
+        title ?? 'OutFitStyle',
         body ?? '',
         const NotificationDetails(
           android: AndroidNotificationDetails(

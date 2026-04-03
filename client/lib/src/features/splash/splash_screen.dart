@@ -71,7 +71,7 @@ class SplashScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.xxxl),
               Text(
-                'OutfitStyle',
+                'OutFitStyle',
                 style: AppTypography.headlineMedium(
                   context,
                 ).copyWith(color: AppColors.primary),

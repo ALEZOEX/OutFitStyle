@@ -21,7 +21,7 @@ class OutfitStyleApp extends ConsumerWidget {
     final languageCode = ref.watch(currentLanguageProvider);
 
     return MaterialApp.router(
-      title: 'OutfitStyle',
+      title: 'OutFitStyle',
       debugShowCheckedModeBanner: false,
       theme: AppThemes.lightTheme,
       darkTheme: AppThemes.darkTheme,

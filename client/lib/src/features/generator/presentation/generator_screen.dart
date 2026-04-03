@@ -173,12 +173,12 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
         end: Alignment.bottomRight,
         colors: isDark
             ? [
-                theme.colorScheme.primary.withValues(alpha: 0.3),
-                theme.colorScheme.primary.withValues(alpha: 0.15),
+                Colors.white.withValues(alpha: 0.05),
+                Colors.white.withValues(alpha: 0.02),
               ]
             : [
-                theme.colorScheme.primary.withValues(alpha: 0.15),
                 theme.colorScheme.primary.withValues(alpha: 0.08),
+                theme.colorScheme.primary.withValues(alpha: 0.04),
               ],
       ),
       child: Column(
@@ -186,7 +186,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
         children: [
           Row(
             children: [
-              Icon(icon, color: AppColors.primary, size: 18),
+              Icon(icon, color: theme.colorScheme.onSurfaceVariant, size: 18),
               const SizedBox(width: AppSpacing.sm),
               Text(title, style: AppTypography.labelLarge(context)),
             ],
@@ -404,8 +404,8 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
                   end: Alignment.bottomRight,
                   colors: isDark
                       ? [
-                          theme.colorScheme.primary.withValues(alpha: 0.6),
-                          theme.colorScheme.secondary.withValues(alpha: 0.4),
+                          theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                          theme.colorScheme.secondaryContainer.withValues(alpha: 0.3),
                         ]
                       : [
                           theme.colorScheme.primary.withValues(alpha: 0.85),
@@ -415,15 +415,15 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           color: isGenerating ? theme.colorScheme.outline : null,
           borderRadius: AppRadius.radiusPill,
           border: Border.all(
-            color: Colors.white.withValues(alpha: isDark ? 0.15 : 0.25),
+            color: Colors.white.withValues(alpha: isDark ? 0.1 : 0.25),
             width: 1,
           ),
           boxShadow: isGenerating
               ? null
               : [
                   BoxShadow(
-                    color: AppColors.primary.withValues(
-                      alpha: isDark ? 0.3 : 0.15,
+                    color: theme.colorScheme.primary.withValues(
+                      alpha: isDark ? 0.15 : 0.15,
                     ),
                     blurRadius: 20,
                     offset: const Offset(0, 6),

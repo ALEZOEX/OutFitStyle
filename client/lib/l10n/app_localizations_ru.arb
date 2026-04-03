@@ -1,9 +1,9 @@
 {
-  "appName": "OutfitStyle",
+  "appName": "OutFitStyle",
   "@appName": {
     "description": "Название приложения"
   },
-  "welcomeMessage": "Добро пожаловать в OutfitStyle!",
+  "welcomeMessage": "Добро пожаловать в OutFitStyle!",
   "@welcomeMessage": {
     "description": "Приветственное сообщение, отображаемое пользователю"
   },
@@ -171,7 +171,7 @@
   "@avatarUpdated": {
     "description": "Сообщение об успешном обновлении аватара"
   },
-  "onboardingWelcomeTitle": "Добро пожаловать в OutfitStyle!",
+  "onboardingWelcomeTitle": "Добро пожаловать в OutFitStyle!",
   "@onboardingWelcomeTitle": {
     "description": "Заголовок экрана приветствия онбординга"
   },
