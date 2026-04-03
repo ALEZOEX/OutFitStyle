@@ -438,7 +438,7 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
 
               return Positioned(
                 left: _bubbleLeft.value + 6,
-                top: _bubbleTop.value + _bubbleHeight.value - 10,
+                top: _bubbleTop.value + _bubbleHeight.value + 2,
                 width: _bubbleWidth.value - 12,
                 height: 6,
                 child: Container(
