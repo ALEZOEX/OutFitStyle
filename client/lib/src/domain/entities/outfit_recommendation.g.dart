@@ -12,14 +12,14 @@ _OutfitRecommendation _$OutfitRecommendationFromJson(
   id: json['id'] as String?,
   title: json['title'] as String?,
   description: json['description'] as String?,
-  recommendedItems: (json['recommendedItems'] as List<dynamic>?)
+  recommendedItems: (json['recommended_items'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
   temperature: (json['temperature'] as num?)?.toDouble(),
-  weatherCondition: json['weatherCondition'] as String?,
-  createdAt: json['createdAt'] == null
+  weatherCondition: json['weather_condition'] as String?,
+  createdAt: json['created_at'] == null
       ? null
-      : DateTime.parse(json['createdAt'] as String),
+      : DateTime.parse(json['created_at'] as String),
 );
 
 Map<String, dynamic> _$OutfitRecommendationToJson(
@@ -28,8 +28,8 @@ Map<String, dynamic> _$OutfitRecommendationToJson(
   'id': instance.id,
   'title': instance.title,
   'description': instance.description,
-  'recommendedItems': instance.recommendedItems,
+  'recommended_items': instance.recommendedItems,
   'temperature': instance.temperature,
-  'weatherCondition': instance.weatherCondition,
-  'createdAt': instance.createdAt?.toIso8601String(),
+  'weather_condition': instance.weatherCondition,
+  'created_at': instance.createdAt?.toIso8601String(),
 };

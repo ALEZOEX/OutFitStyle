@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OutfitRecommendation {
 
- String? get id; String? get title; String? get description; List<String>? get recommendedItems; double? get temperature; String? get weatherCondition; DateTime? get createdAt;
+ String? get id; String? get title; String? get description;@JsonKey(name: 'recommended_items') List<String>? get recommendedItems; double? get temperature;@JsonKey(name: 'weather_condition') String? get weatherCondition;@JsonKey(name: 'created_at') DateTime? get createdAt;
 /// Create a copy of OutfitRecommendation
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $OutfitRecommendationCopyWith<$Res>  {
   factory $OutfitRecommendationCopyWith(OutfitRecommendation value, $Res Function(OutfitRecommendation) _then) = _$OutfitRecommendationCopyWithImpl;
 @useResult
 $Res call({
- String? id, String? title, String? description, List<String>? recommendedItems, double? temperature, String? weatherCondition, DateTime? createdAt
+ String? id, String? title, String? description,@JsonKey(name: 'recommended_items') List<String>? recommendedItems, double? temperature,@JsonKey(name: 'weather_condition') String? weatherCondition,@JsonKey(name: 'created_at') DateTime? createdAt
 });
 
 
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String? title,  String? description,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String? title,  String? description, @JsonKey(name: 'recommended_items')  List<String>? recommendedItems,  double? temperature, @JsonKey(name: 'weather_condition')  String? weatherCondition, @JsonKey(name: 'created_at')  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OutfitRecommendation() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
@@ -180,7 +180,7 @@ return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String? title,  String? description,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String? title,  String? description, @JsonKey(name: 'recommended_items')  List<String>? recommendedItems,  double? temperature, @JsonKey(name: 'weather_condition')  String? weatherCondition, @JsonKey(name: 'created_at')  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _OutfitRecommendation():
 return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
@@ -200,7 +200,7 @@ return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String? title,  String? description,  List<String>? recommendedItems,  double? temperature,  String? weatherCondition,  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String? title,  String? description, @JsonKey(name: 'recommended_items')  List<String>? recommendedItems,  double? temperature, @JsonKey(name: 'weather_condition')  String? weatherCondition, @JsonKey(name: 'created_at')  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _OutfitRecommendation() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_that.temperature,_that.weatherCondition,_that.createdAt);case _:
@@ -215,14 +215,14 @@ return $default(_that.id,_that.title,_that.description,_that.recommendedItems,_t
 @JsonSerializable()
 
 class _OutfitRecommendation implements OutfitRecommendation {
-  const _OutfitRecommendation({this.id, this.title, this.description, final  List<String>? recommendedItems, this.temperature, this.weatherCondition, this.createdAt}): _recommendedItems = recommendedItems;
+  const _OutfitRecommendation({this.id, this.title, this.description, @JsonKey(name: 'recommended_items') final  List<String>? recommendedItems, this.temperature, @JsonKey(name: 'weather_condition') this.weatherCondition, @JsonKey(name: 'created_at') this.createdAt}): _recommendedItems = recommendedItems;
   factory _OutfitRecommendation.fromJson(Map<String, dynamic> json) => _$OutfitRecommendationFromJson(json);
 
 @override final  String? id;
 @override final  String? title;
 @override final  String? description;
  final  List<String>? _recommendedItems;
-@override List<String>? get recommendedItems {
+@override@JsonKey(name: 'recommended_items') List<String>? get recommendedItems {
   final value = _recommendedItems;
   if (value == null) return null;
   if (_recommendedItems is EqualUnmodifiableListView) return _recommendedItems;
@@ -231,8 +231,8 @@ class _OutfitRecommendation implements OutfitRecommendation {
 }
 
 @override final  double? temperature;
-@override final  String? weatherCondition;
-@override final  DateTime? createdAt;
+@override@JsonKey(name: 'weather_condition') final  String? weatherCondition;
+@override@JsonKey(name: 'created_at') final  DateTime? createdAt;
 
 /// Create a copy of OutfitRecommendation
 /// with the given fields replaced by the non-null parameter values.
@@ -267,7 +267,7 @@ abstract mixin class _$OutfitRecommendationCopyWith<$Res> implements $OutfitReco
   factory _$OutfitRecommendationCopyWith(_OutfitRecommendation value, $Res Function(_OutfitRecommendation) _then) = __$OutfitRecommendationCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String? title, String? description, List<String>? recommendedItems, double? temperature, String? weatherCondition, DateTime? createdAt
+ String? id, String? title, String? description,@JsonKey(name: 'recommended_items') List<String>? recommendedItems, double? temperature,@JsonKey(name: 'weather_condition') String? weatherCondition,@JsonKey(name: 'created_at') DateTime? createdAt
 });
 
 

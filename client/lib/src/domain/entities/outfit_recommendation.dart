@@ -9,10 +9,10 @@ abstract class OutfitRecommendation with _$OutfitRecommendation {
     String? id,
     String? title,
     String? description,
-    List<String>? recommendedItems,
+    @JsonKey(name: 'recommended_items') List<String>? recommendedItems,
     double? temperature,
-    String? weatherCondition,
-    DateTime? createdAt,
+    @JsonKey(name: 'weather_condition') String? weatherCondition,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
   }) = _OutfitRecommendation;
 
   factory OutfitRecommendation.fromJson(Map<String, dynamic> json) =>
