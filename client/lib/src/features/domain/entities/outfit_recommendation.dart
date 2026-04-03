@@ -42,3 +42,21 @@ abstract class OutfitRecommendation with _$OutfitRecommendation {
     );
   }
 }
+
+extension OutfitRecommendationJson on OutfitRecommendation {
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'outfit_image_urls': outfitImageUrls,
+      'image_url': imageUrl,
+      'recommended_items': recommendedItems,
+      'weather_condition': weatherCondition,
+      'temperature': temperature,
+      'occasion': occasion,
+      'confidence_score': confidenceScore,
+      'created_at': createdAt?.toIso8601String(),
+    };
+  }
+}
