@@ -638,7 +638,7 @@ func setupRouter(
 		middleware.CORSMiddleware(cfg.Security.CORSAllowedOrigins),
 		middleware.LoggerMiddleware(logger),
 		middleware.InputSanitizationMiddleware, // Security: Sanitize all JSON inputs
-		middleware.PerUserRateLimitMiddleware(limiter, perUserRateLimitConfig),
+		// middleware.PerUserRateLimitMiddleware(limiter, perUserRateLimitConfig), // TEMPORARILY DISABLED
 		middleware.MetricsMiddleware(),
 	)
 

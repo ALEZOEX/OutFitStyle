@@ -334,7 +334,28 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
     _bubbleHeight = Tween<double>(begin: 0, end: 0).animate(
       CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _capturePositions());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _captureAndShow());
+  }
+
+  void _captureAndShow() {
+    _capturePositions();
+    final rect = _itemRects[widget.currentIndex];
+    if (!rect.isEmpty) {
+      setState(() {
+        _bubbleLeft = Tween<double>(begin: rect.left, end: rect.left).animate(
+          CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+        );
+        _bubbleTop = Tween<double>(begin: rect.top, end: rect.top).animate(
+          CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+        );
+        _bubbleWidth = Tween<double>(begin: rect.width, end: rect.width).animate(
+          CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+        );
+        _bubbleHeight = Tween<double>(begin: rect.height, end: rect.height).animate(
+          CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+        );
+      });
+    }
   }
 
   @override
@@ -416,14 +437,14 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
               if (currentRect.isEmpty) return const SizedBox.shrink();
 
               return Positioned(
-                left: _bubbleLeft.value,
-                top: _bubbleTop.value,
-                width: _bubbleWidth.value,
-                height: _bubbleHeight.value,
+                left: _bubbleLeft.value + 4,
+                top: _bubbleTop.value + 2,
+                width: _bubbleWidth.value - 8,
+                height: _bubbleHeight.value - 4,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: AppGradients.primary,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
                         color: theme.colorScheme.primary.withValues(alpha: 0.4),
@@ -521,7 +542,6 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                letterSpacing: 1.5,
                 color: isActive
                     ? theme.colorScheme.primary
                     : theme.colorScheme.onSurfaceVariant,
