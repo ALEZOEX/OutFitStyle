@@ -563,12 +563,12 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
   }
 
   String _generateOutfitName() {
-    final selectedCount = _selectedItems.values.fold<int>(
+    final count = _selectedItems.values.fold<int>(
       0,
       (sum, list) => sum + list.length,
     );
     final now = DateTime.now();
-    return 'Образ ${now.day.toString().padLeft(2, '0')}.${now.month.toString().padLeft(2, '0')} ($selected предметов)';
+    return 'Образ ${now.day.toString().padLeft(2, '0')}.${now.month.toString().padLeft(2, '0')} ($count предметов)';
   }
 }
 

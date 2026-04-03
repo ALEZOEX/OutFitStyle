@@ -173,11 +173,15 @@ func (s *FallbackRecommendationService) calculateScore(
 	occasionScore := s.occasionMatchScore(c.Category, c.Subcategory, occasion)
 	score += occasionScore * 0.10
 
-	// 6. Источник вещи (вес 5%) — предпочитаем вещи из гардероба пользователя
+	// 6. Гендер (вес 5%) — unisex подходит всем
+	genderScore := s.genderMatchScore(c.Gender)
+	score += genderScore * 0.05
+
+	// 7. Источник вещи (вес 5%) — предпочитаем вещи из гардероба пользователя
 	sourceScore := s.sourceScore(c.Source)
 	score += sourceScore * 0.05
 
-	// 7. Случайный фактор для разнообразия (вес 5%)
+	// 8. Случайный фактор для разнообразия (вес 5%)
 	// G404: Используем crypto/rand вместо math/rand
 	randomScore := cryptoRandFloat64() * 0.05
 	score += randomScore
@@ -458,6 +462,19 @@ func (s *FallbackRecommendationService) occasionMatchScore(category, subcategory
 
 	// По умолчанию — нейтральный скор
 	return 0.5
+}
+
+// genderMatchScore оценивает соответствие гендера
+// Если гендер вещи unisex — подходит всем (1.0)
+// Если гендер не указан — нейтральный скор (0.5)
+func (s *FallbackRecommendationService) genderMatchScore(gender string) float64 {
+	g := strings.ToLower(strings.TrimSpace(gender))
+	if g == "" || g == "unisex" {
+		return 1.0 // Unisex подходит всем
+	}
+	// TODO: когда будет профиль пользователя с гендером — фильтровать
+	// Пока все вещи равноправны
+	return 0.8
 }
 
 // desiredWarmth вычисляет желаемый уровень тепла для температуры

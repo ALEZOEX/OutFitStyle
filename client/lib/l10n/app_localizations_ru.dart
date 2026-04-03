@@ -9,10 +9,10 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get appName => 'OutfitStyle';
+  String get appName => 'OutFitStyle';
 
   @override
-  String get welcomeMessage => 'Добро пожаловать в OutfitStyle!';
+  String get welcomeMessage => 'Добро пожаловать в OutFitStyle!';
 
   @override
   String get loading => 'Загрузка...';
@@ -140,7 +140,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get avatarUpdated => 'Аватар успешно обновлен';
 
   @override
-  String get onboardingWelcomeTitle => 'Добро пожаловать в OutfitStyle!';
+  String get onboardingWelcomeTitle => 'Добро пожаловать в OutFitStyle!';
 
   @override
   String get onboardingWelcomeSubtitle => 'Ваш персональный помощник по стилю';

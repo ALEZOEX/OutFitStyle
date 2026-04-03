@@ -9,6 +9,9 @@ type CandidateLite struct {
 
 	Source string `json:"source"` // Источник одежды: user|partner|manual|synthetic
 
+	// Гендер (male, female, unisex)
+	Gender string `json:"gender"`
+
 	// Климатические характеристики и ограничения
 	MinTemp     *int `json:"min_temp,omitempty"`     // Минимальная температура комфорта (в градусах Цельсия)
 	MaxTemp     *int `json:"max_temp,omitempty"`     // Максимальная температура комфорта (в градусах Цельсия)

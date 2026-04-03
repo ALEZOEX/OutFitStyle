@@ -146,13 +146,16 @@ class SavedOutfitCreateRequest {
       'name': name,
       'items': items,
     };
-    if (occasions != null && occasions.isNotEmpty) {
+    final occ = occasions;
+    if (occ != null && occ.isNotEmpty) {
       json['occasions'] = occasions;
     }
-    if (seasons != null && seasons.isNotEmpty) {
+    final seas = seasons;
+    if (seas != null && seas.isNotEmpty) {
       json['seasons'] = seasons;
     }
-    if (description != null && description.isNotEmpty) {
+    final desc = description;
+    if (desc != null && desc.isNotEmpty) {
       json['description'] = description;
     }
     return json;

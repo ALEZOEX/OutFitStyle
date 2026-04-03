@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
-
 import '../../core/api/api_client.dart';
 import '../../domain/entities/saved_outfit.dart';
 

@@ -913,7 +913,7 @@ func (r *ClothingRepository) ListCatalogCandidates(ctx context.Context, includeP
 func (r *ClothingRepository) ListWardrobeCandidatesLite(ctx context.Context, userID domain.ID, limit int) ([]domain.CandidateLite, error) {
 	query := `
 		SELECT
-			id, category, subcategory, source, min_temp, max_temp, warmth_level,
+			id, category, subcategory, source, gender, min_temp, max_temp, warmth_level,
 			rain_ok, snow_ok, wind_ok, style, formality_level, base_colour, pattern,
 			wear_count, is_owned
 		FROM clothing_items
@@ -940,6 +940,7 @@ func (r *ClothingRepository) ListWardrobeCandidatesLite(ctx context.Context, use
 			&item.Category,
 			&item.Subcategory,
 			&item.Source,
+			&item.Gender,
 			&minTemp,
 			&maxTemp,
 			&warmthLevel,
@@ -989,7 +990,7 @@ func (r *ClothingRepository) ListWardrobeCandidatesLite(ctx context.Context, use
 func (r *ClothingRepository) ListCatalogCandidatesLite(ctx context.Context, includePartners bool, limit int) ([]domain.CandidateLite, error) {
 	query := `
 		SELECT
-			id, category, subcategory, source, min_temp, max_temp, warmth_level,
+			id, category, subcategory, source, gender, min_temp, max_temp, warmth_level,
 			rain_ok, snow_ok, wind_ok, style, formality_level, base_colour, pattern,
 			wear_count, is_owned
 		FROM clothing_items
@@ -1023,6 +1024,7 @@ func (r *ClothingRepository) ListCatalogCandidatesLite(ctx context.Context, incl
 			&item.Category,
 			&item.Subcategory,
 			&item.Source,
+			&item.Gender,
 			&minTemp,
 			&maxTemp,
 			&warmthLevel,

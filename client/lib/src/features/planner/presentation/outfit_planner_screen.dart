@@ -1,43 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:outfitstyle_client/src/theme/app_theme.dart';
 import 'package:outfitstyle_client/src/ui/containers/glass_components.dart';
+import 'package:outfitstyle_client/src/domain/entities/saved_outfit.dart';
+import 'package:outfitstyle_client/src/features/wardrobe/presentation/providers/wardrobe_provider.dart';
+import 'package:outfitstyle_client/src/features/builder/presentation/providers/outfit_provider.dart';
 
 /// Экран планировщика образов
-class OutfitPlannerScreen extends StatefulWidget {
+///
+/// Загружает сохранённые образы из API и позволяет
+/// планировать их на конкретные даты.
+class OutfitPlannerScreen extends ConsumerStatefulWidget {
   const OutfitPlannerScreen({super.key});
 
   @override
-  State<OutfitPlannerScreen> createState() => _OutfitPlannerScreenState();
+  ConsumerState<OutfitPlannerScreen> createState() =>
+      _OutfitPlannerScreenState();
 }
 
-class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
+class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
   DateTime _selectedDate = DateTime.now();
   DateTime _focusedMonth = DateTime.now();
 
-  final List<_PlannedOutfit> _plannedOutfits = [
-    _PlannedOutfit(
-      date: DateTime.now(),
-      title: 'Деловая встреча',
-      outfit: 'Деловой костюм',
-      weather: '+18°C, ясно',
-      weatherIcon: Icons.wb_sunny_rounded,
-      eventType: 'work',
-    ),
-    _PlannedOutfit(
-      date: DateTime.now().add(const Duration(days: 1)),
-      title: 'Прогулка в парке',
-      outfit: 'Casual outfit',
-      weather: '+15°C, облачно',
-      weatherIcon: Icons.cloud_rounded,
-      eventType: 'casual',
-    ),
-  ];
+  // Локальный кэш запланированных образов (дата -> outfitId)
+  // В будущем можно заменить на API endpoint планирования
+  final Map<DateTime, List<String>> _plannedOutfitIds = {};
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final outfitState = ref.watch(outfitProvider);
+    final wardrobeState = ref.watch(wardrobeProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -45,7 +41,17 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
           children: [
             // AppBar
             _buildAppBar(context),
-            
+
+            // Индикаторы загрузки
+            if (outfitState.status == OutfitLoadStatus.loading ||
+                wardrobeState.status == WardrobeLoadStatus.loading)
+              const LinearProgressIndicator()
+            else if (outfitState.status == OutfitLoadStatus.error)
+              _buildErrorBanner(
+                context,
+                outfitState.error ?? 'Ошибка загрузки образов',
+              ),
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -55,7 +61,7 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
                     // Календарь
                     _buildCalendar(context, isDark),
                     const SizedBox(height: AppSpacing.lg),
-                    
+
                     // Запланированные образы
                     Text(
                       'Запланировано на ${DateFormat('d MMMM', 'ru_RU').format(_selectedDate)}',
@@ -64,7 +70,7 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    _buildPlannedOutfits(context, isDark),
+                    _buildPlannedOutfits(context, isDark, outfitState.outfits),
                   ],
                 ),
               ),
@@ -80,6 +86,24 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
     );
   }
 
+  Widget _buildErrorBanner(BuildContext context, String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      color: Theme.of(context).colorScheme.errorContainer,
+      child: Text(
+        message,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onErrorContainer,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
   Widget _buildAppBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -89,7 +113,8 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back),
             style: IconButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -116,7 +141,10 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
             children: [
               IconButton(
                 onPressed: () => setState(() {
-                  _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+                  _focusedMonth = DateTime(
+                    _focusedMonth.year,
+                    _focusedMonth.month - 1,
+                  );
                 }),
                 icon: const Icon(Icons.chevron_left),
               ),
@@ -128,33 +156,38 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
               ),
               IconButton(
                 onPressed: () => setState(() {
-                  _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+                  _focusedMonth = DateTime(
+                    _focusedMonth.year,
+                    _focusedMonth.month + 1,
+                  );
                 }),
                 icon: const Icon(Icons.chevron_right),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          
+
           // Дни недели
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-                .map((day) => SizedBox(
-                      width: 40,
-                      child: Text(
-                        day,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
+                .map(
+                  (day) => SizedBox(
+                    width: 40,
+                    child: Text(
+                      day,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ))
+                    ),
+                  ),
+                )
                 .toList(),
           ),
           const SizedBox(height: AppSpacing.sm),
-          
+
           // Дни месяца
           _buildCalendarDays(context, isDark),
         ],
@@ -163,28 +196,40 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
   }
 
   Widget _buildCalendarDays(BuildContext context, bool isDark) {
-    final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
-    final lastDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 0);
+    final firstDayOfMonth = DateTime(
+      _focusedMonth.year,
+      _focusedMonth.month,
+      1,
+    );
+    final lastDayOfMonth = DateTime(
+      _focusedMonth.year,
+      _focusedMonth.month + 1,
+      0,
+    );
     final firstWeekday = firstDayOfMonth.weekday;
     final daysInMonth = lastDayOfMonth.day;
-    
+
     final List<Widget> weeks = [];
     int dayCounter = 1;
-    
+
     for (int week = 0; week < 6; week++) {
       final List<Widget> days = [];
-      
+
       for (int weekday = 0; weekday < 7; weekday++) {
         if (week == 0 && weekday < firstWeekday - 1) {
           days.add(const SizedBox(width: 40, child: SizedBox.shrink()));
         } else if (dayCounter > daysInMonth) {
           days.add(const SizedBox(width: 40, child: SizedBox.shrink()));
         } else {
-          final date = DateTime(_focusedMonth.year, _focusedMonth.month, dayCounter);
+          final date = DateTime(
+            _focusedMonth.year,
+            _focusedMonth.month,
+            dayCounter,
+          );
           final isSelected = _isSameDay(date, _selectedDate);
           final isToday = _isSameDay(date, DateTime.now());
-          final hasOutfit = _plannedOutfits.any((o) => _isSameDay(o.date, date));
-          
+          final hasOutfit = _hasPlannedOutfits(date);
+
           days.add(
             SizedBox(
               width: 40,
@@ -197,8 +242,8 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary
                         : isToday
-                            ? Theme.of(context).colorScheme.primaryContainer
-                            : Colors.transparent,
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -234,7 +279,7 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
           dayCounter++;
         }
       }
-      
+
       weeks.add(
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
@@ -244,16 +289,30 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
           ),
         ),
       );
-      
+
       if (dayCounter > daysInMonth) break;
     }
-    
+
     return Column(children: weeks);
   }
 
-  Widget _buildPlannedOutfits(BuildContext context, bool isDark) {
-    final outfitsForDate = _plannedOutfits
-        .where((o) => _isSameDay(o.date, _selectedDate))
+  Widget _buildPlannedOutfits(
+    BuildContext context,
+    bool isDark,
+    List<SavedOutfit> allOutfits,
+  ) {
+    final outfitIds = _plannedOutfitIds[_normalizeDate(_selectedDate)] ?? [];
+    final outfitsForDate = outfitIds
+        .map((id) => allOutfits.firstWhere(
+              (o) => o.id == id,
+              orElse: () => SavedOutfit(
+                id: id,
+                userId: '',
+                name: 'Удалённый образ',
+                items: [],
+                createdAt: DateTime.now(),
+              ),
+            ))
         .toList();
 
     if (outfitsForDate.isEmpty) {
@@ -303,13 +362,16 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _getEventColor(outfit.eventType).withValues(alpha: 0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.2),
                         borderRadius: AppRadius.radiusMd,
                       ),
                       child: Icon(
-                        _getEventIcon(outfit.eventType),
+                        Icons.checkroom,
                         size: 20,
-                        color: _getEventColor(outfit.eventType),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
@@ -318,24 +380,30 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            outfit.title,
-                            style: AppTypography.headlineSmall(context).copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
+                            outfit.name,
+                            style: AppTypography.headlineSmall(context)
+                                .copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            outfit.outfit,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                            '${outfit.items.length} предметов',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      onPressed: () => _deleteOutfit(outfit),
+                      onPressed: () => _deletePlannedOutfit(outfit.id),
                       icon: Icon(
                         Icons.delete_outline,
                         size: 20,
@@ -344,31 +412,16 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
-                    borderRadius: AppRadius.radiusPill,
+                if (outfit.description != null &&
+                    outfit.description!.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    outfit.description!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        outfit.weatherIcon,
-                        size: 14,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        outfit.weather,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ],
             ),
           ),
@@ -378,22 +431,31 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
   }
 
   void _addPlannedOutfit() {
+    final outfitState = ref.read(outfitProvider);
+
+    if (outfitState.outfits.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Сначала создайте образ в конструкторе'),
+        ),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _AddOutfitSheet(
         selectedDate: _selectedDate,
-        onAdded: () {
+        availableOutfits: outfitState.outfits,
+        onAdded: (outfitId) {
           setState(() {
-            _plannedOutfits.add(_PlannedOutfit(
-              date: _selectedDate,
-              title: 'Новое событие',
-              outfit: 'Casual outfit',
-              weather: '+16°C, облачно',
-              weatherIcon: Icons.cloud_rounded,
-              eventType: 'casual',
-            ));
+            final normalizedDate = _normalizeDate(_selectedDate);
+            if (!_plannedOutfitIds.containsKey(normalizedDate)) {
+              _plannedOutfitIds[normalizedDate] = [];
+            }
+            _plannedOutfitIds[normalizedDate]!.add(outfitId);
           });
           Navigator.pop(context);
         },
@@ -401,73 +463,49 @@ class _OutfitPlannerScreenState extends State<OutfitPlannerScreen> {
     );
   }
 
-  void _deleteOutfit(_PlannedOutfit outfit) {
+  void _deletePlannedOutfit(String outfitId) {
     setState(() {
-      _plannedOutfits.remove(outfit);
+      final normalizedDate = _normalizeDate(_selectedDate);
+      _plannedOutfitIds[normalizedDate]?.remove(outfitId);
+      if (_plannedOutfitIds[normalizedDate]?.isEmpty ?? false) {
+        _plannedOutfitIds.remove(normalizedDate);
+      }
     });
+  }
+
+  bool _hasPlannedOutfits(DateTime date) {
+    final normalizedDate = _normalizeDate(date);
+    final ids = _plannedOutfitIds[normalizedDate];
+    return ids != null && ids.isNotEmpty;
   }
 
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  Color _getEventColor(String eventType) {
-    switch (eventType) {
-      case 'work':
-        return Colors.blue;
-      case 'casual':
-        return Colors.green;
-      case 'party':
-        return Colors.purple;
-      case 'sport':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getEventIcon(String eventType) {
-    switch (eventType) {
-      case 'work':
-        return Icons.work_outline;
-      case 'casual':
-        return Icons.coffee_outlined;
-      case 'party':
-        return Icons.celebration_outlined;
-      case 'sport':
-        return Icons.fitness_center_outlined;
-      default:
-        return Icons.event_outlined;
-    }
+  /// Нормализует дату до начала дня (без времени) для использования как ключ
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 }
 
-class _PlannedOutfit {
-  final DateTime date;
-  final String title;
-  final String outfit;
-  final String weather;
-  final IconData weatherIcon;
-  final String eventType;
-
-  const _PlannedOutfit({
-    required this.date,
-    required this.title,
-    required this.outfit,
-    required this.weather,
-    required this.weatherIcon,
-    required this.eventType,
-  });
-}
-
-class _AddOutfitSheet extends StatelessWidget {
+class _AddOutfitSheet extends StatefulWidget {
   final DateTime selectedDate;
-  final VoidCallback onAdded;
+  final List<SavedOutfit> availableOutfits;
+  final Function(String outfitId) onAdded;
 
   const _AddOutfitSheet({
     required this.selectedDate,
+    required this.availableOutfits,
     required this.onAdded,
   });
+
+  @override
+  State<_AddOutfitSheet> createState() => _AddOutfitSheetState();
+}
+
+class _AddOutfitSheetState extends State<_AddOutfitSheet> {
+  String? _selectedOutfitId;
 
   @override
   Widget build(BuildContext context) {
@@ -479,7 +517,8 @@ class _AddOutfitSheet extends StatelessWidget {
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
@@ -501,17 +540,107 @@ class _AddOutfitSheet extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Добавить образ на ${DateFormat('d MMMM', 'ru_RU').format(selectedDate)}',
+            'Добавить образ на ${DateFormat('d MMMM', 'ru_RU').format(widget.selectedDate)}',
             style: AppTypography.headlineSmall(context).copyWith(
               fontWeight: FontWeight.w700,
               fontSize: 16,
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.md),
+
+          // Список доступных образов
+          SizedBox(
+            height: 200,
+            child: ListView.builder(
+              itemCount: widget.availableOutfits.length,
+              itemBuilder: (context, index) {
+                final outfit = widget.availableOutfits[index];
+                final isSelected = _selectedOutfitId == outfit.id;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                  child: InkWell(
+                    onTap: () => setState(() => _selectedOutfitId = outfit.id),
+                    borderRadius: AppRadius.radiusMd,
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.1)
+                            : isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.black.withValues(alpha: 0.03),
+                        borderRadius: AppRadius.radiusMd,
+                        border: Border.all(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : Colors.transparent,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isSelected
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  outfit.name,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
+                                      ),
+                                ),
+                                Text(
+                                  '${outfit.items.length} предметов',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
           GlassButton(
             label: 'Добавить',
             icon: Icons.check,
-            onPressed: onAdded,
+            onPressed: _selectedOutfitId != null
+                ? () => widget.onAdded(_selectedOutfitId!)
+                : () {},
+            isLoading: false,
           ),
         ],
       ),

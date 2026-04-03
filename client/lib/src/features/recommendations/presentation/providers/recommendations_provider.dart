@@ -132,11 +132,11 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
   RecommendationsNotifier({required ApiClient apiClient})
     : _apiClient = apiClient,
       super(const RecommendationsState()) {
-    _loadRecommendations();
+    loadRecommendations();
   }
 
   /// Загрузить рекомендации с API
-  Future<void> _loadRecommendations() async {
+  Future<void> loadRecommendations() async {
     state = state.copyWith(status: RecommendationsLoadStatus.loading);
 
     try {
@@ -361,7 +361,7 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 
   /// Перезагрузить рекомендации
   Future<void> refresh() async {
-    await _loadRecommendations();
+    await loadRecommendations();
   }
 
   /// Получить рекомендации по погоде

@@ -9,10 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'OutfitStyle';
+  String get appName => 'OutFitStyle';
 
   @override
-  String get welcomeMessage => 'Welcome to OutfitStyle!';
+  String get welcomeMessage => 'Welcome to OutFitStyle!';
 
   @override
   String get loading => 'Loading...';
@@ -140,7 +140,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get avatarUpdated => 'Avatar updated successfully';
 
   @override
-  String get onboardingWelcomeTitle => 'Welcome to OutfitStyle!';
+  String get onboardingWelcomeTitle => 'Welcome to OutFitStyle!';
 
   @override
   String get onboardingWelcomeSubtitle => 'Your personal style assistant';

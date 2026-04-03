@@ -101,13 +101,13 @@ abstract class AppLocalizations {
   /// Название приложения
   ///
   /// In ru, this message translates to:
-  /// **'OutfitStyle'**
+  /// **'OutFitStyle'**
   String get appName;
 
   /// Приветственное сообщение, отображаемое пользователю
   ///
   /// In ru, this message translates to:
-  /// **'Добро пожаловать в OutfitStyle!'**
+  /// **'Добро пожаловать в OutFitStyle!'**
   String get welcomeMessage;
 
   /// Текст индикатора загрузки
@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// Заголовок экрана приветствия онбординга
   ///
   /// In ru, this message translates to:
-  /// **'Добро пожаловать в OutfitStyle!'**
+  /// **'Добро пожаловать в OutFitStyle!'**
   String get onboardingWelcomeTitle;
 
   /// Подзаголовок экрана приветствия онбординга
