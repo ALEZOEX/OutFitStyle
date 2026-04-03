@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/home/home_shell.dart';
 import '../../features/wardrobe/presentation/wardrobe_screen.dart';
 import '../../features/recommendations/presentation/recommendations_screen.dart';
-import '../../features/recommendations/presentation/screens/outfit_planner_screen.dart';
-import '../../features/recommendations/presentation/screens/outfit_builder_screen.dart';
+import '../../features/planner/presentation/outfit_planner_screen.dart';
+import '../../features/builder/presentation/outfit_builder_screen.dart';
 import '../../features/recommendations/presentation/screens/recommendation_detail_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/wardrobe/presentation/screens/wardrobe_item_detail_screen.dart';
@@ -204,10 +204,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/recommendations/planner',
         name: 'outfit_planner',
-        builder: (context, state) {
-          final recommendationId = state.extra as String?;
-          return OutfitPlannerScreen(initialRecommendationId: recommendationId);
-        },
+        builder: (context, state) => const OutfitPlannerScreen(),
       ),
       // Конструктор образов
       GoRoute(
