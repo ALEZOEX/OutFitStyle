@@ -51,21 +51,17 @@ type RecommendationRecord struct {
 	Timestamp   *time.Time           `json:"timestamp,omitempty"`    // Временная метка
 	Weather     *WeatherData         `json:"weather,omitempty"`             // Данные о погоде
 	Outfit      []RecommendationItem `json:"outfit,omitempty"`              // Рекомендованный наряд
-	Items       []RecommendationItem `json:"recommended_items,omitempty"`   // Элементы рекомендованного наряда
+	Items       []RecommendationItem `json:"-"`   // Элементы рекомендованного наряда (загружаются отдельно)
 
 	MLPowered *bool `json:"ml_powered,omitempty"` // Использовалась ли машинное обучение
 
 	Status     *string   `json:"status,omitempty"` // Статус рекомендации (например, "processing", "completed", "failed")
 	IsFavorite bool      `json:"is_favorite"`
 	CreatedAt  time.Time `json:"created_at"`
-
-	// Для совместимости с Flutter (List<String>)
-	RecommendedItemNames []string `json:"-"` // Вычисляется при сериализации
 }
 
 // MarshalJSON кастомная сериализация для Flutter
 func (r RecommendationRecord) MarshalJSON() ([]byte, error) {
-	type Alias RecommendationRecord
 	names := make([]string, len(r.Items))
 	for i, item := range r.Items {
 		if item.Name != "" {
@@ -74,15 +70,16 @@ func (r RecommendationRecord) MarshalJSON() ([]byte, error) {
 			names[i] = "Предмет"
 		}
 	}
-	return json.Marshal(struct {
-		Alias
-		RecommendedItems []string `json:"recommended_items,omitempty"`
-		Title            string   `json:"title"`
-		Description      string   `json:"description"`
-	}{
-		Alias:            Alias(r),
-		RecommendedItems: names,
-		Title:            "Образ на " + r.CreatedAt.Format("02.01"),
-		Description:      "Подобрано автоматически",
+	return json.Marshal(map[string]any{
+		"id":                r.ID,
+		"user_id":           r.UserID,
+		"created_at":        r.CreatedAt,
+		"is_favorite":       r.IsFavorite,
+		"temperature":       r.Temperature,
+		"weather":           r.Weather,
+		"ml_powered":        r.MLPowered,
+		"recommended_items": names,
+		"title":             "Образ на " + r.CreatedAt.Format("02.01"),
+		"description":       "Подобрано автоматически",
 	})
 }
