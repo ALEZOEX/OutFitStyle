@@ -13,8 +13,6 @@ export '../../domain/usecases/save_recommendation_usecase.dart';
 // Presentation
 export 'presentation/recommendations_screen.dart';
 export 'presentation/providers/recommendations_provider.dart';
-export 'presentation/screens/outfit_planner_screen.dart';
-export 'presentation/screens/outfit_builder_screen.dart';
 export 'presentation/screens/recommendation_detail_screen.dart';
 
 // Widgets

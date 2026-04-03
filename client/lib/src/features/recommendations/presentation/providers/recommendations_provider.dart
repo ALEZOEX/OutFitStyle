@@ -351,29 +351,12 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     return 'Что-то пошло не так. Попробуйте снова';
   }
 
-  /// Удалить рекомендацию (локально + сервер)
-  Future<void> removeRecommendation(String id) async {
-    // Сначала удаляем локально для мгновенного UX
+  /// Удалить рекомендацию локально
+  void removeRecommendation(String id) {
     final recommendations = state.recommendations
         .where((r) => r.id != id)
         .toList();
     state = state.copyWith(recommendations: recommendations);
-
-    // Затем отправляем DELETE на сервер
-    try {
-      final session = ref.read(sessionProvider);
-      if (session?.token != null) {
-        final apiClient = ApiClient(
-          baseUrl: 'https://app.outfitstyle.ru',
-          token: session!.token,
-        );
-        await apiClient.delete('/api/v1/recommendations/$id');
-        AppLogger.info('[RecommendationsProvider] 🗑️ Рекомендация удалена с сервера: $id');
-      }
-    } catch (e) {
-      AppLogger.error('[RecommendationsProvider] ⚠️ Ошибка удаления с сервера: $e');
-      // При следующей загрузке сервер синхронизирует
-    }
   }
 
   /// Перезагрузить рекомендации
