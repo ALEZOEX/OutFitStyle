@@ -1,9 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/weather_data.dart';
 import '../../theme/app_theme.dart';
+import '../containers/glass_container.dart';
 
 class WeatherCard extends StatelessWidget {
   final WeatherData? weatherData;
@@ -31,64 +31,25 @@ class WeatherCard extends StatelessWidget {
     final textSecondary = theme.colorScheme.onSurfaceVariant;
     final textMuted = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
 
-    return ClipRRect(
-      borderRadius: AppRadius.radiusXxl,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                  ? [
-                      theme.colorScheme.primary.withValues(alpha: 0.2),
-                      theme.colorScheme.secondary.withValues(alpha: 0.12),
-                      Colors.white.withValues(alpha: 0.05),
-                    ]
-                  : [
-                      theme.colorScheme.primary.withValues(alpha: 0.12),
-                      theme.colorScheme.secondary.withValues(alpha: 0.08),
-                      Colors.white.withValues(alpha: 0.85),
-                    ],
-            ),
-            borderRadius: AppRadius.radiusXxl,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : theme.colorScheme.primary.withValues(alpha: 0.15),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.primary.withValues(
-                  alpha: isDark ? 0.12 : 0.08,
-                ),
-                blurRadius: 32,
-                offset: const Offset(0, 12),
-              ),
-            ],
+    return GlassContainer(
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context, textColor, textSecondary, textMuted),
+          const SizedBox(height: AppSpacing.xl),
+          _buildMainWeather(
+            context,
+            data,
+            temp,
+            isDark,
+            textColor,
+            textSecondary,
+            textMuted,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context, textColor, textSecondary, textMuted),
-              const SizedBox(height: AppSpacing.xl),
-              _buildMainWeather(
-                context,
-                data,
-                temp,
-                isDark,
-                textColor,
-                textSecondary,
-                textMuted,
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              _buildDetails(context, data, isDark, textColor, textSecondary),
-            ],
-          ),
-        ),
+          const SizedBox(height: AppSpacing.xxl),
+          _buildDetails(context, data, isDark, textColor, textSecondary),
+        ],
       ),
     );
   }
@@ -318,48 +279,32 @@ class WeatherCard extends StatelessWidget {
 
   Widget _buildErrorState(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return ClipRRect(
-      borderRadius: AppRadius.radiusXxl,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.white.withValues(alpha: 0.6),
-            borderRadius: AppRadius.radiusXxl,
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+    return GlassContainer(
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.cloud_off,
+            size: 40,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const Text('Нет данных о погоде'),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Проверьте подключение к интернету',
+            style: AppTypography.bodySmall(context),
+          ),
+          if (onRefresh != null) ...[
+            const SizedBox(height: AppSpacing.lg),
+            OutlinedButton.icon(
+              onPressed: onRefresh,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Обновить'),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.cloud_off,
-                size: 40,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              const Text('Нет данных о погоде'),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Проверьте подключение к интернету',
-                style: AppTypography.bodySmall(context),
-              ),
-              if (onRefresh != null) ...[
-                const SizedBox(height: AppSpacing.lg),
-                OutlinedButton.icon(
-                  onPressed: onRefresh,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Обновить'),
-                ),
-              ],
-            ],
-          ),
-        ),
+          ],
+        ],
       ),
     );
   }

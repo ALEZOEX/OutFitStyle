@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../recommendations/presentation/providers/recommendations_provider.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/logger.dart';
+import '../../../ui/containers/glass_container.dart';
 
 class GeneratorScreen extends ConsumerStatefulWidget {
   const GeneratorScreen({super.key});
@@ -162,41 +162,22 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     required IconData icon,
     required Widget child,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return ClipRRect(
+    return GlassContainer(
       borderRadius: AppRadius.radiusXl,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : Colors.white.withValues(alpha: 0.6),
-            borderRadius: AppRadius.radiusXl,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.white.withValues(alpha: 0.4),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Icon(icon, color: AppColors.primary, size: 18),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(title, style: AppTypography.labelLarge(context)),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              child,
+              Icon(icon, color: AppColors.primary, size: 18),
+              const SizedBox(width: AppSpacing.sm),
+              Text(title, style: AppTypography.labelLarge(context)),
             ],
           ),
-        ),
+          const SizedBox(height: AppSpacing.md),
+          child,
+        ],
       ),
     );
   }
@@ -540,7 +521,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           action: SnackBarAction(
             label: 'Посмотреть',
             textColor: Colors.white,
-            onPressed: () => context.go('/recommendations'),
+            onPressed: () => context.go('/home'),
           ),
         ),
       );

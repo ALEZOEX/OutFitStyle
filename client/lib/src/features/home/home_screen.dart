@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +7,7 @@ import 'package:outfitstyle_client/src/presentation/providers/weather_provider.d
 import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
 import 'package:outfitstyle_client/src/ui/widgets/weather_card.dart';
 import 'package:outfitstyle_client/src/ui/widgets/empty_state.dart';
+import 'package:outfitstyle_client/src/ui/containers/glass_container.dart';
 import 'package:outfitstyle_client/src/ui/widgets/max_width_container.dart';
 import 'package:outfitstyle_client/src/domain/entities/outfit_recommendation.dart';
 import 'package:outfitstyle_client/src/theme/app_theme.dart';
@@ -108,41 +108,25 @@ class _WeatherSection extends ConsumerWidget {
 
   Widget _buildErrorCard(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return ClipRRect(
-      borderRadius: AppRadius.radiusXxl,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.white.withValues(alpha: 0.6),
-            borderRadius: AppRadius.radiusXxl,
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-            ),
+    return GlassContainer(
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      child: Column(
+        children: [
+          Icon(
+            Icons.cloud_off,
+            size: 40,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
-          child: Column(
-            children: [
-              Icon(
-                Icons.cloud_off,
-                size: 40,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              const Text('Не удалось загрузить погоду'),
-              const SizedBox(height: AppSpacing.md),
-              OutlinedButton.icon(
-                onPressed: () => ref.invalidate(weatherProvider),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Повторить'),
-              ),
-            ],
+          const SizedBox(height: AppSpacing.md),
+          const Text('Не удалось загрузить погоду'),
+          const SizedBox(height: AppSpacing.md),
+          OutlinedButton.icon(
+            onPressed: () => ref.invalidate(weatherProvider),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Повторить'),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -206,51 +190,18 @@ class _OutfitOfDaySection extends StatelessWidget {
 
   Widget _buildOutfitCard(BuildContext context, OutfitRecommendation rec) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return ClipRRect(
+    return GlassContainer(
       borderRadius: AppRadius.radiusXl,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                  ? [
-                      theme.colorScheme.primary.withValues(alpha: 0.15),
-                      theme.colorScheme.secondary.withValues(alpha: 0.08),
-                    ]
-                  : [
-                      theme.colorScheme.primary.withValues(alpha: 0.12),
-                      theme.colorScheme.secondary.withValues(alpha: 0.06),
-                    ],
-            ),
-            borderRadius: AppRadius.radiusXl,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.5),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: InkWell(
-            onTap: () {
-              if (rec.id != null) context.push('/outfit/${rec.id}');
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xxl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      child: InkWell(
+        onTap: () {
+          if (rec.id != null) context.push('/outfit/${rec.id}');
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
                   Row(
                     children: [
                       Expanded(
@@ -371,30 +322,15 @@ class _OutfitOfDaySection extends StatelessWidget {
 
   Widget _buildEmptyCard(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return ClipRRect(
+    return GlassContainer(
       borderRadius: AppRadius.radiusXl,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.white.withValues(alpha: 0.6),
-            borderRadius: AppRadius.radiusXl,
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-            ),
-          ),
-          child: EmptyState(
-            icon: Icons.checkroom_outlined,
-            title: 'Нет рекомендаций',
-            subtitle: 'Сгенерируйте персональный образ',
-            actionLabel: 'Сгенерировать',
-            onAction: () => context.push('/generator'),
-          ),
-        ),
+      child: EmptyState(
+        icon: Icons.checkroom_outlined,
+        title: 'Нет рекомендаций',
+        subtitle: 'Сгенерируйте персональный образ',
+        actionLabel: 'Сгенерировать',
+        onAction: () => context.push('/generator'),
       ),
     );
   }
