@@ -43,12 +43,18 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Рефреш при возврате на экран (после генерации)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref.read(recommendationsProvider.notifier).loadRecommendations();
-      }
-    });
+    // Используем флаг чтобы не рефрешить при первом открытии
+    if (_wasBuilt) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(recommendationsProvider.notifier).loadRecommendations();
+        }
+      });
+    }
+    _wasBuilt = true;
   }
+
+  bool _wasBuilt = false;
 
   @override
   void dispose() {
