@@ -27,9 +27,9 @@ class WeatherCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final temp = data.temperature?.round() ?? 0;
-    final textColor = theme.colorScheme.onSurface;
-    final textSecondary = theme.colorScheme.onSurfaceVariant;
-    final textMuted = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+    final textColor = isDark ? Colors.white : Colors.black;
+    final textSecondary = isDark ? Colors.white : Colors.black87;
+    final textMuted = isDark ? Colors.white70 : Colors.black54;
 
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -209,7 +209,7 @@ class WeatherCard extends StatelessWidget {
           ),
           child: Icon(
             icon,
-            color: Colors.white,
+            color: isDark ? Colors.white : Colors.black,
             size: 36,
           ),
         ),
@@ -271,14 +271,10 @@ class WeatherCard extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.12)
-            : theme.colorScheme.primary.withValues(alpha: 0.08),
+        color: Colors.white.withValues(alpha: isDark ? 0.12 : 0.5),
         borderRadius: AppRadius.radiusLg,
         border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.15)
-              : theme.colorScheme.primary.withValues(alpha: 0.12),
+          color: Colors.white.withValues(alpha: isDark ? 0.15 : 0.3),
         ),
       ),
       child: Row(

@@ -380,44 +380,35 @@ func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, i
 		}
 	}
 
-	if len(itemsJSON) > 0 {
-		err = json.Unmarshal(itemsJSON, &rec.Items)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal items data")
-		}
+	// Всегда загружаем предметы из recommendation_items (itemsJSON в recommendations пуст)
+	rows, qErr := r.db.Query(ctx, `
+		SELECT ri.id, ri.clothing_item_id, ci.name, ri.category, ri.is_from_wardrobe, ri.score, ri.rank
+		FROM recommendation_items ri
+		LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
+		WHERE ri.recommendation_id = $1
+		ORDER BY ri.rank
+	`, id)
+	if qErr != nil {
+		return nil, errors.Wrap(qErr, "failed to query recommendation items")
 	}
+	defer rows.Close()
 
-	// Загружаем предметы из recommendation_items (если itemsJSON пуст)
-	if len(rec.Items) == 0 {
-		rows, qErr := r.db.Query(ctx, `
-			SELECT ri.id, ri.clothing_item_id, ci.name, ri.category, ri.is_from_wardrobe, ri.score, ri.rank
-			FROM recommendation_items ri
-			LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
-			WHERE ri.recommendation_id = $1
-			ORDER BY ri.rank
-		`, id)
-		if qErr != nil {
-			return nil, errors.Wrap(qErr, "failed to query recommendation items")
+	for rows.Next() {
+		var item domain.RecommendationItem
+		var name *string
+		var isFromWardrobe bool
+		var score *float64
+		var rank *int
+		if err := rows.Scan(&item.ID, &item.ClothingItemID, &name, &item.Category, &isFromWardrobe, &score, &rank); err != nil {
+			return nil, errors.Wrap(err, "failed to scan recommendation item")
 		}
-		defer rows.Close()
-
-		for rows.Next() {
-			var item domain.RecommendationItem
-			var name *string
-			var isFromWardrobe bool
-			var score *float64
-			var rank *int
-			if err := rows.Scan(&item.ID, &item.ClothingItemID, &name, &item.Category, &isFromWardrobe, &score, &rank); err != nil {
-				return nil, errors.Wrap(err, "failed to scan recommendation item")
-			}
-			if name != nil {
-				item.Name = *name
-			}
-			if score != nil {
-				item.Score = *score
-			}
-			rec.Items = append(rec.Items, item)
+		if name != nil {
+			item.Name = *name
 		}
+		if score != nil {
+			item.Score = *score
+		}
+		rec.Items = append(rec.Items, item)
 	}
 
 	rec.CreatedAt = createdAt
