@@ -597,6 +597,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -623,7 +624,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          duration: const Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
           action: SnackBarAction(
             label: 'Повторить',
             textColor: Colors.white,

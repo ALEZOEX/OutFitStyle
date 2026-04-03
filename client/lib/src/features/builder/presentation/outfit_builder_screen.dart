@@ -561,7 +561,10 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Образ сохранён!')),
+          const SnackBar(
+            content: Text('Образ сохранён!'),
+            duration: Duration(seconds: 3),
+          ),
         );
         // Очищаем выбор после сохранения
         _clearSelection();
@@ -569,7 +572,11 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка сохранения: $e')),
+          SnackBar(
+            content: Text('Ошибка сохранения: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     } finally {

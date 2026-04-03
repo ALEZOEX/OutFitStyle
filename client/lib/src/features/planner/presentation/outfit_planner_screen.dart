@@ -437,6 +437,7 @@ class _OutfitPlannerScreenState extends ConsumerState<OutfitPlannerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Сначала создайте образ в конструкторе'),
+          duration: Duration(seconds: 3),
         ),
       );
       return;

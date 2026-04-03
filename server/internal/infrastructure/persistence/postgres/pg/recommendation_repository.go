@@ -995,9 +995,10 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 
 	// Загружаем ВСЕ items одним запросом (оптимизация N+1)
 	if len(recommendations) > 0 {
-		recIDs := make([]domain.ID, len(recommendations))
+		// Конвертируем IDs в строки для pgx
+		recIDStrs := make([]string, len(recommendations))
 		for i, rec := range recommendations {
-			recIDs[i] = rec.ID
+			recIDStrs[i] = rec.ID.String()
 		}
 
 		// Используем ANY для загрузки всех items
@@ -1007,7 +1008,7 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 			LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
 			WHERE ri.recommendation_id = ANY($1::uuid[])
 			ORDER BY ri.recommendation_id, ri.rank
-		`, recIDs)
+		`, recIDStrs)
 		if qErr == nil {
 			defer itemRows.Close()
 			itemsByRec := map[domain.ID][]domain.RecommendationItem{}
