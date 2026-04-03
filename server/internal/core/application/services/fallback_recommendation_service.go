@@ -169,11 +169,15 @@ func (s *FallbackRecommendationService) calculateScore(
 	formalityScore := s.formalityMatchScore(c.FormalityLevel, requestedFormality)
 	score += formalityScore * 0.10
 
-	// 5. Источник вещи (вес 5%) — предпочитаем вещи из гардероба пользователя
+	// 5. Occasion (вес 10%)
+	occasionScore := s.occasionMatchScore(c.Category, c.Subcategory, occasion)
+	score += occasionScore * 0.10
+
+	// 6. Источник вещи (вес 5%) — предпочитаем вещи из гардероба пользователя
 	sourceScore := s.sourceScore(c.Source)
 	score += sourceScore * 0.05
 
-	// 6. Случайный фактор для разнообразия (вес 5%)
+	// 7. Случайный фактор для разнообразия (вес 5%)
 	// G404: Используем crypto/rand вместо math/rand
 	randomScore := cryptoRandFloat64() * 0.05
 	score += randomScore
@@ -393,6 +397,67 @@ func (s *FallbackRecommendationService) sourceScore(source string) float64 {
 	default:
 		return 0.3
 	}
+}
+
+// occasionMatchScore оценивает соответствие категории случаю
+func (s *FallbackRecommendationService) occasionMatchScore(category, subcategory, occasion string) float64 {
+	if occasion == "" || occasion == "casual" || occasion == "everyday" {
+		return 0.7 // Повседневное — подходит почти всё
+	}
+
+	occ := strings.ToLower(strings.TrimSpace(occasion))
+	cat := strings.ToLower(strings.TrimSpace(category))
+	sub := strings.ToLower(strings.TrimSpace(subcategory))
+
+	// Деловой стиль
+	if occ == "business" || occ == "work" {
+		if cat == "upper" && (strings.Contains(sub, "рубашк") || strings.Contains(sub, "блуз") || strings.Contains(sub, "пиджак")) {
+			return 1.0
+		}
+		if cat == "lower" && (strings.Contains(sub, "брюк") || strings.Contains(sub, "классик")) {
+			return 1.0
+		}
+		if cat == "outerwear" && (strings.Contains(sub, "пальт") || strings.Contains(sub, "классик")) {
+			return 0.9
+		}
+		if cat == "footwear" && (strings.Contains(sub, "туфл") || strings.Contains(sub, "оксфорд") || strings.Contains(sub, "лофер")) {
+			return 0.9
+		}
+		return 0.4
+	}
+
+	// Спорт
+	if occ == "sport" {
+		if strings.Contains(sub, "спорт") || strings.Contains(sub, "трениров") || strings.Contains(sub, "кроссов") {
+			return 1.0
+		}
+		if cat == "upper" && strings.Contains(sub, "футбол") {
+			return 0.8
+		}
+		return 0.3
+	}
+
+	// Вечерний
+	if occ == "evening" || occ == "party" {
+		if strings.Contains(sub, "вечерн") || strings.Contains(sub, "нарядн") || strings.Contains(sub, "шелк") {
+			return 1.0
+		}
+		if cat == "footwear" && (strings.Contains(sub, "туфл") || strings.Contains(sub, "каблук")) {
+			return 0.9
+		}
+		return 0.5
+	}
+
+	// Романтичный
+	if occ == "romantic" || occ == "date" {
+		if strings.Contains(sub, "романт") || strings.Contains(sub, "элегант") {
+			return 1.0
+		}
+		return 0.6
+	}
+
+	// По умолчанию — нейтральный скор
+	return 0.5
 }
 
 // desiredWarmth вычисляет желаемый уровень тепла для температуры
