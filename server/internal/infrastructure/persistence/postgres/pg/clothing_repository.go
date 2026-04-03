@@ -1038,7 +1038,7 @@ func (r *ClothingRepository) ListCatalogCandidatesLite(ctx context.Context, incl
 			&item.Style,
 			&formalityLevel,
 			&baseColour,
-			&item.Pattern,
+			&pattern,
 			&item.WearCount,
 			&item.IsFromWardrobe,
 		)
