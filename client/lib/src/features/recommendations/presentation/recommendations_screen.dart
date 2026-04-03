@@ -40,6 +40,17 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Рефреш при возврате на экран (после генерации)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(recommendationsProvider.notifier).loadRecommendations();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
