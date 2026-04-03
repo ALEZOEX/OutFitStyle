@@ -534,6 +534,7 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusMd),
+          duration: const Duration(seconds: 2),
           action: SnackBarAction(
             label: 'Посмотреть',
             textColor: Colors.white,
@@ -541,6 +542,12 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
           ),
         ),
       );
+      // Авто-переход на главную через 2.5 сек
+      Future.delayed(const Duration(milliseconds: 2500), () {
+        if (context.mounted) {
+          context.go('/home');
+        }
+      });
     } else {
       final errorMsg =
           ref.read(recommendationsProvider).error ?? 'Что-то пошло не так';

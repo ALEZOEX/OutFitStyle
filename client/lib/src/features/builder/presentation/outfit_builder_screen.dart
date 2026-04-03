@@ -1,40 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:outfitstyle_client/src/theme/app_theme.dart';
 import 'package:outfitstyle_client/src/ui/containers/glass_components.dart';
+import 'package:outfitstyle_client/src/domain/entities/wardrobe_item.dart';
+import 'package:outfitstyle_client/src/domain/entities/saved_outfit.dart';
+import 'package:outfitstyle_client/src/features/wardrobe/presentation/providers/wardrobe_provider.dart';
+import 'package:outfitstyle_client/src/features/builder/presentation/providers/outfit_provider.dart';
 
 /// Экран конструктора образов
-class OutfitBuilderScreen extends StatefulWidget {
+///
+/// Загружает реальные вещи из гардероба через WardrobeProvider
+/// и сохраняет образы через Outfit API.
+class OutfitBuilderScreen extends ConsumerStatefulWidget {
   const OutfitBuilderScreen({super.key});
 
   @override
-  State<OutfitBuilderScreen> createState() => _OutfitBuilderScreenState();
+  ConsumerState<OutfitBuilderScreen> createState() =>
+      _OutfitBuilderScreenState();
 }
 
-class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
-  int _selectedCategory = 0;
-  final Map<String, List<String>> _selectedItems = {};
+class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
+  int _selectedCategoryIndex = 0;
+  final Map<String, List<WardrobeItem>> _selectedItems = {};
   bool _isSaving = false;
 
   final List<_Category> _categories = [
-    _Category(id: 'top', label: 'Верх', icon: Icons.checkroom),
-    _Category(id: 'bottom', label: 'Низ', icon: Icons.outbond),
-    _Category(id: 'shoes', label: 'Обувь', icon: Icons.directions_walk),
-    _Category(id: 'accessories', label: 'Аксессуары', icon: Icons.backpack),
-    _Category(id: 'outerwear', label: 'Верхняя одежда', icon: Icons.umbrella_outlined),
+    _Category(
+      id: WardrobeCategories.top,
+      label: 'Верх',
+      icon: Icons.checkroom,
+    ),
+    _Category(
+      id: WardrobeCategories.bottom,
+      label: 'Низ',
+      icon: Icons.checkroom_outlined,
+    ),
+    _Category(
+      id: WardrobeCategories.shoes,
+      label: 'Обувь',
+      icon: Icons.directions_walk,
+    ),
+    _Category(
+      id: WardrobeCategories.accessories,
+      label: 'Аксессуары',
+      icon: Icons.backpack,
+    ),
+    _Category(
+      id: WardrobeCategories.outerwear,
+      label: 'Верхняя одежда',
+      icon: Icons.umbrella_outlined,
+    ),
   ];
-
-  final Map<String, List<String>> _wardrobeItems = {
-    'top': ['Футболка белая', 'Рубашка голубая', 'Свитер серый', 'Поло синее'],
-    'bottom': ['Джинсы синие', 'Брюки чёрные', 'Шорты бежевые', 'Чиносы хаки'],
-    'shoes': ['Кроссовки белые', 'Ботинки коричневые', 'Лоферы чёрные', 'Кеды красные'],
-    'accessories': ['Ремень кожаный', 'Часы серебристые', 'Солнечные очки', 'Шарф синий'],
-    'outerwear': ['Куртка демисезонная', 'Пальто чёрное', 'Ветровка синяя', 'Пуховик серый'],
-  };
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    // Загружаем гардероб
+    final wardrobeState = ref.watch(wardrobeProvider);
+    final wardrobeItems = wardrobeState.items;
 
     return Scaffold(
       body: SafeArea(
@@ -42,7 +67,13 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
           children: [
             // AppBar
             _buildAppBar(context),
-            
+
+            // Индикатор загрузки гардероба
+            if (wardrobeState.status == WardrobeLoadStatus.loading)
+              const LinearProgressIndicator()
+            else if (wardrobeState.status == WardrobeLoadStatus.error)
+              _buildErrorBanner(context, wardrobeState.error ?? 'Ошибка загрузки'),
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -52,7 +83,7 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
                     // Preview образа
                     _buildPreview(context, isDark),
                     const SizedBox(height: AppSpacing.lg),
-                    
+
                     // Категории
                     Text(
                       'Категории',
@@ -63,25 +94,40 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
                     const SizedBox(height: AppSpacing.sm),
                     _buildCategories(context),
                     const SizedBox(height: AppSpacing.lg),
-                    
+
                     // Список вещей
                     Text(
-                      _categories[_selectedCategory].label,
+                      _categories[_selectedCategoryIndex].label,
                       style: AppTypography.labelLarge(context).copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    _buildItemsList(context, isDark),
+                    _buildItemsList(context, isDark, wardrobeItems),
                     const SizedBox(height: AppSpacing.xl),
-                    
+
                     // Кнопки действий
-                    _buildActionButtons(context),
+                    _buildActionButtons(context, wardrobeItems),
                   ],
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorBanner(BuildContext context, String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+      color: Theme.of(context).colorScheme.errorContainer,
+      child: Text(
+        message,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onErrorContainer,
+          fontSize: 12,
         ),
       ),
     );
@@ -96,7 +142,8 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back),
             style: IconButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -121,8 +168,11 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
   }
 
   Widget _buildPreview(BuildContext context, bool isDark) {
-    final selectedCount = _selectedItems.values.fold<int>(0, (sum, list) => sum + list.length);
-    
+    final selectedCount = _selectedItems.values.fold<int>(
+      0,
+      (sum, list) => sum + list.length,
+    );
+
     return GlassCard(
       height: 200,
       child: Column(
@@ -138,9 +188,14 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.black.withValues(alpha: 0.05),
                   borderRadius: AppRadius.radiusPill,
                 ),
                 child: Text(
@@ -162,38 +217,64 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
                         Icon(
                           Icons.checkroom_outlined,
                           size: 48,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           'Выберите вещи для создания образа',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
                   )
                 : ListView.builder(
-                    itemCount: selectedCount,
+                    itemCount: _selectedItems.length,
                     itemBuilder: (context, index) {
-                      final category = _selectedItems.keys.elementAt(index ~/ 1);
-                      final items = _selectedItems[category] ?? [];
-                      if (items.isEmpty) return const SizedBox.shrink();
+                      final category = _selectedItems.keys.elementAt(index);
+                      final items = _selectedItems[category]!;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              _getCategoryIcon(category),
-                              size: 18,
-                              color: Theme.of(context).colorScheme.primary,
+                            Text(
+                              WardrobeCategories.getNameRu(category),
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Expanded(
-                              child: Text(
-                                items[index % items.length],
-                                style: Theme.of(context).textTheme.bodyMedium,
+                            ...items.map(
+                              (item) => Padding(
+                                padding: const EdgeInsets.only(
+                                  left: AppSpacing.sm,
+                                  top: 2,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      item.emojiOrPlaceholder,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    const SizedBox(width: AppSpacing.xs),
+                                    Expanded(
+                                      child: Text(
+                                        item.name ?? 'Без названия',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
@@ -219,27 +300,62 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
           return GlassChip(
             label: category.label,
             icon: category.icon,
-            isSelected: _selectedCategory == index,
-            onTap: () => setState(() => _selectedCategory = index),
+            isSelected: _selectedCategoryIndex == index,
+            onTap: () =>
+                setState(() => _selectedCategoryIndex = index),
           );
         },
       ),
     );
   }
 
-  Widget _buildItemsList(BuildContext context, bool isDark) {
-    final categoryId = _categories[_selectedCategory].id;
-    final items = _wardrobeItems[categoryId] ?? [];
+  Widget _buildItemsList(
+    BuildContext context,
+    bool isDark,
+    List<WardrobeItem> wardrobeItems,
+  ) {
+    final categoryId = _categories[_selectedCategoryIndex].id;
+    final itemsInCategory = wardrobeItems
+        .where(
+          (item) =>
+              item.category?.toLowerCase() == categoryId.toLowerCase() &&
+              !(item.isArchived == true),
+        )
+        .toList();
     final selectedItems = _selectedItems[categoryId] ?? [];
+
+    if (itemsInCategory.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            children: [
+              Icon(
+                _categories[_selectedCategoryIndex].icon,
+                size: 48,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Нет вещей в категории',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
+      itemCount: itemsInCategory.length,
       itemBuilder: (context, index) {
-        final item = items[index];
-        final isSelected = selectedItems.contains(item);
-        
+        final item = itemsInCategory[index];
+        final isSelected = selectedItems.any((i) => i.id == item.id);
+
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.sm),
           child: GlassCard(
@@ -250,28 +366,56 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
             onTap: () => _toggleItem(categoryId, item),
             child: Row(
               children: [
+                // Фото или emoji
                 Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.05),
                     borderRadius: AppRadius.radiusMd,
                   ),
-                  child: Icon(
-                    _getCategoryIcon(categoryId),
-                    size: 20,
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: AppRadius.radiusMd,
+                          child: Image.network(
+                            item.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Text(
+                              item.emojiOrPlaceholder,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ),
+                        )
+                      : Text(
+                          item.emojiOrPlaceholder,
+                          style: const TextStyle(fontSize: 20),
+                        ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: Text(
-                    item,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.name ?? 'Без названия',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w400,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (item.color != null)
+                        Text(
+                          item.color!,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Icon(
@@ -289,14 +433,17 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    List<WardrobeItem> wardrobeItems,
+  ) {
     return Row(
       children: [
         Expanded(
           child: GlassButton(
             label: 'Случайный подбор',
             icon: Icons.casino,
-            onPressed: _randomSelect,
+            onPressed: () => _randomSelect(wardrobeItems),
             isPrimary: false,
           ),
         ),
@@ -313,11 +460,12 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
     );
   }
 
-  void _toggleItem(String categoryId, String item) {
+  void _toggleItem(String categoryId, WardrobeItem item) {
     setState(() {
       final items = _selectedItems[categoryId] ?? [];
-      if (items.contains(item)) {
-        items.remove(item);
+      final exists = items.any((i) => i.id == item.id);
+      if (exists) {
+        items.removeWhere((i) => i.id == item.id);
       } else {
         items.add(item);
       }
@@ -325,13 +473,22 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
     });
   }
 
-  void _randomSelect() {
+  void _randomSelect(List<WardrobeItem> wardrobeItems) {
     setState(() {
       _selectedItems.clear();
-      for (final category in _wardrobeItems.keys) {
-        final items = _wardrobeItems[category]!;
-        if (items.isNotEmpty && DateTime.now().millisecondsSinceEpoch % 2 == 0) {
-          _selectedItems[category] = [items[DateTime.now().millisecondsSinceEpoch % items.length]];
+      final rng = DateTime.now().millisecondsSinceEpoch;
+      for (final category in _categories) {
+        final itemsInCategory = wardrobeItems
+            .where(
+              (item) =>
+                  item.category?.toLowerCase() == category.id.toLowerCase() &&
+                  !(item.isArchived == true),
+            )
+            .toList();
+        if (itemsInCategory.isNotEmpty && rng % 2 == 0) {
+          _selectedItems[category.id] = [
+            itemsInCategory[rng % itemsInCategory.length],
+          ];
         }
       }
     });
@@ -344,23 +501,74 @@ class _OutfitBuilderScreenState extends State<OutfitBuilderScreen> {
   }
 
   Future<void> _saveOutfit() async {
+    final selectedCount = _selectedItems.values.fold<int>(
+      0,
+      (sum, list) => sum + list.length,
+    );
+
+    if (selectedCount == 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Выберите хотя бы одну вещь')),
+        );
+      }
+      return;
+    }
+
     setState(() => _isSaving = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isSaving = false);
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Образ сохранён!')),
+
+    try {
+      // Формируем список вещей для отправки на сервер
+      final itemsJson = <Map<String, dynamic>>[];
+      for (final entry in _selectedItems.entries) {
+        for (final item in entry.value) {
+          itemsJson.add({
+            'category': entry.key,
+            'item_id': item.id,
+            'name': item.name,
+            'image_url': item.imageUrl,
+          });
+        }
+      }
+
+      // Генерируем имя образа
+      final outfitName = _generateOutfitName();
+
+      final request = SavedOutfitCreateRequest(
+        name: outfitName,
+        items: itemsJson,
+        description: 'Создано в конструкторе',
       );
+
+      await ref.read(outfitProvider.notifier).createOutfit(request);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Образ сохранён!')),
+        );
+        // Очищаем выбор после сохранения
+        _clearSelection();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка сохранения: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
-  IconData _getCategoryIcon(String categoryId) {
-    final category = _categories.firstWhere(
-      (c) => c.id == categoryId,
-      orElse: () => _categories.first,
+  String _generateOutfitName() {
+    final selectedCount = _selectedItems.values.fold<int>(
+      0,
+      (sum, list) => sum + list.length,
     );
-    return category.icon;
+    final now = DateTime.now();
+    return 'Образ ${now.day.toString().padLeft(2, '0')}.${now.month.toString().padLeft(2, '0')} ($selected предметов)';
   }
 }
 
