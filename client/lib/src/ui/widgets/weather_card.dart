@@ -38,9 +38,9 @@ class WeatherCard extends StatelessWidget {
         end: Alignment.bottomRight,
         colors: isDark
             ? [
-                theme.colorScheme.primary.withValues(alpha: 0.35),
-                theme.colorScheme.secondary.withValues(alpha: 0.25),
-                Colors.white.withValues(alpha: 0.08),
+                theme.colorScheme.primary.withValues(alpha: 0.5),
+                theme.colorScheme.secondary.withValues(alpha: 0.35),
+                Colors.white.withValues(alpha: 0.1),
               ]
             : [
                 theme.colorScheme.primary.withValues(alpha: 0.12),
