@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:outfitstyle_client/src/theme/app_theme.dart';
 import 'package:outfitstyle_client/src/ui/containers/glass_components.dart';
 import 'package:outfitstyle_client/src/domain/entities/wardrobe_item.dart';
@@ -325,6 +326,8 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
     final selectedItems = _selectedItems[categoryId] ?? [];
 
     if (itemsInCategory.isEmpty) {
+      final hasAnyItems = wardrobeItems.isNotEmpty;
+
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
@@ -337,11 +340,25 @@ class _OutfitBuilderScreenState extends ConsumerState<OutfitBuilderScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Нет вещей в категории',
+                hasAnyItems
+                    ? 'Нет вещей в категории'
+                    : 'Гардероб пуст',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: AppSpacing.md),
+              if (!hasAnyItems)
+                GlassButton(
+                  label: 'Добавить вещи',
+                  icon: Icons.add_shopping_cart,
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // Переход на таб гардероба (индекс 1)
+                    context.go('/home', extra: 1);
+                  },
+                ),
             ],
           ),
         ),
