@@ -204,6 +204,10 @@ func (h *RecommendationHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	list, total, err := h.svc.List(r.Context(), userID, q)
 	if err != nil {
+		h.log.Error("❌ [RECOMMENDATION] Failed to list recommendations",
+			zap.Error(err),
+			zap.String("user_id", userID.String()),
+		)
 		resp.Error(w, http.StatusInternalServerError, errors.New("failed to list"))
 		return
 	}

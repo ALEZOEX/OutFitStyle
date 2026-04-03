@@ -980,6 +980,34 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 			}
 		}
 
+		// Загружаем предметы из recommendation_items
+		itemRows, qErr := r.db.Query(ctx, `
+			SELECT ri.id, ri.clothing_item_id, ci.name, ri.category, ri.is_from_wardrobe, ri.score, ri.rank
+			FROM recommendation_items ri
+			LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
+			WHERE ri.recommendation_id = $1
+			ORDER BY ri.rank
+		`, rec.ID)
+		if qErr == nil {
+			for itemRows.Next() {
+				var item domain.RecommendationItem
+				var name *string
+				var isFromWardrobe bool
+				var score *float64
+				var rank *int
+				if err := itemRows.Scan(&item.ID, &item.ClothingItemID, &name, &item.Category, &isFromWardrobe, &score, &rank); err == nil {
+					if name != nil {
+						item.Name = *name
+					}
+					if score != nil {
+						item.Score = *score
+					}
+					rec.Items = append(rec.Items, item)
+				}
+			}
+			itemRows.Close()
+		}
+
 		rec.CreatedAt = createdAt
 		if !timestamp.IsZero() {
 			rec.Timestamp = &timestamp
