@@ -88,7 +88,7 @@ class _CitySelectorDialogState extends ConsumerState<CitySelectorDialog> {
 
       final response = await http.get(
         url,
-        headers: {'User-Agent': 'OutfitStyle/1.0'},
+        headers: {'User-Agent': 'OutFitStyle/1.0'},
       );
 
       if (response.statusCode == 200) {

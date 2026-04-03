@@ -1,7 +1,7 @@
 import '../../../../domain/entities/achievement.dart';
 import '../../../../domain/entities/achievement_category.dart';
 
-/// Определения всех достижений в приложении OutfitStyle
+/// Определения всех достижений в приложении OutFitStyle
 /// Всего 50+ достижений в 10 категориях
 class AchievementDefinitions {
   AchievementDefinitions._();

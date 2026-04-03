@@ -368,7 +368,7 @@ class FirebaseNotificationService extends NotificationService {
 
     const androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'outfitstyle_channel',
-      'OutfitStyle Notifications',
+      'OutFitStyle Notifications',
       channelDescription: 'Уведомления о погоде и рекомендациях нарядов',
       importance: Importance.max,
       priority: Priority.high,

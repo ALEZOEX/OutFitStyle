@@ -1,7 +1,7 @@
 import 'analytics_event.dart';
 import 'combined_analytics_service.dart';
 
-/// Сервис аналитики приложения OutfitStyle
+/// Сервис аналитики приложения OutFitStyle
 /// Обеспечивает централизованное управление событиями аналитики
 class AppAnalyticsService {
   final CombinedAnalyticsService _analyticsService;

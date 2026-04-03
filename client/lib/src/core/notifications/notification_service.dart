@@ -75,7 +75,7 @@ class NotificationService {
         const NotificationDetails(
           android: AndroidNotificationDetails(
             'outfitstyle_channel',
-            'OutfitStyle Notifications',
+            'OutFitStyle Notifications',
             importance: Importance.max,
           ),
         ),
@@ -234,7 +234,7 @@ class NotificationService {
         const NotificationDetails(
           android: AndroidNotificationDetails(
             'outfitstyle_channel',
-            'OutfitStyle Notifications',
+            'OutFitStyle Notifications',
             importance: Importance.max,
           ),
         ),
