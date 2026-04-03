@@ -18,6 +18,12 @@ func HTTPSRedirectMiddleware(environment string) mux.MiddlewareFunc {
 				return
 			}
 
+			// Skip redirect for health checks and metrics (used by k8s probes)
+			if r.URL.Path == "/health" || r.URL.Path == "/metrics" || r.URL.Path == "/swagger/" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			// Check if request is already HTTPS
 			// Check X-Forwarded-Proto header (for reverse proxies/load balancers)
 			proto := r.Header.Get("X-Forwarded-Proto")
