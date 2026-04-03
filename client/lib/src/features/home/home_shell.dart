@@ -305,11 +305,14 @@ class _GlassBottomBar extends StatefulWidget {
 class _GlassBottomBarState extends State<_GlassBottomBar>
     with SingleTickerProviderStateMixin {
   late AnimationController _bubbleController;
-  late Animation<Offset> _bubbleOffset;
-  late Animation<double> _bubbleScale;
+  late Animation<double> _bubbleLeft;
+  late Animation<double> _bubbleTop;
+  late Animation<double> _bubbleWidth;
+  late Animation<double> _bubbleHeight;
   int _previousIndex = 0;
   final List<GlobalKey> _itemKeys = List.generate(4, (_) => GlobalKey());
   final List<Rect> _itemRects = List.filled(4, Rect.zero);
+  final GlobalKey _stackKey = GlobalKey();
 
   @override
   void initState() {
@@ -319,10 +322,16 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _bubbleOffset = Tween<Offset>(begin: Offset.zero, end: Offset.zero).animate(
+    _bubbleLeft = Tween<double>(begin: 0, end: 0).animate(
       CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
     );
-    _bubbleScale = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _bubbleTop = Tween<double>(begin: 0, end: 0).animate(
+      CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+    );
+    _bubbleWidth = Tween<double>(begin: 0, end: 0).animate(
+      CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+    );
+    _bubbleHeight = Tween<double>(begin: 0, end: 0).animate(
       CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _capturePositions());
@@ -340,13 +349,20 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
   }
 
   void _capturePositions() {
+    final stackContext = _stackKey.currentContext;
+    if (stackContext == null) return;
+    
+    final stackBox = stackContext.findRenderObject() as RenderBox?;
+    if (stackBox == null || !stackBox.hasSize) return;
+
     for (int i = 0; i < 4; i++) {
       final context = _itemKeys[i].currentContext;
       if (context != null) {
         final box = context.findRenderObject() as RenderBox?;
         if (box != null && box.hasSize) {
-          final position = box.localToGlobal(Offset.zero);
-          _itemRects[i] = position & box.size;
+          final globalPosition = box.localToGlobal(Offset.zero);
+          final localPosition = stackBox.globalToLocal(globalPosition);
+          _itemRects[i] = localPosition & box.size;
         }
       }
     }
@@ -355,16 +371,25 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
   void _updateBubbleAnimation(int from, int to) {
     final fromRect = _itemRects[from];
     final toRect = _itemRects[to];
-    
+
     if (fromRect.isEmpty || toRect.isEmpty) return;
 
-    final fromOffset = Offset(fromRect.left, fromRect.top);
-    final toOffset = Offset(toRect.left, toRect.top);
-    
-    _bubbleOffset = Tween<Offset>(begin: fromOffset, end: toOffset).animate(
+    _bubbleLeft = Tween<double>(begin: fromRect.left, end: toRect.left).animate(
       CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
     );
-    _bubbleScale = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _bubbleTop = Tween<double>(begin: fromRect.top, end: toRect.top).animate(
+      CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+    );
+    _bubbleWidth = Tween<double>(
+      begin: fromRect.width,
+      end: toRect.width,
+    ).animate(
+      CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+    );
+    _bubbleHeight = Tween<double>(
+      begin: fromRect.height,
+      end: toRect.height,
+    ).animate(
       CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
     );
   }
@@ -381,7 +406,7 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
 
     return GlassContainer(
       child: Stack(
-        alignment: Alignment.center,
+        key: _stackKey,
         children: [
           // Анимированный пузырёк-индикатор
           AnimatedBuilder(
@@ -389,12 +414,12 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
             builder: (context, child) {
               final currentRect = _itemRects[widget.currentIndex];
               if (currentRect.isEmpty) return const SizedBox.shrink();
-              
+
               return Positioned(
-                left: _bubbleOffset.value.dx,
-                top: _bubbleOffset.value.dy,
-                width: currentRect.width * _bubbleScale.value,
-                height: currentRect.height * _bubbleScale.value,
+                left: _bubbleLeft.value,
+                top: _bubbleTop.value,
+                width: _bubbleWidth.value,
+                height: _bubbleHeight.value,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: AppGradients.primary,
