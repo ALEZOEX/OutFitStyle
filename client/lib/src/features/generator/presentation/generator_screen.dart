@@ -162,9 +162,25 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     required IconData icon,
     required Widget child,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return GlassContainer(
       borderRadius: AppRadius.radiusXl,
       padding: const EdgeInsets.all(AppSpacing.lg),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: isDark
+            ? [
+                theme.colorScheme.primary.withValues(alpha: 0.3),
+                theme.colorScheme.primary.withValues(alpha: 0.15),
+              ]
+            : [
+                theme.colorScheme.primary.withValues(alpha: 0.15),
+                theme.colorScheme.primary.withValues(alpha: 0.08),
+              ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
