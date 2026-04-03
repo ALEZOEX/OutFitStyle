@@ -674,19 +674,14 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 			item.OwnerID = &oid
 		}
 
-		// Parse usage and materials from JSON
+		// Parse usage from JSON, materials is text[] already scanned
 		if len(usageJSON) > 0 {
 			err = json.Unmarshal(usageJSON, &item.Usage)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to unmarshal usage")
 			}
 		}
-		if len(materialsJSON) > 0 {
-			err = json.Unmarshal(materialsJSON, &item.Materials)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to unmarshal materials")
-			}
-		}
+		item.Materials = materials
 
 		item.CreatedAt = createdAt
 		item.UpdatedAt = updatedAt
