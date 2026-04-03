@@ -11,6 +11,7 @@ import '../../features/notifications/presentation/providers/notification_provide
 import '../../features/notifications/presentation/widgets/notification_icon.dart';
 import '../../theme/theme_controller.dart';
 import '../../theme/app_theme.dart';
+import '../../ui/containers/glass_container.dart';
 import 'package:outfitstyle_client/src/presentation/providers/user_location_provider.dart';
 import 'package:outfitstyle_client/src/presentation/providers/weather_provider.dart'
     show weatherProvider;
@@ -432,136 +433,70 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.radiusXxl,
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(
-              alpha: widget.isDark ? 0.25 : 0.12,
-            ),
-            blurRadius: 32,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: AppRadius.radiusXxl,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            height: 62,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: widget.isDark
-                    ? [
-                        theme.colorScheme.surface.withValues(alpha: 0.55),
-                        theme.colorScheme.surface.withValues(alpha: 0.4),
-                      ]
-                    : [
-                        Colors.white.withValues(alpha: 0.85),
-                        Colors.white.withValues(alpha: 0.65),
-                      ],
-              ),
-              borderRadius: AppRadius.radiusXxl,
-              border: Border.all(
-                color: widget.isDark
-                    ? Colors.white.withValues(alpha: 0.15)
-                    : Colors.black.withValues(alpha: 0.08),
-                width: 1,
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Верхний блик (iOS highlight)
-                Positioned(
-                  top: 0,
-                  left: 20,
-                  right: 20,
-                  height: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.white.withValues(
-                            alpha: widget.isDark ? 0.15 : 0.5,
-                          ),
-                          Colors.transparent,
-                        ],
+    return GlassContainer(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Анимированный пузырёк-индикатор
+          AnimatedBuilder(
+            animation: _bubbleController,
+            builder: (context, child) {
+              return Positioned(
+                left: MediaQuery.of(context).size.width * _bubbleX.value - 28,
+                bottom: 8,
+                child: Container(
+                  width: 56,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.primary,
+                    borderRadius: AppRadius.radiusPill,
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-                // Анимированный пузырёк-индикатор
-                AnimatedBuilder(
-                  animation: _bubbleController,
-                  builder: (context, child) {
-                    return Positioned(
-                      left: MediaQuery.of(context).size.width * _bubbleX.value -
-                          28,
-                      bottom: 8,
-                      child: Container(
-                        width: 56,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          gradient: AppGradients.primary,
-                          borderRadius: AppRadius.radiusPill,
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.4,
-                              ),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                // Кнопки
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _NavItem(
-                      icon: Icons.home_outlined,
-                      activeIcon: Icons.home_rounded,
-                      label: 'Главная',
-                      isActive: widget.currentIndex == 0,
-                      onTap: () => widget.onTap(0),
-                    ),
-                    _NavItem(
-                      icon: Icons.checkroom_outlined,
-                      activeIcon: Icons.checkroom_rounded,
-                      label: 'Гардероб',
-                      isActive: widget.currentIndex == 1,
-                      onTap: () => widget.onTap(1),
-                    ),
-                    _NavItem(
-                      icon: Icons.auto_awesome_outlined,
-                      activeIcon: Icons.auto_awesome_rounded,
-                      label: 'Рекомендации',
-                      isActive: widget.currentIndex == 2,
-                      onTap: () => widget.onTap(2),
-                    ),
-                    _NavItem(
-                      icon: Icons.person_outline_rounded,
-                      activeIcon: Icons.person_rounded,
-                      label: 'Профиль',
-                      isActive: widget.currentIndex == 3,
-                      onTap: () => widget.onTap(3),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              );
+            },
           ),
-        ),
+          // Кнопки
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _NavItem(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home_rounded,
+                label: 'Главная',
+                isActive: widget.currentIndex == 0,
+                onTap: () => widget.onTap(0),
+              ),
+              _NavItem(
+                icon: Icons.checkroom_outlined,
+                activeIcon: Icons.checkroom_rounded,
+                label: 'Гардероб',
+                isActive: widget.currentIndex == 1,
+                onTap: () => widget.onTap(1),
+              ),
+              _NavItem(
+                icon: Icons.auto_awesome_outlined,
+                activeIcon: Icons.auto_awesome_rounded,
+                label: 'Рекомендации',
+                isActive: widget.currentIndex == 2,
+                onTap: () => widget.onTap(2),
+              ),
+              _NavItem(
+                icon: Icons.person_outline_rounded,
+                activeIcon: Icons.person_rounded,
+                label: 'Профиль',
+                isActive: widget.currentIndex == 3,
+                onTap: () => widget.onTap(3),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
