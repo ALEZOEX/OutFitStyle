@@ -870,12 +870,6 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 		argIndex++
 	}
 
-	if q.Occasion != nil {
-		query += fmt.Sprintf(" AND occasion = $%d", argIndex)
-		args = append(args, *q.Occasion)
-		argIndex++
-	}
-
 	if q.MinRating != nil {
 		query += fmt.Sprintf(" AND score >= $%d", argIndex)
 		args = append(args, *q.MinRating)
