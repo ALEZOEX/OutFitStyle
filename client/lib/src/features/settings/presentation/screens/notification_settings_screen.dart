@@ -486,6 +486,7 @@ class _NotificationSettingsScreenState
           ),
           backgroundColor: theme.colorScheme.primary,
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -508,6 +509,7 @@ class _NotificationSettingsScreenState
           ),
           backgroundColor: theme.colorScheme.error,
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),

@@ -73,6 +73,9 @@ type RecommendationRepository interface {
 	// ListFavorites возвращает список избранных рекомендаций пользователя
 	ListFavorites(ctx context.Context, userID domain.ID, limit int) ([]domain.RecommendationRecord, error)
 
+	// DeleteByUserAndID удаляет рекомендацию по идентификатору и проверяет, что она принадлежит пользователю
+	DeleteByUserAndID(ctx context.Context, userID, id domain.ID) error
+
 	// CreateSession создает сессию рекомендации
 	CreateSession(ctx context.Context, session *RecommendationSession) (domain.ID, error)
 }

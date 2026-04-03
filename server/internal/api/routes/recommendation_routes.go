@@ -15,12 +15,10 @@ func RegisterRecommendationRoutes(router *mux.Router, recommendationHandler *han
 
 	recommendations.HandleFunc("", recommendationHandler.List).Methods("GET")
 	recommendations.HandleFunc("", recommendationHandler.Create).Methods("POST")
-	recommendations.HandleFunc("/history", recommendationHandler.List).Methods("GET")
-	recommendations.HandleFunc("/{id:[0-9]+}", recommendationHandler.Get).Methods("GET")
-	recommendations.HandleFunc("/{id:[0-9]+}/rate", recommendationHandler.Rate).Methods("POST")
-	recommendations.HandleFunc("/{id:[0-9]+}/favorite", recommendationHandler.Favorite).Methods("POST")
-	recommendations.HandleFunc("/{id:[0-9]+}/favorite", recommendationHandler.Favorite).Methods("DELETE")
-
-	// User favorites
-	router.HandleFunc("/api/users/{user_id:[0-9]+}/favorites", recommendationHandler.Favorites).Methods("GET")
+	recommendations.HandleFunc("/favorites", recommendationHandler.Favorites).Methods("GET")
+	recommendations.HandleFunc("/{id}", recommendationHandler.Get).Methods("GET")
+	recommendations.HandleFunc("/{id}/rate", recommendationHandler.Rate).Methods("POST")
+	recommendations.HandleFunc("/{id}/favorite", recommendationHandler.Favorite).Methods("POST")
+	recommendations.HandleFunc("/{id}/favorite", recommendationHandler.Favorite).Methods("DELETE")
+	recommendations.HandleFunc("/{id}/regenerate", recommendationHandler.Regenerate).Methods("POST")
 }

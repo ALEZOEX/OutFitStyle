@@ -1444,6 +1444,31 @@ func (s *RecommendationService) Favorites(ctx context.Context, userID domain.ID,
 	return s.recRepo.ListFavorites(ctx, userID, limit)
 }
 
+// Delete удаляет рекомендацию пользователя
+func (s *RecommendationService) Delete(ctx context.Context, userID domain.ID, id domain.ID) error {
+	// Проверяем, что рекомендация существует и принадлежит пользователю
+	rec, err := s.recRepo.GetByUserAndID(ctx, userID, id)
+	if err != nil {
+		return err
+	}
+	if rec == nil {
+		return repositories.ErrNotFound
+	}
+
+	// Удаляем рекомендацию
+	err = s.recRepo.DeleteByUserAndID(ctx, userID, id)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete recommendation")
+	}
+
+	s.logger.Info("Рекомендация удалена",
+		zap.String("user_id", userID.String()),
+		zap.String("recommendation_id", id.String()),
+	)
+
+	return nil
+}
+
 // SendUserAction отправляет действие пользователя в ML сервис для обучения Ranker
 func (s *RecommendationService) SendUserAction(ctx context.Context, userID domain.ID, requestID string, actionType string, entityID string, entityType string, meta map[string]interface{}) error {
 	if s.ml == nil {

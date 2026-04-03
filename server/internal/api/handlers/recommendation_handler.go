@@ -51,6 +51,7 @@ func (h *RecommendationHandler) RegisterRoutes(r *mux.Router) {
 
 	r.HandleFunc("/favorites", h.Favorites).Methods(http.MethodGet)
 	r.HandleFunc("/{id}", h.Get).Methods(http.MethodGet)
+	r.HandleFunc("/{id}", h.Delete).Methods(http.MethodDelete)
 
 	r.HandleFunc("/{id}/rate", h.Rate).Methods(http.MethodPost)
 	r.HandleFunc("/{id}/favorite", h.Favorite).Methods(http.MethodPost)
@@ -434,4 +435,54 @@ func (h *RecommendationHandler) GetRecommendations(w http.ResponseWriter, r *htt
 	resp.Success(w, map[string]any{
 		"recommendation": result.Recommendation,
 	})
+}
+
+
+// Delete godoc
+// @Summary Delete recommendation
+// @Description Deletes a recommendation by ID (only owner can delete)
+// @Tags recommendations
+// @Param id path string true "Recommendation ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/recommendations/{id} [delete]
+func (h *RecommendationHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		resp.Error(w, http.StatusUnauthorized, errors.New("auth required"))
+		return
+	}
+
+	id, err := domain.ParseID(mux.Vars(r)["id"])
+	if err != nil {
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid id"))
+		return
+	}
+
+	h.log.Info("Удаление рекомендации",
+		zap.String("user_id", userID.String()),
+		zap.String("recommendation_id", id.String()),
+	)
+
+	// Удаляем рекомендацию (проверка владельца внутри репозитория)
+	err = h.svc.Delete(r.Context(), userID, id)
+	if err != nil {
+		if errors.Is(err, repositories.ErrNotFound) {
+			resp.Error(w, http.StatusNotFound, errors.New("recommendation not found"))
+			return
+		}
+		h.log.Error("Не удалось удалить рекомендацию", zap.Error(err))
+		resp.Error(w, http.StatusInternalServerError, errors.New("failed to delete recommendation"))
+		return
+	}
+
+	h.log.Info("Рекомендация удалена",
+		zap.String("user_id", userID.String()),
+		zap.String("recommendation_id", id.String()),
+	)
+
+	w.WriteHeader(http.StatusNoContent)
 }
