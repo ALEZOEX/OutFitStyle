@@ -140,9 +140,20 @@ func (h *WardrobeHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var req domain.WardrobeCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.Error("❌ [WARDROBE] Invalid JSON", zap.Error(err))
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
 		return
 	}
+
+	// DEBUG: Log request
+	h.log.Info("🔵 [WARDROBE] Create request",
+		zap.String("user_id", userID.String()),
+		zap.Any("clothing_item_id", req.ClothingItemID),
+		zap.String("name", ptrStr(req.Name)),
+		zap.String("category", ptrStr(req.Category)),
+		zap.String("subcategory", ptrStr(req.Subcategory)),
+		zap.String("style", ptrStr(req.Style)),
+	)
 
 	// Validate input data
 	v := validation.NewValidator()
@@ -176,6 +187,7 @@ func (h *WardrobeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !v.Valid() {
+		h.log.Error("❌ [WARDROBE] Validation failed", zap.Any("errors", v.Errors))
 		resp.ValidationError(w, v.Errors)
 		return
 	}
@@ -393,4 +405,11 @@ func (h *WardrobeHandler) Worn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp.Success(w, map[string]any{"wear_count": item.WearCount, "last_worn_at": item.LastWornAt})
+}
+
+func ptrStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }
