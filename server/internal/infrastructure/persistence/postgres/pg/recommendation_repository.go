@@ -928,7 +928,7 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 		var outfitJSON []byte
 		var itemsJSON []byte
 		var createdAt time.Time
-		var timestamp time.Time
+		var timestamp *time.Time
 
 		err := rows.Scan(
 			&rec.ID,
@@ -1009,8 +1009,8 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 		}
 
 		rec.CreatedAt = createdAt
-		if !timestamp.IsZero() {
-			rec.Timestamp = &timestamp
+		if timestamp != nil {
+			rec.Timestamp = timestamp
 		}
 
 		recommendations = append(recommendations, rec)
