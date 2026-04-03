@@ -1,0 +1,2 @@
+-- Down migration for 000025_seed_catalog
+-- This migration intentionally does nothing on rollback to preserve catalog data
