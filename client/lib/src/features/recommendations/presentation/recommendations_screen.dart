@@ -331,7 +331,7 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
           child: InkWell(
             onTap: state.isGenerating
                 ? null
-                : () => _generateRecommendation(context),
+                : () => context.push('/generator'),
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
