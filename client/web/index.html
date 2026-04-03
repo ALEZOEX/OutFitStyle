@@ -20,6 +20,11 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="OutfitStyle - твой стильный гардероб">
 
+  <!-- Cache Control - сброс кеша каждый час -->
+  <meta http-equiv="Cache-Control" content="max-age=3600, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -32,7 +37,33 @@
   <title>OutfitStyle</title>
   <link rel="manifest" href="manifest.json">
 
+  <!-- Version tag to bust cache on each deploy -->
+  <meta name="version" content="1.0.0-<!--BUILD_TIME-->">
+
   <script>
+    // Cache busting - принудительная проверка обновлений каждый час
+    (function() {
+      const CACHE_KEY = 'outfitstyle_last_cache_clear';
+      const CACHE_INTERVAL = 60 * 60 * 1000; // 1 час в миллисекундах
+      const now = Date.now();
+      const lastClear = localStorage.getItem(CACHE_KEY);
+
+      if (!lastClear || (now - parseInt(lastClear)) > CACHE_INTERVAL) {
+        // Прошло больше часа - сбрасываем кеш
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (let name of names) {
+              if (name.startsWith('flutter-') || name.startsWith('outfitstyle-')) {
+                caches.delete(name);
+              }
+            }
+          });
+        }
+        localStorage.setItem(CACHE_KEY, now.toString());
+        console.log('[Cache] Cleared old cache, forcing reload');
+      }
+    })();
+
     // Service Worker Update Detection and Notification Logic
     // Validates: Requirements 2.1, 2.4
 

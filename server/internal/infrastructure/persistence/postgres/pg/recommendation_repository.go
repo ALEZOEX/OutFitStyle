@@ -985,40 +985,54 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 			}
 		}
 
-		// Загружаем предметы из recommendation_items
-		itemRows, qErr := r.db.Query(ctx, `
-			SELECT ri.id, ri.clothing_item_id, ci.name, ri.category, ri.is_from_wardrobe, ri.score, ri.rank
-			FROM recommendation_items ri
-			LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
-			WHERE ri.recommendation_id = $1
-			ORDER BY ri.rank
-		`, rec.ID)
-		if qErr == nil {
-			for itemRows.Next() {
-				var item domain.RecommendationItem
-				var name *string
-				var isFromWardrobe bool
-				var score *float64
-				var rank *int
-				if err := itemRows.Scan(&item.ID, &item.ClothingItemID, &name, &item.Category, &isFromWardrobe, &score, &rank); err == nil {
-					if name != nil {
-						item.Name = *name
-					}
-					if score != nil {
-						item.Score = *score
-					}
-					rec.Items = append(rec.Items, item)
-				}
-			}
-			itemRows.Close()
-		}
-
 		rec.CreatedAt = createdAt
 		if timestamp != nil {
 			rec.Timestamp = timestamp
 		}
 
 		recommendations = append(recommendations, rec)
+	}
+
+	// Загружаем ВСЕ items одним запросом (оптимизация N+1)
+	if len(recommendations) > 0 {
+		recIDs := make([]domain.ID, len(recommendations))
+		for i, rec := range recommendations {
+			recIDs[i] = rec.ID
+		}
+
+		// Используем ANY для загрузки всех items
+		itemRows, qErr := r.db.Query(ctx, `
+			SELECT ri.recommendation_id, ri.id, ri.clothing_item_id, ci.name, ri.category, ri.is_from_wardrobe, ri.score, ri.rank
+			FROM recommendation_items ri
+			LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
+			WHERE ri.recommendation_id = ANY($1::uuid[])
+			ORDER BY ri.recommendation_id, ri.rank
+		`, recIDs)
+		if qErr == nil {
+			defer itemRows.Close()
+			itemsByRec := map[domain.ID][]domain.RecommendationItem{}
+			for itemRows.Next() {
+				var recID domain.ID
+				var item domain.RecommendationItem
+				var name *string
+				var isFromWardrobe bool
+				var score *float64
+				var rank *int
+				if err := itemRows.Scan(&recID, &item.ID, &item.ClothingItemID, &name, &item.Category, &isFromWardrobe, &score, &rank); err == nil {
+					if name != nil {
+						item.Name = *name
+					}
+					if score != nil {
+						item.Score = *score
+					}
+					itemsByRec[recID] = append(itemsByRec[recID], item)
+				}
+			}
+			// Присваиваем items каждой рекомендации
+			for i, rec := range recommendations {
+				recommendations[i].Items = itemsByRec[rec.ID]
+			}
+		}
 	}
 
 	// Get total count

@@ -151,7 +151,6 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
   ///
   /// Конвертирует текущее состояние формы в WardrobeItemCreateRequest
   WardrobeItemCreateRequest toCreateRequest() {
-    const uuid = Uuid();
     return WardrobeItemCreateRequest(
       name: state.name.trim(),
       category: state.category,
