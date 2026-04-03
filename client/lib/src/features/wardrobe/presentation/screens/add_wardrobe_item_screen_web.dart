@@ -153,7 +153,6 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
 
   /// Создать запрос на создание элемента гардероба
   WardrobeItemCreateRequest toCreateRequest() {
-    const uuid = Uuid();
     return WardrobeItemCreateRequest(
       name: state.name.trim(),
       category: state.category,
@@ -170,7 +169,7 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
       isFavorite: false,
       isArchived: false,
       userId: '',
-      clothingItemId: uuid.v4(),
+      clothingItemId: '', // Пустой — ручное создание
       color: state.color,
       size: state.size,
       localImagePath: state.localImagePath,

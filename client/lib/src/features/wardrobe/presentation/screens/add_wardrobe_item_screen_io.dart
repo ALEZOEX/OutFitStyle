@@ -168,7 +168,7 @@ class AddItemNotifier extends StateNotifier<AddItemState> {
       isFavorite: false,
       isArchived: false,
       userId: '', // Сервер определит по токену
-      clothingItemId: uuid.v4(), // Временный ID
+      clothingItemId: '', // Пустой — ручное создание
       color: state.color,
       size: state.size,
       localImagePath: state.localImagePath,

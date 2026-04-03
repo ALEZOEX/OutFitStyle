@@ -71,7 +71,7 @@ class WardrobeItemCreateRequest {
   });
 
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> json = {
       'name': name,
       'category': category,
       'subcategory': subcategory,
@@ -101,11 +101,14 @@ class WardrobeItemCreateRequest {
       'purchase_price': purchasePrice,
       'purchase_currency': purchaseCurrency,
       'condition': condition,
-      'user_id': userId,
-      'clothing_item_id': clothingItemId,
       'color': color,
       'size': size,
     };
+    // clothing_item_id только если это не пустой UUID (ручное создание)
+    if (clothingItemId.isNotEmpty && clothingItemId != '00000000-0000-0000-0000-000000000000') {
+      json['clothing_item_id'] = clothingItemId;
+    }
+    return json;
   }
 }
 
