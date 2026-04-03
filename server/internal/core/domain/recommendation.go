@@ -49,9 +49,9 @@ type RecommendationRecord struct {
 	WillSnow    *bool                `json:"will_snow,omitempty"`    // Будет ли снег
 	Humidity    *int                 `json:"humidity,omitempty"`     // Влажность
 	Timestamp   *time.Time           `json:"timestamp,omitempty"`    // Временная метка
-	Weather     *WeatherData         `json:"weather,omitempty"`      // Данные о погоде
-	Outfit      []RecommendationItem `json:"outfit,omitempty"`       // Рекомендованный наряд
-	Items       []RecommendationItem `json:"items,omitempty"`        // Элементы рекомендованного наряда
+	Weather     *WeatherData         `json:"weather,omitempty"`             // Данные о погоде
+	Outfit      []RecommendationItem `json:"outfit,omitempty"`              // Рекомендованный наряд
+	Items       []RecommendationItem `json:"recommended_items,omitempty"`   // Элементы рекомендованного наряда
 
 	MLPowered *bool `json:"ml_powered,omitempty"` // Использовалась ли машинное обучение
 

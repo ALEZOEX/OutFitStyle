@@ -318,7 +318,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         ),
                       ),
                     ),
-                  ),
 
                   // Ошибка
                   if (error != null) ...[
@@ -402,8 +401,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                   offset: const Offset(0, 6),
                                 ),
                               ],
-                      ),
-                      child: Material(
+                            ),
+                            child: Material(
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: isLoading ? null : _submit,

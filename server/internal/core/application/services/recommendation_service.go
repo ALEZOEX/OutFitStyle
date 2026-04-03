@@ -230,6 +230,14 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 		return nil, errors.Wrap(err, "сохранение рекомендации с сессией")
 	}
 
+	// Загружаем полную рекомендацию с предметами
+	fullRec, err := s.recRepo.GetByUserAndID(ctx, userID, rec.ID)
+	if err != nil {
+		s.logger.Warn("Не удалось загрузить полную рекомендацию, возвращаем базовую", zap.Error(err))
+	} else {
+		rec = fullRec
+	}
+
 	s.logger.Info("✅ [Create] SUCCESS", zap.String("rec_id", rec.ID.String()))
 	return rec, nil
 }

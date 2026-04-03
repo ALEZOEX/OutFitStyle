@@ -190,6 +190,7 @@ class _OutfitOfDaySection extends StatelessWidget {
 
   Widget _buildOutfitCard(BuildContext context, OutfitRecommendation rec) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return GlassContainer(
       borderRadius: AppRadius.radiusXl,
@@ -202,118 +203,116 @@ class _OutfitOfDaySection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          rec.title ?? 'Ваш образ',
-                          style: AppTypography.headlineSmall(context),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (rec.temperature != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primaryContainer,
-                            borderRadius: AppRadius.radiusPill,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.thermostat,
-                                size: 16,
-                                color: theme.colorScheme.onPrimaryContainer,
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Text(
-                                '${rec.temperature?.round() ?? 0}°C',
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: theme.colorScheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-
-                  if (rec.description?.isNotEmpty ?? false) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      rec.description!,
-                      style: AppTypography.bodyMedium(context),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      rec.title ?? 'Ваш образ',
+                      style: AppTypography.headlineSmall(context),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-
-                  const SizedBox(height: AppSpacing.xl),
-
-                  if (rec.recommendedItems?.isNotEmpty ?? false)
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: rec.recommendedItems!.take(6).map((item) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
+                  ),
+                  if (rec.temperature != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: AppRadius.radiusPill,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.thermostat,
+                            size: 16,
+                            color: theme.colorScheme.onPrimaryContainer,
                           ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : Colors.white.withValues(alpha: 0.7),
-                            borderRadius: AppRadius.radiusPill,
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.1)
-                                  : theme.colorScheme.outline.withValues(
-                                      alpha: 0.5,
-                                    ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            '${rec.temperature?.round() ?? 0}°C',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          child: Text(
-                            item,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-
-                  const SizedBox(height: AppSpacing.xl),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () {
-                        if (rec.id != null) {
-                          context.push('/outfit/${rec.id}');
-                        }
-                      },
-                      icon: const Icon(Icons.visibility_outlined, size: 18),
-                      label: const Text('Смотреть образ'),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.md,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppRadius.radiusPill,
-                        ),
+                        ],
                       ),
                     ),
-                  ),
                 ],
               ),
-            ),
+
+              if (rec.description?.isNotEmpty ?? false) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  rec.description!,
+                  style: AppTypography.bodyMedium(context),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+
+              const SizedBox(height: AppSpacing.xl),
+
+              if (rec.recommendedItems?.isNotEmpty ?? false)
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: rec.recommendedItems!.take(6).map((item) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.white.withValues(alpha: 0.7),
+                        borderRadius: AppRadius.radiusPill,
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : theme.colorScheme.outline.withValues(
+                                  alpha: 0.5,
+                                ),
+                        ),
+                      ),
+                      child: Text(
+                        item,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+
+              const SizedBox(height: AppSpacing.xl),
+
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () {
+                    if (rec.id != null) {
+                      context.push('/outfit/${rec.id}');
+                    }
+                  },
+                  icon: const Icon(Icons.visibility_outlined, size: 18),
+                  label: const Text('Смотреть образ'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.md,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.radiusPill,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
