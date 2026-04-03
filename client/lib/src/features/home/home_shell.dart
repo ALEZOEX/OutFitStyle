@@ -369,7 +369,7 @@ class HomeShell extends StatelessWidget {
   }
 }
 
-class _GlassBottomBar extends StatelessWidget {
+class _GlassBottomBar extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final bool isDark;
@@ -381,6 +381,54 @@ class _GlassBottomBar extends StatelessWidget {
   });
 
   @override
+  State<_GlassBottomBar> createState() => _GlassBottomBarState();
+}
+
+class _GlassBottomBarState extends State<_GlassBottomBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _bubbleController;
+  late Animation<double> _bubbleX;
+  int _previousIndex = 0;
+
+  // Позиции для 4 вкладок (в процентах от ширины)
+  static const _positions = [0.125, 0.375, 0.625, 0.875];
+
+  @override
+  void initState() {
+    super.initState();
+    _previousIndex = widget.currentIndex;
+    _bubbleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _updateBubbleAnimation(_previousIndex, widget.currentIndex);
+  }
+
+  @override
+  void didUpdateWidget(_GlassBottomBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      _updateBubbleAnimation(_previousIndex, widget.currentIndex);
+      _bubbleController.forward(from: 0);
+      setState(() => _previousIndex = widget.currentIndex);
+    }
+  }
+
+  void _updateBubbleAnimation(int from, int to) {
+    final fromX = _positions[from];
+    final toX = _positions[to];
+    _bubbleX = Tween<double>(begin: fromX, end: toX).animate(
+      CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _bubbleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -390,7 +438,7 @@ class _GlassBottomBar extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.primary.withValues(
-              alpha: isDark ? 0.25 : 0.12,
+              alpha: widget.isDark ? 0.25 : 0.12,
             ),
             blurRadius: 32,
             offset: const Offset(0, 8),
@@ -407,7 +455,7 @@ class _GlassBottomBar extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: isDark
+                colors: widget.isDark
                     ? [
                         theme.colorScheme.surface.withValues(alpha: 0.55),
                         theme.colorScheme.surface.withValues(alpha: 0.4),
@@ -419,7 +467,7 @@ class _GlassBottomBar extends StatelessWidget {
               ),
               borderRadius: AppRadius.radiusXxl,
               border: Border.all(
-                color: isDark
+                color: widget.isDark
                     ? Colors.white.withValues(alpha: 0.15)
                     : Colors.black.withValues(alpha: 0.08),
                 width: 1,
@@ -439,12 +487,42 @@ class _GlassBottomBar extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [
                           Colors.transparent,
-                          Colors.white.withValues(alpha: isDark ? 0.15 : 0.5),
+                          Colors.white.withValues(
+                            alpha: widget.isDark ? 0.15 : 0.5,
+                          ),
                           Colors.transparent,
                         ],
                       ),
                     ),
                   ),
+                ),
+                // Анимированный пузырёк-индикатор
+                AnimatedBuilder(
+                  animation: _bubbleController,
+                  builder: (context, child) {
+                    return Positioned(
+                      left: MediaQuery.of(context).size.width * _bubbleX.value -
+                          28,
+                      bottom: 8,
+                      child: Container(
+                        width: 56,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          gradient: AppGradients.primary,
+                          borderRadius: AppRadius.radiusPill,
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.4,
+                              ),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 // Кнопки
                 Row(
@@ -454,29 +532,29 @@ class _GlassBottomBar extends StatelessWidget {
                       icon: Icons.home_outlined,
                       activeIcon: Icons.home_rounded,
                       label: 'Главная',
-                      isActive: currentIndex == 0,
-                      onTap: () => onTap(0),
+                      isActive: widget.currentIndex == 0,
+                      onTap: () => widget.onTap(0),
                     ),
                     _NavItem(
                       icon: Icons.checkroom_outlined,
                       activeIcon: Icons.checkroom_rounded,
                       label: 'Гардероб',
-                      isActive: currentIndex == 1,
-                      onTap: () => onTap(1),
+                      isActive: widget.currentIndex == 1,
+                      onTap: () => widget.onTap(1),
                     ),
                     _NavItem(
                       icon: Icons.auto_awesome_outlined,
                       activeIcon: Icons.auto_awesome_rounded,
                       label: 'Рекомендации',
-                      isActive: currentIndex == 2,
-                      onTap: () => onTap(2),
+                      isActive: widget.currentIndex == 2,
+                      onTap: () => widget.onTap(2),
                     ),
                     _NavItem(
                       icon: Icons.person_outline_rounded,
                       activeIcon: Icons.person_rounded,
                       label: 'Профиль',
-                      isActive: currentIndex == 3,
-                      onTap: () => onTap(3),
+                      isActive: widget.currentIndex == 3,
+                      onTap: () => widget.onTap(3),
                     ),
                   ],
                 ),
@@ -513,19 +591,6 @@ class _NavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          gradient: isActive ? AppGradients.primary : null,
-          borderRadius: AppRadius.radiusPill,
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -533,8 +598,8 @@ class _NavItem extends StatelessWidget {
               isActive ? activeIcon : icon,
               size: 22,
               color: isActive
-                  ? Colors.white
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 2),
             Text(
@@ -543,8 +608,8 @@ class _NavItem extends StatelessWidget {
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                 color: isActive
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],
