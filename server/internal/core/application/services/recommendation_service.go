@@ -234,7 +234,7 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 	fullRec, err := s.recRepo.GetByUserAndID(ctx, userID, rec.ID)
 	if err != nil {
 		s.logger.Warn("Не удалось загрузить полную рекомендацию, возвращаем базовую", zap.Error(err))
-	} else {
+	} else if fullRec != nil {
 		rec = fullRec
 	}
 
