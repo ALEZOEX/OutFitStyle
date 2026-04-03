@@ -1,6 +1,7 @@
 package domain
 
 type RecommendationCreateRequest struct {
+	City      *string  `json:"city,omitempty"`
 	Location  *string  `json:"location,omitempty"`
 	Latitude  *float64 `json:"latitude,omitempty"`
 	Longitude *float64 `json:"longitude,omitempty"`

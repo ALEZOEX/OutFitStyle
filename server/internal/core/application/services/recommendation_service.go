@@ -820,6 +820,7 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 	rec := &domain.RecommendationRecord{
 		UserID: userID,
 
+		City:      req.City,
 		Location:  req.Location,
 		Latitude:  lat,
 		Longitude: lon,
