@@ -269,7 +269,6 @@ class HomeShell extends StatelessWidget {
                               title,
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: 2.5,
                                 color: theme.colorScheme.onSurface,
                               ),
                             ),
@@ -466,6 +465,7 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                letterSpacing: 1.5,
                 color: isActive
                     ? theme.colorScheme.primary
                     : theme.colorScheme.onSurfaceVariant,

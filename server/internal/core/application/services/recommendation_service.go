@@ -216,6 +216,10 @@ func (s *RecommendationService) Create(ctx context.Context, userID domain.ID, re
 
 	// === ШАГ 6: Сохранение в БД ===
 	s.logger.Info("💾 [Create] Шаг 6: Сохранение в БД")
+
+	// Генерируем ID для рекомендации
+	rec.ID = domain.NewID()
+
 	session := &repositories.RecommendationSession{
 		UserID:          userID,
 		ContextHash:     nil,
