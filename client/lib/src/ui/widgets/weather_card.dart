@@ -34,8 +34,8 @@ class WeatherCard extends StatelessWidget {
     return GlassContainer(
       padding: const EdgeInsets.all(AppSpacing.xxl),
       gradient: LinearGradient(
-        begin: isDark ? Alignment.topLeft : Alignment.topRight,
-        end: isDark ? Alignment.bottomRight : Alignment.bottomLeft,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
         colors: isDark
             ? [
                 theme.colorScheme.primary.withValues(alpha: 0.35),
