@@ -100,12 +100,7 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper>
       title: _getTitle(_currentIndex),
       appBarActions: [
         IconButton(
-          icon: Icon(
-            Icons.location_on_outlined,
-            color: _currentIndex == 0
-                ? Theme.of(context).colorScheme.primary
-                : null,
-          ),
+          icon: Icon(Icons.location_on_outlined),
           onPressed: () => _showCitySelector(context),
           tooltip: userLocation.cityName ?? 'Выбрать город',
         ),
