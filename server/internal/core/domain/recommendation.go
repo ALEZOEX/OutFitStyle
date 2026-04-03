@@ -58,4 +58,31 @@ type RecommendationRecord struct {
 	Status     *string   `json:"status,omitempty"` // Статус рекомендации (например, "processing", "completed", "failed")
 	IsFavorite bool      `json:"is_favorite"`
 	CreatedAt  time.Time `json:"created_at"`
+
+	// Для совместимости с Flutter (List<String>)
+	RecommendedItemNames []string `json:"-"` // Вычисляется при сериализации
+}
+
+// MarshalJSON кастомная сериализация для Flutter
+func (r RecommendationRecord) MarshalJSON() ([]byte, error) {
+	type Alias RecommendationRecord
+	names := make([]string, len(r.Items))
+	for i, item := range r.Items {
+		if item.Name != "" {
+			names[i] = item.Name
+		} else {
+			names[i] = "Предмет"
+		}
+	}
+	return json.Marshal(struct {
+		Alias
+		RecommendedItems []string `json:"recommended_items_strings,omitempty"`
+		Title            string   `json:"title"`
+		Description      string   `json:"description"`
+	}{
+		Alias:              Alias(r),
+		RecommendedItems:   names,
+		Title:              "Образ на " + r.CreatedAt.Format("02.01"),
+		Description:        "Подобрано автоматически",
+	})
 }

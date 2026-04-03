@@ -67,26 +67,23 @@ class EmptyState extends StatelessWidget {
                       vertical: AppSpacing.md,
                     ),
                     decoration: BoxDecoration(
-                      gradient: AppGradients.primary,
+                      color: theme.colorScheme.primary,
                       borderRadius: AppRadius.radiusPill,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.add, size: 18, color: Colors.white),
+                        Icon(
+                          Icons.add,
+                          size: 18,
+                          color: theme.colorScheme.onPrimary,
+                        ),
                         const SizedBox(width: AppSpacing.sm),
                         Text(
                           actionLabel!,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
