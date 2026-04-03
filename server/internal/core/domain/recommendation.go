@@ -73,7 +73,8 @@ func (r RecommendationRecord) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]any{
 		"id":                r.ID,
 		"user_id":           r.UserID,
-		"created_at":        r.CreatedAt,
+		"created_at":        r.CreatedAt.Format(time.RFC3339),
+		"createdAt":         r.CreatedAt.Format(time.RFC3339),
 		"city":              r.City,
 		"is_favorite":       r.IsFavorite,
 		"temperature":       r.Temperature,
@@ -82,5 +83,6 @@ func (r RecommendationRecord) MarshalJSON() ([]byte, error) {
 		"recommended_items": names,
 		"title":             "Образ на " + r.CreatedAt.Format("02.01"),
 		"description":       "Подобрано автоматически",
+		"confidenceScore":   0.95,
 	})
 }
