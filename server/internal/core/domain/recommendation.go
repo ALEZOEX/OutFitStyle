@@ -76,13 +76,13 @@ func (r RecommendationRecord) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(struct {
 		Alias
-		RecommendedItems []string `json:"recommended_items_strings,omitempty"`
+		RecommendedItems []string `json:"recommended_items,omitempty"`
 		Title            string   `json:"title"`
 		Description      string   `json:"description"`
 	}{
-		Alias:              Alias(r),
-		RecommendedItems:   names,
-		Title:              "Образ на " + r.CreatedAt.Format("02.01"),
-		Description:        "Подобрано автоматически",
+		Alias:            Alias(r),
+		RecommendedItems: names,
+		Title:            "Образ на " + r.CreatedAt.Format("02.01"),
+		Description:      "Подобрано автоматически",
 	})
 }
