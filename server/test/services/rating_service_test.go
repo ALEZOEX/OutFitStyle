@@ -156,6 +156,11 @@ func (m *MockRecommendationRepository) CreateSession(ctx context.Context, sessio
 	return args.Get(0).(domain.ID), args.Error(1)
 }
 
+func (m *MockRecommendationRepository) DeleteByUserAndID(ctx context.Context, userID, id domain.ID) error {
+	args := m.Called(ctx, userID, id)
+	return args.Error(0)
+}
+
 // MockClothingRepository - мок-реализация ClothingRepository
 type MockClothingRepository struct {
 	mock.Mock
