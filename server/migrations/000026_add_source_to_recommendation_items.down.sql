@@ -6,3 +6,5 @@ ALTER TABLE recommendation_items
 
 ALTER TABLE recommendation_items
   DROP COLUMN IF EXISTS alternatives_json;
+
+DROP TABLE IF EXISTS user_stats;
