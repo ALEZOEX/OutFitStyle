@@ -257,21 +257,23 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          Icon(
+            icon,
+            color: isDarkMode ? Colors.white : color,
+            size: 24,
+          ),
           const SizedBox(height: 4),
           Text(
             value,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              color: color,
+              color: isDarkMode ? Colors.white : color,
             ),
           ),
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: isDarkMode
-                  ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
-                  : theme.colorScheme.onSurfaceVariant,
+              color: isDarkMode ? Colors.white70 : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -738,13 +740,17 @@ class _QuickActionChip extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: color, size: 24),
+            Icon(
+              icon,
+              color: isDark ? Colors.white : color,
+              size: 24,
+            ),
             const SizedBox(height: 6),
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: color,
+                color: isDark ? Colors.white : color,
               ),
               textAlign: TextAlign.center,
             ),
