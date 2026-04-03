@@ -305,11 +305,11 @@ class _GlassBottomBar extends StatefulWidget {
 class _GlassBottomBarState extends State<_GlassBottomBar>
     with SingleTickerProviderStateMixin {
   late AnimationController _bubbleController;
-  late Animation<double> _bubbleX;
+  late Animation<Offset> _bubbleOffset;
+  late Animation<double> _bubbleScale;
   int _previousIndex = 0;
-
-  // Позиции для 4 вкладок (в процентах от ширины)
-  static const _positions = [0.125, 0.375, 0.625, 0.875];
+  final List<GlobalKey> _itemKeys = List.generate(4, (_) => GlobalKey());
+  final List<Rect> _itemRects = List.filled(4, Rect.zero);
 
   @override
   void initState() {
@@ -319,23 +319,52 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _updateBubbleAnimation(_previousIndex, widget.currentIndex);
+    _bubbleOffset = Tween<Offset>(begin: Offset.zero, end: Offset.zero).animate(
+      CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+    );
+    _bubbleScale = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _capturePositions());
   }
 
   @override
   void didUpdateWidget(_GlassBottomBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentIndex != widget.currentIndex) {
+      _capturePositions();
       _updateBubbleAnimation(_previousIndex, widget.currentIndex);
       _bubbleController.forward(from: 0);
       setState(() => _previousIndex = widget.currentIndex);
     }
   }
 
+  void _capturePositions() {
+    for (int i = 0; i < 4; i++) {
+      final context = _itemKeys[i].currentContext;
+      if (context != null) {
+        final box = context.findRenderObject() as RenderBox?;
+        if (box != null && box.hasSize) {
+          final position = box.localToGlobal(Offset.zero);
+          _itemRects[i] = position & box.size;
+        }
+      }
+    }
+  }
+
   void _updateBubbleAnimation(int from, int to) {
-    final fromX = _positions[from];
-    final toX = _positions[to];
-    _bubbleX = Tween<double>(begin: fromX, end: toX).animate(
+    final fromRect = _itemRects[from];
+    final toRect = _itemRects[to];
+    
+    if (fromRect.isEmpty || toRect.isEmpty) return;
+
+    final fromOffset = Offset(fromRect.left, fromRect.top);
+    final toOffset = Offset(toRect.left, toRect.top);
+    
+    _bubbleOffset = Tween<Offset>(begin: fromOffset, end: toOffset).animate(
+      CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
+    );
+    _bubbleScale = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _bubbleController, curve: Curves.easeOutCubic),
     );
   }
@@ -358,20 +387,22 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
           AnimatedBuilder(
             animation: _bubbleController,
             builder: (context, child) {
+              final currentRect = _itemRects[widget.currentIndex];
+              if (currentRect.isEmpty) return const SizedBox.shrink();
+              
               return Positioned(
-                left: MediaQuery.of(context).size.width * _bubbleX.value - 20,
-                bottom: 4,
+                left: _bubbleOffset.value.dx,
+                top: _bubbleOffset.value.dy,
+                width: currentRect.width * _bubbleScale.value,
+                height: currentRect.height * _bubbleScale.value,
                 child: Container(
-                  width: 40,
-                  height: 40,
                   decoration: BoxDecoration(
                     gradient: AppGradients.primary,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.6),
-                        blurRadius: 16,
-                        spreadRadius: 2,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                        blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
                     ],
@@ -385,6 +416,7 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _NavItem(
+                key: _itemKeys[0],
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home_rounded,
                 label: 'Главная',
@@ -392,6 +424,7 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
                 onTap: () => widget.onTap(0),
               ),
               _NavItem(
+                key: _itemKeys[1],
                 icon: Icons.checkroom_outlined,
                 activeIcon: Icons.checkroom_rounded,
                 label: 'Гардероб',
@@ -399,6 +432,7 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
                 onTap: () => widget.onTap(1),
               ),
               _NavItem(
+                key: _itemKeys[2],
                 icon: Icons.auto_awesome_outlined,
                 activeIcon: Icons.auto_awesome_rounded,
                 label: 'Рекомендации',
@@ -406,6 +440,7 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
                 onTap: () => widget.onTap(2),
               ),
               _NavItem(
+                key: _itemKeys[3],
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
                 label: 'Профиль',
@@ -428,6 +463,7 @@ class _NavItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const _NavItem({
+    super.key,
     required this.icon,
     required this.activeIcon,
     required this.label,
