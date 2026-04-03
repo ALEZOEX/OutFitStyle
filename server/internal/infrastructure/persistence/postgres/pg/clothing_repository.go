@@ -612,7 +612,7 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 		var formalityLevel *int16
 		var baseColour, pattern *string
 		var usageJSON []byte
-		var materialsJSON []byte
+		var materials []string
 		var ownerID *uuid.UUID
 		var createdAt, updatedAt time.Time
 
@@ -633,7 +633,7 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 			&baseColour,
 			&pattern,
 			&usageJSON,
-			&materialsJSON,
+			&materials,
 			&item.Fit,
 			&item.IconEmoji,
 			&item.Source,
