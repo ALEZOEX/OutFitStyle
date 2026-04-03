@@ -628,9 +628,6 @@ func setupRouter(
 ) *mux.Router {
 	router := mux.NewRouter()
 
-	// Configure per-user rate limiting
-	perUserRateLimitConfig := middleware.DefaultPerUserRateLimitConfig()
-
 	router.Use(
 		middleware.RecoveryMiddleware(logger),
 		middleware.HTTPSRedirectMiddleware(cfg.Server.Environment),
