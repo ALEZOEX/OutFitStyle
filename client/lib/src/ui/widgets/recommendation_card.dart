@@ -64,13 +64,12 @@ class RecommendationCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   // Теги
-                  if (recommendation.recommendedItems != null &&
-                      recommendation.recommendedItems!.isNotEmpty)
+                  if (recommendation.recommendedItems.isNotEmpty)
                     Wrap(
                       spacing: 6,
                       runSpacing: 6,
                       children:
-                          recommendation.recommendedItems!
+                          recommendation.recommendedItems
                               .take(3)
                               .map((item) => _buildTag(item, context))
                               .toList(),

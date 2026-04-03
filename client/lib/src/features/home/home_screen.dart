@@ -205,7 +205,7 @@ class _OutfitOfDaySection extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  rec.title ?? 'Ваш образ',
+                  _formatTitle(rec.title),
                   style: AppTypography.headlineSmall(context),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -338,93 +338,43 @@ class _OutfitOfDaySection extends ConsumerWidget {
 
           const SizedBox(height: AppSpacing.lg),
 
-          // Кнопки действий
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    // TODO: Использовать как шаблон
-                  },
-                  borderRadius: AppRadius.radiusPill,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.md,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: AppGradients.primary,
-                      borderRadius: AppRadius.radiusPill,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.4,
-                          ),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.auto_awesome,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        const Text(
-                          'Использовать как шаблон',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+          // Кнопка обновить
+          InkWell(
+            onTap: () {
+              ref.read(recommendationsProvider.notifier).refresh();
+            },
+            borderRadius: AppRadius.radiusPill,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
               ),
-              const SizedBox(width: AppSpacing.sm),
-              InkWell(
-                onTap: () {
-                  ref.read(recommendationsProvider.notifier).refresh();
-                },
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.15),
+                ),
                 borderRadius: AppRadius.radiusPill,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.2)
-                          : Colors.black.withValues(alpha: 0.15),
-                    ),
-                    borderRadius: AppRadius.radiusPill,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.refresh,
-                        size: 18,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        'Обновить',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
-            ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.refresh,
+                    size: 18,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    'Обновить',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -458,6 +408,18 @@ class _OutfitOfDaySection extends ConsumerWidget {
     if (diff.inDays == 1) return 'Вчера';
     if (diff.inDays < 7) return '${diff.inDays} дн. назад';
     return '${date.day}.${date.month}.${date.year}';
+  }
+
+  String _formatTitle(String? title) {
+    if (title == null || title.isEmpty) return 'Ваш образ';
+
+    // Если title похо на номер версии (1.1.1, 2.0.1 и т.д.) — заменяем
+    final versionPattern = RegExp(r'^\d+\.\d+\.\d+$');
+    if (versionPattern.hasMatch(title)) {
+      return 'Ваш образ';
+    }
+
+    return title;
   }
 
   Widget _buildEmptyCard(BuildContext context) {
