@@ -140,8 +140,11 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     state = state.copyWith(status: RecommendationsLoadStatus.loading);
 
     try {
-      // GET /api/v1/recommendations - получаем рекомендации
-      final response = await _apiClient.get('/api/v1/recommendations');
+      // GET /api/v1/recommendations?limit=5 - получаем последние 5 рекомендаций
+      final response = await _apiClient.get(
+        '/api/v1/recommendations',
+        params: {'limit': '5'},
+      );
 
       if (response.statusCode == 200) {
         final rawData = response.data is Map
