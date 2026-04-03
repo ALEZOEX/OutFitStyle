@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -259,105 +258,29 @@ class HomeShell extends StatelessWidget {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: AppRadius.radiusXxl,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: isDark ? 0.2 : 0.08,
-                          ),
-                          blurRadius: 20,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: AppRadius.radiusXxl,
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                        child: Container(
-                          height: kToolbarHeight,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: isDark
-                                  ? [
-                                      const Color(
-                                        0xFF1F2937,
-                                      ).withValues(alpha: 0.5),
-                                      const Color(
-                                        0xFF111827,
-                                      ).withValues(alpha: 0.35),
-                                    ]
-                                  : [
-                                      Colors.white.withValues(alpha: 0.8),
-                                      Colors.white.withValues(alpha: 0.6),
-                                    ],
-                            ),
-                            borderRadius: AppRadius.radiusXxl,
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.12)
-                                  : Colors.black.withValues(alpha: 0.06),
-                              width: 1,
+                  child: GlassContainer(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.2,
+                                color: theme.colorScheme.onSurface,
+                              ),
                             ),
                           ),
-                          child: Stack(
-                            children: [
-                              // Верхний блик
-                              Positioned(
-                                top: 0,
-                                left: 20,
-                                right: 20,
-                                height: 1,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.white.withValues(
-                                          alpha: isDark ? 0.12 : 0.4,
-                                        ),
-                                        Colors.transparent,
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // AppBar контент
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        title,
-                                        style: theme.textTheme.titleLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              color: theme.colorScheme.onSurface,
-                                            ),
-                                      ),
-                                    ),
-                                    if (appBarActions != null &&
-                                        appBarActions!.isNotEmpty)
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: appBarActions!,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                          if (appBarActions != null && appBarActions!.isNotEmpty)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: appBarActions!,
+                            ),
+                        ],
                       ),
                     ),
                   ),
