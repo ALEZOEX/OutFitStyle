@@ -26,7 +26,7 @@ class WardrobeItemCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
-      shadowColor: theme.colorScheme.primary.withOpacity(0.1),
+      shadowColor: theme.colorScheme.primary.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
@@ -51,12 +51,12 @@ class WardrobeItemCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color:
                                 isDark
-                                    ? Colors.black.withOpacity(0.6)
-                                    : Colors.white.withOpacity(0.9),
+                                    ? Colors.black.withValues(alpha: 0.6)
+                                    : Colors.white.withValues(alpha: 0.9),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 4,
                               ),
                             ],
@@ -143,7 +143,7 @@ class WardrobeItemCard extends StatelessWidget {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: theme.colorScheme.outline
-                                          .withOpacity(0.3),
+                                          .withValues(alpha: 0.3),
                                       width: 1,
                                     ),
                                   ),
@@ -238,7 +238,7 @@ class WardrobeItemCard extends StatelessWidget {
           size: 48,
           color: Theme.of(
             context,
-          ).colorScheme.onSurfaceVariant.withOpacity(0.5),
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -346,7 +346,7 @@ class CategoryFilterChip extends StatelessWidget {
             decoration: BoxDecoration(
               color:
                   isSelected
-                      ? theme.colorScheme.onPrimary.withOpacity(0.3)
+                      ? theme.colorScheme.onPrimary.withValues(alpha: 0.3)
                       : theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
@@ -368,7 +368,7 @@ class CategoryFilterChip extends StatelessWidget {
           color:
               isSelected
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withOpacity(0.3),
+                  : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
     );

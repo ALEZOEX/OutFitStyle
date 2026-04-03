@@ -456,8 +456,8 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
           border: Border.all(
             color:
                 state.imageUrl != null
-                    ? theme.colorScheme.primary.withOpacity(0.5)
-                    : theme.colorScheme.outline.withOpacity(0.3),
+                    ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                    : theme.colorScheme.outline.withValues(alpha: 0.3),
             width: 2,
             style:
                 state.imageUrl != null ? BorderStyle.solid : BorderStyle.none,
@@ -528,7 +528,7 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(

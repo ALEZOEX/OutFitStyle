@@ -91,7 +91,6 @@ class _AchievementCategoryTabState extends ConsumerState<AchievementCategoryTab>
       case AchievementFilter.unlocked:
         return achievements.where((a) => a.isUnlocked).toList();
       case AchievementFilter.all:
-      default:
         return achievements;
     }
   }
@@ -157,7 +156,7 @@ class _AchievementCategoryTabState extends ConsumerState<AchievementCategoryTab>
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: categoryProgress.progressPercent / 100,
-              backgroundColor: theme.colorScheme.outline.withOpacity(0.2),
+              backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(
                 theme.colorScheme.primary,
               ),
@@ -173,7 +172,7 @@ class _AchievementCategoryTabState extends ConsumerState<AchievementCategoryTab>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -227,7 +226,7 @@ class _AchievementCategoryTabState extends ConsumerState<AchievementCategoryTab>
             Icon(
               Icons.emoji_events_outlined,
               size: 64,
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -271,7 +270,7 @@ class _AchievementCategoryTabState extends ConsumerState<AchievementCategoryTab>
                           height: 4,
                           margin: const EdgeInsets.only(bottom: 20),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.outline.withOpacity(0.3),
+                            color: theme.colorScheme.outline.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -369,7 +368,7 @@ class _AchievementCategoryTabState extends ConsumerState<AchievementCategoryTab>
                             child: LinearProgressIndicator(
                               value: achievement.progressPercent / 100,
                               backgroundColor: theme.colorScheme.outline
-                                  .withOpacity(0.2),
+                                  .withValues(alpha: 0.2),
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 achievement.isUnlocked
                                     ? theme.colorScheme.primary
@@ -387,10 +386,10 @@ class _AchievementCategoryTabState extends ConsumerState<AchievementCategoryTab>
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.primaryContainer
-                                .withOpacity(0.3),
+                                .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: theme.colorScheme.primary.withOpacity(0.3),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(

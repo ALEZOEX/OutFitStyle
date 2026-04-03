@@ -35,7 +35,7 @@ class AchievementProgress extends StatelessWidget {
             child: Stack(
               children: [
                 // Фон
-                Container(color: theme.colorScheme.outline.withOpacity(0.2)),
+                Container(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
                 // Прогресс
                 AnimatedContainer(
                   duration: animationDuration,
@@ -49,7 +49,7 @@ class AchievementProgress extends StatelessWidget {
                         _getProgressColor(
                           theme,
                           clampedProgress,
-                        ).withOpacity(0.7),
+                        ).withValues(alpha: 0.7),
                       ],
                     ),
                   ),
@@ -137,7 +137,7 @@ class CircularAchievementProgress extends StatelessWidget {
             child: CircularProgressIndicator(
               value: 1.0,
               strokeWidth: strokeWidth,
-              color: theme.colorScheme.outline.withOpacity(0.2),
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
             ),
           ),
           // Прогресс

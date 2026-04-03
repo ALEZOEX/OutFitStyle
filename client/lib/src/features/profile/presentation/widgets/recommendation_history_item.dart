@@ -23,7 +23,7 @@ class RecommendationHistoryItem extends StatelessWidget {
           height: 50,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
           ),
           child: Icon(
             Icons.auto_awesome,

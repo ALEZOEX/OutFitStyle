@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/achievement.dart';
-import '../providers/achievements_providers.dart';
 
-class AchievementCardWidget extends ConsumerWidget {
+class AchievementCardWidget extends StatelessWidget {
   final Achievement achievement;
   final VoidCallback? onTap;
 
@@ -11,7 +9,7 @@ class AchievementCardWidget extends ConsumerWidget {
     : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isUnlocked = achievement.isUnlocked;
     final progress = achievement.currentProgress;
     final target = achievement.targetValue;

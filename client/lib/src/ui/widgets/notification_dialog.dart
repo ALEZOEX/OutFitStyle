@@ -10,7 +10,6 @@ class NotificationPermissionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -28,8 +27,8 @@ class NotificationPermissionDialog extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    theme.colorScheme.primary.withOpacity(0.3),
-                    theme.colorScheme.secondary.withOpacity(0.3),
+                    theme.colorScheme.primary.withValues(alpha: 0.3),
+                    theme.colorScheme.secondary.withValues(alpha: 0.3),
                   ],
                 ),
                 shape: BoxShape.circle,
@@ -136,7 +135,7 @@ class NotificationSnackbar {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: (backgroundColor ?? theme.colorScheme.primary)
-                    .withOpacity(0.2),
+                    .withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(

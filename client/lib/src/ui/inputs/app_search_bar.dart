@@ -154,7 +154,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
         borderRadius: BorderRadius.circular(12.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4.0,
             offset: const Offset(0, 2),
           ),

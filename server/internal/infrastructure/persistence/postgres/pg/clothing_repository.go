@@ -607,11 +607,10 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 	var items []domain.ClothingItem
 	for rows.Next() {
 		var item domain.ClothingItem
-		var description *string
+		var description, usage *string
 		var minTemp, maxTemp, warmthLevel *int16
 		var formalityLevel *int16
 		var baseColour, pattern *string
-		var usageJSON []byte
 		var materials []string
 		var ownerID *uuid.UUID
 		var createdAt, updatedAt time.Time
@@ -632,7 +631,7 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 			&formalityLevel,
 			&baseColour,
 			&pattern,
-			&usageJSON,
+			&usage,
 			&materials,
 			&item.Fit,
 			&item.IconEmoji,
@@ -669,18 +668,14 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 		if pattern != nil {
 			item.Pattern = *pattern
 		}
+		if usage != nil {
+			item.Usage = []string{*usage}
+		}
 		if ownerID != nil {
 			oid := domain.ID(*ownerID)
 			item.OwnerID = &oid
 		}
 
-		// Parse usage from JSON, materials is text[] already scanned
-		if len(usageJSON) > 0 {
-			err = json.Unmarshal(usageJSON, &item.Usage)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to unmarshal usage")
-			}
-		}
 		item.Materials = materials
 
 		item.CreatedAt = createdAt

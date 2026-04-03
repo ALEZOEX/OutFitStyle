@@ -86,7 +86,7 @@ class AppEmptyState extends StatelessWidget {
             if (displayMessage != null) ...[
               const SizedBox(height: 8.0),
               Text(
-                displayMessage!,
+                displayMessage,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.hintColor,
                 ),

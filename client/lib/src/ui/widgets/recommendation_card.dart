@@ -24,12 +24,11 @@ class RecommendationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 3,
-      shadowColor: theme.colorScheme.primary.withOpacity(0.15),
+      shadowColor: theme.colorScheme.primary.withValues(alpha: 0.15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         onTap: onTap,
@@ -103,7 +102,7 @@ class RecommendationCard extends StatelessWidget {
           size: 64,
           color: Theme.of(
             context,
-          ).colorScheme.onPrimaryContainer.withOpacity(0.5),
+          ).colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -160,8 +159,8 @@ class EmptyRecommendationsState extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    theme.colorScheme.primaryContainer.withOpacity(0.5),
-                    theme.colorScheme.secondaryContainer.withOpacity(0.5),
+                    theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                    theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
                   ],
                 ),
                 shape: BoxShape.circle,

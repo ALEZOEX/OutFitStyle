@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import '../../../../core/api/api_client.dart';
-import '../../../../core/di/di.dart';
 import '../../../../domain/entities/achievement.dart';
 import '../../../../domain/entities/achievement_category.dart';
 import '../../../../domain/entities/achievement_progress.dart';
@@ -282,7 +280,6 @@ class AchievementsRepositoryImpl implements AchievementRepository {
       case AchievementFilter.unlocked:
         return _localCache.where((a) => a.isUnlocked).toList();
       case AchievementFilter.all:
-      default:
         return List.unmodifiable(_localCache);
     }
   }
@@ -423,7 +420,6 @@ class AchievementsRepositoryImpl implements AchievementRepository {
     return Future.value(const Left('Not implemented'));
   }
 
-  @override
   Future<Either<String, void>> resetAchievementProgressWithParams({
     required int userId,
     required int achievementId,

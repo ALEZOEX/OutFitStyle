@@ -31,7 +31,7 @@ class AchievementBadge extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     theme.colorScheme.primaryContainer,
-                    theme.colorScheme.primaryContainer.withOpacity(0.5),
+                    theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                   ],
                 )
                 : null,
@@ -40,8 +40,8 @@ class AchievementBadge extends StatelessWidget {
         border: Border.all(
           color:
               isUnlocked
-                  ? theme.colorScheme.primary.withOpacity(0.3)
-                  : theme.colorScheme.outline.withOpacity(0.2),
+                  ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -71,7 +71,7 @@ class AchievementBadge extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: theme.colorScheme.tertiaryContainer.withOpacity(0.5),
+                color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -128,15 +128,14 @@ class CategoryBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final percent = total > 0 ? (progress / total * 100) : 0.0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer.withOpacity(0.3),
+        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.secondary.withOpacity(0.2),
+          color: theme.colorScheme.secondary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -157,7 +156,7 @@ class CategoryBadge extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -194,12 +193,12 @@ class RankBadge extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [rankData.color, rankData.color.withOpacity(0.6)],
+          colors: [rankData.color, rankData.color.withValues(alpha: 0.6)],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: rankData.color.withOpacity(0.3),
+            color: rankData.color.withValues(alpha: 0.3),
             blurRadius: 8,
             spreadRadius: 2,
           ),
@@ -221,7 +220,7 @@ class RankBadge extends StatelessWidget {
           Text(
             '$totalPoints очков',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
             ),
           ),
         ],

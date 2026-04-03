@@ -1,9 +1,6 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:math' as math;
 
 import 'package:outfitstyle_client/l10n/app_localizations.dart';
 import 'package:outfitstyle_client/src/ui/widgets/city_selector_dialog.dart';
@@ -167,7 +164,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(notifier.state.error ?? 'Ошибка сохранения'),
+          content: Text(notifier.error ?? 'Ошибка сохранения'),
           backgroundColor: Colors.red,
         ),
       );
@@ -176,8 +173,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
 
     final state = ref.watch(onboardingNotifierProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;

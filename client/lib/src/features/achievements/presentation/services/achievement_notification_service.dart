@@ -39,7 +39,7 @@ class AchievementNotificationService {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   blurRadius: 8,
                   spreadRadius: 2,
                 ),
@@ -75,7 +75,7 @@ class AchievementNotificationService {
                 Text(
                   achievement.title,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onInverseSurface.withOpacity(0.9),
+                    color: theme.colorScheme.onInverseSurface.withValues(alpha: 0.9),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -137,7 +137,7 @@ class AchievementNotificationService {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  theme.colorScheme.primaryContainer.withOpacity(0.5),
+                  theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                   theme.colorScheme.surface,
                 ],
               ),
@@ -168,7 +168,7 @@ class AchievementNotificationService {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withOpacity(0.3),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.3),
                           blurRadius: 16,
                           spreadRadius: 4,
                         ),
@@ -216,7 +216,7 @@ class AchievementNotificationService {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.tertiaryContainer.withOpacity(0.5),
+                    color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(

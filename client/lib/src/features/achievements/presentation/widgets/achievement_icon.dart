@@ -36,7 +36,7 @@ class AchievementIcon extends StatelessWidget {
                     _getGradientColor(
                       theme,
                       achievement.category,
-                    ).withOpacity(0.6),
+                    ).withValues(alpha: 0.6),
                   ],
                 )
                 : null,
@@ -48,7 +48,7 @@ class AchievementIcon extends StatelessWidget {
                   color:
                       isUnlocked
                           ? _getGradientColor(theme, achievement.category)
-                          : theme.colorScheme.outline.withOpacity(0.3),
+                          : theme.colorScheme.outline.withValues(alpha: 0.3),
                   width: isUnlocked ? 3 : 1,
                 )
                 : null,
@@ -59,7 +59,7 @@ class AchievementIcon extends StatelessWidget {
                     color: _getGradientColor(
                       theme,
                       achievement.category,
-                    ).withOpacity(0.3),
+                    ).withValues(alpha: 0.3),
                     blurRadius: 8,
                     spreadRadius: 2,
                   ),
@@ -111,8 +111,6 @@ class CategoryIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
       width: size,
       height: size,
@@ -122,7 +120,7 @@ class CategoryIcon extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             _getCategoryColor(category),
-            _getCategoryColor(category).withOpacity(0.6),
+            _getCategoryColor(category).withValues(alpha: 0.6),
           ],
         ),
         borderRadius: BorderRadius.circular(10),

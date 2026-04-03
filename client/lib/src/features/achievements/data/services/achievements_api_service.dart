@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/api/api_client.dart';
-import '../../../../core/api/api_config.dart';
 import '../models/achievement_dto.dart';
 
 /// API сервис для работы с достижениями

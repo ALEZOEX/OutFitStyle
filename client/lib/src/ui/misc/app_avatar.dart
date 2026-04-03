@@ -139,17 +139,6 @@ class AppAvatar extends StatelessWidget {
       return false;
     }
   }
-
-  String _getInitials(String name) {
-    if (name.isEmpty) return '?';
-
-    List<String> parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts.first.substring(0, 1)}${parts.last.substring(0, 1)}';
-    } else {
-      return parts.first.isNotEmpty ? parts.first.substring(0, 1) : '?';
-    }
-  }
 }
 
 enum AvatarVariant { circle, square }

@@ -113,7 +113,7 @@ class WeatherConditionBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Icon(icon, color: color, size: 20.0),

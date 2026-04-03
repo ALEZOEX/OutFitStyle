@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import '../../../../domain/entities/achievement.dart';
 import '../../../../domain/entities/achievement_category.dart';
 import 'achievement_definitions.dart';
@@ -59,7 +58,6 @@ class AchievementsRepository {
       case AchievementFilter.unlocked:
         return _achievements.where((a) => a.isUnlocked).toList();
       case AchievementFilter.all:
-      default:
         return List.unmodifiable(_achievements);
     }
   }

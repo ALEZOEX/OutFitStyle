@@ -4,7 +4,6 @@ import 'package:confetti/confetti.dart';
 
 import '../../../../ui/widgets/max_width_container.dart';
 import '../providers/achievements_providers.dart';
-import '../widgets/achievement_card.dart';
 import '../widgets/achievement_category_tab.dart';
 import '../../../../domain/entities/achievement_category.dart';
 import '../../../../domain/entities/achievement.dart';
@@ -213,7 +212,7 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
                         '${stats.progressText} • ${stats.pointsText}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onPrimaryContainer
-                              .withOpacity(0.8),
+                              .withValues(alpha: 0.8),
                         ),
                       ),
                     ],
@@ -250,7 +249,7 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
                   child: LinearProgressIndicator(
                     value: stats.progressPercent / 100,
                     backgroundColor: theme.colorScheme.onPrimaryContainer
-                        .withOpacity(0.2),
+                        .withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       theme.colorScheme.primary,
                     ),
@@ -335,7 +334,7 @@ class _AchievementsPageState extends ConsumerState<AchievementsPage>
                   Text(
                     achievement.title,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onInverseSurface.withOpacity(
+                      color: theme.colorScheme.onInverseSurface.withValues(alpha: 
                         0.8,
                       ),
                     ),

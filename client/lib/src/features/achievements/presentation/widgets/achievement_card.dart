@@ -25,14 +25,14 @@ class AchievementCard extends StatelessWidget {
     return Card(
       elevation: isUnlocked ? 4 : 2,
       shadowColor:
-          isUnlocked ? theme.colorScheme.primary.withOpacity(0.3) : null,
+          isUnlocked ? theme.colorScheme.primary.withValues(alpha: 0.3) : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color:
               isUnlocked
-                  ? theme.colorScheme.primary.withOpacity(0.3)
-                  : theme.colorScheme.outline.withOpacity(0.1),
+                  ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                  : theme.colorScheme.outline.withValues(alpha: 0.1),
           width: isUnlocked ? 2 : 1,
         ),
       ),
@@ -62,7 +62,7 @@ class AchievementCard extends StatelessWidget {
                               color:
                                   isUnlocked
                                       ? theme.colorScheme.onSurface
-                                      : theme.colorScheme.onSurface.withOpacity(
+                                      : theme.colorScheme.onSurface.withValues(alpha: 
                                         0.6,
                                       ),
                             ),
@@ -129,7 +129,7 @@ class AchievementCard extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     theme.colorScheme.primaryContainer,
-                    theme.colorScheme.primary.withOpacity(0.3),
+                    theme.colorScheme.primary.withValues(alpha: 0.3),
                   ],
                 )
                 : null,
@@ -139,7 +139,7 @@ class AchievementCard extends StatelessWidget {
           color:
               isUnlocked
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withOpacity(0.3),
+                  : theme.colorScheme.outline.withValues(alpha: 0.3),
           width: isUnlocked ? 2 : 1,
         ),
       ),
@@ -159,7 +159,7 @@ class AchievementCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer.withOpacity(0.5),
+        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -178,7 +178,7 @@ class AchievementCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(4),
       child: LinearProgressIndicator(
         value: progressPercent / 100,
-        backgroundColor: theme.colorScheme.outline.withOpacity(0.2),
+        backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
         valueColor: AlwaysStoppedAnimation<Color>(
           isUnlocked ? theme.colorScheme.primary : theme.colorScheme.secondary,
         ),
@@ -191,7 +191,7 @@ class AchievementCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: theme.colorScheme.tertiaryContainer.withOpacity(0.5),
+        color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -228,7 +228,7 @@ class AchievementCard extends StatelessWidget {
     } else {
       return Icon(
         Icons.lock_outline,
-        color: theme.colorScheme.outline.withOpacity(0.5),
+        color: theme.colorScheme.outline.withValues(alpha: 0.5),
         size: 24,
       );
     }

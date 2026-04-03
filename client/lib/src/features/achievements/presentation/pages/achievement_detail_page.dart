@@ -31,7 +31,7 @@ class AchievementDetailPage extends ConsumerWidget {
               Icon(
                 Icons.emoji_events_outlined,
                 size: 64,
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
@@ -185,7 +185,7 @@ class AchievementDetailPage extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: theme.colorScheme.tertiaryContainer.withOpacity(0.5),
+                color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -218,7 +218,7 @@ class AchievementDetailPage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -306,13 +306,13 @@ class AchievementDetailPage extends ConsumerWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.colorScheme.tertiaryContainer.withOpacity(0.5),
-            theme.colorScheme.tertiaryContainer.withOpacity(0.2),
+            theme.colorScheme.tertiaryContainer.withValues(alpha: 0.5),
+            theme.colorScheme.tertiaryContainer.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.tertiary.withOpacity(0.3),
+          color: theme.colorScheme.tertiary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -364,10 +364,10 @@ class AchievementDetailPage extends ConsumerWidget {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: theme.colorScheme.primary.withOpacity(0.3),
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -388,7 +388,7 @@ class AchievementDetailPage extends ConsumerWidget {
                 Text(
                   _formatDateTime(achievement.unlockedAt!),
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer.withOpacity(
+                    color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 
                       0.8,
                     ),
                   ),
