@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -138,29 +139,30 @@ func (h *WardrobeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// Читаем body как map для обработки пустого clothing_item_id
+	// Читаем raw JSON для обработки пустого clothing_item_id
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		h.log.Error("❌ [WARDROBE] Failed to read body", zap.Error(err))
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
+		return
+	}
+
 	var rawBody map[string]any
-	if err := json.NewDecoder(r.Body).Decode(&rawBody); err != nil {
+	if err := json.Unmarshal(bodyBytes, &rawBody); err != nil {
 		h.log.Error("❌ [WARDROBE] Invalid JSON", zap.Error(err))
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
 		return
 	}
 
-	// Если clothing_item_id пустая строка — убираем
+	// Удаляем пустой clothing_item_id
 	if cid, ok := rawBody["clothing_item_id"]; ok {
-		if cidStr, ok := cid.(string); ok && cidStr == "" {
+		if cidStr, ok := cid.(string); ok && (cidStr == "" || cidStr == "00000000-0000-0000-0000-000000000000") {
 			delete(rawBody, "clothing_item_id")
 		}
 	}
 
-	// Перекодируем обратно в JSON
-	fixedBody, err := json.Marshal(rawBody)
-	if err != nil {
-		h.log.Error("❌ [WARDROBE] Failed to marshal fixed body", zap.Error(err))
-		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
-		return
-	}
-
+	// Перекодируем и декодируем
+	fixedBody, _ := json.Marshal(rawBody)
 	var req domain.WardrobeCreateRequest
 	if err := json.Unmarshal(fixedBody, &req); err != nil {
 		h.log.Error("❌ [WARDROBE] Invalid JSON after fix", zap.Error(err))
