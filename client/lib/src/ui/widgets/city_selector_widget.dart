@@ -313,10 +313,7 @@ class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
                   ? 'Ваш город: ${selectedCity.name}'
                   : 'Геолокация недоступна в браузере',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color:
-                    selectedCity != null
-                        ? Theme.of(context).colorScheme.onSurface
-                        : Theme.of(context).colorScheme.error,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 12),
