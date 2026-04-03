@@ -67,28 +67,13 @@ class EmptyState extends StatelessWidget {
                       vertical: AppSpacing.md,
                     ),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: isDark
-                            ? [
-                                theme.colorScheme.primary.withValues(alpha: 0.4),
-                                theme.colorScheme.primary.withValues(alpha: 0.25),
-                              ]
-                            : [
-                                theme.colorScheme.primary.withValues(alpha: 0.3),
-                                theme.colorScheme.primary.withValues(alpha: 0.15),
-                              ],
-                      ),
+                      gradient: AppGradients.primary,
                       borderRadius: AppRadius.radiusPill,
-                      border: Border.all(
-                        color: isDark
-                            ? theme.colorScheme.primary.withValues(alpha: 0.3)
-                            : theme.colorScheme.primary.withValues(alpha: 0.2),
-                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -96,16 +81,12 @@ class EmptyState extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.add,
-                          size: 18,
-                          color: isDark ? Colors.white : theme.colorScheme.primary,
-                        ),
+                        const Icon(Icons.add, size: 18, color: Colors.white),
                         const SizedBox(width: AppSpacing.sm),
                         Text(
                           actionLabel!,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : theme.colorScheme.primary,
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
