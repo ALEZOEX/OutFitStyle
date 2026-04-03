@@ -610,7 +610,7 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 		var description *string
 		var minTemp, maxTemp, warmthLevel *int16
 		var formalityLevel *int16
-		var baseColour *string
+		var baseColour, pattern *string
 		var usageJSON []byte
 		var materialsJSON []byte
 		var ownerID *uuid.UUID
@@ -618,6 +618,7 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 
 		err := rows.Scan(
 			&item.ID,
+			&item.Name,
 			&description,
 			&item.Category,
 			&item.Subcategory,
@@ -630,7 +631,7 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 			&item.Style,
 			&formalityLevel,
 			&baseColour,
-			&item.Pattern,
+			&pattern,
 			&usageJSON,
 			&materialsJSON,
 			&item.Fit,
@@ -664,6 +665,9 @@ func (r *ClothingRepository) GetByIDs(ctx context.Context, ids []domain.ID) ([]d
 		}
 		if baseColour != nil {
 			item.BaseColour = baseColour
+		}
+		if pattern != nil {
+			item.Pattern = *pattern
 		}
 		if ownerID != nil {
 			oid := domain.ID(*ownerID)
