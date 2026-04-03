@@ -6,6 +6,7 @@ import '../presentation/providers/recommendations_provider.dart';
 import '../widgets/recommendation_card.dart';
 import '../../../ui/widgets/city_selector_widget.dart';
 import '../../../ui/widgets/max_width_container.dart';
+import '../../../ui/containers/glass_container.dart';
 import '../../../theme/app_theme.dart';
 import '../../../presentation/providers/user_location_provider.dart';
 
@@ -235,31 +236,24 @@ class _RecommendationsScreenState extends ConsumerState<RecommendationsScreen>
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
-    return Container(
+    return GlassContainer(
       padding: const EdgeInsets.symmetric(
         vertical: AppSpacing.md,
         horizontal: AppSpacing.lg,
       ),
-      decoration: BoxDecoration(
-        color: isDarkMode
-            ? color.withValues(alpha: 0.2)
-            : color.withValues(alpha: 0.1),
-        borderRadius: AppRadius.radiusMd,
-        border: Border.all(
-          color: isDarkMode
-              ? color.withValues(alpha: 0.3)
-              : color.withValues(alpha: 0.2),
-          width: 1,
-        ),
-        boxShadow: isDarkMode
+      borderRadius: AppRadius.radiusMd,
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: isDarkMode
             ? [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.15),
-                  blurRadius: 8,
-                  spreadRadius: 0,
-                ),
+                color.withValues(alpha: 0.3),
+                color.withValues(alpha: 0.15),
               ]
-            : null,
+            : [
+                color.withValues(alpha: 0.15),
+                color.withValues(alpha: 0.08),
+              ],
       ),
       child: Column(
         children: [
@@ -717,18 +711,30 @@ class _QuickActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       borderRadius: AppRadius.radiusLg,
-      child: Container(
+      child: GlassContainer(
         padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.md,
           horizontal: AppSpacing.lg,
         ),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: AppRadius.radiusLg,
-          border: Border.all(color: color.withValues(alpha: 0.2)),
+        borderRadius: AppRadius.radiusLg,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+                  color.withValues(alpha: 0.3),
+                  color.withValues(alpha: 0.15),
+                ]
+              : [
+                  color.withValues(alpha: 0.15),
+                  color.withValues(alpha: 0.08),
+                ],
         ),
         child: Column(
           children: [
