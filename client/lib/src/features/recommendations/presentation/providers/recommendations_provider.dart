@@ -351,12 +351,21 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     return 'Что-то пошло не так. Попробуйте снова';
   }
 
-  /// Удалить рекомендацию локально
-  void removeRecommendation(String id) {
+  /// Удалить рекомендацию (локально + сервер)
+  Future<void> removeRecommendation(String id) async {
+    // Сначала удаляем локально для мгновенного UX
     final recommendations = state.recommendations
         .where((r) => r.id != id)
         .toList();
     state = state.copyWith(recommendations: recommendations);
+
+    // Затем отправляем DELETE на сервер
+    try {
+      await _apiClient.delete('/api/v1/recommendations/$id');
+      AppLogger.info('[RecommendationsProvider] 🗑️ Рекомендация удалена с сервера: $id');
+    } catch (e) {
+      AppLogger.error('[RecommendationsProvider] ⚠️ Ошибка удаления с сервера: $e');
+    }
   }
 
   /// Перезагрузить рекомендации
