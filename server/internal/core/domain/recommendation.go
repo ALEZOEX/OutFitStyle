@@ -74,6 +74,7 @@ func (r RecommendationRecord) MarshalJSON() ([]byte, error) {
 		"id":                r.ID,
 		"user_id":           r.UserID,
 		"created_at":        r.CreatedAt,
+		"city":              r.City,
 		"is_favorite":       r.IsFavorite,
 		"temperature":       r.Temperature,
 		"weather":           r.Weather,

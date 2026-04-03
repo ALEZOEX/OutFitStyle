@@ -148,15 +148,15 @@ class SavedOutfitCreateRequest {
     };
     final occ = occasions;
     if (occ != null && occ.isNotEmpty) {
-      json['occasions'] = occasions;
+      json['occasions'] = occ;
     }
     final seas = seasons;
     if (seas != null && seas.isNotEmpty) {
-      json['seasons'] = seasons;
+      json['seasons'] = seas;
     }
     final desc = description;
     if (desc != null && desc.isNotEmpty) {
-      json['description'] = description;
+      json['description'] = desc;
     }
     return json;
   }
@@ -186,9 +186,12 @@ class SavedOutfitUpdateRequest {
     final json = <String, dynamic>{};
     if (name != null) json['name'] = name;
     if (items != null) json['items'] = items;
-    if (occasions != null) json['occasions'] = occasions;
-    if (seasons != null) json['seasons'] = seasons;
-    if (description != null) json['description'] = description;
+    final occ = occasions;
+    if (occ != null && occ.isNotEmpty) json['occasions'] = occ;
+    final seas = seasons;
+    if (seas != null && seas.isNotEmpty) json['seasons'] = seas;
+    final desc = description;
+    if (desc != null && desc.isNotEmpty) json['description'] = desc;
     if (isFavorite != null) json['is_favorite'] = isFavorite;
     return json;
   }
