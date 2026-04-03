@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../presentation/providers/session_provider.dart';
 import '../../data/repositories/notification_settings_repository.dart';
 import '../../domain/entities/notification_settings.dart';
 
@@ -337,19 +336,36 @@ class NotificationSettingsNotifier
   }
 }
 
-// Провайдеры для создания зависимостей (используют глобальные провайдеры из router.dart)
-
-final _notificationSettingsRepositoryProvider =
-    Provider<NotificationSettingsRepository>((ref) {
-      final apiClient = ref.watch(apiClientProvider);
-      return NotificationSettingsRepository(apiClient: apiClient);
-    });
-
-/// Провайдер для управления настройками уведомлений
+// Провайдер для управления настройками уведомлений
+// Работает только с локальными настройками (без API зависимости)
 final notificationSettingsProvider = StateNotifierProvider<
   NotificationSettingsNotifier,
   NotificationSettingsState
 >((ref) {
-  final repository = ref.watch(_notificationSettingsRepositoryProvider);
-  return NotificationSettingsNotifier(repository: repository);
+  return NotificationSettingsNotifier(
+    repository: _LocalNotificationSettingsRepository(),
+  );
 });
+
+/// Локальный репозиторий для настроек уведомлений (без API)
+class _LocalNotificationSettingsRepository
+    implements NotificationSettingsRepository {
+  @override
+  Future<NotificationSettings> getSettings() async {
+    return NotificationSettings.defaultSettings();
+  }
+
+  @override
+  Future<NotificationSettings> updateSettings(
+    NotificationSettings settings,
+  ) async {
+    return settings;
+  }
+
+  @override
+  Future<NotificationSettings> syncWithServer(
+    NotificationSettings localSettings,
+  ) async {
+    return localSettings;
+  }
+}
