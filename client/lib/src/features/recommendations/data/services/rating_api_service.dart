@@ -32,8 +32,11 @@ class RatingApiService {
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final ratingData = data['rating'] as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      final ratingData = data['rating'] as Map<String, dynamic>?;
+      if (ratingData == null) throw RatingApiException(statusCode: 200, message: 'Нет данных');
       return OutfitRating.fromJson(ratingData);
     } else {
       throw RatingApiException(
@@ -46,12 +49,15 @@ class RatingApiService {
   /// Получить статистику качества рекомендации
   Future<RecommendationQuality> getQuality(String recommendationId) async {
     final response = await _client.get(
-      '/recommendations/$recommendationId/quality',
+      '/api/v1/recommendations/$recommendationId/quality',
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final qualityData = data['quality'] as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      final qualityData = data['quality'] as Map<String, dynamic>?;
+      if (qualityData == null) throw RatingApiException(statusCode: 200, message: 'Нет данных');
       return RecommendationQuality.fromJson(qualityData);
     } else {
       throw RatingApiException(
@@ -64,11 +70,13 @@ class RatingApiService {
   /// Получить оценку пользователя для рекомендации
   Future<OutfitRating?> getUserRating(String recommendationId) async {
     final response = await _client.get(
-      '/recommendations/$recommendationId/my-rating',
+      '/api/v1/recommendations/$recommendationId/my-rating',
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       final ratingData = data['rating'];
       if (ratingData == null) return null;
       return OutfitRating.fromJson(ratingData as Map<String, dynamic>);
@@ -83,12 +91,14 @@ class RatingApiService {
   /// Проверить, оценил ли пользователь рекомендацию
   Future<bool> hasRated(String recommendationId) async {
     final response = await _client.get(
-      '/recommendations/$recommendationId/has-rated',
+      '/api/v1/recommendations/$recommendationId/has-rated',
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      return data['has_rated'] as bool;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      return data['has_rated'] as bool? ?? false;
     } else {
       throw RatingApiException(
         statusCode: response.statusCode ?? 0,
@@ -99,11 +109,14 @@ class RatingApiService {
 
   /// Получить статистику оценок пользователя
   Future<UserRatingStats> getUserStats() async {
-    final response = await _client.get('/ratings/me/stats');
+    final response = await _client.get('/api/v1/ratings/me/stats');
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final statsData = data['stats'] as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      final statsData = data['stats'] as Map<String, dynamic>?;
+      if (statsData == null) throw RatingApiException(statusCode: 200, message: 'Нет данных');
       return UserRatingStats.fromJson(statsData);
     } else {
       throw RatingApiException(
@@ -116,11 +129,13 @@ class RatingApiService {
 
   /// Получить вещи с низким рейтингом для ML
   Future<List<int>> getLowQualityItems() async {
-    final response = await _client.get('/ratings/low-quality-items');
+    final response = await _client.get('/api/v1/ratings/low-quality-items');
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final items = data['low_quality_items'] as List;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      final items = data['low_quality_items'] as List? ?? [];
       return items.whereType<int>().toList();
     } else {
       throw RatingApiException(
@@ -137,13 +152,15 @@ class RatingApiService {
     double threshold = -5.0,
   }) async {
     final response = await _client.post(
-      '/ratings/filter-low-quality',
+      '/api/v1/ratings/filter-low-quality',
       data: {'candidate_ids': candidateIds, 'threshold': threshold},
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final filteredIds = data['candidate_ids'] as List;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      final filteredIds = data['candidate_ids'] as List? ?? [];
       return filteredIds.whereType<String>().toList();
     } else {
       throw RatingApiException(
@@ -158,13 +175,15 @@ class RatingApiService {
     List<String> recommendationIds,
   ) async {
     final response = await _client.post(
-      '/ratings/bulk',
+      '/api/v1/ratings/bulk',
       data: {'recommendation_ids': recommendationIds},
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data as String) as Map<String, dynamic>;
-      final ratings = data['ratings'] as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      final ratings = data['ratings'] as Map<String, dynamic>? ?? {};
       return ratings.map((key, value) => MapEntry(key, value as int));
     } else {
       throw RatingApiException(

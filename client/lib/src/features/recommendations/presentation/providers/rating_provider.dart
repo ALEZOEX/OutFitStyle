@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/api/api_client.dart';
+import '../../../../presentation/providers/session_provider.dart';
 import '../../../../domain/entities/outfit_rating.dart';
 import '../../data/services/rating_api_service.dart';
 
@@ -7,13 +7,6 @@ import '../../data/services/rating_api_service.dart';
 final ratingApiServiceProvider = Provider<RatingApiService>((ref) {
   final client = ref.watch(apiClientProvider);
   return RatingApiService(client: client);
-});
-
-/// Провайдер API клиента (предполагается, что он уже определён в проекте)
-final apiClientProvider = Provider<ApiClient>((ref) {
-  // Этот провайдер должен быть определён в другом месте проекта
-  // Если нет, нужно создать его
-  throw UnimplementedError('ApiClient provider must be defined elsewhere');
 });
 
 /// Состояние провайдера рейтинга

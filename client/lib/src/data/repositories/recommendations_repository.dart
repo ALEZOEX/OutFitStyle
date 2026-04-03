@@ -18,9 +18,11 @@ class RecommendationsRepository implements IRecommendationsRepository {
     final response = await apiClient.get('/api/v1/recommendations');
     AppLogger.info('[RecommendationsRepository] getUserRecommendations response: ${response.statusCode}');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       final items =
-          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+          data['recommendations'] as List<dynamic>? ?? data['items'] as List<dynamic>? ?? [];
       AppLogger.info('[RecommendationsRepository] Получено ${items.length} рекомендаций');
       return items
           .map(
@@ -36,7 +38,9 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<OutfitRecommendation?> getRecommendationById(String id) async {
     final response = await apiClient.get('/api/v1/recommendations/$id');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       return OutfitRecommendation.fromJson(data);
     }
     return null;
@@ -113,9 +117,11 @@ class RecommendationsRepository implements IRecommendationsRepository {
       },
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       final items =
-          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+          data['recommendations'] as List<dynamic>? ?? data['items'] as List<dynamic>? ?? [];
       return items
           .map(
             (item) =>
@@ -132,9 +138,11 @@ class RecommendationsRepository implements IRecommendationsRepository {
   Future<List<OutfitRecommendation>> getTrendingRecommendations() async {
     final response = await apiClient.get('/api/v1/recommendations');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       final items =
-          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+          data['recommendations'] as List<dynamic>? ?? data['items'] as List<dynamic>? ?? [];
       return items
           .map(
             (item) =>
@@ -164,9 +172,11 @@ class RecommendationsRepository implements IRecommendationsRepository {
   ) async {
     final response = await apiClient.get('/api/v1/recommendations');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       final items =
-          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+          data['recommendations'] as List<dynamic>? ?? data['items'] as List<dynamic>? ?? [];
       return items
           .map(
             (item) =>
@@ -183,9 +193,11 @@ class RecommendationsRepository implements IRecommendationsRepository {
   ) async {
     final response = await apiClient.get('/api/v1/recommendations/favorites');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       final items =
-          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+          data['recommendations'] as List<dynamic>? ?? data['items'] as List<dynamic>? ?? [];
       return items
           .map(
             (item) =>
@@ -226,7 +238,9 @@ class RecommendationsRepository implements IRecommendationsRepository {
     AppLogger.info('[RecommendationsRepository] 📦 Response data: ${response.data}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       final recData = data['recommendation'] as Map<String, dynamic>? ?? data;
       AppLogger.info('[RecommendationsRepository] ✅ Рекомендация: $recData');
       return OutfitRecommendation.fromJson(recData);
@@ -252,8 +266,10 @@ class RecommendationsRepository implements IRecommendationsRepository {
       },
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
-      final items = data['recommendations'] as List<dynamic>? ?? [];
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+      final items = data['recommendations'] as List<dynamic>? ?? data['items'] as List<dynamic>? ?? [];
       if (items.isNotEmpty) {
         return OutfitRecommendation.fromJson(
           items.first as Map<String, dynamic>,
@@ -278,9 +294,11 @@ class RecommendationsRepository implements IRecommendationsRepository {
       params: params,
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.data) as Map<String, dynamic>;
+      final data = response.data is Map
+          ? response.data as Map<String, dynamic>
+          : jsonDecode(response.data.toString()) as Map<String, dynamic>;
       final items =
-          data['recommendations'] as List<dynamic>? ?? data as List<dynamic>;
+          data['recommendations'] as List<dynamic>? ?? data['items'] as List<dynamic>? ?? [];
       return items
           .map(
             (item) =>
