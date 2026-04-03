@@ -14,6 +14,7 @@ func RegisterRecommendationRoutes(router *mux.Router, recommendationHandler *han
 	recommendations := router.PathPrefix("/api/v1/recommendations").Subrouter()
 
 	recommendations.HandleFunc("", recommendationHandler.List).Methods("GET")
+	recommendations.HandleFunc("", recommendationHandler.Create).Methods("POST")
 	recommendations.HandleFunc("/history", recommendationHandler.List).Methods("GET")
 	recommendations.HandleFunc("/{id:[0-9]+}", recommendationHandler.Get).Methods("GET")
 	recommendations.HandleFunc("/{id:[0-9]+}/rate", recommendationHandler.Rate).Methods("POST")

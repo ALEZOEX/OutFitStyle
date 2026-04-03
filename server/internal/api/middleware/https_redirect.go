@@ -39,9 +39,7 @@ func HTTPSRedirectMiddleware(environment string) mux.MiddlewareFunc {
 				}
 
 				// Remove port if it's the default HTTP port
-				if strings.HasSuffix(host, ":80") {
-					host = strings.TrimSuffix(host, ":80")
-				}
+				host = strings.TrimSuffix(host, ":80")
 
 				// Use URL.Path and URL.RawQuery to build the redirect URL
 				path := r.URL.Path
