@@ -51,7 +51,7 @@ class WeatherCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(context, textColor, textSecondary, textMuted),
+          _buildHeader(context, textColor, textSecondary, textMuted, isDark),
           const SizedBox(height: AppSpacing.xl),
           _buildMainWeather(
             context,
@@ -74,6 +74,7 @@ class WeatherCard extends StatelessWidget {
     Color textColor,
     Color textSecondary,
     Color textMuted,
+    bool isDark,
   ) {
     final theme = Theme.of(context);
     return Row(
@@ -118,17 +119,28 @@ class WeatherCard extends StatelessWidget {
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary.withValues(alpha: 0.3),
-                          theme.colorScheme.primary.withValues(alpha: 0.15),
-                        ],
+                        colors: isDark
+                            ? [
+                                theme.colorScheme.primary.withValues(alpha: 0.3),
+                                theme.colorScheme.primary.withValues(alpha: 0.15),
+                              ]
+                            : [
+                                Colors.black.withValues(alpha: 0.08),
+                                Colors.black.withValues(alpha: 0.04),
+                              ],
                       ),
                       borderRadius: AppRadius.radiusSm,
                       border: Border.all(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                        color: isDark
+                            ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                            : Colors.black.withValues(alpha: 0.1),
                       ),
                     ),
-                    child: Icon(Icons.refresh, color: Colors.white, size: 16),
+                    child: Icon(
+                      Icons.refresh,
+                      color: isDark ? Colors.white : Colors.black,
+                      size: 16,
+                    ),
                   ),
                 ),
               ),
@@ -196,15 +208,15 @@ class WeatherCard extends StatelessWidget {
                       Colors.white.withValues(alpha: 0.08),
                     ]
                   : [
-                      theme.colorScheme.primary.withValues(alpha: 0.15),
-                      theme.colorScheme.primary.withValues(alpha: 0.05),
+                      Colors.black.withValues(alpha: 0.08),
+                      Colors.black.withValues(alpha: 0.04),
                     ],
             ),
             shape: BoxShape.circle,
             border: Border.all(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.2)
-                  : theme.colorScheme.primary.withValues(alpha: 0.2),
+                  : Colors.black.withValues(alpha: 0.1),
             ),
           ),
           child: Icon(
