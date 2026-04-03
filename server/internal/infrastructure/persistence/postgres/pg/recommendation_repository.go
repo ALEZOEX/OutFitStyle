@@ -387,6 +387,42 @@ func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, i
 		}
 	}
 
+	// Загружаем предметы из recommendation_items (если itemsJSON пуст)
+	if len(rec.Items) == 0 {
+		rows, qErr := r.db.Query(ctx, `
+			SELECT ri.id, ri.clothing_item_id, ci.name, ri.category, ri.source, ri.is_from_wardrobe, ri.score, ri.rank
+			FROM recommendation_items ri
+			LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
+			WHERE ri.recommendation_id = $1
+			ORDER BY ri.rank
+		`, id)
+		if qErr != nil {
+			return nil, errors.Wrap(qErr, "failed to query recommendation items")
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var item domain.RecommendationItem
+			var name, source *string
+			var isFromWardrobe bool
+			var score *float64
+			var rank *int
+			if err := rows.Scan(&item.ID, &item.ClothingItemID, &name, &item.Category, &source, &isFromWardrobe, &score, &rank); err != nil {
+				return nil, errors.Wrap(err, "failed to scan recommendation item")
+			}
+			if name != nil {
+				item.Name = *name
+			}
+			if source != nil {
+				item.Source = *source
+			}
+			if score != nil {
+				item.Score = *score
+			}
+			rec.Items = append(rec.Items, item)
+		}
+	}
+
 	rec.CreatedAt = createdAt
 	if !timestamp.IsZero() {
 		rec.Timestamp = &timestamp
