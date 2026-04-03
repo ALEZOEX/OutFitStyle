@@ -92,19 +92,9 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Гардероб',
-                      style: AppTypography.headlineMedium(context),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      '${state.totalCount} вещей',
-                      style: AppTypography.bodyMedium(context),
-                    ),
-                  ],
+                Text(
+                  '${state.totalCount} вещей',
+                  style: AppTypography.bodyMedium(context),
                 ),
                 IconButton(
                   onPressed: () =>
