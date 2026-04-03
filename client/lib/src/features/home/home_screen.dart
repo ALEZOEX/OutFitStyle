@@ -158,7 +158,10 @@ class _OutfitOfDaySection extends ConsumerWidget {
               const Spacer(),
               if (recommendations.isNotEmpty)
                 TextButton(
-                  onPressed: () => context.go('/recommendations'),
+                  onPressed: () {
+                    // Переключаемся на таб рекомендаций внутри HomeShell
+                    context.go('/home', extra: 2);
+                  },
                   child: const Text('Все'),
                 ),
             ],
