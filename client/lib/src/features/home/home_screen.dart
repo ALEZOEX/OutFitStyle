@@ -95,10 +95,11 @@ class _WeatherSection extends ConsumerWidget {
   }
 
   Widget _buildLoadingCard(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       height: 180,
       decoration: BoxDecoration(
-        color: AppColors.grey100,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: AppRadius.radiusXxl,
       ),
       child: const Center(child: CircularProgressIndicator()),
@@ -106,7 +107,8 @@ class _WeatherSection extends ConsumerWidget {
   }
 
   Widget _buildErrorCard(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return ClipRRect(
       borderRadius: AppRadius.radiusXxl,
@@ -119,11 +121,17 @@ class _WeatherSection extends ConsumerWidget {
                 ? Colors.white.withValues(alpha: 0.05)
                 : Colors.white.withValues(alpha: 0.6),
             borderRadius: AppRadius.radiusXxl,
-            border: Border.all(color: AppColors.grey200.withValues(alpha: 0.3)),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+            ),
           ),
           child: Column(
             children: [
-              Icon(Icons.cloud_off, size: 40, color: AppColors.grey400),
+              Icon(
+                Icons.cloud_off,
+                size: 40,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(height: AppSpacing.md),
               const Text('Не удалось загрузить погоду'),
               const SizedBox(height: AppSpacing.md),
@@ -184,6 +192,18 @@ class _OutfitOfDaySection extends StatelessWidget {
     );
   }
 
+  Widget _buildLoadingCard(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      height: 180,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: AppRadius.radiusXxl,
+      ),
+      child: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
   Widget _buildOutfitCard(BuildContext context, OutfitRecommendation rec) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -200,12 +220,12 @@ class _OutfitOfDaySection extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: isDark
                   ? [
-                      AppColors.primary.withValues(alpha: 0.15),
-                      AppColors.secondary.withValues(alpha: 0.08),
+                      theme.colorScheme.primary.withValues(alpha: 0.15),
+                      theme.colorScheme.secondary.withValues(alpha: 0.08),
                     ]
                   : [
-                      AppColors.primary.withValues(alpha: 0.12),
-                      AppColors.secondary.withValues(alpha: 0.06),
+                      theme.colorScheme.primary.withValues(alpha: 0.12),
+                      theme.colorScheme.secondary.withValues(alpha: 0.06),
                     ],
             ),
             borderRadius: AppRadius.radiusXl,
@@ -216,7 +236,7 @@ class _OutfitOfDaySection extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -303,7 +323,9 @@ class _OutfitOfDaySection extends StatelessWidget {
                             border: Border.all(
                               color: isDark
                                   ? Colors.white.withValues(alpha: 0.1)
-                                  : AppColors.grey200.withValues(alpha: 0.5),
+                                  : theme.colorScheme.outline.withValues(
+                                      alpha: 0.5,
+                                    ),
                             ),
                           ),
                           child: Text(
@@ -348,7 +370,8 @@ class _OutfitOfDaySection extends StatelessWidget {
   }
 
   Widget _buildEmptyCard(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return ClipRRect(
       borderRadius: AppRadius.radiusXl,
@@ -360,7 +383,9 @@ class _OutfitOfDaySection extends StatelessWidget {
                 ? Colors.white.withValues(alpha: 0.05)
                 : Colors.white.withValues(alpha: 0.6),
             borderRadius: AppRadius.radiusXl,
-            border: Border.all(color: AppColors.grey200.withValues(alpha: 0.3)),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+            ),
           ),
           child: EmptyState(
             icon: Icons.checkroom_outlined,
@@ -371,17 +396,6 @@ class _OutfitOfDaySection extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildLoadingCard(BuildContext context) {
-    return Container(
-      height: 200,
-      decoration: BoxDecoration(
-        color: AppColors.grey100,
-        borderRadius: AppRadius.radiusXl,
-      ),
-      child: const Center(child: CircularProgressIndicator()),
     );
   }
 }

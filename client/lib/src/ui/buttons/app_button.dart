@@ -51,13 +51,17 @@ class AppButton extends StatelessWidget {
 
   /// Премиальная кнопка — мягкий градиент + цветная тень + border
   Widget _buildGradientButton(BuildContext context) {
+    final theme = Theme.of(context);
     final isDisabled = onPressed == null || isLoading;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
-    // Тёмная тема — приглушённее
+    // Градиент из theme colors
     final colors = isDark
-        ? [const Color(0xFF9333EA), const Color(0xFFD946EF)]
-        : [const Color(0xFFA855F7), const Color(0xFFF43F5E)];
+        ? [
+            theme.colorScheme.primary.withValues(alpha: 0.8),
+            theme.colorScheme.secondary.withValues(alpha: 0.7),
+          ]
+        : [theme.colorScheme.primary, theme.colorScheme.secondary];
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -142,10 +146,11 @@ class AppButton extends StatelessWidget {
   }
 
   Widget _buildDangerButton(BuildContext context) {
+    final theme = Theme.of(context);
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.error,
+        backgroundColor: theme.colorScheme.error,
         foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.radiusPill),

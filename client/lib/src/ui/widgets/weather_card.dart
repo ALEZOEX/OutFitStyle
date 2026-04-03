@@ -24,15 +24,12 @@ class WeatherCard extends StatelessWidget {
     final data = weatherData;
     if (data == null) return _buildErrorState(context);
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final temp = data.temperature?.round() ?? 0;
-    final textColor = isDark ? Colors.white : const Color(0xFF1F2937);
-    final textSecondary = isDark
-        ? Colors.white.withValues(alpha: 0.7)
-        : const Color(0xFF4B5563);
-    final textMuted = isDark
-        ? Colors.white.withValues(alpha: 0.5)
-        : const Color(0xFF9CA3AF);
+    final textColor = theme.colorScheme.onSurface;
+    final textSecondary = theme.colorScheme.onSurfaceVariant;
+    final textMuted = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
 
     return ClipRRect(
       borderRadius: AppRadius.radiusXxl,
@@ -47,13 +44,13 @@ class WeatherCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: isDark
                   ? [
-                      AppColors.primary.withValues(alpha: 0.2),
-                      AppColors.secondary.withValues(alpha: 0.12),
+                      theme.colorScheme.primary.withValues(alpha: 0.2),
+                      theme.colorScheme.secondary.withValues(alpha: 0.12),
                       Colors.white.withValues(alpha: 0.05),
                     ]
                   : [
-                      AppColors.primary.withValues(alpha: 0.12),
-                      AppColors.secondary.withValues(alpha: 0.08),
+                      theme.colorScheme.primary.withValues(alpha: 0.12),
+                      theme.colorScheme.secondary.withValues(alpha: 0.08),
                       Colors.white.withValues(alpha: 0.85),
                     ],
             ),
@@ -61,13 +58,13 @@ class WeatherCard extends StatelessWidget {
             border: Border.all(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.1)
-                  : AppColors.primary.withValues(alpha: 0.15),
+                  : theme.colorScheme.primary.withValues(alpha: 0.15),
             ),
             boxShadow: [
               BoxShadow(
-                color: isDark
-                    ? AppColors.primary.withValues(alpha: 0.12)
-                    : AppColors.primary.withValues(alpha: 0.08),
+                color: theme.colorScheme.primary.withValues(
+                  alpha: isDark ? 0.12 : 0.08,
+                ),
                 blurRadius: 32,
                 offset: const Offset(0, 12),
               ),
@@ -207,20 +204,20 @@ class WeatherCard extends StatelessWidget {
                       Colors.white.withValues(alpha: 0.08),
                     ]
                   : [
-                      AppColors.primary.withValues(alpha: 0.15),
-                      AppColors.primary.withValues(alpha: 0.05),
+                      theme.colorScheme.primary.withValues(alpha: 0.15),
+                      theme.colorScheme.primary.withValues(alpha: 0.05),
                     ],
             ),
             shape: BoxShape.circle,
             border: Border.all(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.2)
-                  : AppColors.primary.withValues(alpha: 0.2),
+                  : theme.colorScheme.primary.withValues(alpha: 0.2),
             ),
           ),
           child: Icon(
             icon,
-            color: isDark ? Colors.white : AppColors.primary,
+            color: theme.colorScheme.primary,
             size: 36,
           ),
         ),
@@ -284,12 +281,12 @@ class WeatherCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.12)
-            : AppColors.primary.withValues(alpha: 0.08),
+            : theme.colorScheme.primary.withValues(alpha: 0.08),
         borderRadius: AppRadius.radiusLg,
         border: Border.all(
           color: isDark
               ? Colors.white.withValues(alpha: 0.15)
-              : AppColors.primary.withValues(alpha: 0.12),
+              : theme.colorScheme.primary.withValues(alpha: 0.12),
         ),
       ),
       child: Row(
@@ -320,7 +317,8 @@ class WeatherCard extends StatelessWidget {
   }
 
   Widget _buildErrorState(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: AppRadius.radiusXxl,
       child: BackdropFilter(
@@ -332,12 +330,18 @@ class WeatherCard extends StatelessWidget {
                 ? Colors.white.withValues(alpha: 0.05)
                 : Colors.white.withValues(alpha: 0.6),
             borderRadius: AppRadius.radiusXxl,
-            border: Border.all(color: AppColors.grey200.withValues(alpha: 0.3)),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.cloud_off, size: 40, color: AppColors.grey400),
+              Icon(
+                Icons.cloud_off,
+                size: 40,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(height: AppSpacing.md),
               const Text('Нет данных о погоде'),
               const SizedBox(height: AppSpacing.sm),

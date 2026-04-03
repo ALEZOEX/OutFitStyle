@@ -339,9 +339,7 @@ class HomeShell extends StatelessWidget {
                                         style: theme.textTheme.titleLarge
                                             ?.copyWith(
                                               fontWeight: FontWeight.w700,
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : const Color(0xFF1F2937),
+                                              color: theme.colorScheme.onSurface,
                                             ),
                                       ),
                                     ),
@@ -411,8 +409,8 @@ class _GlassBottomBar extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        const Color(0xFF1F2937).withValues(alpha: 0.55),
-                        const Color(0xFF111827).withValues(alpha: 0.4),
+                        theme.colorScheme.surface.withValues(alpha: 0.55),
+                        theme.colorScheme.surface.withValues(alpha: 0.4),
                       ]
                     : [
                         Colors.white.withValues(alpha: 0.85),
@@ -508,6 +506,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -520,7 +519,7 @@ class _NavItem extends StatelessWidget {
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 2),
                   ),

@@ -82,14 +82,15 @@ class AppCard extends StatelessWidget {
 
   /// Обычная карточка с тонкой рамкой (Landing default)
   Widget _buildOutlined(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDarkElevated : Colors.white,
+        color: isDark ? theme.colorScheme.surface : Colors.white,
         borderRadius: AppRadius.radiusLg,
         border: Border.all(
           color: isDark
-              ? const Color(0xFF374151).withValues(alpha: 0.5)
-              : AppColors.grey200,
+              ? theme.colorScheme.outline.withValues(alpha: 0.5)
+              : theme.colorScheme.outline,
         ),
       ),
       padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
@@ -280,8 +281,8 @@ class GlassContainer extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        const Color(0xFF1F2937).withValues(alpha: 0.6),
-                        const Color(0xFF111827).withValues(alpha: 0.4),
+                        theme.colorScheme.surface.withValues(alpha: 0.6),
+                        theme.colorScheme.surface.withValues(alpha: 0.4),
                       ]
                     : [
                         Colors.white.withValues(alpha: 0.75),

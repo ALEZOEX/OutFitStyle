@@ -391,8 +391,9 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
     BuildContext context,
     RecommendationsState state,
   ) {
+    final theme = Theme.of(context);
     final isGenerating = state.isGenerating;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
     return SizedBox(
       width: double.infinity,
@@ -406,15 +407,15 @@ class _GeneratorScreenState extends ConsumerState<GeneratorScreen>
                   end: Alignment.bottomRight,
                   colors: isDark
                       ? [
-                          AppColors.primary.withValues(alpha: 0.6),
-                          const Color(0xFFD946EF).withValues(alpha: 0.4),
+                          theme.colorScheme.primary.withValues(alpha: 0.6),
+                          theme.colorScheme.secondary.withValues(alpha: 0.4),
                         ]
                       : [
-                          AppColors.primary.withValues(alpha: 0.85),
-                          const Color(0xFFD946EF).withValues(alpha: 0.75),
+                          theme.colorScheme.primary.withValues(alpha: 0.85),
+                          theme.colorScheme.secondary.withValues(alpha: 0.75),
                         ],
                 ),
-          color: isGenerating ? AppColors.grey200 : null,
+          color: isGenerating ? theme.colorScheme.outline : null,
           borderRadius: AppRadius.radiusPill,
           border: Border.all(
             color: Colors.white.withValues(alpha: isDark ? 0.15 : 0.25),

@@ -64,24 +64,24 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF9333EA), // purple-600
-      Color(0xFFD946EF), // fuchsia-500
-      Color(0xFFF43F5E), // rose-500
+      AppColors.primary, // Rich Violet
+      AppColors.primaryLight, // Lighter Violet
+      AppColors.secondary, // Rose accent
     ],
   );
 
   static const LinearGradient primaryReversed = LinearGradient(
     begin: Alignment.bottomRight,
     end: Alignment.topLeft,
-    colors: [Color(0xFF9333EA), Color(0xFFD946EF), Color(0xFFF43F5E)],
+    colors: [AppColors.primary, AppColors.primaryLight, AppColors.secondary],
   );
 
   static const LinearGradient heroButton = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xCC9333EA), // purple-600 @ 80%
-      Color(0xCCD946EF), // fuchsia-500 @ 80%
+      AppColors.primary, // Rich Violet
+      AppColors.primaryLight, // Lighter Violet
     ],
   );
 
@@ -89,8 +89,8 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0x1AD946EF), // primary @ 10%
-      Color(0x1AF43F5E), // secondary @ 10%
+      Color(0x1A7C3AED), // primary @ 10%
+      Color(0x1AA78BFA), // primaryLight @ 10%
     ],
   );
 
@@ -98,8 +98,8 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0x33D946EF), // primary @ 20%
-      Color(0x1AF43F5E), // secondary @ 10%
+      Color(0x337C3AED), // primary @ 20%
+      Color(0x1AA78BFA), // primaryLight @ 10%
     ],
   );
 
@@ -107,8 +107,8 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0x40D946EF), // primary @ 25%
-      Color(0x26F43F5E), // secondary @ 15%
+      Color(0x407C3AED), // primary @ 25%
+      Color(0x26A78BFA), // primaryLight @ 15%
     ],
   );
 
