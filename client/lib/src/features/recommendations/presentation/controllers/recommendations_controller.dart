@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/states/recommendations_state.dart';
 import '../../../../domain/services/recommendations_domain_service.dart';
+import '../../../../domain/entities/outfit_recommendation.dart';
 
 /// Контроллер рекомендаций
 class RecommendationsController extends StateNotifier<RecommendationsState> {

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../domain/states/generator_state.dart';
+import '../../../../domain/entities/outfit_recommendation.dart';
 import '../../../../data/repositories/recommendations_repository.dart';
 import '../../../../utils/logger.dart';
 
@@ -39,7 +40,7 @@ class GeneratorController extends StateNotifier<GeneratorState> {
             userId: userId,
           );
 
-      AppLogger.info('[GeneratorController] Рекомендация получена: ${recommendation.toJson()}');
+      AppLogger.info('[GeneratorController] Рекомендация получена: ${recommendation.id}');
       state = state.copyWith(
         isLoading: false,
         generatedOutfit: recommendation.toJson(),
