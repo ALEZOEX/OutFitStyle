@@ -12,6 +12,7 @@ class GlassContainer extends StatelessWidget {
   final double? width;
   final BorderRadius? borderRadius;
   final bool showShadow;
+  final Gradient? gradient;
 
   const GlassContainer({
     super.key,
@@ -20,6 +21,7 @@ class GlassContainer extends StatelessWidget {
     this.width,
     this.borderRadius,
     this.showShadow = true,
+    this.gradient,
   });
 
   @override
@@ -36,7 +38,7 @@ class GlassContainer extends StatelessWidget {
           width: width,
           padding: padding,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: gradient ?? LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: isDark
