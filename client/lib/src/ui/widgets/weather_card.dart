@@ -75,6 +75,7 @@ class WeatherCard extends StatelessWidget {
     Color textSecondary,
     Color textMuted,
   ) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -113,7 +114,22 @@ class WeatherCard extends StatelessWidget {
                 borderRadius: AppRadius.radiusSm,
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.xs),
-                  child: Icon(Icons.refresh, color: textSecondary, size: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          theme.colorScheme.primary.withValues(alpha: 0.3),
+                          theme.colorScheme.primary.withValues(alpha: 0.15),
+                        ],
+                      ),
+                      borderRadius: AppRadius.radiusSm,
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Icon(Icons.refresh, color: Colors.white, size: 16),
+                  ),
                 ),
               ),
             ],
@@ -193,7 +209,7 @@ class WeatherCard extends StatelessWidget {
           ),
           child: Icon(
             icon,
-            color: theme.colorScheme.primary,
+            color: Colors.white,
             size: 36,
           ),
         ),
@@ -313,10 +329,41 @@ class WeatherCard extends StatelessWidget {
           ),
           if (onRefresh != null) ...[
             const SizedBox(height: AppSpacing.lg),
-            OutlinedButton.icon(
-              onPressed: onRefresh,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Обновить'),
+            InkWell(
+              onTap: onRefresh,
+              borderRadius: AppRadius.radiusPill,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.3),
+                      theme.colorScheme.primary.withValues(alpha: 0.15),
+                    ],
+                  ),
+                  borderRadius: AppRadius.radiusPill,
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.refresh, color: Colors.white, size: 18),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      'Обновить',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ],
