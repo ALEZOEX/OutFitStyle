@@ -365,18 +365,19 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
             animation: _bubbleController,
             builder: (context, child) {
               return Positioned(
-                left: MediaQuery.of(context).size.width * _bubbleX.value - 12,
-                bottom: 6,
+                left: MediaQuery.of(context).size.width * _bubbleX.value - 20,
+                bottom: 4,
                 child: Container(
-                  width: 24,
-                  height: 24,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     gradient: AppGradients.primary,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
-                        blurRadius: 12,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.6),
+                        blurRadius: 16,
+                        spreadRadius: 2,
                         offset: const Offset(0, 4),
                       ),
                     ],
