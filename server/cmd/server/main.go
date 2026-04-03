@@ -544,7 +544,7 @@ func main() {
 
 	// Стартуем сервер
 	go func() {
-		logger.Info("Starting server", zap.String("address", addr))
+		logger.Info("Starting server", zap.String("address", addr), zap.String("version", "1.0.0"))
 		if err := srv.ListenAndServe(); err != nil && err != stdhttp.ErrServerClosed {
 			logger.Fatal("Server failed to start", zap.Error(err))
 		}
