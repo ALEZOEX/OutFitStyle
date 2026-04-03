@@ -390,7 +390,7 @@ func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, i
 	// Загружаем предметы из recommendation_items (если itemsJSON пуст)
 	if len(rec.Items) == 0 {
 		rows, qErr := r.db.Query(ctx, `
-			SELECT ri.id, ri.clothing_item_id, ci.name, ri.category, ri.source, ri.is_from_wardrobe, ri.score, ri.rank
+			SELECT ri.id, ri.clothing_item_id, ci.name, ri.category, ri.is_from_wardrobe, ri.score, ri.rank
 			FROM recommendation_items ri
 			LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
 			WHERE ri.recommendation_id = $1
@@ -403,18 +403,15 @@ func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, i
 
 		for rows.Next() {
 			var item domain.RecommendationItem
-			var name, source *string
+			var name *string
 			var isFromWardrobe bool
 			var score *float64
 			var rank *int
-			if err := rows.Scan(&item.ID, &item.ClothingItemID, &name, &item.Category, &source, &isFromWardrobe, &score, &rank); err != nil {
+			if err := rows.Scan(&item.ID, &item.ClothingItemID, &name, &item.Category, &isFromWardrobe, &score, &rank); err != nil {
 				return nil, errors.Wrap(err, "failed to scan recommendation item")
 			}
 			if name != nil {
 				item.Name = *name
-			}
-			if source != nil {
-				item.Source = *source
 			}
 			if score != nil {
 				item.Score = *score
