@@ -200,47 +200,12 @@ class _OutfitOfDaySection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Заголовок + температура
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _formatTitle(rec.title),
-                  style: AppTypography.headlineSmall(context),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (rec.temperature != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: AppRadius.radiusPill,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.thermostat,
-                        size: 16,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        '${rec.temperature?.round() ?? 0}°C',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
+          // Заголовок
+          Text(
+            _formatTitle(rec.title),
+            style: AppTypography.headlineSmall(context),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
 
           // Описание
