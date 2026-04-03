@@ -138,9 +138,32 @@ func (h *WardrobeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var req domain.WardrobeCreateRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	// Читаем body как map для обработки пустого clothing_item_id
+	var rawBody map[string]any
+	if err := json.NewDecoder(r.Body).Decode(&rawBody); err != nil {
 		h.log.Error("❌ [WARDROBE] Invalid JSON", zap.Error(err))
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
+		return
+	}
+
+	// Если clothing_item_id пустая строка — убираем
+	if cid, ok := rawBody["clothing_item_id"]; ok {
+		if cidStr, ok := cid.(string); ok && cidStr == "" {
+			delete(rawBody, "clothing_item_id")
+		}
+	}
+
+	// Перекодируем обратно в JSON
+	fixedBody, err := json.Marshal(rawBody)
+	if err != nil {
+		h.log.Error("❌ [WARDROBE] Failed to marshal fixed body", zap.Error(err))
+		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
+		return
+	}
+
+	var req domain.WardrobeCreateRequest
+	if err := json.Unmarshal(fixedBody, &req); err != nil {
+		h.log.Error("❌ [WARDROBE] Invalid JSON after fix", zap.Error(err))
 		resp.Error(w, http.StatusBadRequest, errors.New("invalid body"))
 		return
 	}
