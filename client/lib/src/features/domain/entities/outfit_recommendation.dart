@@ -11,7 +11,7 @@ abstract class OutfitRecommendation with _$OutfitRecommendation {
     required String description,
     @Default([]) List<String> outfitImageUrls,
     @Default(null) String? imageUrl,
-    @Default(null) List<String>? recommendedItems,
+    @JsonKey(name: 'recommended_items_strings') @Default([]) List<String> recommendedItems,
     @Default(null) String? weatherCondition,
     @Default(null) int? temperature,
     @Default(null) String? occasion,
