@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'outfit_recommendation.freezed.dart';
-part 'outfit_recommendation.g.dart';
 
 @freezed
 abstract class OutfitRecommendation with _$OutfitRecommendation {
@@ -9,12 +8,37 @@ abstract class OutfitRecommendation with _$OutfitRecommendation {
     String? id,
     String? title,
     String? description,
-    @JsonKey(name: 'recommended_items') List<String>? recommendedItems,
+    List<String>? recommendedItems,
     double? temperature,
-    @JsonKey(name: 'weather_condition') String? weatherCondition,
-    @JsonKey(name: 'created_at') DateTime? createdAt,
+    String? weatherCondition,
+    DateTime? createdAt,
   }) = _OutfitRecommendation;
 
-  factory OutfitRecommendation.fromJson(Map<String, dynamic> json) =>
-      _$OutfitRecommendationFromJson(json);
+  factory OutfitRecommendation.fromJson(Map<String, dynamic> json) {
+    return OutfitRecommendation(
+      id: json['id'] as String?,
+      title: json['title'] as String?,
+      description: json['description'] as String?,
+      recommendedItems: (json['recommended_items'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      temperature: (json['temperature'] as num?)?.toDouble(),
+      weatherCondition: json['weather_condition'] as String?,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'recommended_items': recommendedItems,
+      'temperature': temperature,
+      'weather_condition': weatherCondition,
+      'created_at': createdAt?.toIso8601String(),
+    };
+  }
 }
