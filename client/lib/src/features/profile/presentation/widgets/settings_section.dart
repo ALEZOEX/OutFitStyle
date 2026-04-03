@@ -24,7 +24,7 @@ class SettingsSection extends StatelessWidget {
               ),
             ),
           ),
-          ...items.map((item) => item.build(context)).toList(),
+          ...items.map((item) => item.build(context)),
         ],
       ),
     );

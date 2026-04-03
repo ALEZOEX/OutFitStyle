@@ -394,7 +394,7 @@ class CompactRatingSlider extends StatelessWidget {
                   onRatingChanged!(newRating);
                 }
               },
-              child: Container(width: double.infinity, height: double.infinity),
+              child: SizedBox(width: double.infinity, height: double.infinity),
             ),
           Builder(
             builder: (context) {

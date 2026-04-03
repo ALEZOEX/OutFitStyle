@@ -32,7 +32,7 @@ class AppSearchBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _AppSearchBarState extends State<AppSearchBar> {
   late final TextEditingController _controller;
-  bool _hasFocus = false;
+  final bool _hasFocus = false;
 
   @override
   void initState() {

@@ -89,9 +89,7 @@ class WardrobeItemCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          _getCategoryEmoji(item.category!) +
-                              ' ' +
-                              _getCategoryName(item.category!),
+                          '${_getCategoryEmoji(item.category!)} ${_getCategoryName(item.category!)}',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.onPrimaryContainer,
                             fontWeight: FontWeight.w600,

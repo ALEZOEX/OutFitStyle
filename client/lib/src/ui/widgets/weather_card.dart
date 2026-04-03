@@ -371,38 +371,52 @@ class WeatherCard extends StatelessWidget {
     final desc = description.toLowerCase();
     if (desc.contains('ясно') ||
         desc.contains('clear') ||
-        desc.contains('sunny'))
+        desc.contains('sunny')) {
       return Icons.wb_sunny_rounded;
+    }
     if (desc.contains('облач') ||
         desc.contains('cloud') ||
-        desc.contains('пасмурно'))
+        desc.contains('пасмурно')) {
       return desc.contains('перемен')
           ? Icons.cloud_queue_rounded
           : Icons.cloud_rounded;
+    }
     if (desc.contains('дожд') ||
         desc.contains('rain') ||
-        desc.contains('морось'))
+        desc.contains('морось')) {
       return (desc.contains('гром') || desc.contains('thunder'))
           ? Icons.thunderstorm_rounded
           : Icons.water_drop_rounded;
-    if (desc.contains('снег') || desc.contains('snow'))
+    }
+    if (desc.contains('снег') || desc.contains('snow')) {
       return Icons.ac_unit_rounded;
-    if (desc.contains('туман') || desc.contains('fog')) return Icons.foggy;
+    }
+    if (desc.contains('туман') || desc.contains('fog')) {
+      return Icons.foggy;
+    }
     return Icons.wb_sunny_rounded;
   }
 
   String _getWeatherDescription(String description) {
     if (description.isEmpty) return 'Ясно';
     final desc = description.toLowerCase();
-    if (desc.contains('ясно') || desc.contains('clear')) return 'Ясно';
-    if (desc.contains('облач') || desc.contains('cloud'))
+    if (desc.contains('ясно') || desc.contains('clear')) {
+      return 'Ясно';
+    }
+    if (desc.contains('облач') || desc.contains('cloud')) {
       return desc.contains('перемен') ? 'Переменная облачность' : 'Облачно';
-    if (desc.contains('дожд') || desc.contains('rain'))
+    }
+    if (desc.contains('дожд') || desc.contains('rain')) {
       return (desc.contains('гром') || desc.contains('thunder'))
           ? 'Гроза'
           : 'Дождь';
-    if (desc.contains('снег') || desc.contains('snow')) return 'Снег';
-    if (desc.contains('туман') || desc.contains('fog')) return 'Туман';
+    }
+    if (desc.contains('снег') || desc.contains('snow')) {
+      return 'Снег';
+    }
+    if (desc.contains('туман') || desc.contains('fog')) {
+      return 'Туман';
+    }
     return description;
   }
 }

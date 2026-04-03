@@ -430,8 +430,6 @@ class AchievementDetailPage extends ConsumerWidget {
     WidgetRef ref,
     Achievement achievement,
   ) {
-    final theme = Theme.of(context);
-
     return Column(
       children: [
         if (!achievement.isUnlocked)
@@ -488,9 +486,11 @@ ${achievement.description}
 ''';
 
     try {
-      await Share.share(
-        shareText,
-        subject: 'Моё достижение в OutfitStyle: ${achievement.title}',
+      await SharePlus.instance.share(
+        ShareParams(
+          text: shareText,
+          subject: 'Моё достижение в OutfitStyle: ${achievement.title}',
+        ),
       );
     } catch (e) {
       if (context.mounted) {

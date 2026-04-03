@@ -207,19 +207,19 @@ class RecommendationCardShimmer extends StatelessWidget {
                 AppShimmer(
                   width: 80,
                   height: 32,
-                  borderRadius: const BorderRadius.all(Radius.circular(16)),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
                 ),
                 SizedBox(width: AppSpacing.sm),
                 AppShimmer(
                   width: 60,
                   height: 32,
-                  borderRadius: const BorderRadius.all(Radius.circular(16)),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
                 ),
                 SizedBox(width: AppSpacing.sm),
                 AppShimmer(
                   width: 70,
                   height: 32,
-                  borderRadius: const BorderRadius.all(Radius.circular(16)),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
                 ),
               ],
             ),

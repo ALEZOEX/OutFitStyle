@@ -32,7 +32,7 @@ class CitySelectorWidget extends ConsumerStatefulWidget {
 class _CitySelectorWidgetState extends ConsumerState<CitySelectorWidget> {
   final _formKey = GlobalKey<FormState>();
   final _cityController = TextEditingController();
-  bool _showDropdown = false;
+  final bool _showDropdown = false;
   bool _isSearching = false;
   List<CityData> _searchResults = [];
 

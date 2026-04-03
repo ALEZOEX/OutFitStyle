@@ -164,7 +164,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(notifier.error ?? 'Ошибка сохранения'),
+          // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+          content: Text(notifier.state.error ?? 'Ошибка сохранения'),
           backgroundColor: Colors.red,
         ),
       );
@@ -173,7 +174,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    // ignore: unnecessary_non_null_assertion
+    final l10n = AppLocalizations.of(context);
 
     final state = ref.watch(onboardingNotifierProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;

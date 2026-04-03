@@ -341,7 +341,6 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(addItemProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -664,8 +663,6 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   }
 
   Widget _buildSaveButton(BuildContext context, AddItemState state) {
-    final theme = Theme.of(context);
-
     return SizedBox(
       width: double.infinity,
       height: 56,

@@ -44,7 +44,7 @@ class RecommendationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    recommendation.title ?? 'Рекомендация',
+                    recommendation.title,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
@@ -54,7 +54,7 @@ class RecommendationCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    recommendation.description ?? '',
+                    recommendation.description,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       height: 1.4,

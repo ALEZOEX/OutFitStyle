@@ -110,6 +110,10 @@ class WeatherConditionBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBadge(
+      text: condition,
+      variant: BadgeVariant.custom,
+      backgroundColor: color,
+      showBadge: true,
       child: Container(
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
@@ -118,10 +122,6 @@ class WeatherConditionBadge extends StatelessWidget {
         ),
         child: Icon(icon, color: color, size: 20.0),
       ),
-      text: condition,
-      variant: BadgeVariant.custom,
-      backgroundColor: color,
-      showBadge: true,
     );
   }
 }

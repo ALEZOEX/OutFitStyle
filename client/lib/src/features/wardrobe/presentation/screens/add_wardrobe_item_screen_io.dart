@@ -332,7 +332,6 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(addItemProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(

@@ -91,28 +91,13 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper>
     final userLocation = ref.watch(userLocationProvider);
 
     return HomeShell(
-      title: _getTitle(_currentIndex),
-      child: GestureDetector(
-        onHorizontalDragEnd: (details) {
-          if (details.primaryVelocity == null) return;
-          if (details.primaryVelocity! < -300 &&
-              _currentIndex < _screens.length - 1) {
-            _switchTo(_currentIndex + 1, fromLeft: true);
-          } else if (details.primaryVelocity! > 300 && _currentIndex > 0) {
-            _switchTo(_currentIndex - 1, fromLeft: false);
-          }
-        },
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: _screens[_currentIndex],
-        ),
-      ),
       currentIndex: _currentIndex,
       onNavigationDestinationSelected: (index) {
         _switchTo(index, fromLeft: index > _currentIndex);
       },
       showBottomNav: true,
       showAppBar: true,
+      title: _getTitle(_currentIndex),
       appBarActions: [
         IconButton(
           icon: Icon(
@@ -146,6 +131,21 @@ class _HomeShellWrapperState extends ConsumerState<HomeShellWrapper>
             tooltip: 'Настройки',
           ),
       ],
+      child: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity == null) return;
+          if (details.primaryVelocity! < -300 &&
+              _currentIndex < _screens.length - 1) {
+            _switchTo(_currentIndex + 1, fromLeft: true);
+          } else if (details.primaryVelocity! > 300 && _currentIndex > 0) {
+            _switchTo(_currentIndex - 1, fromLeft: false);
+          }
+        },
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: _screens[_currentIndex],
+        ),
+      ),
     );
   }
 
