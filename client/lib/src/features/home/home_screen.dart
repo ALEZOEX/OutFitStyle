@@ -320,8 +320,6 @@ class _OutfitOfDaySection extends StatelessWidget {
   }
 
   Widget _buildEmptyCard(BuildContext context) {
-    final theme = Theme.of(context);
-
     return GlassContainer(
       borderRadius: AppRadius.radiusXl,
       child: EmptyState(

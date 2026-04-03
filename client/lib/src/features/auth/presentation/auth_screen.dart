@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../presentation/providers/session_provider.dart';
 import '../../../utils/auth_utils.dart';
 import '../../../theme/app_theme.dart';
-import '../../../ui/containers/glass_container.dart';
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
 final authErrorProvider = StateProvider<String?>((ref) => null);
@@ -224,13 +224,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   const SizedBox(height: AppSpacing.xxxl),
 
                   // Форма — glass container
-                  GlassContainer(
-                    padding: const EdgeInsets.all(AppSpacing.xxl),
+                  ClipRRect(
                     borderRadius: AppRadius.radiusXl,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.xxl),
+                        decoration: BoxDecoration(
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white.withValues(alpha: 0.06)
+                              : Colors.white.withValues(alpha: 0.6),
+                          borderRadius: AppRadius.radiusXl,
+                          border: Border.all(
+                            color: theme.brightness == Brightness.dark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.white.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
                               if (!_isLogin) ...[
                                 TextFormField(
                                   controller: _nameController,
@@ -318,6 +332,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         ),
                       ),
                     ),
+                  ),
 
                   // Ошибка
                   if (error != null) ...[
@@ -401,8 +416,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                   offset: const Offset(0, 6),
                                 ),
                               ],
-                            ),
-                            child: Material(
+                      ),
+                      child: Material(
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: isLoading ? null : _submit,
