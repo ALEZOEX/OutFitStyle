@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -995,20 +996,23 @@ func (r *RecommendationRepository) ListByUser(ctx context.Context, userID domain
 
 	// Загружаем ВСЕ items одним запросом (оптимизация N+1)
 	if len(recommendations) > 0 {
-		// Конвертируем IDs в строки для pgx
-		recIDStrs := make([]string, len(recommendations))
+		// Строим запрос с UNNEST для pgx
+		placeholders := make([]string, len(recommendations))
+		args := make([]interface{}, len(recommendations))
 		for i, rec := range recommendations {
-			recIDStrs[i] = rec.ID.String()
+			placeholders[i] = fmt.Sprintf("$%d", i+1)
+			args[i] = rec.ID.String()
 		}
 
-		// Используем ANY для загрузки всех items
-		itemRows, qErr := r.db.Query(ctx, `
+		query := fmt.Sprintf(`
 			SELECT ri.recommendation_id, ri.id, ri.clothing_item_id, ci.name, ri.category, ri.is_from_wardrobe, ri.score, ri.rank
 			FROM recommendation_items ri
 			LEFT JOIN clothing_items ci ON ri.clothing_item_id = ci.id
-			WHERE ri.recommendation_id = ANY($1::uuid[])
+			WHERE ri.recommendation_id IN (%s)
 			ORDER BY ri.recommendation_id, ri.rank
-		`, recIDStrs)
+		`, strings.Join(placeholders, ","))
+
+		itemRows, qErr := r.db.Query(ctx, query, args...)
 		if qErr == nil {
 			defer itemRows.Close()
 			itemsByRec := map[domain.ID][]domain.RecommendationItem{}
