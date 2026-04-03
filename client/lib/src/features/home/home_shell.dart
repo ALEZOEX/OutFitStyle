@@ -437,10 +437,10 @@ class _GlassBottomBarState extends State<_GlassBottomBar>
               if (currentRect.isEmpty) return const SizedBox.shrink();
 
               return Positioned(
-                left: _bubbleLeft.value + 4,
-                top: _bubbleTop.value + 2,
-                width: _bubbleWidth.value - 8,
-                height: _bubbleHeight.value - 4,
+                left: _bubbleLeft.value + 6,
+                top: _bubbleTop.value + _bubbleHeight.value - 10,
+                width: _bubbleWidth.value - 12,
+                height: 6,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: AppGradients.primary,
