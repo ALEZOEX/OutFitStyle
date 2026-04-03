@@ -59,16 +59,39 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: AppSpacing.xxl),
               SizedBox(
                 width: 200,
-                child: FilledButton.icon(
-                  onPressed: onAction,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(actionLabel!),
-                  style: FilledButton.styleFrom(
+                child: InkWell(
+                  onTap: onAction,
+                  borderRadius: AppRadius.radiusPill,
+                  child: Container(
                     padding: const EdgeInsets.symmetric(
                       vertical: AppSpacing.md,
                     ),
-                    shape: RoundedRectangleBorder(
+                    decoration: BoxDecoration(
+                      gradient: AppGradients.primary,
                       borderRadius: AppRadius.radiusPill,
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.add, size: 18, color: Colors.white),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          actionLabel!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
