@@ -254,7 +254,7 @@ func (r *RecommendationRepository) GetByID(ctx context.Context, id domain.ID) (*
 	var outfitJSON []byte
 	var itemsJSON []byte
 	var createdAt time.Time
-	var timestamp time.Time
+	var timestamp *time.Time
 
 	err = r.db.QueryRow(ctx, query, id).Scan(
 		&rec.ID,
@@ -310,8 +310,8 @@ func (r *RecommendationRepository) GetByID(ctx context.Context, id domain.ID) (*
 	}
 
 	rec.CreatedAt = createdAt
-	if !timestamp.IsZero() {
-		rec.Timestamp = &timestamp
+	if timestamp != nil {
+		rec.Timestamp = timestamp
 	}
 
 	// Cache the result
@@ -451,7 +451,7 @@ func (r *RecommendationRepository) GetByUser(ctx context.Context, userID domain.
 		var outfitJSON []byte
 		var itemsJSON []byte
 		var createdAt time.Time
-		var timestamp time.Time
+		var timestamp *time.Time
 
 		err := rows.Scan(
 			&rec.ID,
@@ -504,8 +504,8 @@ func (r *RecommendationRepository) GetByUser(ctx context.Context, userID domain.
 		}
 
 		rec.CreatedAt = createdAt
-		if !timestamp.IsZero() {
-			rec.Timestamp = &timestamp
+		if timestamp != nil {
+			rec.Timestamp = timestamp
 		}
 
 		recommendations = append(recommendations, rec)
@@ -550,7 +550,7 @@ func (r *RecommendationRepository) GetByUserAndDateRange(ctx context.Context, us
 		var outfitJSON []byte
 		var itemsJSON []byte
 		var createdAt time.Time
-		var timestamp time.Time
+		var timestamp *time.Time
 
 		err := rows.Scan(
 			&rec.ID,
@@ -603,8 +603,8 @@ func (r *RecommendationRepository) GetByUserAndDateRange(ctx context.Context, us
 		}
 
 		rec.CreatedAt = createdAt
-		if !timestamp.IsZero() {
-			rec.Timestamp = &timestamp
+		if timestamp != nil {
+			rec.Timestamp = timestamp
 		}
 
 		recommendations = append(recommendations, rec)
@@ -813,7 +813,7 @@ func (r *RecommendationRepository) ListFavorites(ctx context.Context, userID dom
 		var outfitJSON []byte
 		var itemsJSON []byte
 		var createdAt time.Time
-		var timestamp time.Time
+		var timestamp *time.Time
 
 		err := rows.Scan(
 			&rec.ID,
@@ -866,8 +866,8 @@ func (r *RecommendationRepository) ListFavorites(ctx context.Context, userID dom
 		}
 
 		rec.CreatedAt = createdAt
-		if !timestamp.IsZero() {
-			rec.Timestamp = &timestamp
+		if timestamp != nil {
+			rec.Timestamp = timestamp
 		}
 
 		recommendations = append(recommendations, rec)
