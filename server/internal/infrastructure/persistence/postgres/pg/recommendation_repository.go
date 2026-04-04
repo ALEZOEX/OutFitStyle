@@ -338,7 +338,7 @@ func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, i
 	var outfitJSON []byte
 	var itemsJSON []byte
 	var createdAt time.Time
-	var timestamp time.Time
+	var timestamp *time.Time
 
 	err := r.db.QueryRow(ctx, query, userID, id).Scan(
 		&rec.ID,
@@ -372,9 +372,7 @@ func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, i
 	}
 
 	// Handle nullable timestamp
-	if timestamp != nil {
-		rec.Timestamp = timestamp
-	}
+	rec.Timestamp = timestamp
 
 	// Parse JSON fields
 	if len(weatherJSON) > 0 {
@@ -423,8 +421,8 @@ func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, i
 	}
 
 	rec.CreatedAt = createdAt
-	if !timestamp.IsZero() {
-		rec.Timestamp = &timestamp
+	if timestamp != nil {
+		rec.Timestamp = timestamp
 	}
 
 	return &rec, nil

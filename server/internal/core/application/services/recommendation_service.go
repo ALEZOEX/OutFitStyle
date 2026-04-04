@@ -716,6 +716,9 @@ func (s *RecommendationService) buildRecommendationFromRankings(
 		finalChosen[cat] = list[0].ID
 	}
 
+	// Проверка совместимости категорий (юбка+сапоги, шорты+ботинки и т.д.)
+	finalChosen = s.fixIncompatibleCombinations(finalChosen, rankings, candByID)
+
 	// Проверка: если ни одна категория не выбрана
 	if len(finalChosen) == 0 {
 		s.logger.Error("❌ [Create] Нет выбранных элементов — rankings пусты",
@@ -1500,5 +1503,76 @@ func (s *RecommendationService) SendUserAction(ctx context.Context, userID domai
 		zap.String("user_id", userID.String()),
 		zap.String("action_type", actionType))
 
+	return nil
+}
+
+// fixIncompatibleCombinations проверяет и исправляет несовместимые комбинации одежды
+func (s *RecommendationService) fixIncompatibleCombinations(
+	finalChosen map[string]domain.ID,
+	rankings map[string][]rankedLite,
+	candByID map[domain.ID]domain.CandidateLite,
+) map[string]domain.ID {
+	lowerID, hasLower := finalChosen["lower"]
+	footwearID, hasFootwear := finalChosen["footwear"]
+
+	if hasLower && hasFootwear {
+		lowerCand, lowerOk := candByID[lowerID]
+		footwearCand, footwearOk := candByID[footwearID]
+
+		if lowerOk && footwearOk {
+			if isIncompatible(lowerCand.Subcategory, footwearCand.Subcategory) {
+				s.logger.Info("🚫 [Compatibility] Found incompatible combination",
+					zap.String("lower", lowerCand.Subcategory),
+					zap.String("footwear", footwearCand.Subcategory))
+
+				if newFootwear := findCompatibleFootwear(lowerCand.Subcategory, rankings["footwear"], candByID); newFootwear != nil {
+					finalChosen["footwear"] = newFootwear.ID
+					newCand, ok := candByID[newFootwear.ID]
+					if ok {
+						s.logger.Info("✅ [Compatibility] Replaced footwear",
+							zap.String("from", footwearCand.Subcategory),
+							zap.String("to", newCand.Subcategory))
+					}
+				}
+			}
+		}
+	}
+
+	return finalChosen
+}
+
+// isIncompatible проверяет несовместимость lower + footwear
+func isIncompatible(lowerSubcat, footwearSubcat string) bool {
+	lower := strings.ToLower(lowerSubcat)
+	footwear := strings.ToLower(footwearSubcat)
+
+	if strings.Contains(lower, "шорт") {
+		if strings.Contains(footwear, "сапог") ||
+			strings.Contains(footwear, "ботинк") ||
+			strings.Contains(footwear, "полуботинк") {
+			return true
+		}
+	}
+
+	if strings.Contains(lower, "спорт") || strings.Contains(lower, "джоггер") {
+		if strings.Contains(footwear, "туфл") ||
+			strings.Contains(footwear, "лофер") ||
+			strings.Contains(footwear, "мокасин") {
+			return true
+		}
+	}
+
+	return false
+}
+
+// findCompatibleFootwear ищет совместимую обувь для данного lower
+func findCompatibleFootwear(lowerSubcat string, footwearRankings []rankedLite, candByID map[domain.ID]domain.CandidateLite) *rankedLite {
+	for i := range footwearRankings {
+		fw := footwearRankings[i]
+		cand, ok := candByID[fw.ID]
+		if ok && !isIncompatible(lowerSubcat, cand.Subcategory) {
+			return &footwearRankings[i]
+		}
+	}
 	return nil
 }
