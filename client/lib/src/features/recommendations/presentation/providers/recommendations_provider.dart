@@ -165,6 +165,7 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
         state = state.copyWith(
           recommendations: recommendations,
           status: RecommendationsLoadStatus.success,
+          error: null,
         );
       } else {
         state = state.copyWith(
@@ -188,7 +189,7 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
   }
 
   /// Запланировать образ на дату
-  void planOutfit({
+  PlannedOutfit? planOutfit({
     required String recommendationId,
     required DateTime date,
     String? title,
@@ -196,8 +197,9 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
   }) {
     final recommendation = state.recommendations.firstWhere(
       (r) => r.id == recommendationId,
-      orElse: () => throw Exception('Recommendation not found'),
+      orElse: () => state.recommendations.first,
     );
+    if (recommendation.id != recommendationId) return null;
 
     final normalizedDate = DateTime(date.year, date.month, date.day);
     final plannedOutfit = PlannedOutfit(
@@ -215,6 +217,7 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     plannedOutfits[normalizedDate] = plannedOutfit;
 
     state = state.copyWith(plannedOutfits: plannedOutfits);
+    return plannedOutfit;
   }
 
   /// Отменить запланированный образ

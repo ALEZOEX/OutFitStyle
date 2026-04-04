@@ -22,7 +22,7 @@ class RatingApiService {
     ThermalFeedback? thermalFeedback,
   }) async {
     final response = await _client.post(
-      '/recommendations/$recommendationId/rate',
+      '/api/v1/recommendations/$recommendationId/rate',
       data: {
         'rating': rating,
         'outfit_items': outfitItems ?? [],

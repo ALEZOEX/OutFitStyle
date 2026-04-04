@@ -80,16 +80,22 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
   /// Переключить лайк рекомендации
   Future<void> toggleLike(String recommendationId) async {
     try {
+      final currentRecommendations = state.recommendations.value ?? [];
+      final currentRec = currentRecommendations.firstWhere(
+        (r) => (r.id?.toString() ?? '') == recommendationId,
+        orElse: () => throw Exception('Recommendation not found'),
+      );
+      final newLiked = !currentRec.isFavorite;
+
       await _recommendationsRepository.likeRecommendation(
         recommendationId,
-        true,
+        newLiked,
       );
 
-      final currentRecommendations = state.recommendations.value ?? [];
       final updatedRecommendations =
           currentRecommendations.map((rec) {
             if ((rec.id?.toString() ?? '') == recommendationId) {
-              return rec.copyWith(isFavorite: !(rec.isFavorite));
+              return rec.copyWith(isFavorite: newLiked);
             }
             return rec;
           }).toList();
@@ -158,17 +164,17 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
   /// Переключить сохранение рекомендации
   Future<void> toggleSave(String recommendationId) async {
     try {
-      final rec = state.recommendations.value?.firstWhere(
+      final currentRecommendations = state.recommendations.value ?? [];
+      final rec = currentRecommendations.firstWhere(
         (r) => (r.id?.toString() ?? '') == recommendationId,
-        orElse: () => state.recommendations.value!.first,
+        orElse: () => throw Exception('Recommendation not found'),
       );
-      final isCurrentlySaved = rec?.isSaved ?? false;
+      final isCurrentlySaved = rec.isSaved;
       await _recommendationsRepository.saveRecommendationForLater(
         recommendationId,
         !isCurrentlySaved,
       );
 
-      final currentRecommendations = state.recommendations.value ?? [];
       final updatedRecommendations =
           currentRecommendations.map((rec) {
             if ((rec.id?.toString() ?? '') == recommendationId) {
