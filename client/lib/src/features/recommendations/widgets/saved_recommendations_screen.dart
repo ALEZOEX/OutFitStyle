@@ -4,26 +4,35 @@ import '../../../domain/domain_exports.dart';
 import '../../../presentation/providers/presentation_providers_exports.dart';
 import '../presentation/controllers/recommendation_state_notifier.dart';
 
-class SavedRecommendationsScreen extends ConsumerWidget {
+class SavedRecommendationsScreen extends StatefulWidget {
   const SavedRecommendationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userId = ref.watch(userIdProvider) ?? '';
+  State<SavedRecommendationsScreen> createState() => _SavedRecommendationsScreenState();
+}
 
-    // Load saved recommendations when screen is built
+class _SavedRecommendationsScreenState extends State<SavedRecommendationsScreen> {
+  @override
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(recommendationStateNotifierProvider.notifier)
-          .loadSavedRecommendations(userId: userId);
+      if (mounted) {
+        final ref = ProviderScope.containerOf(context, listen: false);
+        final userId = ref.read(userIdProvider) ?? '';
+        ref.read(recommendationStateNotifierProvider.notifier).loadSavedRecommendations(userId: userId);
+      }
     });
+  }
 
-    final recommendationState = ref.watch(recommendationStateNotifierProvider);
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final recommendationState = ref.watch(recommendationStateNotifierProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Сохраненные рекомендации')),
-      body:
-          recommendationState.isLoading
+        return Scaffold(
+          appBar: AppBar(title: const Text('Сохраненные рекомендации')),
+          body: recommendationState.isLoading
               ? const Center(child: CircularProgressIndicator())
               : recommendationState.errorMessage != null
               ? Center(
@@ -58,6 +67,8 @@ class SavedRecommendationsScreen extends ConsumerWidget {
                   return _buildSavedRecommendationCard(context, recommendation);
                 },
               ),
+        );
+      },
     );
   }
 
@@ -79,7 +90,7 @@ class SavedRecommendationsScreen extends ConsumerWidget {
                 runSpacing: 6,
                 children:
                     (recommendation.outfit?.clothingItemIds ?? [])
-                        .take(6) // Show first 6 items
+                        .take(6)
                         .map(
                           (itemId) =>
                               _buildOutfitItem(itemId.toString(), context),

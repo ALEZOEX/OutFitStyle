@@ -158,11 +158,11 @@ class RecommendationStateNotifier extends StateNotifier<RecommendationState> {
   /// Переключить сохранение рекомендации
   Future<void> toggleSave(String recommendationId) async {
     try {
-      final isCurrentlySaved =
-          state.recommendations.value
-              ?.firstWhere((rec) => (rec.id?.toString() ?? '') == recommendationId)
-              .isSaved ??
-          false;
+      final rec = state.recommendations.value?.firstWhere(
+        (r) => (r.id?.toString() ?? '') == recommendationId,
+        orElse: () => state.recommendations.value!.first,
+      );
+      final isCurrentlySaved = rec?.isSaved ?? false;
       await _recommendationsRepository.saveRecommendationForLater(
         recommendationId,
         !isCurrentlySaved,

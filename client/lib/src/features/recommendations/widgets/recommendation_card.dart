@@ -360,6 +360,7 @@ class RecommendationCard extends StatelessWidget {
               itemLower.contains('поло')) {
             result.add(item);
           }
+          break;
         case 'bottom':
           if (itemLower.contains('джинс') ||
               itemLower.contains('брюк') ||
@@ -371,6 +372,7 @@ class RecommendationCard extends StatelessWidget {
               itemLower.contains('чинос')) {
             result.add(item);
           }
+          break;
         case 'shoes':
           if (itemLower.contains('кроссовк') ||
               itemLower.contains('ботинк') ||
@@ -384,6 +386,7 @@ class RecommendationCard extends StatelessWidget {
               itemLower.contains('лофер')) {
             result.add(item);
           }
+          break;
         case 'accessories':
           if (itemLower.contains('куртк') ||
               itemLower.contains('пальт') ||
@@ -403,6 +406,7 @@ class RecommendationCard extends StatelessWidget {
               itemLower.contains('капюшон')) {
             result.add(item);
           }
+          break;
       }
     }
 

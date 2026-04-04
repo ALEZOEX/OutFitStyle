@@ -231,6 +231,9 @@ class RecommendationsRepository implements IRecommendationsRepository {
         'latitude': latitude,
         'longitude': longitude,
         'occasion': occasion,
+        'excluded_items': excludedItems,
+        'preferred_styles': preferredStyles,
+        'user_id': userId,
       },
     );
 

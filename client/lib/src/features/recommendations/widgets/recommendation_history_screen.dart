@@ -4,26 +4,35 @@ import '../../../domain/domain_exports.dart';
 import '../../../presentation/providers/presentation_providers_exports.dart';
 import '../presentation/controllers/recommendation_state_notifier.dart';
 
-class RecommendationHistoryScreen extends ConsumerWidget {
+class RecommendationHistoryScreen extends StatefulWidget {
   const RecommendationHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userId = ref.watch(userIdProvider) ?? '';
+  State<RecommendationHistoryScreen> createState() => _RecommendationHistoryScreenState();
+}
 
-    // Load history when screen is built
+class _RecommendationHistoryScreenState extends State<RecommendationHistoryScreen> {
+  @override
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(recommendationStateNotifierProvider.notifier)
-          .loadRecommendationHistory(userId: userId);
+      if (mounted) {
+        final ref = ProviderScope.containerOf(context, listen: false);
+        final userId = ref.read(userIdProvider) ?? '';
+        ref.read(recommendationStateNotifierProvider.notifier).loadRecommendationHistory(userId: userId);
+      }
     });
+  }
 
-    final historyState = ref.watch(recommendationStateNotifierProvider);
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final historyState = ref.watch(recommendationStateNotifierProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('История рекомендаций')),
-      body:
-          historyState.isLoading
+        return Scaffold(
+          appBar: AppBar(title: const Text('История рекомендаций')),
+          body: historyState.isLoading
               ? const Center(child: CircularProgressIndicator())
               : historyState.errorMessage != null
               ? Center(child: Text('Ошибка: ${historyState.errorMessage}'))
@@ -44,18 +53,16 @@ class RecommendationHistoryScreen extends ConsumerWidget {
               : ListView.builder(
                 itemCount: historyState.historyRecommendations.length,
                 itemBuilder: (context, index) {
-                  final recommendation =
-                      historyState.historyRecommendations[index];
+                  final recommendation = historyState.historyRecommendations[index];
                   return _buildHistoryItem(context, recommendation);
                 },
               ),
+        );
+      },
     );
   }
 
-  Widget _buildHistoryItem(
-    BuildContext context,
-    Recommendation recommendation,
-  ) {
+  Widget _buildHistoryItem(BuildContext context, Recommendation recommendation) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
@@ -89,72 +96,17 @@ class RecommendationHistoryScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              'Доверие модели: ${recommendation.confidenceScore}%',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text('Доверие: ${recommendation.confidenceScore}%'),
+            if (recommendation.occasion?.isNotEmpty ?? false)
+              Text('Повод: ${recommendation.occasion}'),
             const SizedBox(height: 8),
-            Text(
-              'Повод: ${(recommendation.occasion?.isNotEmpty ?? false) ? (recommendation.occasion ?? 'Общий') : 'Общий'}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Активность: ${(recommendation.activity?.isNotEmpty ?? false) ? (recommendation.activity ?? 'Общая') : 'Общая'}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 12),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children:
-                  (recommendation.outfit?.clothingItemIds ?? [])
-                      .take(4) // Show only first 4 items
-                      .map(
-                        (itemId) =>
-                            _buildOutfitItem(itemId.toString(), context),
-                      )
-                      .toList(),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                if (recommendation.isUsed)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.green[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'Использовано',
-                      style: TextStyle(color: Colors.green, fontSize: 12),
-                    ),
-                  ),
-                const SizedBox(width: 8),
-                if (recommendation.isFavorite)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'Избранное',
-                      style: TextStyle(color: Colors.orange, fontSize: 12),
-                    ),
-                  ),
-              ],
+              spacing: 4,
+              runSpacing: 4,
+              children: (recommendation.outfit?.clothingItemIds ?? [])
+                  .take(6)
+                  .map((id) => _buildOutfitItem(id.toString(), context))
+                  .toList(),
             ),
           ],
         ),
