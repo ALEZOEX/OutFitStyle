@@ -84,7 +84,7 @@ class WardrobeApiService {
 
   /// Получить вещь по ID
   Future<WardrobeItem> getWardrobeItem(String id) async {
-    final response = await _apiClient.get('/api/wardrobe/$id');
+    final response = await _apiClient.get('/api/v1/wardrobe/$id');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
@@ -104,7 +104,7 @@ class WardrobeApiService {
   ) async {
     final response = await _apiClient.post(
       '/api/v1/wardrobe',
-      data: jsonEncode(request.toJson()),
+      data: request.toJson(),
     );
 
     if (response.statusCode == 201 || response.statusCode == 200) {
@@ -131,7 +131,7 @@ class WardrobeApiService {
   ) async {
     final response = await _apiClient.put(
       '/api/v1/wardrobe/$id',
-      data: jsonEncode(request.toJson()),
+      data: request.toJson(),
     );
 
     if (response.statusCode == 200) {
@@ -154,7 +154,7 @@ class WardrobeApiService {
 
   /// Удалить вещь из гардероба
   Future<void> deleteWardrobeItem(String id) async {
-    final response = await _apiClient.delete('/api/wardrobe/$id');
+    final response = await _apiClient.delete('/api/v1/wardrobe/$id');
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw WardrobeApiException(
@@ -167,8 +167,8 @@ class WardrobeApiService {
   /// Добавить/удалить вещь из избранного
   Future<void> toggleFavorite(String id, bool isFavorite) async {
     final response = await _apiClient.post(
-      '/api/wardrobe/$id/favorite',
-      data: jsonEncode({'is_favorite': isFavorite}),
+      '/api/v1/wardrobe/$id/favorite',
+      data: {'is_favorite': isFavorite},
     );
 
     if (response.statusCode != 200) {
@@ -182,8 +182,8 @@ class WardrobeApiService {
   /// Архивировать/восстановить вещь
   Future<void> toggleArchive(String id, bool isArchived) async {
     final response = await _apiClient.post(
-      '/api/wardrobe/$id/archive',
-      data: jsonEncode({'is_archived': isArchived}),
+      '/api/v1/wardrobe/$id/archive',
+      data: {'is_archived': isArchived},
     );
 
     if (response.statusCode != 200) {
@@ -196,7 +196,7 @@ class WardrobeApiService {
 
   /// Отметить вещь как использованную
   Future<WornResponse> markAsWorn(String id) async {
-    final response = await _apiClient.post('/api/wardrobe/$id/worn');
+    final response = await _apiClient.post('/api/v1/wardrobe/$id/worn');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.data as String) as Map<String, dynamic>;
