@@ -371,6 +371,11 @@ func (r *RecommendationRepository) GetByUserAndID(ctx context.Context, userID, i
 		return nil, errors.Wrap(err, "failed to get recommendation by user and ID")
 	}
 
+	// Handle nullable timestamp
+	if timestamp != nil {
+		rec.Timestamp = timestamp
+	}
+
 	// Parse JSON fields
 	if len(weatherJSON) > 0 {
 		err = json.Unmarshal(weatherJSON, &rec.Weather)
