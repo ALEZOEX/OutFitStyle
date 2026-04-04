@@ -219,6 +219,7 @@ func (h *WardrobeHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	item, err := h.svc.Create(r.Context(), userID, req)
 	if err != nil {
+		h.log.Error("❌ [WARDROBE] Create failed", zap.Error(err))
 		resp.Error(w, http.StatusBadRequest, err)
 		return
 	}
