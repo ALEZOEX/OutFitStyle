@@ -298,32 +298,59 @@ class _AddWardrobeItemScreenState extends ConsumerState<AddWardrobeItemScreen> {
     }
 
     final request = ref.read(addItemProvider.notifier).toCreateRequest();
+    final wardrobeNotifier = ref.read(wardrobeProvider.notifier);
 
-    // Сохраняем элемент через провайдер гардероба
+    // Показываем индикатор загрузки
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 16),
+            Text('Сохранение...'),
+          ],
+        ),
+      ),
+    );
+
     try {
-      // Получаем текущий notifier гардероба и добавляем элемент
-      final wardrobeNotifier = ref.read(wardrobeProvider.notifier);
-      wardrobeNotifier.addItem(request);
-
+      final result = await wardrobeNotifier.addItem(request);
+      
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Элемент успешно добавлен'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context, request);
+        Navigator.pop(context); // Закрыть диалог загрузки
+      }
+
+      if (result != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Элемент успешно добавлен'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, request);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ошибка: элемент не был создан'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
-      // Fallback: просто возвращаем элемент
       if (mounted) {
+        Navigator.pop(context); // Закрыть диалог загрузки
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Элемент сохранён локально'),
-            backgroundColor: Colors.orange,
+          SnackBar(
+            content: Text('Ошибка: $e'),
+            backgroundColor: Colors.red,
           ),
         );
-        Navigator.pop(context, request);
       }
     }
   }

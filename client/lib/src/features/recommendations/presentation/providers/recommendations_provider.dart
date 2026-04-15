@@ -381,43 +381,74 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
 
   /// Обновить с созданием новой рекомендации
   Future<void> refreshWithNew() async {
-    state = state.copyWith(status: RecommendationsLoadStatus.loading);
+    state = state.copyWith(isGenerating: true);
     
     try {
-      final response = await _apiClient.get('/api/v1/recommendations', params: {'limit': '1'});
-      
-      if (response.statusCode == 200) {
+      // Генерируем новую рекомендацию
+      final body = <String, dynamic>{
+        'latitude': 55.7558, // Москва по умолчанию
+        'longitude': 37.6173,
+      };
+
+      final response = await _apiClient.post(
+        '/api/v1/recommendations',
+        data: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final rawData = response.data is Map
             ? response.data as Map<String, dynamic>
             : jsonDecode(response.data.toString()) as Map<String, dynamic>;
-        final items = rawData['recommendations'] as List<dynamic>? 
-            ?? rawData['items'] as List<dynamic>? 
-            ?? [];
+
+        final data = rawData.containsKey('recommendation')
+            ? rawData['recommendation'] as Map<String, dynamic>
+            : rawData;
+
+        final recommendation = OutfitRecommendation.fromJson(data);
         
-        if (items.isNotEmpty) {
-          final recommendation = OutfitRecommendation.fromJson(items.first as Map<String, dynamic>);
-          final recommendations = [recommendation, ...state.recommendations];
-          state = state.copyWith(
-            recommendations: recommendations,
-            status: RecommendationsLoadStatus.success,
-            error: null,
-          );
-        } else {
-          // Если нет рекомендаций, пробуем создать новую
-          state = state.copyWith(status: RecommendationsLoadStatus.success);
-        }
+        // Добавляем новую в начало списка
+        final recommendations = [recommendation, ...state.recommendations];
+        state = state.copyWith(
+          recommendations: recommendations,
+          status: RecommendationsLoadStatus.success,
+          isGenerating: false,
+          error: null,
+        );
       } else {
         state = state.copyWith(
-          status: RecommendationsLoadStatus.error,
-          error: 'Ошибка загрузки',
+          isGenerating: false,
+          error: 'Ошибка генерации',
         );
       }
     } catch (e) {
       state = state.copyWith(
-        status: RecommendationsLoadStatus.error,
+        isGenerating: false,
         error: 'Ошибка обновления',
       );
     }
+  }
+
+  /// Получить рекомендацию на сегодня
+  OutfitRecommendation? getTodayRecommendation() {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    
+    // Ищем рекомендацию созданную сегодня
+    for (final rec in state.recommendations) {
+      if (rec.createdAt != null) {
+        final recDate = DateTime(
+          rec.createdAt!.year,
+          rec.createdAt!.month,
+          rec.createdAt!.day,
+        );
+        if (recDate == todayDate) {
+          return rec;
+        }
+      }
+    }
+    
+    // Если нет сегодняшней, возвращаем первую
+    return state.recommendations.isNotEmpty ? state.recommendations.first : null;
   }
 
   /// Получить рекомендации по погоде

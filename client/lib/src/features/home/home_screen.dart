@@ -25,11 +25,12 @@ class HomeScreen extends ConsumerWidget {
       )),
     );
     final recommendationsState = ref.watch(recommendationsProvider);
+    final todayRecommendation = ref.watch(recommendationsProvider.notifier).getTodayRecommendation();
 
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(weatherProvider);
-        // При обновлении создаём новую рекомендацию
+        // При обновлении генерируем новую рекомендацию
         await ref.read(recommendationsProvider.notifier).refreshWithNew();
       },
       child: SafeArea(
@@ -42,19 +43,17 @@ class HomeScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Отступ сверху
                 const SizedBox(height: AppSpacing.lg),
 
-                // Погода
                 _WeatherSection(
                   weatherAsync: weatherAsync,
                   userLocation: userLocation,
                 ),
                 const SizedBox(height: AppSpacing.xxl),
 
-                // Образ дня
                 _OutfitOfDaySection(
                   recommendationsState: recommendationsState,
+                  todayRecommendation: todayRecommendation,
                 ),
               ],
             ),
@@ -141,14 +140,17 @@ class _WeatherSection extends ConsumerWidget {
 
 class _OutfitOfDaySection extends ConsumerWidget {
   final RecommendationsState recommendationsState;
+  final OutfitRecommendation? todayRecommendation;
 
-  const _OutfitOfDaySection({required this.recommendationsState});
+  const _OutfitOfDaySection({
+    required this.recommendationsState,
+    this.todayRecommendation,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recommendations = recommendationsState.recommendations;
-    final isLoading =
-        recommendationsState.status == RecommendationsLoadStatus.loading;
+    final isLoading = recommendationsState.isGenerating;
+    final hasAnyRecommendations = recommendationsState.recommendations.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,10 +161,9 @@ class _OutfitOfDaySection extends ConsumerWidget {
             children: [
               Text('Образ дня', style: AppTypography.headlineSmall(context)),
               const Spacer(),
-              if (recommendations.isNotEmpty)
+              if (hasAnyRecommendations)
                 TextButton(
                   onPressed: () {
-                    // Переключаемся на таб рекомендаций внутри HomeShell
                     context.go('/home', extra: 2);
                   },
                   child: const Text('Все'),
@@ -174,10 +175,10 @@ class _OutfitOfDaySection extends ConsumerWidget {
 
         if (isLoading)
           _buildLoadingCard(context)
-        else if (recommendations.isEmpty)
-          _buildEmptyCard(context)
+        else if (todayRecommendation != null)
+          _buildOutfitCard(context, ref, todayRecommendation!)
         else
-          _buildOutfitCard(context, ref, recommendations.first),
+          _buildEmptyCard(context),
       ],
     );
   }
