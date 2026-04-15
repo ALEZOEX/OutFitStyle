@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../entities/wardrobe.dart';
+import '../entities/wardrobe_item.dart';
 
 part 'wardrobe_state.freezed.dart';
 
