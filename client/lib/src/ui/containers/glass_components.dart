@@ -31,18 +31,18 @@ class GlassCard extends StatelessWidget {
         borderRadius: radius,
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withValues(
-              alpha: isDark ? 0.2 : 0.1,
-            ),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: ClipRRect(
         borderRadius: radius,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: Container(
             padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
@@ -51,45 +51,23 @@ class GlassCard extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        Colors.white.withValues(alpha: 0.08),
-                        Colors.white.withValues(alpha: 0.04),
+                        Colors.white.withValues(alpha: 0.12),
+                        Colors.white.withValues(alpha: 0.06),
                       ]
                     : [
+                        Colors.white.withValues(alpha: 0.9),
                         Colors.white.withValues(alpha: 0.7),
-                        Colors.white.withValues(alpha: 0.5),
                       ],
               ),
               borderRadius: radius,
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.12)
+                    ? Colors.white.withValues(alpha: 0.15)
                     : Colors.black.withValues(alpha: 0.08),
                 width: 1,
               ),
             ),
-            child: Stack(
-              children: [
-                // Верхний блик
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.white.withValues(alpha: isDark ? 0.15 : 0.4),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                child,
-              ],
-            ),
+            child: child,
           ),
         ),
       ),
@@ -136,16 +114,34 @@ class GlassButton extends StatelessWidget {
       height: 48,
       child: InkWell(
         onTap: isLoading ? null : onPressed,
-        borderRadius: AppRadius.radiusPill,
+        borderRadius: AppRadius.radiusMd,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            gradient: isPrimary ? AppGradients.primary : null,
-            color: isPrimary ? null : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5)),
-            borderRadius: AppRadius.radiusPill,
+            gradient: isPrimary
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.secondary,
+                          ]
+                        : [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.secondary,
+                          ],
+                  )
+                : null,
+            color: isPrimary
+                ? null
+                : isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.white.withValues(alpha: 0.7),
+            borderRadius: AppRadius.radiusMd,
             border: Border.all(
               color: isPrimary
-                  ? Colors.transparent
+                  ? Colors.white.withValues(alpha: 0.2)
                   : isDark
                       ? Colors.white.withValues(alpha: 0.2)
                       : Colors.black.withValues(alpha: 0.1),
@@ -153,8 +149,8 @@ class GlassButton extends StatelessWidget {
             boxShadow: isPrimary
                 ? [
                     BoxShadow(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.4),
-                      blurRadius: 16,
+                      color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                      blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ]
