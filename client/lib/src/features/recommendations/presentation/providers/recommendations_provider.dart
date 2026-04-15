@@ -379,6 +379,47 @@ class RecommendationsNotifier extends StateNotifier<RecommendationsState> {
     await loadRecommendations();
   }
 
+  /// Обновить с созданием новой рекомендации
+  Future<void> refreshWithNew() async {
+    state = state.copyWith(status: RecommendationsLoadStatus.loading);
+    
+    try {
+      final response = await _apiClient.get('/api/v1/recommendations', params: {'limit': '1'});
+      
+      if (response.statusCode == 200) {
+        final rawData = response.data is Map
+            ? response.data as Map<String, dynamic>
+            : jsonDecode(response.data.toString()) as Map<String, dynamic>;
+        final items = rawData['recommendations'] as List<dynamic>? 
+            ?? rawData['items'] as List<dynamic>? 
+            ?? [];
+        
+        if (items.isNotEmpty) {
+          final recommendation = OutfitRecommendation.fromJson(items.first as Map<String, dynamic>);
+          final recommendations = [recommendation, ...state.recommendations];
+          state = state.copyWith(
+            recommendations: recommendations,
+            status: RecommendationsLoadStatus.success,
+            error: null,
+          );
+        } else {
+          // Если нет рекомендаций, пробуем создать новую
+          state = state.copyWith(status: RecommendationsLoadStatus.success);
+        }
+      } else {
+        state = state.copyWith(
+          status: RecommendationsLoadStatus.error,
+          error: 'Ошибка загрузки',
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        status: RecommendationsLoadStatus.error,
+        error: 'Ошибка обновления',
+      );
+    }
+  }
+
   /// Получить рекомендации по погоде
   List<OutfitRecommendation> getByWeather(String condition) {
     return state.recommendations

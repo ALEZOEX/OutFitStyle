@@ -176,9 +176,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   Widget build(BuildContext context) {
     // ignore: unnecessary_non_null_assertion
     final l10n = AppLocalizations.of(context);
-
     final state = ref.watch(onboardingNotifierProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final screenSize = MediaQuery.of(context).size;
+    final isWideScreen = screenSize.width > 600;
 
     return Scaffold(
       body: SafeArea(
@@ -192,39 +193,159 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   : [AppColors.backgroundLight, AppColors.grey50],
             ),
           ),
-          child: Column(
-            children: [
-              // Индикатор прогресса
-              _buildProgressIndicator(state.currentPage),
-
-              // PageView с экранами
-              Expanded(
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: PageView(
-                    controller: _pageController,
-                    onPageChanged: _onPageChanged,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      _buildWelcomePage(l10n, isDarkMode),
-                      _buildCityPage(l10n, isDarkMode, state),
-                      _buildStylesPage(l10n, isDarkMode, state),
-                      _buildPreferencesPage(l10n, isDarkMode, state),
-                      _buildCompletePage(l10n, isDarkMode),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Навигационные кнопки
-              _buildNavigationButtons(state, l10n),
-
-              const SizedBox(height: 24),
-            ],
-          ),
+          child: isWideScreen
+              ? _buildWideLayout(l10n, isDarkMode, state)
+              : _buildMobileLayout(l10n, isDarkMode, state),
         ),
       ),
-      // Confetti effect for the last page
+    );
+  }
+
+  Widget _buildWideLayout(
+    AppLocalizations l10n,
+    bool isDarkMode,
+    OnboardingState state,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final leftPanelWidth = screenWidth > 1200 ? 500.0 : (screenWidth > 900 ? 400.0 : 320.0);
+
+    return Row(
+      children: [
+        // Левая часть - визуальная информация
+        Container(
+          width: leftPanelWidth,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDarkMode
+                  ? [AppColors.primaryDark.withValues(alpha: 0.4), AppColors.primaryDark]
+                  : [AppColors.primary, AppColors.primaryDark],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 160,
+                      height: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      child: const Icon(
+                        Icons.checkroom_rounded,
+                        size: 80,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      'OutfitStyle',
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _getPageDescription(state.currentPage),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Правая часть - контент
+        Expanded(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  children: [
+                    _buildProgressIndicator(state.currentPage),
+                    Expanded(
+                      child: PageView(
+                        controller: _pageController,
+                        onPageChanged: _onPageChanged,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          _buildWelcomePage(l10n, isDarkMode),
+                          _buildCityPage(l10n, isDarkMode, state),
+                          _buildStylesPage(l10n, isDarkMode, state),
+                          _buildPreferencesPage(l10n, isDarkMode, state),
+                          _buildCompletePage(l10n, isDarkMode),
+                        ],
+                      ),
+                    ),
+                    _buildNavigationButtons(state, l10n),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getPageDescription(int page) {
+    switch (page) {
+      case 0:
+        return 'Добро пожаловать в OutfitStyle';
+      case 1:
+        return 'Выберите ваш город для точных рекомендаций';
+      case 2:
+        return 'Расскажите о вашем стиле';
+      case 3:
+        return 'Настройте свои предпочтения';
+      case 4:
+        return 'Всё готово! Начнём';
+      default:
+        return '';
+    }
+  }
+
+  Widget _buildMobileLayout(
+    AppLocalizations l10n,
+    bool isDarkMode,
+    OnboardingState state,
+  ) {
+    return Column(
+      children: [
+        _buildProgressIndicator(state.currentPage),
+        Expanded(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _buildWelcomePage(l10n, isDarkMode),
+                _buildCityPage(l10n, isDarkMode, state),
+                _buildStylesPage(l10n, isDarkMode, state),
+                _buildPreferencesPage(l10n, isDarkMode, state),
+                _buildCompletePage(l10n, isDarkMode),
+              ],
+            ),
+          ),
+        ),
+        _buildNavigationButtons(state, l10n),
+        const SizedBox(height: 24),
+      ],
     );
   }
 

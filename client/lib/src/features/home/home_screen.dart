@@ -29,7 +29,8 @@ class HomeScreen extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(weatherProvider);
-        ref.invalidate(recommendationsProvider);
+        // При обновлении создаём новую рекомендацию
+        await ref.read(recommendationsProvider.notifier).refreshWithNew();
       },
       child: SafeArea(
         top: false,
@@ -52,7 +53,9 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.xxl),
 
                 // Образ дня
-                _OutfitOfDaySection(recommendationsState: recommendationsState),
+                _OutfitOfDaySection(
+                  recommendationsState: recommendationsState,
+                ),
               ],
             ),
           ),

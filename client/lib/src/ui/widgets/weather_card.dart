@@ -38,14 +38,14 @@ class WeatherCard extends StatelessWidget {
         end: isDark ? Alignment.bottomRight : Alignment.topLeft,
         colors: isDark
             ? [
-                theme.colorScheme.primary.withValues(alpha: 0.5),
-                theme.colorScheme.secondary.withValues(alpha: 0.35),
-                Colors.white.withValues(alpha: 0.1),
+                theme.colorScheme.primary.withValues(alpha: 0.6),
+                theme.colorScheme.secondary.withValues(alpha: 0.4),
+                theme.colorScheme.surface.withValues(alpha: 0.3),
               ]
             : [
-                theme.colorScheme.primary.withValues(alpha: 0.12),
-                theme.colorScheme.secondary.withValues(alpha: 0.08),
-                Colors.white.withValues(alpha: 0.85),
+                theme.colorScheme.primary.withValues(alpha: 0.15),
+                theme.colorScheme.secondary.withValues(alpha: 0.1),
+                Colors.white.withValues(alpha: 0.95),
               ],
       ),
       child: Column(

@@ -33,7 +33,7 @@ class GlassContainer extends StatelessWidget {
     Widget content = ClipRRect(
       borderRadius: radius,
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
           width: width,
           padding: padding,
@@ -43,19 +43,19 @@ class GlassContainer extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: isDark
                   ? [
-                      theme.colorScheme.surface.withValues(alpha: 0.55),
-                      theme.colorScheme.surface.withValues(alpha: 0.4),
+                      theme.colorScheme.surface.withValues(alpha: 0.85),
+                      theme.colorScheme.surface.withValues(alpha: 0.7),
                     ]
                   : [
+                      Colors.white.withValues(alpha: 0.95),
                       Colors.white.withValues(alpha: 0.85),
-                      Colors.white.withValues(alpha: 0.65),
                     ],
             ),
             borderRadius: radius,
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.15)
-                  : Colors.black.withValues(alpha: 0.15),
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.1),
               width: 1,
             ),
           ),
@@ -73,7 +73,7 @@ class GlassContainer extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        Colors.white.withValues(alpha: isDark ? 0.15 : 0.5),
+                        Colors.white.withValues(alpha: isDark ? 0.2 : 0.6),
                         Colors.transparent,
                       ],
                     ),
@@ -95,10 +95,10 @@ class GlassContainer extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.25)
-                  : Colors.black.withValues(alpha: 0.15),
-              blurRadius: 32,
-              offset: const Offset(0, 8),
+                  ? Colors.black.withValues(alpha: 0.4)
+                  : Colors.black.withValues(alpha: 0.12),
+              blurRadius: 24,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
