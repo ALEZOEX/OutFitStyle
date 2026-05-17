@@ -28,7 +28,7 @@ dev = [
     "pytest-anyio>=0.0.0",
     "mypy>=1.7.0",
     "ruff>=0.1.0",
-    "types-requests>=2.31.0",
+    "types-requests>=2.32.4.20260107",
 ]
 
 [tool.setuptools.packages.find]
